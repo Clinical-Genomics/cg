@@ -15,7 +15,7 @@ from cg.constants.constants import FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
+    IlluminaRunAlreadyBackedUpError,
     IlluminaRunEncryptionError,
     FlowCellError,
     PdcError,
@@ -49,11 +49,11 @@ def backup(context: CGConfig):
     pass
 
 
-@backup.command("flow-cells")
+@backup.command("illumina-runs")
 @DRY_RUN
 @click.pass_obj
-def backup_flow_cells(context: CGConfig, dry_run: bool):
-    """Back-up flow cells."""
+def backup_illumina_runs(context: CGConfig, dry_run: bool):
+    """Back-up illumina runs."""
     pdc_service = context.pdc_service
     pdc_service.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
@@ -73,13 +73,13 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
     for run_dir_data in runs_dir_data:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
-            flow_cell_name=run_dir_data.id
+        sequencing_run: IlluminaSequencingRun | None = (
+            status_db.get_illumina_sequencing_run_by_device_internal_id(run_dir_data.id)
         )
         try:
-            backup_service.start_flow_cell_backup(
+            backup_service.start_run_backup(
                 run_dir_data=run_dir_data,
-                db_flow_cell=db_flow_cell,
+                sequencing_run=sequencing_run,
                 status_db=status_db,
                 binary_path=context.encryption.binary_path,
                 encryption_dir=Path(context.encryption.encryption_dir),
@@ -88,7 +88,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             )
         except (
             DsmcAlreadyRunningError,
-            FlowCellAlreadyBackedUpError,
+            IlluminaRunAlreadyBackedUpError,
             IlluminaRunEncryptionError,
             PdcError,
         ) as error:
@@ -127,12 +127,12 @@ def encrypt_illumina_runs(context: CGConfig, dry_run: bool):
             logging.error(f"{error}")
 
 
-@backup.command("fetch-flow-cell")
+@backup.command("fetch-illumina-run")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
-    """Fetch the first flow cell in the requested queue from backup"""
+def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
+    """Fetch the first Illumina run in the requested queue from backup"""
 
     pdc_service = context.pdc_service
     pdc_service.dry_run = dry_run
@@ -149,29 +149,32 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None =
     )
     backup_api: IlluminaBackupService = context.meta_apis["backup_api"]
 
-    status_api: Store = context.status_db
-    flow_cell: Flowcell | None = (
-        status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id) if flow_cell_id else None
+    status_db: Store = context.status_db
+    sequencing_run: IlluminaSequencingRun | None = (
+        status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+        if flow_cell_id
+        else None
     )
 
-    if not flow_cell and flow_cell_id:
+    if not sequencing_run and flow_cell_id:
         LOG.error(f"{flow_cell_id}: not found in database")
         raise click.Abort
 
     if not flow_cell_id:
-        LOG.info("Fetching first flow cell in queue")
+        LOG.info("Fetching first sequencing run in queue")
 
-    retrieval_time: float | None = backup_api.fetch_sequencing_run(sequencing_run=flow_cell)
+    retrieval_time: float | None = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
         LOG.info(f"Retrieval time: {hours:.1}h")
         return
 
-    if not dry_run and flow_cell:
-        LOG.info(f"{flow_cell}: updating flow cell status to {FlowCellStatus.REQUESTED}")
-        flow_cell.status = FlowCellStatus.REQUESTED
-        status_api.session.commit()
+    if not dry_run and sequencing_run:
+        LOG.info(f"{sequencing_run}: updating flow cell status to {FlowCellStatus.REQUESTED}")
+        status_db.update_illumina_sequencing_run_status(
+            sequencing_run=sequencing_run, status=FlowCellStatus.REQUESTED
+        )
 
 
 @backup.command("archive-spring-files")

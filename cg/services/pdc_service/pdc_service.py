@@ -10,7 +10,7 @@ from cg.constants.pdc import DSMCParameters
 from cg.constants.process import EXIT_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
+    IlluminaRunAlreadyBackedUpError,
     IlluminaRunEncryptionError,
     PdcError,
 )

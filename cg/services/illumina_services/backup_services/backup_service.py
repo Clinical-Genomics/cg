@@ -9,7 +9,7 @@ from cg.exc import (
     PdcError,
     PdcNoFilesMatchingSearchError,
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
+    IlluminaRunAlreadyBackedUpError,
     IlluminaRunEncryptionError,
 )
 from cg.meta.backup.backup import LOG
@@ -301,20 +301,22 @@ class IlluminaBackupService:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
 
-    def validate_is_flow_cell_backup_possible(
-        self, db_flow_cell: Flowcell, illumina_run_encryption_service: IlluminaRunEncryptionService
+    def validate_is_run_backup_possible(
+        self,
+        sequencing_run: IlluminaSequencingRun,
+        illumina_run_encryption_service: IlluminaRunEncryptionService,
     ) -> None:
-        """Check if back-up of flow cell is possible.
+        """Check if back-up of sequencing run is possible.
         Raises:
             DsmcAlreadyRunningError if there is already a Dsmc process ongoing.
-            FlowCellAlreadyBackupError if flow cell is already backed up.
-            FlowCellEncryptionError if encryption is not complete.
+            IlluminaRunAlreadyBackupError if sequencing run is already backed up.
+            IlluminaRunEncryptionError if encryption is not complete.
         """
         if self.pdc.validate_is_dsmc_running():
             raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
-        if db_flow_cell and db_flow_cell.has_backup:
-            raise FlowCellAlreadyBackedUpError(
-                f"Flow cell: {db_flow_cell.name} is already backed-up"
+        if sequencing_run and sequencing_run.has_backup:
+            raise IlluminaRunAlreadyBackedUpError(
+                f"Flow cell: {sequencing_run.device.internal_id} is already backed-up"
             )
         if not illumina_run_encryption_service.complete_file_path.exists():
             raise IlluminaRunEncryptionError(
@@ -322,20 +324,24 @@ class IlluminaBackupService:
             )
         LOG.debug("Flow cell can be backed up")
 
-    def backup_flow_cell(
-        self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
+    def backup_run(
+        self, files_to_archive: list[Path], store: Store, sequencing_run: IlluminaSequencingRun
     ) -> None:
-        """Back-up flow cell files."""
+        """Back-up sequecing run files."""
         for encrypted_file in files_to_archive:
             if not self.dry_run:
                 self.pdc.archive_file_to_pdc(file_path=encrypted_file.as_posix())
         if not self.dry_run:
-            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+            store.update_illumina_sequencing_run_has_backup(
+                sequencing_run=sequencing_run, has_backup=True
+            )
+            LOG.info(
+                f"Illumina run for flow cell: {sequencing_run.device.internal_id} has been backed up"
+            )
 
-    def start_flow_cell_backup(
+    def start_run_backup(
         self,
-        db_flow_cell: Flowcell,
+        sequencing_run: IlluminaSequencingRun,
         run_dir_data: IlluminaRunDirectoryData,
         status_db: Store,
         binary_path: str,
@@ -354,15 +360,15 @@ class IlluminaBackupService:
             sbatch_parameter=sbatch_parameter,
             tar_api=self.tar_api,
         )
-        self.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell,
+        self.validate_is_run_backup_possible(
+            sequencing_run=sequencing_run,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
-        self.backup_flow_cell(
+        self.backup_run(
             files_to_archive=[
                 illumina_run_encryption_service.final_passphrase_file_path,
                 illumina_run_encryption_service.encrypted_gpg_file_path,
             ],
             store=status_db,
-            db_flow_cell=db_flow_cell,
+            sequencing_run=sequencing_run,
         )

@@ -5,7 +5,7 @@ import pytest
 from click.testing import CliRunner
 from psutil import Process
 
-from cg.cli.backup import backup_flow_cells, encrypt_illumina_runs, fetch_flow_cell
+from cg.cli.backup import backup_illumina_runs, encrypt_illumina_runs, fetch_illumina_run
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.exc import IlluminaRunEncryptionError
 from cg.models.cg_config import CGConfig
@@ -39,7 +39,7 @@ def test_backup_flow_cells(
     Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -62,7 +62,7 @@ def test_backup_flow_cells_when_dsmc_is_running(
     mocker.patch.object(Process, "name", return_value="dsmc")
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -90,7 +90,7 @@ def test_backup_flow_cells_when_flow_cell_already_has_backup(
     )
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -112,7 +112,7 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
     # GIVEN a flow cells directory
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -280,7 +280,7 @@ def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
     )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    result = cli_runner.invoke(fetch_illumina_run, ["--dry-run"], obj=backup_context)
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
@@ -311,7 +311,7 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
     )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    result = cli_runner.invoke(fetch_illumina_run, ["--dry-run"], obj=backup_context)
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
@@ -330,7 +330,7 @@ def test_run_fetch_flow_cell_non_existing_flow_cell(
 
     # WHEN running the command with the non-existing flow cell id
     result = cli_runner.invoke(
-        fetch_flow_cell, ["--flow-cell-id", flow_cell_id], obj=backup_context
+        fetch_illumina_run, ["--flow-cell-id", flow_cell_id], obj=backup_context
     )
 
     # THEN assert that it exits with a non-zero exit code

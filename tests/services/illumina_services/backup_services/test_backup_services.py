@@ -11,7 +11,7 @@ from cg.constants import FileExtensions, FlowCellStatus, EXIT_FAIL
 from cg.constants.sequencing import Sequencers
 from cg.exc import (
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
+    IlluminaRunAlreadyBackedUpError,
     PdcError,
     IlluminaRunEncryptionError,
 )
@@ -543,8 +543,8 @@ def test_validate_is_flow_cell_backup_possible(
     illumina_run_encryption_service.complete_file_path.touch()
 
     # WHEN checking if back-up is possible
-    backup_service.validate_is_flow_cell_backup_possible(
-        db_flow_cell=db_flow_cell, illumina_run_encryption_service=illumina_run_encryption_service
+    backup_service.validate_is_run_backup_possible(
+        sequencing_run=db_flow_cell, illumina_run_encryption_service=illumina_run_encryption_service
     )
 
     # THEN communicate that it passed
@@ -583,8 +583,8 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
 
     # WHEN checking if back-up is possible
     with pytest.raises(DsmcAlreadyRunningError):
-        backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell,
+        backup_service.validate_is_run_backup_possible(
+            sequencing_run=db_flow_cell,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
@@ -619,9 +619,9 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
     )
 
     # WHEN checking if back-up is possible
-    with pytest.raises(FlowCellAlreadyBackedUpError):
-        backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell,
+    with pytest.raises(IlluminaRunAlreadyBackedUpError):
+        backup_service.validate_is_run_backup_possible(
+            sequencing_run=db_flow_cell,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
@@ -656,8 +656,8 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
 
     # WHEN checking if back-up is possible
     with pytest.raises(IlluminaRunEncryptionError):
-        backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell,
+        backup_service.validate_is_run_backup_possible(
+            sequencing_run=db_flow_cell,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
@@ -694,13 +694,13 @@ def test_backup_flow_cell(
     )
 
     # WHEN backing up flow cell
-    backup_service.backup_flow_cell(
+    backup_service.backup_run(
         files_to_archive=[
             illumina_run_encryption_service.final_passphrase_file_path,
             illumina_run_encryption_service.encrypted_gpg_file_path,
         ],
         store=base_store,
-        db_flow_cell=db_flow_cell,
+        sequencing_run=db_flow_cell,
     )
 
     # THEN flow cell should hava a back-up
@@ -744,11 +744,11 @@ def test_backup_flow_cell_when_unable_to_archive(
 
         # THEN the appropriate error should have been raised
         with pytest.raises(PdcError):
-            backup_service.backup_flow_cell(
+            backup_service.backup_run(
                 files_to_archive=[
                     illumina_run_encryption_service.final_passphrase_file_path,
                     illumina_run_encryption_service.encrypted_gpg_file_path,
                 ],
                 store=base_store,
-                db_flow_cell=db_flow_cell,
+                sequencing_run=db_flow_cell,
             )
