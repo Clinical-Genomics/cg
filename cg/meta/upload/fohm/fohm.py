@@ -56,6 +56,16 @@ def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplem
     return complementary_reports
 
 
+def validate_fohm_pangolin_reports(reports: list[dict]) -> list[FohmPangolinReport]:
+    """Validate FOHM Pangolin reports.
+    Raises: ValidateError"""
+    pangolin_reports = []
+    for report in reports:
+        pangolin_report = FohmPangolinReport.model_validate(report)
+        pangolin_reports.append(pangolin_report)
+    return pangolin_reports
+
+
 def get_sars_cov_complementary_reports(
     reports: list[FohmComplementaryReport],
 ) -> list[FohmComplementaryReport]:

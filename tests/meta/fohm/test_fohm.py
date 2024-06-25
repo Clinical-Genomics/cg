@@ -6,6 +6,7 @@ from cg.meta.upload.fohm.fohm import (
     get_sars_cov_pangolin_reports,
     remove_duplicate_dicts,
     validate_fohm_complementary_reports,
+    validate_fohm_pangolin_reports,
 )
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
@@ -54,7 +55,7 @@ def test_remove_duplicate_dicts_when_no_duplicates():
     assert len(content[3]) == 2
 
 
-def test_validate_fohm_reports(fohm_complementary_report_raw: dict[str, str]):
+def test_validate_fohm_complementary_reports(fohm_complementary_report_raw: dict[str, str]):
     # GIVEN a list of dicts
 
     # WHEN matching values
@@ -62,7 +63,19 @@ def test_validate_fohm_reports(fohm_complementary_report_raw: dict[str, str]):
         reports=[fohm_complementary_report_raw]
     )
 
-    # THEN a list of models is returned
+    # THEN a list of reports is returned
+    assert isinstance(content[0], FohmComplementaryReport)
+
+
+def test_validate_fohm_pangolin_reports(fohm_pangoliny_report_raw: dict[str, str]):
+    # GIVEN a list of dicts
+
+    # WHEN matching values
+    content: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
+        reports=[fohm_pangoliny_report_raw]
+    )
+
+    # THEN a list of reports is returned
     assert isinstance(content[0], FohmComplementaryReport)
 
 
