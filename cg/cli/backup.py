@@ -61,10 +61,10 @@ def backup_illumina_runs(context: CGConfig, dry_run: bool):
     backup_service = IlluminaBackupService(
         encryption_api=encryption_api,
         pdc_archiving_directory=context.illumina_backup_service.pdc_archiving_directory,
-        status=context.status_db,
+        status_db=context.status_db,
         tar_api=tar_api,
         pdc_service=pdc_service,
-        flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
+        sequencing_runs_dir=context.run_instruments.illumina.sequencing_runs_dir,
         dry_run=dry_run,
     )
     backup_service.dry_run = dry_run
@@ -141,10 +141,10 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
     context.meta_apis["backup_api"] = IlluminaBackupService(
         encryption_api=encryption_api,
         pdc_archiving_directory=context.illumina_backup_service.pdc_archiving_directory,
-        status=context.status_db,
+        status_db=context.status_db,
         tar_api=tar_api,
         pdc_service=pdc_service,
-        flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
+        sequencing_runs_dir=context.run_instruments.illumina.sequencing_runs_dir,
         dry_run=dry_run,
     )
     backup_api: IlluminaBackupService = context.meta_apis["backup_api"]
@@ -172,8 +172,8 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
 
     if not dry_run and sequencing_run:
         LOG.info(f"{sequencing_run}: updating flow cell status to {FlowCellStatus.REQUESTED}")
-        status_db.update_illumina_sequencing_run_status(
-            sequencing_run=sequencing_run, status=FlowCellStatus.REQUESTED
+        status_db.update_illumina_sequencing_run_availability(
+            sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
         )
 
 

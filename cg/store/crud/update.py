@@ -29,11 +29,11 @@ class UpdateHandler(BaseHandler):
         self.session.commit()
         return order
 
-    def update_illumina_sequencing_run_status(
-        self, sequencing_run: IlluminaSequencingRun, status: FlowCellStatus
+    def update_illumina_sequencing_run_availability(
+        self, sequencing_run: IlluminaSequencingRun, data_availability: FlowCellStatus
     ) -> IlluminaSequencingRun:
         """Update the status of an Illumina sequencing run."""
-        sequencing_run.status = status
+        sequencing_run.data_availability = data_availability
         self.session.commit()
         return sequencing_run
 

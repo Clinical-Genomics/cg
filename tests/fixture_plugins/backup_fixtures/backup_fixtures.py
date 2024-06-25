@@ -73,11 +73,11 @@ def backup_api(
     )
     _backup_api: IlluminaBackupService = IlluminaBackupService(
         encryption_api=encryption_api,
-        status=store,
+        status_db=store,
         tar_api=tar_api,
         pdc_service=pdc_service,
         pdc_archiving_directory=pdc_archiving_directory,
-        flow_cells_dir=illumina_sequencing_runs_directory,
+        sequencing_runs_dir=illumina_sequencing_runs_directory,
         dry_run=True,
     )
     return _backup_api

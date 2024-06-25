@@ -206,7 +206,7 @@ class CaseSubmitter(Submitter):
                             sample.reference_genome if hasattr(sample, "reference_genome") else None
                         ),
                         "sex": sample.sex,
-                        "status": sample.status if hasattr(sample, "status") else None,
+                        "status": sample.status_db if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
                         "tumour": sample.tumour,
                     }
@@ -305,7 +305,7 @@ class CaseSubmitter(Submitter):
 
     @staticmethod
     def _update_relationship(father_obj, link_obj, mother_obj, sample):
-        link_obj.status = sample["status"] or link_obj.status
+        link_obj.status_db = sample["status"] or link_obj.status_db
         link_obj.mother = mother_obj or link_obj.mother
         link_obj.father = father_obj or link_obj.father
 
