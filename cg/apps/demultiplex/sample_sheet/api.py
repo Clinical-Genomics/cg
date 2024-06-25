@@ -71,7 +71,7 @@ class SampleSheetAPI:
         """Return the sample sheet path if it exists and if it passes validation.
         Raises:
             MissingFilesError: If the sample sheet does not exist.
-            SampleSheetError: If the sample sheet content is wrong.
+            SampleSheetContentError: If the sample sheet content is wrong.
             SampleSheetFormatError: If the sample sheet format is wrong.
         """
         if not (sample_sheet_path and sample_sheet_path.exists()):
