@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FlowCellStatus, FileExtensions
-from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
+from cg.constants.backup import MAX_PROCESSING_ILLUMINA_RUNS
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import (
     PdcError,
@@ -21,7 +21,7 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.time import get_start_time, get_elapsed_time
 
@@ -47,51 +47,60 @@ class IlluminaBackupService:
         self.flow_cells_dir: str = flow_cells_dir
         self.dry_run: bool = dry_run
 
-    def check_processing(self) -> bool:
-        """Check if the processing queue for flow cells is not full."""
-        processing_flow_cells_count: int = len(
-            self.status.get_flow_cells_by_statuses(flow_cell_statuses=[FlowCellStatus.PROCESSING])
+    def is_processing_queue_full(self) -> bool:
+        """Check if the processing queue for illumina runs is not full."""
+        proccessing_runs_count: int = len(
+            self.status.get_illumina_sequencing_run_by_statuses(
+                run_statuses=[FlowCellStatus.PROCESSING]
+            )
         )
-        LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
-        return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
+        LOG.debug(f"Processing illumina runs: {proccessing_runs_count}")
+        return proccessing_runs_count < MAX_PROCESSING_ILLUMINA_RUNS
 
-    def get_first_flow_cell(self) -> Flowcell | None:
-        """Get the first flow cell from the requested queue."""
-        flow_cell: Flowcell | None = self.status.get_flow_cells_by_statuses(
-            flow_cell_statuses=[FlowCellStatus.REQUESTED]
+    def get_first_run(self) -> IlluminaSequencingRun | None:
+        """Get the sequencing run from the requested queue."""
+        sequencing_run: IlluminaSequencingRun | None = (
+            self.status.get_illumina_sequencing_run_by_statuses(
+                run_statuses=[FlowCellStatus.REQUESTED]
+            )
         )
-        return flow_cell[0] if flow_cell else None
+        return sequencing_run[0] if sequencing_run else None
 
-    def fetch_flow_cell(self, flow_cell: Flowcell | None = None) -> float | None:
-        """Start fetching a flow cell from backup if possible.
-
-        1. The processing queue is not full.
-        2. The requested queue is not emtpy.
+    def fetch_sequencing_run(
+        self, sequencing_run: IlluminaSequencingRun | None = None
+    ) -> float | None:
+        """Start fetching a sequencing run from backup if possible.
+        A run can only be fetched when:
+            1. The processing queue is not full.
+            2. The requested queue is not emtpy.
         """
-        if self.check_processing() is False:
+        if not self.is_processing_queue_full():
             LOG.info("Processing queue is full")
             return None
 
-        if not flow_cell:
-            flow_cell: Flowcell | None = self.get_first_flow_cell()
+        if not sequencing_run:
+            sequencing_run: IlluminaSequencingRun | None = self.get_first_run()
 
-        if not flow_cell:
-            LOG.info("No flow cells requested")
+        if not sequencing_run:
+            LOG.info("No sequencing run requested")
             return None
 
-        flow_cell.status = FlowCellStatus.PROCESSING
         if not self.dry_run:
-            self.status.session.commit()
-            LOG.info(f"{flow_cell.name}: retrieving from PDC")
+            self.status.update_illumina_sequencing_run_status(
+                sequencing_run=sequencing_run, status=FlowCellStatus.PROCESSING
+            )
+            LOG.info(f"{sequencing_run.device.internal_id}: retrieving from PDC")
 
-        dsmc_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
+        dsmc_output: list[str] = self.query_pdc_for_sequencing_run(
+            sequencing_run.device.internal_id
+        )
 
         archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(dsmc_output=dsmc_output)
+        archived_flow_cell: Path = self.get_archived_sequencing_run_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_flow_cell(
-                flow_cell=flow_cell,
+                flow_cell=sequencing_run,
                 archived_key=archived_key,
                 archived_flow_cell=archived_flow_cell,
             )
@@ -104,8 +113,8 @@ class IlluminaBackupService:
         run_dir: Path = Path(self.flow_cells_dir)
         flow_cell_output_directory: Path = Path(run_dir, archived_flow_cell.name.split(".")[0])
         self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
-        self.retrieve_archived_flow_cell(
-            archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
+        self.retrieve_archived_sequencing_run(
+            archived_flow_cell=archived_flow_cell, sequencing_run=flow_cell, run_dir=run_dir
         )
 
         try:
@@ -214,8 +223,8 @@ class IlluminaBackupService:
                 self.status.session.commit()
             raise error
 
-    def retrieve_archived_flow_cell(
-        self, archived_flow_cell: Path, flow_cell: Flowcell, run_dir: Path
+    def retrieve_archived_sequencing_run(
+        self, archived_flow_cell: Path, sequencing_run: IlluminaSequencingRun, run_dir: Path
     ):
         """Attempt to retrieve an archived flow cell."""
         try:
@@ -224,20 +233,18 @@ class IlluminaBackupService:
                 run_dir=run_dir,
             )
             if not self.dry_run:
-                self._set_flow_cell_status_to_retrieved(flow_cell)
+                self.status.update_illumina_sequencing_run_status(
+                    sequencing_run=sequencing_run, status=FlowCellStatus.RETRIEVED
+                )
         except PdcError as error:
-            LOG.error(f"{flow_cell.name}: run directory retrieval failed")
+            LOG.error(f"{sequencing_run.device.internal_id}: run directory retrieval failed")
             if not self.dry_run:
-                flow_cell.status = FlowCellStatus.REQUESTED
-                self.status.session.commit()
+                self.status.update_illumina_sequencing_run_status(
+                    sequencing_run=sequencing_run, status=FlowCellStatus.REQUESTED
+                )
             raise error
 
-    def _set_flow_cell_status_to_retrieved(self, flow_cell: Flowcell):
-        flow_cell.status = FlowCellStatus.RETRIEVED
-        self.status.session.commit()
-        LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")
-
-    def query_pdc_for_flow_cell(self, flow_cell_id: str) -> list[str]:
+    def query_pdc_for_sequencing_run(self, flow_cell_id: str) -> list[str]:
         """Query PDC for a given flow cell id.
         Raise:
             PdcNoFilesMatchingSearchError if no files are found.
@@ -255,7 +262,7 @@ class IlluminaBackupService:
         )
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
-        """Retrieve the archived file from PDC to a flow cell runs directory."""
+        """Retrieve the archived file from PDC to a sequencing runs directory."""
         retrieved_file = Path(run_dir, archived_file.name)
         LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
         self.pdc.retrieve_file_from_pdc(
@@ -263,9 +270,9 @@ class IlluminaBackupService:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Path | None:
-        """Get the path of the archived flow cell from a PDC query."""
-        flow_cell_line: str = [
+    def get_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
+        """Get the path of the archived sequencing run from a PDC query."""
+        run_line: str = [
             row
             for row in dsmc_output
             if FileExtensions.TAR in row
@@ -273,14 +280,14 @@ class IlluminaBackupService:
             and FileExtensions.GPG in row
         ][0]
 
-        archived_flow_cell = Path(flow_cell_line.split()[4])
-        if archived_flow_cell:
-            LOG.info(f"Flow cell found: {archived_flow_cell}")
-            return archived_flow_cell
+        archived_run = Path(run_line.split()[4])
+        if archived_run:
+            LOG.info(f"Sequencing run found: {archived_run}")
+            return archived_run
 
     @classmethod
     def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
-        """Get the encryption key for the archived flow cell from a PDC query."""
+        """Get the encryption key for the archived sequencing run from a PDC query."""
         encryption_key_line: str = [
             row
             for row in dsmc_output

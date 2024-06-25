@@ -494,6 +494,16 @@ class ReadHandler(BaseHandler):
             filter_functions=[FlowCellFilter.WITH_STATUSES],
         ).all()
 
+    def get_illumina_sequencing_run_by_statuses(
+        self, run_statuses: list[str]
+    ) -> list[IlluminaSequencingRun] | None:
+        """Return flow cells with supplied statuses."""
+        return apply_illumina_sequencing_run_filter(
+            runs=self._get_query(table=IlluminaSequencingRun),
+            run_statuses=run_statuses,
+            filter_functions=[IlluminaSequencingRunFilter.WITH_STATUSES],
+        ).all()
+
     def get_flow_cell_by_name_pattern_and_status(
         self, flow_cell_statuses: list[str], name_pattern: str
     ) -> list[Flowcell]:

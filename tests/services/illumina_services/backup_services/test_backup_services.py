@@ -56,7 +56,7 @@ def test_query_pdc_for_flow_cell(
     backup_api.pdc.query_pdc = mock_pdc_query_method
 
     # WHEN querying pdc for a flow cell
-    backup_api.query_pdc_for_flow_cell(flow_cell_id=flow_cell_name)
+    backup_api.query_pdc_for_sequencing_run(flow_cell_id=flow_cell_name)
 
     # THEN the flow cell is logged as found for one of the search patterns
     assert fnmatch.filter(
@@ -106,7 +106,9 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     )
 
     # WHEN getting the flow cell path
-    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(dsmc_output=dsmc_q_archive_output)
+    flow_cell_path: Path = backup_api.get_archived_sequencing_run_path(
+        dsmc_output=dsmc_q_archive_output
+    )
 
     # THEN this method should return a path object
     assert isinstance(flow_cell_path, Path)
@@ -135,7 +137,7 @@ def test_maximum_processing_queue_full(mock_store):
     mock_store.get_flow_cells_by_statuses.return_value = [[mock.Mock()]]
 
     # THEN this method should return False
-    assert backup_api.check_processing() is False
+    assert backup_api.is_processing_queue_full() is False
 
 
 @mock.patch("cg.store")
@@ -154,7 +156,7 @@ def test_maximum_processing_queue_not_full(mock_store):
     mock_store.get_flow_cells_by_statuses().return_value = []
 
     # THEN this method should return True
-    assert backup_api.check_processing() is True
+    assert backup_api.is_processing_queue_full() is True
 
 
 @mock.patch("cg.store.models.Flowcell")
@@ -174,7 +176,7 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     # WHEN a flow cell is requested to be retrieved from PDC
     mock_store.get_flow_cells_by_statuses().return_value = [mock_flow_cell]
 
-    popped_flow_cell = backup_api.get_first_flow_cell()
+    popped_flow_cell = backup_api.get_first_run()
 
     # THEN a flow cell is returned
     assert popped_flow_cell is not None
@@ -196,7 +198,7 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     # WHEN there are no flow cells requested to be retrieved from PDC
     mock_store.get_flow_cells_by_statuses.return_value = []
 
-    popped_flow_cell = backup_api.get_first_flow_cell()
+    popped_flow_cell = backup_api.get_first_run()
 
     # THEN no flow cell is returned
     assert popped_flow_cell is None
@@ -222,8 +224,8 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
     )
 
     # WHEN the processing queue is full
-    backup_api.check_processing.return_value = False
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    backup_api.is_processing_queue_full.return_value = False
+    result = backup_api.fetch_sequencing_run(mock_flow_cell)
 
     # THEN no flow cell will be fetched and a log message indicates that the processing queue is
     # full
@@ -259,13 +261,13 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     )
 
     # WHEN no flow cells are requested
-    backup_api.get_first_flow_cell.return_value = None
-    backup_api.check_processing.return_value = True
+    backup_api.get_first_run.return_value = None
+    backup_api.is_processing_queue_full.return_value = True
 
     # AND no flow cell has been specified
     mock_flow_cell = None
 
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    result = backup_api.fetch_sequencing_run(mock_flow_cell)
 
     # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
     # requested
@@ -328,12 +330,12 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
-    backup_api.get_first_flow_cell.return_value = mock_flow_cell
-    backup_api.check_processing.return_value = True
+    backup_api.get_first_run.return_value = mock_flow_cell
+    backup_api.is_processing_queue_full.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
+    backup_api.get_archived_sequencing_run_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=None)
+    result = backup_api.fetch_sequencing_run(sequencing_run=None)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
@@ -407,11 +409,11 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
-    backup_api.check_processing.return_value = True
+    backup_api.is_processing_queue_full.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
+    backup_api.get_archived_sequencing_run_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run(sequencing_run=mock_flow_cell)
 
     # THEN no flow cell is taken form statusdb
     mock_get_first_flow_cell.assert_not_called()
@@ -487,7 +489,7 @@ def test_fetch_flow_cell_integration(
     mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run(sequencing_run=mock_flow_cell)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text

@@ -2,8 +2,9 @@
 
 from sqlalchemy.orm import Session
 
+from cg.constants import FlowCellStatus
 from cg.store.base import BaseHandler
-from cg.store.models import Flowcell, Order, Sample
+from cg.store.models import Flowcell, Order, Sample, IlluminaSequencingRun
 
 
 class UpdateHandler(BaseHandler):
@@ -31,3 +32,11 @@ class UpdateHandler(BaseHandler):
         order.is_delivered = delivered
         self.session.commit()
         return order
+
+    def update_illumina_sequencing_run_status(
+        self, sequencing_run: IlluminaSequencingRun, status: FlowCellStatus
+    ) -> IlluminaSequencingRun:
+        """Update the status of an Illumina sequencing run."""
+        sequencing_run.status = status
+        self.session.commit()
+        return sequencing_run
