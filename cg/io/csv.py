@@ -42,6 +42,17 @@ def write_csv(content: list[list[Any]], file_path: Path, delimiter: str = ",") -
             csv_writer.writerow(row)
 
 
+def write_csv_from_dict(
+    content: list[dict[Any]], fieldnames: list[str], file_path: Path, delimiter: str = ","
+) -> None:
+    """Write content to a CSV file."""
+    with open(file_path, "w", newline="") as file:
+        csv_writer = csv.DictWriter(file, delimiter=delimiter, fieldnames=fieldnames)
+        csv_writer.writeheader()
+        for row in content:
+            csv_writer.writerow(row)
+
+
 def write_csv_stream(content: list[list[Any]], delimiter: str = ",") -> str:
     """Write content to a CSV stream."""
     csv_stream = io.StringIO()

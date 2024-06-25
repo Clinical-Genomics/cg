@@ -15,7 +15,8 @@ from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import CgError
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import ReadFile
+from cg.io.csv import write_csv_from_dict
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
@@ -282,23 +283,25 @@ class FOHMUploadAPI:
             )
             pangolin_path.chmod(0o0777)
 
-    def create_pangolin_reports_csv(self, reports: list[FohmPangolinReport]) -> None:
-        LOG.info("Creating Pangolin reports")
+    def create_pangolin_report_csv(self, reports: list[FohmPangolinReport]) -> None:
+        LOG.info("Creating aggregate Pangolin report")
         unique_region_labs: set[str] = {report.region_lab for report in reports}
         LOG.info(f"Regions in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            pangolin_reports = [report for report in reports if report.region_lab == region_lab]
+            region_lab_reports = [report for report in reports if report.region_lab == region_lab]
             if self._dry_run:
-                LOG.info(pangolin_reports)
+                LOG.info(region_lab_reports)
                 continue
             pangolin_path = Path(
                 self.daily_rawdata_path,
                 f"{region_lab}_{self.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
             )
-            WriteFile.write_file_from_content(
-                content=pangolin_reports,
-                file_format=FileFormat.CSV,
+            all_reports: list[dict] = [report.model_dump() for report in region_lab_reports]
+            fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
+            write_csv_from_dict(
+                content=all_reports,
+                fieldnames=fieldnames,
                 file_path=pangolin_path,
             )
             pangolin_path.chmod(0o0777)
@@ -321,25 +324,27 @@ class FOHMUploadAPI:
                 index=False,
             )
 
-    def create_komplettering_reports_csv(self, dicts: list[dict]) -> None:
-        LOG.info("Creating 'komplettering' reports")
-        unique_region_labs: set[str] = {dictionary["region_lab"] for dictionary in dicts}
-        LOG.info(f"Regions in batch: {unique_region_labs}")
+    def create_complementary_report_csv(self, reports: list[FohmComplementaryReport]) -> None:
+        LOG.info("Creating aggregate 'komplettering' report")
+        unique_region_labs: set[str] = {report.region_lab for report in reports}
+        LOG.info(f"Regions laboratories  in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            region_lab_reports = [
-                dictionary for dictionary in dicts if dictionary["region_lab"] == region_lab
+            region_lab_reports: list[FohmComplementaryReport] = [
+                report for report in reports if report.region_lab == region_lab
             ]
             if self._dry_run:
                 LOG.info(region_lab_reports)
                 continue
-            WriteFile.write_file_from_content(
-                content=region_lab_reports,
-                file_format=FileFormat.CSV,
-                file_path=Path(
-                    self.daily_report_path,
-                    f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
-                ),
+            all_reports: list[dict] = [report.model_dump() for report in region_lab_reports]
+            fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
+            complementary_report_file = Path(
+                self.daily_report_path,
+                f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
+            )
+
+            write_csv_from_dict(
+                content=all_reports, fieldnames=fieldnames, file_path=complementary_report_file
             )
 
     def send_mail_reports(self) -> None:

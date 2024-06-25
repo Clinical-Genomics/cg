@@ -164,7 +164,7 @@ def test_add_region_lab_to_reports(
 
 
 def test_create_pangolin_reports_csv(
-    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI, tmp_path: Path
+    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
 ):
     # GIVEN a list of reports
 
@@ -181,7 +181,31 @@ def test_create_pangolin_reports_csv(
     assert not pangolin_path.exists()
 
     # WHEN creating reports
-    fohm_upload_api.create_pangolin_reports_csv(fohm_pangolin_reports)
+    fohm_upload_api.create_pangolin_report_csv(fohm_pangolin_reports)
 
     # THEN a file with reports id generated
     assert pangolin_path.exists()
+
+
+def test_create_complementary_report_csv(
+    fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
+):
+    # GIVEN a list of reports
+
+    # GIVEN report folders exist
+    fohm_upload_api.create_daily_delivery_folders()
+
+    # GIVEN an outdata path for reports
+    complementary_report_file = Path(
+        fohm_upload_api.daily_report_path,
+        f"None_{fohm_upload_api.current_datestr}_komplettering{FileExtensions.CSV}",
+    )
+
+    # GIVEN that the Pangolin report path does not exist
+    assert not complementary_report_file.exists()
+
+    # WHEN creating reports
+    fohm_upload_api.create_complementary_report_csv(fohm_complementary_reports)
+
+    # THEN a file with reports id generated
+    assert complementary_report_file.exists()

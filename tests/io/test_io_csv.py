@@ -2,7 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.io.csv import read_csv, read_csv_stream, write_csv, write_csv_stream
+from cg.io.csv import (
+    read_csv,
+    read_csv_stream,
+    write_csv,
+    write_csv_from_dict,
+    write_csv_stream,
+)
 from tests.io.conftest import FileRepresentation
 
 
@@ -111,6 +117,48 @@ def test_write_csv(delimiter: str, delimiter_map: dict[str, FileRepresentation])
 
     # WHEN reading it again
     written_raw_csv_content: list[list[str]] = read_csv(file_path=output_file, delimiter=delimiter)
+
+    # THEN assert that all data is the same
+    assert raw_csv_content == written_raw_csv_content
+
+
+@pytest.mark.parametrize(
+    "delimiter",
+    [
+        ",",
+        "\t",
+    ],
+)
+def test_write_csv_from_dict(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
+    """
+    Tests writing content to a file with each delimiter.
+    """
+    # GIVEN a file with the given delimiter
+
+    # GIVEN a file path to write to
+    file_path = delimiter_map[delimiter].filepath
+    output_file = delimiter_map[delimiter].output_file
+
+    # WHEN reading the file
+    raw_csv_content: list[dict] = read_csv(
+        file_path=file_path, delimiter=delimiter, read_to_dict=True
+    )
+
+    # WHEN writing the content
+    write_csv_from_dict(
+        content=raw_csv_content,
+        file_path=output_file,
+        delimiter=delimiter,
+        fieldnames=sorted(raw_csv_content[0].keys()),
+    )
+
+    # THEN a file was successfully created
+    assert Path.exists(output_file)
+
+    # WHEN reading it again
+    written_raw_csv_content: list[dict] = read_csv(
+        file_path=output_file, delimiter=delimiter, read_to_dict=True
+    )
 
     # THEN assert that all data is the same
     assert raw_csv_content == written_raw_csv_content
