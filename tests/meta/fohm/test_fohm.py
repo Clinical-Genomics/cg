@@ -172,19 +172,19 @@ def test_create_pangolin_reports_csv(
     fohm_upload_api.create_daily_delivery_folders()
 
     # GIVEN an outdata path for reports
-    pangolin_path = Path(
+    pangolin_report_file = Path(
         fohm_upload_api.daily_rawdata_path,
         f"None_{fohm_upload_api.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
     )
 
     # GIVEN that the Pangolin report path does not exist
-    assert not pangolin_path.exists()
+    assert not pangolin_report_file.exists()
 
     # WHEN creating reports
     fohm_upload_api.create_pangolin_report_csv(fohm_pangolin_reports)
 
     # THEN a file with reports id generated
-    assert pangolin_path.exists()
+    assert pangolin_report_file.exists()
 
 
 def test_create_complementary_report_csv(

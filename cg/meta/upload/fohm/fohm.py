@@ -289,22 +289,26 @@ class FOHMUploadAPI:
         LOG.info(f"Regions in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            region_lab_reports = [report for report in reports if report.region_lab == region_lab]
+            region_lab_reports: list[FohmPangolinReport] = [
+                report for report in reports if report.region_lab == region_lab
+            ]
             if self._dry_run:
                 LOG.info(region_lab_reports)
                 continue
-            pangolin_path = Path(
+            pangolin_report_file = Path(
                 self.daily_rawdata_path,
                 f"{region_lab}_{self.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
             )
-            all_reports: list[dict] = [report.model_dump() for report in region_lab_reports]
+            all_region_lab_reports: list[dict] = [
+                report.model_dump() for report in region_lab_reports
+            ]
             fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
             write_csv_from_dict(
-                content=all_reports,
+                content=all_region_lab_reports,
                 fieldnames=fieldnames,
-                file_path=pangolin_path,
+                file_path=pangolin_report_file,
             )
-            pangolin_path.chmod(0o0777)
+            pangolin_report_file.chmod(0o0777)
 
     def create_komplettering_reports(self) -> None:
         LOG.info("Creating komplettering reports")
@@ -336,15 +340,18 @@ class FOHMUploadAPI:
             if self._dry_run:
                 LOG.info(region_lab_reports)
                 continue
-            all_reports: list[dict] = [report.model_dump() for report in region_lab_reports]
+            all_region_lab_reports: list[dict] = [
+                report.model_dump() for report in region_lab_reports
+            ]
             fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
             complementary_report_file = Path(
                 self.daily_report_path,
                 f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
             )
-
             write_csv_from_dict(
-                content=all_reports, fieldnames=fieldnames, file_path=complementary_report_file
+                content=all_region_lab_reports,
+                fieldnames=fieldnames,
+                file_path=complementary_report_file,
             )
 
     def send_mail_reports(self) -> None:
