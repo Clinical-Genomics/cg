@@ -52,9 +52,8 @@ class MipDNAObservationsAnalysisTag(StrEnum):
 class RarediseaseObservationsAnalysisTag(StrEnum):
     """Rare disease observations files analysis tags."""
 
-    SNV_VCF: str = "deepvariant"
+    SNV_VCF: str = "vcf-snv"
     SV_VCF: str = "vcf-sv-research"
-    PROFILE_GBCF: str = "vcf-snv"
     FAMILY_PED: str = "pedigree"
 
 
