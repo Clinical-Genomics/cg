@@ -4,7 +4,7 @@ from cg.models.fohm.reports import FohmComplementaryReport
 
 
 @pytest.fixture
-def fohm_complementary_reports_raw() -> dict[str, str]:
+def fohm_complementary_report_raw() -> dict[str, str]:
     """Return raw FOHM complementary reports."""
     return {
         "provnummer": "a_sample_number",
@@ -18,7 +18,7 @@ def fohm_complementary_report(
     fohm_complementary_reports_raw: list[dict],
 ) -> FohmComplementaryReport:
     """Return FohmComplementaryReport."""
-    return FohmComplementaryReport.model_validate(fohm_complementary_reports_raw)
+    return FohmComplementaryReport.model_validate(fohm_complementary_report_raw)
 
 
 @pytest.fixture
