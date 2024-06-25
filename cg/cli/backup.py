@@ -36,7 +36,7 @@ from cg.models.run_devices.illumina_run_directory_data import (
     IlluminaRunDirectoryData,
     get_sequencing_runs_from_path,
 )
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Flowcell, Sample, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -95,25 +95,27 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             logging.error(f"{error}")
 
 
-@backup.command("encrypt-flow-cells")
+@backup.command("encrypt-illumina-runs")
 @DRY_RUN
 @click.pass_obj
-def encrypt_flow_cells(context: CGConfig, dry_run: bool):
-    """Encrypt flow cells."""
+def encrypt_illumina_runs(context: CGConfig, dry_run: bool):
+    """Encrypt illumina runs."""
     status_db: Store = context.status_db
-    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+    runs: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
-    for flow_cell in flow_cells:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
-        if db_flow_cell and db_flow_cell.has_backup:
-            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+    for run in runs:
+        sequencing_run: IlluminaSequencingRun | None = (
+            status_db.get_illumina_sequencing_run_by_device_internal_id(run.id)
+        )
+        if sequencing_run and sequencing_run.has_backup:
+            LOG.debug(f"Run: {run.id} is already backed-up")
             continue
         illumina_run_encryption_service = IlluminaRunEncryptionService(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            run_dir_data=flow_cell,
+            run_dir_data=run,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),

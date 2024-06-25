@@ -2,7 +2,10 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import FileExtensions
 from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
+from cg.models.cg_config import CGConfig
+from cg.store.store import Store
 
 
 @pytest.fixture
@@ -201,3 +204,20 @@ def key_asymmetric_decryption_command(
         encryption_key_file.as_posix(),
         encrypted_key_file.as_posix(),
     ]
+
+
+@pytest.fixture
+def encryption_context(
+    cg_context: CGConfig,
+    store_with_illumina_sequencing_data: Store,
+    tmp_path,
+    novaseq_x_flow_cell_full_name: str,
+) -> CGConfig:
+    """Return a CGConfig setup for encryption tests."""
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    run_encrypt_dir = Path(tmp_path, "test-encryption-dir")
+    run_encrypt_dir.mkdir(parents=True, exist_ok=True)
+    Path(run_encrypt_dir, novaseq_x_flow_cell_full_name).mkdir(parents=True, exist_ok=True)
+    cg_context.run_instruments.illumina.sequencing_runs_dir = run_encrypt_dir
+    cg_context.encryption.encryption_dir = run_encrypt_dir
+    return cg_context

@@ -121,14 +121,14 @@ class IlluminaRunEncryptionService(EncryptionAPI):
             FlowCellError if sequencing is not ready, encryption is pending or complete.
         """
         if not self.run_dir_data.is_sequencing_run_ready():
-            raise FlowCellError(f"Flow cell: {self.run_dir_data.id} is not ready")
+            raise FlowCellError(f"Run: {self.run_dir_data.id} is not ready")
         if self.complete_file_path.exists():
             raise IlluminaRunEncryptionError(
-                f"Encryption already completed for flow cell: {self.run_dir_data.id}"
+                f"Encryption already completed for run: {self.run_dir_data.id}"
             )
         if self.pending_file_path.exists():
             raise IlluminaRunEncryptionError(
-                f"Encryption already started for flow cell: {self.run_dir_data.id}"
+                f"Encryption already started for run: {self.run_dir_data.id}"
             )
         return True
 
@@ -192,7 +192,7 @@ class IlluminaRunEncryptionService(EncryptionAPI):
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
-        LOG.info(f"Flow cell encryption running as job {sbatch_number}")
+        LOG.info(f"Run encryption running as job {sbatch_number}")
 
     def start_encryption(self) -> None:
         """Start encryption if requirements are met."""

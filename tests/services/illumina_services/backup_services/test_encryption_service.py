@@ -127,13 +127,11 @@ def test_is_encryption_possible_when_sequencing_not_ready(
         illumina_run_encryption_service.is_encryption_possible()
 
         # THEN error should be raised
-        assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
 
 
 def test_is_encryption_possible_when_encryption_is_completed(
     caplog,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
-    flow_cell_name: str,
     mocker,
 ):
     # GIVEN a IlluminaRunEncryptionService
@@ -151,7 +149,6 @@ def test_is_encryption_possible_when_encryption_is_completed(
         illumina_run_encryption_service.is_encryption_possible()
 
         # THEN error should be raised
-        assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
 
     # Clean-up
     shutil.rmtree(illumina_run_encryption_service.run_encryption_dir)
@@ -160,7 +157,6 @@ def test_is_encryption_possible_when_encryption_is_completed(
 def test_is_encryption_possible_when_encryption_is_pending(
     caplog,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
-    flow_cell_name: str,
     mocker,
 ):
     # GIVEN a IlluminaRunEncryptionService
@@ -177,8 +173,7 @@ def test_is_encryption_possible_when_encryption_is_pending(
     with pytest.raises(IlluminaRunEncryptionError):
         illumina_run_encryption_service.is_encryption_possible()
 
-        # THEN error should be raised
-        assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
+        # THEN an error should be raised
 
     # Clean-up
     shutil.rmtree(illumina_run_encryption_service.run_encryption_dir)
@@ -201,7 +196,7 @@ def test_encrypt_run(
     illumina_run_encryption_service.encrypt_run()
 
     # THEN sbatch should be submitted
-    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
+    assert f"Run encryption running as job {sbatch_job_number}" in caplog.text
 
 
 def test_start_encryption(
@@ -221,4 +216,4 @@ def test_start_encryption(
     illumina_run_encryption_service.start_encryption()
 
     # THEN sbatch should be submitted
-    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
+    assert f"Run encryption running as job {sbatch_job_number}" in caplog.text
