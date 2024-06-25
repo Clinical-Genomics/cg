@@ -28,3 +28,22 @@ def test_upload_auto_with_workflow(
     cli_runner.invoke(upload_all_completed_analyses, ["--workflow", "mip-dna"], obj=upload_context)
     # THEN assert that the MIP analysis was successfully uploaded
     assert "Uploading analysis for case" in caplog.text
+
+
+def test_upload_auto_with_workflow_raredisease(
+    cli_runner: CliRunner,
+    helpers: StoreHelpers,
+    timestamp: datetime.datetime,
+    upload_context: CGConfig,
+    caplog,
+):
+    """Test upload auto"""
+    # GIVEN a store with a workflow
+    workflow = Workflow.RAREDISEASE
+    helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, workflow=workflow)
+
+    # WHEN uploading all analysis from workflow MIP
+    caplog.set_level(logging.INFO)
+    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", "raredisease"], obj=upload_context)
+    # THEN assert that the RAREDISEASE analysis was successfully uploaded
+    assert "Uploading analysis for case" in caplog.text
