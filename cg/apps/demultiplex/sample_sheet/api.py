@@ -234,7 +234,7 @@ class SampleSheetAPI:
         housekeeper or creating it if there is not a valid sample sheet.
         """
         flow_cell: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
-        LOG.info("Fetching and validating sample sheet from Housekeeper")
+        LOG.info(f"Fetching and validating sample sheet for {flow_cell_name} from Housekeeper")
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)
             return
