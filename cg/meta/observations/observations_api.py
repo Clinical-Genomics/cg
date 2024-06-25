@@ -18,7 +18,7 @@ from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
-    RarediseaseObservationsInputFiles
+    RarediseaseObservationsInputFiles,
 )
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -155,7 +155,11 @@ class ObservationsAPI:
 
     def get_observations_files_from_hk(
         self, hk_version: Version, case_id: str
-    ) ->  BalsamicObservationsInputFiles | MipDNAObservationsInputFiles | RarediseaseObservationsInputFiles:
+    ) -> (
+        BalsamicObservationsInputFiles
+        | MipDNAObservationsInputFiles
+        | RarediseaseObservationsInputFiles
+    ):
         """Return observations files given a Housekeeper version."""
         raise NotImplementedError
 
