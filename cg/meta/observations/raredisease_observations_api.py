@@ -126,13 +126,12 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 else None
             ),
             "profile_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.PROFILE_GBCF]
+                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
             ).first(),
             "family_ped_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.FAMILY_PED]
             ).first(),
         }
-        LOG.info(input_files)
         return RarediseaseObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case_id: str) -> None:
