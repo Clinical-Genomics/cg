@@ -102,7 +102,7 @@ class FlowCellsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 
-class FlowCellEncryptionError(CgError):
+class IlluminaRunEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 

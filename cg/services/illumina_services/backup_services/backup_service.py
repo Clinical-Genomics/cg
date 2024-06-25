@@ -10,10 +10,13 @@ from cg.exc import (
     PdcNoFilesMatchingSearchError,
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
-    FlowCellEncryptionError,
+    IlluminaRunEncryptionError,
 )
 from cg.meta.backup.backup import LOG
-from cg.meta.encryption.encryption import EncryptionAPI, FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -292,7 +295,7 @@ class IlluminaBackupService:
             return archived_encryption_key
 
     def validate_is_flow_cell_backup_possible(
-        self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
+        self, db_flow_cell: Flowcell, illumina_run_encryption_service: IlluminaRunEncryptionService
     ) -> None:
         """Check if back-up of flow cell is possible.
         Raises:
@@ -306,9 +309,9 @@ class IlluminaBackupService:
             raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
             )
-        if not flow_cell_encryption_api.complete_file_path.exists():
-            raise FlowCellEncryptionError(
-                f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
+        if not illumina_run_encryption_service.complete_file_path.exists():
+            raise IlluminaRunEncryptionError(
+                f"Flow cell: {illumina_run_encryption_service.run_dir_data.id} encryption process is not complete"
             )
         LOG.debug("Flow cell can be backed up")
 
@@ -334,23 +337,24 @@ class IlluminaBackupService:
         sbatch_parameter,
     ) -> None:
         """Check if back-up of flow cell is possible and if so starts it."""
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
+        illumina_run_encryption_service = IlluminaRunEncryptionService(
             binary_path=binary_path,
             dry_run=self.dry_run,
             encryption_dir=encryption_dir,
-            flow_cell=run_dir_data,
+            run_dir_data=run_dir_data,
             pigz_binary_path=pigz_binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=sbatch_parameter,
             tar_api=self.tar_api,
         )
         self.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            illumina_run_encryption_service=illumina_run_encryption_service,
         )
         self.backup_flow_cell(
             files_to_archive=[
-                flow_cell_encryption_api.final_passphrase_file_path,
-                flow_cell_encryption_api.encrypted_gpg_file_path,
+                illumina_run_encryption_service.final_passphrase_file_path,
+                illumina_run_encryption_service.encrypted_gpg_file_path,
             ],
             store=status_db,
             db_flow_cell=db_flow_cell,
