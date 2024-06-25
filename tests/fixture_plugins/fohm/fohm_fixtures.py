@@ -15,7 +15,7 @@ def fohm_complementary_report_raw() -> dict[str, str]:
 
 @pytest.fixture
 def fohm_complementary_report(
-    fohm_complementary_reports_raw: list[dict],
+    fohm_complementary_report_raw: list[dict],
 ) -> FohmComplementaryReport:
     """Return FohmComplementaryReport."""
     return FohmComplementaryReport.model_validate(fohm_complementary_report_raw)

@@ -2,8 +2,8 @@ from pathlib import Path
 
 from cg.meta.upload.fohm.fohm import (
     create_daily_deliveries_csv,
-    get_kompletterings_reports,
     get_pangolin_reports,
+    get_sars_cov_complementary_reports,
     remove_duplicate_dicts,
     validate_fohm_complementary_reports,
 )
@@ -54,23 +54,25 @@ def test_remove_duplicate_dicts_when_no_duplicates():
     assert len(content[3]) == 2
 
 
-def test_validate_fohm_reports(fohm_complementary_reports_raw: dict[str, str]):
+def test_validate_fohm_reports(fohm_complementary_report_raw: dict[str, str]):
     # GIVEN a list of dicts
 
     # WHEN matching values
     content: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
-        reports=[fohm_complementary_reports_raw]
+        reports=[fohm_complementary_report_raw]
     )
 
     # THEN a list of models is returned
     assert isinstance(content[0], FohmComplementaryReport)
 
 
-def test_get_kompletterings_reports(fohm_complementary_reports: list[FohmComplementaryReport]):
+def test_get_sars_cov_complementary_reports(
+    fohm_complementary_reports: list[FohmComplementaryReport],
+):
     # GIVEN a list of reports
 
     # WHEN matching values in reports
-    content: list[FohmComplementaryReport] = get_kompletterings_reports(
+    content: list[FohmComplementaryReport] = get_sars_cov_complementary_reports(
         reports=fohm_complementary_reports
     )
 

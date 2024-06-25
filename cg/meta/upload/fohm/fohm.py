@@ -56,7 +56,7 @@ def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplem
     return complementary_reports
 
 
-def get_kompletterings_reports(
+def get_sars_cov_complementary_reports(
     reports: list[FohmComplementaryReport],
 ) -> list[FohmComplementaryReport]:
     """Return all "Sars-cov2" reports from multiple cases."""
