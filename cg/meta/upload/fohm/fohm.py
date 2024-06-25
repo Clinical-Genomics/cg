@@ -209,20 +209,25 @@ class FOHMUploadAPI:
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
-    def add_internal_id(self, dicts: list[dict]) -> None:
-        """Add key for internal id to dicts."""
-        for dictionary in dicts:
-            dictionary["internal_id"] = self.status_db.get_sample_by_name(
-                name=dictionary["provnummer"]
+    def k(self, reports: list[FohmComplementaryReport]) -> None:
+        """Add key for internal id to complementary reports."""
+        for report in reports:
+            report.internal_id = self.status_db.get_sample_by_name(
+                name=report.sample_number
             ).internal_id
 
-    def add_region_lab(self, dicts: list[dict]) -> None:
-        """Add key for region lab to dicts."""
-        for dictionary in dicts:
-            dictionary["region_lab"] = (
-                f"""{self.lims_api.get_sample_attribute(lims_id=dictionary["internal_id"], key="region_code").split(' ')[0]}"""
-            )
-            f"""_{self.lims_api.get_sample_attribute(lims_id=dictionary["internal_id"], key="lab_code").split(' ')[0]}"""
+    def add_internal_id_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
+        """Add key for internal id to Pangolin reports."""
+        for report in reports:
+            report.internal_id = self.status_db.get_sample_by_name(name=report.taxon).internal_id
+
+    def add_region_lab(
+        self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
+    ) -> None:
+        """Add key for region lab to reports."""
+        for report in reports:
+            report.region_lab = f"""{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="region_code").split(' ')[0]}"""
+            f"""_{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="lab_code").split(' ')[0]}"""
 
     def append_metadata_to_aggregation_df(self) -> None:
         """
@@ -275,15 +280,13 @@ class FOHMUploadAPI:
             )
             pangolin_path.chmod(0o0777)
 
-    def create_pangolin_reports_csv(self, dicts: list[dict]) -> None:
-        LOG.info("Creating pangolin reports")
-        unique_region_labs: set[str] = {dictionary["region_lab"] for dictionary in dicts}
+    def create_pangolin_reports_csv(self, reports: list[FohmPangolinReport]) -> None:
+        LOG.info("Creating Pangolin reports")
+        unique_region_labs: set[str] = {report.region_lab for report in reports}
         LOG.info(f"Regions in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            pangolin_reports = [
-                dictionary for dictionary in dicts if dictionary["region_lab"] == region_lab
-            ]
+            pangolin_reports = [report for report in reports if report.region_lab == region_lab]
             if self._dry_run:
                 LOG.info(pangolin_reports)
                 continue

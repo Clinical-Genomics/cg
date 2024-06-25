@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.meta.upload.fohm.fohm import (
+    FOHMUploadAPI,
     create_daily_deliveries_csv,
     get_sars_cov_complementary_reports,
     get_sars_cov_pangolin_reports,
