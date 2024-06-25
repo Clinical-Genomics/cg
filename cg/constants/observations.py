@@ -7,7 +7,6 @@ from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.RAREDISEASE, Workflow.MIP_DNA, Workflow.BALSAMIC]
-
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST110,
