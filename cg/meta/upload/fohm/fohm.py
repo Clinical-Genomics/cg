@@ -209,15 +209,17 @@ class FOHMUploadAPI:
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
-    def k(self, reports: list[FohmComplementaryReport]) -> None:
-        """Add key for internal id to complementary reports."""
+    def add_sample_internal_id_complementary_report(
+        self, reports: list[FohmComplementaryReport]
+    ) -> None:
+        """Add sample internal id to complementary reports."""
         for report in reports:
             report.internal_id = self.status_db.get_sample_by_name(
                 name=report.sample_number
             ).internal_id
 
-    def add_internal_id_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
-        """Add key for internal id to Pangolin reports."""
+    def add_sample_internal_id_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
+        """Add sample internal id to Pangolin reports."""
         for report in reports:
             report.internal_id = self.status_db.get_sample_by_name(name=report.taxon).internal_id
 

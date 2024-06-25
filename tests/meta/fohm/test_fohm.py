@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from cg.meta.upload.fohm.fohm import (
     FOHMUploadAPI,
     create_daily_deliveries_csv,
@@ -110,3 +112,35 @@ def test_get_sars_cov_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinR
     # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
     assert content[0].taxon == "44CS000001"
+
+
+@pytest.fixture
+def test_add_sample_internal_id_complementary_report(
+    fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
+):
+    """Test adding sample internal id to the reports."""
+    # GIVEN a FOHM upload API
+
+    # GIVEN a list of complementary reports
+
+    # WHEN adding sample internal id
+    fohm_upload_api.add_sample_internal_id_complementary_report(reports=fohm_complementary_reports)
+
+    # THEN a sample internal id has been added
+    assert isinstance(fohm_complementary_reports[0].internal_id, str)
+
+
+@pytest.fixture
+def testadd_sample_internal_id_pangolin_report(
+    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
+):
+    """Test adding sample internal id to the reports."""
+    # GIVEN a FOHM upload API
+
+    # GIVEN a list of Pangolin reports
+
+    # WHEN adding sample internal id
+    fohm_upload_api.add_sample_internal_id_pangolin_report(reports=fohm_pangolin_reports)
+
+    # THEN a sample internal id has been added
+    assert isinstance(fohm_pangolin_reports[0].internal_id, str)
