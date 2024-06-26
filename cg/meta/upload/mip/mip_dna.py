@@ -35,7 +35,7 @@ class MipDNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         # Main upload
-        ctx.invoke(upload_coverage, family_id=case.internal_id, re_upload=restart)
+        ctx.invoke(upload_coverage, family_id=case.internal_id)
         ctx.invoke(validate, family_id=case.internal_id)
         ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)

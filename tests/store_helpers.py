@@ -7,11 +7,18 @@ from pathlib import Path
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery, Workflow
+from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaFlowCellDTO,
+    IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -24,6 +31,9 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -106,8 +116,9 @@ class StoreHelpers:
         _bundle = StoreHelpers.ensure_hk_bundle(store, bundle_data)
         return store.last_version(_bundle.name)
 
-    @staticmethod
+    @classmethod
     def ensure_application_version(
+        cls,
         store: Store,
         application_tag: str = "dummy_tag",
         prep_category: str = "wgs",
@@ -127,7 +138,7 @@ class StoreHelpers:
 
         application: Application = store.get_application_by_tag(tag=application_tag)
         if not application:
-            application: Application = StoreHelpers.add_application(
+            application: Application = cls.add_application(
                 store=store,
                 application_tag=application_tag,
                 prep_category=prep_category,
@@ -179,8 +190,9 @@ class StoreHelpers:
         store.session.commit()
         return new_record
 
-    @staticmethod
+    @classmethod
     def ensure_application(
+        cls,
         store: Store,
         tag: str,
         prep_category: str = "wgs",
@@ -191,7 +203,7 @@ class StoreHelpers:
         """Ensure that application exists in store."""
         application: Application = store.get_application_by_tag(tag=tag)
         if not application:
-            application: Application = StoreHelpers.add_application(
+            application: Application = cls.add_application(
                 store=store,
                 application_tag=tag,
                 prep_category=prep_category,
@@ -282,15 +294,16 @@ class StoreHelpers:
             collaboration = store.add_collaboration(collaboration_id, collaboration_id)
         return collaboration
 
-    @staticmethod
+    @classmethod
     def ensure_customer(
+        cls,
         store: Store,
         customer_id: str = "cust000",
         customer_name: str = "Production",
         scout_access: bool = False,
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
-        collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
+        collaboration: Collaboration = cls.ensure_collaboration(store)
         customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
         if not customer:
@@ -711,6 +724,164 @@ class StoreHelpers:
         return flow_cell
 
     @staticmethod
+    def add_illumina_flow_cell(
+        store: Store, flow_cell_id: str = "flow_cell_test", model: str = "10B"
+    ) -> IlluminaFlowCell:
+        """Add an Illumina flow cell to the store and return it assuming it does not exist."""
+        flow_cell_dto = IlluminaFlowCellDTO(
+            internal_id=flow_cell_id, type=DeviceType.ILLUMINA, model=model
+        )
+        flow_cell: IlluminaFlowCell = store.add_illumina_flow_cell(flow_cell_dto)
+        store.session.commit()
+        return flow_cell
+
+    @classmethod
+    def ensure_illumina_flow_cell(
+        cls,
+        store: Store,
+        flow_cell_id: str = "flow_cell_test",
+        model: str = "10B",
+    ) -> IlluminaFlowCell:
+        """Return an Illumina flow cell if exists, otherwise add it to the store and return it."""
+        flow_cell: IlluminaFlowCell | None = store.get_illumina_flow_cell_by_internal_id(
+            internal_id=flow_cell_id
+        )
+        if flow_cell:
+            return flow_cell
+        flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
+            store=store, flow_cell_id=flow_cell_id, model=model
+        )
+        return flow_cell
+
+    @staticmethod
+    def add_illumina_sequencing_run(
+        store: Store,
+        flow_cell: IlluminaFlowCell,
+        sequencer_type: Sequencers = Sequencers.NOVASEQ,
+        sequencer_name: str = "dummy_sequencer",
+        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        archived_at: datetime = None,
+        has_backup: bool | None = False,
+    ) -> IlluminaSequencingRun:
+        """Add an Illumina sequencing run to the store and return it assuming it does not exist."""
+        illumina_run_dto = IlluminaSequencingRunDTO(
+            type=DeviceType.ILLUMINA,
+            sequencer_type=sequencer_type,
+            sequencer_name=sequencer_name,
+            data_availability=data_availability,
+            archived_at=archived_at,
+            has_backup=has_backup,
+            total_reads=100,
+            total_undetermined_reads=10,
+            percent_undetermined_reads=0.1,
+            percent_q30=0.9,
+            mean_quality_score=35,
+            total_yield=100,
+            yield_q30=None,
+            cycles=None,
+            demultiplexing_software=None,
+            demultiplexing_software_version=None,
+            sequencing_started_at=None,
+            sequencing_completed_at=None,
+            demultiplexing_started_at=None,
+            demultiplexing_completed_at=None,
+        )
+        illumina_run: IlluminaSequencingRun = store.add_illumina_sequencing_run(
+            sequencing_run_dto=illumina_run_dto, flow_cell=flow_cell
+        )
+        store.session.commit()
+        return illumina_run
+
+    @classmethod
+    def ensure_illumina_sequencing_run(
+        cls,
+        store: Store,
+        flow_cell: IlluminaFlowCell,
+        sequencer_type: Sequencers = Sequencers.NOVASEQ,
+        sequencer_name: str = "dummy_sequencer",
+        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        archived_at: datetime = None,
+        has_backup: bool | None = False,
+    ) -> IlluminaSequencingRun:
+        """
+        Return an Illumina sequencing run if exists, otherwise add it to the store and return it.
+        """
+        illumina_run: IlluminaSequencingRun | None = (
+            store.get_illumina_sequencing_run_by_device_internal_id(
+                device_internal_id=flow_cell.internal_id
+            )
+        )
+        if illumina_run:
+            return illumina_run
+        illumina_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
+            store=store,
+            flow_cell=flow_cell,
+            sequencer_type=sequencer_type,
+            sequencer_name=sequencer_name,
+            data_availability=data_availability,
+            archived_at=archived_at,
+            has_backup=has_backup,
+        )
+        return illumina_run
+
+    @staticmethod
+    def add_illumina_sample_sequencing_metrics_object(
+        store: Store, sample_id: str, sequencing_run: IlluminaSequencingRun, lane: int
+    ) -> IlluminaSampleSequencingMetrics:
+        """
+        Add an Illumina sample sequencing metrics object to the store given for a sample and lane,
+        and return it assuming it does not exist.
+        """
+
+        metrics_dto = IlluminaSampleSequencingMetricsDTO(
+            sample_id=sample_id,
+            type=DeviceType.ILLUMINA,
+            flow_cell_lane=lane,
+            total_reads_in_lane=100,
+            base_passing_q30_percent=90,
+            base_mean_quality_score=35,
+            yield_=100,
+            yield_q30=0.9,
+            created_at=datetime.now(),
+        )
+        metrics: IlluminaSampleSequencingMetrics = store.add_illumina_sample_metrics_entry(
+            metrics_dto=metrics_dto, sequencing_run=sequencing_run
+        )
+        store.session.commit()
+        return metrics
+
+    @classmethod
+    def ensure_illumina_sample_sequencing_metrics_object(
+        cls,
+        store: Store,
+        sequencing_run: IlluminaSequencingRun,
+        sample_id: str,
+        lane: int,
+    ) -> IlluminaSampleSequencingMetrics:
+        """
+        Return an Illumina sample sequencing metrics object if exists,
+        otherwise add it to the store and return it.
+        """
+        illumina_sample_metrics: IlluminaSampleSequencingMetrics | None = (
+            store.get_illumina_metrics_entry_by_device_sample_and_lane(
+                device_internal_id=sequencing_run.device.internal_id,
+                sample_internal_id=sample_id,
+                lane=lane,
+            )
+        )
+        if illumina_sample_metrics:
+            return illumina_sample_metrics
+        metrics: IlluminaSampleSequencingMetrics = (
+            cls.add_illumina_sample_sequencing_metrics_object(
+                store=store,
+                sample_id=sample_id,
+                sequencing_run=sequencing_run,
+                lane=lane,
+            )
+        )
+        return metrics
+
+    @staticmethod
     def add_relationship(
         store: Store,
         sample: Sample,
@@ -942,7 +1113,7 @@ class StoreHelpers:
         sample_base_mean_quality_score: int = 35,
         created_at: datetime = datetime.now(),
         **kwargs,
-    ):
+    ) -> SampleLaneSequencingMetrics:
         """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
         flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
@@ -981,6 +1152,29 @@ class StoreHelpers:
                 store=store,
                 sample_internal_id=sample_id,
                 flow_cell_name=flow_cell_name,
+            )
+
+    @classmethod
+    def add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+        cls, run_directory_data: IlluminaRunDirectoryData, sample_ids: list[str], store: Store
+    ) -> None:
+        """Add an Illumina flow cell and the given samples with sequencing metrics to a store."""
+        flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
+            store=store,
+            flow_cell_id=run_directory_data.id,
+        )
+        sequencing_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
+            store=store,
+            flow_cell=flow_cell,
+            sequencer_type=run_directory_data.sequencer_type,
+        )
+        for i, sample_id in enumerate(sample_ids):
+            cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
+            cls.add_illumina_sample_sequencing_metrics_object(
+                store=store,
+                sample_id=sample_id,
+                sequencing_run=sequencing_run,
+                lane=i + 1,
             )
 
     @classmethod

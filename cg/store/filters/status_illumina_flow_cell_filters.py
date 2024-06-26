@@ -1,10 +1,8 @@
-"""Fillters for the Illumina Flow Cells."""
+"""Filters for the Illumina Flow Cells."""
 
 from enum import Enum
 
 from sqlalchemy.orm import Query
-
-from cg.store.models import IlluminaFlowCell
 
 
 def filter_illumina_flow_cell_by_internal_id(

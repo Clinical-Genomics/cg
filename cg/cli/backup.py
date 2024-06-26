@@ -9,7 +9,9 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.constants import DRY_RUN, FlowCellStatus
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
@@ -27,9 +29,9 @@ from cg.meta.encryption.encryption import (
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-    get_flow_cells_from_path,
+from cg.models.run_devices.illumina_run_directory_data import (
+    IlluminaRunDirectoryData,
+    get_sequencing_runs_from_path,
 )
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
@@ -37,7 +39,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""
@@ -52,8 +54,8 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
     pdc_api = context.pdc_api
     pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
-    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+        sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -88,8 +90,8 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+        sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -129,7 +131,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None =
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
-        flow_cells_dir=context.illumina_flow_cells_directory,
+        flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
         dry_run=dry_run,
     )
     backup_api: BackupAPI = context.meta_apis["backup_api"]
@@ -206,7 +208,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 @DRY_RUN
 @click.option("-s", "--sample-id", "object_type", flag_value="sample", type=str)
 @click.option("-c", "--case-id", "object_type", flag_value="case", type=str)
-@click.option("-f", "--flow-cell-id", "object_type", flag_value="flow_cell", type=str)
+@click.option("-f", "--flow-cell-id", "object_type", flag_value="run_devices", type=str)
 @click.argument("identifier", type=str)
 @click.pass_context
 @click.pass_obj

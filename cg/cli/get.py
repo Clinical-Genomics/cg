@@ -5,6 +5,8 @@ from typing import Iterable
 import click
 from tabulate import tabulate
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Customer, Flowcell, Sample
 from cg.store.store import Store
@@ -17,7 +19,7 @@ LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option("-i", "--identifier", help="made a guess what type you are looking for")
 @click.pass_context
 def get(context: click.Context, identifier: str | None):
