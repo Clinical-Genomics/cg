@@ -209,7 +209,7 @@ def test_get_first_run_no_run_requested(store_with_illumina_sequencing_data: Sto
         sequencing_runs_dir=mock.Mock(),
     )
 
-    # WHEN there are no sequencing runs requested to be retrieved from PDC
+    # WHEN getting the first requested run
     requested_run = backup_api.get_first_run()
 
     # THEN no sequencing run is returned
