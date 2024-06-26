@@ -150,7 +150,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> MetricsBase:
-        """Parse the information from a qc metrics file"""
+        """Parse the information from a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
