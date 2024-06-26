@@ -6,7 +6,6 @@ import re
 import shutil
 from pathlib import Path
 
-import pandas as pd
 import paramiko
 from housekeeper.store.models import Version
 
@@ -120,40 +119,6 @@ class FOHMUploadAPI:
         return self._daily_report_path
 
     @property
-    def reports_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all 'komplettering' rows from multiple cases"""
-        if not isinstance(self._reports_dataframe, pd.DataFrame):
-            self._reports_dataframe = self.create_joined_dataframe(
-                self.daily_reports_list
-            ).sort_values(by=["provnummer"])
-            self._reports_dataframe.drop_duplicates(inplace=True, ignore_index=True)
-            self._reports_dataframe = self._reports_dataframe[
-                self._reports_dataframe["provnummer"].str.contains(SARS_COV_REGEX)
-            ].reset_index(drop=True)
-        return self._reports_dataframe
-
-    @property
-    def pangolin_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all pangolin rows from multiple cases"""
-        if not isinstance(self._pangolin_dataframe, pd.DataFrame):
-            self._pangolin_dataframe = self.create_joined_dataframe(
-                self.daily_pangolin_list
-            ).sort_values(by=["taxon"])
-            self._pangolin_dataframe.drop_duplicates(inplace=True, ignore_index=True)
-            self._pangolin_dataframe = self.pangolin_dataframe[
-                self._pangolin_dataframe["taxon"].str.contains(SARS_COV_REGEX)
-            ].reset_index(drop=True)
-        return self._pangolin_dataframe
-
-    @property
-    def aggregation_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be
-        used for aggregation."""
-        if not isinstance(self._aggregation_dataframe, pd.DataFrame):
-            self._aggregation_dataframe = self.reports_dataframe.copy()
-        return self._aggregation_dataframe
-
-    @property
     def daily_reports_list(self) -> list[Path]:
         if not self._daily_reports_list:
             for case_id in self._cases_to_aggregate:
@@ -200,12 +165,6 @@ class FOHMUploadAPI:
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
         self.daily_report_path.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def create_joined_dataframe(file_list: list[Path]) -> pd.DataFrame:
-        """Creates dataframe with all csv files used in daily delivery"""
-        dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
-        return pd.concat(dataframe_list, axis=0, ignore_index=True)
-
     def add_sample_internal_id_complementary_report(
         self, reports: list[FohmComplementaryReport]
     ) -> None:
@@ -228,34 +187,6 @@ class FOHMUploadAPI:
             report.region_lab = f"""{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="region_code").split(' ')[0]}"""
             f"""_{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="lab_code").split(' ')[0]}"""
 
-    def append_metadata_to_aggregation_df(self) -> None:
-        """
-        Add fields with internal_id and region_lab to dataframe
-        """
-
-        self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
-            lambda x: self.status_db.get_sample_by_name(name=x).internal_id
-        )
-        self.aggregation_dataframe["region_lab"] = self.aggregation_dataframe["internal_id"].apply(
-            lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code').split(' ')[0]}"
-            f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code').split(' ')[0]}"
-        )
-
-    def link_sample_rawdata_files(self) -> None:
-        """Hardlink samples rawdata files to fohm delivery folder."""
-        for sample_id in self.aggregation_dataframe["internal_id"]:
-            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            bundle_name = sample.links[0].case.internal_id
-            version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-            files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
-            for file in files:
-                if self._dry_run:
-                    LOG.info(
-                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                    )
-                    continue
-                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-
     def link_sample_rawdata_files_csv(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
@@ -273,29 +204,6 @@ class FOHMUploadAPI:
                         )
                         continue
                     shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-
-    def create_pangolin_reports(self) -> None:
-        LOG.info("Creating pangolin reports")
-        unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
-        LOG.info(f"Regions in batch: {unique_regionlabs}")
-        for region_lab in unique_regionlabs:
-            LOG.info(f"Aggregating data for {region_lab}")
-            pangolin_df = self.pangolin_dataframe[
-                self.aggregation_dataframe["region_lab"] == region_lab
-            ]
-            if self._dry_run:
-                LOG.info(pangolin_df)
-                continue
-            pangolin_path = Path(
-                self.daily_rawdata_path,
-                f"{region_lab}_{self.current_datestr}_pangolin_classification_format4.txt",
-            )
-            pangolin_df.to_csv(
-                pangolin_path,
-                sep="\t",
-                index=False,
-            )
-            pangolin_path.chmod(0o0777)
 
     def create_pangolin_report_csv(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
@@ -323,24 +231,6 @@ class FOHMUploadAPI:
                 file_path=pangolin_report_file,
             )
             pangolin_report_file.chmod(0o0777)
-
-    def create_komplettering_reports(self) -> None:
-        LOG.info("Creating komplettering reports")
-        unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
-        LOG.info(f"Regions in batch: {unique_regionlabs}")
-        for region_lab in unique_regionlabs:
-            LOG.info(f"Aggregating data for {region_lab}")
-            report_df = self.reports_dataframe[
-                self.aggregation_dataframe["region_lab"] == region_lab
-            ]
-            if self._dry_run:
-                LOG.info(report_df)
-                continue
-            report_df.to_csv(
-                self.daily_report_path / f"{region_lab}_{self.current_datestr}_komplettering.csv",
-                sep=",",
-                index=False,
-            )
 
     def create_complementary_report_csv(self, reports: list[FohmComplementaryReport]) -> None:
         LOG.info("Creating aggregate 'komplettering' report")
