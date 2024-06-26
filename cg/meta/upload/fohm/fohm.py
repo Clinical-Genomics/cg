@@ -14,6 +14,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.constants.housekeeper_tags import FohmTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.io.csv import write_csv_from_dict
@@ -22,29 +23,24 @@ from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+from cg.utils.dict import remove_duplicate_dicts
 from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)
 
 
-def create_daily_deliveries_csv(file_paths: list[Path]) -> list[list[dict]]:
-    """Creates a list with all CSV files used in daily delivery."""
-    return [
+def create_daily_deliveries_csv(file_paths: list[Path]) -> list[dict]:
+    """Creates a list of dicts with all CSV files used in daily delivery."""
+    all_deliveries = [
         ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
         )
         for file_path in file_paths
     ]
-
-
-def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
-    all_dicts = []
-    for dictionary in dicts:
-        all_dicts.extend(iter(dictionary))
-    return [
-        dict(dictionary_tuple)
-        for dictionary_tuple in {tuple(dictionary.items()) for dictionary in all_dicts}
-    ]
+    dicts = []
+    for list_with_dicts in all_deliveries:
+        dicts.extend(iter(list_with_dicts))
+    return dicts
 
 
 def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplementaryReport]:
@@ -163,7 +159,7 @@ class FOHMUploadAPI:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
                     self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id, tags=["komplettering"]
+                        bundle_name=case_id, tags=[FohmTag.Complementary]
                     ).full_path
                 )
         return self._daily_reports_list
@@ -174,7 +170,7 @@ class FOHMUploadAPI:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
                     self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id, tags=["pangolin-typing-fohm"]
+                        bundle_name=case_id, tags=[FohmTag.PANGOLIN_TYPING]
                     ).full_path
                 )
         return self._daily_pangolin_list
@@ -435,9 +431,56 @@ class FOHMUploadAPI:
         self.status_db.session.commit()
 
     def update_uploaded_at(self, case_id: str) -> None:
-        """Update timestamp for cases which uploaded successfully"""
+        """Update timestamp for a case which uploaded successfully."""
         if self._dry_run:
             return
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        case_obj.analyses[0].uploaded_at = dt.datetime.now()
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.session.commit()
+
+    def parse_write_complementary_report(self) -> list[FohmComplementaryReport]:
+        """Create and write a complementary report."""
+        complementary_reports_raw: list[dict] = create_daily_deliveries_csv(self.daily_reports_list)
+        unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(
+            complementary_reports_raw
+        )
+        complementary_reports: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
+            unique_complementary_reports_raw
+        )
+        complementary_reports: list[FohmComplementaryReport] = get_sars_cov_complementary_reports(
+            complementary_reports
+        )
+        self.add_sample_internal_id_complementary_report(complementary_reports)
+        self.add_region_lab_to_reports(complementary_reports)
+        self.create_complementary_report_csv(complementary_reports)
+        return complementary_reports
+
+    def parse_and_write_pangolin_report(self) -> list[FohmPangolinReport]:
+        """Create and write a Pangolin report."""
+        pangolin_reports_raw: list[dict] = create_daily_deliveries_csv(self.daily_pangolin_list)
+        unique_pangolin_reports_raw: list[dict] = remove_duplicate_dicts(pangolin_reports_raw)
+        pangolin_reports: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
+            unique_pangolin_reports_raw
+        )
+        pangolin_reports: list[FohmPangolinReport] = get_sars_cov_pangolin_reports(pangolin_reports)
+        self.add_sample_internal_id_pangolin_report(pangolin_reports)
+        self.add_region_lab_to_reports(pangolin_reports)
+        self.create_pangolin_report_csv(pangolin_reports)
+        return pangolin_reports
+
+    def aggregate_delivery(self, cases: list[str]) -> None:
+        """Aggregate and hardlink reports."""
+        self.set_cases_to_aggregate(cases)
+        self.create_daily_delivery_folders()
+        complementary_reports: list[FohmComplementaryReport] = (
+            self.parse_write_complementary_report()
+        )
+        self.link_sample_rawdata_files_csv(complementary_reports)
+        pangolin_reports: list[FohmPangolinReport] = self.parse_and_write_pangolin_report()
+        self.link_sample_rawdata_files_csv(pangolin_reports)
+
+    def create_complementary_report(self, cases: list[str]) -> None:
+        """Create and write a complementary report."""
+        self.set_cases_to_aggregate(cases)
+        self.create_daily_delivery_folders()
+        self.parse_write_complementary_report()
