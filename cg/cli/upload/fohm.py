@@ -44,7 +44,7 @@ def aggregate_delivery(
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     try:
         fohm_api.aggregate_delivery(cases)
-    except ValidationError as error:
+    except (ValidationError, TypeError) as error:
         LOG.warning(error)
 
 

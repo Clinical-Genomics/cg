@@ -174,7 +174,7 @@ def test_create_complementary_report(
     assert not complementary_report_file.exists()
 
     # WHEN creating reports
-    fohm_upload_api.create_and_write_complementary_report(fohm_complementary_reports)
+    fohm_upload_api.create_complementary_report(fohm_complementary_reports)
 
     # THEN a file with reports id generated
     assert complementary_report_file.exists()
