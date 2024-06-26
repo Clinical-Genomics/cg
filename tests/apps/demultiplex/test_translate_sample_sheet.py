@@ -4,7 +4,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetFormatError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -102,7 +102,7 @@ def test_replace_sample_sheet_header_bcl_convert(
     # GIVEN a BCLConvert sample sheet content
 
     # WHEN replacing the header
-    with pytest.raises(SampleSheetError) as error:
+    with pytest.raises(SampleSheetFormatError) as error:
         # THEN an error is raised
         api._replace_sample_header(sample_sheet_bcl_convert_data_header)
     assert "Could not find BCL2FASTQ data header in sample sheet" in str(error.value)
