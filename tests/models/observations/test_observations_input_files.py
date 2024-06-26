@@ -73,13 +73,13 @@ def test_instantiate_raredisease_input_files(
 ):
     """Tests input files against a pydantic RarediseaseObservationsInputFiles."""
 
-    # GIVEN balsamic input files
+    # GIVEN RAREDISEASE input files
 
     # WHEN instantiating an observations input files object
     input_files = RarediseaseObservationsInputFiles(**raredisease_observations_input_files_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(input_files, BalsamicObservationsInputFiles)
+    assert isinstance(input_files, RarediseaseObservationsInputFiles)
 
 
 def test_instantiate_raredisease_input_files_missing_field(

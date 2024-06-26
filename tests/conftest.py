@@ -1341,10 +1341,10 @@ def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 @pytest.fixture
 def customer(collaboration_id: str, customer_id: str) -> Customer:
-    """Return a default customer."""
+    """Return a random customer."""
     return Customer(
-        name="CG",
-        internal_id=CustomerId.CG_INTERNAL_CUSTOMER,
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
 
