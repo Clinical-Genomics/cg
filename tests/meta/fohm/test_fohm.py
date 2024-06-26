@@ -11,9 +11,7 @@ def test_create_daily_delivery(fohm_upload_api: FOHMUploadAPI, csv_file_path: Pa
     # GIVEN a list of csv files
 
     # WHEN creating the delivery content
-    content: list[dict] = fohm_upload_api.create_daily_deliveries_csv(
-        [csv_file_path, csv_file_path]
-    )
+    content: list[dict] = fohm_upload_api.create_daily_deliveries([csv_file_path, csv_file_path])
 
     # THEN each file is a list of dicts where each dict is a row in a CSV file
     assert isinstance(content[0], dict)
@@ -152,13 +150,13 @@ def test_create_pangolin_reports_csv(
     assert not pangolin_report_file.exists()
 
     # WHEN creating reports
-    fohm_upload_api.create_pangolin_report_csv(fohm_pangolin_reports)
+    fohm_upload_api.create_pangolin_report_(fohm_pangolin_reports)
 
     # THEN a file with reports id generated
     assert pangolin_report_file.exists()
 
 
-def test_create_complementary_report_csv(
+def test_create_complementary_report(
     fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
 ):
     # GIVEN a list of reports
@@ -176,7 +174,7 @@ def test_create_complementary_report_csv(
     assert not complementary_report_file.exists()
 
     # WHEN creating reports
-    fohm_upload_api.create_complementary_report_csv(fohm_complementary_reports)
+    fohm_upload_api.create_and_write_complementary_report(fohm_complementary_reports)
 
     # THEN a file with reports id generated
     assert complementary_report_file.exists()

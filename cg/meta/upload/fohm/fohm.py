@@ -99,7 +99,7 @@ class FOHMUploadAPI:
         return self._dry_run
 
     @staticmethod
-    def create_daily_deliveries_csv(file_paths: list[Path]) -> list[dict]:
+    def create_daily_deliveries(file_paths: list[Path]) -> list[dict]:
         """Creates a list of dicts with all CSV files used in daily delivery."""
         all_deliveries = [
             ReadFile.get_content_from_file(
@@ -189,7 +189,7 @@ class FOHMUploadAPI:
             report.region_lab = f"""{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="region_code").split(' ')[0]}"""
             f"""_{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="lab_code").split(' ')[0]}"""
 
-    def link_sample_rawdata_files_csv(
+    def link_sample_rawdata_files(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
@@ -207,7 +207,7 @@ class FOHMUploadAPI:
                         continue
                     shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
-    def create_pangolin_report_csv(self, reports: list[FohmPangolinReport]) -> None:
+    def create_pangolin_report_(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
         unique_region_labs: set[str] = {report.region_lab for report in reports}
         LOG.info(f"Regions in batch: {unique_region_labs}")
@@ -234,7 +234,7 @@ class FOHMUploadAPI:
             )
             pangolin_report_file.chmod(0o0777)
 
-    def create_complementary_report_csv(self, reports: list[FohmComplementaryReport]) -> None:
+    def create_complementary_report(self, reports: list[FohmComplementaryReport]) -> None:
         LOG.info("Creating aggregate 'komplettering' report")
         unique_region_labs: set[str] = {report.region_lab for report in reports}
         LOG.info(f"Regions laboratories  in batch: {unique_region_labs}")
@@ -332,7 +332,7 @@ class FOHMUploadAPI:
 
     def parse_write_complementary_report(self) -> list[FohmComplementaryReport]:
         """Create and write a complementary report."""
-        complementary_reports_raw: list[dict] = self.create_daily_deliveries_csv(
+        complementary_reports_raw: list[dict] = self.create_daily_deliveries(
             self.daily_reports_list
         )
         unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(
@@ -346,14 +346,12 @@ class FOHMUploadAPI:
         )
         self.add_sample_internal_id_complementary_report(complementary_reports)
         self.add_region_lab_to_reports(complementary_reports)
-        self.create_complementary_report_csv(complementary_reports)
+        self.create_and_write_complementary_report(complementary_reports)
         return complementary_reports
 
     def parse_and_write_pangolin_report(self) -> list[FohmPangolinReport]:
         """Create and write a Pangolin report."""
-        pangolin_reports_raw: list[dict] = self.create_daily_deliveries_csv(
-            self.daily_pangolin_list
-        )
+        pangolin_reports_raw: list[dict] = self.create_daily_deliveries(self.daily_pangolin_list)
         unique_pangolin_reports_raw: list[dict] = remove_duplicate_dicts(pangolin_reports_raw)
         pangolin_reports: list[FohmPangolinReport] = self.validate_fohm_pangolin_reports(
             unique_pangolin_reports_raw
@@ -363,7 +361,7 @@ class FOHMUploadAPI:
         )
         self.add_sample_internal_id_pangolin_report(pangolin_reports)
         self.add_region_lab_to_reports(pangolin_reports)
-        self.create_pangolin_report_csv(pangolin_reports)
+        self.create_pangolin_report_(pangolin_reports)
         return pangolin_reports
 
     def aggregate_delivery(self, cases: list[str]) -> None:
@@ -373,11 +371,11 @@ class FOHMUploadAPI:
         complementary_reports: list[FohmComplementaryReport] = (
             self.parse_write_complementary_report()
         )
-        self.link_sample_rawdata_files_csv(complementary_reports)
+        self.link_sample_rawdata_files(complementary_reports)
         pangolin_reports: list[FohmPangolinReport] = self.parse_and_write_pangolin_report()
-        self.link_sample_rawdata_files_csv(pangolin_reports)
+        self.link_sample_rawdata_files(pangolin_reports)
 
-    def create_complementary_report(self, cases: list[str]) -> None:
+    def create_and_write_complementary_report(self, cases: list[str]) -> None:
         """Create and write a complementary report."""
         self.set_cases_to_aggregate(cases)
         self.create_daily_delivery_folders()

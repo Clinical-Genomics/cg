@@ -59,7 +59,7 @@ def create_komplettering(
     """Re-aggregates komplettering files for FOHM and saves them to default working directory."""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     try:
-        fohm_api.create_complementary_report(cases)
+        fohm_api.create_and_write_complementary_report(cases)
     except ValidationError as error:
         LOG.warning(error)
 
