@@ -3,22 +3,17 @@ from pathlib import Path
 import pytest
 
 from cg.constants import FileExtensions
-from cg.meta.upload.fohm.fohm import (
-    FOHMUploadAPI,
-    create_daily_deliveries_csv,
-    get_sars_cov_complementary_reports,
-    get_sars_cov_pangolin_reports,
-    validate_fohm_complementary_reports,
-    validate_fohm_pangolin_reports,
-)
+from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
 
-def test_create_daily_delivery(csv_file_path: Path):
+def test_create_daily_delivery(fohm_upload_api: FOHMUploadAPI, csv_file_path: Path):
     # GIVEN a list of csv files
 
     # WHEN creating the delivery content
-    content: list[dict] = create_daily_deliveries_csv(file_paths=[csv_file_path, csv_file_path])
+    content: list[dict] = fohm_upload_api.create_daily_deliveries_csv(
+        [csv_file_path, csv_file_path]
+    )
 
     # THEN each file is a list of dicts where each dict is a row in a CSV file
     assert isinstance(content[0], dict)
@@ -27,24 +22,28 @@ def test_create_daily_delivery(csv_file_path: Path):
     assert len(content) == 6
 
 
-def test_validate_fohm_complementary_reports(fohm_complementary_report_raw: dict[str, str]):
+def test_validate_fohm_complementary_reports(
+    fohm_upload_api: FOHMUploadAPI, fohm_complementary_report_raw: dict[str, str]
+):
     # GIVEN a list of dicts
 
     # WHEN matching values
-    content: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
-        reports=[fohm_complementary_report_raw]
+    content: list[FohmComplementaryReport] = fohm_upload_api.validate_fohm_complementary_reports(
+        [fohm_complementary_report_raw]
     )
 
     # THEN a list of reports is returned
     assert isinstance(content[0], FohmComplementaryReport)
 
 
-def test_validate_fohm_pangolin_reports(fohm_pangolin_report_raw: dict[str, str]):
+def test_validate_fohm_pangolin_reports(
+    fohm_upload_api: FOHMUploadAPI, fohm_pangolin_report_raw: dict[str, str]
+):
     # GIVEN a list of dicts
 
     # WHEN matching values
-    content: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
-        reports=[fohm_pangolin_report_raw]
+    content: list[FohmPangolinReport] = fohm_upload_api.validate_fohm_pangolin_reports(
+        [fohm_pangolin_report_raw]
     )
 
     # THEN a list of reports is returned
@@ -52,13 +51,13 @@ def test_validate_fohm_pangolin_reports(fohm_pangolin_report_raw: dict[str, str]
 
 
 def test_get_sars_cov_complementary_reports(
-    fohm_complementary_reports: list[FohmComplementaryReport],
+    fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
 ):
     # GIVEN a list of reports
 
     # WHEN matching values in reports
-    content: list[FohmComplementaryReport] = get_sars_cov_complementary_reports(
-        reports=fohm_complementary_reports
+    content: list[FohmComplementaryReport] = fohm_upload_api.get_sars_cov_complementary_reports(
+        fohm_complementary_reports
     )
 
     # THEN a list of reports is returned
@@ -69,11 +68,15 @@ def test_get_sars_cov_complementary_reports(
     assert content[0].sample_number == "44CS000000"
 
 
-def test_get_sars_cov_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinReport]):
+def test_get_sars_cov_pangolin_reports(
+    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
+):
     # GIVEN a list of reports
 
     # WHEN matching values
-    content: list[FohmPangolinReport] = get_sars_cov_pangolin_reports(reports=fohm_pangolin_reports)
+    content: list[FohmPangolinReport] = fohm_upload_api.get_sars_cov_pangolin_reports(
+        fohm_pangolin_reports
+    )
 
     # THEN a list of reports is returned
     assert isinstance(content[0], FohmPangolinReport)
@@ -93,7 +96,7 @@ def test_add_sample_internal_id_complementary_report(
     # GIVEN a list of complementary reports
 
     # WHEN adding sample internal id
-    fohm_upload_api.add_sample_internal_id_complementary_report(reports=fohm_complementary_reports)
+    fohm_upload_api.add_sample_internal_id_complementary_report(fohm_complementary_reports)
 
     # THEN a sample internal id has been added
     assert isinstance(fohm_complementary_reports[0].internal_id, str)
@@ -109,7 +112,7 @@ def test_add_sample_internal_id_pangolin_report(
     # GIVEN a list of Pangolin reports
 
     # WHEN adding sample internal id
-    fohm_upload_api.add_sample_internal_id_pangolin_report(reports=fohm_pangolin_reports)
+    fohm_upload_api.add_sample_internal_id_pangolin_report(fohm_pangolin_reports)
 
     # THEN a sample internal id has been added
     assert isinstance(fohm_pangolin_reports[0].internal_id, str)
@@ -125,7 +128,7 @@ def test_add_region_lab_to_reports(
     # GIVEN a list of Pangolin reports
 
     # WHEN adding region lab
-    fohm_upload_api.add_region_lab_to_reports(reports=fohm_pangolin_reports)
+    fohm_upload_api.add_region_lab_to_reports(fohm_pangolin_reports)
 
     # THEN a region lab has been added
     assert isinstance(fohm_pangolin_reports[0].region_lab, str)

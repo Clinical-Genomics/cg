@@ -28,52 +28,6 @@ from cg.utils.email import send_mail
 LOG = logging.getLogger(__name__)
 
 
-def create_daily_deliveries_csv(file_paths: list[Path]) -> list[dict]:
-    """Creates a list of dicts with all CSV files used in daily delivery."""
-    all_deliveries = [
-        ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
-        )
-        for file_path in file_paths
-    ]
-    dicts = []
-    for list_with_dicts in all_deliveries:
-        dicts.extend(iter(list_with_dicts))
-    return dicts
-
-
-def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplementaryReport]:
-    """Validate FOHM complementary reports.
-    Raises: ValidateError"""
-    complementary_reports = []
-    for report in reports:
-        complementary_report = FohmComplementaryReport.model_validate(report)
-        complementary_reports.append(complementary_report)
-    return complementary_reports
-
-
-def validate_fohm_pangolin_reports(reports: list[dict]) -> list[FohmPangolinReport]:
-    """Validate FOHM Pangolin reports.
-    Raises: ValidateError"""
-    pangolin_reports = []
-    for report in reports:
-        pangolin_report = FohmPangolinReport.model_validate(report)
-        pangolin_reports.append(pangolin_report)
-    return pangolin_reports
-
-
-def get_sars_cov_complementary_reports(
-    reports: list[FohmComplementaryReport],
-) -> list[FohmComplementaryReport]:
-    """Return all "Sars-cov2" reports from multiple cases."""
-    return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
-
-
-def get_sars_cov_pangolin_reports(reports: list[FohmPangolinReport]) -> list[FohmPangolinReport]:
-    """Return all "Sars-cov2" reports from multiple cases."""
-    return [report for report in reports if re.search(SARS_COV_REGEX, report.taxon)]
-
-
 class FOHMUploadAPI:
     def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
@@ -143,6 +97,54 @@ class FOHMUploadAPI:
     @property
     def dry_run(self):
         return self._dry_run
+
+    @staticmethod
+    def create_daily_deliveries_csv(file_paths: list[Path]) -> list[dict]:
+        """Creates a list of dicts with all CSV files used in daily delivery."""
+        all_deliveries = [
+            ReadFile.get_content_from_file(
+                file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
+            )
+            for file_path in file_paths
+        ]
+        dicts = []
+        for list_with_dicts in all_deliveries:
+            dicts.extend(iter(list_with_dicts))
+        return dicts
+
+    @staticmethod
+    def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplementaryReport]:
+        """Validate FOHM complementary reports.
+        Raises: ValidateError"""
+        complementary_reports = []
+        for report in reports:
+            complementary_report = FohmComplementaryReport.model_validate(report)
+            complementary_reports.append(complementary_report)
+        return complementary_reports
+
+    @staticmethod
+    def validate_fohm_pangolin_reports(reports: list[dict]) -> list[FohmPangolinReport]:
+        """Validate FOHM Pangolin reports.
+        Raises: ValidateError"""
+        pangolin_reports = []
+        for report in reports:
+            pangolin_report = FohmPangolinReport.model_validate(report)
+            pangolin_reports.append(pangolin_report)
+        return pangolin_reports
+
+    @staticmethod
+    def get_sars_cov_complementary_reports(
+        reports: list[FohmComplementaryReport],
+    ) -> list[FohmComplementaryReport]:
+        """Return all "Sars-cov2" reports from multiple cases."""
+        return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
+
+    @staticmethod
+    def get_sars_cov_pangolin_reports(
+        reports: list[FohmPangolinReport],
+    ) -> list[FohmPangolinReport]:
+        """Return all "Sars-cov2" reports from multiple cases."""
+        return [report for report in reports if re.search(SARS_COV_REGEX, report.taxon)]
 
     def check_username(self) -> None:
         if self._dry_run:
@@ -330,15 +332,17 @@ class FOHMUploadAPI:
 
     def parse_write_complementary_report(self) -> list[FohmComplementaryReport]:
         """Create and write a complementary report."""
-        complementary_reports_raw: list[dict] = create_daily_deliveries_csv(self.daily_reports_list)
+        complementary_reports_raw: list[dict] = self.create_daily_deliveries_csv(
+            self.daily_reports_list
+        )
         unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(
             complementary_reports_raw
         )
-        complementary_reports: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
-            unique_complementary_reports_raw
+        complementary_reports: list[FohmComplementaryReport] = (
+            self.validate_fohm_complementary_reports(unique_complementary_reports_raw)
         )
-        complementary_reports: list[FohmComplementaryReport] = get_sars_cov_complementary_reports(
-            complementary_reports
+        complementary_reports: list[FohmComplementaryReport] = (
+            self.get_sars_cov_complementary_reports(complementary_reports)
         )
         self.add_sample_internal_id_complementary_report(complementary_reports)
         self.add_region_lab_to_reports(complementary_reports)
@@ -347,12 +351,16 @@ class FOHMUploadAPI:
 
     def parse_and_write_pangolin_report(self) -> list[FohmPangolinReport]:
         """Create and write a Pangolin report."""
-        pangolin_reports_raw: list[dict] = create_daily_deliveries_csv(self.daily_pangolin_list)
+        pangolin_reports_raw: list[dict] = self.create_daily_deliveries_csv(
+            self.daily_pangolin_list
+        )
         unique_pangolin_reports_raw: list[dict] = remove_duplicate_dicts(pangolin_reports_raw)
-        pangolin_reports: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
+        pangolin_reports: list[FohmPangolinReport] = self.validate_fohm_pangolin_reports(
             unique_pangolin_reports_raw
         )
-        pangolin_reports: list[FohmPangolinReport] = get_sars_cov_pangolin_reports(pangolin_reports)
+        pangolin_reports: list[FohmPangolinReport] = self.get_sars_cov_pangolin_reports(
+            pangolin_reports
+        )
         self.add_sample_internal_id_pangolin_report(pangolin_reports)
         self.add_region_lab_to_reports(pangolin_reports)
         self.create_pangolin_report_csv(pangolin_reports)
