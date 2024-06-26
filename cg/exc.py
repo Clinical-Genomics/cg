@@ -188,8 +188,16 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class SampleSheetError(CgError):
+class NfSampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
+
+
+class SampleSheetContentError(CgError):
+    """Raised when something is wrong with the sample sheet content."""
+
+
+class SampleSheetFormatError(CgError):
+    """Raised when something is wrong with the sample sheet format."""
 
 
 class ScoutUploadError(CgError):

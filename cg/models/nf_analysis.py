@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
-from cg.exc import SampleSheetError
+from cg.exc import NfSampleSheetError
 
 
 class WorkflowParameters(BaseModel):
@@ -48,7 +48,7 @@ class NextflowSampleSheetEntry(BaseModel):
     ) -> list[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
         if len(fastq_reverse) != len(values.get("fastq_forward_read_paths")):
-            raise SampleSheetError("Fastq file length for forward and reverse do not match")
+            raise NfSampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 
     @validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
@@ -56,7 +56,7 @@ class NextflowSampleSheetEntry(BaseModel):
         """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
             if not fastq_path.is_file():
-                raise SampleSheetError(f"Fastq file does not exist: {str(fastq_path)}")
+                raise NfSampleSheetError(f"Fastq file does not exist: {str(fastq_path)}")
         return fastq_paths
 
 
