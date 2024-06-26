@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
-    RarediseaseObservationsInputFiles
+    RarediseaseObservationsInputFiles,
 )
 
 
@@ -67,7 +67,10 @@ def test_instantiate_balsamic_input_files_missing_field(
         # WHEN instantiating a ObservationsInputFiles object
         BalsamicObservationsInputFiles(**balsamic_observations_input_files_raw)
 
-def test_instantiate_raredisease_input_files(raredisease_observations_input_files_raw: dict[str, Path]):
+
+def test_instantiate_raredisease_input_files(
+    raredisease_observations_input_files_raw: dict[str, Path]
+):
     """Tests input files against a pydantic RarediseaseObservationsInputFiles."""
 
     # GIVEN balsamic input files

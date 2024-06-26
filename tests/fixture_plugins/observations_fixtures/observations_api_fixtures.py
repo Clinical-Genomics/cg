@@ -96,7 +96,9 @@ def raredisease_observations_api(
     mocker: MockFixture,
 ) -> RarediseaseObservationsAPI:
     """Rare diseases observations API fixture."""
-    raredisease_observations_api: RarediseaseObservationsAPI = RarediseaseObservationsAPI(cg_context)
+    raredisease_observations_api: RarediseaseObservationsAPI = RarediseaseObservationsAPI(
+        cg_context
+    )
     raredisease_observations_api.store = analysis_store
     raredisease_observations_api.loqusdb_api = loqusdb_api
 
