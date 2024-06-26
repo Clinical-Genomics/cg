@@ -4,7 +4,7 @@ from pydantic import TypeAdapter
 
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 LOG = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         if sample_id in sample_ids:
             message: str = f"Sample {sample.sample_id} exists multiple times in sample sheet"
             LOG.error(message)
-            raise SampleSheetError(message)
+            raise SampleSheetContentError(message)
         sample_ids.add(sample_id)
 
 
@@ -50,11 +50,11 @@ def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[
     if not header:
         message = "Could not find header in sample sheet"
         LOG.warning(message)
-        raise SampleSheetError(message)
+        raise SampleSheetFormatError(message)
     if not raw_samples:
         message = "Could not find any samples in sample sheet"
         LOG.warning(message)
-        raise SampleSheetError(message)
+        raise SampleSheetFormatError(message)
     return raw_samples
 
 
