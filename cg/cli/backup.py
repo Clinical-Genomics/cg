@@ -163,7 +163,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
     if not flow_cell_id:
         LOG.info("Fetching first sequencing run in queue")
 
-    retrieval_time: float | None = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
+    retrieval_time: float | None = backup_api.fetch_sequencing_run(sequencing_run)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
@@ -171,7 +171,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
         return
 
     if not dry_run and sequencing_run:
-        LOG.info(f"{sequencing_run}: updating flow cell status to {FlowCellStatus.REQUESTED}")
+        LOG.info(f"{sequencing_run}: updating sequencing run data avaliability to {FlowCellStatus.REQUESTED}")
         status_db.update_illumina_sequencing_run_data_availability(
             sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
         )

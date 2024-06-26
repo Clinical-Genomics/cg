@@ -106,7 +106,7 @@ def test_get_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name:
     )
 
     # WHEN getting the run path
-    flow_cell_path: Path = backup_api.get_archived_sequencing_run_path(
+    runs_path: Path = backup_api.get_archived_sequencing_run_path(
         dsmc_output=dsmc_q_archive_output
     )
 
@@ -121,7 +121,7 @@ def test_get_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name:
 
 
 def test_maximum_processing_queue_full(store_with_illumina_sequencing_data: Store):
-    # GIVEN a sequencing run needs to be retrieved from PDC
+    # GIVEN that a sequencing run needs to be retrieved from PDC
     sequencing_runs: list[IlluminaSequencingRun] = store_with_illumina_sequencing_data._get_query(
         IlluminaSequencingRun
     ).all()
