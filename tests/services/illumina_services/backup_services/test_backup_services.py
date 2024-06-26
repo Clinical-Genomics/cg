@@ -252,13 +252,13 @@ def test_fetch_sequencing_run_processing_queue_full(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 @mock.patch("cg.store")
-def test_fetch_flow_cell_no_flow_cells_requested(
+def test_fetch_sequencing_run_no_runs_requested(
     mock_store,
-    mock_check_processing,
-    mock_get_first_flow_cell,
+    has_processing_queue_capacity,
+    mock_get_first_run,
     caplog,
 ):
-    """Tests the fetch_flow_cell method of the backup API when no flow cell requested"""
+    """Tests the fetch sequencing run method of the backup API when no flow cell requested"""
 
     caplog.set_level(logging.INFO)
 
@@ -272,17 +272,14 @@ def test_fetch_flow_cell_no_flow_cells_requested(
         sequencing_runs_dir=mock.Mock(),
     )
 
-    # WHEN no flow cells are requested
+    # WHEN no runs are requested
     backup_api.get_first_run.return_value = None
     backup_api.has_processing_queue_capacity.return_value = True
 
     # AND no flow cell has been specified
-    mock_flow_cell = None
+    result = backup_api.fetch_sequencing_run(None)
 
-    result = backup_api.fetch_sequencing_run(mock_flow_cell)
-
-    # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
-    # requested
+    # THEN no sequencing run will be fetched and a log message indicates that no runs have been requested
     assert result is None
     assert "No sequencing run requested" in caplog.text
 
@@ -317,11 +314,11 @@ def test_fetch_sequencing_run_retrieve_next_run(
     novaseq_x_flow_cell_id: str,
     caplog,
 ):
-    """Tests the fetch_flow_cell method of the backup API when retrieving next flow cell"""
+    """Tests the fetch sequencing run method of the backup API when retrieving next sequencing run"""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we check if a flow cell needs to be retrieved from PDC
+    # GIVEN we check if a sequencing run needs to be retrieved from PDC
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
@@ -331,7 +328,7 @@ def test_fetch_sequencing_run_retrieve_next_run(
         sequencing_runs_dir="cg_context.flow_cells_dir",
     )
 
-    # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
+    # WHEN no sequencing run is specified, but a sequencing run in status-db has the status "requested"
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
@@ -390,7 +387,7 @@ def test_fetch_sequencing_run_retrieve_specified_run(
     novaseq_x_flow_cell_id: str,
     caplog,
 ):
-    """Tests the fetch_flow_cell method of the backup API when given a sequencing run."""
+    """Tests the fetch sequencing run method of the backup API when given a sequencing run."""
 
     caplog.set_level(logging.INFO)
 
@@ -415,13 +412,13 @@ def test_fetch_sequencing_run_retrieve_specified_run(
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
-    # THEN no flow cell is taken form statusdb
+    # THEN no sequencing run is taken form statusdb
     mock_get_first_run.assert_not_called()
 
-    # THEN the process to retrieve the flow cell from PDC is started
+    # THEN the process to retrieve the sequencing run from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flow cell is set to "retrieved"
+    # AND when done the data availability of sequencing run is set to "retrieved"
     assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
