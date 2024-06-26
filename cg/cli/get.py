@@ -39,7 +39,7 @@ def get(context: click.Context, identifier: str | None):
             context.invoke(get_case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(get_sequencing_run, device_id=identifier)
+            context.invoke(get_sequencing_run, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
@@ -183,16 +183,16 @@ def get_case(
 
 @get.command("sequencing-run")
 @click.option("--samples/--no-samples", default=True, help="Display related samples")
-@click.argument("device-id")
+@click.argument("flow-cell-id")
 @click.pass_context
-def get_sequencing_run(context: click.Context, samples: bool, device_id: str):
+def get_sequencing_run(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a sequencing run and its samples, if any."""
     status_db: Store = context.obj.status_db
     sequencing_run: IlluminaSequencingRun = (
-        status_db.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=device_id)
+        status_db.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=flow_cell_id)
     )
     if not sequencing_run:
-        LOG.error(f"Sequencing run with {device_id} not found")
+        LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
     row: list[str] = [
         sequencing_run.device.internal_id,
