@@ -27,6 +27,7 @@ jobs:
         env:
           PYPI_USERNAME: __token__
           PYPI_PASSWORD: ${{ secrets.pypi_password }}
+          POETRY_REQUESTS_TIMEOUT: 60
         run: |
           poetry publish --no-interaction --build \
             --username $PYPI_USERNAME \

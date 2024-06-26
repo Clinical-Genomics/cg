@@ -52,5 +52,5 @@ class MockTB:
     def get_summaries(self, order_ids: list[int]):
         return []
 
-    def verify_latest_analysis_is_completed(self, case_id: str):
+    def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False):
         return
