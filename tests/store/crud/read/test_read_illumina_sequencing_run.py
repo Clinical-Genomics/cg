@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from cg.constants import Workflow
+from cg.constants import Workflow, FlowCellStatus
 from cg.exc import CgError
 from cg.store.models import IlluminaSequencingRun, Case
 from cg.store.store import Store
@@ -62,3 +62,21 @@ def test_get_latest_illumina_sequencing_run_for_nipt_case_fail(
         re_sequenced_sample_illumina_data_store.get_latest_illumina_sequencing_run_for_nipt_case(
             case_id_for_sample_on_multiple_flow_cells
         )
+
+
+def test_get_illumina_sequencing_run_by_data_availability(
+    store_with_illumina_sequencing_data: Store,
+):
+
+    # GIVEN a store with Illumina Sequencing Runs with data availability
+
+    # WHEN filtering sequencing runs by data availability
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_data_availability(
+            [FlowCellStatus.ON_DISK]
+        )
+    )
+
+    # THEN the runs with the availability are returned
+    for sequencing_run in sequencing_runs:
+        assert sequencing_run.data_availability == FlowCellStatus.ON_DISK

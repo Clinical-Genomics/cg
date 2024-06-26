@@ -5,7 +5,7 @@ import pytest
 from click.testing import CliRunner
 from psutil import Process
 
-from cg.cli.backup import backup_flow_cells, encrypt_illumina_runs, fetch_flow_cell
+from cg.cli.backup import backup_illumina_runs, encrypt_illumina_runs, fetch_illumina_run
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.exc import IlluminaRunEncryptionError
 from cg.models.cg_config import CGConfig
@@ -15,54 +15,51 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def test_backup_flow_cells(
+def test_backup_illumina_runs(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    backup_context: CGConfig,
     caplog,
-    flow_cell_name: str,
-    flow_cell_full_name: str,
+    novaseq_x_flow_cell_id: str,
+    novaseq_x_flow_cell_full_name: str,
     helpers: StoreHelpers,
 ):
-    """Test backing up flow cell in dry run mode."""
+    """Test backing up an Illumina run in dry run mode."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a flow cells directory
-
-    # Given a flow cell with no back-up
-    helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=False
+    # GIVEN a sequencing run without back-up
+    sequencing_run: IlluminaSequencingRun = (
+        backup_context.status_db.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
-    # GIVEN an encrypted flow cell
-    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
-    flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
-    Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+    # GIVEN an encrypted run
+    run_encrypt_dir = Path(backup_context.encryption.encryption_dir, novaseq_x_flow_cell_full_name)
+    run_encrypt_dir.mkdir(parents=True, exist_ok=True)
+    Path(run_encrypt_dir, novaseq_x_flow_cell_id).with_suffix(FileExtensions.COMPLETE).touch()
 
-    # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    # WHEN backing up runs in dry run mode
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=backup_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_backup_flow_cells_when_dsmc_is_running(
+def test_backup_illumina_runs_when_dsmc_is_running(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    flow_cell_name: str,
-    flow_cell_full_name: str,
     mocker,
 ):
-    """Test backing-up flow cell in dry run mode when Dsmc processing has started."""
+    """Test backing-up Illumina runs in dry run mode when Dsmc processing has started."""
     caplog.set_level(logging.ERROR)
-
-    # GIVEN a flow cells directory
 
     # GIVEN an ongoing Dsmc process
     mocker.patch.object(Process, "name", return_value="dsmc")
 
-    # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    # WHEN backing up Illumina runs in dry run mode
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -71,63 +68,66 @@ def test_backup_flow_cells_when_dsmc_is_running(
     assert "Too many Dsmc processes are already running" in caplog.text
 
 
-def test_backup_flow_cells_when_flow_cell_already_has_backup(
+def test_backup_illumina_run_when_run_already_has_backup(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    flow_cell_name: str,
-    flow_cell_full_name: str,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     helpers: StoreHelpers,
 ):
-    """Test backing-up flow cell in dry run mode when already backed-up."""
+    """Test backing-up an Illumina run in dry run mode when already backed-up."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a flow cells directory
-
-    # GIVEN a flow cell with a back-up
-    helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+    # GIVEN a store with a backed up sequencing run
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    sequencing_run.has_backup = True
 
-    # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    # WHEN backing up Illumina runs in dry run mode
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell has already benn backed upped
-    assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
+    # THEN communicate the sequencing run has already benn backed upped
+    assert (
+        f"Sequencing run for flow cell: {novaseq_x_flow_cell_id} is already backed-up"
+        in caplog.text
+    )
 
 
-def test_backup_flow_cells_when_encryption_is_not_completed(
+def test_backup_illumina_runs_when_encryption_is_not_completed(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    flow_cell_name: str,
-    flow_cell_full_name: str,
+    novaseq_x_flow_cell_id: str,
 ):
-    """Test backing-up flow cell in dry run mode when encryption is not complete."""
+    """Test backing-up Illumina run in dry run mode when encryption is not complete."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a flow cells directory
-
-    # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    # WHEN backing up Illumina runs in dry run mode
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell encryption is not completed
-    assert f"Flow cell: {flow_cell_name} encryption process is not complete" in caplog.text
+    # THEN communicate runs encryption is not completed
+    assert (
+        f"Sequencing run for flow cell: {novaseq_x_flow_cell_id} encryption process is not complete"
+        in caplog.text
+    )
 
 
 def test_encrypt_illumina_runs(
     cli_runner: CliRunner, cg_context: CGConfig, caplog, sbatch_job_number: str
 ):
-    """Test encrypt flow cell in dry run mode."""
+    """Test encrypt Illumina runs in dry run mode."""
     caplog.set_level(logging.INFO)
-
-    # GIVEN an illumina runs directory
 
     # WHEN encrypting run in dry run mode
     result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=cg_context)
@@ -147,7 +147,7 @@ def test_encrypt_illumina_runs_when_already_backed_up(
     store_with_illumina_sequencing_data: Store,
     helpers: StoreHelpers,
 ):
-    """Test encrypt illumina run in dry run mode when there is already a back-up."""
+    """Test encrypt Illumina run in dry run mode when there is already a back-up."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a sequencing run with a back-up
@@ -178,10 +178,10 @@ def test_encrypt_illumina_run_when_sequencing_not_done(
     mocker,
     novaseq_x_flow_cell_id: str,
 ):
-    """Test encrypt illumina runs in dry run mode when sequencing is not done."""
+    """Test encrypt Illumina runs in dry run mode when sequencing is not done."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN flow cells that are being sequenced
+    # GIVEN Illumina runs that are being sequenced
     mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = False
 
@@ -208,10 +208,10 @@ def test_encrypt_illumina_run_when_encryption_already_started(
     tmp_path: Path,
     mocker,
 ):
-    """Test encrypt illumina runs in dry run mode when pending file exists"""
+    """Test encrypt Illumina runs in dry run mode when pending file exists"""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN illumina runs that are ready
+    # GIVEN Illumina runs that are ready
     mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
@@ -222,7 +222,7 @@ def test_encrypt_illumina_run_when_encryption_already_started(
         novaseq_x_flow_cell_id,
     ).with_suffix(FileExtensions.PENDING).touch()
 
-    # WHEN encrypting flow cells in dry run mode
+    # WHEN encrypting Illumina runs in dry run mode
     result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=encryption_context)
 
     # THEN exits without any errors
@@ -232,7 +232,7 @@ def test_encrypt_illumina_run_when_encryption_already_started(
     assert f"Encryption already started for run: {novaseq_x_flow_cell_id}" in caplog.text
 
 
-def test_encrypt_flow_cell_when_encryption_already_completed(
+def test_encrypt_illumina_run_when_encryption_already_completed(
     cli_runner: CliRunner,
     encryption_context: CGConfig,
     novaseq_x_flow_cell_full_name: str,
@@ -241,10 +241,10 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     pdc_archiving_dir: Path,
     mocker,
 ):
-    """Test encrypt illumina runs in dry run mode when completed file exists"""
+    """Test encrypt Illumina runs in dry run mode when completed file exists"""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN illumina runs that are ready
+    # GIVEN Illumina runs that are ready
     mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
@@ -255,7 +255,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
         novaseq_x_flow_cell_id,
     ).with_suffix(FileExtensions.COMPLETE).touch()
 
-    # WHEN encrypting flow cells in dry run mode
+    # WHEN encrypting Illumina runs in dry run mode
     result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=encryption_context)
 
     # THEN exits without any errors
@@ -265,53 +265,53 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     assert f"Encryption already completed for run: {novaseq_x_flow_cell_id}" in caplog.text
 
 
-def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
+def test_run_fetch_sequencing_run_dry_run_no_run_specified(
     cli_runner: CliRunner, backup_context: CGConfig, caplog
 ):
-    """Test fetching flow cell when no flow cells with correct status."""
+    """Test fetching flow cell when no Illumina runs with correct status."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with a backup_api
     assert "backup_api" in backup_context.meta_apis
 
-    # GIVEN that there are no flow cells set to "requested" in status_db
-    assert not backup_context.status_db.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.REQUESTED]
+    # GIVEN that there are no Illumina runs set to "requested" in status_db
+    assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
+        data_availability=[FlowCellStatus.REQUESTED]
     )
 
-    # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    # WHEN running the fetch_illumina_run command without specifying any flow cell in dry run mode
+    result = cli_runner.invoke(fetch_illumina_run, ["--dry-run"], obj=backup_context)
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN assert that it is communicated that no flow cells are requested
-    assert "No flow cells requested" in caplog.text
+    # THEN assert that it is communicated that no Illumina runs are requested
+    assert "No sequencing run requested" in caplog.text
 
 
-def test_run_fetch_flow_cell_dry_run_retrieval_time(
+def test_run_fetch_sequencing_run_dry_run_retrieval_time(
     cli_runner: CliRunner, backup_context: CGConfig, caplog, mocker
 ):
-    """Test fetching flow cell retrieval time."""
+    """Test fetching Illumina run retrieval time."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with a backup_api
     assert "backup_api" in backup_context.meta_apis
 
-    # GIVEN that there are no flow cells set to "requested" in status_db
-    assert not backup_context.status_db.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.REQUESTED]
+    # GIVEN that there are no Illumina runs set to "requested" in status_db
+    assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
+        data_availability=[FlowCellStatus.REQUESTED]
     )
 
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
     mocker.patch(
-        "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.fetch_flow_cell",
+        "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.fetch_sequencing_run",
         return_value=expected_time,
     )
 
-    # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    # WHEN running the fetch Illumina run command without specifying any illumina in dry run mode
+    result = cli_runner.invoke(fetch_illumina_run, ["--dry-run"], obj=backup_context)
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
@@ -320,17 +320,21 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
     assert "Retrieval time" in caplog.text
 
 
-def test_run_fetch_flow_cell_non_existing_flow_cell(
+def test_run_fetch_illumina_run_non_existing_flow_cell(
     cli_runner: CliRunner, backup_context: CGConfig, caplog
 ):
     # GIVEN a context with a backup api
+
     # GIVEN a non-existing flow cell id
-    flow_cell_id = "hello"
-    assert backup_context.status_db.get_flow_cell_by_name(flow_cell_id) is None
+    flow_cell_id = "non-existing-id"
+    assert (
+        backup_context.status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+        is None
+    )
 
     # WHEN running the command with the non-existing flow cell id
     result = cli_runner.invoke(
-        fetch_flow_cell, ["--flow-cell-id", flow_cell_id], obj=backup_context
+        fetch_illumina_run, ["--flow-cell-id", flow_cell_id], obj=backup_context
     )
 
     # THEN assert that it exits with a non-zero exit code

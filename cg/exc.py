@@ -106,7 +106,7 @@ class IlluminaRunEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
-class FlowCellAlreadyBackedUpError(CgError):
+class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 

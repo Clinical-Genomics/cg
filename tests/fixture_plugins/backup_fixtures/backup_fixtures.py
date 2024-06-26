@@ -15,11 +15,11 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def mock_pdc_query_method(archived_flow_cells: list[str]) -> Callable:
+def mock_pdc_query_method(archived_illumina_runs: list[str]) -> Callable:
     """Returns a mock method mimicking the pattern search made by the dsmc q archive command."""
 
     def mock_method(search_pattern: str) -> list[str] | None:
-        if match := fnmatch.filter(archived_flow_cells, search_pattern):
+        if match := fnmatch.filter(archived_illumina_runs, search_pattern):
             return match
 
     return mock_method
@@ -47,7 +47,7 @@ Accessing as node: SLLCLINICAL
 
 
 @pytest.fixture
-def archived_flow_cells(pdc_archiving_directory: PDCArchivingDirectory) -> list[str]:
+def archived_illumina_runs(pdc_archiving_directory: PDCArchivingDirectory) -> list[str]:
     """Returns a list of archived flow cells."""
     return [
         f"{pdc_archiving_directory.current}/new_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
@@ -73,11 +73,11 @@ def backup_api(
     )
     _backup_api: IlluminaBackupService = IlluminaBackupService(
         encryption_api=encryption_api,
-        status=store,
+        status_db=store,
         tar_api=tar_api,
         pdc_service=pdc_service,
         pdc_archiving_directory=pdc_archiving_directory,
-        flow_cells_dir=illumina_sequencing_runs_directory,
+        sequencing_runs_dir=illumina_sequencing_runs_directory,
         dry_run=True,
     )
     return _backup_api
@@ -96,8 +96,8 @@ def backup_file_path() -> str:
 
 
 @pytest.fixture
-def archived_flow_cell() -> Path:
-    """Path of archived flow cell"""
+def archived_illumina_run() -> Path:
+    """Path of archived sequencing run"""
     return Path("/path/to/archived/run_devices.tar.gz.gpg")
 
 
