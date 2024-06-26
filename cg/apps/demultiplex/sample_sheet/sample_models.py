@@ -12,7 +12,6 @@ from cg.apps.demultiplex.sample_sheet.index import (
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
-from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -136,8 +135,6 @@ class FlowCellSample(BaseModel):
         is_reverse_complement: bool,
     ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
-        if not samples_to_compare:
-            raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
         if is_run_single_index:
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")
