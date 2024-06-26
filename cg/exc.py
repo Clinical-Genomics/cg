@@ -188,7 +188,7 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class SampleSheetError(CgError):
+class NfSampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
 
 
