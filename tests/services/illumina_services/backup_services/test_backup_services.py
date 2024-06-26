@@ -520,10 +520,11 @@ def test_validate_is_flow_cell_backup_possible(
     base_store: Store,
     caplog,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
-    """Tests checking if a back-up of flow-cell is possible."""
+    """Tests checking if a back-up of an Illumina run is possible."""
     caplog.set_level(logging.DEBUG)
     # GIVEN an instance of the PDC API
     pdc_service = cg_context.pdc_service
@@ -540,11 +541,14 @@ def test_validate_is_flow_cell_backup_possible(
 
     # GIVEN no Dsmc process is running
 
-    # GIVEN a database flow cell which is not backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
+    # GIVEN a sequencing run which is not backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        cg_context.status_db_.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
     # GIVEN that encryption is completed
     illumina_run_encryption_service.run_encryption_dir.mkdir(parents=True)
@@ -552,21 +556,23 @@ def test_validate_is_flow_cell_backup_possible(
 
     # WHEN checking if back-up is possible
     backup_service.validate_is_run_backup_possible(
-        sequencing_run=db_flow_cell, illumina_run_encryption_service=illumina_run_encryption_service
+        sequencing_run=sequencing_run,
+        illumina_run_encryption_service=illumina_run_encryption_service,
     )
 
     # THEN communicate that it passed
-    assert "Flow cell can be backed up" in caplog.text
+    assert "Sequencing run can be backed up" in caplog.text
 
 
 def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     base_store: Store,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    novaseq_x_flow_cell_id: str,
+    store_with_illumina_sequencing_data: Store,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
     mocker,
 ):
-    """Tests checking if a back-up of flow-cell is possible when Dsmc is already running."""
+    """Tests checking if a back-up of a sequencing run is possible when Dsmc is already running."""
     # GIVEN an instance of the PDC API
     pdc_service = cg_context.pdc_service
 
@@ -583,29 +589,33 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     # GIVEN a Dsmc process is already running
     mocker.patch.object(PdcService, "validate_is_dsmc_running", return_value=True)
 
-    # GIVEN a database flow cell which is not backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
+    # GIVEN a sequencing run which is not backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        cg_context.status_db_.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
     # WHEN checking if back-up is possible
     with pytest.raises(DsmcAlreadyRunningError):
         backup_service.validate_is_run_backup_possible(
-            sequencing_run=db_flow_cell,
+            sequencing_run=sequencing_run,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
 
 
-def test_validate_is_flow_cell_backup_when_already_backed_up(
+def test_validate_is_illumina_run_backup_when_already_backed_up(
     base_store: Store,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
-    """Tests checking if a back-up of flow-cell is possible when flow cell is already backed up."""
+    """Tests checking if a back-up of ab Illumina run is possible when the run is already backed up."""
     # GIVEN an instance of the PDC API
     pdc_service = cg_context.pdc_service
 
@@ -619,30 +629,33 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
 
-    # GIVEN a database flow cell which is backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
-        has_backup=True,
+    # GIVEN a sequencing run which backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        cg_context.status_db_.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    sequencing_run.has_backup = True
 
     # WHEN checking if back-up is possible
     with pytest.raises(IlluminaRunAlreadyBackedUpError):
         backup_service.validate_is_run_backup_possible(
-            sequencing_run=db_flow_cell,
+            sequencing_run=sequencing_run,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
 
 
-def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
+def test_validate_is_run_backup_when_encryption_is_not_complete(
     base_store: Store,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
-    """Tests checking if a back-up of flow-cell is possible when encryption is not complete."""
+    """Tests checking if a back-up of an Illumina run is possible when encryption is not complete."""
     # GIVEN an instance of the PDC API
     pdc_service = cg_context.pdc_service
 
@@ -656,30 +669,34 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
 
-    # GIVEN a database flow cell which is backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
+    # GIVEN a sequencing run which is not backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        cg_context.status_db_.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
     # WHEN checking if back-up is possible
     with pytest.raises(IlluminaRunEncryptionError):
         backup_service.validate_is_run_backup_possible(
-            sequencing_run=db_flow_cell,
+            sequencing_run=sequencing_run,
             illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
 
 
-def test_backup_flow_cell(
+def test_backup_illumina_runs(
     base_store: Store,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
     mocker,
 ):
-    """Tests back-up flow cell."""
+    """Tests back-up Illumina runs."""
     # GIVEN an instance of the PDC API
     pdc_service = cg_context.pdc_service
 
@@ -695,34 +712,38 @@ def test_backup_flow_cell(
     # GIVEN a mocked archiving call
     mocker.patch.object(PdcService, "archive_file_to_pdc", return_value=None)
 
-    # GIVEN a database flow cell which is not backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
+    # GIVEN a sequencing run which is not backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
-    # WHEN backing up flow cell
+    # WHEN backing up the sequencing run
     backup_service.backup_run(
         files_to_archive=[
             illumina_run_encryption_service.final_passphrase_file_path,
             illumina_run_encryption_service.encrypted_gpg_file_path,
         ],
         store=base_store,
-        sequencing_run=db_flow_cell,
+        sequencing_run=sequencing_run,
     )
 
-    # THEN flow cell should hava a back-up
-    assert db_flow_cell.has_backup
+    # THEN sequencing run should hava a back-up
+    assert sequencing_run.has_backup
 
 
-def test_backup_flow_cell_when_unable_to_archive(
+def test_backup_illumina_run_when_unable_to_archive(
     base_store: Store,
     cg_context: CGConfig,
-    helpers: StoreHelpers,
+    novaseq_x_flow_cell_id: str,
     illumina_run_encryption_service: IlluminaRunEncryptionService,
+    store_with_illumina_sequencing_data: Store,
     caplog,
 ):
-    """Tests back-up flow cell when unable to archive."""
+    """Tests back-up Illumina run when unable to archive."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN an instance of the PDC API
@@ -737,18 +758,21 @@ def test_backup_flow_cell_when_unable_to_archive(
         pdc_service=pdc_service,
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
-    # GIVEN a database flow cell which is not backed up
-    db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
-        store=base_store,
+    # GIVEN a sequencing run which is not backed up
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        cg_context.status_db.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    assert not sequencing_run.has_backup
 
     # GIVEN that archiving fails
     with mock.patch(
         "cg.utils.commands.subprocess.run",
         return_value=create_process_response(return_code=EXIT_FAIL),
     ):
-        # WHEN backing up flow cell
+        # WHEN backing up a sequencing run
 
         # THEN the appropriate error should have been raised
         with pytest.raises(PdcError):
@@ -758,5 +782,5 @@ def test_backup_flow_cell_when_unable_to_archive(
                     illumina_run_encryption_service.encrypted_gpg_file_path,
                 ],
                 store=base_store,
-                sequencing_run=db_flow_cell,
+                sequencing_run=sequencing_run,
             )
