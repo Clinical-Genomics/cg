@@ -113,7 +113,7 @@ def demultiplex_sequencing_run(
     try:
         sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
     except SampleSheetContentError:
-        LOG.warning("Demultiplexing a with a manually modified sample sheet")
+        LOG.warning("Starting demultiplexing a with a manually modified sample sheet")
     except (CgError, ValidationError) as error:
         LOG.warning(
             "Malformed sample sheet. "
