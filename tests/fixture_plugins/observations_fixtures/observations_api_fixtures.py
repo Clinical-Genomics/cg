@@ -90,7 +90,7 @@ def raredisease_observations_api(
     lims_api: LimsAPI,
     loqusdb_api: LoqusdbAPI,
     case_id: str,
-    raredisease_customer: Customer,
+    customer: Customer,
     number_of_loaded_variants: int,
     loqusdb_id: str,
     mocker: MockFixture,
@@ -104,7 +104,7 @@ def raredisease_observations_api(
 
     # Mocked case scenario for MIP-DNA uploads
     case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = raredisease_customer.internal_id
+    case.customer.internal_id = customer.internal_id
 
     # Mocked Loqusdb API scenario for MIP-DNA uploads
     mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
