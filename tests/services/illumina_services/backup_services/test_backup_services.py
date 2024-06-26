@@ -109,11 +109,11 @@ def test_get_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name:
     runs_path: Path = backup_api.get_archived_sequencing_run_path(dsmc_output=dsmc_q_archive_output)
 
     # THEN this method should return a path object
-    assert isinstance(flow_cell_path, Path)
+    assert isinstance(runs_path, Path)
 
     # THEN return the Illumina run file name
     assert (
-        flow_cell_path.name
+        runs_path.name
         == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
     )
 
