@@ -50,8 +50,8 @@ class IlluminaBackupService:
     def has_processing_queue_capacity(self) -> bool:
         """Check if the processing queue for illumina runs is not full."""
         proccessing_runs_count: int = len(
-            self.status_db.get_illumina_sequencing_runs_by_availability(
-                statuses=[FlowCellStatus.PROCESSING]
+            self.status_db.get_illumina_sequencing_runs_by_data_availability(
+                data_availability=[FlowCellStatus.PROCESSING]
             )
         )
         LOG.debug(f"Processing illumina runs: {proccessing_runs_count}")
@@ -60,8 +60,8 @@ class IlluminaBackupService:
     def get_first_run(self) -> IlluminaSequencingRun | None:
         """Get the sequencing run from the requested queue."""
         sequencing_run: list[IlluminaSequencingRun] | None = (
-            self.status_db.get_illumina_sequencing_runs_by_availability(
-                statuses=[FlowCellStatus.REQUESTED]
+            self.status_db.get_illumina_sequencing_runs_by_data_availability(
+                data_availability=[FlowCellStatus.REQUESTED]
             )
         )
         return sequencing_run[0] if sequencing_run else None
@@ -86,7 +86,7 @@ class IlluminaBackupService:
             return None
 
         if not self.dry_run:
-            self.status_db.update_illumina_sequencing_run_availability(
+            self.status_db.update_illumina_sequencing_run_data_availability(
                 sequencing_run=sequencing_run, data_availability=FlowCellStatus.PROCESSING
             )
             LOG.info(f"{sequencing_run.device.internal_id}: retrieving from PDC")
@@ -134,7 +134,7 @@ class IlluminaBackupService:
         except subprocess.CalledProcessError as error:
             LOG.error(f"Decryption failed: {error.stderr}")
             if not self.dry_run:
-                self.status_db.update_illumina_sequencing_run_availability(
+                self.status_db.update_illumina_sequencing_run_data_availability(
                     sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
                 )
             raise error
@@ -222,7 +222,7 @@ class IlluminaBackupService:
         except PdcError as error:
             LOG.error(f"{sequencing_run.device.internal_id}: key retrieval failed")
             if not self.dry_run:
-                self.status_db.update_illumina_sequencing_run_availability(
+                self.status_db.update_illumina_sequencing_run_data_availability(
                     sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
                 )
             raise error
@@ -237,13 +237,13 @@ class IlluminaBackupService:
                 run_dir=run_dir,
             )
             if not self.dry_run:
-                self.status_db.update_illumina_sequencing_run_availability(
+                self.status_db.update_illumina_sequencing_run_data_availability(
                     sequencing_run=sequencing_run, data_availability=FlowCellStatus.RETRIEVED
                 )
         except PdcError as error:
             LOG.error(f"{sequencing_run.device.internal_id}: run directory retrieval failed")
             if not self.dry_run:
-                self.status_db.update_illumina_sequencing_run_availability(
+                self.status_db.update_illumina_sequencing_run_data_availability(
                     sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
                 )
             raise error

@@ -172,7 +172,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
 
     if not dry_run and sequencing_run:
         LOG.info(f"{sequencing_run}: updating flow cell status to {FlowCellStatus.REQUESTED}")
-        status_db.update_illumina_sequencing_run_availability(
+        status_db.update_illumina_sequencing_run_data_availability(
             sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
         )
 

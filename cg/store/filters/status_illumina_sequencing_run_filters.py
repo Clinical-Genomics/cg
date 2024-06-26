@@ -18,9 +18,9 @@ def filter_by_entry_id(runs: Query, entry_id: int, **kwargs) -> Query:
     return runs.filter(IlluminaSequencingRun.id == entry_id)
 
 
-def filter_by_data_availability(runs: Query, statuses: list[str], **kwargs) -> Query:
+def filter_by_data_availability(runs: Query, data_availability: list[str], **kwargs) -> Query:
     """Filter sequencing runs by data availability statuses."""
-    return runs.filter(IlluminaSequencingRun.data_availability.in_(statuses))
+    return runs.filter(IlluminaSequencingRun.data_availability.in_(data_availability))
 
 
 class IlluminaSequencingRunFilter(Enum):
@@ -34,10 +34,13 @@ def apply_illumina_sequencing_run_filter(
     filter_functions: list[callable],
     device_internal_id: str | None = None,
     entry_id: int | None = None,
-    statuses: list[str] | None = None,
+    data_availability: list[str] | None = None,
 ) -> Query:
     for filter_function in filter_functions:
         runs: Query = filter_function(
-            runs=runs, device_internal_id=device_internal_id, entry_id=entry_id, statuses=statuses
+            runs=runs,
+            device_internal_id=device_internal_id,
+            entry_id=entry_id,
+            data_availability=data_availability,
         )
     return runs

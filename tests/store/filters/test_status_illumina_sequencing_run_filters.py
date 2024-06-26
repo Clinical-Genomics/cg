@@ -69,7 +69,7 @@ def test_filter_by_data_availability(
 
     # WHEN filtering sequencing runs by data availability
     filtered_runs: Query = filter_by_data_availability(
-        runs=sequencing_runs, statuses=[FlowCellStatus.ON_DISK]
+        runs=sequencing_runs, data_availability=[FlowCellStatus.ON_DISK]
     )
 
     # THEN the runs with the availability are returned

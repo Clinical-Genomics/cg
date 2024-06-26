@@ -275,8 +275,8 @@ def test_run_fetch_sequencing_run_dry_run_no_run_specified(
     assert "backup_api" in backup_context.meta_apis
 
     # GIVEN that there are no Illumina runs set to "requested" in status_db
-    assert not backup_context.status_db.get_illumina_sequencing_runs_by_availability(
-        statuses=[FlowCellStatus.REQUESTED]
+    assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
+        data_availability=[FlowCellStatus.REQUESTED]
     )
 
     # WHEN running the fetch_illumina_run command without specifying any flow cell in dry run mode
@@ -299,8 +299,8 @@ def test_run_fetch_sequencing_run_dry_run_retrieval_time(
     assert "backup_api" in backup_context.meta_apis
 
     # GIVEN that there are no Illumina runs set to "requested" in status_db
-    assert not backup_context.status_db.get_illumina_sequencing_runs_by_availability(
-        statuses=[FlowCellStatus.REQUESTED]
+    assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
+        data_availability=[FlowCellStatus.REQUESTED]
     )
 
     # GIVEN that the backup api returns a retrieval time
