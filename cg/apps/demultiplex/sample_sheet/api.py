@@ -234,7 +234,7 @@ class SampleSheetAPI:
         housekeeper or creating it if there is not a valid sample sheet.
         """
         flow_cell: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
-        LOG.info(f"Fetching and validating sample sheet for {flow_cell_name} from Housekeeper")
+        LOG.debug(f"Fetching and validating sample sheet for {flow_cell_name} from Housekeeper")
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)
             return
@@ -268,6 +268,7 @@ class SampleSheetAPI:
     def get_or_create_all_sample_sheets(self):
         """Ensure that a valid sample sheet is present in all flow cell directories."""
         for flow_cell_dir in get_directories_in_path(self.flow_cell_runs_dir):
+            LOG.info(f"Getting a valid sample sheet for flow cell {flow_cell_dir.name}")
             try:
                 self.get_or_create_sample_sheet(flow_cell_dir.name)
             except Exception as error:
