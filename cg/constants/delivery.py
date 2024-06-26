@@ -149,29 +149,6 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
-RAREDISEASE_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {HK_DELIVERY_REPORT_TAG},
-    {"vcf-snv"},
-    {"vcf-snv-index"},
-    {"vcf-sv"},
-    {"vcf-sv-index"},
-    {"vcf-snv-clinical"},
-    {"vcf-snv-clinical-index"},
-    {"vcf-snv-research"},
-    {"vcf-snv-research-index"},
-    {"vcf-sv-clinical"},
-    {"vcf-sv-clinical-index"},
-    {"vcf-sv-research"},
-    {"vcf-sv-research-index"},
-]
-
-RAREDISEASE_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {AlignmentFileTag.BAM},
-    {AlignmentFileTag.BAM_BAI},
-    {AlignmentFileTag.CRAM},
-    {AlignmentFileTag.CRAM_INDEX},
-]
-
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
     {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
