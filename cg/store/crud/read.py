@@ -497,7 +497,7 @@ class ReadHandler(BaseHandler):
     def get_illumina_sequencing_runs_by_availability(
         self, statuses: list[str]
     ) -> list[IlluminaSequencingRun] | None:
-        """Return flow cells with supplied statuses."""
+        """Return Illumina sequencing runs with supplied statuses."""
         return apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             statuses=statuses,

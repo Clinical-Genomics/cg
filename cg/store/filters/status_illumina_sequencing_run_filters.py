@@ -19,7 +19,7 @@ def filter_by_entry_id(runs: Query, entry_id: int, **kwargs) -> Query:
 
 
 def filter_by_data_availability(runs: Query, statuses: list[str], **kwargs) -> Query:
-    """Filter sequencing runs by statuses."""
+    """Filter sequencing runs by data availability statuses."""
     return runs.filter(IlluminaSequencingRun.data_availability.in_(statuses))
 
 

@@ -23,7 +23,7 @@ def test_backup_illumina_runs(
     novaseq_x_flow_cell_full_name: str,
     helpers: StoreHelpers,
 ):
-    """Test backing up an illumina run in dry run mode."""
+    """Test backing up an Illumina run in dry run mode."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a sequencing run without back-up
@@ -52,7 +52,7 @@ def test_backup_illumina_runs_when_dsmc_is_running(
     caplog,
     mocker,
 ):
-    """Test backing-up illumina runs in dry run mode when Dsmc processing has started."""
+    """Test backing-up Illumina runs in dry run mode when Dsmc processing has started."""
     caplog.set_level(logging.ERROR)
 
     # GIVEN an ongoing Dsmc process
@@ -279,7 +279,7 @@ def test_run_fetch_sequencing_run_dry_run_no_run_specified(
         statuses=[FlowCellStatus.REQUESTED]
     )
 
-    # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
+    # WHEN running the fetch_illumina_run command without specifying any flow cell in dry run mode
     result = cli_runner.invoke(fetch_illumina_run, ["--dry-run"], obj=backup_context)
 
     # THEN assert that it exits without any problems
@@ -326,7 +326,7 @@ def test_run_fetch_illumina_run_non_existing_flow_cell(
     # GIVEN a context with a backup api
 
     # GIVEN a non-existing flow cell id
-    flow_cell_id = "hello"
+    flow_cell_id = "non-existing-id"
     assert (
         backup_context.status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
         is None

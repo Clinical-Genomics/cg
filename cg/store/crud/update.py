@@ -32,7 +32,7 @@ class UpdateHandler(BaseHandler):
     def update_illumina_sequencing_run_availability(
         self, sequencing_run: IlluminaSequencingRun, data_availability: FlowCellStatus
     ) -> IlluminaSequencingRun:
-        """Update the status of an Illumina sequencing run."""
+        """Update the data availability status of an Illumina sequencing run."""
         sequencing_run.data_availability = data_availability
         self.session.commit()
         return sequencing_run

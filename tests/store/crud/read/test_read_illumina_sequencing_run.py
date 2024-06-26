@@ -71,7 +71,7 @@ def test_get_illumina_sequencing_run_by_data_availability(
     # GIVEN a store with Illumina Sequencing Runs with data availability
 
     # WHEN filtering sequencing runs by data availability
-    sequencing_runs = (
+    sequencing_runs: list[IlluminaSequencingRun] = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_availability(
             [FlowCellStatus.ON_DISK]
         )
