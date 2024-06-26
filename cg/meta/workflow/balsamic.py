@@ -658,3 +658,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if case.non_tumour_samples and not case.tumour_samples:
             return True
         return False
+
+    def _get_samples_sex(self, case_obj: Case) -> dict:
+        samples_sex = {}
+        for link_obj in case_obj.links:
+            if link_obj.sample.is_tumour:
+                continue
+            sample_id = link_obj.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": link_obj.sample.sex,
+                "analysis": Sex.UNKNOWN,
+            }
+        return samples_sex
+

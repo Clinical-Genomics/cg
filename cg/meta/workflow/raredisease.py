@@ -4,20 +4,25 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from housekeeper.store.models import Version
+
+
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.constants import AnalysisType, FileFormat, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -142,3 +147,34 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    def _get_samples_sex(self, case_obj: Case, hk_version: Version) -> dict:
+        qc_metrics_file = self.get_qcmetrics_file(hk_version)
+        samples_sex = {}
+        for link_obj in case_obj.links:
+            sample_id = link_obj.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": link_obj.sample.sex,
+                "analysis": self.analysis_sex(qc_metrics_file, sample_id=sample_id),
+            }
+        return samples_sex
+
+    def analysis_sex(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
+        """Fetch analysis sex for each sample of an analysis."""
+        qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        return str(
+            next(
+                metric.value
+                for metric in qc_metrics
+                if metric.name == "predicted_sex_sex_check" and metric.id == sample_id
+            )
+        )
+
+    @staticmethod
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsBase:
+        """Parse the information from a QC metrics file."""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
+
