@@ -55,7 +55,9 @@ def test_is_case_eligible_for_observations_upload(
     """Test whether a case is eligible for RAREDISEASE observation uploads."""
 
     # GIVEN a case and a RAREDISEASE observations API
-    case: Case = raredisease_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+    case: Case = raredisease_observations_api.analysis_api.status_db.get_case_by_internal_id(
+        case_id
+    )
 
     # GIVEN a RAREDISEASE scenario for Loqusdb uploads
     mocker.patch.object(
@@ -77,7 +79,9 @@ def test_is_case_not_eligible_for_observations_upload(
     """Test whether a case is not eligible for RAREDISEASE observation uploads."""
 
     # GIVEN a case and a RAREDISEASE observations API
-    case: Case = raredisease_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+    case: Case = raredisease_observations_api.analysis_api.status_db.get_case_by_internal_id(
+        case_id
+    )
 
     # GIVEN a RAREDISEASE scenario for Loqusdb uploads with an invalid sequencing method
     mocker.patch.object(
