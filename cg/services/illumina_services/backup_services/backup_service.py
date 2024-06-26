@@ -110,8 +110,8 @@ class IlluminaBackupService:
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
-        run_dir: Path = Path(self.sequencing_runs_dir)
-        sequencing_run_output_dir: Path = Path(run_dir, archived_run.name.split(".")[0])
+        run_dir = Path(self.sequencing_runs_dir)
+        sequencing_run_output_dir = Path(run_dir, archived_run.name.split(".")[0])
         self.retrieve_archived_key(
             archived_key=archived_key, sequencing_run=sequencing_run, run_dir=run_dir
         )
