@@ -96,13 +96,13 @@ class IlluminaBackupService:
         )
 
         archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
-        archived_flow_cell: Path = self.get_archived_sequencing_run_path(dsmc_output=dsmc_output)
+        archived_run: Path = self.get_archived_sequencing_run_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_run(
                 sequencing_run=sequencing_run,
                 archived_key=archived_key,
-                archived_run=archived_flow_cell,
+                archived_run=archived_run,
             )
 
     def _process_run(

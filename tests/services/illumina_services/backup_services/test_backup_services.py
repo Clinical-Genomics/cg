@@ -305,24 +305,16 @@ def test_fetch_flow_cell_no_flow_cells_requested(
 @mock.patch(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
-@mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_run"
-)
-@mock.patch("cg.meta.tar.tar.TarAPI")
-@mock.patch("cg.store.models.IlluminaRunDirectoryData")
-@mock.patch("cg.store")
-def test_fetch_flow_cell_retrieve_next_flow_cell(
-    mock_store,
-    mock_illumina_run,
-    mock_tar,
-    mock_get_first_run,
+def test_fetch_sequencing_run_retrieve_next_run(
     mock_get_archived_encryption_key_path,
     mock_get_archived_sequencing_run_path,
     mock_create_copy_complete,
     mock_create_rta_complete,
     archived_key,
-    archived_flow_cell,
+    archived_illumina_run,
     cg_context,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     caplog,
 ):
     """Tests the fetch_flow_cell method of the backup API when retrieving next flow cell"""
@@ -333,30 +325,30 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
-        status_db=mock_store,
-        tar_api=mock_tar,
+        status_db=store_with_illumina_sequencing_data,
+        tar_api=mock.Mock(),
         pdc_service=mock.Mock(),
         sequencing_runs_dir="cg_context.flow_cells_dir",
     )
 
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
-    mock_illumina_run.data_availability = FlowCellStatus.REQUESTED
-    mock_illumina_run.sequencer_type = Sequencers.NOVASEQ
-    backup_api.get_first_run.return_value = mock_illumina_run
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    sequencing_run.data_availability = FlowCellStatus.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_sequencing_run_path.return_value = archived_flow_cell
+    backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_sequencing_run(sequencing_run=None)
 
-    # THEN the process to retrieve the flow cell from PDC is started
+    # THEN the process to retrieve the sequencing run from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flow cell is set to "retrieved"
-    assert mock_illumina_run.data_availability == "retrieved"
-
-    # AND status-db is updated with the new status
-    assert mock_store.session.commit.called
+    # AND when done the status of that sequencing run is set to "retrieved"
+    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -372,72 +364,65 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_flow_cell_path"
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
 )
 @mock.patch(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.check_processing"
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_flow_cell"
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_run"
 )
-@mock.patch("cg.meta.tar.tar.TarAPI")
-@mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.store")
-def test_fetch_flow_cell_retrieve_specified_flow_cell(
-    mock_store,
-    mock_flow_cell,
-    mock_tar,
-    mock_get_first_flow_cell,
-    mock_check_processing,
+def test_fetch_sequencing_run_retrieve_specified_run(
+    mock_get_first_run,
+    mock_has_processing_queue_capacity,
     mock_get_archived_key,
-    mock_get_archived_flow_cell,
+    mock_get_archived_sequencing_run,
     mock_create_copy_complete,
     mock_create_rta_complete,
     mock_unlink_files,
     archived_key,
-    archived_flow_cell,
+    archived_illumina_run,
     cg_context,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     caplog,
 ):
-    """Tests the fetch_flow_cell method of the backup API when given a flow cell"""
+    """Tests the fetch_flow_cell method of the backup API when given a sequencing run."""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we want to retrieve a specific flow cell from PDC
+    # GIVEN we want to retrieve a specific sequencing run from PDC
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
-        status_db=mock_store,
-        tar_api=mock_tar,
+        status_db=store_with_illumina_sequencing_data,
+        tar_api=mock.Mock(),
         pdc_service=mock.Mock(),
         sequencing_runs_dir="cg_context.flow_cells_dir",
     )
-    mock_flow_cell.status_db = FlowCellStatus.REQUESTED
-    mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    sequencing_run.data_availability = FlowCellStatus.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_sequencing_run_path.return_value = archived_flow_cell
+    backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_sequencing_run(sequencing_run=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
     # THEN no flow cell is taken form statusdb
-    mock_get_first_flow_cell.assert_not_called()
+    mock_get_first_run.assert_not_called()
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flow cell is set to "retrieved"
-    assert (
-        f"Status for flow cell {mock_flow_cell.name} set to {FlowCellStatus.RETRIEVED}"
-        in caplog.text
-    )
-    assert mock_flow_cell.status_db == "retrieved"
-
-    # AND status-db is updated with the new status
-    assert mock_store.session.commit.called
+    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -453,70 +438,62 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.query_pdc_for_flow_cell"
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.query_pdc_for_sequencing_run"
 )
 @mock.patch(
     "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_flow_cell_path"
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
 )
-@mock.patch("cg.meta.tar.tar.TarAPI")
-@mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.store")
-def test_fetch_flow_cell_integration(
-    mock_store,
-    mock_flow_cell,
-    mock_tar,
-    mock_flow_cell_path,
+def test_fetch_sequencing_run_integration(
+    mock_sequencing_run_path,
     mock_key_path,
     mock_query,
     mock_create_copy_complete,
     mock_create_rta_complete,
     mock_unlink_files,
     cg_context,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     dsmc_q_archive_output,
     caplog,
 ):
-    """Component integration test for the BackupAPI, fetching a specified flow cell"""
+    """Component integration test for the BackupAPI, fetching a specified sequencing run."""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we want to retrieve a specific flow cell from PDC
+    # GIVEN we want to retrieve a specific sequencing run from PDC
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
-        status_db=mock_store,
-        tar_api=mock_tar,
+        status_db=store_with_illumina_sequencing_data,
+        tar_api=mock.Mock(),
         pdc_service=mock.Mock(),
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
-    mock_flow_cell.status_db = FlowCellStatus.REQUESTED
-    mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
-    mock_store.get_flow_cells_by_statuses.return_value.count.return_value = 0
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    sequencing_run.data_availability = FlowCellStatus.REQUESTED
     mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_sequencing_run(sequencing_run=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
-    # THEN the process to retrieve the flow cell from PDC is started
+    # THEN the process to retrieve the sequencing run from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flow cell is set to "retrieved"
-    assert (
-        f"Status for flow cell {mock_flow_cell.name} set to {FlowCellStatus.RETRIEVED}"
-        in caplog.text
-    )
-    assert mock_flow_cell.status_db == "retrieved"
-
-    # AND status-db is updated with the new status
-    assert mock_store.session.commit.called
+    # AND when done the status of that sequencing run is set to "retrieved"
+    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
 
 
-def test_validate_is_flow_cell_backup_possible(
+def test_validate_is_sequencing_run_backup_possible(
     base_store: Store,
     caplog,
     cg_context: CGConfig,
