@@ -7,7 +7,7 @@ import pytest
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
-    RarediseaseObservationsInputFiles
+    RarediseaseObservationsInputFiles,
 )
 
 
