@@ -1,12 +1,17 @@
 import logging
+from pathlib import Path
+
+from housekeeper.store.models import Version
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType
+from cg.constants.constants import AnalysisType, FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
+from cg.io.controller import ReadFile
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import CaseSample, Case
 from cg.utils import Process
 
@@ -94,3 +99,32 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             )
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
+
+    def _get_samples_sex(self, case_obj: Case, hk_version: Version) -> dict:
+        qc_metrics_file = self.get_qcmetrics_file(hk_version)
+        analysis_sexes = self.analysis_sex(qc_metrics_file)
+        samples_sex = {}
+        for link_obj in case_obj.links:
+            sample_id = link_obj.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": link_obj.sample.sex,
+                "analysis": analysis_sexes[sample_id],
+            }
+        return samples_sex
+
+    def analysis_sex(self, qc_metrics_file: Path) -> dict:
+        """Fetch analysis sex for each sample of an analysis."""
+        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        return {
+            sample_id_metric.sample_id: sample_id_metric.predicted_sex
+            for sample_id_metric in qc_metrics.sample_id_metrics
+        }
+
+    @staticmethod
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
+        """Parse the information from a qc metrics file"""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return MIPMetricsDeliverables(**qcmetrics_raw)
+

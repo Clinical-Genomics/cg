@@ -89,9 +89,8 @@ class BalsamicAnalysisTag:
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
-class RarediseaseAnalysisTag:
-    QC_METRICS: list[str] = ["qc-metrics"]
-
+class HkAnalysisMetricsTag:
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
