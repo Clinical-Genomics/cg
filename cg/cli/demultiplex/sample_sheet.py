@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
-from cg.exc import SampleSheetError
+from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     try:
         sample_sheet_api.validate_sample_sheet(Path(sheet))
-    except (SampleSheetError, ValidationError) as error:
+    except (CgError, ValidationError) as error:
         LOG.error("Sample sheet failed validation")
         raise click.Abort from error
     LOG.info("Sample sheet passed validation")
