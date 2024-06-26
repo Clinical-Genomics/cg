@@ -64,5 +64,5 @@ def raredisease_observations_input_files_raw(case_id: str, filled_file: Path) ->
 def raredisease_observations_input_files(
     raredisease_observations_input_files_raw: dict[str, Path],
 ) -> RarediseaseObservationsInputFiles:
-    """Return raw observations input files for rare diseases WES analysis."""
-    return RarediseaseObservationsInputFiles(**mip_dna_observations_input_files_raw)
+    """Return raw observations input files for RAREDISEASE WES analysis."""
+    return RarediseaseObservationsInputFiles(**raredisease_observations_input_files_raw)
