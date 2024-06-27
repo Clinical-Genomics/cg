@@ -127,4 +127,3 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
-

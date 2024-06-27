@@ -11,6 +11,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.store.models import Analysis, Case, Sample
+
 LOG = logging.getLogger(__name__)
 
 
@@ -54,8 +55,8 @@ class UploadGenotypesAPI(object):
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         data["samples_sex"] = analysis_api._get_samples_sex(
-                case_obj=analysis.case, hk_version=hk_version
-            )
+            case_obj=analysis.case, hk_version=hk_version
+        )
         return data
 
     def upload(self, data: dict, replace: bool = False):

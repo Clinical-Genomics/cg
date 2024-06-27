@@ -92,6 +92,7 @@ class BalsamicAnalysisTag:
 class HkAnalysisMetricsTag:
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
+
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
