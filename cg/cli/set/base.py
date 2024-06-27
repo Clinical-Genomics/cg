@@ -290,7 +290,7 @@ def _update_comment(comment, obj):
 )
 @click.argument("flow_cell_id")
 @click.pass_obj
-def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: str | None):
+def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: str):
     """Update data availability information for a sequencing run."""
     status_db: Store = context.status_db
     sequencing_run: IlluminaSequencingRun = (
@@ -299,6 +299,11 @@ def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: 
 
     if not sequencing_run:
         LOG.error(f"Sequencing run with {flow_cell_id} not found")
+        raise click.Abort
+    if not data_availability:
+        LOG.error(
+            f"Please provide a data availability status. Choose from: {SequencingRunDataAvailability.statuses()}"
+        )
         raise click.Abort
     prev_status: str = sequencing_run.data_availability
     sequencing_run.data_availability = data_availability
