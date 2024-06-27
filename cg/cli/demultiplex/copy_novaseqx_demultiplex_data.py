@@ -3,7 +3,6 @@ import os
 import shutil
 from pathlib import Path
 
-
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.io.csv import read_csv, write_csv
 
