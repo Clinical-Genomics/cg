@@ -1,29 +1,5 @@
-from cg.store.models import Case, CaseSample, Flowcell, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
-from tests.meta.demultiplex.conftest import populated_flow_cell_store
-
-
-def test_delete_flow_cell(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, populated_flow_cell_store: Store
-):
-    """Test deleting a flow cell in Store."""
-
-    # GIVEN a database containing a flow cell
-    flow_cell: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
-    )
-
-    assert flow_cell
-
-    # WHEN removing flow cell
-    populated_flow_cell_store.delete_flow_cell(flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id)
-
-    # THEN no entry should be found for the flow cell
-    results: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
-    )
-
-    assert not results
 
 
 def test_store_api_delete_relationships_between_sample_and_cases(

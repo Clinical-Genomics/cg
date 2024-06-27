@@ -3,11 +3,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.base import BaseHandler
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
-from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Case, Sample, SampleLaneSequencingMetrics
 
 
 class DeleteDataHandler(BaseHandler):
@@ -16,18 +12,6 @@ class DeleteDataHandler(BaseHandler):
     def __init__(self, session: Session):
         super().__init__(session=session)
         self.session = session
-
-    def delete_flow_cell(self, flow_cell_id: str) -> None:
-        """Delete flow cell."""
-        flow_cell: Flowcell = apply_flow_cell_filter(
-            flow_cells=self._get_query(table=Flowcell),
-            flow_cell_name=flow_cell_id,
-            filter_functions=[FlowCellFilter.BY_NAME],
-        ).first()
-
-        if flow_cell:
-            self.session.delete(flow_cell)
-            self.session.commit()
 
     def delete_relationships_sample(self, sample: Sample) -> None:
         """Delete relationships between all cases and the provided sample."""
