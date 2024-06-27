@@ -1,4 +1,4 @@
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.store.models import Flowcell, IlluminaSequencingRun
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -8,18 +8,18 @@ def test_update_illumina_sequencing_run_availability(store_with_illumina_sequenc
     # GIVEN a store with Illumina Sequencing Runs that have data availability ON_DISK
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_data_availability(
-            [FlowCellStatus.ON_DISK]
+            [SequencingRunDataAvailability.ON_DISK]
         )[0]
     )
-    assert sequencing_run.data_availability == FlowCellStatus.ON_DISK
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK
 
     # WHEN updating the data availability of a sequencing run
     store_with_illumina_sequencing_data.update_illumina_sequencing_run_data_availability(
-        sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
+        sequencing_run=sequencing_run, data_availability=SequencingRunDataAvailability.REQUESTED
     )
 
     # THEN the data availability of the sequencing run is updated
-    assert sequencing_run.data_availability == FlowCellStatus.REQUESTED
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.REQUESTED
 
 
 def test_update_illumina_sequencing_run_has_backup(store_with_illumina_sequencing_data: Store):

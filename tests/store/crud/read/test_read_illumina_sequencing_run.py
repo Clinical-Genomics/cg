@@ -4,9 +4,9 @@ from datetime import datetime
 
 import pytest
 
-from cg.constants import Workflow, FlowCellStatus
+from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.exc import CgError
-from cg.store.models import IlluminaSequencingRun, Case
+from cg.store.models import Case, IlluminaSequencingRun
 from cg.store.store import Store
 
 
@@ -73,10 +73,10 @@ def test_get_illumina_sequencing_run_by_data_availability(
     # WHEN filtering sequencing runs by data availability
     sequencing_runs: list[IlluminaSequencingRun] = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_data_availability(
-            [FlowCellStatus.ON_DISK]
+            [SequencingRunDataAvailability.ON_DISK]
         )
     )
 
     # THEN the runs with the availability are returned
     for sequencing_run in sequencing_runs:
-        assert sequencing_run.data_availability == FlowCellStatus.ON_DISK
+        assert sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK

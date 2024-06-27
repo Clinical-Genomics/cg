@@ -19,7 +19,7 @@ from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
@@ -648,7 +648,7 @@ class Flowcell(Base):
     sequencer_name: Mapped[Str32 | None]
     sequenced_at: Mapped[datetime | None]
     status: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+        types.Enum(*(status.value for status in SequencingRunDataAvailability)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
@@ -1058,7 +1058,7 @@ class IlluminaSequencingRun(InstrumentRun):
     )
     sequencer_name: Mapped[Str32 | None]
     data_availability: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+        types.Enum(*(status.value for status in SequencingRunDataAvailability)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)

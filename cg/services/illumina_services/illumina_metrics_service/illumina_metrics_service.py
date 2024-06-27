@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -12,8 +12,8 @@ from cg.services.illumina_services.illumina_metrics_service.illumina_demux_versi
     IlluminaDemuxVersionService,
 )
 from cg.services.illumina_services.illumina_metrics_service.models import (
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 
 
@@ -130,7 +130,7 @@ class IlluminaMetricsService:
         return IlluminaSequencingRunDTO(
             sequencer_type=sequencer_type,
             sequencer_name=sequencer_name,
-            data_availability=FlowCellStatus.ON_DISK,
+            data_availability=SequencingRunDataAvailability.ON_DISK,
             archived_at=None,
             has_backup=False,
             total_reads=total_reads,

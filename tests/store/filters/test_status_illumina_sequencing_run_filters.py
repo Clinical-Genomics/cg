@@ -2,12 +2,12 @@
 
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.filters.status_illumina_sequencing_run_filters import (
+    filter_by_data_availability,
     filter_by_device_internal_id,
     filter_by_entry_id,
-    filter_by_data_availability,
 )
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
@@ -69,9 +69,9 @@ def test_filter_by_data_availability(
 
     # WHEN filtering sequencing runs by data availability
     filtered_runs: Query = filter_by_data_availability(
-        runs=sequencing_runs, data_availability=[FlowCellStatus.ON_DISK]
+        runs=sequencing_runs, data_availability=[SequencingRunDataAvailability.ON_DISK]
     )
 
     # THEN the runs with the availability are returned
     for run in filtered_runs:
-        assert run.data_availability == FlowCellStatus.ON_DISK
+        assert run.data_availability == SequencingRunDataAvailability.ON_DISK

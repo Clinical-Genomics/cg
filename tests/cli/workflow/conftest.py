@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FileExtensions, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, FileExtensions, SequencingRunDataAvailability, Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -232,7 +232,7 @@ def mock_analysis_flow_cell(mocker) -> None:
     """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
     on disk."""
     flow_cell = Mock()
-    flow_cell.status = FlowCellStatus.ON_DISK
+    flow_cell.status = SequencingRunDataAvailability.ON_DISK
     mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
     ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
 

@@ -2,9 +2,9 @@
 
 from sqlalchemy.orm import Session
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.store.base import BaseHandler
-from cg.store.models import Flowcell, Order, Sample, IlluminaSequencingRun
+from cg.store.models import Flowcell, IlluminaSequencingRun, Order, Sample
 
 
 class UpdateHandler(BaseHandler):
@@ -30,7 +30,9 @@ class UpdateHandler(BaseHandler):
         return order
 
     def update_illumina_sequencing_run_data_availability(
-        self, sequencing_run: IlluminaSequencingRun, data_availability: FlowCellStatus
+        self,
+        sequencing_run: IlluminaSequencingRun,
+        data_availability: SequencingRunDataAvailability,
     ) -> IlluminaSequencingRun:
         """Update the data availability status of an Illumina sequencing run."""
         sequencing_run.data_availability = data_availability

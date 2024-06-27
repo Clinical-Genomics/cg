@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
@@ -598,12 +598,15 @@ def test_get_flow_cells_by_statuses(
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+        flow_cell_statuses=[
+            SequencingRunDataAvailability.ON_DISK,
+            SequencingRunDataAvailability.REQUESTED,
+        ]
     )
 
     # THEN the flow cell status should be "ondisk"
     for flow_cell in flow_cells:
-        assert flow_cell.status == FlowCellStatus.ON_DISK
+        assert flow_cell.status == SequencingRunDataAvailability.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cells[0].name == novaseq_6000_post_1_5_kits_flow_cell_id
@@ -616,23 +619,29 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_st
 
     # GIVEN a flow cell that exist in status db with status "requested"
     flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
-    flow_cells[0].status = FlowCellStatus.REQUESTED
+    flow_cells[0].status = SequencingRunDataAvailability.REQUESTED
     re_sequenced_sample_store.session.add(flow_cells[0])
     re_sequenced_sample_store.session.commit()
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+        flow_cell_statuses=[
+            SequencingRunDataAvailability.ON_DISK,
+            SequencingRunDataAvailability.REQUESTED,
+        ]
     )
 
     # THEN the flow cell status should be "ondisk" or "requested"
     for flow_cell in flow_cells:
-        assert flow_cell.status in [FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+        assert flow_cell.status in [
+            SequencingRunDataAvailability.ON_DISK,
+            SequencingRunDataAvailability.REQUESTED,
+        ]
 
     # THEN the returned flow cell should have the same status as the ones in the database
-    assert flow_cells[0].status == FlowCellStatus.REQUESTED
+    assert flow_cells[0].status == SequencingRunDataAvailability.REQUESTED
 
-    assert flow_cells[1].status == FlowCellStatus.ON_DISK
+    assert flow_cells[1].status == SequencingRunDataAvailability.ON_DISK
 
 
 def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
@@ -658,7 +667,7 @@ def test_get_flow_cell_by_enquiry_and_status(
 
     # WHEN fetching the latest flow cell
     flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK],
+        flow_cell_statuses=[SequencingRunDataAvailability.ON_DISK],
         name_pattern=novaseq_6000_pre_1_5_kits_flow_cell_id[:4],
     )
 
@@ -666,7 +675,7 @@ def test_get_flow_cell_by_enquiry_and_status(
     assert flow_cell[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
     # THEN the returned flow cell should have the same status as the query
-    assert flow_cell[0].status == FlowCellStatus.ON_DISK
+    assert flow_cell[0].status == SequencingRunDataAvailability.ON_DISK
 
 
 def test_get_samples_from_flow_cell(
@@ -719,14 +728,14 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
         store=base_store,
         flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
-        status=FlowCellStatus.PROCESSING,
+        status=SequencingRunDataAvailability.PROCESSING,
     )
 
     helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         samples=[sample],
-        status=FlowCellStatus.RETRIEVED,
+        status=SequencingRunDataAvailability.RETRIEVED,
     )
 
     # WHEN fetching the latest flow cell
@@ -753,13 +762,13 @@ def test_are_all_flow_cells_on_disk_when_requested(
         store=base_store,
         flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
-        status=FlowCellStatus.REMOVED,
+        status=SequencingRunDataAvailability.REMOVED,
     )
     helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         samples=[sample],
-        status=FlowCellStatus.REQUESTED,
+        status=SequencingRunDataAvailability.REQUESTED,
     )
 
     # WHEN fetching the latest flow cell

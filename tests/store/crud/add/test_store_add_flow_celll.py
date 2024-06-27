@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.sequencing import Sequencers
 from cg.store.models import Flowcell
 from cg.store.store import Store
@@ -24,14 +24,14 @@ def test_add_flowcell(
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
-        flow_cell_status=FlowCellStatus.ON_DISK,
+        flow_cell_status=SequencingRunDataAvailability.ON_DISK,
     )
 
     # THEN flow cell should be returned
     assert flow_cell
 
     # THEN the flow cell status should be "ondisk"
-    assert flow_cell.status == FlowCellStatus.ON_DISK
+    assert flow_cell.status == SequencingRunDataAvailability.ON_DISK
 
 
 def test_add_flowcell_status(
@@ -51,8 +51,8 @@ def test_add_flowcell_status(
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
-        flow_cell_status=FlowCellStatus.PROCESSING,
+        flow_cell_status=SequencingRunDataAvailability.PROCESSING,
     )
 
     # THEN the flow cell status should be "processing"
-    assert flow_cell.status == FlowCellStatus.PROCESSING
+    assert flow_cell.status == SequencingRunDataAvailability.PROCESSING
