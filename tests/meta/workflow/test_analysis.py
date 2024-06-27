@@ -6,7 +6,7 @@ from datetime import datetime
 import mock
 import pytest
 
-from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
+from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
@@ -171,7 +171,7 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -203,7 +203,7 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.REMOVED,
+        status=SequencingRunDataAvailability.REMOVED,
         date=datetime.now(),
     )
 
@@ -216,7 +216,10 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(
         mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
 
     # THEN the flow cell's status should be set to REQUESTED for the case
-    assert analysis_store.get_flow_cell_by_name("flow_cell_test").status == FlowCellStatus.REQUESTED
+    assert (
+        analysis_store.get_flow_cell_by_name("flow_cell_test").status
+        == SequencingRunDataAvailability.REQUESTED
+    )
 
 
 def test_is_case_ready_for_analysis_true(
@@ -233,7 +236,7 @@ def test_is_case_ready_for_analysis_true(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -260,7 +263,7 @@ def test_is_case_ready_for_analysis_decompression_needed(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -290,7 +293,7 @@ def test_is_case_ready_for_analysis_decompression_running(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -325,7 +328,7 @@ def test_prepare_fastq_files_success(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -395,7 +398,7 @@ def test_prepare_fastq_files_does_not_request_miria(
         archived_at=datetime.now(),
         sequencer_type=Sequencers.NOVASEQ,
         samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=FlowCellStatus.ON_DISK,
+        status=SequencingRunDataAvailability.ON_DISK,
         date=datetime.now(),
     )
 
@@ -470,7 +473,8 @@ def test_ensure_files_are_present(
 
 
 @pytest.mark.parametrize(
-    "flow_cell_status, result", [(FlowCellStatus.REMOVED, True), (FlowCellStatus.ON_DISK, False)]
+    "flow_cell_status, result",
+    [(SequencingRunDataAvailability.REMOVED, True), (SequencingRunDataAvailability.ON_DISK, False)],
 )
 def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
     mip_analysis_api: MipDNAAnalysisAPI,

@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from psutil import Process
 
 from cg.cli.backup import backup_illumina_runs, encrypt_illumina_runs, fetch_illumina_run
-from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
+from cg.constants import EXIT_SUCCESS, FileExtensions, SequencingRunDataAvailability
 from cg.exc import IlluminaRunEncryptionError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -276,7 +276,7 @@ def test_run_fetch_sequencing_run_dry_run_no_run_specified(
 
     # GIVEN that there are no Illumina runs set to "requested" in status_db
     assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
-        data_availability=[FlowCellStatus.REQUESTED]
+        data_availability=[SequencingRunDataAvailability.REQUESTED]
     )
 
     # WHEN running the fetch_illumina_run command without specifying any flow cell in dry run mode
@@ -300,7 +300,7 @@ def test_run_fetch_sequencing_run_dry_run_retrieval_time(
 
     # GIVEN that there are no Illumina runs set to "requested" in status_db
     assert not backup_context.status_db.get_illumina_sequencing_runs_by_data_availability(
-        data_availability=[FlowCellStatus.REQUESTED]
+        data_availability=[SequencingRunDataAvailability.REQUESTED]
     )
 
     # GIVEN that the backup api returns a retrieval time

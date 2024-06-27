@@ -7,7 +7,7 @@ from typing import Callable, Iterator, Literal
 
 from sqlalchemy.orm import Query, Session
 
-from cg.constants import FlowCellStatus, Workflow
+from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -541,7 +541,9 @@ class ReadHandler(BaseHandler):
         if not flow_cells:
             LOG.info("No flow cells found")
             return False
-        return all(flow_cell.status == FlowCellStatus.ON_DISK for flow_cell in flow_cells)
+        return all(
+            flow_cell.status == SequencingRunDataAvailability.ON_DISK for flow_cell in flow_cells
+        )
 
     def request_flow_cells_for_case(self, case_id) -> None:
         """Set the status of removed flow cells to REQUESTED for the given case."""
@@ -549,9 +551,11 @@ class ReadHandler(BaseHandler):
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
         for flow_cell in flow_cells:
-            if flow_cell.status == FlowCellStatus.REMOVED:
-                flow_cell.status = FlowCellStatus.REQUESTED
-                LOG.info(f"Setting status for {flow_cell.name} to {FlowCellStatus.REQUESTED}")
+            if flow_cell.status == SequencingRunDataAvailability.REMOVED:
+                flow_cell.status = SequencingRunDataAvailability.REQUESTED
+                LOG.info(
+                    f"Setting status for {flow_cell.name} to {SequencingRunDataAvailability.REQUESTED}"
+                )
         self.session.commit()
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> list[Invoice]:

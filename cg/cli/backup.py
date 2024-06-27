@@ -11,32 +11,29 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import FlowCellStatus
+from cg.constants.constants import SequencingRunDataAvailability
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
+    FlowCellError,
     IlluminaRunAlreadyBackedUpError,
     IlluminaRunEncryptionError,
-    FlowCellError,
     PdcError,
 )
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
-from cg.services.pdc_service.pdc_service import PdcService
-from cg.meta.encryption.encryption import (
-    EncryptionAPI,
-    SpringEncryptionAPI,
-)
-from cg.services.illumina_services.backup_services.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import (
     IlluminaRunDirectoryData,
     get_sequencing_runs_from_path,
 )
-from cg.store.models import Flowcell, Sample, IlluminaSequencingRun
+from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
+from cg.services.pdc_service.pdc_service import PdcService
+from cg.store.models import Flowcell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -172,10 +169,10 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
 
     if not dry_run and sequencing_run:
         LOG.info(
-            f"{sequencing_run}: updating sequencing run data avaliability to {FlowCellStatus.REQUESTED}"
+            f"{sequencing_run}: updating sequencing run data avaliability to {SequencingRunDataAvailability.REQUESTED}"
         )
         status_db.update_illumina_sequencing_run_data_availability(
-            sequencing_run=sequencing_run, data_availability=FlowCellStatus.REQUESTED
+            sequencing_run=sequencing_run, data_availability=SequencingRunDataAvailability.REQUESTED
         )
 
 

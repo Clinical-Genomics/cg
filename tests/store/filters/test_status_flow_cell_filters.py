@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cell_by_name,
     filter_flow_cell_by_name_search,
@@ -118,7 +118,10 @@ def test_get_flow_cells_with_statuses(
     # WHEN getting flow cell
     returned_flow_cell_query: Query = filter_flow_cells_with_statuses(
         flow_cells=base_store._get_query(table=Flowcell),
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.PROCESSING],
+        flow_cell_statuses=[
+            SequencingRunDataAvailability.ON_DISK,
+            SequencingRunDataAvailability.PROCESSING,
+        ],
     )
 
     # THEN a query should be returned
