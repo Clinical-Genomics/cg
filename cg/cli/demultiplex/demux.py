@@ -13,6 +13,10 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     is_ready_for_post_processing,
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
+    is_manifest_file_required,
+    create_manifest_file,
+    is_syncing_complete,
+    is_flow_cell_sync_confirmed,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
