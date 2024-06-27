@@ -67,9 +67,6 @@ class UploadGenotypesAPI(object):
     def _is_variant_file(genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
-    def _get_genotype_files(self, version_id: int) -> list:
-        return self.hk.files(version=version_id, tags=["genotype"]).all()
-
     @staticmethod
     def is_suitable_for_genotype_upload(case_obj: Case) -> bool:
         """Check if a cancer case is contains WGS and normal sample."""

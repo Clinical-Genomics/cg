@@ -725,6 +725,9 @@ class AnalysisAPI(MetaAPI):
             )
         return analysis_types.pop() if analysis_types else None
 
+    def _get_genotype_files(self, version_id: int) -> list:
+        return self.hk.files(version=version_id, tags=["genotype"]).all()
+
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
