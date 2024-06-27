@@ -2,7 +2,8 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.models.orders.constants import ORIGINAL_LAB_ADDRESSES, REGION_CODES, OrderType
+from cg.constants.orderforms import ORIGINAL_LAB_ADDRESSES, REGION_CODES
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
     ContainerEnum,
