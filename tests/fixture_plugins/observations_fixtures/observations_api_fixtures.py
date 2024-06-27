@@ -102,11 +102,11 @@ def raredisease_observations_api(
     raredisease_observations_api.store = analysis_store
     raredisease_observations_api.loqusdb_api = loqusdb_api
 
-    # Mocked case scenario for MIP-DNA uploads
+    # Mocked case scenario for RAREDISEASE uploads
     case: Case = analysis_store.get_case_by_internal_id(case_id)
     case.customer.internal_id = customer.internal_id
 
-    # Mocked Loqusdb API scenario for MIP-DNA uploads
+    # Mocked Loqusdb API scenario for RAREDISEASE uploads
     mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
     mocker.patch.object(
         LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
