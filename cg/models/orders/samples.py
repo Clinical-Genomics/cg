@@ -279,13 +279,13 @@ class SarsCov2Sample(MicrobialSample):
     # 2184 Orderform SARS-COV-2
     # "These fields are required"
     collection_date: str
-    lab_code: str
+    lab_code: str = None
     primer: str
     original_lab: str
-    original_lab_address: str
+    original_lab_address: str = None
     pre_processing_method: str
     region: str
-    region_code: str
+    region_code: str = None
     selection_criteria: str
     volume: str | None
 
