@@ -1,4 +1,4 @@
-"""Commands to finish up after a demultiplex run."""
+"""CLI commands to post-process a demultiplex run."""
 
 import logging
 from pathlib import Path

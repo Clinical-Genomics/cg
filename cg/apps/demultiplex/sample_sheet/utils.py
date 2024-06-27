@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-
+from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
