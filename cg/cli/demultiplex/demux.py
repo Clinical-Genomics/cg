@@ -17,12 +17,6 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import CgError, FlowCellError, SampleSheetContentError
-from cg.meta.demultiplex.utils import (
-    create_manifest_file,
-    is_flow_cell_sync_confirmed,
-    is_manifest_file_required,
-    is_syncing_complete,
-)
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 

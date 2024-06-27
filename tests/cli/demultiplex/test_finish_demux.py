@@ -4,7 +4,7 @@ import logging
 
 from click import testing
 
-from cg.cli.demultiplex.finish import finish_all_cmd, finish_flow_cell
+from cg.cli.demultiplex.finish import post_process_all_illumina_runs, post_process_illumina_run
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
@@ -23,7 +23,7 @@ def test_finish_all_cmd_dry_run(
 
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        finish_all_cmd,
+        post_process_all_illumina_runs,
         ["--dry-run"],
         obj=demultiplex_context,
     )
@@ -49,7 +49,7 @@ def test_finish_flow_cell_dry_run(
 
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        finish_flow_cell,
+        post_process_illumina_run,
         ["--dry-run", novaseq_6000_pre_1_5_kits_flow_cell_full_name],
         obj=demultiplex_context,
     )

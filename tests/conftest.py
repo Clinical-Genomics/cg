@@ -44,7 +44,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.services.illumina_services.backup_services.encrypt_service import (
     IlluminaRunEncryptionService,
 )
@@ -607,25 +606,6 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
-
-
-@pytest.fixture
-def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
-) -> DemuxPostProcessingAPI:
-    api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
-    return api
-
-
-@pytest.fixture
-def updated_demux_post_processing_api(
-    updated_demultiplex_context: CGConfig,
-    tmp_illumina_demultiplexed_flow_cells_directory,
-) -> DemuxPostProcessingAPI:
-    api = DemuxPostProcessingAPI(updated_demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
-    return api
 
 
 @pytest.fixture

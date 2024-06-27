@@ -31,15 +31,25 @@ from cg.services.illumina_services.illumina_post_processing_service.validation i
 )
 from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
+from cg.utils.files import get_directories_in_path
 
 LOG = logging.getLogger(__name__)
 
 
 class IlluminaPostProcessingService:
-    def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI, dry_run: bool) -> None:
+    def __init__(
+        self,
+        status_db: Store,
+        housekeeper_api: HousekeeperAPI,
+        demultiplexed_runs_dir: Path,
+        dry_run: bool,
+        force: bool,
+    ) -> None:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
+        self.demultiplexed_runs_dir = demultiplexed_runs_dir
         self.dry_run: bool = dry_run
+        self.force: bool = force
 
     def store_illumina_flow_cell(
         self,
@@ -144,7 +154,6 @@ class IlluminaPostProcessingService:
     def post_process_illumina_flow_cell(
         self,
         sequencing_run_name: str,
-        demultiplexed_runs_dir: Path,
     ) -> None:
         """Store data for an Illumina demultiplexed run and mark it as ready for delivery.
         This function:
@@ -158,7 +167,7 @@ class IlluminaPostProcessingService:
         """
 
         LOG.info(f"Post-process Illumina run {sequencing_run_name}")
-        demux_run_dir = Path(demultiplexed_runs_dir, sequencing_run_name)
+        demux_run_dir = Path(self.demultiplexed_runs_dir, sequencing_run_name)
         run_directory_data = IlluminaRunDirectoryData(demux_run_dir)
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
         run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
@@ -185,3 +194,22 @@ class IlluminaPostProcessingService:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
             raise
         create_delivery_file_in_flow_cell_directory(demux_run_dir)
+
+    def get_all_demultiplexed_runs(self) -> list[Path]:
+        """Get all demultiplexed Illumina runs."""
+        return get_directories_in_path(self.demultiplexed_runs_dir)
+
+    def post_process_all_runs(self) -> bool:
+        """Post process all demultiplex illumina runs that need it."""
+        demux_dirs = self.get_all_demultiplexed_runs()
+        is_error_raised: bool = False
+        for demux_dir in demux_dirs:
+            try:
+                self.post_process_illumina_flow_cell(demux_dir.name)
+            except Exception as error:
+                LOG.error(
+                    f"Failed to post process demultiplexed Illumina run {demux_dir.name}: {str(error)}"
+                )
+                is_error_raised = True
+                continue
+        return is_error_raised
