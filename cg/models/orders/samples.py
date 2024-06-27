@@ -2,7 +2,7 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.models.orders.order import OrderType
+from cg.models.orders.constants import ORIGINAL_LAB_ADDRESSES, REGION_CODES, OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
     ContainerEnum,
@@ -291,6 +291,14 @@ class SarsCov2Sample(MicrobialSample):
     @validator("lab_code", pre=True, always=True)
     def set_lab_code(cls, value):
         return "SE100 Karolinska"
+
+    @validator("region_code", pre=True, always=True)
+    def set_region_code(cls, value, values):
+        return value if value else REGION_CODES[values["region"]]
+
+    @validator("original_lab_address", pre=True, always=True)
+    def set_original_lab_address(cls, value, values):
+        return value if value else ORIGINAL_LAB_ADDRESSES[values["original_lab"]]
 
 
 def sample_class_for(project: OrderType):
