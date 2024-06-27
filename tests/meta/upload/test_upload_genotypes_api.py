@@ -50,7 +50,7 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
 
 
 def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Path):
-    """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
+    """Test to get the predicted sex from a RAREDISEASE run using the upload Genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex
