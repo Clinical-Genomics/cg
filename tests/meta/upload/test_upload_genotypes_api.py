@@ -16,19 +16,28 @@ from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Analysis
 
 
-@pytest.mark.parametrize(
-    "WorkflowAnalysisAPI",
-    [BalsamicAnalysisAPI, MipDNAAnalysisAPI, RarediseaseAnalysisAPI],
-)
-def test_get_analysis_sex(
-    WorkflowAnalysisAPI: AnalysisAPI,
+def test_get_analysis_sex_mip(
     case_qc_metrics_deliverables: Path,
     genotype_analysis_sex: dict,
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
+    analysis_api: AnalysisAPI = MipDNAAnalysisAPI
 
-    analysis_api: AnalysisAPI = WorkflowAnalysisAPI
+    # WHEN fetching the predicted sex by the analysis
+    sex: dict = analysis_api.analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
+
+    # THEN assert that the the predicted sex per sample_id is returned
+    assert sex == genotype_analysis_sex
+
+
+def test_get_analysis_sex_raredisease(
+    case_qc_metrics_deliverables: Path,
+    genotype_analysis_sex: dict,
+):
+    """Test to get the predicted sex from a MIP run using the upload genotypes API"""
+    # GIVEN an AnalysisAPI and some qcmetrics data
+    analysis_api: AnalysisAPI = RarediseaseAnalysisAPI
     # WHEN fetching the predicted sex by the analysis
     sex: dict = analysis_api.analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
 
@@ -78,7 +87,7 @@ def test_get_bcf_file_mip(
 
     analysis_api: AnalysisAPI = MipDNAAnalysisAPI
     # WHEN fetching the gbcf file with the api
-    gbcf = analysis_api.get_bcf_file(hk_version)
+    gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
@@ -96,7 +105,7 @@ def test_get_bcf_file_raredisease(
     analysis_api: AnalysisAPI = MipDNAAnalysisAPI
 
     # WHEN fetching the gbcf file with the api
-    gbcf = analysis_api.get_bcf_file(hk_version)
+    gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
