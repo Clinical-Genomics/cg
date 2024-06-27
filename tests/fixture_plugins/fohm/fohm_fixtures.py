@@ -9,7 +9,7 @@ from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
 @pytest.fixture
 def fohm_complementary_report_raw() -> dict[str, str]:
-    """Return raw FOHM complementary reports."""
+    """Return a raw FOHM complementary report."""
     return {
         "provnummer": "a_sample_number",
         "urvalskriterium": "a_selection_criteria",
@@ -45,7 +45,7 @@ def fohm_complementary_reports(
 
 @pytest.fixture
 def fohm_pangolin_report_raw() -> dict[str, str]:
-    """Return FOHM Pangolin report."""
+    """Return a raw FOHM Pangolin report."""
     return {
         "taxon": "a_taxon",
         "lineage": "a_lineage",

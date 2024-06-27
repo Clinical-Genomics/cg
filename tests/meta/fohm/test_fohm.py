@@ -16,7 +16,7 @@ def test_create_daily_delivery(fohm_upload_api: FOHMUploadAPI, csv_file_path: Pa
     # THEN each file is a list of dicts where each dict is a row in a CSV file
     assert isinstance(content[0], dict)
 
-    # THEN two files are added a list of dicts
+    # THEN two files are added as a list of dicts
     assert len(content) == 6
 
 
@@ -120,7 +120,7 @@ def test_add_sample_internal_id_to_pangolin_reports(
 def test_add_region_lab_to_reports(
     fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
 ):
-    """Test adding sample internal id to the reports."""
+    """Test adding region lab to the reports."""
     # GIVEN a FOHM upload API
 
     # GIVEN a list of Pangolin reports
@@ -170,7 +170,7 @@ def test_create_complementary_report(
         f"None_{fohm_upload_api.current_datestr}_komplettering{FileExtensions.CSV}",
     )
 
-    # GIVEN that the Pangolin report path does not exist
+    # GIVEN that the complementary report path does not exist
     assert not complementary_report_file.exists()
 
     # WHEN creating reports
