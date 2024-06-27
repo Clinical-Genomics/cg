@@ -85,7 +85,7 @@ def test_get_sars_cov_pangolin_reports(
 
 
 @pytest.fixture
-def test_add_sample_internal_id_complementary_report(
+def test_add_sample_internal_id_to_complementary_reports(
     fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
 ):
     """Test adding sample internal id to the reports."""
@@ -94,14 +94,14 @@ def test_add_sample_internal_id_complementary_report(
     # GIVEN a list of complementary reports
 
     # WHEN adding sample internal id
-    fohm_upload_api.add_sample_internal_id_complementary_report(fohm_complementary_reports)
+    fohm_upload_api.add_sample_internal_id_to_complementary_reports(fohm_complementary_reports)
 
     # THEN a sample internal id has been added
     assert isinstance(fohm_complementary_reports[0].internal_id, str)
 
 
 @pytest.fixture
-def test_add_sample_internal_id_pangolin_report(
+def test_add_sample_internal_id_to_pangolin_reports(
     fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
 ):
     """Test adding sample internal id to the reports."""
@@ -110,7 +110,7 @@ def test_add_sample_internal_id_pangolin_report(
     # GIVEN a list of Pangolin reports
 
     # WHEN adding sample internal id
-    fohm_upload_api.add_sample_internal_id_pangolin_report(fohm_pangolin_reports)
+    fohm_upload_api.add_sample_internal_id_to_pangolin_reports(fohm_pangolin_reports)
 
     # THEN a sample internal id has been added
     assert isinstance(fohm_pangolin_reports[0].internal_id, str)
@@ -150,7 +150,7 @@ def test_create_pangolin_reports_csv(
     assert not pangolin_report_file.exists()
 
     # WHEN creating reports
-    fohm_upload_api.create_pangolin_report_(fohm_pangolin_reports)
+    fohm_upload_api.create_pangolin_report(fohm_pangolin_reports)
 
     # THEN a file with reports id generated
     assert pangolin_report_file.exists()

@@ -167,7 +167,7 @@ class FOHMUploadAPI:
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
         self.daily_report_path.mkdir(parents=True, exist_ok=True)
 
-    def add_sample_internal_id_complementary_report(
+    def add_sample_internal_id_to_complementary_reports(
         self, reports: list[FohmComplementaryReport]
     ) -> None:
         """Add sample internal id to complementary reports."""
@@ -176,7 +176,7 @@ class FOHMUploadAPI:
                 name=report.sample_number
             ).internal_id
 
-    def add_sample_internal_id_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
+    def add_sample_internal_id_to_pangolin_reports(self, reports: list[FohmPangolinReport]) -> None:
         """Add sample internal id to Pangolin reports."""
         for report in reports:
             report.internal_id = self.status_db.get_sample_by_name(name=report.taxon).internal_id
@@ -207,7 +207,7 @@ class FOHMUploadAPI:
                         continue
                     shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
-    def create_pangolin_report_(self, reports: list[FohmPangolinReport]) -> None:
+    def create_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
         unique_region_labs: set[str] = {report.region_lab for report in reports}
         LOG.info(f"Regions in batch: {unique_region_labs}")
@@ -330,7 +330,7 @@ class FOHMUploadAPI:
         case.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.session.commit()
 
-    def parse_write_complementary_report(self) -> list[FohmComplementaryReport]:
+    def parse_and_write_complementary_report(self) -> list[FohmComplementaryReport]:
         """Create and write a complementary report."""
         complementary_reports_raw: list[dict] = self.create_daily_deliveries(
             self.daily_reports_list
@@ -344,7 +344,7 @@ class FOHMUploadAPI:
         complementary_reports: list[FohmComplementaryReport] = (
             self.get_sars_cov_complementary_reports(complementary_reports)
         )
-        self.add_sample_internal_id_complementary_report(complementary_reports)
+        self.add_sample_internal_id_to_complementary_reports(complementary_reports)
         self.add_region_lab_to_reports(complementary_reports)
         self.create_and_write_complementary_report(complementary_reports)
         return complementary_reports
@@ -359,9 +359,9 @@ class FOHMUploadAPI:
         pangolin_reports: list[FohmPangolinReport] = self.get_sars_cov_pangolin_reports(
             pangolin_reports
         )
-        self.add_sample_internal_id_pangolin_report(pangolin_reports)
+        self.add_sample_internal_id_to_pangolin_reports(pangolin_reports)
         self.add_region_lab_to_reports(pangolin_reports)
-        self.create_pangolin_report_(pangolin_reports)
+        self.create_pangolin_report(pangolin_reports)
         return pangolin_reports
 
     def aggregate_delivery(self, cases: list[str]) -> None:
@@ -369,7 +369,7 @@ class FOHMUploadAPI:
         self.set_cases_to_aggregate(cases)
         self.create_daily_delivery_folders()
         complementary_reports: list[FohmComplementaryReport] = (
-            self.parse_write_complementary_report()
+            self.parse_and_write_complementary_report()
         )
         self.link_sample_rawdata_files(complementary_reports)
         pangolin_reports: list[FohmPangolinReport] = self.parse_and_write_pangolin_report()
@@ -379,4 +379,4 @@ class FOHMUploadAPI:
         """Create and write a complementary report."""
         self.set_cases_to_aggregate(cases)
         self.create_daily_delivery_folders()
-        self.parse_write_complementary_report()
+        self.parse_and_write_complementary_report()
