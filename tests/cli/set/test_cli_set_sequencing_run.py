@@ -6,7 +6,7 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.set.base import set_sequencing_run
-from cg.constants import EXIT_SUCCESS, FlowCellStatus
+from cg.constants import EXIT_SUCCESS, SequencingRunDataAvailability
 from cg.models.cg_config import CGConfig
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
@@ -52,7 +52,7 @@ def test_set_sequencing_run_data_availability(
     """Test that the updated sequencing run get the data availability we send in."""
     # GIVEN a database with a sequencing run with a data availability different from 'requested'"
     status_db: Store = new_demultiplex_context.status_db
-    data_availability = FlowCellStatus.statuses()[2]
+    data_availability = SequencingRunDataAvailability.statuses()[2]
     run_before_update: IlluminaSequencingRun = (
         status_db.get_illumina_sequencing_run_by_device_internal_id(novaseq_x_flow_cell_id)
     )

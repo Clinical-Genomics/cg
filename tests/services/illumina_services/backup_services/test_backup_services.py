@@ -7,26 +7,24 @@ from typing import Callable
 
 import mock
 import pytest
-from cg.constants import FileExtensions, FlowCellStatus, EXIT_FAIL
+
+from cg.constants import EXIT_FAIL, FileExtensions, SequencingRunDataAvailability
 from cg.constants.sequencing import Sequencers
 from cg.exc import (
     DsmcAlreadyRunningError,
     IlluminaRunAlreadyBackedUpError,
-    PdcError,
     IlluminaRunEncryptionError,
+    PdcError,
 )
-
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.illumina_services.backup_services.encrypt_service import (
     IlluminaRunEncryptionService,
 )
-from cg.models.cg_config import PDCArchivingDirectory, CGConfig
-
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import Flowcell, IlluminaSequencingRun
 from cg.store.store import Store
 from tests.conftest import create_process_response
-
 from tests.store_helpers import StoreHelpers
 
 
@@ -124,7 +122,7 @@ def test_maximum_processing_queue_full(store_with_illumina_sequencing_data: Stor
         IlluminaSequencingRun
     ).all()
     for sequencing_run in sequencing_runs:
-        sequencing_run.data_availability = FlowCellStatus.PROCESSING
+        sequencing_run.data_availability = SequencingRunDataAvailability.PROCESSING
 
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
@@ -147,7 +145,7 @@ def test_maximum_processing_queue_not_full(store_with_illumina_sequencing_data: 
         IlluminaSequencingRun
     ).all()
     for sequencing_run in sequencing_runs:
-        sequencing_run.data_availability = FlowCellStatus.REQUESTED
+        sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
 
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
@@ -172,7 +170,7 @@ def test_get_first_run_next_requested(
             novaseq_x_flow_cell_id
         )
     )
-    sequencing_run.data_availability = FlowCellStatus.REQUESTED
+    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
 
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
@@ -196,7 +194,7 @@ def test_get_first_run_no_run_requested(store_with_illumina_sequencing_data: Sto
         IlluminaSequencingRun
     ).all()
     for sequencing_run in sequencing_runs:
-        sequencing_run.data_availability = FlowCellStatus.ON_DISK
+        sequencing_run.data_availability = SequencingRunDataAvailability.ON_DISK
 
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
@@ -332,7 +330,7 @@ def test_fetch_sequencing_run_retrieve_next_run(
             novaseq_x_flow_cell_id
         )
     )
-    sequencing_run.data_availability = FlowCellStatus.REQUESTED
+    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
@@ -343,7 +341,7 @@ def test_fetch_sequencing_run_retrieve_next_run(
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that sequencing run is set to "retrieved"
-    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -403,7 +401,7 @@ def test_fetch_sequencing_run_retrieve_specified_run(
             novaseq_x_flow_cell_id
         )
     )
-    sequencing_run.data_availability = FlowCellStatus.REQUESTED
+    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
@@ -417,7 +415,7 @@ def test_fetch_sequencing_run_retrieve_specified_run(
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the data availability of sequencing run is set to "retrieved"
-    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -472,7 +470,7 @@ def test_fetch_sequencing_run_integration(
             novaseq_x_flow_cell_id
         )
     )
-    sequencing_run.data_availability = FlowCellStatus.REQUESTED
+    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
     mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
@@ -482,7 +480,7 @@ def test_fetch_sequencing_run_integration(
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that sequencing run is set to "retrieved"
-    assert sequencing_run.data_availability == FlowCellStatus.RETRIEVED
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0

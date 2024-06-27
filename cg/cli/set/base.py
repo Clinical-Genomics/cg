@@ -10,7 +10,7 @@ import click
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Customer, Flowcell, IlluminaSequencingRun, Sample
@@ -285,7 +285,9 @@ def _update_comment(comment, obj):
 
 
 @set_cmd.command("sequencing-run")
-@click.option("-d", "--data-availability", type=click.Choice(FlowCellStatus.statuses()))
+@click.option(
+    "-d", "--data-availability", type=click.Choice(SequencingRunDataAvailability.statuses())
+)
 @click.argument("flow_cell_id")
 @click.pass_obj
 def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: str | None):

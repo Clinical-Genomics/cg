@@ -5,7 +5,7 @@ import petname
 from sqlalchemy import Insert
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
@@ -266,7 +266,7 @@ class CreateHandler(BaseHandler):
         sequencer_name: str,
         sequencer_type: str,
         date: datetime,
-        flow_cell_status: str | None = FlowCellStatus.ON_DISK,
+        flow_cell_status: str | None = SequencingRunDataAvailability.ON_DISK,
         has_backup: bool | None = False,
     ) -> Flowcell:
         """Build a new Flowcell record."""

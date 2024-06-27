@@ -3,15 +3,13 @@
 import datetime
 import logging
 
-
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
-
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.store.store import Store
 
@@ -37,7 +35,7 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
-        flow_cell.status = FlowCellStatus.ON_DISK
+        flow_cell.status = SequencingRunDataAvailability.ON_DISK
     LOG.info(f"Added samples to flow cell: {parsed_flow_cell.id}.")
     store.session.add(flow_cell)
     store.session.commit()

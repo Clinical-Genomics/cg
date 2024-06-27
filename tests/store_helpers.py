@@ -7,7 +7,7 @@ from pathlib import Path
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, SequencingRunDataAvailability, Workflow
 from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
@@ -760,7 +760,7 @@ class StoreHelpers:
         timestamp_now: datetime = datetime.now(),
         sequencer_type: Sequencers = Sequencers.NOVASEQ,
         sequencer_name: str = "dummy_sequencer",
-        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        data_availability: SequencingRunDataAvailability = SequencingRunDataAvailability.ON_DISK,
         archived_at: datetime = None,
         has_backup: bool | None = False,
     ) -> IlluminaSequencingRun:
@@ -800,7 +800,7 @@ class StoreHelpers:
         flow_cell: IlluminaFlowCell,
         sequencer_type: Sequencers = Sequencers.NOVASEQ,
         sequencer_name: str = "dummy_sequencer",
-        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        data_availability: SequencingRunDataAvailability = SequencingRunDataAvailability.ON_DISK,
         archived_at: datetime = None,
         has_backup: bool | None = False,
     ) -> IlluminaSequencingRun:
