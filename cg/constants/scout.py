@@ -62,6 +62,8 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
+RAREDISEASE_CASE_TAGS: dict = MIP_CASE_TAGS
+
 RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     multiqc_rna={"multiqc-html", "rna"},
     gene_fusion={"arriba-visualisation", "clinical"},

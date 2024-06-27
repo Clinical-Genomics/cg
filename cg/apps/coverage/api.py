@@ -1,6 +1,7 @@
 """Chanjo API"""
 
 import logging
+import requests
 import tempfile
 
 from cg.constants.constants import FileFormat
@@ -87,3 +88,32 @@ class ChanjoAPI:
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ).get(sample_id)
+
+
+class Chanjo2API:
+    """Interface to Chanjo2, the coverage analysis tool"""
+
+    def __init__(self, base_url, config):
+        self.base_url = base_url
+        self.chanjo2_config = config["chanjo2"]["config_path"]
+        self.chanjo2_binary = config["chanjo2"]["binary_path"]
+        self.process = Process(binary=self.chanjo2_binary, config=self.chanjo2_config)
+
+    def get_coverage_statistics(
+        self, coverage_file_path, intervals_bed_path, completeness_thresholds
+    ):
+        endpoint = f"{self.base_url}/coverage/d4/genes/summary"
+        headers = {"accept": "application/json", "Content-Type": "application/json"}
+        payload = {
+            "coverage_file_path": coverage_file_path,
+            "intervals_bed_path": intervals_bed_path,
+            "completeness_thresholds": completeness_thresholds,
+        }
+
+        response = requests.post(endpoint, headers=headers, json=payload)
+        response.raise_for_status()
+
+        return ReadStream.get_content_from_stream(file_format="json", stream=response.json())
+
+    def sample_coverage(self, sample_id, panel_genes):
+        pass

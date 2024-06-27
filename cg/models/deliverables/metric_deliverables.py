@@ -103,6 +103,12 @@ class MeanInsertSize(SampleMetric):
         return int(value)
 
 
+class rdmetric(SampleMetric):
+    """Definition of median target coverage"""
+
+    value: int
+
+
 class MedianTargetCoverage(SampleMetric):
     """Definition of median target coverage"""
 

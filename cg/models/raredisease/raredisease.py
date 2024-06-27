@@ -2,19 +2,16 @@ from enum import StrEnum
 
 from pydantic import BaseModel
 
+from cg.models.qc_metrics import QCMetrics
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
-class RarediseaseQCMetrics(BaseModel):
+class RarediseaseQCMetrics(QCMetrics):
     """Raredisease QC metrics"""
 
-    percentage_mapped_reads: float | None
-    pct_target_bases_10x: float | None
-    median_target_coverage: float | None
-    pct_pf_reads_aligned: float | None
-    pct_pf_reads_improper_pairs: float | None
-    pct_adapter: float | None
-    fraction_duplicates: float | None
+    percentage_mapped_reads: float
+    predicted_sex: float
+    fraction_duplicates: float
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):

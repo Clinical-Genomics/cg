@@ -6,6 +6,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
     MipDNASampleMetadataModel,
+    RarediseaseSampleMetadataModel,
     RnafusionSampleMetadataModel,
     TaxprofilerSampleMetadataModel,
     TomteSampleMetadataModel,
@@ -108,6 +109,7 @@ class SampleModel(BaseModel):
         MipDNASampleMetadataModel
         | BalsamicTargetedSampleMetadataModel
         | BalsamicWGSSampleMetadataModel
+        | RarediseaseSampleMetadataModel
         | RnafusionSampleMetadataModel
         | TaxprofilerSampleMetadataModel
         | TomteSampleMetadataModel
