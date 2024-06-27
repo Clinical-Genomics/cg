@@ -13,14 +13,14 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Workflow", "Version"]
 FAMILY_HEADERS = ["Case", "Name", "Customer", "Priority", "Panels", "Action"]
-FLOW_CELL_HEADERS = [
+SEQUENCING_RUN_HEADERS = [
     "Flowcell",
     "Type",
     "Sequencer",
     "Sequencing started",
     "Sequencing finished",
     "Archived?",
-    "Status",
+    "Data availability",
 ]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
@@ -203,7 +203,7 @@ def get_sequencing_run(context: click.Context, samples: bool, flow_cell_id: str)
         sequencing_run.archived_at.date() if sequencing_run.archived_at else "No",
         sequencing_run.data_availability,
     ]
-    click.echo(tabulate([row], headers=FLOW_CELL_HEADERS, tablefmt="psql"))
+    click.echo(tabulate([row], headers=SEQUENCING_RUN_HEADERS, tablefmt="psql"))
     if samples:
         sample_ids: list[str] = [
             metric.sample.internal_id for metric in sequencing_run.sample_metrics

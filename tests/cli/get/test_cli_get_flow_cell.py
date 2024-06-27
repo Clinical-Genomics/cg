@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from cg.cli.get import get
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store.models import Flowcell, IlluminaFlowCell, IlluminaSequencingRun, Sample
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -23,7 +23,7 @@ def test_get_sequencing_run_wrong_device_id(cli_runner: CliRunner, base_context:
     assert result.exit_code == EXIT_FAIL
 
 
-def test_get_flow_cell_required(
+def test_get_sequencing_run_required(
     cli_runner: CliRunner,
     new_demultiplex_context: CGConfig,
     novaseq_x_flow_cell_id: str,
