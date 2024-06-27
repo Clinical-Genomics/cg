@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.base import BaseHandler
-from cg.store.models import Case, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Case, Sample
 
 
 class DeleteDataHandler(BaseHandler):
@@ -26,16 +26,4 @@ class DeleteDataHandler(BaseHandler):
             case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
             if case and not case.links:
                 self.session.delete(case)
-        self.session.commit()
-
-    def delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str
-    ) -> None:
-        """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
-        metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
-        for metric in metrics:
-            if metric:
-                self.session.delete(metric)
         self.session.commit()
