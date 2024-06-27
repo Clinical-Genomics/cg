@@ -105,6 +105,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
@@ -427,14 +428,14 @@ def demultiplexing_context_for_demux(
 @pytest.fixture
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
-    real_housekeeper_api: HousekeeperAPI,
+    illumina_demultiplexed_runs_post_proccesing_hk_api: HousekeeperAPI,
     cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
+    cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_proccesing_hk_api
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
