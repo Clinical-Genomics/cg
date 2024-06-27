@@ -430,10 +430,14 @@ def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
     illumina_demultiplexed_runs_post_proccesing_hk_api: HousekeeperAPI,
     cg_context: CGConfig,
+    tmp_illumina_demultiplexed_runs_directory: Path,
     store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
+        tmp_illumina_demultiplexed_runs_directory.as_posix()
+    )
     cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_proccesing_hk_api
     cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
