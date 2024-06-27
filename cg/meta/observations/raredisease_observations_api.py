@@ -78,7 +78,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def load_observations(self, case: Case) -> None:
         """
-        Load observation counts to Loqusdb for a MIP-DNA case.
+        Load observation counts to Loqusdb for a case.
 
         Raises:
             LoqusdbDuplicateRecordError: If case has already been uploaded.
