@@ -18,7 +18,7 @@ def illumina_demultiplexed_runs_post_proccesing_hk_api(
 ) -> HousekeeperAPI:
     """Return a Housekeeper API instance with Illumina demultiplexed runs."""
     for flow_cell_id in sample_sheet_paths_canonical_illumina_runs.keys():
-        sample_sheet_path = sample_sheet_paths_canonical_illumina_runs[flow_cell_id]
+        sample_sheet_path: Path = sample_sheet_paths_canonical_illumina_runs[flow_cell_id]
         run_sample_sheet_bundle: dict = {
             "name": flow_cell_id,
             "created": datetime.now(),
@@ -33,7 +33,7 @@ def illumina_demultiplexed_runs_post_proccesing_hk_api(
         }
         helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=run_sample_sheet_bundle)
 
-        sample_ids = tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs[
+        sample_ids: list[str] = tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs[
             flow_cell_id
         ].keys()
         for sample_id in sample_ids:
@@ -53,5 +53,4 @@ def illumina_demultiplexed_runs_post_proccesing_hk_api(
                 ],
             }
             helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=bundle_data)
-
     return real_housekeeper_api

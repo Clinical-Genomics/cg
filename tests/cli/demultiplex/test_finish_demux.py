@@ -13,6 +13,7 @@ def test_post_process_all_cmd_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
+    novaseq_x_flow_cell_id: str,
 ):
     caplog.set_level(logging.INFO)
 
