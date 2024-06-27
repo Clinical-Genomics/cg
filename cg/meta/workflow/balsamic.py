@@ -670,4 +670,3 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "analysis": Sex.UNKNOWN,
             }
         return samples_sex
-

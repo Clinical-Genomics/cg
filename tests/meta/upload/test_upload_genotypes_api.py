@@ -1,4 +1,5 @@
 """Tests for the upload genotypes api"""
+
 import pytest
 from _pytest.fixtures import FixtureRequest
 
@@ -14,12 +15,17 @@ from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Analysis
 
+
 @pytest.mark.parametrize(
     "WorkflowAnalysisAPI",
     [BalsamicAnalysisAPI, MipDNAAnalysisAPI, RarediseaseAnalysisAPI],
 )
-def test_get_analysis_sex(WorkflowAnalysisAPI: AnalysisAPI,
-case_qc_metrics_deliverables: Path, genotype_analysis_sex: dict, request: FixtureRequest):
+def test_get_analysis_sex(
+    WorkflowAnalysisAPI: AnalysisAPI,
+    case_qc_metrics_deliverables: Path,
+    genotype_analysis_sex: dict,
+    request: FixtureRequest,
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
 
@@ -59,7 +65,12 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Pa
     assert isinstance(metrics_object, list[MetricsBase])
 
 
-def test_get_bcf_file_mip(upload_genotypes_api: UploadGenotypesAPI, analysis_api: MipDNAAnalysisAPI, case_id: str, timestamp: datetime):
+def test_get_bcf_file_mip(
+    upload_genotypes_api: UploadGenotypesAPI,
+    analysis_api: MipDNAAnalysisAPI,
+    case_id: str,
+    timestamp: datetime,
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
@@ -70,7 +81,13 @@ def test_get_bcf_file_mip(upload_genotypes_api: UploadGenotypesAPI, analysis_api
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
 
-def test_get_bcf_file_raredisease(upload_genotypes_api: UploadGenotypesAPI, analysis_api: RarediseaseAnalysisAPI, case_id: str, timestamp: datetime):
+
+def test_get_bcf_file_raredisease(
+    upload_genotypes_api: UploadGenotypesAPI,
+    analysis_api: RarediseaseAnalysisAPI,
+    case_id: str,
+    timestamp: datetime,
+):
     """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)

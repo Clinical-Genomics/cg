@@ -177,4 +177,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
-
