@@ -209,11 +209,11 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.RAREDISEASE: [
         ["vcf-snv-clinical"],
         ["vcf-snv-research"],
-        ["vcf-str"],  # not unique, problem? (also in addition to mitochondria)
-        ["vcf-snv"],  # -> ["snv-gbcf", "snv-bcf"],
+        ["vcf-str"],
+        ["vcf-snv"],
         ["qc-metrics"],
         ["smn-calling"],
-        ["vcf-sv"],  # ->["sv-bcf"],
+        ["vcf-sv"],
         ["vcf-sv-clinical"],
         ["vcf-sv-research"],
         ["vcf2cytosure"],
