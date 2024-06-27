@@ -1,4 +1,4 @@
-"""Test CLI functions to get flow cells in the Status database."""
+"""Test CLI function to get sequencing runs from StatusDB."""
 
 from datetime import datetime
 

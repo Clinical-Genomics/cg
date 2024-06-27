@@ -295,7 +295,7 @@ def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: 
         status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
     )
 
-    if sequencing_run is None:
+    if not sequencing_run:
         LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
     prev_status: str = sequencing_run.data_availability
