@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Workflow", "Version"]
 FAMILY_HEADERS = ["Case", "Name", "Customer", "Priority", "Panels", "Action"]
 SEQUENCING_RUN_HEADERS = [
-    "Flowcell",
+    "Flow Cell",
     "Type",
     "Sequencer",
     "Sequencing started",
