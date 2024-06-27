@@ -31,7 +31,6 @@ def illumina_post_postprocessing_service(
         status_db=store,
         housekeeper_api=illumina_demultiplexed_runs_post_proccesing_hk_api,
         dry_run=False,
-        force=False,
         demultiplexed_runs_dir=Path(tmp_illumina_demultiplexed_runs_directory),
     )
 

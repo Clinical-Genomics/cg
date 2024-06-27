@@ -21,6 +21,7 @@ from cg.services.illumina_services.illumina_post_processing_service.housekeeper_
     add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     store_undetermined_fastq_files,
+    delete_sequencing_data_from_housekeeper,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     combine_sample_metrics_with_undetermined,
@@ -43,13 +44,11 @@ class IlluminaPostProcessingService:
         housekeeper_api: HousekeeperAPI,
         demultiplexed_runs_dir: Path,
         dry_run: bool,
-        force: bool,
     ) -> None:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.demultiplexed_runs_dir = demultiplexed_runs_dir
         self.dry_run: bool = dry_run
-        self.force: bool = force
 
     def store_illumina_flow_cell(
         self,
@@ -213,3 +212,11 @@ class IlluminaPostProcessingService:
                 is_error_raised = True
                 continue
         return is_error_raised
+
+    def delete_sequencing_run_data(self, flow_cell_id: str):
+        """Delete sequencing run entries from Housekeeper and StatusDB."""
+        try:
+            self.status_db.delete_illumina_flow_cell(flow_cell_id=flow_cell_id)
+        except ValueError:
+            LOG.warning(f"Flow cell {flow_cell_id} not found in StatusDB.")
+        delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
