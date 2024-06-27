@@ -50,7 +50,7 @@ def mip_dna_observations_input_files(
 
 
 @pytest.fixture
-def raredisease_observations_input_files_raw(case_id: str, filled_file: Path) -> dict[str, Path]:
+def raredisease_observations_input_files_raw(case_id: str, filled_file: Path) -> dict[str, Path | None]:
     """Return raw observations input files for RAREDISEASE."""
     return {
         "family_ped_path": filled_file,

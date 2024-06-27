@@ -18,7 +18,6 @@ def test_is_sample_type_eligible_for_observations_upload(
     case_id: str, raredisease_observations_api: RarediseaseObservationsAPI
 ):
     """Test if the sample type is eligible for observation uploads."""
-
     # GIVEN a case without tumor samples and a RAREDISEASE observations API
     case: Case = raredisease_observations_api.store.get_case_by_internal_id(case_id)
 

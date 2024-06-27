@@ -78,7 +78,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def load_observations(self, case: Case) -> None:
         """
-        Load observation counts to Loqusdb for a MIP-DNA case.
+        Load observation counts to Loqusdb for a case.
 
         Raises:
             LoqusdbDuplicateRecordError: If case has already been uploaded.
@@ -106,7 +106,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             hard_threshold=RarediseaseLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=RarediseaseLoadParameters.SOFT_THRESHOLD.value,
         )
-        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
+        loqusdb_id = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
