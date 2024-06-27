@@ -76,8 +76,9 @@ def test_get_bcf_file_mip(
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
+    analysis_api: AnalysisAPI = MipDNAAnalysisAPI
     # WHEN fetching the gbcf file with the api
-    gbcf = MipDNAAnalysisAPI.get_bcf_file(hk_version)
+    gbcf = analysis_api.get_bcf_file(hk_version)
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
@@ -92,8 +93,10 @@ def test_get_bcf_file_raredisease(
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
+    analysis_api: AnalysisAPI = MipDNAAnalysisAPI
+
     # WHEN fetching the gbcf file with the api
-    gbcf = RarediseaseAnalysisAPI.get_bcf_file(hk_version)
+    gbcf = analysis_api.get_bcf_file(hk_version)
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
