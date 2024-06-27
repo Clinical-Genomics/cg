@@ -12,7 +12,7 @@ from tests.store_helpers import StoreHelpers
 @pytest.fixture(scope="function")
 def illumina_demultiplexed_runs_post_proccesing_hk_api(
     sample_sheet_paths_canonical_illumina_runs: dict[str, Path],
-    tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs: dict[str, list[Path]],
+    tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs: dict[str, list[Path]],
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
 ) -> HousekeeperAPI:
@@ -33,11 +33,11 @@ def illumina_demultiplexed_runs_post_proccesing_hk_api(
         }
         helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=run_sample_sheet_bundle)
 
-        sample_ids: list[str] = tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs[
+        sample_ids: list[str] = tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs[
             flow_cell_id
         ].keys()
         for sample_id in sample_ids:
-            tmp_fastq_path: Path = tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs[
+            tmp_fastq_path: Path = tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs[
                 flow_cell_id
             ][sample_id]
             bundle_data: dict = {

@@ -747,7 +747,7 @@ def tmp_novaseq_x_fastq_path(
 
 
 @pytest.fixture
-def tmp_fastq_files_for_all_canocial_illumina_demultiplexed_runs(
+def tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs(
     tmp_novaseq_x_fastq_path: list[Path],
     novaseq_x_flow_cell_id: str,
     tmp_hiseq_x_single_index_fastq_path: list[Path],
