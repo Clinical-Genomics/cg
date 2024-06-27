@@ -21,6 +21,7 @@ from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBu
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
+from cg.meta.upload.scout.tomte_config_builder import TomteConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
@@ -54,7 +55,7 @@ class UploadScoutAPI:
         self.housekeeper = hk_api
         self.scout_api = scout_api
         self.madeline_api = madeline_api
-        self.mip_analysis_api = analysis_api
+        self.analysis_api = analysis_api
         self.lims = lims_api
         self.status_db = status_db
 
@@ -416,19 +417,25 @@ class UploadScoutAPI:
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Workflow.TOMTE: TomteConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                analysis_api=self.analysis_api,
+                lims_api=self.lims,
             ),
         }
 

@@ -64,6 +64,7 @@ class AnalysisTag(StrEnum):
 
     ARRIBA: str = "arriba"
     ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    CLINICAL: str = "clinical"
     FUSION: str = "fusion"
     FUSIONCATCHER: str = "fusioncatcher"
     FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
@@ -74,7 +75,9 @@ class AnalysisTag(StrEnum):
     MULTIQC_HTML: str = "multiqc-html"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SNV: str = "snv"
     STARFUSION: str = "star-fusion"
+    VCF: str = "vcf"
     VCF_FUSION: str = "vcf-fusion"
 
 
