@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from cg.constants import SequencingRunDataAvailability
 from cg.store.base import BaseHandler
-from cg.store.models import Flowcell, IlluminaSequencingRun, Order, Sample
+from cg.store.models import IlluminaSequencingRun, Order, Sample
 
 
 class UpdateHandler(BaseHandler):
