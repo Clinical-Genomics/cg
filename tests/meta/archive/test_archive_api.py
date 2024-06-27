@@ -111,7 +111,7 @@ def test_convert_into_transfer_data(
         return_value=123,
     ):
         # WHEN calling the corresponding archive method
-        data_flow_client: ArchiveHandler = ARCHIVE_HANDLERS[ArchiveLocations.KAROLINSKA_BUCKET](
+        data_flow_client: ArchiveHandler = ARCHIVE_HANDLERS[ArchiveLocations.KAROLINSKA_HOSPITAL](
             config=ddn_dataflow_config
         )
     # WHEN using it to instantiate the correct class
@@ -202,7 +202,7 @@ def test_archive_all_non_archived_spring_files(
                 sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
                     file.version.bundle.name
                 )
-                if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
+                if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_HOSPITAL:
                     assert file.archive
     else:
         mock_request_submitter.assert_not_called()
@@ -497,7 +497,7 @@ def test_delete_file_raises_http_error(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = spring_archive_api.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL}
     ).first()
     spring_file_path: str = spring_file.path
     if not spring_file.archive:
@@ -539,7 +539,7 @@ def test_delete_file_success(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = spring_archive_api.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL}
     ).first()
     spring_file_id: int = spring_file.id
     if not spring_file.archive:

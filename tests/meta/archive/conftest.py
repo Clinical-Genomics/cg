@@ -231,7 +231,7 @@ def archive_store(
         invoice_reference="Sherlock Holmes",
         name="Sherlock Holmes",
         is_clinical=True,
-        data_archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
+        data_archive_location=ArchiveLocations.KAROLINSKA_HOSPITAL,
     )
     customer_without_ddn: Customer = base_store.add_customer(
         internal_id="CustWithoutDDN",
@@ -312,13 +312,13 @@ def spring_archive_api(
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowClient.
     Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them."""
     populated_housekeeper_api.add_tags_if_non_existent(
-        tag_names=[ArchiveLocations.KAROLINSKA_BUCKET]
+        tag_names=[ArchiveLocations.KAROLINSKA_HOSPITAL]
     )
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
         if spring_file.version.bundle.name == sample_id:
             spring_file.tags.append(
-                populated_housekeeper_api.get_tag(name=ArchiveLocations.KAROLINSKA_BUCKET)
+                populated_housekeeper_api.get_tag(name=ArchiveLocations.KAROLINSKA_HOSPITAL)
             )
 
     populated_housekeeper_api.commit()
@@ -361,7 +361,7 @@ def archive_context(
     customer = helpers.ensure_customer(
         store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
     )
-    customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+    customer.data_archive_location = ArchiveLocations.KAROLINSKA_HOSPITAL
 
     base_context.status_db.add_sample(
         name="sample_with_spring_files",
@@ -376,12 +376,12 @@ def archive_context(
     real_housekeeper_api.add_file(
         path=path_to_spring_file_to_archive,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL],
     )
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL],
     )
     file.id = 1234
     real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
