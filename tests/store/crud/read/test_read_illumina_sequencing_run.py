@@ -67,7 +67,6 @@ def test_get_latest_illumina_sequencing_run_for_nipt_case_fail(
 def test_get_illumina_sequencing_run_by_data_availability(
     store_with_illumina_sequencing_data: Store,
 ):
-
     # GIVEN a store with Illumina Sequencing Runs with data availability
 
     # WHEN filtering sequencing runs by data availability
@@ -80,3 +79,19 @@ def test_get_illumina_sequencing_run_by_data_availability(
     # THEN the runs with the availability are returned
     for sequencing_run in sequencing_runs:
         assert sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK
+
+
+def test_get_illumina_sequencing_run_by_data_availability_non_existetnt_status(
+    store_with_illumina_sequencing_data: Store,
+):
+    # GIVEN a store with Illumina Sequencing Runs with data availability
+
+    # WHEN filtering sequencing runs by data availability
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_data_availability(
+            ["non_existent_status"]
+        )
+    )
+
+    # THEN no runs are returned
+    assert not sequencing_runs

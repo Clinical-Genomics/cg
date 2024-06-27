@@ -1,4 +1,4 @@
-from cg.store.models import Case, CaseSample, Flowcell, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
