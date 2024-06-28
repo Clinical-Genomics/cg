@@ -50,7 +50,6 @@ from cg.store.models import (
     ApplicationLimitations,
     Case,
     Customer,
-    Flowcell,
     IlluminaSequencingRun,
     Pool,
     Sample,
@@ -360,19 +359,21 @@ def parse_pool(pool_id):
 
 
 @BLUEPRINT.route("/flowcells")
-def parse_flow_cells() -> Any:
-    """Return flow cells."""
-    flow_cells: list[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[request.args.get("status")],
-        name_pattern=request.args.get("enquiry"),
+def parse_sequencing_runs() -> Any:
+    """Return Illumina sequencing runs."""
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        db.get_illumina_sequencing_runs_by_data_availability_and_id_pattern(
+            data_availability=[request.args.get("status")],
+            pattern=request.args.get("enquiry"),
+        )
     )
-    parsed_flow_cells: list[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
-    return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
+    parsed_runs: list[dict] = [run.to_dict() for run in sequencing_runs[:50]]
+    return jsonify(flowcells=parsed_runs, total=len(sequencing_runs))
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
-def parse_flow_cell(flowcell_id):
-    """Return a single sequencing run."""
+def parse_illumina_sequencing_run(flowcell_id):
+    """Return a single Illumina sequencing run."""
     sequencing_run: IlluminaSequencingRun = db.get_sequencing_run_by_id(flowcell_id)
     if sequencing_run is None:
         return abort(HTTPStatus.NOT_FOUND)
