@@ -108,7 +108,7 @@ def test_store_api_delete_non_existing_case(
 
 
 def test_delete_illumina_flow_cell(
-    store_with_illumina_sequencing_data: Store, novaseq_x_flow_cell_id
+    store_with_illumina_sequencing_data: Store, novaseq_x_flow_cell_id: str
 ):
     # GIVEN a store containing an Illumina flow cell and sequencing data
     flow_cell: IlluminaFlowCell = (
