@@ -183,7 +183,10 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
-        self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
+        try:
+            self.delete_sequencing_run_data(run_directory_data.id)
+        except ValueError:
+            LOG.warning(f"Flow cell {run_directory_data.id} not found in StatusDB.")
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
             self.store_sequencing_data_in_housekeeper(
@@ -216,8 +219,5 @@ class IlluminaPostProcessingService:
 
     def delete_sequencing_run_data(self, flow_cell_id: str):
         """Delete sequencing run entries from Housekeeper and StatusDB."""
-        try:
-            self.status_db.delete_illumina_flow_cell(flow_cell_id=flow_cell_id)
-        except ValueError:
-            LOG.warning(f"Flow cell {flow_cell_id} not found in StatusDB.")
+        self.status_db.delete_illumina_flow_cell(flow_cell_id)
         delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
