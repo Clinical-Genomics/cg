@@ -53,7 +53,7 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
     """Rare disease observations files analysis tags."""
 
     SNV_VCF: str = "vcf-snv"
-    SV_VCF: str = "vcf-sv-research"
+    SV_VCF: str = "vcf-sv"
     FAMILY_PED: str = "pedigree"
 
 

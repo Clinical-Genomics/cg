@@ -29,7 +29,6 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.fastq import FastqFileMeta
 from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
