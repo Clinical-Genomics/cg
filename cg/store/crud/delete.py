@@ -27,3 +27,12 @@ class DeleteDataHandler(BaseHandler):
             if case and not case.links:
                 self.session.delete(case)
         self.session.commit()
+
+    def delete_illumina_flow_cell(self, internal_id: str):
+        """Delete an Illumina flow cell."""
+        flow_cell = self.get_illumina_flow_cell_by_internal_id(internal_id=internal_id)
+        if flow_cell:
+            self.session.delete(flow_cell)
+            self.session.commit()
+        else:
+            raise ValueError(f"Illumina flow cell with internal id {internal_id} not found.")
