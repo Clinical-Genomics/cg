@@ -403,7 +403,7 @@ def get_sequencing_metrics(flow_cell_name: str):
         SequencingMetricsRequest.model_validate(metric, from_attributes=True)
         for metric in sequencing_metrics
     ]
-    return jsonify([metric.to_dict() for metric in metrics_dtos])
+    return jsonify([metric.model_dump() for metric in metrics_dtos])
 
 
 @BLUEPRINT.route("/analyses")
