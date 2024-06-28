@@ -47,6 +47,7 @@ from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpd
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
+from cg.server.dto.sequencing_metrics import SequencingMetricsRequest
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.store.models import (
     Analysis,
@@ -398,8 +399,10 @@ def get_sequencing_metrics(flow_cell_name: str):
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             HTTPStatus.NOT_FOUND,
         )
-
-    return jsonify([metric.to_dict() for metric in sequencing_metrics])
+    metrics_dtos: list[SequencingMetricsRequest] = [
+        SequencingMetricsRequest.from_orm(metric) for metric in sequencing_metrics
+    ]
+    return jsonify([metric.to_dict() for metric in metrics_dtos])
 
 
 @BLUEPRINT.route("/analyses")
