@@ -1048,13 +1048,6 @@ class InstrumentRun(Base):
         "polymorphic_on": "type",
     }
 
-    def to_dict(self, samples: bool = False):
-        """Represent as dictionary"""
-        data = to_dict(model_instance=InstrumentRun)
-        if samples:
-            data["samples"] = [sample.to_dict() for sample in self.device.samples]
-        return data
-
 
 class IlluminaSequencingRun(InstrumentRun):
     __tablename__ = "illumina_sequencing_run"
