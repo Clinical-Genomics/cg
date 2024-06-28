@@ -10,6 +10,7 @@ import click
 from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
@@ -727,6 +728,9 @@ class AnalysisAPI(MetaAPI):
 
     def _get_genotype_files(self, version_id: int) -> list:
         return self.hk.files(version=version_id, tags=["genotype"]).all()
+
+    def _is_variant_file(genotype_file: File):
+        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
