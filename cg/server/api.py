@@ -358,28 +358,6 @@ def parse_pool(pool_id):
     return jsonify(**pool.to_dict())
 
 
-@BLUEPRINT.route("/flowcells")
-def parse_sequencing_runs() -> Any:
-    """Return Illumina sequencing runs."""
-    sequencing_runs: list[IlluminaSequencingRun] = (
-        db.get_illumina_sequencing_runs_by_data_availability_and_id_pattern(
-            data_availability=[request.args.get("status")],
-            pattern=request.args.get("enquiry"),
-        )
-    )
-    parsed_runs: list[dict] = [run.to_dict() for run in sequencing_runs[:50]]
-    return jsonify(flowcells=parsed_runs, total=len(sequencing_runs))
-
-
-@BLUEPRINT.route("/flowcells/<flowcell_id>")
-def parse_illumina_sequencing_run(flowcell_id):
-    """Return a single Illumina sequencing run."""
-    sequencing_run: IlluminaSequencingRun = db.get_sequencing_run_by_id(flowcell_id)
-    if sequencing_run is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    return jsonify(**sequencing_run.to_dict(samples=True))
-
-
 @BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""

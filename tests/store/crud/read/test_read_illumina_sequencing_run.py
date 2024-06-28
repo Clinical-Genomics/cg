@@ -95,27 +95,3 @@ def test_get_illumina_sequencing_run_by_data_availability_non_existetnt_status(
 
     # THEN no runs are returned
     assert not sequencing_runs
-
-
-def test_get_illumina_sequencing_runs_by_data_availability_and_id_pattern(
-    store_with_illumina_sequencing_data: Store,
-    novaseq_x_flow_cell_id: str,
-    seven_canonical_flow_cells: list[IlluminaSequencingRun],
-):
-    # GIVEN a store with Illumina Sequencing Runs for canonical flow cells
-    store: Store = store_with_illumina_sequencing_data
-
-    # GIVEN a pattern present in most of the flow cell ids
-    pattern: str = "H"
-
-    # WHEN getting sequencing runs by data availability and by device internal id pattern
-    sequencing_runs: list[IlluminaSequencingRun] = (
-        store.get_illumina_sequencing_runs_by_data_availability_and_id_pattern(
-            data_availability=[SequencingRunDataAvailability.ON_DISK],
-            pattern=pattern,
-        )
-    )
-
-    # THEN the filtered runs are returned
-    for sequencing_run in sequencing_runs:
-        assert pattern in sequencing_run.device.internal_id

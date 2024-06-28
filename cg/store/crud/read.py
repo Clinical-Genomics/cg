@@ -473,20 +473,6 @@ class ReadHandler(BaseHandler):
             filter_functions=[IlluminaSequencingRunFilter.WITH_DATA_AVAILABILITY],
         ).all()
 
-    def get_illumina_sequencing_runs_by_data_availability_and_id_pattern(
-        self, data_availability: list[str], pattern: str
-    ):
-        """Return Illumina sequencing runs with supplied data statuses and id pattern."""
-        return apply_illumina_sequencing_run_filter(
-            runs=self._get_query(table=IlluminaSequencingRun),
-            filter_functions=[
-                IlluminaSequencingRunFilter.WITH_DATA_AVAILABILITY,
-                IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID_SEARCH,
-            ],
-            data_availability=data_availability,
-            id_search=pattern,
-        ).all()
-
     def get_flow_cells_by_case(self, case: Case) -> list[Flowcell] | None:
         """Return flow cells for a case."""
         return apply_flow_cell_filter(
