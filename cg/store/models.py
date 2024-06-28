@@ -998,7 +998,7 @@ class RunDevice(Base):
             {
                 sample_run_metric.sample
                 for run in self.instrument_runs
-                for sample_run_metric in run.sample_run_metrics
+                for sample_run_metric in run.sample_metrics
             }
         )
 
