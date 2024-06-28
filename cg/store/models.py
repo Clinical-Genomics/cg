@@ -992,7 +992,7 @@ class RunDevice(Base):
     )
 
     @property
-    def _samples(self) -> list[Sample]:
+    def samples(self) -> list[Sample]:
         """Return the samples sequenced in this device."""
         return list(
             {
@@ -1047,6 +1047,13 @@ class InstrumentRun(Base):
     __mapper_args__ = {
         "polymorphic_on": "type",
     }
+
+    def to_dict(self, samples: bool = False):
+        """Represent as dictionary"""
+        data = to_dict(model_instance=InstrumentRun)
+        if samples:
+            data["samples"] = [sample.to_dict() for sample in self.device.samples]
+        return data
 
 
 class IlluminaSequencingRun(InstrumentRun):

@@ -37,12 +37,8 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -51,14 +47,15 @@ from cg.server.ext import db, delivery_message_service, lims, order_service, ost
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Case,
     Customer,
     Flowcell,
+    IlluminaSequencingRun,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -375,11 +372,11 @@ def parse_flow_cells() -> Any:
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
-    """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
-    if flow_cell is None:
+    """Return a single sequencing run."""
+    sequencing_run: IlluminaSequencingRun = db.get_sequencing_run_by_id(flowcell_id)
+    if sequencing_run is None:
         return abort(HTTPStatus.NOT_FOUND)
-    return jsonify(**flow_cell.to_dict(samples=True))
+    return jsonify(**sequencing_run.to_dict(samples=True))
 
 
 @BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
