@@ -37,12 +37,8 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -52,14 +48,14 @@ from cg.server.ext import db, delivery_message_service, lims, order_service, ost
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Case,
     Customer,
-    Flowcell,
+    IlluminaSequencingRun,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -361,26 +357,6 @@ def parse_pool(pool_id):
     if not g.current_user.is_admin and (pool.customer not in g.current_user.customers):
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**pool.to_dict())
-
-
-@BLUEPRINT.route("/flowcells")
-def parse_flow_cells() -> Any:
-    """Return flow cells."""
-    flow_cells: list[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[request.args.get("status")],
-        name_pattern=request.args.get("enquiry"),
-    )
-    parsed_flow_cells: list[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
-    return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
-
-
-@BLUEPRINT.route("/flowcells/<flowcell_id>")
-def parse_flow_cell(flowcell_id):
-    """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
-    if flow_cell is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    return jsonify(**flow_cell.to_dict(samples=True))
 
 
 @BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])

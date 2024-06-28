@@ -589,26 +589,6 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
-def test_get_flow_cell_by_enquiry_and_status(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
-):
-    """Test returning the latest flow cell from the database by enquiry and status."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[SequencingRunDataAvailability.ON_DISK],
-        name_pattern=novaseq_6000_pre_1_5_kits_flow_cell_id[:4],
-    )
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
-
-    # THEN the returned flow cell should have the same status as the query
-    assert flow_cell[0].status == SequencingRunDataAvailability.ON_DISK
-
-
 def test_get_samples_from_flow_cell(
     novaseq_6000_pre_1_5_kits_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
 ):

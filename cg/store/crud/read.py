@@ -473,21 +473,6 @@ class ReadHandler(BaseHandler):
             filter_functions=[IlluminaSequencingRunFilter.WITH_DATA_AVAILABILITY],
         ).all()
 
-    def get_flow_cell_by_name_pattern_and_status(
-        self, flow_cell_statuses: list[str], name_pattern: str
-    ) -> list[Flowcell]:
-        """Return flow cell by name pattern and status."""
-        filter_functions: list[FlowCellFilter] = [
-            FlowCellFilter.WITH_STATUSES,
-            FlowCellFilter.BY_NAME_SEARCH,
-        ]
-        return apply_flow_cell_filter(
-            flow_cells=self._get_query(table=Flowcell),
-            name_search=name_pattern,
-            flow_cell_statuses=flow_cell_statuses,
-            filter_functions=filter_functions,
-        ).all()
-
     def get_flow_cells_by_case(self, case: Case) -> list[Flowcell] | None:
         """Return flow cells for a case."""
         return apply_flow_cell_filter(

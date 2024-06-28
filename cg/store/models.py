@@ -992,13 +992,13 @@ class RunDevice(Base):
     )
 
     @property
-    def _samples(self) -> list[Sample]:
+    def samples(self) -> list[Sample]:
         """Return the samples sequenced in this device."""
         return list(
             {
                 sample_run_metric.sample
                 for run in self.instrument_runs
-                for sample_run_metric in run.sample_run_metrics
+                for sample_run_metric in run.sample_metrics
             }
         )
 
