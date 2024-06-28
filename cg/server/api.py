@@ -51,11 +51,11 @@ from cg.store.models import (
     ApplicationLimitations,
     Case,
     Customer,
-    IlluminaSequencingRun,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -364,19 +364,33 @@ def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
-    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-        db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    sequencing_metrics: list[IlluminaSampleSequencingMetrics] = (
+        db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_name).sample_metrics
     )
     if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             HTTPStatus.NOT_FOUND,
         )
-    metrics_dtos: list[SequencingMetricsRequest] = [
-        SequencingMetricsRequest.model_validate(metric, from_attributes=True)
-        for metric in sequencing_metrics
-    ]
+    metrics_dtos: list[SequencingMetricsRequest] = parse_metrics_into_request(sequencing_metrics)
     return jsonify([metric.model_dump() for metric in metrics_dtos])
+
+
+def parse_metrics_into_request(
+    metrics: list[IlluminaSampleSequencingMetrics],
+) -> list[SequencingMetricsRequest]:
+    """Parse  sequencing metrics into a request."""
+    parsed_metrics: list[SequencingMetricsRequest] = []
+    for metric in metrics:
+        parsed_metric = SequencingMetricsRequest(
+            flow_cell_name=metric.instrument_run.device.internal_id,
+            flow_cell_lane_number=metric.flow_cell_lane,
+            sample_internal_id=metric.sample.internal_id,
+            sample_total_reads_in_lane=metric.total_reads_in_lane,
+            sample_base_percentage_passing_q30=metric.base_passing_q30_percent,
+        )
+        parsed_metrics.append(parsed_metric)
+    return parsed_metrics
 
 
 @BLUEPRINT.route("/analyses")

@@ -1,6 +1,6 @@
 """DTO for the sequencing metrics."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SequencingMetricsRequest(BaseModel):
