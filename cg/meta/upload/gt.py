@@ -44,7 +44,7 @@ class UploadGenotypesAPI(object):
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
-        hk_bcf = AnalysisAPI.get_bcf_file(hk_version_obj=hk_version)
+        hk_bcf = AnalysisAPI.get_bcf_file(self, hk_version_obj=hk_version)
         data = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             analysis_api = BalsamicAnalysisAPI
@@ -63,9 +63,6 @@ class UploadGenotypesAPI(object):
         """Upload data about genotypes for a family of samples."""
         self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
 
-    @staticmethod
-    def _is_variant_file(genotype_file: File):
-        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     @staticmethod
     def is_suitable_for_genotype_upload(case_obj: Case) -> bool:

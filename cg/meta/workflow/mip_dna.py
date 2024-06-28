@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import Version
-
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
