@@ -8,7 +8,11 @@ from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetEntry, TomteSampleSheetHeaders
+from cg.models.tomte.tomte import (
+    TomteParameters,
+    TomteSampleSheetEntry,
+    TomteSampleSheetHeaders,
+)
 from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -62,8 +66,8 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             sample=case_sample.sample
         )
         sample_sheet_entry = TomteSampleSheetEntry(
-            case_id=case_sample.case.internal_id,
-            name=case_sample.sample.internal_id,
+            case=case_sample.case.name,
+            name=case_sample.sample.name,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             strandedness=Strandedness.REVERSE,

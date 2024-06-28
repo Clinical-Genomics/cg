@@ -13,7 +13,7 @@ from cg.utils.utils import replace_non_alphanumeric
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
     """Tomte sample model is used when building the sample sheet."""
 
-    case_id: str
+    case: str
     strandedness: Strandedness
 
     @property
@@ -22,7 +22,7 @@ class TomteSampleSheetEntry(NextflowSampleSheetEntry):
         each list represents a line in the final file."""
         return [
             [
-                self.case_id,
+                self.case,
                 self.name,
                 fastq_forward_read_path,
                 fastq_reverse_read_path,
@@ -35,7 +35,7 @@ class TomteSampleSheetEntry(NextflowSampleSheetEntry):
 
 
 class TomteSampleSheetHeaders(StrEnum):
-    case_id: str = "case"
+    case: str = "case"
     name: str = "sample"
     fastq_1: str = "fastq_1"
     fastq_2: str = "fastq_2"
