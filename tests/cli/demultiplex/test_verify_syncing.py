@@ -1,10 +1,10 @@
-import os
 import shutil
 from pathlib import Path
 
 from cg.cli.demultiplex.demux import create_manifest_files
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.io.csv import read_csv
+from cg.utils.files import get_all_files_in_directory_tree
 
 
 def test_create_manifest_files_true(
@@ -106,12 +106,3 @@ def assert_manifest_file_contains_all_files(
         Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
     ]
     assert all(file in files_in_manifest for file in all_files_in_directory)
-
-
-def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
-    """Get the relative paths of all files in a directory and its subdirectories."""
-    files_in_directory: list[Path] = []
-    for subdir, _, files in os.walk(directory):
-        subdir = Path(subdir).relative_to(directory)
-        files_in_directory.extend([Path(subdir, file) for file in files])
-    return files_in_directory
