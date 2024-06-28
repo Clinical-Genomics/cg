@@ -1322,24 +1322,6 @@ def test_get_illumina_sequencing_run_by_device_internal_id(
     assert run.device.internal_id == novaseq_x_flow_cell_id
 
 
-def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting sequencing metrics for a flow cell
-    metrics: list[SampleLaneSequencingMetrics] = (
-        store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-            flow_cell_name=flow_cell_name
-        )
-    )
-
-    # THEN assert that the metrics are returned
-    assert metrics
-    for metric in metrics:
-        assert metric.flow_cell_name == flow_cell_name
-
-
 def test_case_with_name_exists(
     store_with_case_and_sample_with_reads: Store, downsample_case_internal_id: str
 ):
