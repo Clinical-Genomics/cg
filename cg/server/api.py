@@ -45,17 +45,17 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
+from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationLimitations,
     Case,
     Customer,
-    IlluminaSequencingRun,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
+    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -364,18 +364,15 @@ def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
-    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-        db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    sequencing_metrics: list[IlluminaSampleSequencingMetrics] = (
+        db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_name).sample_metrics
     )
     if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             HTTPStatus.NOT_FOUND,
         )
-    metrics_dtos: list[SequencingMetricsRequest] = [
-        SequencingMetricsRequest.model_validate(metric, from_attributes=True)
-        for metric in sequencing_metrics
-    ]
+    metrics_dtos: list[SequencingMetricsRequest] = parse_metrics_into_request(sequencing_metrics)
     return jsonify([metric.model_dump() for metric in metrics_dtos])
 
 
