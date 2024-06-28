@@ -4,7 +4,6 @@ import logging
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
     LOQUSDB_ID,
@@ -18,7 +17,6 @@ from cg.constants.sequencing import SequencingMethod
 from cg.exc import (
     CaseNotFoundError,
     LoqusdbDuplicateRecordError,
-    LoqusdbUploadCaseError,
 )
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.observations.observations_api import ObservationsAPI
@@ -36,8 +34,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig):
         self.analysis_api = RarediseaseAnalysisAPI(config)
-        super().__init__(config, analysis_api=self.analysis_api)
+        super().__init__(config=config, analysis_api=self.analysis_api)
         self.loqusdb_api = None
+
 
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
@@ -144,4 +143,4 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             raise CaseNotFoundError
         self.loqusdb_api.delete_case(case_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
-        LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
+        LOG.info(f"Removed observations for case {case_id} from {repr(self.loqusdb_api)}")
