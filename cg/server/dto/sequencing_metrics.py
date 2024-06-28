@@ -9,6 +9,3 @@ class SequencingMetricsRequest(BaseModel):
     sample_internal_id: str
     sample_total_reads_in_lane: int
     sample_base_percentage_passing_q30: float
-
-    class Config:
-        orm_mode = True

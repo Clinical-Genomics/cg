@@ -400,7 +400,8 @@ def get_sequencing_metrics(flow_cell_name: str):
             HTTPStatus.NOT_FOUND,
         )
     metrics_dtos: list[SequencingMetricsRequest] = [
-        SequencingMetricsRequest.from_orm(metric) for metric in sequencing_metrics
+        SequencingMetricsRequest.model_validate(metric, from_attributes=True)
+        for metric in sequencing_metrics
     ]
     return jsonify([metric.to_dict() for metric in metrics_dtos])
 
