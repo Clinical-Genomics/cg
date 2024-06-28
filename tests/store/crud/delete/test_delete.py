@@ -1,4 +1,4 @@
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample, IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 
 
@@ -105,3 +105,40 @@ def test_store_api_delete_non_existing_case(
     remaining_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
 
     assert len(remaining_cases) == len(existing_cases)
+
+
+def test_delete_illumina_flow_cell(
+    store_with_illumina_sequencing_data: Store, novaseq_x_flow_cell_id
+):
+    # GIVEN a store containing an Illumina flow cell and sequencing data
+    flow_cell: IlluminaFlowCell = (
+        store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+
+    assert flow_cell
+    assert sequencing_run
+
+    # WHEN deleting the flow cell
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(novaseq_x_flow_cell_id)
+
+    # THEN the flow cell should no longer be found in the store
+    deleted_flow_cell: IlluminaFlowCell = (
+        store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    deleted_sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+
+    assert not deleted_flow_cell
+    assert not deleted_sequencing_run

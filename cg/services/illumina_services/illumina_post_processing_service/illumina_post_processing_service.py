@@ -183,6 +183,7 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
+        self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
             self.store_sequencing_data_in_housekeeper(
