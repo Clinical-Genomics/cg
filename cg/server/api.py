@@ -47,6 +47,7 @@ from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpd
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
+from cg.server.dto.sequencing_metrics.sequencing_metrics import SequencingMetricsRequest
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.store.models import (
     Analysis,
@@ -385,21 +386,21 @@ def parse_flow_cell(flowcell_id):
 @BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
-
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
-
     sequencing_metrics: list[SampleLaneSequencingMetrics] = (
         db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
     )
-
     if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             HTTPStatus.NOT_FOUND,
         )
-
-    return jsonify([metric.to_dict() for metric in sequencing_metrics])
+    metrics_dtos: list[SequencingMetricsRequest] = [
+        SequencingMetricsRequest.model_validate(metric, from_attributes=True)
+        for metric in sequencing_metrics
+    ]
+    return jsonify([metric.model_dump() for metric in metrics_dtos])
 
 
 @BLUEPRINT.route("/analyses")
