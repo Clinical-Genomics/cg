@@ -1,6 +1,6 @@
 """Tests for the sequencing metrics dtos."""
 
-from cg.server.dto.sequencing_metrics.sequencing_metrics import SequencingMetricsRequest
+from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.store.store import Store
 
