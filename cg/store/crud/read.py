@@ -418,18 +418,9 @@ class ReadHandler(BaseHandler):
         case: Case = self.get_case_by_internal_id(case_internal_id)
         if case.data_analysis != Workflow.FLUFFY:
             raise CgError(f"Case {case_internal_id} is not a NIPT case")
-        samples_on_case: list[Sample] = case.samples
-        sample_metrics: list[SampleRunMetrics] = []
-        for sample in samples_on_case:
-            sample_metrics.extend(sample.sample_run_metrics)
-        sequencing_runs: list[IlluminaSequencingRun] = [
-            apply_illumina_sequencing_run_filter(
-                runs=self._get_query(IlluminaSequencingRun),
-                filter_functions=[IlluminaSequencingRunFilter.BY_ENTRY_ID],
-                entry_id=sample_metric.instrument_run_id,
-            ).first()
-            for sample_metric in sample_metrics
-        ]
+        sequencing_runs: list[IlluminaSequencingRun] = self.get_illumina_sequencing_runs_by_case(
+            case.internal_id
+        )
         return max(sequencing_runs, key=lambda run: run.sequencing_completed_at)
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
@@ -477,16 +468,36 @@ class ReadHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-    def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
-        """Check if flow cells are on disk for sample before starting the analysis."""
-        flow_cells: list[Flowcell] | None = self.get_flow_cells_by_case(
-            case=self.get_case_by_internal_id(internal_id=case_id)
+    def get_illumina_sequencing_runs_by_case(
+        self, case_id: str
+    ) -> list[IlluminaSequencingRun] | None:
+        """Get all Illumina sequencing runs for a case."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        samples_on_case: list[Sample] = case.samples
+        sample_metrics: list[SampleRunMetrics] = []
+        for sample in samples_on_case:
+            sample_metrics.extend(sample.sample_run_metrics)
+        sequencing_runs: list[IlluminaSequencingRun] = [
+            apply_illumina_sequencing_run_filter(
+                runs=self._get_query(IlluminaSequencingRun),
+                filter_functions=[IlluminaSequencingRunFilter.BY_ENTRY_ID],
+                entry_id=sample_metric.instrument_run_id,
+            ).first()
+            for sample_metric in sample_metrics
+        ]
+        return sequencing_runs
+
+    def are_all_illumina_runs_on_disk(self, case_id: str) -> bool:
+        """Check if Illumina runs are on disk for sample before starting the analysis."""
+        sequencing_runs: list[IlluminaSequencingRun] | None = (
+            self.get_illumina_sequencing_runs_by_case(case_id)
         )
-        if not flow_cells:
-            LOG.info("No flow cells found")
+        if not sequencing_runs:
+            LOG.info("No sequencing runs found")
             return False
         return all(
-            flow_cell.status == SequencingRunDataAvailability.ON_DISK for flow_cell in flow_cells
+            sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK
+            for sequencing_run in sequencing_runs
         )
 
     def request_flow_cells_for_case(self, case_id) -> None:

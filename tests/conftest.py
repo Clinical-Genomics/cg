@@ -1327,6 +1327,28 @@ def store_with_illumina_sequencing_data(
 
 
 @pytest.fixture
+def store_with_illumina_sequencing_data_on_disk(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: list[str],
+    helpers: StoreHelpers,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
+) -> Store:
+    """Store with illumina sequencing data for run on disk tests."""
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(
+        novaseq_6000_pre_1_5_kits_flow_cell_id
+    )
+    helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+        run_directory_data=novaseq_6000_pre_1_5_kits_flow_cell,
+        sample_ids=[selected_novaseq_6000_pre_1_5_kits_sample_ids[0]],
+        case_ids=[selected_novaseq_x_case_ids[0]],
+        store=store_with_illumina_sequencing_data,
+    )
+    return store_with_illumina_sequencing_data
+
+
+@pytest.fixture
 def re_sequenced_sample_illumina_data_store(
     store_with_illumina_sequencing_data: Store,
     sample_id_sequenced_on_multiple_flow_cells: str,

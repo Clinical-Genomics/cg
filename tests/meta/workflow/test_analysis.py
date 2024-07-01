@@ -156,24 +156,16 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
     )
 
 
-def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
+def test_ensure_illumina_runs_on_disk_does_not_request_runs(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    store_with_illumina_sequencing_data_on_disk: Store,
+    helpers: StoreHelpers,
+    selected_novaseq_x_case_ids: list[str],
 ):
     """Tests that ensure_flow_cells_on_disk does not perform any action
     when is_flow_cell_check_applicable returns True and all flow cells are ON_DISK already."""
 
     # GIVEN a case
-    case: Case = analysis_store.get_cases()[0]
-
-    helpers.add_flow_cell(
-        analysis_store,
-        flow_cell_name="flow_cell_test",
-        archived_at=datetime.now(),
-        sequencer_type=Sequencers.NOVASEQ,
-        samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=SequencingRunDataAvailability.ON_DISK,
-        date=datetime.now(),
-    )
 
     # WHEN _is_flow_cell_check_available returns True and the attached flow cell is ON_DISK
     with mock.patch.object(
@@ -183,7 +175,7 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
     ), mock.patch.object(
         Store, "request_flow_cells_for_case", return_value=None
     ) as request_checker:
-        mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
+        mip_analysis_api.ensure_flow_cells_on_disk(selected_novaseq_x_case_ids[0])
 
     # THEN flow cells should not be requested for the case
     assert request_checker.call_count == 0

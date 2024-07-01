@@ -585,7 +585,7 @@ class AnalysisAPI(MetaAPI):
                 "the case is either down sampled or external."
             )
             return
-        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
+        if not self.status_db.are_all_illumina_runs_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
@@ -604,7 +604,7 @@ class AnalysisAPI(MetaAPI):
         """Checks whether we need to retrieve files from an external data location."""
         if self._is_flow_cell_check_applicable(
             case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+        ) and not self.status_db.are_all_illumina_runs_on_disk(case_id):
             LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
             return True
         else:
