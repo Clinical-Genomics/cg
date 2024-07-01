@@ -192,7 +192,7 @@ def test_store_demultiplexed_flow_cell(
     sample: Sample = real_populated_compress_context.status_db.get_sample_by_internal_id(sample_id)
 
     # GIVEN samples objects on a flow cell
-    mocker.patch.object(Store, "get_samples_from_flow_cell")
+    mocker.patch.object(Store, "get_samples_by_illumina_flow_cell_internal_id")
     Store.get_samples_by_illumina_flow_cell_internal_id.return_value = [sample]
 
     # GIVEN an updated metadata file
