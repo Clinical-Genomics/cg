@@ -77,7 +77,7 @@ def store_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) ->
     """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
 
     status_db: Store = context.obj.status_db
-    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell_internal_id(flow_cell_id)
+    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell(flow_cell_id)
     stored_individuals: int = invoke_store_samples(
         context=context, dry_run=dry_run, sample_ids=[sample.internal_id for sample in samples]
     )
@@ -108,7 +108,7 @@ def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry
     status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell_internal_id(flow_cell_id)
+    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell(flow_cell_id)
     bundle_names: list[str] = (
         [sample.internal_id for sample in samples if sample.internal_id] + [flow_cell_id]
         if samples

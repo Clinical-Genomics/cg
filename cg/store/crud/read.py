@@ -471,9 +471,7 @@ class ReadHandler(BaseHandler):
             case=case,
         ).all()
 
-    def get_samples_by_illumina_flow_cell_internal_id(
-        self, flow_cell_id: str
-    ) -> list[Sample] | None:
+    def get_samples_by_illumina_flow_cell(self, flow_cell_id: str) -> list[Sample] | None:
         """Return samples present on an Illumina flow cell."""
         sequencing_run: IlluminaSequencingRun = (
             self.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=flow_cell_id)
@@ -1068,7 +1066,7 @@ class ReadHandler(BaseHandler):
         object_to_filter: dict[str, Callable] = {
             "sample": self.get_sample_by_internal_id,
             "case": self.get_samples_by_case_id,
-            "flow_cell": self.get_samples_by_illumina_flow_cell_internal_id,
+            "flow_cell": self.get_samples_by_illumina_flow_cell,
         }
         samples: Sample | list[Sample] = object_to_filter[object_type](identifier)
         return samples if isinstance(samples, list) else [samples]

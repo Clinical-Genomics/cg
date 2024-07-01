@@ -73,10 +73,10 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
             case_ids: list[str] = [link_obj.case.internal_id for link_obj in existing_sample.links]
             context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
-            for sample_flow_cell in existing_sample.flow_cells:
-                LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
+            for sample_flow_cell in existing_sample.run_devices:
+                LOG.debug(f"Get info on flow cell: {sample_flow_cell.internal_id}")
                 context.invoke(
-                    get_sequencing_run, flow_cell_id=sample_flow_cell.name, samples=False
+                    get_sequencing_run, flow_cell_id=sample_flow_cell.internal_id, samples=False
                 )
 
 

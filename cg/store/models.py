@@ -857,7 +857,7 @@ class Sample(Base, PriorityMixin):
         return f"Ordered {self.ordered_at.date()}"
 
     @property
-    def _run_devices(self) -> list["RunDevice"]:
+    def run_devices(self) -> list["RunDevice"]:
         """Return the run_devices a sample has been sequenced on."""
         return list({metric.instrument_run.device for metric in self._sample_run_metrics})
 
