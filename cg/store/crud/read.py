@@ -45,7 +45,6 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
     apply_illumina_sequencing_run_filter,
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
@@ -73,7 +72,6 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     SampleRunMetrics,
     User,
 )
@@ -360,22 +358,6 @@ class ReadHandler(BaseHandler):
             name=sample_name,
         ).first()
 
-    def get_number_of_reads_for_sample_passing_q30_threshold(
-        self, sample_internal_id: str, q30_threshold: int
-    ) -> int:
-        """Get number of reads above q30 threshold for sample from sample lane sequencing metrics."""
-        total_reads_query: Query = apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[
-                SequencingMetricsFilter.TOTAL_READ_COUNT_FOR_SAMPLE,
-                SequencingMetricsFilter.ABOVE_Q30_THRESHOLD,
-            ],
-            sample_internal_id=sample_internal_id,
-            q30_threshold=q30_threshold,
-        )
-        reads_count: int | None = total_reads_query.scalar()
-        return reads_count if reads_count else 0
-
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int
     ) -> IlluminaSampleSequencingMetrics:
@@ -431,18 +413,6 @@ class ReadHandler(BaseHandler):
             for sample_metric in sample_metrics
         ]
         return max(sequencing_runs, key=lambda run: run.sequencing_completed_at)
-
-    def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        self, flow_cell_name: str, sample_internal_id: str, lane: int
-    ) -> SampleLaneSequencingMetrics:
-        """Get metrics entry by flow cell name, sample internal id and lane."""
-        return apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[SequencingMetricsFilter.BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE],
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
-            lane=lane,
-        ).first()
 
     # TODO: Remove this function. It has been replaced by get_illumina_sequencing_run_by_device_internal_id
     def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell | None:
