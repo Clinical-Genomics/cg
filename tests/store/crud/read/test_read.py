@@ -535,7 +535,7 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the flow cells
-    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
+    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell).all()
 
     # THEN a flow cells should be returned
     assert flow_cells
@@ -589,20 +589,25 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
-def test_get_samples_from_flow_cell(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
+def test_get_samples_from_illumina_flow_cell_internal_id(
+    novaseq_x_flow_cell_id: str, store_with_illumina_sequencing_data: Store
 ):
-    """Test returning samples present on the latest flow cell from the database."""
+    """Test getting samples from an Illumina flow cell by internal ID"""
+    # GIVEN a store with an Illumina flow cell and samples
 
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the samples from the latest flow cell
-    samples: list[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
-        flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id
+    # WHEN fetching the samples from the flow cell
+    samples: list[Sample] = (
+        store_with_illumina_sequencing_data.get_samples_by_illumina_flow_cell_internal_id(
+            flow_cell_id=novaseq_x_flow_cell_id
+        )
     )
 
-    # THEN the returned sample id should have the same id as the one in the database
-    assert samples[0].internal_id == sample_id
+    # THEN a list of samples should be returned
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN the samples should be from the flow cell
+    assert samples[0]._run_devices[0].internal_id == novaseq_x_flow_cell_id
 
 
 def test_is_all_flow_cells_on_disk_when_no_flow_cell(
@@ -664,7 +669,6 @@ def test_are_all_flow_cells_on_disk_when_requested(
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
-    request,
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
@@ -769,7 +773,7 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 def test_get_application_limitations_by_tag(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag."""
 
     # GIVEN a store with some application limitations
@@ -794,7 +798,7 @@ def test_get_application_limitation_by_tag_and_workflow(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     workflow: Workflow = Workflow.MIP_DNA,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag and workflow."""
 
     # GIVEN a store with some application limitations

@@ -471,11 +471,15 @@ class ReadHandler(BaseHandler):
             case=case,
         ).all()
 
-    def get_samples_from_flow_cell(self, flow_cell_id: str) -> list[Sample] | None:
-        """Return samples present on flow cell."""
-        flow_cell: Flowcell = self.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
-        if flow_cell:
-            return flow_cell.samples
+    def get_samples_by_illumina_flow_cell_internal_id(
+        self, flow_cell_id: str
+    ) -> list[Sample] | None:
+        """Return samples present on an Illumina flow cell."""
+        sequencing_run: IlluminaSequencingRun = (
+            self.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=flow_cell_id)
+        )
+        if sequencing_run:
+            return sequencing_run.device.samples
 
     def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis."""
@@ -1058,6 +1062,16 @@ class ReadHandler(BaseHandler):
             samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).first()
+
+    def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
+        """Return all samples from a flow cell, case or sample id"""
+        object_to_filter: dict[str, Callable] = {
+            "sample": self.get_sample_by_internal_id,
+            "case": self.get_samples_by_case_id,
+            "flow_cell": self.get_samples_by_illumina_flow_cell_internal_id,
+        }
+        samples: Sample | list[Sample] = object_to_filter[object_type](identifier)
+        return samples if isinstance(samples, list) else [samples]
 
     def get_samples_by_internal_id(self, internal_id: str) -> list[Sample]:
         """Return all samples by lims id."""

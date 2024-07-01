@@ -28,13 +28,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    FileFormat,
-    GenomeVersion,
-    Strandedness,
-)
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -44,9 +38,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.services.illumina_services.backup_services.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -63,21 +54,24 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
+    Application,
+    ApplicationVersion,
     Bed,
     BedVersion,
     Case,
     Customer,
+    IlluminaSequencingRun,
     Order,
     Organism,
     Sample,
-    IlluminaSequencingRun,
-    Application,
-    ApplicationVersion,
 )
 from cg.store.store import Store
 from cg.utils import Process
@@ -440,20 +434,6 @@ def demultiplex_context(
     )
     cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_proccesing_hk_api
     cg_context.status_db_ = store_with_illumina_sequencing_data
-    return cg_context
-
-
-@pytest.fixture
-def updated_demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI,
-    real_housekeeper_api: HousekeeperAPI,
-    cg_context: CGConfig,
-    updated_store_with_demultiplexed_samples: Store,
-) -> CGConfig:
-    """Return cg context with a demultiplex context."""
-    cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = updated_store_with_demultiplexed_samples
     return cg_context
 
 
@@ -1279,26 +1259,6 @@ def store_with_demultiplexed_samples(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=hiseq_x_dual_index_flow_cell_id,
-        )
-    return store
-
-
-@pytest.fixture
-def updated_store_with_demultiplexed_samples(
-    store: Store,
-    helpers: StoreHelpers,
-    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
-    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
-) -> Store:
-    """Return a store with the 7 canonical flow cells with samples added to store."""
-    for flow_cell, sample_internal_ids in zip(
-        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
-    ):
-        helpers.add_flow_cell_and_samples_with_sequencing_metrics(
-            flow_cell_name=flow_cell.id,
-            sequencer=flow_cell.sequencer_type,
-            sample_ids=sample_internal_ids,
-            store=store,
         )
     return store
 
