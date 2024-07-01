@@ -535,7 +535,7 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the flow cells
-    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
+    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell).all()
 
     # THEN a flow cells should be returned
     assert flow_cells
@@ -589,20 +589,23 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
-def test_get_samples_from_flow_cell(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
+def test_get_samples_from_illumina_flow_cell_internal_id(
+    novaseq_x_flow_cell_id: str, store_with_illumina_sequencing_data: Store
 ):
-    """Test returning samples present on the latest flow cell from the database."""
+    """Test getting samples from an Illumina flow cell by internal ID"""
+    # GIVEN a store with an Illumina flow cell and samples
 
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the samples from the latest flow cell
-    samples: list[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
-        flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id
+    # WHEN fetching the samples from the flow cell
+    samples: list[Sample] = store_with_illumina_sequencing_data.get_samples_by_illumina_flow_cell(
+        flow_cell_id=novaseq_x_flow_cell_id
     )
 
-    # THEN the returned sample id should have the same id as the one in the database
-    assert samples[0].internal_id == sample_id
+    # THEN a list of samples should be returned
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN the samples should be from the flow cell
+    assert samples[0].run_devices[0].internal_id == novaseq_x_flow_cell_id
 
 
 def test_is_all_illumina_runs_on_disk_when_no_illumina_run(
@@ -741,7 +744,7 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 def test_get_application_limitations_by_tag(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag."""
 
     # GIVEN a store with some application limitations
@@ -766,7 +769,7 @@ def test_get_application_limitation_by_tag_and_workflow(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     workflow: Workflow = Workflow.MIP_DNA,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag and workflow."""
 
     # GIVEN a store with some application limitations
@@ -1156,97 +1159,6 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
     for case in cases:
         assert not case.analyses
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
-
-
-def test_get_total_counts_passing_q30(
-    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
-):
-    # GIVEN a store with sequencing metrics
-
-    total_reads_count_passing_q30 = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=0
-        )
-    )
-    # THEN assert that the total read count is correct
-    assert total_reads_count_passing_q30 == expected_total_reads
-
-
-def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting a metrics entry by flow cell name, sample internal id and lane
-    metrics_entry: SampleLaneSequencingMetrics = (
-        store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-            sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
-        )
-    )
-
-    assert metrics_entry is not None
-    assert metrics_entry.flow_cell_name == flow_cell_name
-    assert metrics_entry.flow_cell_lane_number == lane
-    assert metrics_entry.sample_internal_id == sample_id
-
-
-def test_get_number_of_reads_for_sample_passing_q30_threshold(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
-):
-    # GIVEN a store with sequencing metrics
-    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-
-    # GIVEN a metric for a specific sample
-    sample_metric: SampleLaneSequencingMetrics | None = metrics.filter(
-        SampleLaneSequencingMetrics.sample_internal_id == sample_id
-    ).first()
-    assert sample_metric
-
-    # GIVEN a Q30 threshold that the sample will pass
-    q30_threshold = int(sample_metric.sample_base_percentage_passing_q30 / 2)
-
-    # WHEN getting the number of reads for the sample that pass the Q30 threshold
-    number_of_reads: int = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=q30_threshold
-        )
-    )
-
-    # THEN assert that the number of reads is an integer
-    assert isinstance(number_of_reads, int)
-
-    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
-    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
-
-
-def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
-    store_with_sequencing_metrics: Store, sample_id: str
-):
-    # GIVEN a store with sequencing metrics
-    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-
-    # GIVEN a metric for a specific sample
-    sample_metrics: list[SampleLaneSequencingMetrics] = metrics.filter(
-        SampleLaneSequencingMetrics.sample_internal_id == sample_id
-    ).all()
-
-    assert sample_metrics
-
-    # GIVEN a Q30 threshold that some of the sample's metrics will not pass
-    q30_values = [metric.sample_base_percentage_passing_q30 for metric in sample_metrics]
-    q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
-
-    # WHEN getting the number of reads for the sample that pass the Q30 threshold
-    number_of_reads: int = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=q30_threshold
-        )
-    )
-
-    # THEN assert that the number of reads is less than the total number of reads for the sample
-    total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
-    assert number_of_reads < total_sample_reads
 
 
 def test_get_illumina_metrics_entry_by_device_sample_and_lane(

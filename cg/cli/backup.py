@@ -33,7 +33,7 @@ from cg.services.illumina_services.backup_services.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.store.models import Flowcell, IlluminaSequencingRun, Sample
+from cg.store.models import IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -238,7 +238,9 @@ def retrieve_spring_files(
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
-    samples: list[Sample] = _get_samples(status_api, object_type, identifier)
+    samples: list[Sample] = status_api.get_samples_by_identifier(
+        object_type=object_type, identifier=identifier
+    )
 
     for sample in samples:
         latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
@@ -249,17 +251,6 @@ def retrieve_spring_files(
         )
         for spring_file in spring_files:
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
-
-
-def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[Sample]:
-    """Gets all samples belonging to a sample, case or flow cell id"""
-    get_samples = {
-        "sample": status_api.sample,
-        "case": status_api.get_samples_by_case_id,
-        "flow_cell": status_api.get_samples_from_flow_cell,
-    }
-    samples: Sample | list[Sample] = get_samples[object_type](identifier)
-    return samples if isinstance(samples, list) else [samples]
 
 
 @backup.command("retrieve-spring-file")
