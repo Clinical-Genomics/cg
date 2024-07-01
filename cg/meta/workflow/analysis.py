@@ -622,7 +622,7 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):
-        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self.ensure_illumina_run_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
