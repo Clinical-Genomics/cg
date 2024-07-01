@@ -578,7 +578,7 @@ class AnalysisAPI(MetaAPI):
         )
 
     def ensure_illumina_run_on_disk(self, case_id: str) -> None:
-        """Check if Illumina are on disk for given case."""
+        """Check if Illumina sequencing runs are on disk for given case."""
         if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
                 "Illumina run check is not applicable - "
