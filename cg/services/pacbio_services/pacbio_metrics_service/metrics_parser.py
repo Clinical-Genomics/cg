@@ -16,7 +16,7 @@ class MetricsParser:
         self.report_dir = Path(smrt_cell_path, "statistics")
         # For HiFi metrics
         self.css_report_file: Path = get_file_in_directory(
-            directory=self.report_dir, file_name=PacBioDirsAndFiles.CCS_REPORT
+            directory=self.report_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
         )
         # For control metrics
         self.control_report_file: Path = get_file_in_directory(
@@ -34,13 +34,14 @@ class MetricsParser:
             json_file=self.css_report_file, model=HiFiMetrics
         )
 
-    def _parse_attributes_from_json(self, json_file: Path) -> list[dict[str, Any]]:
+    @staticmethod
+    def _parse_report(json_file: Path) -> list[dict[str, Any]]:
         """Parse the attribute element of a PacBio JSON file."""
         parsed_json: dict = ReadFile.read_file[FileFormat.JSON](file_path=json_file)
         return parsed_json.get("attributes")
 
     def parse_attributes_to_model(self, json_file: Path, model: Callable) -> HiFiMetrics:
         """Parse the attributes to a model."""
-        attributes: list[dict[str, Any]] = self._parse_attributes_from_json(json_file=json_file)
-        data: dict = {attr["id"]: attr["value"] for attr in attributes}
+        report_content: list[dict[str, Any]] = self._parse_report(json_file=json_file)
+        data: dict = {report_field["id"]: report_field["value"] for report_field in report_content}
         return model(**data)

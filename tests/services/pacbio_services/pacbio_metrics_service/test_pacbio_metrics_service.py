@@ -13,7 +13,7 @@ def test_parse_attributes_from_json(
     # GIVEN a PacBio JSON file and a PacBio metrics parser initialised from the path
 
     # WHEN parsing the attributes from the JSON file
-    attributes: list[dict[str, Any]] = pac_bio_metrics_parser._parse_attributes_from_json(
+    attributes: list[dict[str, Any]] = pac_bio_metrics_parser._parse_report(
         json_file=pac_bio_css_report
     )
 
