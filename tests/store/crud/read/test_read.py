@@ -636,7 +636,7 @@ def test_is_all_illumina_runs_on_disk_when_no_illumina_run(
     assert is_on_disk is False
 
 
-def test_are_all_flow_cells_on_disk_when_not_on_disk(
+def test_are_all_illumina_runs_on_disk_when_not_on_disk(
     store_with_illumina_sequencing_data_on_disk: Store,
     selected_novaseq_x_case_ids: str,
 ):
