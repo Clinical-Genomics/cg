@@ -596,10 +596,8 @@ def test_get_samples_from_illumina_flow_cell_internal_id(
     # GIVEN a store with an Illumina flow cell and samples
 
     # WHEN fetching the samples from the flow cell
-    samples: list[Sample] = (
-        store_with_illumina_sequencing_data.get_samples_by_illumina_flow_cell_internal_id(
-            flow_cell_id=novaseq_x_flow_cell_id
-        )
+    samples: list[Sample] = store_with_illumina_sequencing_data.get_samples_by_illumina_flow_cell(
+        flow_cell_id=novaseq_x_flow_cell_id
     )
 
     # THEN a list of samples should be returned
@@ -607,7 +605,7 @@ def test_get_samples_from_illumina_flow_cell_internal_id(
     assert isinstance(samples[0], Sample)
 
     # THEN the samples should be from the flow cell
-    assert samples[0]._run_devices[0].internal_id == novaseq_x_flow_cell_id
+    assert samples[0].run_devices[0].internal_id == novaseq_x_flow_cell_id
 
 
 def test_is_all_flow_cells_on_disk_when_no_flow_cell(
