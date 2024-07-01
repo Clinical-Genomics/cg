@@ -98,7 +98,7 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
-class FlowCellsNeededError(CgError):
+class IlluminaRunsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 

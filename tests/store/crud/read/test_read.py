@@ -608,111 +608,84 @@ def test_get_samples_from_illumina_flow_cell_internal_id(
     assert samples[0].run_devices[0].internal_id == novaseq_x_flow_cell_id
 
 
-def test_is_all_flow_cells_on_disk_when_no_flow_cell(
-    base_store: Store,
-    caplog,
-    case_id: str,
+def test_is_all_illumina_runs_on_disk_when_no_illumina_run(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test check if all flow cells for samples on a case is on disk when no flow cells."""
-    caplog.set_level(logging.DEBUG)
-
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
-
-    # THEN return false
-    assert is_on_disk is False
-
-    # THEN log no flow cells found
-    assert "No flow cells found" in caplog.text
-
-
-def test_are_all_flow_cells_on_disk_when_not_on_disk(
-    base_store: Store,
-    caplog,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
-):
-    """Test check if all flow cells for samples on a case is on disk when not on disk."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
-        samples=[sample],
-        status=SequencingRunDataAvailability.PROCESSING,
+    """Test check if all sequencing runs for samples on a case are on disk when there are no sequencing runs."""
+    # GIVEN a store with a case that has no sequencing runs
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
-
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        samples=[sample],
-        status=SequencingRunDataAvailability.RETRIEVED,
+    assert sequencing_runs
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(
+        sequencing_runs[0].device.internal_id
     )
+    deleted_run: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
+    )
+    assert not deleted_run
 
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
+    # WHEN fetching the illumina runs for a case
+    is_on_disk = store_with_illumina_sequencing_data.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
+    )
 
     # THEN return false
     assert is_on_disk is False
 
 
-def test_are_all_flow_cells_on_disk_when_requested(
-    base_store: Store,
-    caplog,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
+def test_are_all_illumina_runs_on_disk_when_not_on_disk(
+    store_with_illumina_sequencing_data_on_disk: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test check if all flow cells for samples on a case is on disk when requested."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
-        samples=[sample],
-        status=SequencingRunDataAvailability.REMOVED,
+    """Test check if all sequencing runs on a case is on disk when not on disk."""
+    # GIVEN a store with two sequencing runs on a case that are not on disk
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        samples=[sample],
-        status=SequencingRunDataAvailability.REQUESTED,
-    )
+    assert sequencing_runs
+    assert len(sequencing_runs) == 2
+    for sequencing_run in sequencing_runs:
+        sequencing_run.data_availability = SequencingRunDataAvailability.RETRIEVED
 
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
+    # WHEN fetching the sequencing runs for a case
+    is_on_disk = store_with_illumina_sequencing_data_on_disk.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
+    )
 
     # THEN return false
     assert is_on_disk is False
 
 
-def test_are_all_flow_cells_on_disk(
-    base_store: Store,
-    caplog,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
+def test_are_all_illumina_runs_on_disk(
+    store_with_illumina_sequencing_data_on_disk: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test check if all flow cells for samples on a case is on disk."""
-    caplog.set_level(logging.DEBUG)
-
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
+    """Test check if all sequencing runs on a case is on disk."""
+    # GIVEN a store with two sequencing runs on a case that are on disk
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
-    helpers.add_flow_cell(store=base_store, flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id)
+    assert sequencing_runs
+    assert len(sequencing_runs) == 2
+    for sequencing_run in sequencing_runs:
+        assert sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK
 
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
+    # WHEN fetching the sequencing runs for a case
+    is_on_disk = store_with_illumina_sequencing_data_on_disk.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
+    )
 
-    # THEN return true
+    # THEN return True
     assert is_on_disk is True
 
 
