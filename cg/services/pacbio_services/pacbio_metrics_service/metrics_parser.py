@@ -13,25 +13,25 @@ class MetricsParser:
 
     def __init__(self, smrt_cell_path: Path) -> None:
         self.smrt_cell_path: Path = smrt_cell_path
-        self.report_path = Path(smrt_cell_path, "statistics")
+        self.report_dir = Path(smrt_cell_path, "statistics")
         # For HiFi metrics
-        self.css_report_path: Path = get_file_in_directory(
-            directory=self.report_path, file_name=PacBioDirsAndFiles.CCS_REPORT
+        self.css_report_file: Path = get_file_in_directory(
+            directory=self.report_dir, file_name=PacBioDirsAndFiles.CCS_REPORT
         )
         # For control metrics
-        self.control_report_path: Path = get_file_in_directory(
-            directory=self.report_path, file_name=PacBioDirsAndFiles.CONTROL_REPORT
+        self.control_report_file: Path = get_file_in_directory(
+            directory=self.report_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
         )
         # For productivity metrics
-        self.loading_report_path: Path = get_file_in_directory(
-            directory=self.report_path, file_name=PacBioDirsAndFiles.LOADING_REPORT
+        self.loading_report_file: Path = get_file_in_directory(
+            directory=self.report_dir, file_name=PacBioDirsAndFiles.LOADING_REPORT
         )
         # For polymerase metrics
-        self.raw_data_report_path: Path = get_file_in_directory(
-            directory=self.report_path, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
+        self.raw_data_report_file: Path = get_file_in_directory(
+            directory=self.report_dir, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
         )
         self.hifi_metrics: HiFiMetrics = self.parse_attributes_to_model(
-            json_file=self.css_report_path, model=HiFiMetrics
+            json_file=self.css_report_file, model=HiFiMetrics
         )
 
     def _parse_attributes_from_json(self, json_file: Path) -> list[dict[str, Any]]:
