@@ -72,15 +72,6 @@ class BaseHandler:
         """Return join sample and customer query."""
         return self._get_query(table=Sample).join(Customer)
 
-    def _get_join_flow_cell_sample_links_query(self) -> Query:
-        """Return join flow cell samples and relationship query."""
-        return (
-            self._get_query(table=Flowcell)
-            .join(Flowcell.sequencing_metrics)
-            .join(SampleLaneSequencingMetrics.sample)
-            .join(Sample.links)
-        )
-
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""
         return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)

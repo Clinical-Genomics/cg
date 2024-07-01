@@ -26,7 +26,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -259,25 +258,6 @@ class CreateHandler(BaseHandler):
         new_record.mother = mother
         new_record.father = father
         return new_record
-
-    def add_flow_cell(
-        self,
-        flow_cell_name: str,
-        sequencer_name: str,
-        sequencer_type: str,
-        date: datetime,
-        flow_cell_status: str | None = SequencingRunDataAvailability.ON_DISK,
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Build a new Flowcell record."""
-        return Flowcell(
-            name=flow_cell_name,
-            sequencer_name=sequencer_name,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
-            status=flow_cell_status,
-            has_backup=has_backup,
-        )
 
     def add_analysis(
         self,
