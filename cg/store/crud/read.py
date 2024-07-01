@@ -500,16 +500,16 @@ class ReadHandler(BaseHandler):
             for sequencing_run in sequencing_runs
         )
 
-    def request_flow_cells_for_case(self, case_id) -> None:
-        """Set the status of removed flow cells to REQUESTED for the given case."""
-        flow_cells: list[Flowcell] | None = self.get_flow_cells_by_case(
-            case=self.get_case_by_internal_id(internal_id=case_id)
+    def request_sequencing_runs_for_case(self, case_id) -> None:
+        """Set the status of removed Illumina sequencing runs to REQUESTED for the given case."""
+        sequencing_runs: list[IlluminaSequencingRun] | None = (
+            self.get_illumina_sequencing_runs_by_case(case_id)
         )
-        for flow_cell in flow_cells:
-            if flow_cell.status == SequencingRunDataAvailability.REMOVED:
-                flow_cell.status = SequencingRunDataAvailability.REQUESTED
+        for sequencing_run in sequencing_runs:
+            if sequencing_run.data_availability == SequencingRunDataAvailability.REMOVED:
+                sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
                 LOG.info(
-                    f"Setting status for {flow_cell.name} to {SequencingRunDataAvailability.REQUESTED}"
+                    f"Setting status for {sequencing_run.device.internal_id} to {SequencingRunDataAvailability.REQUESTED}"
                 )
         self.session.commit()
 

@@ -183,7 +183,7 @@ def test_ensure_illumina_runs_on_disk_does_not_request_runs(
         "_is_illumina_run_check_applicable",
         return_value=True,
     ), mock.patch.object(
-        Store, "request_flow_cells_for_case", return_value=None
+        Store, "request_sequencing_runs_for_case", return_value=None
     ) as request_checker:
         mip_analysis_api.ensure_illumina_run_on_disk(selected_novaseq_x_case_ids[0])
 
@@ -191,23 +191,23 @@ def test_ensure_illumina_runs_on_disk_does_not_request_runs(
     assert request_checker.call_count == 0
 
 
-def test_ensure_illumina_run_on_disk_does_request_flow_cells(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
+def test_ensure_illumina_run_on_disk_does_request_run(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    store_with_illumina_sequencing_data_on_disk: Store,
+    helpers: StoreHelpers,
+    selected_novaseq_x_case_ids: list[str],
 ):
     """Tests that ensure_illumina_run_on_disk requests a removed flow cell
     when is_flow_cell_check_applicable returns True.."""
 
-    # GIVEN a case with a REMOVED flow cell
-    case: Case = analysis_store.get_cases()[0]
-    helpers.add_flow_cell(
-        analysis_store,
-        flow_cell_name="flow_cell_test",
-        archived_at=datetime.now(),
-        sequencer_type=Sequencers.NOVASEQ,
-        samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=SequencingRunDataAvailability.REMOVED,
-        date=datetime.now(),
+    # GIVEN a case with a REMOVED Illumina run
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
+    for sequencing_run in sequencing_runs:
+        sequencing_run.data_availability = SequencingRunDataAvailability.REMOVED
 
     # WHEN _is_flow_cell_check_available returns True
     with mock.patch.object(
@@ -215,13 +215,16 @@ def test_ensure_illumina_run_on_disk_does_request_flow_cells(
         "_is_illumina_run_check_applicable",
         return_value=True,
     ):
-        mip_analysis_api.ensure_illumina_run_on_disk(case.internal_id)
+        mip_analysis_api.ensure_illumina_run_on_disk(selected_novaseq_x_case_ids[0])
 
     # THEN the flow cell's status should be set to REQUESTED for the case
-    assert (
-        analysis_store.get_flow_cell_by_name("flow_cell_test").status
-        == SequencingRunDataAvailability.REQUESTED
+    modified_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
+    for run in modified_runs:
+        assert run.data_availability == SequencingRunDataAvailability.REQUESTED
 
 
 def test_is_case_ready_for_analysis_true(

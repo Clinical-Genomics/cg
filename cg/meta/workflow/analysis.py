@@ -586,7 +586,7 @@ class AnalysisAPI(MetaAPI):
             )
             return
         if not self.status_db.are_all_illumina_runs_on_disk(case_id=case_id):
-            self.status_db.request_flow_cells_for_case(case_id)
+            self.status_db.request_sequencing_runs_for_case(case_id)
 
     def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are

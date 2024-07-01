@@ -234,7 +234,7 @@ def mock_analysis_illumina_run(mocker) -> None:
     sequencing_run = Mock()
     sequencing_run.data_availability = SequencingRunDataAvailability.ON_DISK
     mocker.patch.object(ReadHandler, "get_illumina_sequencing_runs_by_case")
-    ReadHandler.get_flow_cells_by_case.return_value = [sequencing_run]
+    ReadHandler.get_illumina_sequencing_runs_by_case.return_value = [sequencing_run]
 
 
 @pytest.fixture(scope="session")
