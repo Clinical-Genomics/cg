@@ -13,7 +13,7 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import SequencingRunDataAvailability
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store.models import ApplicationVersion, Customer, Flowcell, IlluminaSequencingRun, Sample
+from cg.store.models import ApplicationVersion, Customer, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 CONFIRM = "Continue?"

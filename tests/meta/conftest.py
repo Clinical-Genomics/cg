@@ -115,50 +115,6 @@ def binary_path() -> str:
 
 
 @pytest.fixture
-def stats_sample_data(
-    sample_id: str,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-) -> dict:
-    return {
-        "samples": [
-            {
-                "name": sample_id,
-                "index": "ACGTACAT",
-                "flowcell": novaseq_6000_pre_1_5_kits_flow_cell_id,
-                "type": Sequencers.NOVASEQ,
-            },
-            {
-                "name": "ADM1136A3",
-                "index": "ACGTACAT",
-                "flowcell": novaseq_6000_post_1_5_kits_flow_cell_id,
-                "type": Sequencers.NOVASEQ,
-            },
-        ]
-    }
-
-
-@pytest.fixture
-def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Store, None, None]:
-    """Setup store with sample data for testing flow cell transfer."""
-    for sample_data in stats_sample_data["samples"]:
-        customer: Customer = (base_store.get_customers())[0]
-        application_version: ApplicationVersion = base_store.get_application_by_tag(
-            "WGSPCFC030"
-        ).versions[0]
-        sample: Sample = base_store.add_sample(
-            name="NA", sex=Sex.MALE, internal_id=sample_data["name"]
-        )
-        sample.customer = customer
-        sample.application_version = application_version
-        sample.received_at = dt.datetime.now()
-        sample.last_sequenced_at = dt.datetime.now()
-        base_store.session.add(sample)
-    base_store.session.commit()
-    yield base_store
-
-
-@pytest.fixture
 def get_invoice_api_sample(
     store: Store,
     lims_api: MockLimsAPI,
