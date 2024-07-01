@@ -267,7 +267,6 @@ def test_is_case_ready_for_analysis_decompression_needed(
 
 def test_is_case_ready_for_analysis_decompression_running(
     mip_hk_store,
-    store_with_illumina_sequencing_data: Store,
     selected_novaseq_x_case_ids: list[str],
     mip_analysis_api: MipDNAAnalysisAPI,
 ):
@@ -328,15 +327,12 @@ def test_prepare_fastq_files_success(
 
 def test_prepare_fastq_files_request_miria(
     mip_analysis_api: MipDNAAnalysisAPI,
-    store_with_illumina_sequencing_data: Store,
     selected_novaseq_x_case_ids: list[str],
 ):
     """Tests that samples' input files are requested via Miria for a Clinical customer, if files are archived."""
 
     # GIVEN a case belonging to a non-PDC customer with at least one archived spring file
-    case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
-        selected_novaseq_x_case_ids[0]
-    )
+    case: Case = mip_analysis_api.status_db.get_case_by_internal_id(selected_novaseq_x_case_ids[0])
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
     # GIVEN that at least one file is archived and not retrieved
@@ -351,6 +347,7 @@ def test_prepare_fastq_files_request_miria(
     ) as request_submitter:
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
+
             # THEN an AnalysisNotReadyError should be thrown
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
 
