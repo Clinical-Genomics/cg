@@ -685,45 +685,6 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flow_cell(
-        store: Store,
-        flow_cell_name: str = "flow_cell_test",
-        archived_at: datetime = None,
-        sequencer_type: str = Sequencers.HISEQX,
-        samples: list[Sample] = None,
-        status: str = None,
-        date: datetime = datetime.now(),
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Utility function to add a flow cell to the store and return an object."""
-        flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
-        if flow_cell:
-            return flow_cell
-        flow_cell: Flowcell = store.add_flow_cell(
-            flow_cell_name=flow_cell_name,
-            sequencer_name="dummy_sequencer",
-            sequencer_type=sequencer_type,
-            date=date,
-            has_backup=has_backup,
-        )
-        flow_cell.archived_at = archived_at
-        if status:
-            flow_cell.status = status
-
-        store.session.add(flow_cell)
-        store.session.commit()
-
-        if samples:
-            for sample in samples:
-                StoreHelpers.ensure_sample_lane_sequencing_metrics(
-                    sample_internal_id=sample.internal_id,
-                    flow_cell_name=flow_cell.name,
-                    store=store,
-                )
-        store.session.commit()
-        return flow_cell
-
-    @staticmethod
     def add_illumina_flow_cell(
         store: Store, flow_cell_id: str = "flow_cell_test", model: str = "10B"
     ) -> IlluminaFlowCell:

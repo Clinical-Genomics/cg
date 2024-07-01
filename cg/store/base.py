@@ -12,12 +12,10 @@ from cg.store.models import (
     Case,
     CaseSample,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Sample,
-    SampleLaneSequencingMetrics,
 )
 
 

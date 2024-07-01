@@ -410,12 +410,12 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
     cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
@@ -1231,36 +1231,6 @@ def analysis_store_single_case(
     """Set up a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
-
-
-@pytest.fixture
-def store_with_demultiplexed_samples(
-    store: Store,
-    helpers: StoreHelpers,
-    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
-    selected_hiseq_x_dual_index_sample_ids: list[str],
-    hiseq_x_dual_index_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-) -> Store:
-    """Return a store with samples that have been demultiplexed."""
-    helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
-    helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
-    for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        )
-
-    for i, sample_internal_id in enumerate(selected_hiseq_x_dual_index_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
-        )
-    return store
 
 
 @pytest.fixture

@@ -247,22 +247,14 @@ def test_is_case_ready_for_analysis_true(
 
 
 def test_is_case_ready_for_analysis_decompression_needed(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers
+    mip_analysis_api: MipDNAAnalysisAPI,
+    store_with_illumina_sequencing_data_on_disk: Store,
+    selected_novaseq_x_case_ids: list[str],
 ):
-    """Tests that is_case_ready_for_analysis returns false for a case whose flow cells are all ON_DISK but whose
+    """Tests that is_case_ready_for_analysis returns false for a case whose sequencing runs are all ON_DISK but whose
     files need decompression."""
 
-    # GIVEN a case and a flow cell
-    case: Case = analysis_store.get_cases()[0]
-    helpers.add_flow_cell(
-        analysis_store,
-        flow_cell_name="flowcell_test",
-        archived_at=datetime.now(),
-        sequencer_type=Sequencers.NOVASEQ,
-        samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=SequencingRunDataAvailability.ON_DISK,
-        date=datetime.now(),
-    )
+    # GIVEN a case and an Illumina run
 
     # GIVEN that some files need to be decompressed
     with mock.patch.object(
@@ -270,29 +262,19 @@ def test_is_case_ready_for_analysis_decompression_needed(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(selected_novaseq_x_case_ids[0])
 
 
 def test_is_case_ready_for_analysis_decompression_running(
     mip_hk_store,
-    analysis_store,
-    helpers,
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: list[str],
     mip_analysis_api: MipDNAAnalysisAPI,
 ):
-    """Tests that is_case_ready_for_analysis returns false for a case whose flow cells are all ON_DISK but whose
+    """Tests that is_case_ready_for_analysis returns false for a case whose Illumina run are all ON_DISK but whose
     files are being decompressed currently."""
 
-    # GIVEN a case and a flow cell
-    case: Case = analysis_store.get_cases()[0]
-    helpers.add_flow_cell(
-        analysis_store,
-        flow_cell_name="flowcell_test",
-        archived_at=datetime.now(),
-        sequencer_type=Sequencers.NOVASEQ,
-        samples=analysis_store.get_samples_by_case_id(case.internal_id),
-        status=SequencingRunDataAvailability.ON_DISK,
-        date=datetime.now(),
-    )
+    # GIVEN a case and a Illumina sequencing run
 
     # GIVEN that some files are being decompressed
     with mock.patch.object(
@@ -300,7 +282,7 @@ def test_is_case_ready_for_analysis_decompression_running(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(selected_novaseq_x_case_ids[0])
 
 
 @pytest.mark.parametrize(
@@ -345,12 +327,16 @@ def test_prepare_fastq_files_success(
 
 
 def test_prepare_fastq_files_request_miria(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_spring_file
+    mip_analysis_api: MipDNAAnalysisAPI,
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: list[str],
 ):
     """Tests that samples' input files are requested via Miria for a Clinical customer, if files are archived."""
 
     # GIVEN a case belonging to a non-PDC customer with at least one archived spring file
-    case: Case = analysis_store.get_cases()[0]
+    case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
+        selected_novaseq_x_case_ids[0]
+    )
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
     # GIVEN that at least one file is archived and not retrieved
