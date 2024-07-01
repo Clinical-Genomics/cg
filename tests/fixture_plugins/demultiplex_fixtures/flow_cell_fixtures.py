@@ -44,23 +44,23 @@ def hiseq_2500_custom_index_flow_cell(
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(
-    illumina_flow_cells_directory: Path,
+    illumina_sequencing_runs_directory: Path,
     novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return IlluminaRunDirectoryData(
-        Path(illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
+        Path(illumina_sequencing_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
     )
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_flow_cell(
-    illumina_flow_cells_directory: Path,
+    illumina_sequencing_runs_directory: Path,
     novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
 ) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
     return IlluminaRunDirectoryData(
-        Path(illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
+        Path(illumina_sequencing_runs_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
     )
 
 
@@ -129,9 +129,13 @@ def hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet(
 
 
 @pytest.fixture
-def novaseq_x_demux_runs_flow_cell(novaseq_x_demux_runs_dir: Path) -> IlluminaRunDirectoryData:
+def novaseq_x_demux_runs_flow_cell(
+    novaseq_x_demux_runs_dir: Path, novaseq_x_flow_cell: IlluminaRunDirectoryData
+) -> IlluminaRunDirectoryData:
     """Return a NovaSeqX flow cell."""
-    return IlluminaRunDirectoryData(novaseq_x_demux_runs_dir)
+    demux_run = IlluminaRunDirectoryData(novaseq_x_demux_runs_dir)
+    demux_run.set_sample_sheet_path_hk(novaseq_x_flow_cell.path / "SampleSheet.csv")
+    return demux_run
 
 
 @pytest.fixture

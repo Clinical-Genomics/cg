@@ -131,14 +131,14 @@ def test_add_fastq_files_without_sample_id(
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,
     novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
-    tmp_illumina_flow_cells_directory: Path,
+    tmp_illumina_sequencing_runs_directory: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a flow cell directory and name
     flow_cell_directory = Path(
-        tmp_illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell.full_name
+        tmp_illumina_sequencing_runs_directory, novaseq_6000_post_1_5_kits_flow_cell.full_name
     )
 
     # GIVEN that a flow cell bundle exists in Housekeeper
@@ -229,7 +229,7 @@ def test_add_run_parameters_to_housekeeper(
     # WHEN adding the run parameters file to housekeeper
     add_run_parameters_file_to_housekeeper(
         flow_cell_name=novaseq_x_flow_cell.full_name,
-        flow_cell_run_dir=demultiplex_context.demultiplex_api.flow_cells_dir,
+        flow_cell_run_dir=demultiplex_context.demultiplex_api.sequencing_runs_dir,
         hk_api=hk_api,
     )
 

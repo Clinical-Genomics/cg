@@ -5,7 +5,9 @@ import logging
 import os
 from pathlib import Path
 from typing import Type
+
 from typing_extensions import Literal
+
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
@@ -25,7 +27,7 @@ from cg.services.parse_run_completion_status_service.parse_run_completion_status
     ParseRunCompletionStatusService,
 )
 from cg.utils.files import get_source_creation_time_stamp
-from cg.utils.time import format_time_from_string, format_time_from_ctime
+from cg.utils.time import format_time_from_ctime
 
 LOG = logging.getLogger(__name__)
 RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
@@ -40,7 +42,7 @@ class IlluminaRunDirectoryData:
     """Class to collect information about sequencing run directories and their particular files."""
 
     def __init__(self, sequencing_run_path: Path):
-        LOG.debug(f"Instantiating FlowCellDirectoryData with path {sequencing_run_path}")
+        LOG.debug(f"Instantiating IlluminaRunDirectoryData with path {sequencing_run_path}")
         self.path: Path = sequencing_run_path
         self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None
@@ -91,7 +93,9 @@ class IlluminaRunDirectoryData:
         """
         Return sample sheet path.
         """
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+        return Path(
+            self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
@@ -111,7 +115,7 @@ class IlluminaRunDirectoryData:
                 str.replace(
                     current_path,
                     DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
-                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME,
                 )
             )
         return self.path
@@ -121,11 +125,11 @@ class IlluminaRunDirectoryData:
         Return the demultiplexed run directory regardless of the path used to initialise the IlluminaRunDirectoryData.
         """
         current_path: str = self.path.as_posix()
-        if DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME in current_path:
+        if DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME in current_path:
             return Path(
                 str.replace(
                     current_path,
-                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME,
                     DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
                 )
             )
@@ -165,12 +169,12 @@ class IlluminaRunDirectoryData:
     @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
+        return Path(self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.RTACOMPLETE)
 
     @property
     def copy_complete_path(self) -> Path:
         """Return copy complete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+        return Path(self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.COPY_COMPLETE)
 
     @property
     def demultiplexing_started_path(self) -> Path:
@@ -193,7 +197,7 @@ class IlluminaRunDirectoryData:
     @property
     def trailblazer_config_path(self) -> Path:
         """Return file to SLURM job ids path."""
-        return Path(self.path, "slurm_job_ids.yaml")
+        return Path(self.get_sequencing_runs_dir(), "slurm_job_ids.yaml")
 
     @property
     def is_demultiplexing_complete(self) -> bool:
@@ -224,7 +228,7 @@ class IlluminaRunDirectoryData:
 
     def has_demultiplexing_started_on_sequencer(self) -> bool:
         """Check if demultiplexing has started on the NovaSeqX machine."""
-        latest_analysis: Path = get_latest_analysis_path(self.path)
+        latest_analysis: Path = get_latest_analysis_path(self.get_demultiplexed_runs_dir())
         if not latest_analysis:
             return False
         return Path(
