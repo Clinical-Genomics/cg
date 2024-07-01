@@ -312,7 +312,7 @@ class OxfordNanoporeConfig(BaseModel):
 
 
 class IlluminaConfig(BaseModel):
-    flow_cell_runs_dir: str
+    sequencing_runs_dir: str
     demultiplexed_runs_dir: str
 
 
@@ -326,10 +326,8 @@ class CGConfig(BaseModel):
     database: str
     delivery_path: str
     downsample: DownsampleConfig
-    illumina_demultiplexed_runs_directory: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
-    illumina_flow_cells_directory: str
     madeline_exe: str
     nanopore_data_directory: str
     tower_binary_path: str
@@ -561,7 +559,7 @@ class CGConfig(BaseModel):
         if sample_sheet_api is None:
             LOG.debug("Instantiating sample sheet API")
             sample_sheet_api = SampleSheetAPI(
-                flow_cell_dir=self.illumina_flow_cells_directory,
+                flow_cell_dir=self.run_instruments.illumina.sequencing_runs_dir,
                 hk_api=self.housekeeper_api,
                 lims_api=self.lims_api,
             )

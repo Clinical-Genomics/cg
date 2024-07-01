@@ -21,9 +21,9 @@ def demultiplex_fixtures(apps_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def illumina_flow_cells_directory(demultiplex_fixtures: Path) -> Path:
+def illumina_sequencing_runs_directory(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME)
+    return Path(demultiplex_fixtures, DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME)
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +35,7 @@ def illumina_demultiplexed_runs_directory(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(scope="session")
 def illumina_demux_all_directory(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells_demux_all")
+    return Path(demultiplex_fixtures, "sequencing_runs_demux_all")
 
 
 @pytest.fixture(scope="session")
@@ -71,7 +71,7 @@ def spring_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(scope="session")
 def broken_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the broken or incomplete flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells_broken")
+    return Path(demultiplex_fixtures, "sequencing_runs_broken")
 
 
 @pytest.fixture(scope="session")
@@ -84,13 +84,15 @@ def illumina_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def tmp_illumina_flow_cells_directory(tmp_path: Path, illumina_flow_cells_directory: Path) -> Path:
+def tmp_illumina_sequencing_runs_directory(
+    tmp_path: Path, illumina_sequencing_runs_directory: Path
+) -> Path:
     """
     Return the path to a temporary flow cells directory with flow cells ready for demultiplexing.
     Generates a copy of the original flow cells directory
     """
-    original_dir = illumina_flow_cells_directory
-    tmp_dir = Path(tmp_path, "flow_cells")
+    original_dir = illumina_sequencing_runs_directory
+    tmp_dir = Path(tmp_path, "sequencing-runs")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
 
@@ -125,7 +127,7 @@ def tmp_illumina_flow_cells_demux_all_directory(
     This fixture is used for testing of the cg demutliplex all cmd.
     """
     original_dir = illumina_demux_all_directory
-    tmp_dir = Path(tmp_path, "flow_cells_demux_all")
+    tmp_dir = Path(tmp_path, "sequencing_runs_demux_all")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
 
@@ -147,56 +149,61 @@ def tmp_broken_flow_cells_directory(tmp_path: Path, broken_flow_cells_dir: Path)
 
 @pytest.fixture(scope="session")
 def hiseq_x_single_index_flow_cell_dir(
-    illumina_flow_cells_directory, hiseq_x_single_index_flow_cell_name: str
+    illumina_sequencing_runs_directory, hiseq_x_single_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeqX flow cell."""
-    return Path(illumina_flow_cells_directory, hiseq_x_single_index_flow_cell_name)
+    return Path(illumina_sequencing_runs_directory, hiseq_x_single_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
 def hiseq_x_dual_index_flow_cell_dir(
-    illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name: str
+    illumina_sequencing_runs_directory, hiseq_x_dual_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a dual-index HiSeqX flow cell."""
-    return Path(illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name)
+    return Path(illumina_sequencing_runs_directory, hiseq_x_dual_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
 def hiseq_2500_dual_index_flow_cell_dir(
-    illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name: str
+    illumina_sequencing_runs_directory, hiseq_2500_dual_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
-    return Path(illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
+    return Path(illumina_sequencing_runs_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
 def hiseq_2500_custom_index_flow_cell_dir(
-    illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name: str
+    illumina_sequencing_runs_directory, hiseq_2500_custom_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
-    return Path(illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name)
+    return Path(illumina_sequencing_runs_directory, hiseq_2500_custom_index_flow_cell_name)
 
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell_path(
-    tmp_illumina_flow_cells_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
+    tmp_illumina_sequencing_runs_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
 ) -> Path:
-    return Path(tmp_illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
+    return Path(
+        tmp_illumina_sequencing_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name
+    )
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_flow_cell_path(
-    tmp_illumina_flow_cells_directory: Path, novaseq_6000_post_1_5_kits_flow_cell_full_name: str
+    tmp_illumina_sequencing_runs_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
 ) -> Path:
-    return Path(tmp_illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
+    return Path(
+        tmp_illumina_sequencing_runs_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name
+    )
 
 
 @pytest.fixture
 def novaseq_x_flow_cell_dir(
-    illumina_flow_cells_directory: Path, novaseq_x_flow_cell_full_name: str
+    illumina_sequencing_runs_directory: Path, novaseq_x_flow_cell_full_name: str
 ) -> Path:
     """Return the path to a NovaSeqX flow cell."""
-    return Path(illumina_flow_cells_directory, novaseq_x_flow_cell_full_name)
+    return Path(illumina_sequencing_runs_directory, novaseq_x_flow_cell_full_name)
 
 
 # Tmp flow cell paths
@@ -204,9 +211,11 @@ def novaseq_x_flow_cell_dir(
 
 @pytest.fixture
 def tmp_novaseq_6000_pre_1_5_kits_flow_cell_path(
-    tmp_illumina_flow_cells_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
+    tmp_illumina_sequencing_runs_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
 ) -> Path:
-    return Path(tmp_illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
+    return Path(
+        tmp_illumina_sequencing_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name
+    )
 
 
 @pytest.fixture
@@ -221,9 +230,9 @@ def tmp_illumina_flow_cells_demux_results_not_finished_directory(
 
 
 @pytest.fixture
-def tmp_flow_cell_directory_bcl_convert(tmp_illumina_flow_cells_directory: Path) -> Path:
+def tmp_flow_cell_directory_bcl_convert(tmp_illumina_sequencing_runs_directory: Path) -> Path:
     """Return a path to a flow cell directory with the run parameters present."""
-    return Path(tmp_illumina_flow_cells_directory, "211101_A00187_0615_AHLG5GDRZZ")
+    return Path(tmp_illumina_sequencing_runs_directory, "211101_A00187_0615_AHLG5GDRZZ")
 
 
 @pytest.fixture
@@ -277,10 +286,10 @@ def tmp_novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_na
 
 @pytest.fixture
 def tmp_flow_cells_directory_ready_for_demultiplexing(
-    hiseq_2500_dual_index_flow_cell_name: str, tmp_illumina_flow_cells_directory
+    hiseq_2500_dual_index_flow_cell_name: str, tmp_illumina_sequencing_runs_directory
 ) -> Path:
     """Return a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
+    return Path(tmp_illumina_sequencing_runs_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
 # Temporary demultiplexed runs fixtures
@@ -294,6 +303,18 @@ def tmp_demultiplexed_flow_cell_no_fastq_files(
     """Return the path to a demultiplexed flow cell directory without fastq files."""
     return Path(
         tmp_illumina_flow_cells_demux_results_not_finished_directory,
+        novaseq_6000_post_1_5_kits_flow_cell_full_name,
+    )
+
+
+@pytest.fixture
+def tmp_demultiplexed_novaseq_6000_post_1_5_kits_path(
+    tmp_illumina_demultiplexed_flow_cells_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
+) -> Path:
+    """Return the path to a demultiplexed flow cell directory without fastq files."""
+    return Path(
+        tmp_illumina_demultiplexed_flow_cells_directory,
         novaseq_6000_post_1_5_kits_flow_cell_full_name,
     )
 
@@ -383,10 +404,10 @@ def novaseq_x_demux_runs_dir(
 
 @pytest.fixture
 def hiseq_2500_dual_index_demux_runs_dir(
-    illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name: str
+    illumina_sequencing_runs_directory, hiseq_2500_dual_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
-    return Path(illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
+    return Path(illumina_sequencing_runs_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
 # Path to run parameter files

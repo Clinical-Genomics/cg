@@ -43,18 +43,16 @@ class RnafusionReportAPI(ReportAPI):
         return RnafusionSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
             duplicates=sample_metrics.pct_duplication,
+            dv200=self.lims_api.get_sample_dv200(sample.internal_id),
             gc_content=sample_metrics.after_filtering_gc_content,
+            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
-            insert_size=None,
-            insert_size_peak=None,
             mapped_reads=get_mapped_reads_fraction(
                 mapped_reads=sample_metrics.read_pairs_examined * 2,
                 total_reads=sample_metrics.before_filtering_total_reads,
             ),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
-            million_read_pairs=get_million_read_pairs(
-                reads=sample_metrics.before_filtering_total_reads
-            ),
+            million_read_pairs=get_million_read_pairs(sample_metrics.before_filtering_total_reads),
             mrna_bases=sample_metrics.pct_mrna_bases,
             pct_adapter=sample_metrics.pct_adapter,
             pct_surviving=sample_metrics.pct_surviving,
