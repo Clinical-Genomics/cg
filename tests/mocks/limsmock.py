@@ -5,6 +5,8 @@ from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
 
+from cg.constants.lims import LimsArtifactTypes, LimsProcess
+
 
 class LimsProject(BaseModel):
     id: str = "1"
@@ -16,6 +18,17 @@ class MockReagentType:
     def __init__(self, label: str, sequence: str):
         self.label: str = label
         self.sequence: str = sequence
+
+
+class LimsUDF(BaseModel):
+    control: str | None = None
+    customer: str = None
+
+    def get(self, argument: str) -> str:
+        if argument == "Control":
+            return self.control
+        if argument == "customer":
+            return self.customer
 
 
 class LimsSample(BaseModel):
@@ -35,10 +48,17 @@ class LimsSample(BaseModel):
     received: str = None
     source: str = None
     priority: str = None
+    udf: LimsUDF = LimsUDF()
+
+
+class LimsArtifactObject(BaseModel):
+    parent_process: LimsProcess = LimsProcess.COVID_POOLING_STEP
+    type: LimsArtifactTypes = LimsArtifactTypes.ANALYTE
+    samples: list[LimsSample] = []
 
 
 class MockLimsAPI(LimsAPI):
-    """Mock LIMS API to get target bed from LIMS."""
+    """Mock LIMS API for testing."""
 
     def __init__(self, config: dict = None, samples: list[dict] = None):
         if samples is None:
@@ -56,6 +76,7 @@ class MockLimsAPI(LimsAPI):
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
         self._source = "cell-free DNA"
+        self.artifacts: dict[str, list[LimsArtifactObject]] = {}
 
     def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
@@ -75,6 +96,21 @@ class MockLimsAPI(LimsAPI):
         if internal_id not in self.sample_vars:
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
+
+    def add_artifact_for_sample(
+        self,
+        sample_id: str,
+        samples: list[LimsSample] = None,
+    ):
+        if sample_id in self.artifacts:
+            self.artifacts[sample_id].append(LimsArtifactObject(samples=samples))
+        else:
+            self.artifacts[sample_id] = [LimsArtifactObject(samples=samples)]
+
+    def get_latest_artifact_for_sample(
+        self, parent_process, type, sample_internal_id
+    ) -> list[LimsArtifactObject]:
+        return self.artifacts[sample_internal_id]
 
     def capture_kit(self, lims_id: str):
         if lims_id in self.sample_vars:

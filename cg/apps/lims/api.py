@@ -9,8 +9,13 @@ from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+    LimsProcess,
+)
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -478,3 +483,18 @@ class LimsAPI(Lims, OrderHandler):
         )
         input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
         return input_amount
+
+    def get_latest_artifact_for_sample(
+        self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
+    ) -> Artifact:
+        """Return latest artifact for a given sample, process and artifact type."""
+
+        artifacts: list[Artifact] = self.get_artifacts(
+            process_type=process_type,
+            type=artifact_type,
+            samplelimsid=sample_internal_id,
+        )
+        try:
+            return artifacts[0]
+        except IndexError as e:
+            raise LimsDataError(e)
