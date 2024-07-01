@@ -190,7 +190,7 @@ def test_get_sample_cases_with_case(
         assert link.case.internal_id in result.output
 
 
-def test_hide_sample_flow_cells_without_flowcell(
+def test_hide_sample_flow_cells_without_flow_cell(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test that we can query samples and hide flow cell even when there are none."""
@@ -211,7 +211,7 @@ def test_hide_sample_flow_cells_without_flowcell(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_get_sample_flowcells_with_flowcell(
+def test_get_sample_flow_cells_with_flow_cell(
     cli_runner: CliRunner,
     new_demultiplex_context: CGConfig,
     novaseq_x_flow_cell_id: str,
