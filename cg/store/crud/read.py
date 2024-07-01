@@ -479,7 +479,7 @@ class ReadHandler(BaseHandler):
             self.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=flow_cell_id)
         )
         if sequencing_run:
-            return [metric.sample for metric in sequencing_run.sample_metrics]
+            return sequencing_run.device.samples
 
     def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis."""
