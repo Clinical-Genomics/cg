@@ -30,6 +30,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    IlluminaSampleSequencingMetrics,
 )
 
 
@@ -115,6 +116,9 @@ def _register_admin_views():
     ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
+    ext.admin.add_view(
+        admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
     ext.admin.add_view(
         admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
     )
