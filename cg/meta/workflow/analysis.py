@@ -700,7 +700,7 @@ class AnalysisAPI(MetaAPI):
         ):
             return GenePanelMasterList.get_panel_names()
         all_panels: set[str] = add_gene_panel_combo(gene_panels=default_panels)
-        all_panels |= GenePanelMasterList.get_broad_non_specific_gene_panels()
+        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
         return list(all_panels)
 
     def run_analysis(self, *args, **kwargs):

@@ -73,7 +73,7 @@ class GenePanelMasterList(StrEnum):
         )
 
     @staticmethod
-    def get_broad_non_specific_gene_panels() -> set[str]:
+    def get_non_specific_gene_panels() -> set[str]:
         return {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
 
 

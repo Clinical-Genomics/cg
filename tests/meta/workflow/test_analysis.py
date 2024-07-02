@@ -61,9 +61,7 @@ def test_gene_panels_not_part_of_master_list(customer_id: str):
     # THEN the list of gene panels returned is the custom panel and broad non-specific panels
     assert set(
         list_of_gene_panels_used
-    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(
-        set(default_panels_not_included)
-    )
+    ) == GenePanelMasterList.get_non_specific_gene_panels().union(set(default_panels_not_included))
 
 
 def test_gene_panels_customer_collaborator_and_panel_part_of_master_list(customer_id: str):
@@ -99,7 +97,7 @@ def test_gene_panels_customer_is_collaborator_and_panel_not_part_of_master_list(
     # THEN the list of gene panels returned the custom panel and broad non-specific panels
     assert set(
         list_of_gene_panels_used
-    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(set(default_panels))
+    ) == GenePanelMasterList.get_non_specific_gene_panels().union(set(default_panels))
 
 
 def test_gene_panels_customer_not_collaborator_for_gene_master_list():
@@ -117,7 +115,7 @@ def test_gene_panels_customer_not_collaborator_for_gene_master_list():
     # THEN the list of gene panels returned the custom panel and broad non-specific panels
     assert set(
         list_of_gene_panels_used
-    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(set(default_panels))
+    ) == GenePanelMasterList.get_non_specific_gene_panels().union(set(default_panels))
 
 
 def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store):
