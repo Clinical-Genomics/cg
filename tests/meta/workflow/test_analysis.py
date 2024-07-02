@@ -46,27 +46,11 @@ def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_q
     assert slurm_qos is expected_slurm_qos
 
 
-def test_gene_panels_add_master_list(customer_id: str):
-    """Test get all gene panels in master list if supplied gene panel is part of master list."""
+def test_gene_panels_not_part_of_master_list(customer_id: str):
+    """Test get only broad non-specific gene panels and custom gene panel list if a supplied gene panels is not part of master list."""
+    # GIVEN a customer who is a collaborator on the master list
 
-    # GIVEN a case that has a gene panel included in the gene panel master list
-    default_panels_included: list[str] = [GenePanelMasterList.get_panel_names()[0]]
-
-    # GIVEN a master list
-    master_list: list[str] = GenePanelMasterList.get_panel_names()
-
-    # WHEN converting the gene panels between the default and the gene panel master list
-    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
-        customer_id=customer_id, default_panels=set(default_panels_included)
-    )
-
-    # THEN the list of gene panels used should return all gene panels in the master list
-    assert set(list_of_gene_panels_used) == set(master_list)
-
-
-def test_gene_panels_not_added_master_list(customer_id: str):
-    """Test get only broad non-specific gene panels and custom gene panel list if a supplied gene panel is part of master list."""
-    # GIVEN a case that has a gene panel that is NOT included in the gene panel master list
+    # GIVEN a gene panel NOT included in the gene panel master list
     default_panels_not_included: list[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
 
     # WHEN converting the gene panels between the default and the gene panel master list
@@ -74,21 +58,21 @@ def test_gene_panels_not_added_master_list(customer_id: str):
         customer_id=customer_id, default_panels=set(default_panels_not_included)
     )
 
-    # THEN the list of gene panels returned the custom panel and broad non-specific panels
-    assert set(list_of_gene_panels_used) == set(
-        default_panels_not_included
-        + [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]
+    # THEN the list of gene panels returned is the custom panel and broad non-specific panels
+    assert set(
+        list_of_gene_panels_used
+    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(
+        set(default_panels_not_included)
     )
 
 
-def test_gene_panels_customer_collaborator_panel_part_of_master_list(customer_id: str):
+def test_gene_panels_customer_collaborator_and_panel_part_of_master_list(customer_id: str):
     """Test get gene panels when customer is collaborator for gene panel master list, and supplied gene panels are a subset of the masters list."""
 
-    # GIVEN a case that has a gene panel included in the gene panel master list
+    # GIVEN a a gene panel included in the gene panel master list
     default_panels_included: list[str] = [GenePanelMasterList.get_panel_names()[0]]
 
     # GIVEN a master list
-    master_list: list[str] = GenePanelMasterList.get_panel_names()
 
     # WHEN converting the gene panels between the default and the gene panel master list
     list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
@@ -96,14 +80,16 @@ def test_gene_panels_customer_collaborator_panel_part_of_master_list(customer_id
     )
 
     # THEN the list of gene panels used should return all gene panels in the master list
-    assert set(list_of_gene_panels_used) == set(master_list)
+    assert set(list_of_gene_panels_used) == set(GenePanelMasterList.get_panel_names())
 
 
-def test_gene_panels_customer_collaborator_panel_not_part_of_master_list(customer_id: str):
+def test_gene_panels_customer_is_collaborator_and_panel_not_part_of_master_list(customer_id: str):
     """Test get gene panels when customer is collaborator for gene panel master list, but supplied gene panels are not a subset of the masters list."""
 
     # GIVEN a case that has a customer collaborator for the gene panel master list
-    default_panels: list[str] = ["A_PANEL"]
+
+    # GIVEN a gene panel not in the master list
+    default_panels: list[str] = ["A_PANEL_NOT_IN_MASTER_LIST"]
 
     # WHEN converting the gene panels between the default and the gene panel master list
     list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
@@ -111,26 +97,27 @@ def test_gene_panels_customer_collaborator_panel_not_part_of_master_list(custome
     )
 
     # THEN the list of gene panels returned the custom panel and broad non-specific panels
-    assert set(list_of_gene_panels_used) == set(
-        default_panels + [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]
-    )
+    assert set(
+        list_of_gene_panels_used
+    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(set(default_panels))
 
 
-def test_gene_panels_customer_not_collaborator_gene_master_list():
-    """Test get gene panels when customer is not collaborator for gene panel master list."""
+def test_gene_panels_customer_not_collaborator_for_gene_master_list():
+    """Test get gene panels when customer is not collaborator for the gene panel master list."""
+    # GIVEN a a gene panel included in the gene panel master list
+    default_panels: list[str] = [GenePanelMasterList.get_panel_names()[0]]
 
     # GIVEN a case that has a customer, who is not a collaborator for the gene panel master list
-    default_panels: list[str] = ["A_PANEL"]
 
     # WHEN converting the gene panels between the default and the gene panel master list
     list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
-        customer_id="CUSTOMER_NOT_COLLABORATOR", default_panels=set(default_panels)
+        customer_id="CUSTOMER_NOT_COLLABORATOR_FOR_MASTER_LIST", default_panels=set(default_panels)
     )
 
     # THEN the list of gene panels returned the custom panel and broad non-specific panels
-    assert set(list_of_gene_panels_used) == set(
-        default_panels + [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]
-    )
+    assert set(
+        list_of_gene_panels_used
+    ) == GenePanelMasterList.get_broad_non_specific_gene_panels().union(set(default_panels))
 
 
 def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store):
