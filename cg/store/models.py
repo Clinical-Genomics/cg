@@ -406,9 +406,7 @@ class Customer(Base):
 class Collaboration(Base):
     __tablename__ = "collaboration"
     id: Mapped[PrimaryKeyInt]
-    internal_id: Mapped[Str32] = mapped_column(
-        unique=True,
-    )
+    internal_id: Mapped[Str32] = mapped_column(unique=True)
     name: Mapped[Str128]
     customers: Mapped[list[Customer]] = orm.relationship(
         secondary="customer_collaboration", back_populates="collaborations"
