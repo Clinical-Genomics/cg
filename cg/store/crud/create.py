@@ -5,7 +5,7 @@ import petname
 from sqlalchemy import Insert
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
@@ -35,7 +35,6 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
     order_case,
 )
@@ -372,16 +371,6 @@ class CreateHandler(BaseHandler):
             name=name,
             reference_genome=reference_genome,
             verified=verified,
-            **kwargs,
-        )
-
-    def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
-    ) -> SampleLaneSequencingMetrics:
-        """Add a new SampleLaneSequencingMetrics record."""
-        return SampleLaneSequencingMetrics(
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
             **kwargs,
         )
 

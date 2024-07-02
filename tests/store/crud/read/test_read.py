@@ -28,7 +28,6 @@ from cg.store.models import (
     Organism,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
 )
 from cg.store.store import Store
