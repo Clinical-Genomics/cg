@@ -64,6 +64,10 @@ class GenePanelMasterList(StrEnum):
             CustomerId.CUST042,
         }
 
+    @staticmethod
+    def is_customer_collaborator_for_gene_panel_master_list(customer_id: str) -> bool:
+        return customer_id in GenePanelMasterList.collaborators()
+
 
 class GenePanelCombo:
     COMBO_1: dict[str, set[str]] = {
