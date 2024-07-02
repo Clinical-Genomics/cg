@@ -241,3 +241,8 @@ class JanusTags:
         "star",
         "general-stats",
     ]
+
+
+class FohmTag(StrEnum):
+    Complementary = "komplettering"
+    PANGOLIN_TYPING = "pangolin-typing-fohm"
