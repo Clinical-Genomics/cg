@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
+from cg.apps.downsample.models import DownsampleInput
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
@@ -25,9 +26,7 @@ class DownsampleAPI(MetaAPI):
         super().__init__(config)
         self.dry_run: bool = dry_run
 
-    def get_downsample_data(
-        self, sample_id: str, number_of_reads: float, case_id: str, case_name: str
-    ) -> DownsampleData:
+    def get_downsample_data(self, downsample_input: DownsampleInput) -> DownsampleData:
         """Return the DownSampleData.
         Raises:
             DownsampleFailedError
@@ -36,10 +35,7 @@ class DownsampleAPI(MetaAPI):
             return DownsampleData(
                 status_db=self.status_db,
                 hk_api=self.housekeeper_api,
-                sample_id=sample_id,
-                number_of_reads=number_of_reads,
-                case_id=case_id,
-                case_name=case_name,
+                downsample_input=downsample_input,
                 out_dir=Path(self.config.downsample.downsample_dir),
             )
         except Exception as error:
@@ -126,22 +122,12 @@ class DownsampleAPI(MetaAPI):
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def downsample_sample(
-        self,
-        sample_id: str,
-        case_name: str,
-        case_id: str,
-        number_of_reads: float,
-        account: str | None = None,
-    ) -> int | None:
+    def downsample_sample(self, downsample_input: DownsampleInput) -> int | None:
         """Downsample a sample."""
-        LOG.info(f"Starting Downsampling for sample {sample_id}.")
-        validate_sample_id(sample_id)
+        LOG.info(f"Starting downsampling for sample {downsample_input.sample_id}.")
+        validate_sample_id(downsample_input.sample_id)
         downsample_data: DownsampleData = self.get_downsample_data(
-            sample_id=sample_id,
-            case_id=case_id,
-            number_of_reads=number_of_reads,
-            case_name=case_name,
+            downsample_input=downsample_input,
         )
         if self.prepare_fastq_api.is_sample_decompression_needed(
             downsample_data.original_sample.internal_id
@@ -155,6 +141,6 @@ class DownsampleAPI(MetaAPI):
         if not self.dry_run:
             downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
-            downsample_data=downsample_data, account=account
+            downsample_data=downsample_data, account=downsample_input.account
         )
         return submitted_job
