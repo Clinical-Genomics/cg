@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaIndexSettings
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.demultiplex.sample_sheet.utils import (
@@ -123,7 +123,7 @@ class SampleSheetAPI:
         )
         content_with_fixed_header: list[list[str]] = self._replace_sample_header(original_content)
 
-        flow_cell_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        flow_cell_samples: list[IlluminaIndexSettings] = get_flow_cell_samples_from_content(
             sample_sheet_content=content_with_fixed_header
         )
         bcl_convert_creator = SampleSheetCreator(
@@ -186,7 +186,7 @@ class SampleSheetAPI:
         Raises:
              LimsDataError: If no samples are found in LIMS for the flow cell.
         """
-        lims_samples: list[FlowCellSample] = list(
+        lims_samples: list[IlluminaIndexSettings] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=flow_cell.id,

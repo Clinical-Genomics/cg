@@ -6,7 +6,7 @@ from click.testing import CliRunner, Result
 from pydantic import BaseModel
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaIndexSettings
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.process import EXIT_SUCCESS
 from cg.io.txt import read_txt
@@ -20,7 +20,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: CliRunner,
     tmp_flow_cell_without_run_parameters_path: Path,
     sample_sheet_context_broken_flow_cells: CGConfig,
-    hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSample],
+    hiseq_2500_custom_index_bcl_convert_lims_samples: list[IlluminaIndexSettings],
     caplog,
     mocker,
 ):

@@ -2,14 +2,14 @@ import logging
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaIndexSettings
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 LOG = logging.getLogger(__name__)
 
 
-def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
+def validate_samples_are_unique(samples: list[IlluminaIndexSettings]) -> None:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -21,9 +21,9 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         sample_ids.add(sample_id)
 
 
-def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
+def validate_samples_unique_per_lane(samples: list[IlluminaIndexSettings]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
-    sample_by_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(samples)
+    sample_by_lane: dict[int, list[IlluminaIndexSettings]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.debug(f"Validate that samples are unique in lane: {lane}")
         validate_samples_are_unique(samples=lane_samples)
@@ -59,11 +59,11 @@ def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[
 
 
 def get_samples_by_lane(
-    samples: list[FlowCellSample],
-) -> dict[int, list[FlowCellSample]]:
+    samples: list[IlluminaIndexSettings],
+) -> dict[int, list[IlluminaIndexSettings]]:
     """Group and return samples by lane."""
     LOG.debug("Order samples by lane")
-    sample_by_lane: dict[int, list[FlowCellSample]] = {}
+    sample_by_lane: dict[int, list[IlluminaIndexSettings]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
             sample_by_lane[sample.lane] = []
@@ -73,7 +73,7 @@ def get_samples_by_lane(
 
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
-) -> list[FlowCellSample]:
+) -> list[IlluminaIndexSettings]:
     """
     Return the samples in a sample sheet as a list of FlowCellSample objects.
     Raises:
@@ -82,5 +82,5 @@ def get_flow_cell_samples_from_content(
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )
-    adapter = TypeAdapter(list[FlowCellSample])
+    adapter = TypeAdapter(list[IlluminaIndexSettings])
     return adapter.validate_python(raw_samples)
