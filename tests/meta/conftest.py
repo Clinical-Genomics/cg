@@ -26,10 +26,10 @@ def mip_hk_store(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     timestamp: datetime,
-    case_id: str,
+    selected_novaseq_x_case_ids: list[str],
 ) -> HousekeeperAPI:
     deliver_hk_bundle_data = {
-        "name": case_id,
+        "name": selected_novaseq_x_case_ids[0],
         "created": timestamp,
         "expires": timestamp,
         "files": [
@@ -95,7 +95,6 @@ def mip_hk_store(
         ],
     }
     helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
-
     return real_housekeeper_api
 
 

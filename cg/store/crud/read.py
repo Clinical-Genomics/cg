@@ -31,7 +31,6 @@ from cg.store.filters.status_collaboration_filters import (
     apply_collaboration_filter,
 )
 from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -62,7 +61,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -405,15 +403,6 @@ class ReadHandler(BaseHandler):
         )
         return max(sequencing_runs, key=lambda run: run.sequencing_completed_at)
 
-    # TODO: Remove this function. It has been replaced by get_illumina_sequencing_run_by_device_internal_id
-    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell | None:
-        """Return flow cell by flow cell name."""
-        return apply_flow_cell_filter(
-            flow_cells=self._get_query(table=Flowcell),
-            flow_cell_name=flow_cell_name,
-            filter_functions=[FlowCellFilter.BY_NAME],
-        ).first()
-
     def get_illumina_sequencing_runs_by_data_availability(
         self, data_availability: list[str]
     ) -> list[IlluminaSequencingRun] | None:
@@ -422,14 +411,6 @@ class ReadHandler(BaseHandler):
             runs=self._get_query(table=IlluminaSequencingRun),
             data_availability=data_availability,
             filter_functions=[IlluminaSequencingRunFilter.WITH_DATA_AVAILABILITY],
-        ).all()
-
-    def get_flow_cells_by_case(self, case: Case) -> list[Flowcell] | None:
-        """Return flow cells for a case."""
-        return apply_flow_cell_filter(
-            flow_cells=self._get_join_flow_cell_sample_links_query(),
-            filter_functions=[FlowCellFilter.BY_CASE],
-            case=case,
         ).all()
 
     def get_samples_by_illumina_flow_cell(self, flow_cell_id: str) -> list[Sample] | None:

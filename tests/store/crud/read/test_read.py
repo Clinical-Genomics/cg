@@ -28,7 +28,6 @@ from cg.store.models import (
     Organism,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
 )
 from cg.store.store import Store
@@ -517,76 +516,23 @@ def test_get_analysis_by_case_entry_id_and_started_at(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
-    """Test function to return the flow cell sample links query from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_join_flow_cell_sample_links_query()
-
-    # THEN a query should be returned
-    assert isinstance(flow_cell_query, Query)
-
-
-def test_get_flow_cells(re_sequenced_sample_store: Store):
-    """Test function to return the flow cells from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the flow cells
-    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell).all()
-
-    # THEN a flow cells should be returned
-    assert flow_cells
-
-    # THEN a flow cell model should be returned
-    assert isinstance(flow_cells[0], Flowcell)
-
-
-def test_get_flow_cell(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
+def test_get_illumina_sequencing_runs_by_case(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test returning the latest flow cell from the database."""
+    """Test returning a sequencing run from the database by case."""
 
-    # GIVEN a store with two flow cells
+    # GIVEN a store with a sequencing run
 
-    # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
+    # WHEN fetching the a sequencing run by case
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
 
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == novaseq_6000_pre_1_5_kits_flow_cell_id
-
-
-def test_get_flow_cells_by_case(
-    base_store: Store,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    case: Case,
-    helpers: StoreHelpers,
-    sample: Sample,
-):
-    """Test returning the latest flow cell from the database by case."""
-
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
-    )
-
-    helpers.add_flow_cell(store=base_store, flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id)
-
-    # WHEN fetching the latest flow cell
-    flow_cells: list[Flowcell] = base_store.get_flow_cells_by_case(case=case)
-
-    # THEN the flow cell samples for the case should be returned
-    for flow_cell in flow_cells:
-        for sample in flow_cell.samples:
-            assert sample in case.samples
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
+    # THEN a list of sequencing runs should be returned
+    assert sequencing_runs
 
 
 def test_get_samples_from_illumina_flow_cell_internal_id(

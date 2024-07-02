@@ -410,12 +410,12 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
     cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
@@ -1231,36 +1231,6 @@ def analysis_store_single_case(
     """Set up a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
-
-
-@pytest.fixture
-def store_with_demultiplexed_samples(
-    store: Store,
-    helpers: StoreHelpers,
-    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
-    selected_hiseq_x_dual_index_sample_ids: list[str],
-    hiseq_x_dual_index_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-) -> Store:
-    """Return a store with samples that have been demultiplexed."""
-    helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
-    helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
-    for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        )
-
-    for i, sample_internal_id in enumerate(selected_hiseq_x_dual_index_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
-        )
-    return store
 
 
 @pytest.fixture
@@ -3862,39 +3832,6 @@ def expected_average_q30_for_flow_cell() -> float:
 def expected_total_reads_hiseq_x_flow_cell() -> int:
     """Return an expected read count"""
     return 8_000_000
-
-
-@pytest.fixture
-def store_with_sequencing_metrics(
-    store: Store,
-    sample_id: str,
-    father_sample_id: str,
-    mother_sample_id: str,
-    expected_total_reads: int,
-    flow_cell_name: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    hiseq_x_dual_index_flow_cell_id: str,
-    helpers: StoreHelpers,
-) -> Store:
-    """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[tuple] = [
-        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
-        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
-        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 85.5, 30),
-        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 80.5, 30),
-        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 83.5, 30),
-        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 81.5, 30),
-        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 3, 1_500_000, 80.5, 33),
-        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 2, 1_500_000, 80.5, 33),
-    ]
-    helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
-    helpers.add_sample(
-        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
-    )
-    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
-        metrics_data=sample_sequencing_metrics_details, store=store
-    )
-    return store
 
 
 @pytest.fixture

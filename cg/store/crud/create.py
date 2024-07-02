@@ -5,7 +5,7 @@ import petname
 from sqlalchemy import Insert
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
@@ -26,7 +26,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -36,7 +35,6 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
     order_case,
 )
@@ -260,25 +258,6 @@ class CreateHandler(BaseHandler):
         new_record.father = father
         return new_record
 
-    def add_flow_cell(
-        self,
-        flow_cell_name: str,
-        sequencer_name: str,
-        sequencer_type: str,
-        date: datetime,
-        flow_cell_status: str | None = SequencingRunDataAvailability.ON_DISK,
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Build a new Flowcell record."""
-        return Flowcell(
-            name=flow_cell_name,
-            sequencer_name=sequencer_name,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
-            status=flow_cell_status,
-            has_backup=has_backup,
-        )
-
     def add_analysis(
         self,
         workflow: Workflow,
@@ -392,16 +371,6 @@ class CreateHandler(BaseHandler):
             name=name,
             reference_genome=reference_genome,
             verified=verified,
-            **kwargs,
-        )
-
-    def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
-    ) -> SampleLaneSequencingMetrics:
-        """Add a new SampleLaneSequencingMetrics record."""
-        return SampleLaneSequencingMetrics(
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
             **kwargs,
         )
 
