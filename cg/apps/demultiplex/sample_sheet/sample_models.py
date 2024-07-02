@@ -17,7 +17,7 @@ from cg.models.demultiplex.run_parameters import RunParameters
 LOG = logging.getLogger(__name__)
 
 
-class IlluminaSampleIndexSettings(BaseModel):
+class IlluminaSampleIndexSetting(BaseModel):
     """Class that represents index settings for a sample on an Illumina run."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
@@ -81,7 +81,7 @@ class IlluminaSampleIndexSettings(BaseModel):
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def _update_barcode_mismatches_1(
-        self, samples_to_compare: list["IlluminaSampleIndexSettings"]
+        self, samples_to_compare: list["IlluminaSampleIndexSetting"]
     ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
@@ -98,7 +98,7 @@ class IlluminaSampleIndexSettings(BaseModel):
 
     def _update_barcode_mismatches_2(
         self,
-        samples_to_compare: list["IlluminaSampleIndexSettings"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_reverse_complement: bool,
     ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
@@ -132,7 +132,7 @@ class IlluminaSampleIndexSettings(BaseModel):
 
     def update_barcode_mismatches(
         self,
-        samples_to_compare: list["IlluminaSampleIndexSettings"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_run_single_index: bool,
         is_reverse_complement: bool,
     ) -> None:

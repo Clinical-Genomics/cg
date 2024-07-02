@@ -3,7 +3,7 @@
 import logging
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSettings
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -17,17 +17,17 @@ class SampleSheetCreator:
     def __init__(
         self,
         run_directory_data: IlluminaRunDirectoryData,
-        samples: list[IlluminaSampleIndexSettings],
+        samples: list[IlluminaSampleIndexSetting],
     ):
         self.run_directory_data: IlluminaRunDirectoryData = run_directory_data
         self.flow_cell_id: str = run_directory_data.id
-        self.samples: list[IlluminaSampleIndexSettings] = samples
+        self.samples: list[IlluminaSampleIndexSetting] = samples
         self.run_parameters: RunParameters = run_directory_data.run_parameters
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     def convert_sample_to_header_dict(
         self,
-        sample: IlluminaSampleIndexSettings,
+        sample: IlluminaSampleIndexSetting,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
