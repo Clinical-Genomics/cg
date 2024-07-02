@@ -1,6 +1,6 @@
-from enum import Enum
 import re
 from datetime import datetime
+from enum import Enum
 from typing import Annotated
 
 from sqlalchemy import (
@@ -456,7 +456,7 @@ class Case(Base, PriorityMixin):
         default=Priority.standard,
     )
 
-    sequencing_qc_status: Mapped[SequencingQCStatus] = mapped_column(
+    aggregated_sequencing_qc: Mapped[SequencingQCStatus] = mapped_column(
         types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
