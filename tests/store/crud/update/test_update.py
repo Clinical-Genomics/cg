@@ -1,7 +1,6 @@
 from cg.constants import SequencingRunDataAvailability
-from cg.store.models import Flowcell, IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
 
 
 def test_update_illumina_sequencing_run_availability(store_with_illumina_sequencing_data: Store):

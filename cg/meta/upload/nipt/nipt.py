@@ -15,7 +15,7 @@ from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import SequencingRunQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Case, Flowcell, IlluminaSequencingRun
+from cg.store.models import Analysis, Case, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)

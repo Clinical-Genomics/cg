@@ -1,24 +1,13 @@
 """ Module to group PDC related commands."""
 
 import logging
-from pathlib import Path
 from subprocess import CalledProcessError
 
 import psutil
 
 from cg.constants.pdc import DSMCParameters
 from cg.constants.process import EXIT_WARNING
-from cg.exc import (
-    DsmcAlreadyRunningError,
-    IlluminaRunAlreadyBackedUpError,
-    IlluminaRunEncryptionError,
-    PdcError,
-)
-from cg.services.illumina_services.backup_services.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
-from cg.store.models import Flowcell
-from cg.store.store import Store
+from cg.exc import PdcError
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
