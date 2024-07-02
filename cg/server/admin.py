@@ -492,6 +492,22 @@ class IlluminaFlowCellView(BaseView):
         "archived_at",
     ]
 
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                "<a href='%s'>%s</a>"
+                % (
+                    url_for("illuminaflowcell.index_view", search=model.device.internal_id),
+                    model.device.internal_id,
+                )
+            )
+            if model.device
+            else ""
+        )
+
 
 class OrganismView(BaseView):
     """Admin view for Model.Organism"""
