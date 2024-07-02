@@ -1025,6 +1025,16 @@ class PacBioSMRTCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
 
+class OxfordNanoporeFlowCell(RunDevice):
+    """Model for storing Oxford Nanopore flow cells."""
+
+    __tablename__ = "oxford_nanopore_flow_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.OXFORD_NANOPORE}
+
+
 class InstrumentRun(Base):
     """Parent model for the different types of instrument runs."""
 
