@@ -3,10 +3,14 @@ from pathlib import Path
 
 import click
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.apps.demultiplex.sample_sheet.utils import (
+    delete_sample_sheet_from_housekeeper,
+    add_and_include_sample_sheet_path_to_housekeeper,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
@@ -22,17 +26,13 @@ from cg.exc import (
     SampleSheetFormatError,
 )
 from cg.io.controller import ReadFile, WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-    delete_sample_sheet_from_housekeeper,
-)
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.utils.files import get_directories_in_path, link_or_overwrite_file
 
 LOG = logging.getLogger(__name__)
 
 
-class SampleSheetAPI:
+class IlluminaSampleSheetService:
     """Sample Sheet API class."""
 
     def __init__(self, flow_cell_dir: str, hk_api: HousekeeperAPI, lims_api: LimsAPI) -> None:
@@ -115,19 +115,19 @@ class SampleSheetAPI:
 
     def translate_sample_sheet(self, flow_cell_name: str) -> None:
         """Translate a Bcl2Fastq sample sheet to a BCLConvert sample sheet."""
-        flow_cell: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
-        if not self._are_necessary_files_in_flow_cell(flow_cell):
+        run_directory_data: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
+        if not self._are_necessary_files_in_flow_cell(run_directory_data):
             raise MissingFilesError("Missing necessary files in run directory for translation")
         original_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
+            file_format=FileFormat.CSV, file_path=run_directory_data.sample_sheet_path
         )
         content_with_fixed_header: list[list[str]] = self._replace_sample_header(original_content)
 
-        flow_cell_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(
             sample_sheet_content=content_with_fixed_header
         )
         bcl_convert_creator = SampleSheetCreator(
-            flow_cell=flow_cell, lims_samples=flow_cell_samples
+            run_directory_data=run_directory_data, samples=samples
         )
         new_content = bcl_convert_creator.construct_sample_sheet()
         self.validator.validate_sample_sheet_from_content(new_content)
@@ -141,15 +141,17 @@ class SampleSheetAPI:
         WriteFile.write_file_from_content(
             content=new_content,
             file_format=FileFormat.CSV,
-            file_path=flow_cell.sample_sheet_path,
+            file_path=run_directory_data.sample_sheet_path,
         )
 
-    def _use_sample_sheet_from_housekeeper(self, flow_cell: IlluminaRunDirectoryData) -> None:
+    def _use_sample_sheet_from_housekeeper(
+        self, run_directory_data: IlluminaRunDirectoryData
+    ) -> None:
         """
         Copy the sample sheet from Housekeeper to the flow cell directory if it exists and is valid.
         """
-        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
-        flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
+        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
+        run_directory_data.set_sample_sheet_path_hk(sample_sheet_path)
         self.validate_sample_sheet(sample_sheet_path)
 
         if self.dry_run:
@@ -159,7 +161,7 @@ class SampleSheetAPI:
             )
             return
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
-        link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
+        link_or_overwrite_file(src=sample_sheet_path, dst=run_directory_data.sample_sheet_path)
 
     def _use_flow_cell_sample_sheet(self, flow_cell: IlluminaRunDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
@@ -186,7 +188,7 @@ class SampleSheetAPI:
         Raises:
              LimsDataError: If no samples are found in LIMS for the flow cell.
         """
-        lims_samples: list[FlowCellSample] = list(
+        lims_samples: list[IlluminaSampleIndexSetting] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=flow_cell.id,
@@ -196,7 +198,7 @@ class SampleSheetAPI:
             message: str = f"Could not find any samples in LIMS for {flow_cell.id}"
             LOG.warning(message)
             raise LimsDataError(message)
-        creator = SampleSheetCreator(flow_cell=flow_cell, lims_samples=lims_samples)
+        creator = SampleSheetCreator(run_directory_data=flow_cell, samples=lims_samples)
         LOG.info(
             f"Constructing sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
         )

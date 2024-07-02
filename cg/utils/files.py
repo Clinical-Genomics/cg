@@ -100,3 +100,12 @@ def link_or_overwrite_file(src: Path, dst: Path) -> None:
         dst.unlink()
     os.link(src=src, dst=dst)
     LOG.debug(f"Linked {src} to {dst}")
+
+
+def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
+    """Get the relative paths of all files in a directory and its subdirectories."""
+    files_in_directory: list[Path] = []
+    for subdir, _, files in os.walk(directory):
+        subdir = Path(subdir).relative_to(directory)
+        files_in_directory.extend([Path(subdir, file) for file in files])
+    return files_in_directory

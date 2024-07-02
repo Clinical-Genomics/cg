@@ -1,5 +1,8 @@
 import logging
 from pathlib import Path
+from typing import Iterable
+
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -143,3 +146,16 @@ def add_run_parameters_file_to_housekeeper(
         f"Added run parameters file {run_parameters_file_path} to {run_directory_data.id}"
         " in Housekeeper."
     )
+
+
+def delete_sequencing_data_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
+    """Delete FASTQ, SPRING and metadata files associated with a flow cell from Housekeeper."""
+    tag_combinations: list[set[str]] = [
+        {SequencingFileTag.FASTQ, flow_cell_id},
+        {SequencingFileTag.SPRING, flow_cell_id},
+        {SequencingFileTag.SPRING_METADATA, flow_cell_id},
+    ]
+    for tags in tag_combinations:
+        housekeeper_files: Iterable[File] = hk_api.files(tags=tags)
+        for housekeeper_file in housekeeper_files:
+            hk_api.delete_file(file_id=housekeeper_file.id)

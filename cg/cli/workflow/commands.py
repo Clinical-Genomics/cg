@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
-from cg.exc import FlowCellsNeededError
+from cg.exc import IlluminaRunsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -41,25 +41,28 @@ OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
 LOG = logging.getLogger(__name__)
 
 
-@click.command("ensure-flow-cells-on-disk")
+@click.command("ensure-illumina-runs-on-disk")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
-    """Check if flow cells are on disk for a given case. If not, request flow cells and raise FlowcellsNeededError."""
+def ensure_illumina_runs_on_disk(context: CGConfig, case_id: str):
+    """
+    Check if Illumina runs are on disk for a given case.
+    If not, request Illumnina run and raise IlluminaRunsNeededError.
+    """
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    if not status_db.are_all_flow_cells_on_disk(case_id=case_id):
+    if not status_db.are_all_illumina_runs_on_disk(case_id=case_id):
         if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
             LOG.debug("All samples have been down sampled. Flow cell check not applicable")
             return
         elif analysis_api.status_db.is_case_external(case_id=case_id):
             LOG.debug("All samples are external. Flow cell check not applicable")
             return
-        raise FlowCellsNeededError(
+        raise IlluminaRunsNeededError(
             "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
-    LOG.info("All flow cells present on disk")
+    LOG.info("All Illumina runs present on disk")
 
 
 @click.command("resolve-compression")

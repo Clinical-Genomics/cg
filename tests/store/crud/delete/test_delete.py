@@ -1,29 +1,5 @@
-from cg.store.models import Case, CaseSample, Flowcell, Sample
+from cg.store.models import Case, CaseSample, Sample, IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
-from tests.meta.demultiplex.conftest import populated_flow_cell_store
-
-
-def test_delete_flow_cell(
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str, populated_flow_cell_store: Store
-):
-    """Test deleting a flow cell in Store."""
-
-    # GIVEN a database containing a flow cell
-    flow_cell: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
-    )
-
-    assert flow_cell
-
-    # WHEN removing flow cell
-    populated_flow_cell_store.delete_flow_cell(flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id)
-
-    # THEN no entry should be found for the flow cell
-    results: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
-    )
-
-    assert not results
 
 
 def test_store_api_delete_relationships_between_sample_and_cases(
@@ -131,23 +107,38 @@ def test_store_api_delete_non_existing_case(
     assert len(remaining_cases) == len(existing_cases)
 
 
-def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
+def test_delete_illumina_flow_cell(
+    store_with_illumina_sequencing_data: Store, novaseq_x_flow_cell_id: str
 ):
-    """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
-
-    # GIVEN a database containing a flow cell
-    metrics = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-        flow_cell_name=flow_cell_name
+    # GIVEN a store containing an Illumina flow cell and sequencing data
+    flow_cell: IlluminaFlowCell = (
+        store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
-    assert metrics
-
-    # WHEN removing flow cell
-    store_with_sequencing_metrics.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
-        flow_cell_name=metrics[0].flow_cell_name
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
 
-    # THEN no entry should be found for the flow cell
-    assert not store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-        flow_cell_name=metrics[0].flow_cell_name
+    assert flow_cell
+    assert sequencing_run
+
+    # WHEN deleting the flow cell
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(novaseq_x_flow_cell_id)
+
+    # THEN the flow cell should no longer be found in the store
+    deleted_flow_cell: IlluminaFlowCell = (
+        store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    deleted_sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+
+    assert not deleted_flow_cell
+    assert not deleted_sequencing_run

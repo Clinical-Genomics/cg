@@ -6,11 +6,9 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_sequencing_run
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-)
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 

@@ -196,5 +196,5 @@ def setup_mocks(
         return_value=["a str"],
     )
 
-    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
-    ReadHandler.are_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(ReadHandler, "are_all_illumina_runs_on_disk")
+    ReadHandler.are_all_illumina_runs_on_disk.return_value = True

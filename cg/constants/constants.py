@@ -74,7 +74,7 @@ class CustomerId(StrEnum):
     CUST999: str = "cust999"
 
 
-class FlowCellStatus(StrEnum):
+class SequencingRunDataAvailability(StrEnum):
     ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"

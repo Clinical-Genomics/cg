@@ -29,7 +29,7 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool, force: bool
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    if force or nipt_upload_api.flowcell_passed_qc_value(
+    if force or nipt_upload_api.sequencing_run_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         LOG.info("*** NIPT FTP UPLOAD START ***")
