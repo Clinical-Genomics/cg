@@ -1,4 +1,4 @@
-"""Interactions with the gisaid cli upload_results_to_gisaid"""
+"""GISAID API."""
 
 import logging
 import re
@@ -14,6 +14,7 @@ from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
+from cg.models.gisaid.reports import GisaidComplementaryReport
 from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils import Process
@@ -27,7 +28,7 @@ UPLOADED_REGEX_MATCH = r"\[\"([A-Za-z0-9_]+)\"\]\}$"
 
 
 class GisaidAPI:
-    """Interface with Gisaid cli uppload"""
+    """Interface with Gisaid CLI upload."""
 
     def __init__(self, config: CGConfig):
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
@@ -43,6 +44,47 @@ class GisaidAPI:
         self.mutant_root_dir = Path(config.mutant.root)
 
         self.process = Process(binary=self.gisaid_binary)
+
+    @staticmethod
+    def get_complementary_report_content(complementary_file: Path) -> list[dict]:
+        """Return complementary report content from file."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=complementary_file, read_to_dict=True
+        )
+
+    @staticmethod
+    def validate_gisaid_complementary_reports(
+        reports: list[dict],
+    ) -> list[GisaidComplementaryReport]:
+        """Validate GISAID complementary reports.
+        Raises:
+            ValidateError."""
+        complementary_reports = []
+        for report in reports:
+            complementary_report = GisaidComplementaryReport.model_validate(report)
+            complementary_reports.append(complementary_report)
+        return complementary_reports
+
+    @staticmethod
+    def get_sars_cov_complementary_reports(
+        reports: list[GisaidComplementaryReport],
+    ) -> list[GisaidComplementaryReport]:
+        """Return all "Sars-cov2" reports."""
+        return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
+
+    @staticmethod
+    def get_complementary_report_sample_number(
+        reports: list[GisaidComplementaryReport],
+    ) -> set[str]:
+        """Return all unique samples in reports."""
+        return {report.sample_number for report in reports}
+
+    def get_complementary_report_sample(self, sample_numbers: set[str]) -> list[Sample]:
+        """Return all unique samples in reports."""
+        return [
+            self.status_db.get_sample_by_name(name=sample_number)
+            for sample_number in sample_numbers
+        ]
 
     def get_completion_file_from_hk(self, case_id: str) -> File:
         """Find completon file in Housekeeper and return it"""
@@ -175,10 +217,9 @@ class GisaidAPI:
 
     def create_gisaid_log_file(self, case_id: str) -> None:
         """Path for gisaid bundle log"""
-        gisaid_log_file = self.housekeeper_api.get_files(
+        if _ := self.housekeeper_api.get_files(
             bundle=case_id, tags=["gisaid-log", case_id]
-        ).first()
-        if gisaid_log_file:
+        ).first():
             LOG.info("GISAID log exists in case bundle in Housekeeper")
             return
 

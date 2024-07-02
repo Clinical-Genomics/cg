@@ -1,6 +1,13 @@
 """Module to handle dictionary helper functions."""
 
 
+def remove_duplicate_dicts(dicts: list[dict]) -> list[dict]:
+    return [
+        dict(dictionary_tuple)
+        for dictionary_tuple in {tuple(dictionary.items()) for dictionary in dicts}
+    ]
+
+
 def get_list_from_dictionary(dictionary: dict) -> list:
     """Return a list of the passed dict non-empty key values."""
     list_from_dict: list[str] = []
