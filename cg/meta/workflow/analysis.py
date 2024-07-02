@@ -34,14 +34,14 @@ from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+def add_gene_panel_combo(gene_panels: set[str]) -> set[str]:
     """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
     additional_panels = set()
-    for panel in default_panels:
+    for panel in gene_panels:
         if panel in GenePanelCombo.COMBO_1:
             additional_panels |= GenePanelCombo.COMBO_1.get(panel)
-    default_panels |= additional_panels
-    return default_panels
+    gene_panels |= additional_panels
+    return gene_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -691,17 +691,16 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if customer should use the gene panel master list
+        """Check if customer is collaborator for gene panel master list
         and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO.
+        If not, add gene panel combo and broad non-specific gene panels.
         Return an aggregated gene panel."""
-        master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
-            master_list
+        if GenePanelMasterList.is_customer_collaborator_and_panels_in_gene_panels_master_list(
+            customer_id=customer_id, gene_panels=default_panels
         ):
-            return master_list
-        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+            return GenePanelMasterList.get_panel_names()
+        all_panels: set[str] = add_gene_panel_combo(gene_panels=default_panels)
+        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
         return list(all_panels)
 
     def run_analysis(self, *args, **kwargs):
