@@ -3,25 +3,25 @@ from collections import defaultdict
 
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaIndexSettings
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSettings
 
 LOG = logging.getLogger(__name__)
 
 
 class SampleSheet(BaseModel):
-    samples: list[IlluminaIndexSettings]
+    samples: list[IlluminaSampleIndexSettings]
 
     def get_non_pooled_lanes_and_samples(self) -> list[tuple[int, str]]:
         """Return tuples of non-pooled lane and sample ids."""
         non_pooled_lane_sample_id_pairs: list[tuple[int, str]] = []
-        non_pooled_samples: list[IlluminaIndexSettings] = self.get_non_pooled_samples()
+        non_pooled_samples: list[IlluminaSampleIndexSettings] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
             non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))
         return non_pooled_lane_sample_id_pairs
 
-    def get_non_pooled_samples(self) -> list[IlluminaIndexSettings]:
+    def get_non_pooled_samples(self) -> list[IlluminaSampleIndexSettings]:
         """Return samples that are sequenced solo in their lane."""
-        lane_samples: dict[int, list[IlluminaIndexSettings]] = defaultdict(list)
+        lane_samples: dict[int, list[IlluminaSampleIndexSettings]] = defaultdict(list)
         for sample in self.samples:
             lane_samples[sample.lane].append(sample)
         return [samples[0] for samples in lane_samples.values() if len(samples) == 1]

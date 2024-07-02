@@ -17,7 +17,7 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -534,7 +534,7 @@ def sample_sheet_context(
     """Return cg context with added Lims and Housekeeper API."""
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
-    cg_context.sample_sheet_api_ = SampleSheetAPI(
+    cg_context.sample_sheet_api_ = IlluminaSampleSheetService(
         flow_cell_dir=tmp_illumina_sequencing_runs_directory.as_posix(),
         hk_api=cg_context.housekeeper_api,
         lims_api=cg_context.lims_api,
@@ -555,7 +555,7 @@ def sample_sheet_context_broken_flow_cells(
     )
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
-    cg_context.sample_sheet_api_ = SampleSheetAPI(
+    cg_context.sample_sheet_api_ = IlluminaSampleSheetService(
         flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
         hk_api=cg_context.housekeeper_api,
         lims_api=cg_context.lims_api,

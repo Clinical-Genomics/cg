@@ -7,7 +7,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -372,7 +372,7 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None
-    sample_sheet_api_: SampleSheetAPI | None = None
+    sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
@@ -554,11 +554,11 @@ class CGConfig(BaseModel):
         return service
 
     @property
-    def sample_sheet_api(self) -> SampleSheetAPI:
+    def sample_sheet_api(self) -> IlluminaSampleSheetService:
         sample_sheet_api = self.__dict__.get("sample_sheet_api_")
         if sample_sheet_api is None:
             LOG.debug("Instantiating sample sheet API")
-            sample_sheet_api = SampleSheetAPI(
+            sample_sheet_api = IlluminaSampleSheetService(
                 flow_cell_dir=self.run_instruments.illumina.sequencing_runs_dir,
                 hk_api=self.housekeeper_api,
                 lims_api=self.lims_api,
