@@ -68,6 +68,14 @@ class GenePanelMasterList(StrEnum):
     def is_customer_collaborator_for_gene_panel_master_list(customer_id: str) -> bool:
         return customer_id in GenePanelMasterList.collaborators()
 
+    @staticmethod
+    def is_customer_collaborator_and_panels_in_gene_panels_master_list(
+        customer_id: str, gene_panels: set[str]
+    ) -> bool:
+        return GenePanelMasterList.is_customer_collaborator_for_gene_panel_master_list(
+            customer_id
+        ) and gene_panels.issubset(GenePanelMasterList.get_panel_names())
+
 
 class GenePanelCombo:
     COMBO_1: dict[str, set[str]] = {

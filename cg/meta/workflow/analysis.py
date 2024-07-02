@@ -691,15 +691,14 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if customer should use the gene panel master list
+        """Check if customer is collaborator for gene panel master list
         and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO.
+        If not, add gene panel combo and broad non-specific gene panels.
         Return an aggregated gene panel."""
-        gene_panel_master_list_names: list[str] = GenePanelMasterList.get_panel_names()
-        if GenePanelMasterList.is_customer_collaborator_for_gene_panel_master_list(
-            customer_id
-        ) and default_panels.issubset(gene_panel_master_list_names):
-            return gene_panel_master_list_names
+        if GenePanelMasterList.is_customer_collaborator_and_panels_in_gene_panels_master_list(
+            customer_id=customer_id, gene_panels=default_panels
+        ):
+            return GenePanelMasterList.get_panel_names()
         all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
         all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
