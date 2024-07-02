@@ -6,7 +6,7 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     hardlink_flow_cell_analysis_data,
@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dry_run: bool):
     """Demultiplex all sequencing runs that are ready under the sequencing runs directory."""
     LOG.info("Running cg demultiplex all ...")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     if sequencing_runs_directory:
@@ -90,7 +90,7 @@ def demultiplex_sequencing_run(
     """
 
     LOG.info(f"Starting demultiplexing of sequencing run {sequencing_run_name}")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     sequencing_run_dir: Path = Path(
         context.demultiplex_api.sequencing_runs_dir, sequencing_run_name

@@ -7,8 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants import Workflow, SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
@@ -176,7 +176,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def create_fluffy_sample_sheet(
         self,
-        samples: list[FlowCellSample],
+        samples: list[IlluminaSampleIndexSetting],
         flow_cell_id: str,
     ) -> FluffySampleSheet:
         fluffy_sample_sheet_rows = []
@@ -214,7 +214,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+        samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(sample_sheet_content)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
