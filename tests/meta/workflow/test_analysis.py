@@ -344,6 +344,8 @@ def test_prepare_fastq_files_request_miria(
         PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
     ), mock.patch.object(
         SpringArchiveAPI, "retrieve_spring_files_for_case"
+    ), mock.patch.object(
+        AnalysisAPI, "is_raw_data_ready_for_analysis", return_value=False
     ) as request_submitter:
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
