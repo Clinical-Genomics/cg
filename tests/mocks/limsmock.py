@@ -132,3 +132,11 @@ class MockLimsAPI(LimsAPI):
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
         """Mock return input amount used in the latest preparation of an RNA sample."""
         return 300.0
+
+    def get_sample_dv200(self, sample_id: str) -> float:
+        """Mock return sample's percentage of RNA fragments greater than 200 nucleotides."""
+        return 75.0
+
+    def has_sample_passed_initial_qc(self, sample_id: str) -> bool:
+        """Mock return of the sample initial QC flag."""
+        return True

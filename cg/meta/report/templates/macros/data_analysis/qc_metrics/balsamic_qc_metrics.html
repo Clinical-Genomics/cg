@@ -4,9 +4,9 @@
   {% set
     metrics = [
       {"name": "Läspar [M]",                  "key": "million_read_pairs", "description": "Antal sekvenseringsläsningar i miljoner läspar."},
-      {"name": "Duplikat [%]",                "key": "duplicates",         "description": "Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering."},
-      {"name": "Medelfragmentlängd [baspar]", "key": "mean_insert_size",   "description": "Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. < 200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning."},
-      {"name": "Fold 80 base penalty",        "key": "fold_80",            "description": "Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet."},
+      {"name": "Duplikat [%]",                "key": "duplicates",         "description": "Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
+      {"name": "Medelfragmentlängd [baspar]", "key": "mean_insert_size",   "description": "Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument."},
+      {"name": "Fold 80 base penalty",        "key": "fold_80",            "description": "Jämnhet av täckningsgraden över alla gener i analyspanlen."},
     ]
   %}
   {% if "helgenomsekvensering" in analysis_type %}

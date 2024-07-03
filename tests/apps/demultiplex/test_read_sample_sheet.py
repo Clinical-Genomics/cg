@@ -8,7 +8,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     validate_samples_are_unique,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 
 def test_validate_samples_are_unique(
@@ -35,7 +35,7 @@ def test_validate_samples_are_unique_when_not_unique(
     caplog.set_level(logging.INFO)
 
     # WHEN validating the samples
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetContentError):
         validate_samples_are_unique(
             samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_1]
         )
@@ -90,7 +90,7 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_column_names: list[li
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         get_raw_samples_from_content(sample_sheet_content=sample_sheet_samples_no_column_names)
 
     # THEN an exception is raised because of the missing header
@@ -103,7 +103,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl_convert_data_header: list[l
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         get_raw_samples_from_content(sample_sheet_content=sample_sheet_bcl_convert_data_header)
 
     # THEN an exception is raised because of the missing samples

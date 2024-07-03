@@ -12,6 +12,7 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -22,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_case_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -42,7 +43,7 @@ def test_config_case_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
@@ -72,7 +73,7 @@ def test_config_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_case_without_samples(
     cli_runner: CliRunner,
@@ -102,7 +103,7 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
@@ -156,27 +157,13 @@ def test_config_case_default_parameters(
     )
     assert sample_sheet_content_expected in sample_sheet_content_created
 
-    # WHEN workflow is not raredisease nor tomte
-    # Note this will need to be unified once all workflows are standarised
-    if workflow not in {Workflow.RAREDISEASE, Workflow.TOMTE}:
-        # THEN the params file should contain all parameters
-        parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
-        params_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.TXT, file_path=params_file_path, read_to_string=True
-        )
-        for parameter in parameters_default:
-            assert parameter in params_content
-
-    # Check that parameters are written in the config file for tomte
-    # Note this will need to be unified once all workflows are standarised
-    if workflow in {Workflow.TOMTE}:
-        # THEN the params file should contain all parameters
-        parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
-        params_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.TXT, file_path=nexflow_config_file_path, read_to_string=True
-        )
-        for parameter in parameters_default:
-            assert f"params.{parameter}" in params_content
+    # THEN the params file should contain all parameters
+    parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
+    params_content: list[list[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=params_file_path, read_to_string=True
+    )
+    for parameter in parameters_default:
+        assert parameter in params_content
 
     # WHEN the workflow requires a gene panel
     # THEN information about the panel being generated should be logged and the file should be written
@@ -189,7 +176,7 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,
