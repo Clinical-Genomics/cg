@@ -62,3 +62,21 @@ def test_get_complementary_report_sample_number(
     # THEN return sample numbers from reports
     for report in gisaid_complementary_reports:
         assert report.sample_number in sample_numbers
+
+
+def test_add_gisaid_accession_to_reports(
+    gisaid_complementary_reports: list[GisaidComplementaryReport], gisaid_api: GisaidAPI
+):
+    """Test adding gisaid accession to the reports."""
+    # GIVEN a GISAID API
+
+    # GIVEN a list of reports
+
+    # WHEN adding GISAID accession
+    gisaid_api.add_gisaid_accession_to_complementary_reports(
+        gisaid_accession={gisaid_complementary_reports[0].sample_number: "a_gisaid_accession"},
+        reports=[gisaid_complementary_reports[0]],
+    )
+
+    # THEN a region lab has been added
+    assert isinstance(gisaid_complementary_reports[0].gisaid_accession, str)

@@ -282,6 +282,20 @@ class GisaidAPI:
             bundle_name=case_id, file=log_file_path, tags=["gisaid-log", case_id]
         )
 
+    def parse_and_get_sars_cov_complementary_reports(
+        self, complementary_report_file: Path
+    ) -> list[GisaidComplementaryReport]:
+        complementary_report_content_raw: list[dict] = self.get_complementary_report_content(
+            complementary_report_file
+        )
+        complementary_report_content_raw_unique: list[dict] = remove_duplicate_dicts(
+            complementary_report_content_raw
+        )
+        complementary_report_sars_cov: list[GisaidComplementaryReport] = (
+            self.validate_gisaid_complementary_reports(complementary_report_content_raw_unique)
+        )
+        return self.get_sars_cov_complementary_reports(complementary_report_sars_cov)
+
     def create_gisaid_files_in_housekeeper(self, case_id: str) -> None:
         """Create all gisaid files in Housekeeper, if needed."""
         gisaid_samples = self.get_gisaid_samples(case_id=case_id)
@@ -292,19 +306,12 @@ class GisaidAPI:
     def create_gisaid_files_in_housekeeper_csv(self, case_id: str) -> None:
         """Create all GISAID files in Housekeeper."""
         complementary_report_file: Path = self.get_complementary_file_from_hk(case_id)
-        complementary_report_content_raw: list[dict] = self.get_complementary_report_content(
-            complementary_report_file
+        complementary_report_sars_cov: list[GisaidComplementaryReport] = (
+            self.parse_and_get_sars_cov_complementary_reports(complementary_report_file)
         )
-        complementary_report_content_raw_unique: list[dict] = remove_duplicate_dicts(
-            complementary_report_content_raw
+        sample_numbers: set[str] = self.get_complementary_report_sample_number(
+            complementary_report_sars_cov
         )
-        complementary_report: list[GisaidComplementaryReport] = (
-            self.validate_gisaid_complementary_reports(complementary_report_content_raw_unique)
-        )
-        complementary_report: list[GisaidComplementaryReport] = (
-            self.get_sars_cov_complementary_reports(complementary_report)
-        )
-        sample_numbers: set[str] = self.get_complementary_report_sample_number(complementary_report)
         samples: list[Sample] = self.get_complementary_report_samples(sample_numbers)
 
         gisaid_samples: list[GisaidSample] = self.get_gisaid_samples_csv(
@@ -382,21 +389,21 @@ class GisaidAPI:
         )
         temp_log.unlink()
 
-    def get_accession_numbers(self, case_id: str) -> dict[str, str]:
-        """Parse accession numbers and sample ids from log file"""
-
-        LOG.info("Parsing accession numbers from log file")
-        accession_numbers = {}
+    def get_gisaid_accession_numbers(self, case_id: str) -> dict[str, str]:
+        """Parse and return GISAID accession numbers and sample ids from log file."""
         log_file = Path(
             self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
             .first()
             .full_path
         )
+        LOG.info(f"Parsing accession numbers from log file: {log_file}")
+        accession_numbers = {}
+
         if log_file.stat().st_size != 0:
-            log_data = ReadFile.get_content_from_file(
+            log_contents: list[dict] = ReadFile.get_content_from_file(
                 file_format=FileFormat.JSON, file_path=log_file.absolute()
             )
-            for log in log_data:
+            for log in log_contents:
                 if log.get("code") == "epi_isl_id":
                     log_message = log.get("msg")
                 elif log.get("code") == "validation_error" and "existing_ids" in log.get("msg"):
@@ -406,14 +413,36 @@ class GisaidAPI:
                     )
                 else:
                     continue
-                accession_obj = GisaidAccession(log_message=log_message)
-                accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
+                gisaid_accession = GisaidAccession(log_message=log_message)
+                accession_numbers[gisaid_accession.sample_id] = gisaid_accession.accession_nr
         return accession_numbers
+
+    def add_gisaid_accession_to_complementary_reports(
+        self, gisaid_accession: dict[str, str], reports: list[GisaidComplementaryReport]
+    ) -> None:
+        """Add GISAID accession to complementary reports."""
+        for report in reports:
+            report.gisaid_accession = gisaid_accession[report.sample_number]
+
+    def update_complementary_file_with_gisaid_accessions(self, case_id: str) -> None:
+        """Update complementary file with GISAID accession numbers."""
+        complementary_report: File | None = self.get_complementary_file_from_hk(case_id=case_id)
+        accession: dict = self.get_gisaid_accession_numbers(case_id=case_id)
+        complementary_report_sars_cov: list[GisaidComplementaryReport] = (
+            self.parse_and_get_sars_cov_complementary_reports(Path(complementary_report.full_path))
+        )
+        self.add_gisaid_accession_to_complementary_reports(
+            gisaid_accession=accession, reports=complementary_report_sars_cov
+        )
+        all_reports: list[dict] = [report.model_dump() for report in complementary_report_sars_cov]
+        write_csv_from_dict(
+            content=all_reports, fieldnames=HEADERS, file_path=Path(complementary_report.full_path)
+        )
 
     def update_completion_file(self, case_id: str) -> None:
         """Update completion file with accession numbers"""
         completion_file = self.get_complementary_file_from_hk(case_id=case_id)
-        accession_dict = self.get_accession_numbers(case_id=case_id)
+        accession_dict = self.get_gisaid_accession_numbers(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         completion_df["GISAID_accession"] = completion_df["provnummer"].apply(
             lambda x: accession_dict[x]
@@ -436,3 +465,24 @@ class GisaidAPI:
         self.create_gisaid_files_in_housekeeper(case_id=case_id)
         self.upload_results_to_gisaid(case_id=case_id)
         self.update_completion_file(case_id=case_id)
+
+    def upload_hs(self, case_id: str) -> None:
+        """Uploading results to GISAID and saving the accession numbers in complementary file."""
+        gisaid_accession_count: int = 0
+        sample_number_count: int = 0
+        complementary_report_file: File | None = self.get_complementary_file_from_hk(case_id)
+        complementary_report_sars_cov: list[GisaidComplementaryReport] = (
+            self.parse_and_get_sars_cov_complementary_reports(complementary_report_file)
+        )
+        for report in complementary_report_sars_cov:
+            if report.gisaid_accession:
+                gisaid_accession_count += 1
+            if report.sample_number:
+                sample_number_count += 1
+        if len(gisaid_accession_count) == len(sample_number_count):
+            LOG.info("All samples already uploaded")
+            return
+
+        self.create_gisaid_files_in_housekeeper_csv(case_id=case_id)
+        self.upload_results_to_gisaid(case_id=case_id)
+        self.update_complementary_file_with_gisaid_accessions(case_id=case_id)
