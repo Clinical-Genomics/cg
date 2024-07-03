@@ -1535,8 +1535,8 @@ class ReadHandler(BaseHandler):
             self._get_query(table=Case)
             .join(Case.links)
             .join(CaseSample.sample)
-            .join(Sample.application_version)
-            .join(ApplicationVersion.application)
+            .join(ApplicationVersion)
+            .join(Application)
         )
         return apply_case_filter(
             cases=query,
