@@ -343,7 +343,7 @@ class CGConfig(BaseModel):
     status_db_: Store | None = None
 
     # App APIs that can be instantiated in CGConfig
-    arnold: ArnoldConfig = None
+    arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
@@ -386,19 +386,19 @@ class CGConfig(BaseModel):
     trailblazer_api_: TrailblazerAPI = None
 
     # Meta APIs that will use the apps from CGConfig
-    balsamic: BalsamicConfig = None
-    fluffy: FluffyConfig = None
+    balsamic: BalsamicConfig | None = None
+    fluffy: FluffyConfig | None = None
     fohm: FOHMConfig | None = None
-    gisaid: GisaidConfig = None
-    microsalt: MicrosaltConfig = None
-    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
-    mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
-    mutant: MutantConfig = None
-    raredisease: RarediseaseConfig = None
-    rnafusion: RnafusionConfig = None
-    statina: StatinaConfig = None
-    taxprofiler: TaxprofilerConfig = None
-    tomte: TomteConfig = None
+    gisaid: GisaidConfig | None = None
+    microsalt: MicrosaltConfig | None = None
+    mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
+    mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
+    mutant: MutantConfig | None = None
+    raredisease: RarediseaseConfig | None = None
+    rnafusion: RnafusionConfig | None = None
+    statina: StatinaConfig | None = None
+    taxprofiler: TaxprofilerConfig | None = None
+    tomte: TomteConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
