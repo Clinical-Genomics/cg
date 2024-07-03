@@ -4,39 +4,36 @@ from pydantic_core import InitErrorDetails, PydanticCustomError
 from cg.services.validation_service.models.order_sample import OrderSample
 
 
-def validate_mothers(samples: list[OrderSample]):
-    sample_names = [sample.name for sample in samples]
-    error_details: list[InitErrorDetails] = []
-    for sample in samples:
-        if sample.mother not in sample_names:
-            error_detail = InitErrorDetails(
-                type=PydanticCustomError(
-                    error_type="Mother missing",
-                    message_template="The provided mother needs to be in the case.",
-                ),
-                loc=("sample", sample.name, "mother"),
-                input=sample.mother,
-                ctx={},
-            )
-            error_details.append(error_detail)
-    if error_details:
-        raise ValidationError.from_exception_data(title="Mothers", line_errors=error_details)
+def validate_required_buffer(self: OrderSample) -> OrderSample:
+    if (
+        self.application.startswith("PAN")
+        or self.application.startswith("EX")
+        and not self.elution_buffer
+    ):
+        error_detail = InitErrorDetails(
+            type=PydanticCustomError(
+                error_type="Missing buffer",
+                message_template="Buffer is required when running PAN or EX applications.",
+            ),
+            loc=("sample", self.name, "elution_buffer"),
+            input=self.elution_buffer,
+            ctx={},
+        )
+        raise ValidationError.from_exception_data(title="FFPE source", line_errors=[error_detail])
+    return self
 
 
-def validate_fathers(samples: list[OrderSample]):
-    sample_names = [sample.name for sample in samples]
-    error_details: list[InitErrorDetails] = []
-    for sample in samples:
-        if sample.father not in sample_names:
-            error_detail = InitErrorDetails(
-                type=PydanticCustomError(
-                    error_type="Father missing",
-                    message_template="The provided father needs to be in the case.",
-                ),
-                loc=("sample", sample.name, "father"),
-                input=sample.father,
-                ctx={},
-            )
-            error_details.append(error_detail)
-    if error_details:
-        raise ValidationError.from_exception_data(title="Fathers", line_errors=error_details)
+def validate_FFPE_source(self: OrderSample) -> OrderSample:
+    if "FFPE" in str(self.source) and self.application.startswith("WG"):
+        error_detail = InitErrorDetails(
+            type=PydanticCustomError(
+                error_type="WGS with FFPE source",
+                message_template="FFPE sources are not allowed for whole genome sequencing.",
+            ),
+            loc=("sample", self.name, "source"),
+            input=self.source,
+            ctx={},
+        )
+        raise ValidationError.from_exception_data(title="FFPE source", line_errors=[error_detail])
+
+    return self
