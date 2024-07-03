@@ -21,7 +21,7 @@ def upgrade():
         table_name="case",
         column_name="sequencing_qc_status",
         new_column_name="aggregated_sequencing_qc",
-        existing_type=sa.Enum("passed", "failed", "pending"),
+        existing_type=sa.Enum("PASSED", "FAILED", "PENDING"),
     )
 
 
@@ -30,5 +30,5 @@ def downgrade():
         table_name="case",
         column_name="aggregated_sequencing_qc",
         new_column_name="sequencing_qc_status",
-        existing_type=sa.Enum("passed", "failed", "pending"),
+        existing_type=sa.Enum("PASSED", "FAILED", "PENDING"),
     )
