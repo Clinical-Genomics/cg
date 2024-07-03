@@ -34,5 +34,5 @@ class UpdateHandler(BaseHandler):
         return order
 
     def update_sequencing_qc_status(self, case: Case, status: SequencingQCStatus) -> None:
-        case.sequencing_qc_status = status
+        case.aggregated_sequencing_qc = status
         self.session.commit()
