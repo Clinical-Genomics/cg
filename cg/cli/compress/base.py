@@ -7,7 +7,7 @@ import click
 from cg.cli.compress.fastq import (
     clean_fastq,
     decompress_case,
-    decompress_flowcell,
+    decompress_illumina_run,
     decompress_sample,
     decompress_ticket,
     fastq_cmd,
@@ -15,10 +15,10 @@ from cg.cli.compress.fastq import (
 )
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
+from cg.services.pdc_service.pdc_service import PdcService
 
 LOG = logging.getLogger(__name__)
 
@@ -83,4 +83,4 @@ def decompress(context: CGConfig):
 decompress.add_command(decompress_sample)
 decompress.add_command(decompress_case)
 decompress.add_command(decompress_ticket)
-decompress.add_command(decompress_flowcell)
+decompress.add_command(decompress_illumina_run)
