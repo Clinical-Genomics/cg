@@ -151,15 +151,16 @@ class BalsamicConfig(CommonAppConfig):
     bed_path: str
     binary_path: str
     cadd_path: str
-    genome_interval_path: str
-    gnomad_af5_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
     conda_binary: str
     conda_env: str
+    genome_interval_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    gnomad_af5_path: str
     loqusdb_path: str
     pon_path: str
     root: str
+    sentieon_licence_path: str
     slurm: SlurmConfig
     swegen_path: str
 
@@ -333,6 +334,7 @@ class CGConfig(BaseModel):
     max_flowcells: int | None
     nanopore_data_directory: str
     run_instruments: RunInstruments
+    sentieon_licence_server: str
     tower_binary_path: str
 
     # Base APIs that always should exist
