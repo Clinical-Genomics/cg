@@ -1,6 +1,7 @@
 from pydantic import ValidationError
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
+from cg.models.orders.sample_base import ContainerEnum
 from cg.services.validation_service.models.order_sample import OrderSample
 
 
@@ -35,5 +36,25 @@ def validate_FFPE_source(self: OrderSample) -> OrderSample:
             ctx={},
         )
         raise ValidationError.from_exception_data(title="FFPE source", line_errors=[error_detail])
-
     return self
+
+
+def validate_required_container_name(self: OrderSample):
+    if self.container == ContainerEnum.plate and not self.container_name:
+        error_details = InitErrorDetails(
+            type="missing", loc=("container_name",), input=self.container_name, ctx={}
+        )
+        raise ValidationError.from_exception_data(
+            title=self.__class__.__name__, line_errors=[error_details]
+        )
+    return self
+
+
+def validate_required_well_position(self: OrderSample):
+    if self.container == ContainerEnum.plate and not self.well_position:
+        error_details = InitErrorDetails(
+            type="missing", loc=("well_position",), input=self.well_position, ctx={}
+        )
+        raise ValidationError.from_exception_data(
+            title=self.__class__.__name__, line_errors=[error_details]
+        )

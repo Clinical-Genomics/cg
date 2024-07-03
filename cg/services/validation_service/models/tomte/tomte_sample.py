@@ -21,7 +21,7 @@ class TomteSample(OrderSample):
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
     reference_genome: GenomeVersion
-    sex: SexEnum = SexEnum.unknown
+    sex: SexEnum
     source: str
     status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)

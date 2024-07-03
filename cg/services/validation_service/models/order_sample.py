@@ -1,7 +1,10 @@
-from pydantic import BaseModel, Field, ValidationError, model_validator
-from pydantic_core import InitErrorDetails
+from pydantic import BaseModel, Field, model_validator
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
+from cg.services.validation_service.models.sample_validators import (
+    validate_required_container_name,
+    validate_required_well_position,
+)
 
 
 class OrderSample(BaseModel):
@@ -15,22 +18,9 @@ class OrderSample(BaseModel):
     volume: int | None = None
     well_position: str | None = None
 
-    @model_validator(mode="after")
-    def validate_container_name(self):
-        if self.container == ContainerEnum.plate and not self.container_name:
-            error_details = InitErrorDetails(
-                type="missing", loc=("container_name",), input=self.container_name, ctx={}
-            )
-            raise ValidationError.from_exception_data(
-                title=self.__class__.__name__, line_errors=[error_details]
-            )
-
-    @model_validator(mode="after")
-    def validate_well_position(self):
-        if self.container == ContainerEnum.plate and not self.well_position:
-            error_details = InitErrorDetails(
-                type="missing", loc=("well_position",), input=self.well_position, ctx={}
-            )
-            raise ValidationError.from_exception_data(
-                title=self.__class__.__name__, line_errors=[error_details]
-            )
+    _validate_required_container_name = model_validator(mode="after")(
+        validate_required_container_name
+    )
+    _validate_required_well_position = model_validator(mode="after")(
+        validate_required_well_position
+    )
