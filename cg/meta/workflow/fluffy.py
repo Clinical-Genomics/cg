@@ -14,7 +14,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
