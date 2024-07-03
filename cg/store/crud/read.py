@@ -1542,7 +1542,6 @@ class ReadHandler(BaseHandler):
             cases=query,
             filter_functions=[
                 CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
-                CaseFilter.HAS_SAMPLES,
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()

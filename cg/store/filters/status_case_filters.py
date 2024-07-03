@@ -215,10 +215,6 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
     )
 
 
-def filter_cases_with_samples(cases: Query, **kwargs) -> Query:
-    return cases.filter(exists().where(CaseSample.case_id == Case.id))
-
-
 def apply_case_filter(
     cases: Query,
     filter_functions: list[Callable],
@@ -298,4 +294,3 @@ class CaseFilter(Enum):
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
     PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
-    HAS_SAMPLES: Callable = filter_cases_with_samples
