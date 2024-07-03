@@ -2,28 +2,28 @@ import subprocess
 from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import SequencingRunDataAvailability, FileExtensions
+from cg.constants import FileExtensions, SequencingRunDataAvailability
 from cg.constants.backup import MAX_PROCESSING_ILLUMINA_RUNS
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import (
-    PdcError,
-    PdcNoFilesMatchingSearchError,
     DsmcAlreadyRunningError,
     IlluminaRunAlreadyBackedUpError,
     IlluminaRunEncryptionError,
+    PdcError,
+    PdcNoFilesMatchingSearchError,
 )
 from cg.meta.backup.backup import LOG
 from cg.meta.encryption.encryption import EncryptionAPI
-from cg.services.illumina_services.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina_services.backup.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.store.models import Flowcell, IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
-from cg.utils.time import get_start_time, get_elapsed_time
+from cg.utils.time import get_elapsed_time, get_start_time
 
 
 class IlluminaBackupService:

@@ -20,7 +20,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,

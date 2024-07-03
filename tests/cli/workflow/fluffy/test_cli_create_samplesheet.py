@@ -6,7 +6,7 @@ from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Flowcell, Sample, IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun, Sample
 
 
 def test_create_samplesheet_dry(

@@ -9,7 +9,6 @@ import mock
 import pytest
 
 from cg.constants import EXIT_FAIL, FileExtensions, SequencingRunDataAvailability
-from cg.constants.sequencing import Sequencers
 from cg.exc import (
     DsmcAlreadyRunningError,
     IlluminaRunAlreadyBackedUpError,
@@ -22,10 +21,9 @@ from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.store.models import Flowcell, IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.conftest import create_process_response
-from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.parametrize(

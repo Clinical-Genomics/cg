@@ -9,12 +9,12 @@ from sqlalchemy.orm import Query
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.constants import Workflow, SequencingFileTag
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Flowcell, Sample
+from cg.store.models import Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)

@@ -11,14 +11,14 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(scope="function")
 def illumina_demultiplexed_runs_post_proccesing_hk_api(
-    sample_sheet_paths_canonical_illumina_runs: dict[str, Path],
+    canonical_flow_cell_ids_and_sample_sheet_paths,
     tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs: dict[str, list[Path]],
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
 ) -> HousekeeperAPI:
     """Return a Housekeeper API instance with Illumina demultiplexed runs."""
-    for flow_cell_id in sample_sheet_paths_canonical_illumina_runs.keys():
-        sample_sheet_path: Path = sample_sheet_paths_canonical_illumina_runs[flow_cell_id]
+    for flow_cell_id in canonical_flow_cell_ids_and_sample_sheet_paths.keys():
+        sample_sheet_path: Path = canonical_flow_cell_ids_and_sample_sheet_paths[flow_cell_id]
         run_sample_sheet_bundle: dict = {
             "name": flow_cell_id,
             "created": datetime.now(),
