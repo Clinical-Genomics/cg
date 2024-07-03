@@ -35,8 +35,7 @@ MAX_CASES_TO_START_IN_50_MINUTES = 21
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
-    """Handles communication between BALSAMIC processes
-    and the rest of CG infrastructure"""
+    """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""
 
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
@@ -48,21 +47,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.account: str = config.balsamic.slurm.account
-        self.binary_path: str = config.balsamic.binary_path
         self.balsamic_cache: str = config.balsamic.balsamic_cache
+        self.bed_path: str = config.balsamic.bed_path
+        self.binary_path: str = config.balsamic.binary_path
+        self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.bed_path: str = config.balsamic.bed_path
-        self.cadd_path: str = config.balsamic.cadd_path
+        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
-        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
-        self.email: EmailStr = config.balsamic.slurm.mail_user
+        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
         self.loqusdb_path: str = config.balsamic.loqusdb_path
         self.pon_path: str = config.balsamic.pon_path
         self.qos: SlurmQos = config.balsamic.slurm.qos
         self.root_dir: str = config.balsamic.root
+        self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
+        self.sentieon_licence_server: str = config.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
 
     @property
