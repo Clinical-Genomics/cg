@@ -580,7 +580,7 @@ def seven_canonical_flow_cell_sample_sheets(
 
 
 @pytest.fixture
-def sample_sheet_paths_canonical_illumina_runs(
+def canonical_flow_cell_ids_and_sample_sheet_paths(
     seven_canonical_flow_cell_ids: list[str],
     seven_canonical_flow_cell_sample_sheets: list[Path],
 ) -> dict[str, Path]:
