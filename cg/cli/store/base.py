@@ -8,7 +8,7 @@ from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.store.store import (
     store_case,
-    store_demultiplexed_run,
+    store_demultiplexed_illumina_run,
     store_illumina_run,
     store_qc_metrics,
     store_sample,
@@ -39,7 +39,7 @@ def store(context: CGConfig):
 
 for sub_cmd in [
     store_case,
-    store_demultiplexed_run,
+    store_demultiplexed_illumina_run,
     store_illumina_run,
     store_sample,
     store_ticket,

@@ -4,7 +4,7 @@ from click.testing import CliRunner
 
 from cg.cli.store.store import (
     store_case,
-    store_demultiplexed_run,
+    store_demultiplexed_illumina_run,
     store_illumina_run,
     store_sample,
     store_ticket,
@@ -200,7 +200,7 @@ def test_store_demultiplexed_flow_cell(
 
     # WHEN running the store demultiplexed flow cell command
     res = cli_runner.invoke(
-        store_demultiplexed_run,
+        store_demultiplexed_illumina_run,
         [novaseq_6000_pre_1_5_kits_flow_cell_id],
         obj=real_populated_compress_context,
     )

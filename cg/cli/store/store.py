@@ -101,7 +101,9 @@ def store_ticket(context: click.Context, ticket: str, dry_run: bool) -> None:
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def store_demultiplexed_run(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
+def store_demultiplexed_illumina_run(
+    context: click.Context, flow_cell_id: str, dry_run: bool
+) -> None:
     """
     Include all flow cell bundle and sequencing files to Housekeeper. Updates SPRING metadata file.
     """
