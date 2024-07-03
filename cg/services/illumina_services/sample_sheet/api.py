@@ -3,11 +3,11 @@ from pathlib import Path
 
 import click
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.apps.demultiplex.sample_sheet.utils import (
+from cg.services.illumina_services.sample_sheet.read_sample_sheet import get_samples_from_content
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_sheet_creator import SampleSheetCreator
+from cg.services.illumina_services.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.services.illumina_services.sample_sheet.utils import (
     delete_sample_sheet_from_housekeeper,
     add_and_include_sample_sheet_path_to_housekeeper,
 )

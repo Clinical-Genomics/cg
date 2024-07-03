@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
+from cg.services.illumina_services.sample_sheet.read_sample_sheet import get_samples_from_content
+from cg.services.illumina_services.sample_sheet.sample_sheet_creator import SampleSheetCreator
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 
 def test_construct_bcl_convert_sheet(

@@ -2,14 +2,14 @@ import logging
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cg.apps.demultiplex.sample_sheet.index import (
+from cg.services.illumina_services.sample_sheet.index import (
     MINIMUM_HAMMING_DISTANCE,
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
     is_dual_index,
 )
-from cg.apps.demultiplex.sample_sheet.validators import SampleId
+from cg.services.illumina_services.sample_sheet.validators import SampleId
 from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters

@@ -2,8 +2,8 @@
 
 import logging
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.read_sample_sheet import get_samples_by_lane
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData

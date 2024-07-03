@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError

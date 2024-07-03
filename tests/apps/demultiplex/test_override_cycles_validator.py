@@ -1,6 +1,8 @@
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
+from cg.services.illumina_services.sample_sheet.override_cycles_validator import (
+    OverrideCyclesValidator,
+)
 from cg.constants.demultiplexing import FORWARD_INDEX_CYCLE_PATTERN, REVERSE_INDEX_CYCLE_PATTERN
 from cg.exc import OverrideCyclesError
 

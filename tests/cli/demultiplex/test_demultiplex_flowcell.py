@@ -5,8 +5,10 @@ from pathlib import Path
 
 from click import testing
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
+from cg.services.illumina_services.demultiplex.demultiplex_service import IlluminaDemultiplexService
+from cg.services.illumina_services.sample_sheet.utils import (
+    add_and_include_sample_sheet_path_to_housekeeper,
+)
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_sequencing_run
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.cg_config import CGConfig
@@ -32,7 +34,7 @@ def test_demultiplex_dragen_flowcell(
     )
 
     # GIVEN a flow cell that is ready for demultiplexing
-    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
+    demux_api: IlluminaDemultiplexService = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.demultiplexed_run_dir_path(flow_cell)
     assert demux_api.is_demultiplexing_possible(sequencing_run=flow_cell)
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
@@ -73,7 +75,7 @@ def test_demultiplex_all_novaseq(
     caplog.set_level(logging.INFO)
 
     # GIVEN a demultiplexing context with an API and correct structure
-    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
+    demux_api: IlluminaDemultiplexService = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.sequencing_runs_dir == tmp_illumina_flow_cells_demux_all_directory
 
     # GIVEN a sequencing run with their sample sheet in Housekeeper

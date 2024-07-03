@@ -6,8 +6,7 @@ from typing_extensions import Literal
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.demultiplex.demultiplex_service import IlluminaDemultiplexService
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -27,6 +26,7 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -350,7 +350,7 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
-    demultiplex_api_: DemultiplexingAPI = None
+    demultiplex_api_: IlluminaDemultiplexService = None
     encryption: Encryption | None = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
@@ -450,11 +450,11 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def demultiplex_api(self) -> DemultiplexingAPI:
+    def demultiplex_api(self) -> IlluminaDemultiplexService:
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
             LOG.debug("Instantiating demultiplexing api")
-            demultiplex_api = DemultiplexingAPI(
+            demultiplex_api = IlluminaDemultiplexService(
                 config=self.dict(), housekeeper_api=self.housekeeper_api
             )
             self.demultiplex_api_ = demultiplex_api

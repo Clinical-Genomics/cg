@@ -3,9 +3,6 @@
 import logging
 from pathlib import Path
 from typing import Callable
-
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-
 from cg.constants.constants import SCALE_TO_READ_PAIRS, FileFormat
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.metrics import (
@@ -18,6 +15,7 @@ from cg.services.illumina_services.metrics.models import (
     DemuxMetrics,
     SequencingQualityMetrics,
 )
+from cg.services.illumina_services.sample_sheet.validators import is_valid_sample_internal_id
 from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)

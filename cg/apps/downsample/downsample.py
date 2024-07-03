@@ -3,12 +3,12 @@
 import logging
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
+from cg.services.illumina_services.sample_sheet.validators import validate_sample_id
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils.calculations import multiply_by_million
 

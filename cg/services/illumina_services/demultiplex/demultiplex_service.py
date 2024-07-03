@@ -6,7 +6,7 @@ from pathlib import Path
 
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
+from cg.services.illumina_services.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -23,7 +23,7 @@ from cg.models.slurm.sbatch import SbatchDragen
 LOG = logging.getLogger(__name__)
 
 
-class DemultiplexingAPI:
+class IlluminaDemultiplexService:
     """Demultiplexing API should deal with anything related to demultiplexing.
 
     This includes starting demultiplexing, creating sample sheets, creating base masks,
@@ -66,7 +66,9 @@ class DemultiplexingAPI:
         error_parameters: SbatchError = SbatchError(
             flow_cell_id=sequencing_run.id,
             email=email,
-            logfile=DemultiplexingAPI.get_stderr_logfile(sequencing_run=sequencing_run).as_posix(),
+            logfile=IlluminaDemultiplexService.get_stderr_logfile(
+                sequencing_run=sequencing_run
+            ).as_posix(),
             demux_dir=demux_dir.as_posix(),
             demux_started=sequencing_run.demultiplexing_started_path.as_posix(),
         )
@@ -109,12 +111,16 @@ class DemultiplexingAPI:
     @staticmethod
     def get_stderr_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to the stderr logfile."""
-        return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stderr")
+        return Path(
+            sequencing_run.path, f"{IlluminaDemultiplexService.get_run_name(sequencing_run)}.stderr"
+        )
 
     @staticmethod
     def get_stdout_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to the stdout logfile."""
-        return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stdout")
+        return Path(
+            sequencing_run.path, f"{IlluminaDemultiplexService.get_run_name(sequencing_run)}.stdout"
+        )
 
     def demultiplexed_run_dir_path(self, sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
 from cg.exc import SampleSheetFormatError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData

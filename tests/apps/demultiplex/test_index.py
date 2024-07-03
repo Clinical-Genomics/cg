@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import (
+from cg.services.illumina_services.sample_sheet.index import (
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,

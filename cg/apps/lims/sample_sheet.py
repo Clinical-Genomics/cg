@@ -2,12 +2,12 @@
 
 import logging
 import re
-from typing import Iterable, Type
+from typing import Iterable
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 LOG = logging.getLogger(__name__)
 

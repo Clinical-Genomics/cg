@@ -1,5 +1,5 @@
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.validators import is_valid_sample_internal_id
 
 
 def test_is_valid_sample_internal_id(

@@ -5,13 +5,13 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.store_helpers import StoreHelpers
 
-GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
+GET_FLOW_CELL_SAMPLES: str = "cg.services.illumina_services.sample_sheet.api.get_flow_cell_samples"
 
 
 def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(

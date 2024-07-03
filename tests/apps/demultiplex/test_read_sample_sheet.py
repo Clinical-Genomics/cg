@@ -2,12 +2,12 @@ import logging
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_raw_samples_from_content,
-    get_samples_by_lane,
+from cg.services.illumina_services.sample_sheet.read_sample_sheet import (
     validate_samples_are_unique,
+    get_samples_by_lane,
+    get_raw_samples_from_content,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 

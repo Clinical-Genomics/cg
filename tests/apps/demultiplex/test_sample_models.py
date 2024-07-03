@@ -1,7 +1,7 @@
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import get_reverse_complement_dna_seq
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.index import get_reverse_complement_dna_seq
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import IndexOverrideCycles
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters

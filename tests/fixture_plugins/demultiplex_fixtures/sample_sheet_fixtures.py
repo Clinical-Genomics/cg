@@ -4,9 +4,10 @@ from typing import Any
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_sheet_models import SampleSheet
+
+from cg.services.illumina_services.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.io.controller import ReadFile

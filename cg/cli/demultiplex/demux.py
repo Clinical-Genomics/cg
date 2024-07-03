@@ -5,8 +5,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.demultiplex.demultiplex_service import IlluminaDemultiplexService
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     hardlink_flow_cell_analysis_data,
@@ -23,6 +22,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import CgError, FlowCellError, SampleSheetContentError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dr
     """Demultiplex all sequencing runs that are ready under the sequencing runs directory."""
     LOG.info("Running cg demultiplex all ...")
     sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
-    demultiplex_api: DemultiplexingAPI = context.demultiplex_api
+    demultiplex_api: IlluminaDemultiplexService = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     if sequencing_runs_directory:
         sequencing_runs_directory: Path = Path(str(sequencing_runs_directory))
@@ -91,7 +91,7 @@ def demultiplex_sequencing_run(
 
     LOG.info(f"Starting demultiplexing of sequencing run {sequencing_run_name}")
     sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
-    demultiplex_api: DemultiplexingAPI = context.demultiplex_api
+    demultiplex_api: IlluminaDemultiplexService = context.demultiplex_api
     sequencing_run_dir: Path = Path(
         context.demultiplex_api.sequencing_runs_dir, sequencing_run_name
     )

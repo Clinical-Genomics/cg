@@ -1,7 +1,9 @@
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.override_cycles_validator import (
+    OverrideCyclesValidator,
+)
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 
 @pytest.fixture

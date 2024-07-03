@@ -16,8 +16,7 @@ from housekeeper.store.models import File, Version
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.demultiplex.demultiplex_service import IlluminaDemultiplexService
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -60,6 +59,7 @@ from cg.services.illumina_services.backup.encrypt_service import (
 from cg.services.illumina_services.metrics.metrics_service import (
     IlluminaMetricsService,
 )
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -408,7 +408,7 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
 
 @pytest.fixture
 def demultiplexing_context_for_demux(
-    demultiplexing_api_for_demux: DemultiplexingAPI,
+    demultiplexing_api_for_demux: IlluminaDemultiplexService,
     cg_context: CGConfig,
     store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
@@ -421,7 +421,7 @@ def demultiplexing_context_for_demux(
 
 @pytest.fixture
 def demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI,
+    demultiplexing_api: IlluminaDemultiplexService,
     illumina_demultiplexed_runs_post_proccesing_hk_api: HousekeeperAPI,
     cg_context: CGConfig,
     tmp_illumina_demultiplexed_runs_directory: Path,
@@ -439,7 +439,7 @@ def demultiplex_context(
 
 @pytest.fixture
 def new_demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI,
+    demultiplexing_api: IlluminaDemultiplexService,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_illumina_sequencing_data: Store,
@@ -571,9 +571,9 @@ def demultiplexing_api_for_demux(
     demultiplex_configs_for_demux: dict,
     sbatch_process: Process,
     populated_housekeeper_api: HousekeeperAPI,
-) -> DemultiplexingAPI:
+) -> IlluminaDemultiplexService:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(
+    demux_api = IlluminaDemultiplexService(
         config=demultiplex_configs_for_demux,
         housekeeper_api=populated_housekeeper_api,
     )
@@ -584,9 +584,9 @@ def demultiplexing_api_for_demux(
 @pytest.fixture
 def demultiplexing_api(
     demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
-) -> DemultiplexingAPI:
+) -> IlluminaDemultiplexService:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(
+    demux_api = IlluminaDemultiplexService(
         config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
     )
     demux_api.slurm_api.process = sbatch_process

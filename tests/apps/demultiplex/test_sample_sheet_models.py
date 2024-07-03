@@ -1,7 +1,7 @@
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_sheet_models import SampleSheet
+from cg.services.illumina_services.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.services.illumina_services.sample_sheet.validators import is_valid_sample_internal_id
 
 
 def test_get_non_pooled_samples_when_no_samples():

@@ -5,7 +5,7 @@ from unittest.mock import PropertyMock, patch
 
 from housekeeper.store.models import File
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -16,6 +16,7 @@ from cg.services.illumina_services.post_processing.housekeeper_storage import (
     add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
 )
+from cg.services.illumina_services.sample_sheet.sample_sheet_models import SampleSheet
 from cg.store.store import Store
 
 

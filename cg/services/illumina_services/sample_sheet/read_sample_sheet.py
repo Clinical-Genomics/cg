@@ -2,7 +2,7 @@ import logging
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetContentError, SampleSheetFormatError
 

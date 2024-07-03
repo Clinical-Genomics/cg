@@ -7,21 +7,9 @@ import psutil
 
 from cg.constants.pdc import DSMCParameters
 from cg.constants.process import EXIT_WARNING
-<<<<<<< HEAD
-from cg.exc import (
-    DsmcAlreadyRunningError,
-    IlluminaRunAlreadyBackedUpError,
-    IlluminaRunEncryptionError,
-    PdcError,
-)
-from cg.services.illumina_services.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
-from cg.store.models import Flowcell
-from cg.store.store import Store
-=======
+
 from cg.exc import PdcError
->>>>>>> develop-illumina-devices
+
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)

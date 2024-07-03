@@ -5,14 +5,16 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+from cg.services.illumina_services.sample_sheet.override_cycles_validator import (
+    OverrideCyclesValidator,
+)
+from cg.services.illumina_services.sample_sheet.read_sample_sheet import (
     get_samples_from_content,
     get_raw_samples_from_content,
     validate_samples_unique_per_lane,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import NAME_TO_INDEX_SETTINGS, SampleSheetBCLConvertSections
 from cg.exc import OverrideCyclesError, SampleSheetContentError, SampleSheetFormatError

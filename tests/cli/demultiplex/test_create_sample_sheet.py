@@ -5,15 +5,15 @@ from _pytest.fixtures import FixtureRequest
 from click.testing import CliRunner, Result
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.api import IlluminaSampleSheetService
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.process import EXIT_SUCCESS
 from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
-GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
+GET_FLOW_CELL_SAMPLES: str = "cg.services.illumina_services.sample_sheet.api.get_flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters_fails(

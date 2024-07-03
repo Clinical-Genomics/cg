@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 LOG = logging.getLogger(__name__)
 
