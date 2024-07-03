@@ -22,7 +22,7 @@ class SequencingQCService:
         self.store = store
 
     def run_sequencing_qc(self) -> None:
-        """Run sequencing QC for all pending or failed cases."""
+        """Run QC for samples in pending or failed cases and store the aggregated score on each case."""
         cases: list[Case] = self.store.get_cases_for_sequencing_qc()
         for case in cases:
             passes_qc: bool = self.case_pass_sequencing_qc(case)
@@ -32,16 +32,12 @@ class SequencingQCService:
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:
-        """
-        Run the QC for the case or sample.
-        """
+        """Run the sequencing QC for the case or sample."""
         sequencing_quality_check: Callable = get_sequencing_quality_check_for_case(case)
         return run_quality_checks(quality_checks=[sequencing_quality_check], case=case)
 
     @staticmethod
     def sample_pass_sequencing_qc(sample: Sample) -> bool:
-        """
-        Run the sequencing QC for a sample.
-        """
+        """Run the sequencing QC for a sample."""
         sample_sequencing_quality_check: Callable = get_sample_sequencing_quality_check()
         return run_quality_checks(quality_checks=[sample_sequencing_quality_check], sample=sample)
