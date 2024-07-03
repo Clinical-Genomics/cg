@@ -1,18 +1,14 @@
-"""Fixtures for cli clean tests"""
+"""Fixtures for cli clean tests."""
 
 import datetime
 from pathlib import Path
 
 import pytest
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.store.models import IlluminaSequencingRun
-from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -95,7 +91,7 @@ def clean_context(
 
 @pytest.fixture
 def rsync_process(project_dir: Path) -> Path:
-    """Return a rsync process after ensuing that is is created"""
+    """Return a rsync process after ensuing that is created"""
 
     rsync_process = project_dir / "rsync" / "rsync_process"
 

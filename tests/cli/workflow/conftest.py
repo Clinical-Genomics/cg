@@ -229,8 +229,7 @@ def tb_api():
 
 @pytest.fixture
 def mock_analysis_illumina_run(mocker) -> None:
-    """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
-    on disk."""
+    """Mocks the get_flow_cells_by_case method to return a list containing an "ondisk" flow cell."""
     sequencing_run = Mock()
     sequencing_run.data_availability = SequencingRunDataAvailability.ON_DISK
     mocker.patch.object(ReadHandler, "get_illumina_sequencing_runs_by_case")

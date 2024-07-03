@@ -422,7 +422,7 @@ def demultiplexing_context_for_demux(
 @pytest.fixture
 def demultiplex_context(
     demultiplexing_api: IlluminaDemultiplexService,
-    illumina_demultiplexed_runs_post_proccesing_hk_api: HousekeeperAPI,
+    illumina_demultiplexed_runs_post_processing_hk_api: HousekeeperAPI,
     cg_context: CGConfig,
     tmp_illumina_demultiplexed_runs_directory: Path,
     store_with_illumina_sequencing_data: Store,
@@ -432,7 +432,7 @@ def demultiplex_context(
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
         tmp_illumina_demultiplexed_runs_directory.as_posix()
     )
-    cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_proccesing_hk_api
+    cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_processing_hk_api
     cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 

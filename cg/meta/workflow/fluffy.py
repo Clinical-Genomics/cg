@@ -11,7 +11,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.utils import Process
 from cg.services.illumina_services.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.services.illumina_services.sample_sheet.read_sample_sheet import get_samples_from_content
