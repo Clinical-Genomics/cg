@@ -209,8 +209,8 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
     """Filter cases with pending or failed sequencing QC."""
     return cases.filter(
         or_(
-            Case.sequencing_qc_status == SequencingQCStatus.PENDING,
-            Case.sequencing_qc_status == SequencingQCStatus.FAILED,
+            Case.aggregated_sequencing_qc == SequencingQCStatus.PENDING,
+            Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
         )
     )
 
