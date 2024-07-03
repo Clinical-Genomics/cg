@@ -14,7 +14,7 @@ from cg.exc import (
     IlluminaRunEncryptionError,
     PdcError,
 )
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.store.models import Flowcell

@@ -12,7 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.exc import IlluminaCleanRunError, HousekeeperFileMissingError
-from cg.services.illumina_services.cleaning_services.clean_runs_service import (
+from cg.services.illumina_services.cleaning.clean_runs_service import (
     IlluminaCleanRunsService,
 )
 from cg.store.models import (
@@ -237,7 +237,7 @@ def test_can_sequencing_run_be_deleted(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         # WHEN checking that the sequencing run can be deleted
@@ -254,11 +254,11 @@ def test_can_sequencing_run_be_deleted_no_spring_with_fastq(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+            "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the sequencing run can be deleted
@@ -277,11 +277,11 @@ def test_can_sequencing_run_be_deleted_spring_no_fastq(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
+            "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the sequencing run can be deleted
@@ -299,13 +299,13 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
     """Test that a sequencing run can not be deleted when it has no spring files and no fastq files."""
     # GIVEN a sequencing run that can be deleted
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ), mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
         return_value=False,
     ), mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
         return_value=False,
     ):
         # WHEN checking that the sequencing run can be deleted
@@ -326,7 +326,7 @@ def test_delete_sequencing_run_directory(
 
     # WHEN removing the sequencing run directory
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         illumina_clean_service_can_be_removed.delete_run_directory()

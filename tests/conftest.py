@@ -54,10 +54,10 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
-from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
+from cg.services.illumina_services.metrics.metrics_service import (
     IlluminaMetricsService,
 )
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.illumina_services.illumina_metrics_service.illumina_demux_version_service import (
+from cg.services.illumina_services.metrics.demux_version_service import (
     IlluminaDemuxVersionService,
 )
 

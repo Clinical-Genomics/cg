@@ -14,7 +14,7 @@ from cg.exc import (
 )
 from cg.meta.backup.backup import LOG
 from cg.meta.encryption.encryption import EncryptionAPI
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.meta.tar.tar import TarAPI

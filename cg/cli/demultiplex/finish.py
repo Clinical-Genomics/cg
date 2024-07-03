@@ -8,7 +8,7 @@ import click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.models.cg_config import CGConfig
-from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
+from cg.services.illumina_services.post_processing.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
 

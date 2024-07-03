@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from cg.exc import IlluminaRunEncryptionError, FlowCellError
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData

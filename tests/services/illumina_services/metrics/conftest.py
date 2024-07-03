@@ -5,11 +5,11 @@ from pathlib import Path
 import pytest
 
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina_services.metrics.models import (
     DemuxMetrics,
     SequencingQualityMetrics,
 )
-from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
+from cg.services.illumina_services.metrics.bcl_convert_metrics_parser import (
     BCLConvertMetricsParser,
 )
 
@@ -21,7 +21,8 @@ def bcl_convert_metrics_dir_path() -> Path:
         "tests",
         "fixtures",
         "services",
-        "illumina_metrics_service",
+        "illumina_services",
+        "metrics",
         "230622_A00621_0864_AHY7FFDRX2",
     )
 

@@ -11,7 +11,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina_services.illumina_post_processing_service.housekeeper_storage import (
+from cg.services.illumina_services.post_processing.housekeeper_storage import (
     add_demux_logs_to_housekeeper,
     add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,

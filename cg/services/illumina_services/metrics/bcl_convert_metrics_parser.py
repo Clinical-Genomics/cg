@@ -14,7 +14,7 @@ from cg.constants.metrics import (
     QUALITY_METRICS_FILE_NAME,
 )
 from cg.io.controller import ReadFile
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina_services.metrics.models import (
     DemuxMetrics,
     SequencingQualityMetrics,
 )

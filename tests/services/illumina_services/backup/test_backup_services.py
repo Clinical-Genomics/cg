@@ -17,8 +17,8 @@ from cg.exc import (
     PdcError,
 )
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
-from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.backup_service import IlluminaBackupService
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
@@ -213,7 +213,7 @@ def test_get_first_run_no_run_requested(store_with_illumina_sequencing_data: Sto
 
 
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 @mock.patch("cg.store.models.IlluminaSequencingRun")
 def test_fetch_sequencing_run_processing_queue_full(
@@ -242,10 +242,10 @@ def test_fetch_sequencing_run_processing_queue_full(
 
 
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_run"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_first_run"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 @mock.patch("cg.store")
 def test_fetch_sequencing_run_no_runs_requested(
@@ -281,22 +281,22 @@ def test_fetch_sequencing_run_no_runs_requested(
 
 
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.unlink_files"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_rta_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_copy_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 def test_fetch_sequencing_run_retrieve_next_run(
     mock_get_archived_encryption_key_path,
@@ -348,25 +348,25 @@ def test_fetch_sequencing_run_retrieve_next_run(
 
 
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.unlink_files"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_rta_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_copy_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.has_processing_queue_capacity"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_run"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_first_run"
 )
 def test_fetch_sequencing_run_retrieve_specified_run(
     mock_get_first_run,
@@ -422,22 +422,22 @@ def test_fetch_sequencing_run_retrieve_specified_run(
 
 
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.unlink_files"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_rta_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.create_copy_complete"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.query_pdc_for_sequencing_run"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.query_pdc_for_sequencing_run"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
 )
 @mock.patch(
-    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
+    "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
 )
 def test_fetch_sequencing_run_integration(
     mock_sequencing_run_path,
