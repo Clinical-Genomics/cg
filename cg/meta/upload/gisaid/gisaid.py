@@ -13,11 +13,13 @@ from cg.apps.lims import LimsAPI
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.csv import write_csv_from_dict
 from cg.models.cg_config import CGConfig
 from cg.models.gisaid.reports import GisaidComplementaryReport
 from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils import Process
+from cg.utils.dict import remove_duplicate_dicts
 
 from .constants import HEADERS
 from .models import GisaidAccession, GisaidSample
@@ -79,23 +81,22 @@ class GisaidAPI:
         """Return all unique samples in reports."""
         return {report.sample_number for report in reports}
 
-    def get_complementary_report_sample(self, sample_numbers: set[str]) -> list[Sample]:
+    def get_complementary_report_samples(self, sample_numbers: set[str]) -> list[Sample]:
         """Return all unique samples in reports."""
         return [
             self.status_db.get_sample_by_name(name=sample_number)
             for sample_number in sample_numbers
         ]
 
-    def get_completion_file_from_hk(self, case_id: str) -> File:
-        """Find completon file in Housekeeper and return it"""
-
-        completion_file: File | None = self.housekeeper_api.get_file_from_latest_version(
+    def get_complementary_file_from_hk(self, case_id: str) -> File:
+        """Return complementary file."""
+        complementary_file: File | None = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=["komplettering"]
         )
-        if not completion_file:
-            msg = f"completion file missing for bundle {case_id}"
+        if not complementary_file:
+            msg = f"completion file missing for bundle: {case_id}"
             raise HousekeeperFileMissingError(message=msg)
-        return completion_file
+        return complementary_file
 
     def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
         """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
@@ -109,7 +110,7 @@ class GisaidAPI:
         The criteria is that the sample reached 20x coverage for >95% bases.
         The sample will be included in completion file."""
 
-        completion_file = self.get_completion_file_from_hk(case_id=case_id)
+        completion_file = self.get_complementary_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         sample_names = list(completion_df["provnummer"].unique())
         return [self.status_db.get_sample_by_name(name=sample_name) for sample_name in sample_names]
@@ -121,6 +122,35 @@ class GisaidAPI:
     def get_gisaid_csv_path(self, case_id: str) -> Path:
         """Get path to gisaid csv"""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.csv")
+
+    def get_gisaid_samples_csv(self, case_id: str, samples: list[Sample]) -> list[GisaidSample]:
+        """Return Gisaid samples."""
+        gisaid_samples = []
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            LOG.info(f"Creating GisaidSample for {sample_id}")
+            gisaid_sample = GisaidSample(
+                case_id=case_id,
+                cg_lims_id=sample_id,
+                covv_subm_sample_id=sample.name,
+                submitter=self.gisaid_submitter,
+                fn=f"{case_id}.fasta",
+                covv_collection_date=str(
+                    self.lims_api.get_sample_attribute(lims_id=sample_id, key="collection_date")
+                ),
+                region=self.lims_api.get_sample_attribute(lims_id=sample_id, key="region"),
+                region_code=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="region_code"
+                ),
+                covv_orig_lab=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="original_lab"
+                ),
+                covv_orig_lab_addr=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="original_lab_address"
+                ),
+            )
+            gisaid_samples.append(gisaid_sample)
+        return gisaid_samples
 
     def get_gisaid_samples(self, case_id: str) -> list[GisaidSample]:
         """Get list of Gisaid sample objects."""
@@ -191,6 +221,26 @@ class GisaidAPI:
             bundle_name=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
         )
 
+    def create_gisaid_csv_hs(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
+        """Create CSV file for GISAID samples."""
+        gisaid_csv_file: File | None = self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=["gisaid-csv", case_id]
+        )
+        if gisaid_csv_file:
+            LOG.info(f"GISAID CSV for case {case_id} exists, will be replaced")
+            gisaid_csv_path = gisaid_csv_file.full_path
+        else:
+            gisaid_csv_path: Path = self.get_gisaid_csv_path(case_id=case_id)
+        all_samples: list[dict] = [sample.model_dump() for sample in gisaid_samples]
+        write_csv_from_dict(content=all_samples, fieldnames=HEADERS, file_path=gisaid_csv_path)
+
+        if gisaid_csv_file:
+            return
+
+        self.housekeeper_api.add_and_include_file_to_latest_version(
+            bundle_name=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
+        )
+
     def create_gisaid_csv(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
@@ -225,7 +275,7 @@ class GisaidAPI:
 
         log_file_path = Path(self.gisaid_log_dir, case_id).with_suffix(".log")
         if not log_file_path.parent.exists():
-            raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
+            raise ValueError(f"GISAID log dir: {self.gisaid_log_dir} does not exist")
         if not log_file_path.exists():
             log_file_path.touch()
         self.housekeeper_api.add_and_include_file_to_latest_version(
@@ -236,6 +286,31 @@ class GisaidAPI:
         """Create all gisaid files in Housekeeper, if needed."""
         gisaid_samples = self.get_gisaid_samples(case_id=case_id)
         self.create_gisaid_csv(gisaid_samples=gisaid_samples, case_id=case_id)
+        self.create_gisaid_fasta(gisaid_samples=gisaid_samples, case_id=case_id)
+        self.create_gisaid_log_file(case_id=case_id)
+
+    def create_gisaid_files_in_housekeeper_csv(self, case_id: str) -> None:
+        """Create all GISAID files in Housekeeper."""
+        complementary_report_file: Path = self.get_complementary_file_from_hk(case_id)
+        complementary_report_content_raw: list[dict] = self.get_complementary_report_content(
+            complementary_report_file
+        )
+        complementary_report_content_raw_unique: list[dict] = remove_duplicate_dicts(
+            complementary_report_content_raw
+        )
+        complementary_report: list[GisaidComplementaryReport] = (
+            self.validate_gisaid_complementary_reports(complementary_report_content_raw_unique)
+        )
+        complementary_report: list[GisaidComplementaryReport] = (
+            self.get_sars_cov_complementary_reports(complementary_report)
+        )
+        sample_numbers: set[str] = self.get_complementary_report_sample_number(complementary_report)
+        samples: list[Sample] = self.get_complementary_report_samples(sample_numbers)
+
+        gisaid_samples: list[GisaidSample] = self.get_gisaid_samples_csv(
+            case_id=case_id, samples=samples
+        )
+        self.create_gisaid_csv_hs(case_id=case_id, gisaid_samples=gisaid_samples)
         self.create_gisaid_fasta(gisaid_samples=gisaid_samples, case_id=case_id)
         self.create_gisaid_log_file(case_id=case_id)
 
@@ -337,7 +412,7 @@ class GisaidAPI:
 
     def update_completion_file(self, case_id: str) -> None:
         """Update completion file with accession numbers"""
-        completion_file = self.get_completion_file_from_hk(case_id=case_id)
+        completion_file = self.get_complementary_file_from_hk(case_id=case_id)
         accession_dict = self.get_accession_numbers(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         completion_df["GISAID_accession"] = completion_df["provnummer"].apply(
@@ -352,7 +427,7 @@ class GisaidAPI:
     def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
-        completion_file = self.get_completion_file_from_hk(case_id=case_id)
+        completion_file = self.get_complementary_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         if len(completion_df["GISAID_accession"].dropna()) == len(completion_df["provnummer"]):
             LOG.info("All samples already uploaded")

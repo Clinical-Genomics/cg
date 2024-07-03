@@ -47,3 +47,18 @@ def test_get_sars_cov_complementary_reports(
     # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
     assert content[0].sample_number == "44CS000000"
+
+
+def test_get_complementary_report_sample_number(
+    gisaid_complementary_reports: list[GisaidComplementaryReport], gisaid_api: GisaidAPI
+):
+    # GIVEN a list of reports
+
+    # WHEN getting the sample numbers in the reports
+    sample_numbers: set[str] = gisaid_api.get_complementary_report_sample_number(
+        gisaid_complementary_reports
+    )
+
+    # THEN return sample numbers from reports
+    for report in gisaid_complementary_reports:
+        assert report.sample_number in sample_numbers
