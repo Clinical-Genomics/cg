@@ -1531,12 +1531,15 @@ class ReadHandler(BaseHandler):
         
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """Return all cases that are ready for sequencing QC."""
-        return apply_case_filter(
-            cases=self._get_query(table=Case)
+        query = (
+            self._get_query(table=Case)
             .join(Case.links)
             .join(CaseSample.sample)
-            .join(ApplicationVersion)
-            .join(Application),
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
+        )
+        return apply_case_filter(
+            cases=query,
             filter_functions=[
                 CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
                 CaseFilter.HAS_SAMPLES,
