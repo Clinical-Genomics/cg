@@ -11,7 +11,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(scope="function")
 def illumina_demultiplexed_runs_post_proccesing_hk_api(
-        canonical_flow_cell_ids_and_sample_sheet_paths,
+    canonical_flow_cell_ids_and_sample_sheet_paths,
     tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs: dict[str, list[Path]],
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,

@@ -22,12 +22,12 @@ from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -342,7 +342,7 @@ class CGConfig(BaseModel):
     # App APIs that can be instantiated in CGConfig
     arnold: ArnoldConfig = Field(None, alias="arnold")
     arnold_api_: ArnoldAPIClient | None = None
-    illumina_backup_service: IlluminaBackupConfig = None
+    illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
