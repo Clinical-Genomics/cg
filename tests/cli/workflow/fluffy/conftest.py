@@ -9,7 +9,7 @@ from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Sample, Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -153,7 +153,7 @@ def fluffy_store(
     case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
         internal_id=fluffy_case_id_existing
     )
-    case.data_analysis: Workflow = Workflow.FLUFFY
+    case.data_analysis = Workflow.FLUFFY
     case.links[0].sample.last_sequenced_at = dt.datetime.now()
     case.links[0].sample.reads = 50
     case.action = CaseActions.ANALYZE

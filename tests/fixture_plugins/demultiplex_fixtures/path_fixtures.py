@@ -125,7 +125,7 @@ def tmp_illumina_flow_cells_demux_all_directory(
     """
     Return the path to a temporary flow cells directory with flow cells ready for demultiplexing.
     Generates a copy of the original flow cells directory.
-    This fixture is used for testing of the cg demutliplex all cmd.
+    This fixture is used for testing of the cg demultiplex all cmd.
     """
     original_dir = illumina_demux_all_directory
     tmp_dir = Path(tmp_path, "sequencing_runs_demux_all")

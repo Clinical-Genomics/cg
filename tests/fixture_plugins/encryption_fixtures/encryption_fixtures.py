@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants import FileExtensions
 from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store

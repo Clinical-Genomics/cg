@@ -21,7 +21,7 @@ def illumina_post_postprocessing_service(
     real_housekeeper_api: HousekeeperAPI,
     selected_novaseq_x_sample_ids: list[str],
     helpers: StoreHelpers,
-    illumina_demultiplexed_runs_post_proccesing_hk_api: HousekeeperAPI,
+    illumina_demultiplexed_runs_post_processing_hk_api: HousekeeperAPI,
     tmp_illumina_demultiplexed_runs_directory: str,
 ) -> IlluminaPostProcessingService:
     """Return an instance of the IlluminaPostProcessingService."""
@@ -29,7 +29,7 @@ def illumina_post_postprocessing_service(
         helpers.add_sample(store, internal_id=sample_id)
     return IlluminaPostProcessingService(
         status_db=store,
-        housekeeper_api=illumina_demultiplexed_runs_post_proccesing_hk_api,
+        housekeeper_api=illumina_demultiplexed_runs_post_processing_hk_api,
         dry_run=False,
         demultiplexed_runs_dir=Path(tmp_illumina_demultiplexed_runs_directory),
     )
