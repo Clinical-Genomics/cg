@@ -129,7 +129,7 @@ def encrypt_illumina_runs(context: CGConfig, dry_run: bool):
 @DRY_RUN
 @click.pass_obj
 def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
-    """Fetch the first Illumina run in the requested queue from backup"""
+    """Fetch the first Illumina run in the requested queue from backup."""
 
     pdc_service = context.pdc_service
     pdc_service.dry_run = dry_run
@@ -181,7 +181,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
 @click.pass_context
 @click.pass_obj
 def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool):
-    """Archive spring files to PDC"""
+    """Archive spring files to PDC."""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
@@ -202,7 +202,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 @DRY_RUN
 @click.pass_obj
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
-    """Archive a spring file to PDC"""
+    """Archive a spring file to PDC."""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
@@ -234,7 +234,7 @@ def retrieve_spring_files(
     identifier: str,
     dry_run: bool,
 ):
-    """Retrieve all spring files for a given identity"""
+    """Retrieve all spring files for a given identity."""
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
@@ -258,7 +258,7 @@ def retrieve_spring_files(
 @DRY_RUN
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
-    """Retrieve a spring file from PDC"""
+    """Retrieve a spring file from PDC."""
     LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
