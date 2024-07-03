@@ -6,6 +6,7 @@ Create Date: 2024-07-02 13:46:02.090345
 
 """
 
+import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -20,6 +21,7 @@ def upgrade():
         table_name="case",
         column_name="sequencing_qc_status",
         new_column_name="aggregated_sequencing_qc",
+        existing_type=sa.Enum("passed", "failed", "pending"),
     )
 
 
@@ -28,4 +30,5 @@ def downgrade():
         table_name="case",
         column_name="aggregated_sequencing_qc",
         new_column_name="sequencing_qc_status",
+        existing_type=sa.Enum("passed", "failed", "pending"),
     )
