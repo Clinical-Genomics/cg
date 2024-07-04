@@ -25,9 +25,9 @@ def finish_group():
 @DRY_RUN
 @click.pass_obj
 def post_process_illumina_run(context: CGConfig, demultiplexed_run_dir_name: str, dry_run: bool):
-    """Command to post-process an illumina run after demultiplexing.
+    """Command to post-process an Illumina run after demultiplexing.
 
-    flow-cell-name is full flow cell name, e.g. '230912_A00187_1009_AHK33MDRX3'.
+    demultiplexed-run-dir-name is the full run name, e.g. '230912_A00187_1009_AHK33MDRX3'.
     """
     post_processing_service = IlluminaPostProcessingService(
         status_db=context.status_db,
@@ -44,7 +44,7 @@ def post_process_illumina_run(context: CGConfig, demultiplexed_run_dir_name: str
 @click.pass_obj
 @DRY_RUN
 def post_process_all_illumina_runs(context: CGConfig, dry_run: bool):
-    """Command to post process all demultiplexed Illumina runs."""
+    """Command to post-process all demultiplexed Illumina runs."""
 
     post_processing_service = IlluminaPostProcessingService(
         status_db=context.status_db,
