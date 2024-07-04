@@ -39,28 +39,28 @@ class OrderSummaryService:
         order_id = order.id
         counted_cases: list[str] = summary.case_ids if summary else []
         not_received: list[Case] = [
-            case.name
+            case.internal_id
             for case in self.store.get_case_not_received_count(
                 order_id=order_id, cases_to_exclude=counted_cases
             )
         ]
         not_received_summary = StatusSummary(case_ids=not_received, count=len(not_received))
         in_preparation: list[Case] = [
-            case.name
+            case.internal_id
             for case in self.store.get_case_in_preparation_count(
                 order_id=order_id, cases_to_exclude=counted_cases
             )
         ]
         in_preparation_summary = StatusSummary(case_ids=in_preparation, count=len(in_preparation))
         in_sequencing: list[Case] = [
-            case.name
+            case.internal_id
             for case in self.store.get_case_in_sequencing_count(
                 order_id=order_id, cases_to_exclude=counted_cases
             )
         ]
         in_sequencing_summary = StatusSummary(case_ids=in_sequencing, count=len(in_sequencing))
         failed_sequencing_qc: list[Case] = [
-            case.name
+            case.internal_id
             for case in get_cases_failed_sequencing_qc_count(
                 order=order, cases_to_exclude=counted_cases
             )
