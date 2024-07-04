@@ -2,9 +2,14 @@
 
 from sqlalchemy.orm import Session
 
+
 from cg.constants import SequencingRunDataAvailability
 from cg.store.base import BaseHandler
-from cg.store.models import IlluminaSequencingRun, Order, Sample
+from cg.store.models import IlluminaSequencingRun
+
+from cg.constants.constants import SequencingQCStatus
+from cg.store.base import BaseHandler
+from cg.store.models import Case, Order, Sample
 
 
 class UpdateHandler(BaseHandler):
@@ -46,3 +51,7 @@ class UpdateHandler(BaseHandler):
         sequencing_run.has_backup = has_backup
         self.session.commit()
         return sequencing_run
+
+    def update_sequencing_qc_status(self, case: Case, status: SequencingQCStatus) -> None:
+        case.aggregated_sequencing_qc = status
+        self.session.commit()

@@ -1429,3 +1429,20 @@ class ReadHandler(BaseHandler):
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+
+    def get_cases_for_sequencing_qc(self) -> list[Case]:
+        """Return all cases that are ready for sequencing QC."""
+        query = (
+            self._get_query(table=Case)
+            .join(Case.links)
+            .join(CaseSample.sample)
+            .join(ApplicationVersion)
+            .join(Application)
+        )
+        return apply_case_filter(
+            cases=query,
+            filter_functions=[
+                CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
+                CaseFilter.HAS_SEQUENCE,
+            ],
+        ).all()
