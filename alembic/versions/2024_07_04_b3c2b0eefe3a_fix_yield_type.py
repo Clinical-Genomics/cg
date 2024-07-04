@@ -19,7 +19,7 @@ depends_on = None
 
 def upgrade():
     op.alter_column(
-        "illumina_sample_seequencing_metrics",
+        "illumina_sample_sequencing_metrics",
         "yield",
         type_=sa.BigInteger(),
         existing_type=sa.Integer(),
@@ -28,7 +28,7 @@ def upgrade():
 
 def downgrade():
     op.alter_column(
-        "illumina_sample_seequencing_metrics",
+        "illumina_sample_sequencing_metrics",
         "yield",
         type_=sa.Integer(),
         existing_type=sa.BigInteger(),
