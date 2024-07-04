@@ -25,8 +25,8 @@ def downsample():
     help="Downsample reads in one or multiple samples in a case. Usage: \n"
     "For a single sample: cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1\n"
     "For multiple samples:cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1 -i ACC12324 10\n"
-    "If multiple samples are provided possible sample relationships will need to be added using the:\n"
-    "cg add relationship command.",
+    "If multiple samples are provided possible sample relationships will need to be added using:\n"
+    "cg add relationship.",
 )
 @click.option(
     "-c",
