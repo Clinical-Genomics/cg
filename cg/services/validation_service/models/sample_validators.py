@@ -58,3 +58,13 @@ def validate_required_well_position(self: OrderSample):
         raise ValidationError.from_exception_data(
             title=self.__class__.__name__, line_errors=[error_details]
         )
+
+
+def validate_required_volume(self: OrderSample):
+    if self.container != ContainerEnum.no_container and not self.volume:
+        error_details = InitErrorDetails(
+            type="missing", loc=("volume",), input=self.well_position, ctx={}
+        )
+        raise ValidationError.from_exception_data(
+            title=self.__class__.__name__, line_errors=[error_details]
+        )
