@@ -370,6 +370,7 @@ def base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "sentieon_licence_server": "127.0.0.1:8080",
     }
 
 
@@ -1862,6 +1863,7 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "sentieon_licence_server": "127.0.0.1:8080",
         "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "backup": {
@@ -1879,20 +1881,21 @@ def context_config(
             "bed_path": str(cg_dir),
             "binary_path": "echo",
             "cadd_path": str(cg_dir),
-            "genome_interval_path": str(cg_dir),
-            "gnomad_af5_path": str(cg_dir),
-            "gens_coverage_female_path": str(cg_dir),
-            "gens_coverage_male_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
+            "genome_interval_path": str(cg_dir),
+            "gens_coverage_female_path": str(cg_dir),
+            "gens_coverage_male_path": str(cg_dir),
+            "gnomad_af5_path": str(cg_dir),
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": email_address,
                 "account": "development",
+                "mail_user": email_address,
                 "qos": SlurmQos.LOW,
             },
+            "sentieon_licence_path": str(cg_dir),
             "swegen_path": str(cg_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
