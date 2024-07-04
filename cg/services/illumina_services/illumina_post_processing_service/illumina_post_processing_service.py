@@ -183,7 +183,7 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
-        sequencing_run: IlluminaSequencingRun = (
+        sequencing_run: IlluminaSequencingRun | None = (
             self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
         )
         has_backup: bool = False
@@ -196,13 +196,13 @@ class IlluminaPostProcessingService:
                 run_directory_data=run_directory_data,
                 store=self.status_db,
             )
-
-            self.status_db.update_illumina_sequencing_run_has_backup(
-                sequencing_run=sequencing_run, has_backup=has_backup
-            )
         except Exception as e:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
             raise
+        if sequencing_run:
+            self.status_db.update_illumina_sequencing_run_has_backup(
+                sequencing_run=sequencing_run, has_backup=has_backup
+            )
         create_delivery_file_in_flow_cell_directory(demux_run_dir)
 
     def get_all_demultiplexed_runs(self) -> list[Path]:
