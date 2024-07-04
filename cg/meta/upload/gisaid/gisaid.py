@@ -101,7 +101,7 @@ class GisaidAPI:
             bundle_name=case_id, tags=["komplettering"]
         )
         if not complementary_file:
-            msg = f"completion file missing for bundle: {case_id}"
+            msg = f"Complementary file missing for bundle: {case_id}"
             raise HousekeeperFileMissingError(message=msg)
         return complementary_file
 
@@ -151,9 +151,9 @@ class GisaidAPI:
             bundle_name=case_id, tags={GisaidTag.FASTA, case_id}
         )
         if gisaid_fasta:
-            gisaid_fasta_path = Path(gisaid_fasta.full_path)
+            gisaid_fasta_file = Path(gisaid_fasta.full_path)
         else:
-            gisaid_fasta_path: Path = self.get_gisaid_fasta_file_path(case_id=case_id)
+            gisaid_fasta_file: Path = self.get_gisaid_fasta_file_path(case_id=case_id)
 
         fasta_lines: list[str] = []
 
@@ -172,14 +172,14 @@ class GisaidAPI:
                     else:
                         fasta_lines.append(line)
 
-        with open(gisaid_fasta_path, "w") as write_handle:
+        with open(gisaid_fasta_file, "w") as write_handle:
             write_handle.writelines(fasta_lines)
 
         if gisaid_fasta:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=gisaid_fasta_path, tags=[GisaidTag.FASTA, case_id]
+            bundle_name=case_id, file=gisaid_fasta_file, tags=[GisaidTag.FASTA, case_id]
         )
 
     def create_and_include_gisaid_samples_to_hk(
@@ -191,15 +191,15 @@ class GisaidAPI:
         )
         if gisaid_samples_csv:
             LOG.info(f"GISAID samples CSV for case {case_id} exists, and will be replaced")
-            gisaid_csv_path = Path(gisaid_samples_csv.full_path)
+            gisaid_csv_file = Path(gisaid_samples_csv.full_path)
         else:
-            gisaid_csv_path: Path = self.get_gisaid_csv_path(case_id=case_id)
+            gisaid_csv_file: Path = self.get_gisaid_csv_path(case_id=case_id)
         samples: list[dict] = [sample.model_dump() for sample in gisaid_samples]
-        write_csv_from_dict(content=samples, fieldnames=HEADERS, file_path=gisaid_csv_path)
+        write_csv_from_dict(content=samples, fieldnames=HEADERS, file_path=gisaid_csv_file)
         if gisaid_samples_csv:
             return
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=gisaid_csv_path, tags=[GisaidTag.CSV, case_id]
+            bundle_name=case_id, file=gisaid_csv_file, tags=[GisaidTag.CSV, case_id]
         )
 
     def create_and_include_gisaid_log_file_to_hk(self, case_id: str) -> None:
@@ -210,13 +210,13 @@ class GisaidAPI:
             LOG.info(f"GISAID log exists in case: {case_id} bundle in Housekeeper")
             return
 
-        log_file_path = Path(self.gisaid_log_dir, case_id).with_suffix(FileExtensions.LOG)
-        if not log_file_path.parent.exists():
+        log_file = Path(self.gisaid_log_dir, case_id).with_suffix(FileExtensions.LOG)
+        if not log_file.parent.exists():
             raise ValueError(f"GISAID log dir: {self.gisaid_log_dir} does not exist")
-        if not log_file_path.exists():
-            log_file_path.touch()
+        if not log_file.exists():
+            log_file.touch()
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=log_file_path, tags=[GisaidTag.LOG, case_id]
+            bundle_name=case_id, file=log_file, tags=[GisaidTag.LOG, case_id]
         )
 
     def parse_and_get_sars_cov_complementary_reports(
