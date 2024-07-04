@@ -152,15 +152,16 @@ class BalsamicConfig(CommonAppConfig):
     bed_path: str
     binary_path: str
     cadd_path: str
-    genome_interval_path: str
-    gnomad_af5_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
     conda_binary: str
     conda_env: str
+    genome_interval_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    gnomad_af5_path: str
     loqusdb_path: str
     pon_path: str
     root: str
+    sentieon_licence_path: str
     slurm: SlurmConfig
     swegen_path: str
 
@@ -324,24 +325,26 @@ class RunInstruments(BaseModel):
 
 
 class CGConfig(BaseModel):
+    data_input: DataInput | None = None
     database: str
     delivery_path: str
     downsample: DownsampleConfig
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    nanopore_data_directory: str
-    tower_binary_path: str
     max_flowcells: int | None
-    data_input: DataInput | None = None
+    nanopore_data_directory: str
     run_instruments: RunInstruments
+    sentieon_licence_server: str
+    tower_binary_path: str
+
     # Base APIs that always should exist
-    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
+    status_db_: Store | None = None
 
     # App APIs that can be instantiated in CGConfig
-    arnold: ArnoldConfig = Field(None, alias="arnold")
+    arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
@@ -350,6 +353,7 @@ class CGConfig(BaseModel):
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
+    delivery_api_: DeliveryAPI | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -360,43 +364,42 @@ class CGConfig(BaseModel):
     gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
+    janus: JanusConfig | None = None
+    janus_api_: JanusAPIClient | None = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
     loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
+    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
     pdc_api_: PdcAPI | None
+    pigz: CommonAppConfig | None = None
     sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
-    janus: JanusConfig | None = None
-    janus_api_: JanusAPIClient | None = None
-    delivery_api_: DeliveryAPI | None = None
 
     # Meta APIs that will use the apps from CGConfig
-    balsamic: BalsamicConfig = None
-    statina: StatinaConfig = None
+    balsamic: BalsamicConfig | None = None
+    fluffy: FluffyConfig | None = None
     fohm: FOHMConfig | None = None
-    fluffy: FluffyConfig = None
-    microsalt: MicrosaltConfig = None
-    gisaid: GisaidConfig = None
-    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
-    mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
-    mutant: MutantConfig = None
-    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
-    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
-    taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
-    tomte: TomteConfig = Field(None, alias="tomte")
+    gisaid: GisaidConfig | None = None
+    microsalt: MicrosaltConfig | None = None
+    mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
+    mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
+    mutant: MutantConfig | None = None
+    raredisease: RarediseaseConfig | None = None
+    rnafusion: RnafusionConfig | None = None
+    statina: StatinaConfig | None = None
+    taxprofiler: TaxprofilerConfig | None = None
+    tomte: TomteConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
