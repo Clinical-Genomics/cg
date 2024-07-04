@@ -5,23 +5,23 @@ from cg.models.orders.sample_base import ContainerEnum
 from cg.services.validation_service.models.order_sample import OrderSample
 
 
-def validate_required_buffer(self: OrderSample) -> OrderSample:
+def validate_required_buffer(sample: OrderSample) -> OrderSample:
     if (
-        self.application.startswith("PAN")
-        or self.application.startswith("EX")
-        and not self.elution_buffer
+        sample.application.startswith("PAN")
+        or sample.application.startswith("EX")
+        and not sample.elution_buffer
     ):
         error_detail = InitErrorDetails(
             type=PydanticCustomError(
                 error_type="Missing buffer",
                 message_template="Buffer is required when running PAN or EX applications.",
             ),
-            loc=("sample", self.name, "elution_buffer"),
-            input=self.elution_buffer,
+            loc=("sample", sample.name, "elution_buffer"),
+            input=sample.elution_buffer,
             ctx={},
         )
         raise ValidationError.from_exception_data(title="FFPE source", line_errors=[error_detail])
-    return self
+    return sample
 
 
 def validate_FFPE_source(self: OrderSample) -> OrderSample:
@@ -39,32 +39,32 @@ def validate_FFPE_source(self: OrderSample) -> OrderSample:
     return self
 
 
-def validate_required_container_name(self: OrderSample):
-    if self.container == ContainerEnum.plate and not self.container_name:
+def validate_required_container_name(sample: OrderSample):
+    if sample.container == ContainerEnum.plate and not sample.container_name:
         error_details = InitErrorDetails(
-            type="missing", loc=("container_name",), input=self.container_name, ctx={}
+            type="missing", loc=("container_name",), input=sample.container_name, ctx={}
         )
         raise ValidationError.from_exception_data(
-            title=self.__class__.__name__, line_errors=[error_details]
+            title=sample.__class__.__name__, line_errors=[error_details]
         )
-    return self
+    return sample
 
 
-def validate_required_well_position(self: OrderSample):
-    if self.container == ContainerEnum.plate and not self.well_position:
+def validate_required_well_position(sample: OrderSample):
+    if sample.container == ContainerEnum.plate and not sample.well_position:
         error_details = InitErrorDetails(
-            type="missing", loc=("well_position",), input=self.well_position, ctx={}
+            type="missing", loc=("well_position",), input=sample.well_position, ctx={}
         )
         raise ValidationError.from_exception_data(
-            title=self.__class__.__name__, line_errors=[error_details]
+            title=sample.__class__.__name__, line_errors=[error_details]
         )
 
 
-def validate_required_volume(self: OrderSample):
-    if self.container != ContainerEnum.no_container and not self.volume:
+def validate_required_volume(sample: OrderSample):
+    if sample.container != ContainerEnum.no_container and not sample.volume:
         error_details = InitErrorDetails(
-            type="missing", loc=("volume",), input=self.well_position, ctx={}
+            type="missing", loc=("volume",), input=sample.well_position, ctx={}
         )
         raise ValidationError.from_exception_data(
-            title=self.__class__.__name__, line_errors=[error_details]
+            title=sample.__class__.__name__, line_errors=[error_details]
         )

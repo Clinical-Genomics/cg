@@ -43,10 +43,10 @@ def validate_fathers(samples: list[OrderSample]):
         raise ValidationError.from_exception_data(title="Fathers", line_errors=error_details)
 
 
-def validate_subject_id(self: OrderCase):
+def validate_subject_id(case: OrderCase):
     error_details: list[InitErrorDetails] = []
-    case_name: str = self.name
-    for sample in self.samples:
+    case_name: str = case.name
+    for sample in case.samples:
         if sample.subject_id == sample.name or sample.subject_id == case_name:
             error_detail = InitErrorDetails(
                 type=PydanticCustomError(
@@ -60,5 +60,5 @@ def validate_subject_id(self: OrderCase):
             error_details.append(error_detail)
     if error_details:
         raise ValidationError.from_exception_data(
-            title=self.__class__.__name__, line_errors=error_details
+            title=case.__class__.__name__, line_errors=error_details
         )
