@@ -1,7 +1,7 @@
 """Rename sequencing qc column
 
 Revision ID: 2a2c618967af
-Revises: 6c98ed61b29e
+Revises: b3c2b0eefe3a
 Create Date: 2024-07-02 13:46:02.090345
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "2a2c618967af"
-down_revision = "951939f0f9b7"
+down_revision = "b3c2b0eefe3a"
 branch_labels = None
 depends_on = None
 
