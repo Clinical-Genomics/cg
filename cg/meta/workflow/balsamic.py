@@ -650,10 +650,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_pons(self, case_id: str) -> list[str]:
         """Return list of panel of normals used for analysis."""
+        pons: list[str] = []
         analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
         if analysis_metadata.config.panel:
-            return [analysis_metadata.config.panel.pon_cnvkit]
-        return []
+            pon_cnn: str | None = analysis_metadata.config.panel.pon_cnn
+            if pon_cnn:
+                pons.append(pon_cnn)
+        return pons
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
