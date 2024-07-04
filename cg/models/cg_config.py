@@ -28,6 +28,7 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -635,3 +636,7 @@ class CGConfig(BaseModel):
             )
             self.delivery_api_ = api
         return api
+
+    @property
+    def sequencing_qc_service(self) -> SequencingQCService:
+        return SequencingQCService(self.status_db)

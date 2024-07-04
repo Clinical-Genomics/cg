@@ -2,8 +2,9 @@
 
 from sqlalchemy.orm import Session
 
+from cg.constants.constants import SequencingQCStatus
 from cg.store.base import BaseHandler
-from cg.store.models import Flowcell, Order, Sample
+from cg.store.models import Case, Flowcell, Order, Sample
 
 
 class UpdateHandler(BaseHandler):
@@ -31,3 +32,7 @@ class UpdateHandler(BaseHandler):
         order.is_delivered = delivered
         self.session.commit()
         return order
+
+    def update_sequencing_qc_status(self, case: Case, status: SequencingQCStatus) -> None:
+        case.aggregated_sequencing_qc = status
+        self.session.commit()
