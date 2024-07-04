@@ -50,7 +50,7 @@ def backup(context: CGConfig):
 @DRY_RUN
 @click.pass_obj
 def backup_illumina_runs(context: CGConfig, dry_run: bool):
-    """Back-up illumina runs."""
+    """Back-up Illumina runs."""
     pdc_service = context.pdc_service
     pdc_service.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
