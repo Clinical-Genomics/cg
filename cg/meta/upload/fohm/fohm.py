@@ -77,9 +77,11 @@ class FOHMUploadAPI:
         if not self._daily_reports_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
-                    self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id, tags=[FohmTag.Complementary]
-                    ).full_path
+                    Path(
+                        self.housekeeper_api.get_file_from_latest_version(
+                            bundle_name=case_id, tags={FohmTag.Complementary}
+                        ).full_path
+                    )
                 )
         return self._daily_reports_list
 
@@ -88,9 +90,11 @@ class FOHMUploadAPI:
         if not self._daily_pangolin_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
-                    self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id, tags=[FohmTag.PANGOLIN_TYPING]
-                    ).full_path
+                    Path(
+                        self.housekeeper_api.get_file_from_latest_version(
+                            bundle_name=case_id, tags={FohmTag.PANGOLIN_TYPING}
+                        ).full_path
+                    )
                 )
         return self._daily_pangolin_list
 
@@ -99,24 +103,23 @@ class FOHMUploadAPI:
         return self._dry_run
 
     @staticmethod
-    def create_daily_deliveries(file_paths: list[Path]) -> list[dict]:
-        """Creates a list of dicts with all CSV files used in daily delivery."""
-        all_deliveries = [
+    def get_reports_contents(file_paths: list[Path]) -> list[dict]:
+        """Return a list of dicts with all CSV files reports."""
+        csv_reports = [
             ReadFile.get_content_from_file(
                 file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
             )
             for file_path in file_paths
         ]
-        dicts = []
-        for list_with_dicts in all_deliveries:
-            dicts.extend(iter(list_with_dicts))
-        return dicts
+        reports: list[dict] = []
+        for report in csv_reports:
+            reports.extend(iter(report))
+        return reports
 
     @staticmethod
     def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplementaryReport]:
-        """Validate FOHM complementary reports.
-        Raises: ValidateError"""
-        complementary_reports = []
+        """Validate FOHM complementary reports."""
+        complementary_reports: list[FohmComplementaryReport] = []
         for report in reports:
             complementary_report = FohmComplementaryReport.model_validate(report)
             complementary_reports.append(complementary_report)
@@ -124,9 +127,8 @@ class FOHMUploadAPI:
 
     @staticmethod
     def validate_fohm_pangolin_reports(reports: list[dict]) -> list[FohmPangolinReport]:
-        """Validate FOHM Pangolin reports.
-        Raises: ValidateError"""
-        pangolin_reports = []
+        """Validate FOHM Pangolin reports."""
+        pangolin_reports: list[FohmPangolinReport] = []
         for report in reports:
             pangolin_report = FohmPangolinReport.model_validate(report)
             pangolin_reports.append(pangolin_report)
@@ -136,14 +138,14 @@ class FOHMUploadAPI:
     def get_sars_cov_complementary_reports(
         reports: list[FohmComplementaryReport],
     ) -> list[FohmComplementaryReport]:
-        """Return all "Sars-cov2" reports from multiple cases."""
+        """Return all "Sars-cov2" reports from reports."""
         return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
 
     @staticmethod
     def get_sars_cov_pangolin_reports(
         reports: list[FohmPangolinReport],
     ) -> list[FohmPangolinReport]:
-        """Return all "Sars-cov2" reports from multiple cases."""
+        """Return all "Sars-cov2" reports from reports."""
         return [report for report in reports if re.search(SARS_COV_REGEX, report.taxon)]
 
     def check_username(self) -> None:
@@ -184,21 +186,21 @@ class FOHMUploadAPI:
     def add_region_lab_to_reports(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
-        """Add region lab to reports."""
+        """Add region laboratory to reports."""
         for report in reports:
             report.region_lab = f"""{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="region_code").split(' ')[0]}"""
             f"""_{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="lab_code").split(' ')[0]}"""
 
-    def link_sample_rawdata_files(
+    def link_sample_raw_data_files(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
         for report in reports:
             for sample_id in report.internal_id:
                 sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-                bundle_name = sample.links[0].case.internal_id
-                version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-                files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
+                bundle_name: str = sample.links[0].case.internal_id
+                version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+                files = self.housekeeper_api.files(version=version.id, tags={sample_id}).all()
                 for file in files:
                     if self._dry_run:
                         LOG.info(
@@ -213,23 +215,23 @@ class FOHMUploadAPI:
         LOG.info(f"Regions in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            region_lab_reports: list[FohmPangolinReport] = [
+            region_lab_reports_contents: list[FohmPangolinReport] = [
                 report for report in reports if report.region_lab == region_lab
             ]
             if self._dry_run:
-                LOG.info(region_lab_reports)
+                LOG.info(region_lab_reports_contents)
                 continue
             pangolin_report_file = Path(
                 self.daily_rawdata_path,
                 f"{region_lab}_{self.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
             )
-            all_region_lab_reports: list[dict] = [
-                report.model_dump() for report in region_lab_reports
+            region_lab_reports_contents: list[dict] = [
+                report.model_dump() for report in region_lab_reports_contents
             ]
-            fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
+            field_names: list[str] = sorted(region_lab_reports_contents[0].model_dump().keys())
             write_csv_from_dict(
-                content=all_region_lab_reports,
-                fieldnames=fieldnames,
+                content=region_lab_reports_contents,
+                fieldnames=field_names,
                 file_path=pangolin_report_file,
             )
             pangolin_report_file.chmod(0o0777)
@@ -246,17 +248,17 @@ class FOHMUploadAPI:
             if self._dry_run:
                 LOG.info(region_lab_reports)
                 continue
-            all_region_lab_reports: list[dict] = [
+            region_lab_reports_contents: list[dict] = [
                 report.model_dump() for report in region_lab_reports
             ]
-            fieldnames: list[str] = sorted(region_lab_reports[0].model_dump().keys())
+            field_names: list[str] = sorted(region_lab_reports[0].model_dump().keys())
             complementary_report_file = Path(
                 self.daily_report_path,
                 f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
             )
             write_csv_from_dict(
-                content=all_region_lab_reports,
-                fieldnames=fieldnames,
+                content=region_lab_reports_contents,
+                fieldnames=field_names,
                 file_path=complementary_report_file,
             )
 
@@ -315,11 +317,11 @@ class FOHMUploadAPI:
             self.daily_rawdata_path.rmdir()
 
     def update_upload_started_at(self, case_id: str) -> None:
-        """Update timestamp for cases which started being processed as batch"""
+        """Update timestamp for cases which started being processed as batch."""
         if self._dry_run:
             return
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        case_obj.analyses[0].upload_started_at = dt.datetime.now()
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case.analyses[0].upload_started_at = dt.datetime.now()
         self.status_db.session.commit()
 
     def update_uploaded_at(self, case_id: str) -> None:
@@ -332,48 +334,46 @@ class FOHMUploadAPI:
 
     def parse_and_write_complementary_report(self) -> list[FohmComplementaryReport]:
         """Create and write a complementary report."""
-        complementary_reports_raw: list[dict] = self.create_daily_deliveries(
-            self.daily_reports_list
-        )
+        complementary_reports_raw: list[dict] = self.get_reports_contents(self.daily_reports_list)
         unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(
             complementary_reports_raw
         )
-        complementary_reports: list[FohmComplementaryReport] = (
+        sars_cov_complementary_reports: list[FohmComplementaryReport] = (
             self.validate_fohm_complementary_reports(unique_complementary_reports_raw)
         )
-        complementary_reports: list[FohmComplementaryReport] = (
-            self.get_sars_cov_complementary_reports(complementary_reports)
+        sars_cov_complementary_reports: list[FohmComplementaryReport] = (
+            self.get_sars_cov_complementary_reports(sars_cov_complementary_reports)
         )
-        self.add_sample_internal_id_to_complementary_reports(complementary_reports)
-        self.add_region_lab_to_reports(complementary_reports)
-        self.create_and_write_complementary_report(complementary_reports)
-        return complementary_reports
+        self.add_sample_internal_id_to_complementary_reports(sars_cov_complementary_reports)
+        self.add_region_lab_to_reports(sars_cov_complementary_reports)
+        self.create_and_write_complementary_report(sars_cov_complementary_reports)
+        return sars_cov_complementary_reports
 
     def parse_and_write_pangolin_report(self) -> list[FohmPangolinReport]:
         """Create and write a Pangolin report."""
-        pangolin_reports_raw: list[dict] = self.create_daily_deliveries(self.daily_pangolin_list)
+        pangolin_reports_raw: list[dict] = self.get_reports_contents(self.daily_pangolin_list)
         unique_pangolin_reports_raw: list[dict] = remove_duplicate_dicts(pangolin_reports_raw)
-        pangolin_reports: list[FohmPangolinReport] = self.validate_fohm_pangolin_reports(
+        sars_cov_pangolin_reports: list[FohmPangolinReport] = self.validate_fohm_pangolin_reports(
             unique_pangolin_reports_raw
         )
-        pangolin_reports: list[FohmPangolinReport] = self.get_sars_cov_pangolin_reports(
-            pangolin_reports
+        sars_cov_pangolin_reports: list[FohmPangolinReport] = self.get_sars_cov_pangolin_reports(
+            sars_cov_pangolin_reports
         )
-        self.add_sample_internal_id_to_pangolin_reports(pangolin_reports)
-        self.add_region_lab_to_reports(pangolin_reports)
-        self.create_pangolin_report(pangolin_reports)
-        return pangolin_reports
+        self.add_sample_internal_id_to_pangolin_reports(sars_cov_pangolin_reports)
+        self.add_region_lab_to_reports(sars_cov_pangolin_reports)
+        self.create_pangolin_report(sars_cov_pangolin_reports)
+        return sars_cov_pangolin_reports
 
     def aggregate_delivery(self, cases: list[str]) -> None:
         """Aggregate and hardlink reports."""
         self.set_cases_to_aggregate(cases)
         self.create_daily_delivery_folders()
-        complementary_reports: list[FohmComplementaryReport] = (
+        sars_cov_complementary_reports: list[FohmComplementaryReport] = (
             self.parse_and_write_complementary_report()
         )
-        self.link_sample_rawdata_files(complementary_reports)
-        pangolin_reports: list[FohmPangolinReport] = self.parse_and_write_pangolin_report()
-        self.link_sample_rawdata_files(pangolin_reports)
+        self.link_sample_raw_data_files(sars_cov_complementary_reports)
+        sars_cov_pangolin_reports: list[FohmPangolinReport] = self.parse_and_write_pangolin_report()
+        self.link_sample_raw_data_files(sars_cov_pangolin_reports)
 
     def create_and_write_complementary_report(self, cases: list[str]) -> None:
         """Create and write a complementary report."""
