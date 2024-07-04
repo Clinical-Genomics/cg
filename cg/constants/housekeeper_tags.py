@@ -241,3 +241,10 @@ class JanusTags:
         "star",
         "general-stats",
     ]
+
+
+class GisaidTag(StrEnum):
+    FASTA = "gisaid-fasta"
+    CONSENSUS_SAMPLE = "consensus-sample"
+    CSV = "gisaid-csv"
+    LOG = "gisaid-log"

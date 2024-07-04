@@ -5,24 +5,24 @@ from cg.models.gisaid.reports import GisaidComplementaryReport
 
 
 def test_get_complementary_report_content(gisaid_api: GisaidAPI, csv_file_path: Path):
-    # GIVEN a list of csv files
+    # GIVEN a list of CSV files
 
-    # WHEN creating the delivery content
+    # WHEN creating the report content
     content: list[dict] = gisaid_api.get_complementary_report_content(csv_file_path)
 
-    # THEN each file is a list of dicts where each dict is a row in a CSV file
+    # THEN each file is a list of dicts where each dict represents a row in a CSV file
     assert isinstance(content[0], dict)
 
-    # THEN two files are added as a list of dicts
+    # THEN the file ise added as a list of dicts
     assert len(content) == 3
 
 
 def test_validate_gisaid_complementary_reports(
     gisaid_api: GisaidAPI, gisaid_complementary_report_raw: dict[str, str]
 ):
-    # GIVEN a list of dicts
+    # GIVEN a dict
 
-    # WHEN matching values
+    # WHEN validating the dict
     content: list[GisaidComplementaryReport] = gisaid_api.validate_gisaid_complementary_reports(
         [gisaid_complementary_report_raw]
     )
@@ -36,7 +36,7 @@ def test_get_sars_cov_complementary_reports(
 ):
     # GIVEN a list of reports
 
-    # WHEN matching values in reports
+    # WHEN getting Sars-cov reports from reports
     content: list[GisaidComplementaryReport] = gisaid_api.get_sars_cov_complementary_reports(
         gisaid_complementary_reports
     )
@@ -72,11 +72,11 @@ def test_add_gisaid_accession_to_reports(
 
     # GIVEN a list of reports
 
-    # WHEN adding GISAID accession
+    # WHEN adding GISAID accession to reports
     gisaid_api.add_gisaid_accession_to_complementary_reports(
         gisaid_accession={gisaid_complementary_reports[0].sample_number: "a_gisaid_accession"},
         reports=[gisaid_complementary_reports[0]],
     )
 
-    # THEN a region lab has been added
+    # THEN a GISAID accession has been added
     assert isinstance(gisaid_complementary_reports[0].gisaid_accession, str)
