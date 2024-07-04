@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class FohmComplementaryReport(BaseModel):
     """Model for validating FOHM complementary reports."""
 
-    gsaid_accession: str = Field(str, alias="GISAID_accession")
+    gisaid_accession: str = Field(str, alias="GISAID_accession")
     internal_id: str | None = None
     sample_number: str = Field(str, alias="provnummer")
     selection_criteria: str = Field(str, alias="urvalskriterium")
