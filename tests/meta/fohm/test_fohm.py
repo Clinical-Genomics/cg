@@ -90,7 +90,7 @@ def test_add_sample_internal_id_to_complementary_reports(
 
     # GIVEN a list of complementary reports
 
-    # WHEN adding sample internals id to reports
+    # WHEN adding sample internal ids to reports
     fohm_upload_api.add_sample_internal_id_to_complementary_reports(fohm_complementary_reports)
 
     # THEN a sample internal id has been added

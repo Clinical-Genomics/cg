@@ -215,22 +215,22 @@ class FOHMUploadAPI:
         LOG.info(f"Regions in batch: {unique_region_labs}")
         for region_lab in unique_region_labs:
             LOG.info(f"Aggregating data for {region_lab}")
-            region_lab_reports_contents: list[FohmPangolinReport] = [
+            region_lab_reports: list[FohmPangolinReport] = [
                 report for report in reports if report.region_lab == region_lab
             ]
             if self._dry_run:
-                LOG.info(region_lab_reports_contents)
+                LOG.info(region_lab_reports)
                 continue
             pangolin_report_file = Path(
                 self.daily_rawdata_path,
                 f"{region_lab}_{self.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
             )
-            region_lab_reports_contents: list[dict] = [
-                report.model_dump() for report in region_lab_reports_contents
+            region_lab_reports_raw: list[dict] = [
+                report.model_dump() for report in region_lab_reports
             ]
-            field_names: list[str] = sorted(region_lab_reports_contents[0].model_dump().keys())
+            field_names: list[str] = sorted(region_lab_reports[0].model_dump().keys())
             write_csv_from_dict(
-                content=region_lab_reports_contents,
+                content=region_lab_reports_raw,
                 fieldnames=field_names,
                 file_path=pangolin_report_file,
             )
@@ -248,7 +248,7 @@ class FOHMUploadAPI:
             if self._dry_run:
                 LOG.info(region_lab_reports)
                 continue
-            region_lab_reports_contents: list[dict] = [
+            region_lab_reports_raw: list[dict] = [
                 report.model_dump() for report in region_lab_reports
             ]
             field_names: list[str] = sorted(region_lab_reports[0].model_dump().keys())
@@ -257,7 +257,7 @@ class FOHMUploadAPI:
                 f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
             )
             write_csv_from_dict(
-                content=region_lab_reports_contents,
+                content=region_lab_reports_raw,
                 fieldnames=field_names,
                 file_path=complementary_report_file,
             )

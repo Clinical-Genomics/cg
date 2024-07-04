@@ -5,6 +5,8 @@ from cg.apps.lims import LimsAPI
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
+from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
@@ -104,13 +106,19 @@ def fohm_pangolin_reports(
 
 @pytest.fixture
 def fohm_upload_api(
-    cg_context: CGConfig,
-    mocker: MockFixture,
+    cg_context: CGConfig, mocker: MockFixture, helpers: StoreHelpers
 ) -> FOHMUploadAPI:
     """FOHM upload API fixture."""
     fohm_upload_api = FOHMUploadAPI(cg_context)
 
-    # Mocked LIMS API scenario
-    mocker.patch.object(LimsAPI, "get_sample_attribute", return_value="a_str")
+    # Mock getting Sample object from StatusDB
+    mocker.patch.object(
+        Store,
+        "get_sample_by_name",
+        return_value=helpers.add_sample(fohm_upload_api.status_db, internal_id="a_sample_name"),
+    )
+
+    # Mock getting sample attribute from LIMS
+    mocker.patch.object(LimsAPI, "get_sample_attribute", return_value="a_sample_attribute")
 
     return fohm_upload_api
