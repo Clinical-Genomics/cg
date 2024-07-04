@@ -183,7 +183,6 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
-        # TODO: fix this when backup refactored
         sequencing_run: IlluminaSequencingRun = (
             self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
         )
@@ -197,7 +196,7 @@ class IlluminaPostProcessingService:
                 run_directory_data=run_directory_data,
                 store=self.status_db,
             )
-            # TODO fix this when backup refactored
+
             self.status_db.update_illumina_sequencing_run_has_backup(has_backup)
         except Exception as e:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
