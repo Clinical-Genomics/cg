@@ -197,7 +197,9 @@ class IlluminaPostProcessingService:
                 store=self.status_db,
             )
 
-            self.status_db.update_illumina_sequencing_run_has_backup(has_backup)
+            self.status_db.update_illumina_sequencing_run_has_backup(
+                sequencing_run=sequencing_run, has_backup=has_backup
+            )
         except Exception as e:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
             raise
