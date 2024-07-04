@@ -47,7 +47,7 @@ LOG = logging.getLogger(__name__)
 def ensure_illumina_runs_on_disk(context: CGConfig, case_id: str):
     """
     Check if Illumina runs are on disk for a given case.
-    If not, request Illumnina run and raise IlluminaRunsNeededError.
+    If not, request Illumina run and raise IlluminaRunsNeededError.
     """
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
