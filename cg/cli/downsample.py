@@ -24,13 +24,15 @@ def downsample():
     "samples",
     help="Downsample reads in one or multiple samples in a case. Usage: \n"
     "For a single sample: cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1\n"
-    "For multiple samples:cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1 -i ACC12324 10",
+    "For multiple samples:cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1 -i ACC12324 10\n"
+    "If multiple samples are provided possible sample relationships will need to be added using:\n"
+    "cg add relationship.",
 )
 @click.option(
     "-c",
     "--case-id",
     required=True,
-    help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred to the downsampled case.",
+    help="Case identifier used in statusdb, e.g. supersonicturtle.",
 )
 @click.option(
     "-cn",
