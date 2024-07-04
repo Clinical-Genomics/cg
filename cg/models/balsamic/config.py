@@ -66,23 +66,33 @@ class BalsamicConfigPanel(BaseModel):
         capture_kit: string representation of a panel BED filename
         capture_kit_version: capture kit version
         chrom: list of chromosomes in the panel BED file
+        pon_cnvkit: panel of normal applied to CNVkit variant calling
     """
 
     capture_kit: str
     capture_kit_version: str | None
     chrom: list[str]
+    pon_cnvkit: str | None = None
+    pon_cnvkit_version: str | None = None
 
-    @validator("capture_kit", pre=True)
-    def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
-        """Return the base name of the provided capture kit path."""
-        return Path(capture_kit).name
+    @validator("capture_kit", "pon_cnvkit", pre=True)
+    def get_filename_from_path(cls, path: str) -> str:
+        """Return the base name of the provided file path."""
+        return Path(path).name
 
     @validator("capture_kit_version", always=True)
-    def extract_capture_kit_name_from_name(
-        cls, capture_kit_version: str | None, values: dict
+    def get_panel_version_from_filename(
+        cls, capture_kit_version: str | None, values: dict[str, str | None]
     ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
+
+    @validator("capture_kit_version")
+    def get_pon_cnvkit_version_from_filename(
+        cls, pon_cnvkit_version: str | None, values: dict[str, str | None]
+    ) -> str:
+        """Return the PON CNVkit version from its filename (e.g. gmsmyeloid_5.3_hg19_design_CNVkit_PON_reference_v1.cnn)."""
+        return values["pon_cnvkit"].split("_")[-1]
 
 
 class BalsamicConfigQC(BaseModel):
