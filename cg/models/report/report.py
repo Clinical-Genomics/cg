@@ -84,10 +84,10 @@ class DataAnalysisModel(BaseModel):
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     pons: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
-    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
-    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":
