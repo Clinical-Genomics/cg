@@ -65,8 +65,6 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
         median_target_coverage: median coverage of a target region in bases; source: workflow
         pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
         pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
-        pon_cnvkit: CNVkit PON used for analysis; source: workflow
-        pon_cnvkit_version: CNVkit PON version used for analysis; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -75,8 +73,6 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pon_cnvkit: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pon_cnvkit_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):

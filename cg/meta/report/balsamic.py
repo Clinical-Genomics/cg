@@ -98,8 +98,6 @@ class BalsamicReportAPI(ReportAPI):
             million_read_pairs=million_read_pairs,
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
-            pon_cnvkit=analysis_metadata.config.panel.pon_cnvkit,
-            pon_cnvkit_version=analysis_metadata.config.panel.pon_cnvkit_version,
         )
 
     @staticmethod
