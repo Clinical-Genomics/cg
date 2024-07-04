@@ -11,10 +11,10 @@ def _is_case_failed_sequencing_qc(case: Case) -> bool:
     return case.are_all_samples_sequenced and not SequencingQCService.case_pass_sequencing_qc(case)
 
 
-def get_cases_failed_sequencing_qc_count(order: Order, cases_to_exclude: list[str]) -> int:
+def get_cases_failed_sequencing_qc_count(order: Order, cases_to_exclude: list[str]) -> list[Case]:
     cases: list[Case] = order.cases
-    return sum(
-        1
+    return [
+        case
         for case in cases
         if _is_case_failed_sequencing_qc(case) and case.internal_id not in cases_to_exclude
-    )
+    ]

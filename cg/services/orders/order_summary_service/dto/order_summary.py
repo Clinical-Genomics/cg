@@ -1,15 +1,17 @@
 from pydantic import BaseModel, Field
 
+from cg.apps.tb.dto.summary_response import StatusSummary
+
 
 class OrderSummary(BaseModel):
     order_id: int = Field(exclude=True)
     total: int
-    cancelled: int
-    completed: int
-    delivered: int
-    failed: int
-    failed_sequencing_qc: int
-    in_lab_preparation: int
-    in_sequencing: int
-    not_received: int
-    running: int
+    cancelled: StatusSummary
+    completed: StatusSummary
+    delivered: StatusSummary
+    failed: StatusSummary
+    failed_sequencing_qc: StatusSummary
+    in_lab_preparation: StatusSummary
+    in_sequencing: StatusSummary
+    not_received: StatusSummary
+    running: StatusSummary

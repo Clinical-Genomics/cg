@@ -1476,7 +1476,7 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
-    def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+    def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> list[Case]:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
@@ -1488,9 +1488,11 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
             cases_to_exclude=cases_to_exclude,
-        ).count()
+        ).all()
 
-    def get_case_in_preparation_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+    def get_case_in_preparation_count(
+        self, order_id: int, cases_to_exclude: list[str]
+    ) -> list[Case]:
         filters: list[CaseFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
@@ -1503,9 +1505,11 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
             cases_to_exclude=cases_to_exclude,
-        ).count()
+        ).all()
 
-    def get_case_in_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+    def get_case_in_sequencing_count(
+        self, order_id: int, cases_to_exclude: list[str]
+    ) -> list[Case]:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
@@ -1519,7 +1523,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
             cases_to_exclude=cases_to_exclude,
-        ).count()
+        ).all()
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""

@@ -24,7 +24,7 @@ def test_not_received(summary_service: OrderSummaryService, order_with_cases: Or
     summary: OrderSummary = summary_service.get_summary(order_id)
 
     # THEN the summary should contain one case not received
-    assert summary.not_received == 1
+    assert summary.not_received.count == 1
 
 
 def test_in_preparation(summary_service: OrderSummaryService, order_with_cases: Order):
@@ -35,7 +35,7 @@ def test_in_preparation(summary_service: OrderSummaryService, order_with_cases: 
     summary: OrderSummary = summary_service.get_summary(order_id)
 
     # THEN the summary should contain one case in preparation
-    assert summary.in_lab_preparation == 1
+    assert summary.in_lab_preparation.count == 1
 
 
 def test_in_sequencing(summary_service: OrderSummaryService, order_with_cases: Order):
@@ -46,7 +46,7 @@ def test_in_sequencing(summary_service: OrderSummaryService, order_with_cases: O
     summary: OrderSummary = summary_service.get_summary(order_id)
 
     # THEN the summary should contain one case in sequencing
-    assert summary.in_sequencing == 1
+    assert summary.in_sequencing.count == 1
 
 
 def test_summarize_multiple_samples_not_received(
@@ -62,7 +62,7 @@ def test_summarize_multiple_samples_not_received(
     assert summary.total == 1
 
     # THEN the summary should contain one case not received
-    assert summary.not_received == 1
+    assert summary.not_received.count == 1
 
 
 def test_summarize_order_with_two_cases(
@@ -78,7 +78,7 @@ def test_summarize_order_with_two_cases(
     assert summary.total == 2
 
     # THEN the summary should contain one case not received
-    assert summary.not_received == 2
+    assert summary.not_received.count == 2
 
     # THEN the summary should not contain any case in sequencing
-    assert summary.in_sequencing == 0
+    assert summary.in_sequencing.count == 0
