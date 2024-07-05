@@ -2,17 +2,17 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, exists, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, Customer, Sample
+from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -205,6 +205,16 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     return cases.order_by(Case.created_at.desc())
 
 
+def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Query:
+    """Filter cases with pending or failed sequencing QC."""
+    return cases.filter(
+        or_(
+            Case.aggregated_sequencing_qc == SequencingQCStatus.PENDING,
+            Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
+        )
+    )
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: list[Callable],
@@ -283,3 +293,4 @@ class CaseFilter(Enum):
     WITH_WORKFLOW: Callable = filter_cases_with_workflow
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
+    PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc

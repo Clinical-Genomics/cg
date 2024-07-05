@@ -456,7 +456,7 @@ class Case(Base, PriorityMixin):
         default=Priority.standard,
     )
 
-    sequencing_qc_status: Mapped[SequencingQCStatus] = mapped_column(
+    aggregated_sequencing_qc: Mapped[SequencingQCStatus] = mapped_column(
         types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
@@ -858,7 +858,7 @@ class Sample(Base, PriorityMixin):
 
     @property
     def _run_devices(self) -> list["RunDevice"]:
-        """Return the devices a sample has been sequenced on."""
+        """Return the run_devices a sample has been sequenced on."""
         return list({metric.run_metrics.device for metric in self._new_run_metrics})
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
@@ -974,7 +974,7 @@ class Order(Base):
 
 
 class RunDevice(Base):
-    """Parent model for the different types of run devices."""
+    """Parent model for the different types of run run_devices."""
 
     __tablename__ = "run_device"
 
@@ -992,7 +992,7 @@ class RunDevice(Base):
         return list(
             {
                 sample_run_metric.sample
-                for run in self.instrument_run
+                for run in self.instrument_runs
                 for sample_run_metric in run.sample_run_metrics
             }
         )

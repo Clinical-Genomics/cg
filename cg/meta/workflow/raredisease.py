@@ -16,6 +16,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
+from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             analysis_type=analysis_type,
-            target_bed=target_bed,
+            target_bed=Path(self.references, target_bed).as_posix(),
         )
 
     @staticmethod
@@ -115,6 +116,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         except KeyError:
             raise ValueError(f"{sex} is not a valid sex")
         return code
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Raredisease bundle filenames path."""
+        return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
     def root(self) -> str:
