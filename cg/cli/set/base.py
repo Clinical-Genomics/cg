@@ -11,7 +11,7 @@ from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import FlowCellStatus
-from cg.constants.constants import SKIP_CONFIRMATION
+from cg.constants.cli_options import SKIP_CONFIRMATION
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
