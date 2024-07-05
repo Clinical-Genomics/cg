@@ -92,7 +92,7 @@ class BalsamicConfigPanel(BaseModel):
         pon_cnn_filename_split: list[str] = Path(pon_cnn).stem.split("_")
         pon_cnn_name: str = f"{pon_cnn_filename_split[0]} v{pon_cnn_filename_split[1]}"
         pon_cnn_version: str = pon_cnn_filename_split[-1]
-        pon_tool_name: str = pon_cnn_filename_split[5]
+        pon_tool_name: str = pon_cnn_filename_split[4]
         return f"{pon_tool_name} {pon_cnn_name (pon_cnn_version)}"
 
 
