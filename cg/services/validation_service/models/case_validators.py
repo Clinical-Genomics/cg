@@ -9,7 +9,7 @@ def validate_mothers(samples: list[OrderSample]):
     sample_names = [sample.name for sample in samples]
     error_details: list[InitErrorDetails] = []
     for sample in samples:
-        if sample.mother not in sample_names:
+        if sample.mother and sample.mother not in sample_names:
             error_detail = InitErrorDetails(
                 type=PydanticCustomError(
                     error_type="Mother missing",
@@ -28,7 +28,7 @@ def validate_fathers(samples: list[OrderSample]):
     sample_names = [sample.name for sample in samples]
     error_details: list[InitErrorDetails] = []
     for sample in samples:
-        if sample.father not in sample_names:
+        if sample.father and sample.father not in sample_names:
             error_detail = InitErrorDetails(
                 type=PydanticCustomError(
                     error_type="Father missing",
