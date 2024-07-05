@@ -50,10 +50,7 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
         LOG.info(f"{case_id}: analysis uploaded!")
     else:
         LOG.error(f"Uploading case failed: {case_id}")
-        LOG.error(
-            f"Flowcell did not pass one of the following QC parameters:\n"
-            f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"
-        )
+        LOG.error("Sequencing run did not pass QC. Please check the QC values in the database.")
         raise AnalysisUploadError("Upload failed")
 
 
