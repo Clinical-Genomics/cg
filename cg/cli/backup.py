@@ -223,7 +223,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 @DRY_RUN
 @click.option("-s", "--sample-id", "object_type", flag_value="sample", type=str)
 @click.option("-c", "--case-id", "object_type", flag_value="case", type=str)
-@click.option("-f", "--flow-cell-id", "object_type", flag_value="run_devices", type=str)
+@click.option("-f", "--flow-cell-id", "object_type", flag_value="flow_cell", type=str)
 @click.argument("identifier", type=str)
 @click.pass_context
 @click.pass_obj
