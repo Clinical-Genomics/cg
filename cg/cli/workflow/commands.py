@@ -26,7 +26,6 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
-
 OPTION_SKIP_CONFIRMATION = click.option("-y", "--skip-confirmation", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
