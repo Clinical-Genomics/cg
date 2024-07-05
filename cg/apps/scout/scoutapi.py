@@ -157,7 +157,7 @@ class ScoutAPI:
             get_cases_command.append("--finished")
 
         if reruns:
-            LOG.info("Fetching cases that are reruns")
+            LOG.debug("Fetching cases that are reruns")
             get_cases_command.append("--reruns")
 
         if days_ago:
@@ -175,7 +175,7 @@ class ScoutAPI:
         for case_export in ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
-            LOG.info(f"Validating case {case_export.get('_id')}")
+            LOG.debug(f"Validating case {case_export.get('_id')}")
             cases.append(ScoutExportCase.model_validate(case_export))
         return cases
 
