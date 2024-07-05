@@ -44,7 +44,7 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confir
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=skip_confirmation)
+    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, skip_confirmation=skip_confirmation)
 
     if not (skip_confirmation or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
@@ -58,11 +58,11 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confir
     status_db.session.commit()
 
 
-def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, yes: bool):
+def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, skip_confirmation: bool):
     """Delete all links from a case to samples"""
     samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
-        if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
+        if not (skip_confirmation or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             raise click.Abort
 
         samples_to_delete.append(case_link.sample)
@@ -75,10 +75,10 @@ def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, y
             status_db.session.commit()
 
     for sample in samples_to_delete:
-        _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
+        _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, skip_confirmation=skip_confirmation)
 
 
-def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
+def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, skip_confirmation: bool):
     if _has_sample_been_lab_processed(sample):
         _log_sample_process_information(sample)
         return
@@ -89,7 +89,7 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     if not (
-        yes
+        skip_confirmation
         or click.confirm(
             f"Sample {sample.internal_id} is not linked to anything, "
             f"do you want to DELETE sample:"

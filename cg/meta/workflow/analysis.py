@@ -546,7 +546,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -554,7 +554,7 @@ class AnalysisAPI(MetaAPI):
         except FileNotFoundError:
             self.clean_analyses(case_id)
 
-        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+        if skip_confirmation or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
             if case_path.is_symlink():
                 LOG.warning(
                     f"Will not automatically delete symlink: {case_path}, delete it manually",

@@ -50,12 +50,12 @@ def delete_available_observations(
         f"This would delete observations for the following cases: "
         f"{[case.internal_id for case in uploaded_observations]}"
     )
-    if yes or click.confirm("Do you want to continue?", abort=True):
+    if skip_confirmation or click.confirm("Do you want to continue?", abort=True):
         for case in uploaded_observations:
             try:
                 LOG.info(f"Will delete observations for {case.internal_id}")
                 context.invoke(
-                    delete_observations, case_id=case.internal_id, dry_run=dry_run, yes=skip_confirmation
+                    delete_observations, case_id=case.internal_id, dry_run=dry_run, skip_confirmation=skip_confirmation
                 )
             except (CaseNotFoundError, LoqusdbError) as error:
                 LOG.error(f"Error deleting observations for {case.internal_id}: {error}")
