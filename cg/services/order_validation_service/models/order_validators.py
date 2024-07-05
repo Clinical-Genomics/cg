@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
-from cg.services.validation_service.models.order_case import OrderCase
+from cg.services.order_validation_service.models.order_case import OrderCase
 
 
 def validate_well_positions(cases: list[OrderCase]):
