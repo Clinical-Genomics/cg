@@ -96,7 +96,11 @@ def samples(
 
     for sample_obj in sample_objs:
         context.invoke(
-            sample, sample_id=sample_obj.internal_id, kwargs=kwargs, skip_confirmation=skip_confirmation, skip_lims=skip_lims
+            sample,
+            sample_id=sample_obj.internal_id,
+            kwargs=kwargs,
+            skip_confirmation=skip_confirmation,
+            skip_lims=skip_lims,
         )
 
 

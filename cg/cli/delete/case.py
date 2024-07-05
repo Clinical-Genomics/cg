@@ -44,7 +44,9 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confir
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, skip_confirmation=skip_confirmation)
+    _delete_links_and_samples(
+        case_obj=case, dry_run=dry_run, status_db=status_db, skip_confirmation=skip_confirmation
+    )
 
     if not (skip_confirmation or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
@@ -58,7 +60,9 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confir
     status_db.session.commit()
 
 
-def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, skip_confirmation: bool):
+def _delete_links_and_samples(
+    case_obj: Case, dry_run: bool, status_db: Store, skip_confirmation: bool
+):
     """Delete all links from a case to samples"""
     samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
@@ -75,7 +79,9 @@ def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, s
             status_db.session.commit()
 
     for sample in samples_to_delete:
-        _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, skip_confirmation=skip_confirmation)
+        _delete_sample(
+            dry_run=dry_run, sample=sample, status_db=status_db, skip_confirmation=skip_confirmation
+        )
 
 
 def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, skip_confirmation: bool):

@@ -135,7 +135,9 @@ def scout_finished_cases(
         LOG.info(f"{cases_added} cases marked for alignment files removal")
 
     for bundle in bundles:
-        context.invoke(hk_alignment_files, bundle=bundle, skip_confirmation=skip_confirmation, dry_run=dry_run)
+        context.invoke(
+            hk_alignment_files, bundle=bundle, skip_confirmation=skip_confirmation, dry_run=dry_run
+        )
 
 
 @clean.command("hk-case-bundle-files")

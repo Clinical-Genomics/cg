@@ -53,7 +53,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def clean_run_dir(self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
