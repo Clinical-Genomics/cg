@@ -39,6 +39,12 @@ def view_flow_cell_internal_id(unused1, unused2, model, unused3):
     return Markup("%s" % model.device.internal_id)
 
 
+def view_flow_cell_model(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.model)
+
+
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -452,6 +458,7 @@ class IlluminaFlowCellView(BaseView):
 
     column_list = (
         "internal_id",
+        "model",
         "sequencer_type",
         "sequencer_name",
         "data_availability",
@@ -472,9 +479,7 @@ class IlluminaFlowCellView(BaseView):
         "demultiplexing_completed_at",
         "archived_at",
     )
-    column_formatters = {
-        "internal_id": view_flow_cell_internal_id,
-    }
+    column_formatters = {"internal_id": view_flow_cell_internal_id, "model": view_flow_cell_model}
 
     column_default_sort = ("sequencing_completed_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
