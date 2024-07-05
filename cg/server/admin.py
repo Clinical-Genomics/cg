@@ -500,11 +500,14 @@ class IlluminaFlowCellView(BaseView):
             Markup(
                 "<a href='%s'>%s</a>"
                 % (
-                    url_for("illuminaflowcell.index_view", search=model.device.internal_id),
-                    model.device.internal_id,
+                    url_for(
+                        "illuminasequencingrun.index_view",
+                        search=model.instrument_run.device.internal_id,
+                    ),
+                    model.instrument_run.device.internal_id,
                 )
             )
-            if model.device
+            if model.instrument_run.device
             else ""
         )
 

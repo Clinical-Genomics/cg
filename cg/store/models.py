@@ -1077,6 +1077,11 @@ class IlluminaSequencingRun(InstrumentRun):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
+    def to_dict(self):
+        """Represent as dictionary"""
+        data = to_dict(model_instance=IlluminaSequencingRun)
+        return data
+
 
 class PacBioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"

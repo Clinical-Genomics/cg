@@ -52,10 +52,10 @@ from cg.store.models import (
     ApplicationLimitations,
     Case,
     Customer,
+    IlluminaSampleSequencingMetrics,
     Pool,
     Sample,
     User,
-    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
