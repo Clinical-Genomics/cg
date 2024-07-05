@@ -90,7 +90,7 @@ def hk_alignment_files(
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
-            LOG.warning(
+            LOG.debug(
                 f"Could not find any files ready for cleaning for bundle {bundle} and tag {tag}"
             )
 
