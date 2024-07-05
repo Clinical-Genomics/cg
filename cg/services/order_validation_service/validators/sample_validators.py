@@ -2,7 +2,7 @@ from pydantic import ValidationError
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.validation_service.models.order_sample import OrderSample
+from cg.services.order_validation_service.models.order_sample import OrderSample
 
 
 def validate_required_buffer(sample: OrderSample) -> OrderSample:

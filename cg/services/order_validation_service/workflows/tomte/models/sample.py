@@ -2,9 +2,9 @@ from pydantic import Field, model_validator
 
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.validation_service.constants import TissueBlockEnum
-from cg.services.validation_service.models.order_sample import OrderSample
-from cg.services.validation_service.models.sample_validators import (
+from cg.services.order_validation_service.constants import TissueBlockEnum
+from cg.services.order_validation_service.models.order_sample import OrderSample
+from cg.services.order_validation_service.validators.sample_validators import (
     validate_ffpe_source,
     validate_required_buffer,
 )
