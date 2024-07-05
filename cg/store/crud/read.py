@@ -1537,7 +1537,7 @@ class ReadHandler(BaseHandler):
             order_id=order_id,
             cases_to_exclude=cases_to_exclude,
         ).count()
-    
+
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
         return apply_illumina_flow_cell_filters(
