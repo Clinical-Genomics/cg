@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 from cg.constants import DataDelivery
 from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
-from cg.services.order_validation_service.models.case_validators import (
+from cg.services.order_validation_service.validators.case_validators import (
     validate_fathers,
     validate_mothers,
 )

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
-from cg.services.order_validation_service.models.sample_validators import (
+from cg.services.order_validation_service.validators.sample_validators import (
     validate_required_container_name,
     validate_required_volume,
     validate_required_well_position,
