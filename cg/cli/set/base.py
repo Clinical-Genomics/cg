@@ -10,6 +10,7 @@ import click
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
 from cg.constants import FlowCellStatus
+from cg.constants.constants import SKIP_CONFIRMATION
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
@@ -18,12 +19,9 @@ from cg.store.store import Store
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
 HELP_SKIP_LIMS = "Skip setting value in LIMS"
-HELP_YES = "Answer yes on all confirmations"
 OPTION_LONG_KEY_VALUE = "--key-value"
 OPTION_LONG_SKIP_LIMS = "--skip-lims"
-OPTION_LONG_YES = "--yes"
 OPTION_SHORT_KEY_VALUE = "-kv"
-OPTION_SHORT_YES = "-y"
 NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
     "application_version_id",
     "customer_id",
@@ -68,7 +66,7 @@ def set_cmd():
     help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
 )
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
-@click.option("-y", "--skip-confirmation", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@SKIP_CONFIRMATION
 @click.argument("case_id", required=False)
 @click.pass_context
 def samples(
@@ -182,7 +180,7 @@ def list_keys(
     help=HELP_KEY_VALUE,
 )
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
-@click.option(OPTION_SHORT_YES, "--skip-confirmation", OPTION_LONG_YES, is_flag=True, help=HELP_YES)
+@SKIP_CONFIRMATION
 @click.pass_obj
 def sample(
     context: CGConfig,
