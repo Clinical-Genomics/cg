@@ -5,7 +5,7 @@ from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, Sta
 from cg.services.validation_service.constants import TissueBlockEnum
 from cg.services.validation_service.models.order_sample import OrderSample
 from cg.services.validation_service.models.sample_validators import (
-    validate_FFPE_source,
+    validate_ffpe_source,
     validate_required_buffer,
 )
 
@@ -28,5 +28,5 @@ class TomteSample(OrderSample):
     tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None
 
-    _validate_ffpe_source = model_validator(mode="after")(validate_FFPE_source)
+    _validate_ffpe_source = model_validator(mode="after")(validate_ffpe_source)
     _validate_required_buffer = model_validator(mode="after")(validate_required_buffer)

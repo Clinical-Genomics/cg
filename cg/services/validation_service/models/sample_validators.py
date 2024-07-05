@@ -24,7 +24,7 @@ def validate_required_buffer(sample: OrderSample) -> OrderSample:
     return sample
 
 
-def validate_FFPE_source(self: OrderSample) -> OrderSample:
+def validate_ffpe_source(self: OrderSample) -> OrderSample:
     if "FFPE" in str(self.source) and self.application.startswith("WG"):
         error_detail = InitErrorDetails(
             type=PydanticCustomError(
