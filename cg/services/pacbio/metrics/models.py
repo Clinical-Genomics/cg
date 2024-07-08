@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 
-from cg.constants.pacbio import CCSAttributeIDs
+from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs
+from cg.utils.calculations import fraction_to_percent
 
 
 class HiFiMetrics(BaseModel):
@@ -14,8 +15,25 @@ class HiFiMetrics(BaseModel):
     median_read_quality: str = Field(..., alias=CCSAttributeIDs.MEDIAN_ACCURACY)
     percent_q30: float = Field(..., alias=CCSAttributeIDs.PERCENT_Q30)
 
-    @field_validator("percent_q30", mode="before")
-    def transform_percent_q30(cls, value: float) -> float:
-        if 0.0 <= value <= 1.0:
-            value *= 100
-        return value
+    _validate_percent_q30 = field_validator("percent_q30", mode="before")(fraction_to_percent)
+
+
+class ControlMetrics(BaseModel):
+    """Model for the control metrics."""
+
+    reads: int = Field(..., alias=ControlAttributeIDs.NUMBER_OF_READS)
+    mean_read_length: int = Field(..., alias=ControlAttributeIDs.MEAN_READ_LENGTH)
+    percent_mean_concordance_reads: float = Field(
+        ..., alias=ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE
+    )
+    percent_mode_concordance_reads: float = Field(
+        ..., alias=ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE
+    )
+
+    _validate_percent_mean_concordance_reads = field_validator(
+        "percent_mean_concordance_reads", mode="before"
+    )(fraction_to_percent)
+
+    _validate_percent_mode_concordance_reads = field_validator(
+        "percent_mode_concordance_reads", mode="before"
+    )(fraction_to_percent)
