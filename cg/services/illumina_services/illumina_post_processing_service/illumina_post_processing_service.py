@@ -121,10 +121,10 @@ class IlluminaPostProcessingService:
                 run_directory_data=run_directory_data, sequencing_run=sequencing_run
             )
         )
-        self.status_db.commit_to_store()
         self.update_samples_for_metrics(
             sample_metrics=sample_metrics, sequencing_run=sequencing_run
         )
+        self.status_db.commit_to_store()
 
     def update_samples_for_metrics(
         self,
