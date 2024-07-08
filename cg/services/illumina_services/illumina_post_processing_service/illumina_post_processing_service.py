@@ -103,7 +103,7 @@ class IlluminaPostProcessingService:
             self.status_db.add_illumina_sample_metrics_entry(
                 metrics_dto=sample_metric, sequencing_run=sequencing_run
             )
-        return sample_metrics
+        return combined_metrics
 
     def store_sequencing_data_in_status_db(
         self, run_directory_data: IlluminaRunDirectoryData
