@@ -5,7 +5,7 @@ from cg.services.pacbio.metrics.models import HiFiMetrics
 
 
 @pytest.fixture
-def pacbio_hifi_metrics():
+def pac_bio_hifi_metrics():
     data = {
         CCSAttributeIDs.NUMBER_OF_READS: 6580977,
         CCSAttributeIDs.TOTAL_NUMBER_OF_BASES: 106192944185,

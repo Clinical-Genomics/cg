@@ -27,7 +27,7 @@ def test_parse_attributes_from_json(
 def test_parse_attributes_to_model(
     pac_bio_metrics_parser: MetricsParser,
     pac_bio_css_report: Path,
-    pacbio_hifi_metrics: HiFiMetrics,
+    pac_bio_hifi_metrics: HiFiMetrics,
 ):
     """Test to parse the attributes to a HiFi model."""
     # GIVEN a PacBio JSON file
@@ -39,4 +39,7 @@ def test_parse_attributes_to_model(
     )
 
     # THEN assert that the attributes are parsed to a model correctly
-    assert parsed_hifi_metrics == pacbio_hifi_metrics
+    assert parsed_hifi_metrics == pac_bio_hifi_metrics
+
+    # THEN assert that the percentage is not taken as a fraction
+    assert parsed_hifi_metrics.percent_q30 > 1
