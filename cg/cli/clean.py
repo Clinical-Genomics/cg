@@ -80,7 +80,7 @@ for sub_cmd in [
 @SKIP_CONFIRMATION
 @click.pass_obj
 def hk_alignment_files(
-    context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False
+    context: CGConfig, bundle: str, skip_confirmation: bool = False, dry_run: bool = False
 ) -> None:
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -93,7 +93,7 @@ def hk_alignment_files(
             )
 
         for hk_file in tag_files:
-            if not (yes or click.confirm(_get_confirm_question(bundle, hk_file))):
+            if not (skip_confirmation or click.confirm(_get_confirm_question(bundle, hk_file))):
                 continue
 
             file_path: Path = Path(hk_file.full_path)
@@ -119,7 +119,7 @@ def hk_alignment_files(
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
-    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+    context: click.Context, days_old: int, skip_confirmation: bool = False, dry_run: bool = False
 ) -> None:
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -135,7 +135,9 @@ def scout_finished_cases(
         LOG.info(f"{cases_added} cases marked for alignment files removal")
 
     for bundle in bundles:
-        context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
+        context.invoke(
+            hk_alignment_files, bundle=bundle, skip_confirmation=skip_confirmation, dry_run=dry_run
+        )
 
 
 @clean.command("hk-case-bundle-files")
