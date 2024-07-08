@@ -35,13 +35,13 @@ class MetricsParser:
         )
 
     @staticmethod
-    def _parse_report(json_file: Path) -> list[dict[str, Any]]:
-        """Parse the attribute element of a PacBio JSON file."""
-        parsed_json: dict = ReadFile.read_file[FileFormat.JSON](file_path=json_file)
+    def _parse_report(report_file: Path) -> list[dict[str, Any]]:
+        """Parse the attribute element of a PacBio report file in JSON format."""
+        parsed_json: dict = ReadFile.read_file[FileFormat.JSON](file_path=report_file)
         return parsed_json.get("attributes")
 
     def parse_attributes_to_model(self, json_file: Path, model: Callable) -> HiFiMetrics:
         """Parse the attributes to a model."""
-        report_content: list[dict[str, Any]] = self._parse_report(json_file=json_file)
+        report_content: list[dict[str, Any]] = self._parse_report(report_file=json_file)
         data: dict = {report_field["id"]: report_field["value"] for report_field in report_content}
         return model(**data)

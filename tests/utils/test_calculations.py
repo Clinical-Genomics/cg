@@ -1,6 +1,26 @@
 """Tests for the calculations module."""
 
-from cg.utils.calculations import multiply_by_million
+import pytest
+
+from cg.utils.calculations import fraction_to_percent, multiply_by_million
+
+
+@pytest.mark.parametrize(
+    "fraction, expected",
+    [
+        (0.50, 50.00),
+        (0.001, 0.1),
+        (2, 2),
+    ],
+)
+def test_fraction_to_percent(fraction: float, expected: float):
+    # GIVEN a fraction
+
+    # WHEN converting the fraction to a percentage
+    percentage: float = fraction_to_percent(fraction)
+
+    # THEN the fraction should be converted to a percentage
+    assert percentage == expected
 
 
 def test_multiple_by_a_million():

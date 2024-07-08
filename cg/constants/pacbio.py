@@ -17,3 +17,10 @@ class CCSAttributeIDs:
     READ_LENGTH_N50: str = "ccs2.ccs_readlength_n50"
     MEDIAN_ACCURACY: str = "ccs2.median_accuracy"
     PERCENT_Q30: str = "ccs2.percent_ccs_bases_q30"
+
+
+class ControlAttributeIDs:
+    NUMBER_OF_READS: str = "control.reads_n"
+    MEAN_READ_LENGTH: str = "control.readlength_mean"
+    PERCENT_MEAN_READ_CONCORDANCE: str = "control.concordance_mean"
+    PERCENT_MODE_READ_CONCORDANCE: str = "control.concordance_mode"
