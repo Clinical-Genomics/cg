@@ -34,6 +34,7 @@ def pac_bio_control_metrics() -> ControlMetrics:
 @pytest.fixture
 def pac_bio_productivity_metrics() -> ProductivityMetrics:
     data: dict[str, Any] = {
+        LoadingAttributesIDs.PRODUCTIVE_ZMWS: 25165824,
         LoadingAttributesIDs.P_0: 10012557,
         LoadingAttributesIDs.P_1: 15048838,
         LoadingAttributesIDs.P_2: 104429,

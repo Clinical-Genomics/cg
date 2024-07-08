@@ -42,6 +42,25 @@ class ControlMetrics(BaseModel):
 class ProductivityMetrics(BaseModel):
     """Model for the loading metrics."""
 
+    productive_zmws: int = Field(..., alias=LoadingAttributesIDs.PRODUCTIVE_ZMWS)
     p_0: int = Field(..., alias=LoadingAttributesIDs.P_0)
     p_1: int = Field(..., alias=LoadingAttributesIDs.P_1)
     p_2: int = Field(..., alias=LoadingAttributesIDs.P_2)
+
+    @property
+    def percentage_p_0(self) -> float:
+        return self._calculate_percentage(self.p_0)
+
+    @property
+    def percentage_p_1(self) -> float:
+        return self._calculate_percentage(self.p_1)
+
+    @property
+    def percentage_p_2(self) -> float:
+        return self._calculate_percentage(self.p_2)
+
+    def _calculate_percentage(self, value: int) -> float:
+        """Calculates the percentage of a value to productive_zmws."""
+        if self.productive_zmws == 0:
+            return 0.0
+        return round((value / self.productive_zmws) * 100, 0)

@@ -100,3 +100,20 @@ def test_parse_attributes_to_model(
     metrics_dict: dict = parsed_metrics.dict(by_alias=True)
     for percent_field in percent_fields:
         assert metrics_dict.get(percent_field) > 1
+
+
+def test_productivity_metrics_percentage_attributes(
+    pac_bio_productivity_metrics: ProductivityMetrics,
+):
+    """Test the percentage attributes of the productivity metrics."""
+    # GIVEN a productivity metrics object
+
+    # WHEN accessing the percentage attributes
+    percentage_p_0: float = pac_bio_productivity_metrics.percentage_p_0
+    percentage_p_1: float = pac_bio_productivity_metrics.percentage_p_1
+    percentage_p_2: float = pac_bio_productivity_metrics.percentage_p_2
+
+    # THEN assert that the percentage attributes are calculated correctly
+    assert percentage_p_0 == 40.0
+    assert percentage_p_1 == 60.0
+    assert percentage_p_2 == 0.0

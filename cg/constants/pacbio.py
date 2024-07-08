@@ -27,6 +27,7 @@ class ControlAttributeIDs:
 
 
 class LoadingAttributesIDs:
+    PRODUCTIVE_ZMWS: str = "loading_xml_report.productive_zmws"
     P_0: str = "loading_xml_report.productivity_0_n"
     P_1: str = "loading_xml_report.productivity_1_n"
     P_2: str = "loading_xml_report.productivity_2_n"
