@@ -1,5 +1,5 @@
 from cg.constants import SequencingRunDataAvailability
-from cg.store.models import IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 
@@ -35,3 +35,25 @@ def test_update_illumina_sequencing_run_has_backup(store_with_illumina_sequencin
 
     # THEN the backup status of the sequencing run is updated
     assert sequencing_run.has_backup is True
+
+
+def test_update_sample_reads_illumina(
+    store_with_illumina_sequencing_data: Store, selected_novaseq_x_sample_ids: list[str]
+):
+    # GIVEN a store with Illumina Sequencing Runs and a sample id
+    sample: Sample = store_with_illumina_sequencing_data.get_sample_by_internal_id(
+        selected_novaseq_x_sample_ids[0]
+    )
+    assert sample.reads == 0
+
+    # WHEN updating the sample reads for a sequencing run
+    store_with_illumina_sequencing_data.update_sample_reads_illumina(
+        internal_id=selected_novaseq_x_sample_ids[0]
+    )
+
+    # THEN the total reads for the sample is updated
+    total_reads_for_sample: int = 0
+    sample_metrics = sample.sample_run_metrics
+    for sample_metric in sample_metrics:
+        total_reads_for_sample += sample_metric.total_reads_in_lane
+    assert sample.reads == total_reads_for_sample
