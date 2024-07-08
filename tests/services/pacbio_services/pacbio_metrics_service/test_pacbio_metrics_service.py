@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Type
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs
 from cg.services.pacbio.metrics.metrics_parser import MetricsParser
-from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics
+from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics, ProductivityMetrics
 
 
 def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
@@ -19,11 +19,16 @@ def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
     # THEN assert that the parser is initialised with the expected attributes
     assert isinstance(parser.hifi_metrics, HiFiMetrics)
     assert isinstance(parser.control_metrics, ControlMetrics)
+    assert isinstance(parser.productivity_metrics, ProductivityMetrics)
 
 
 @pytest.mark.parametrize(
     "report_file_path",
-    ["pac_bio_control_report", "pac_bio_css_report"],
+    [
+        "pac_bio_control_report",
+        "pac_bio_css_report",
+        "pac_bio_loading_report",
+    ],
 )
 def test_parse_attributes_from_json(
     pac_bio_metrics_parser: MetricsParser,
@@ -57,12 +62,14 @@ def test_parse_attributes_from_json(
             ],
         ),
         ("pac_bio_css_report", HiFiMetrics, "pac_bio_hifi_metrics", [CCSAttributeIDs.PERCENT_Q30]),
+        ("pac_bio_loading_report", ProductivityMetrics, "pac_bio_productivity_metrics", []),
     ],
+    ids=["Control", "Hi-Fi", "Productivity"],
 )
 def test_parse_attributes_to_model(
     pac_bio_metrics_parser: MetricsParser,
     report_file_path: str,
-    model: Callable,
+    model: Type[ControlMetrics | HiFiMetrics | ProductivityMetrics],
     metrics_fixture: str,
     percent_fields: list[str],
     request: FixtureRequest,
@@ -74,12 +81,16 @@ def test_parse_attributes_to_model(
     report_file: Path = request.getfixturevalue(report_file_path)
 
     # GIVEN a metrics object with the expected parsed metrics
-    expected_metrics: ControlMetrics | HiFiMetrics = request.getfixturevalue(metrics_fixture)
+    expected_metrics: ControlMetrics | HiFiMetrics | ProductivityMetrics = request.getfixturevalue(
+        metrics_fixture
+    )
 
     # WHEN parsing the attributes to a given metrics model
-    parsed_metrics: ControlMetrics | HiFiMetrics = pac_bio_metrics_parser.parse_attributes_to_model(
-        report_file=report_file,
-        data_model=model,
+    parsed_metrics: ControlMetrics | HiFiMetrics | ProductivityMetrics = (
+        pac_bio_metrics_parser.parse_attributes_to_model(
+            report_file=report_file,
+            data_model=model,
+        )
     )
 
     # THEN assert that the model attributes are the expected ones

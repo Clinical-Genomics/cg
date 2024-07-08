@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 
-from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs
+from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs, LoadingAttributesIDs
 from cg.utils.calculations import fraction_to_percent
 
 
@@ -37,3 +37,11 @@ class ControlMetrics(BaseModel):
     _validate_percent_mode_concordance_reads = field_validator(
         "percent_mode_concordance_reads", mode="before"
     )(fraction_to_percent)
+
+
+class ProductivityMetrics(BaseModel):
+    """Model for the loading metrics."""
+
+    p_0: int = Field(..., alias=LoadingAttributesIDs.P_0)
+    p_1: int = Field(..., alias=LoadingAttributesIDs.P_1)
+    p_2: int = Field(..., alias=LoadingAttributesIDs.P_2)

@@ -24,3 +24,9 @@ class ControlAttributeIDs:
     MEAN_READ_LENGTH: str = "control.readlength_mean"
     PERCENT_MEAN_READ_CONCORDANCE: str = "control.concordance_mean"
     PERCENT_MODE_READ_CONCORDANCE: str = "control.concordance_mode"
+
+
+class LoadingAttributesIDs:
+    P_0: str = "loading_xml_report.productivity_0_n"
+    P_1: str = "loading_xml_report.productivity_1_n"
+    P_2: str = "loading_xml_report.productivity_2_n"
