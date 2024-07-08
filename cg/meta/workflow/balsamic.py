@@ -653,8 +653,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pons: list[str] = []
         analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
         if analysis_metadata.config.panel:
-            pon_cnn: str | None = analysis_metadata.config.panel.pon_cnn
-            if pon_cnn:
+            if pon_cnn := analysis_metadata.config.panel.pon_cnn:
                 pons.append(pon_cnn)
         return pons
 
