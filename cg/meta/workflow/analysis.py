@@ -537,6 +537,10 @@ class AnalysisAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        return []
+
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
@@ -551,7 +555,9 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -559,7 +565,9 @@ class AnalysisAPI(MetaAPI):
         except FileNotFoundError:
             self.clean_analyses(case_id)
 
-        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+        if skip_confirmation or click.confirm(
+            f"Are you sure you want to remove all files in {case_path}?"
+        ):
             if case_path.is_symlink():
                 LOG.warning(
                     f"Will not automatically delete symlink: {case_path}, delete it manually",
