@@ -1,11 +1,13 @@
 """Handler to update data objects"""
 
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 
 from cg.constants import SequencingRunDataAvailability
 from cg.store.base import BaseHandler
-from cg.store.models import IlluminaSequencingRun
+from cg.store.models import IlluminaSequencingRun, IlluminaSampleSequencingMetrics, SampleRunMetrics
 
 from cg.constants.constants import SequencingQCStatus
 from cg.store.base import BaseHandler
@@ -54,4 +56,18 @@ class UpdateHandler(BaseHandler):
 
     def update_sequencing_qc_status(self, case: Case, status: SequencingQCStatus) -> None:
         case.aggregated_sequencing_qc = status
+        self.session.commit()
+
+    def update_sample_reads_illumina(self, internal_id: str):
+        sample: Sample = self.get_sample_by_internal_id(internal_id)
+        total_reads_for_sample: int = 0
+        sample_metrics: list[IlluminaSampleSequencingMetrics] = sample.sample_run_metrics
+        for sample_metric in sample_metrics:
+            total_reads_for_sample += sample_metric.total_reads_in_lane
+        sample.reads = total_reads_for_sample
+        self.session.commit()
+
+    def update_sample_sequenced_at(self, internal_id: str, date: datetime):
+        sample: Sample = self.get_sample_by_internal_id(internal_id)
+        sample.last_sequenced_at = date
         self.session.commit()

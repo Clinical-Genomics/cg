@@ -82,7 +82,7 @@ class IlluminaPostProcessingService:
         self,
         run_directory_data: IlluminaRunDirectoryData,
         sequencing_run: IlluminaSequencingRun,
-    ) -> None:
+    ) -> list[IlluminaSampleSequencingMetricsDTO]:
         """Store Illumina sample sequencing metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
@@ -103,6 +103,7 @@ class IlluminaPostProcessingService:
             self.status_db.add_illumina_sample_metrics_entry(
                 metrics_dto=sample_metric, sequencing_run=sequencing_run
             )
+        return sample_metrics
 
     def store_sequencing_data_in_status_db(
         self, run_directory_data: IlluminaRunDirectoryData
@@ -115,10 +116,23 @@ class IlluminaPostProcessingService:
         sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
             run_directory_data=run_directory_data, flow_cell=flow_cell
         )
-        self.store_illumina_sample_sequencing_metrics(
-            run_directory_data=run_directory_data, sequencing_run=sequencing_run
+        sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
+            self.store_illumina_sample_sequencing_metrics(
+                run_directory_data=run_directory_data, sequencing_run=sequencing_run
+            )
         )
         self.status_db.commit_to_store()
+        unique_samples_on_run: list[str] = self.get_unique_samples_from_run(sample_metrics)
+        for sample_id in unique_samples_on_run:
+            self.status_db.update_sample_reads_illumina(internal_id=sample_id)
+            self.status_db.update_sample_sequenced_at(
+                sample_id, date=sequencing_run.sequencing_completed_at
+            )
+
+    @staticmethod
+    def get_unique_samples_from_run(sample_metrics: list[IlluminaSampleSequencingMetricsDTO]):
+        """Get unique samples from the run."""
+        return list({sample_metric.sample_id for sample_metric in sample_metrics})
 
     def store_sequencing_data_in_housekeeper(
         self,
