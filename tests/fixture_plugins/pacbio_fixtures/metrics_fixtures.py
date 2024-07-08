@@ -1,7 +1,7 @@
 import pytest
 
 from cg.constants.pacbio import CCSAttributeIDs
-from cg.services.pacbio_services.pacbio_metrics_service.models import HiFiMetrics
+from cg.services.pacbio.metrics.models import HiFiMetrics
 
 
 @pytest.fixture

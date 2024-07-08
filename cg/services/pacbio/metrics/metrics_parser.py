@@ -4,7 +4,7 @@ from typing import Any, Callable
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.io.controller import ReadFile
-from cg.services.pacbio_services.pacbio_metrics_service.models import HiFiMetrics
+from cg.services.pacbio.metrics.models import HiFiMetrics
 from cg.utils.files import get_file_in_directory
 
 

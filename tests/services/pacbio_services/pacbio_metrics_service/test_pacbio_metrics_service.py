@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Any
 
-from cg.services.pacbio_services.pacbio_metrics_service.metrics_parser import MetricsParser
-from cg.services.pacbio_services.pacbio_metrics_service.models import HiFiMetrics
+from cg.services.pacbio.metrics.metrics_parser import MetricsParser
+from cg.services.pacbio.metrics.models import HiFiMetrics
 
 
 def test_parse_attributes_from_json(
