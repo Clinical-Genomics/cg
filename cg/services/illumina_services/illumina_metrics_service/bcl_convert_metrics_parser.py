@@ -2,10 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-
 from cg.constants.constants import SCALE_TO_READ_PAIRS, FileFormat
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.metrics import (
@@ -52,7 +51,7 @@ class BCLConvertMetricsParser:
 
     @staticmethod
     def parse_metrics_file(
-        metrics_file_path, metrics_model: Callable
+        metrics_file_path, metrics_model: Type[SequencingQualityMetrics | DemuxMetrics]
     ) -> list[SequencingQualityMetrics | DemuxMetrics]:
         """Parse specified metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")

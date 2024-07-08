@@ -9,6 +9,18 @@ from cg.services.pacbio.metrics.metrics_parser import MetricsParser
 from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics
 
 
+def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
+    """Test the initialisation of the metrics parser."""
+    # GIVEN a PacBio SMRT cell path
+
+    # WHEN initialising the metrics parser
+    parser = MetricsParser(smrt_cell_path=pac_bio_smrt_cell_dir)
+
+    # THEN assert that the parser is initialised with the expected attributes
+    assert isinstance(parser.hifi_metrics, HiFiMetrics)
+    assert isinstance(parser.control_metrics, ControlMetrics)
+
+
 @pytest.mark.parametrize(
     "report_file_path",
     ["pac_bio_control_report", "pac_bio_css_report"],
@@ -67,7 +79,7 @@ def test_parse_attributes_to_model(
     # WHEN parsing the attributes to a given metrics model
     parsed_metrics: ControlMetrics | HiFiMetrics = pac_bio_metrics_parser.parse_attributes_to_model(
         report_file=report_file,
-        model=model,
+        data_model=model,
     )
 
     # THEN assert that the model attributes are the expected ones

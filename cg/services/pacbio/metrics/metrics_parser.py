@@ -19,14 +19,14 @@ class MetricsParser:
             directory=self.report_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
         )
         self.hifi_metrics: HiFiMetrics = self.parse_attributes_to_model(
-            report_file=self.base_calling_report_file, model=HiFiMetrics
+            report_file=self.base_calling_report_file, data_model=HiFiMetrics
         )
         # For control metrics
         self.control_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
         )
         self.control_metrics: ControlMetrics = self.parse_attributes_to_model(
-            report_file=self.control_report_file, model=ControlMetrics
+            report_file=self.control_report_file, data_model=ControlMetrics
         )
         # For productivity metrics
         self.loading_report_file: Path = get_file_in_directory(
@@ -44,9 +44,9 @@ class MetricsParser:
         return parsed_json.get("attributes")
 
     def parse_attributes_to_model(
-        self, report_file: Path, data_model: BaseModel
+        self, report_file: Path, data_model: Type[ControlMetrics | HiFiMetrics]
     ) -> ControlMetrics | HiFiMetrics:
         """Parse the attributes to a model."""
         report_content: list[dict[str, Any]] = self._parse_report(report_file=report_file)
         data: dict = {report_field["id"]: report_field["value"] for report_field in report_content}
-        return model(**data)
+        return data_model.model_validate(data, from_attributes=True)
