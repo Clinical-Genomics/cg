@@ -18,7 +18,7 @@ def test_parse_attributes_from_json(
     report_file_path: str,
     request: FixtureRequest,
 ):
-    """Test teh parsing of attributes from any PacBio report file."""
+    """Test the parsing of attributes from any PacBio report file."""
     # GIVEN a PacBio report file and a PacBio metrics parser initialised from the SMRTcell path
     report_file: Path = request.getfixturevalue(report_file_path)
 
