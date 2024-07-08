@@ -122,6 +122,15 @@ class IlluminaPostProcessingService:
             )
         )
         self.status_db.commit_to_store()
+        self.update_samples_for_metrics(
+            sample_metrics=sample_metrics, sequencing_run=sequencing_run
+        )
+
+    def update_samples_for_metrics(
+        self,
+        sample_metrics: list[IlluminaSampleSequencingMetricsDTO],
+        sequencing_run: IlluminaSequencingRun,
+    ):
         unique_samples_on_run: list[str] = self.get_unique_samples_from_run(sample_metrics)
         for sample_id in unique_samples_on_run:
             self.status_db.update_sample_reads_illumina(internal_id=sample_id)
