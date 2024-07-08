@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -26,9 +26,6 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
-OPTION_SKIP_CONFIRMATION = click.option(
-    "-y", "--skip-confirmation", "--yes", is_flag=True, help="Skip confirmation"
-)
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
@@ -137,7 +134,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 
 @click.command("rsync-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
@@ -163,7 +160,7 @@ def rsync_past_run_dirs(
 
 
 @click.command("clean-run-dir")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
@@ -185,7 +182,7 @@ def clean_run_dir(context: CGConfig, skip_confirmation: bool, case_id: str, dry_
 
 
 @click.command("past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -220,7 +217,7 @@ def past_run_dirs(
 
 
 @click.command("balsamic-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -236,7 +233,7 @@ def balsamic_past_run_dirs(
 
 
 @click.command("balsamic-qc-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -252,7 +249,7 @@ def balsamic_qc_past_run_dirs(
 
 
 @click.command("balsamic-umi-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -268,7 +265,7 @@ def balsamic_umi_past_run_dirs(
 
 
 @click.command("balsamic-pon-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -284,7 +281,7 @@ def balsamic_pon_past_run_dirs(
 
 
 @click.command("fluffy-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -300,7 +297,7 @@ def fluffy_past_run_dirs(
 
 
 @click.command("mip-dna-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -316,7 +313,7 @@ def mip_dna_past_run_dirs(
 
 
 @click.command("mip-rna-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -332,7 +329,7 @@ def mip_rna_past_run_dirs(
 
 
 @click.command("mutant-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -348,7 +345,7 @@ def mutant_past_run_dirs(
 
 
 @click.command("rnafusion-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
@@ -364,7 +361,7 @@ def rnafusion_past_run_dirs(
 
 
 @click.command("microsalt-past-run-dirs")
-@OPTION_SKIP_CONFIRMATION
+@SKIP_CONFIRMATION
 @DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
