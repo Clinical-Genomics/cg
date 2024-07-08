@@ -55,7 +55,7 @@ def test_update_sample_reads_illumina(
 
     # THEN the total reads for the sample is updated
     total_reads_for_sample: int = 0
-    sample_metrics = sample.sample_run_metrics
+    sample_metrics: list[IlluminaSampleSequencingMetrics] = sample.sample_run_metrics
     for sample_metric in sample_metrics:
         total_reads_for_sample += sample_metric.total_reads_in_lane
     assert sample.reads == total_reads_for_sample

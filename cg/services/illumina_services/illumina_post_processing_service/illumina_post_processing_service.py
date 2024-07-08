@@ -130,7 +130,7 @@ class IlluminaPostProcessingService:
         self,
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO],
         sequencing_run: IlluminaSequencingRun,
-    ):
+    )-> None:
         unique_samples_on_run: list[str] = self.get_unique_samples_from_run(sample_metrics)
         for sample_id in unique_samples_on_run:
             self.status_db.update_sample_reads_illumina(internal_id=sample_id)
@@ -139,7 +139,7 @@ class IlluminaPostProcessingService:
             )
 
     @staticmethod
-    def get_unique_samples_from_run(sample_metrics: list[IlluminaSampleSequencingMetricsDTO]):
+    def get_unique_samples_from_run(sample_metrics: list[IlluminaSampleSequencingMetricsDTO]) -> list[str]:
         """Get unique samples from the run."""
         return list({sample_metric.sample_id for sample_metric in sample_metrics})
 
