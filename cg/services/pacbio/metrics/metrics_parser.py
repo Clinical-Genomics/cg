@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Type
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
@@ -44,7 +44,7 @@ class MetricsParser:
         return parsed_json.get("attributes")
 
     def parse_attributes_to_model(
-        self, report_file: Path, model: Callable
+        self, report_file: Path, data_model: BaseModel
     ) -> ControlMetrics | HiFiMetrics:
         """Parse the attributes to a model."""
         report_content: list[dict[str, Any]] = self._parse_report(report_file=report_file)
