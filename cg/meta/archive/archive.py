@@ -17,7 +17,7 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
-    ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
+    ArchiveLocations.KAROLINSKA_HOSPITAL: DDNDataFlowClient
 }
 
 
