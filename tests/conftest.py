@@ -108,6 +108,10 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
 ]
 
 
@@ -740,6 +744,12 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
 def data_dir(fixtures_dir: Path) -> Path:
     """Return the path to the data dir."""
     return Path(fixtures_dir, "data")
+
+
+@pytest.fixture(scope="session")
+def devices_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the device dir."""
+    return Path(fixtures_dir, "devices")
 
 
 @pytest.fixture
