@@ -66,7 +66,7 @@ def test_parse_attributes_to_model(
 
     # WHEN parsing the attributes to a given metrics model
     parsed_metrics: ControlMetrics | HiFiMetrics = pac_bio_metrics_parser.parse_attributes_to_model(
-        json_file=report_file,
+        report_file=report_file,
         model=model,
     )
 

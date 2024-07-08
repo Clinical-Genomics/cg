@@ -4,7 +4,7 @@ from typing import Any, Callable
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.io.controller import ReadFile
-from cg.services.pacbio.metrics.models import HiFiMetrics
+from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics
 from cg.utils.files import get_file_in_directory
 
 
@@ -15,12 +15,18 @@ class MetricsParser:
         self.smrt_cell_path: Path = smrt_cell_path
         self.report_dir = Path(smrt_cell_path, "statistics")
         # For HiFi metrics
-        self.css_report_file: Path = get_file_in_directory(
+        self.base_calling_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
+        )
+        self.hifi_metrics: HiFiMetrics = self.parse_attributes_to_model(
+            report_file=self.base_calling_report_file, model=HiFiMetrics
         )
         # For control metrics
         self.control_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
+        )
+        self.control_metrics: ControlMetrics = self.parse_attributes_to_model(
+            report_file=self.control_report_file, model=ControlMetrics
         )
         # For productivity metrics
         self.loading_report_file: Path = get_file_in_directory(
@@ -30,9 +36,6 @@ class MetricsParser:
         self.raw_data_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
         )
-        self.hifi_metrics: HiFiMetrics = self.parse_attributes_to_model(
-            json_file=self.css_report_file, model=HiFiMetrics
-        )
 
     @staticmethod
     def _parse_report(report_file: Path) -> list[dict[str, Any]]:
@@ -40,8 +43,10 @@ class MetricsParser:
         parsed_json: dict = ReadFile.read_file[FileFormat.JSON](file_path=report_file)
         return parsed_json.get("attributes")
 
-    def parse_attributes_to_model(self, json_file: Path, model: Callable) -> HiFiMetrics:
+    def parse_attributes_to_model(
+        self, report_file: Path, model: Callable
+    ) -> ControlMetrics | HiFiMetrics:
         """Parse the attributes to a model."""
-        report_content: list[dict[str, Any]] = self._parse_report(report_file=json_file)
+        report_content: list[dict[str, Any]] = self._parse_report(report_file=report_file)
         data: dict = {report_field["id"]: report_field["value"] for report_field in report_content}
         return model(**data)
