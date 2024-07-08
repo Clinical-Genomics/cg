@@ -537,6 +537,10 @@ class AnalysisAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        return []
+
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
