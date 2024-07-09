@@ -307,7 +307,8 @@ class IlluminaRunDirectoryData:
         try:
             time: float = get_source_creation_time_stamp(self.demultiplexing_started_path)
             return format_time_from_ctime(time)
-        except FileNotFoundError:
+        except FileNotFoundError as error:
+            LOG.error(error)
             return None
 
     @property

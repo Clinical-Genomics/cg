@@ -404,7 +404,7 @@ class CreateHandler(BaseHandler):
             model=flow_cell_dto.model,
         )
         self.session.add(new_flow_cell)
-        LOG.debug(f"Flow cell added to status db: {new_flow_cell.id}.")
+        LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
         return new_flow_cell
 
     def add_illumina_sequencing_run(
@@ -435,7 +435,7 @@ class CreateHandler(BaseHandler):
             demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
         )
         self.session.add(new_sequencing_run)
-        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
+        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.device.internal_id}.")
         return new_sequencing_run
 
     def add_illumina_sample_metrics_entry(
