@@ -121,7 +121,11 @@ class IlluminaMetricsService:
             demultiplexed_run_dir.demultiplex_software_info_path
         )
         sequencing_started_at: datetime = demultiplexed_run_dir.sequencing_started_at
-        sequencing_comleted_at: datetime = demultiplexed_run_dir.sequencing_completed_at
+        sequencing_completed_at: datetime = (
+            demultiplexed_run_dir.sequencing_completed_at
+            if demultiplexed_run_dir.sequencing_completed_at
+            else demultiplexed_run_dir.sequenced_at
+        )
         demultiplexing_started_at: datetime = demultiplexed_run_dir.demultiplexing_started_at
         demultiplexing_completed_at: datetime = demultiplexed_run_dir.demultiplexing_completed_at
         sequencer_type: str = demultiplexed_run_dir.sequencer_type
@@ -144,7 +148,7 @@ class IlluminaMetricsService:
             demultiplexing_software=demux_software,
             demultiplexing_software_version=demux_software_version,
             sequencing_started_at=sequencing_started_at,
-            sequencing_completed_at=sequencing_comleted_at,
+            sequencing_completed_at=sequencing_completed_at,
             demultiplexing_started_at=demultiplexing_started_at,
             demultiplexing_completed_at=demultiplexing_completed_at,
             type=DeviceType.ILLUMINA,

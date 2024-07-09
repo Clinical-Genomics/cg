@@ -20,8 +20,8 @@ from cg.services.illumina_services.illumina_post_processing_service.housekeeper_
     add_demux_logs_to_housekeeper,
     add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
-    store_undetermined_fastq_files,
     delete_sequencing_data_from_housekeeper,
+    store_undetermined_fastq_files,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     combine_sample_metrics_with_undetermined,
