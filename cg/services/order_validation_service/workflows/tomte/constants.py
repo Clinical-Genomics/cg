@@ -8,4 +8,3 @@ class TomteDeliveryType(Enum):
     DataDelivery.FASTQ,
     DataDelivery.FASTQ_ANALYSIS,
     DataDelivery.NO_DELIVERY,
-
