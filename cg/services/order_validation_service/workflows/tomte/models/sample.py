@@ -1,10 +1,17 @@
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from cg.constants.constants import GenomeVersion
-from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum, ControlEnum, SexEnum, StatusEnum
+from cg.models.orders.sample_base import (
+    NAME_PATTERN,
+    ContainerEnum,
+    ControlEnum,
+    SexEnum,
+    StatusEnum,
+)
 from cg.services.order_validation_service.constants import TissueBlockEnum
 
-class TomteSample():
+
+class TomteSample:
     application: str
     comment: str | None = None
     container: ContainerEnum

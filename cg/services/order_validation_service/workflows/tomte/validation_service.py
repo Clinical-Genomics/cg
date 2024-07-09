@@ -3,7 +3,7 @@ from cg.services.order_validation_service.order_validation_service import OrderV
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 
 
-class TomteOrderValidationService(OrderValidationService):
+class TomteValidationService(OrderValidationService):
 
     def validate(self, order_json: str) -> ValidationErrors:
         TomteOrder.model_validate(order_json)
