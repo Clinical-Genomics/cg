@@ -3,24 +3,15 @@ from pydantic import Field
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
-    ContainerEnum,
     ControlEnum,
     SexEnum,
     StatusEnum,
 )
 from cg.services.order_validation_service.constants import TissueBlockEnum
+from cg.services.order_validation_service.models.sample import Sample
 
 
-class TomteSample:
-    application: str
-    comment: str | None = None
-    container: ContainerEnum
-    container_name: str | None = None
-    internal_id: str | None = None
-    name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
-    require_qc_ok: bool
-    volume: int | None = None
-    well_position: str | None = None
+class TomteSample(Sample):
     age_at_sampling: float | None = None
     control: ControlEnum | None = None
     elution_buffer: str | None = None
