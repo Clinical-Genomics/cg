@@ -35,7 +35,7 @@ class IlluminaFlowCellDTO(BaseModel):
 
     internal_id: str
     type: DeviceType
-    model: str
+    model: str | None
 
     class Config:
         arbitrary_types_allowed = True
