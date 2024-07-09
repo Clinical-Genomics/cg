@@ -115,6 +115,6 @@ def test_productivity_metrics_percentage_attributes(
     percentage_p_2: float = pac_bio_productivity_metrics.percentage_p_2
 
     # THEN assert that the percentage attributes are calculated correctly
-    assert math.isclose(percentage_p_0, 40, rel_tol=1e-9)
-    assert math.isclose(percentage_p_1, 60, rel_tol=1e-9)
-    assert math.isclose(percentage_p_2, 0, rel_tol=1e-9)
+    assert math.isclose(percentage_p_0, 40, abs_tol=1e-9)
+    assert math.isclose(percentage_p_1, 60, abs_tol=1e-9)
+    assert math.isclose(percentage_p_2, 0, abs_tol=1e-9)
