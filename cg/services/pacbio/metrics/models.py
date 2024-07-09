@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
 
-from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs, LoadingAttributesIDs
+from cg.constants.pacbio import (
+    CCSAttributeIDs,
+    ControlAttributeIDs,
+    LoadingAttributesIDs,
+    PolymeraseDataAttributeIDs,
+)
 from cg.utils.calculations import fraction_to_percent
 
 
@@ -64,3 +69,36 @@ class ProductivityMetrics(BaseModel):
         if self.productive_zmws == 0:
             return 0.0
         return round((value / self.productive_zmws) * 100, 0)
+
+
+class PolymeraseMetrics(BaseModel):
+    """Model for the polymerase metrics."""
+
+    mean_read_length: int = Field(..., alias=PolymeraseDataAttributeIDs.MEAN_READ_LENGTH)
+    read_length_n50: int = Field(..., alias=PolymeraseDataAttributeIDs.READ_LENGTH_N50)
+    mean_longest_subread_length: int = Field(
+        ..., alias=PolymeraseDataAttributeIDs.MEAN_LONGEST_SUBREAD_LENGTH
+    )
+    longest_subread_length_n50: int = Field(
+        ..., alias=PolymeraseDataAttributeIDs.LONGEST_SUBREAD_LENGTH_N50
+    )
+
+    @property
+    def mean_read_length_kb(self) -> float:
+        """Calculates the mean read length in kilobases."""
+        return round(self.mean_read_length / 1000, 1)
+
+    @property
+    def read_length_n50_kb(self) -> float:
+        """Calculates the read length N50 in kilobases."""
+        return round(self.read_length_n50 / 1000, 1)
+
+    @property
+    def mean_longest_subread_length_kb(self) -> float:
+        """Calculates the mean longest subread length in kilobases."""
+        return round(self.mean_longest_subread_length / 1000, 1)
+
+    @property
+    def longest_subread_length_n50_kb(self) -> float:
+        """Calculates the longest subread length N50 in kilobases."""
+        return round(self.longest_subread_length_n50 / 1000, 1)

@@ -7,7 +7,12 @@ from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs
 from cg.services.pacbio.metrics.metrics_parser import MetricsParser
-from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics, ProductivityMetrics
+from cg.services.pacbio.metrics.models import (
+    ControlMetrics,
+    HiFiMetrics,
+    PolymeraseMetrics,
+    ProductivityMetrics,
+)
 
 
 def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
@@ -21,6 +26,7 @@ def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
     assert isinstance(parser.hifi_metrics, HiFiMetrics)
     assert isinstance(parser.control_metrics, ControlMetrics)
     assert isinstance(parser.productivity_metrics, ProductivityMetrics)
+    assert isinstance(parser.polymerase_metrics, PolymeraseMetrics)
 
 
 @pytest.mark.parametrize(
@@ -29,6 +35,7 @@ def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
         "pac_bio_control_report",
         "pac_bio_css_report",
         "pac_bio_loading_report",
+        "pac_bio_raw_data_report",
     ],
 )
 def test_parse_attributes_from_json(
@@ -63,9 +70,10 @@ def test_parse_attributes_from_json(
             ],
         ),
         ("pac_bio_css_report", HiFiMetrics, "pac_bio_hifi_metrics", [CCSAttributeIDs.PERCENT_Q30]),
+        ("pac_bio_raw_data_report", PolymeraseMetrics, "pac_bio_polymerase_metrics", []),
         ("pac_bio_loading_report", ProductivityMetrics, "pac_bio_productivity_metrics", []),
     ],
-    ids=["Control", "Hi-Fi", "Productivity"],
+    ids=["Control", "Hi-Fi", "Polymerase", "Productivity"],
 )
 def test_parse_attributes_to_model(
     pac_bio_metrics_parser: MetricsParser,

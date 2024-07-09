@@ -57,3 +57,9 @@ def pac_bio_control_report(pac_bio_run_statistics_dir: Path) -> Path:
 def pac_bio_loading_report(pac_bio_run_statistics_dir: Path) -> Path:
     """Return the path to the PacBio loading report."""
     return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.LOADING_REPORT)
+
+
+@pytest.fixture
+def pac_bio_raw_data_report(pac_bio_run_statistics_dir: Path) -> Path:
+    """Return the path to the PacBio raw data report."""
+    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.RAW_DATA_REPORT)

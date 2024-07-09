@@ -2,8 +2,18 @@ from typing import Any
 
 import pytest
 
-from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs, LoadingAttributesIDs
-from cg.services.pacbio.metrics.models import ControlMetrics, HiFiMetrics, ProductivityMetrics
+from cg.constants.pacbio import (
+    CCSAttributeIDs,
+    ControlAttributeIDs,
+    LoadingAttributesIDs,
+    PolymeraseDataAttributeIDs,
+)
+from cg.services.pacbio.metrics.models import (
+    ControlMetrics,
+    HiFiMetrics,
+    PolymeraseMetrics,
+    ProductivityMetrics,
+)
 
 
 @pytest.fixture
@@ -40,3 +50,14 @@ def pac_bio_productivity_metrics() -> ProductivityMetrics:
         LoadingAttributesIDs.P_2: 104429,
     }
     return ProductivityMetrics.model_validate(data, from_attributes=True)
+
+
+@pytest.fixture
+def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
+    data: dict[str, Any] = {
+        PolymeraseDataAttributeIDs.MEAN_READ_LENGTH: 82182,
+        PolymeraseDataAttributeIDs.READ_LENGTH_N50: 153250,
+        PolymeraseDataAttributeIDs.MEAN_LONGEST_SUBREAD_LENGTH: 18466,
+        PolymeraseDataAttributeIDs.LONGEST_SUBREAD_LENGTH_N50: 22250,
+    }
+    return PolymeraseMetrics.model_validate(data, from_attributes=True)
