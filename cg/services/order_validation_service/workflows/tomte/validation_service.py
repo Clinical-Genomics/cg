@@ -1,10 +1,9 @@
+from cg.services.order_validation_service.models.validation_error import ValidationErrors
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 
 
-class TomteOrderValidationService:
+class TomteOrderValidationService(OrderValidationService):
 
-    def __init__(self):
-        pass
-
-    def validate(self, order_json: str):
-        order = TomteOrder.model_validate_json(order_json)
+    def validate(self, order_json: str) -> ValidationErrors:
+        TomteOrder.model_validate(order_json)
