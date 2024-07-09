@@ -80,31 +80,24 @@ class ProductivityMetrics(BaseModel):
 class PolymeraseMetrics(BaseModel):
     """Model for the polymerase metrics."""
 
-    mean_read_length: int = Field(..., alias=PolymeraseDataAttributeIDs.MEAN_READ_LENGTH)
-    read_length_n50: int = Field(..., alias=PolymeraseDataAttributeIDs.READ_LENGTH_N50)
-    mean_longest_subread_length: int = Field(
+    mean_read_length: float = Field(..., alias=PolymeraseDataAttributeIDs.MEAN_READ_LENGTH)
+    read_length_n50: float = Field(..., alias=PolymeraseDataAttributeIDs.READ_LENGTH_N50)
+    mean_longest_subread_length: float = Field(
         ..., alias=PolymeraseDataAttributeIDs.MEAN_LONGEST_SUBREAD_LENGTH
     )
-    longest_subread_length_n50: int = Field(
+    longest_subread_length_n50: float = Field(
         ..., alias=PolymeraseDataAttributeIDs.LONGEST_SUBREAD_LENGTH_N50
     )
 
-    @property
-    def mean_read_length_kb(self) -> float:
-        """Calculates the mean read length in kilobases."""
-        return divide_by_thousand_with_one_decimal(self.mean_read_length)
-
-    @property
-    def read_length_n50_kb(self) -> float:
-        """Calculates the read length N50 in kilobases."""
-        return divide_by_thousand_with_one_decimal(self.read_length_n50)
-
-    @property
-    def mean_longest_subread_length_kb(self) -> float:
-        """Calculates the mean longest subread length in kilobases."""
-        return divide_by_thousand_with_one_decimal(self.mean_longest_subread_length)
-
-    @property
-    def longest_subread_length_n50_kb(self) -> float:
-        """Calculates the longest subread length N50 in kilobases."""
-        return divide_by_thousand_with_one_decimal(self.longest_subread_length_n50)
+    _validate_mean_read_length = field_validator("mean_read_length", mode="before")(
+        divide_by_thousand_with_one_decimal
+    )
+    _validate_read_length_n50 = field_validator("read_length_n50", mode="before")(
+        divide_by_thousand_with_one_decimal
+    )
+    _validate_mean_longest_subread_length = field_validator(
+        "mean_longest_subread_length", mode="before"
+    )(divide_by_thousand_with_one_decimal)
+    _validate_longest_subread_length_n50 = field_validator(
+        "longest_subread_length_n50", mode="before"
+    )(divide_by_thousand_with_one_decimal)
