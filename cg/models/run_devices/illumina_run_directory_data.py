@@ -308,13 +308,16 @@ class IlluminaRunDirectoryData:
             time: float = get_source_creation_time_stamp(self.demultiplexing_started_path)
             return format_time_from_ctime(time)
         except FileNotFoundError as error:
-            LOG.error(error)
+            LOG.warning(error)
             return None
 
     @property
     def demultiplexing_completed_at(self) -> datetime.datetime | None:
         """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
         try:
+            LOG.debug(
+                f"Looking for demultiplexing completion time in {self.get_demultiplexed_runs_dir()}"
+            )
             time: float = get_source_creation_time_stamp(self.demux_complete_path)
             return format_time_from_ctime(time)
         except FileNotFoundError:
