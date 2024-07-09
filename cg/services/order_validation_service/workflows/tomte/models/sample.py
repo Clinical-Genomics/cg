@@ -1,7 +1,7 @@
 from pydantic import Field, model_validator
 
 from cg.constants.constants import GenomeVersion
-from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
+from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import TissueBlockEnum
 from cg.services.order_validation_service.models.order_sample import OrderSample
 from cg.services.order_validation_service.validators.sample_validators import (
@@ -11,6 +11,24 @@ from cg.services.order_validation_service.validators.sample_validators import (
 
 
 class TomteSample(OrderSample):
+    application: str
+    comment: str | None = None
+    container: ContainerEnum
+    container_name: str | None = None
+    internal_id: str | None = None
+    name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
+    require_qc_ok: bool
+    volume: int | None = None
+    well_position: str | None = None
+
+    _validate_required_container_name = model_validator(mode="after")(
+        validate_required_container_name
+    )
+    _validate_required_volume = model_validator(mode="after")(validate_required_volume)
+    _validate_required_well_position = model_validator(mode="after")(
+        validate_required_well_position
+    )
+
     age_at_sampling: float | None = None
     control: ControlEnum | None = None
     elution_buffer: str | None = None
