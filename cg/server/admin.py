@@ -480,12 +480,12 @@ class IlluminaFlowCellView(BaseView):
         "archived_at",
     )
     column_formatters = {"internal_id": view_flow_cell_internal_id, "model": view_flow_cell_model}
-
     column_default_sort = ("sequencing_completed_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
     column_editable_list = ["data_availability"]
     column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
     column_sortable_list = [
+        ("internal_id", "device.internal_id"),
         "sequencer_type",
         "sequencer_name",
         "data_availability",
@@ -732,7 +732,7 @@ class IlluminaSampleSequencingMetricsView(BaseView):
         "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["sample_id", "instrument_run.device.internal_id"]
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
 
 
 class SampleLaneSequencingMetricsView(BaseView):
