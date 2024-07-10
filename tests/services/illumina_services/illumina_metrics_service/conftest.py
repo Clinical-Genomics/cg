@@ -110,7 +110,7 @@ def expected_aggregated_undetermined_reads() -> int:
 @pytest.fixture(scope="session")
 def expected_aggregated_percent_q30() -> float:
     """Return the expected aggregated percent Q30 for metrics file."""
-    return 0.92
+    return 92.00
 
 
 @pytest.fixture(scope="session")

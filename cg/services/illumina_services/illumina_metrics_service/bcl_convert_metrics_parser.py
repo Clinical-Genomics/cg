@@ -198,7 +198,7 @@ class BCLConvertMetricsParser:
         """Calculate the mean percent Q30 for the aggregated quality metrics."""
         aggregate_yield: int = self.get_yield_for_flow_cell()
         aggregate_yield_q30: int = self.get_yield_q30_for_flow_cell()
-        return round(aggregate_yield_q30 / aggregate_yield, 2)
+        return round(aggregate_yield_q30 / aggregate_yield, 2) * 100
 
     def get_mean_quality_score_sum_for_flow_cell(self) -> float:
         """Calculate the mean quality score for the aggregated quality metrics."""
