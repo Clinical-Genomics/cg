@@ -2,10 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-
 from cg.constants.constants import SCALE_TO_READ_PAIRS, FileFormat
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.metrics import (
@@ -52,7 +51,7 @@ class BCLConvertMetricsParser:
 
     @staticmethod
     def parse_metrics_file(
-        metrics_file_path, metrics_model: Callable
+        metrics_file_path, metrics_model: Type[SequencingQualityMetrics | DemuxMetrics]
     ) -> list[SequencingQualityMetrics | DemuxMetrics]:
         """Parse specified metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
@@ -199,7 +198,7 @@ class BCLConvertMetricsParser:
         """Calculate the mean percent Q30 for the aggregated quality metrics."""
         aggregate_yield: int = self.get_yield_for_flow_cell()
         aggregate_yield_q30: int = self.get_yield_q30_for_flow_cell()
-        return round(aggregate_yield_q30 / aggregate_yield, 2)
+        return round(aggregate_yield_q30 / aggregate_yield, 2) * 100
 
     def get_mean_quality_score_sum_for_flow_cell(self) -> float:
         """Calculate the mean quality score for the aggregated quality metrics."""

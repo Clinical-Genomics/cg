@@ -3,7 +3,7 @@
 import logging
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -12,22 +12,22 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleSheetCreator:
-    """Base class for sample sheet creation."""
+    """Base class for sample sheet creation for an Illumina run."""
 
     def __init__(
         self,
-        flow_cell: IlluminaRunDirectoryData,
-        lims_samples: list[FlowCellSample],
+        run_directory_data: IlluminaRunDirectoryData,
+        samples: list[IlluminaSampleIndexSetting],
     ):
-        self.flow_cell: IlluminaRunDirectoryData = flow_cell
-        self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: list[FlowCellSample] = lims_samples
-        self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.run_directory_data: IlluminaRunDirectoryData = run_directory_data
+        self.flow_cell_id: str = run_directory_data.id
+        self.samples: list[IlluminaSampleIndexSetting] = samples
+        self.run_parameters: RunParameters = run_directory_data.run_parameters
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     def convert_sample_to_header_dict(
         self,
-        sample: FlowCellSample,
+        sample: IlluminaSampleIndexSetting,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
@@ -49,7 +49,7 @@ class SampleSheetCreator:
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
                 SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
-                    self.flow_cell.sequencer_type
+                    self.run_directory_data.sequencer_type
                 ),
             ],
             SampleSheetBCLConvertSections.Header.index_orientation_forward(),
@@ -102,7 +102,7 @@ class SampleSheetCreator:
         sample_sheet_content: list[list[str]] = (
             self.get_additional_sections_sample_sheet() + complete_data_section
         )
-        for sample in self.lims_samples:
+        for sample in self.samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
@@ -113,15 +113,15 @@ class SampleSheetCreator:
 
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
-        for lims_sample in self.lims_samples:
-            lims_sample.process_indexes(run_parameters=self.run_parameters)
+        for sample in self.samples:
+            sample.process_indexes(run_parameters=self.run_parameters)
         is_reverse_complement: bool = (
             self.index_settings.are_i5_override_cycles_reverse_complemented
         )
-        for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
+        for lane, samples_in_lane in get_samples_by_lane(self.samples).items():
             LOG.info(f"Updating barcode mismatch values for samples in lane {lane}")
-            for lims_sample in samples_in_lane:
-                lims_sample.update_barcode_mismatches(
+            for sample in samples_in_lane:
+                sample.update_barcode_mismatches(
                     samples_to_compare=samples_in_lane,
                     is_run_single_index=self.run_parameters.is_single_index,
                     is_reverse_complement=is_reverse_complement,

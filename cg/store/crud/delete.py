@@ -3,11 +3,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.base import BaseHandler
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
-from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Case, Sample
 
 
 class DeleteDataHandler(BaseHandler):
@@ -16,18 +12,6 @@ class DeleteDataHandler(BaseHandler):
     def __init__(self, session: Session):
         super().__init__(session=session)
         self.session = session
-
-    def delete_flow_cell(self, flow_cell_id: str) -> None:
-        """Delete flow cell."""
-        flow_cell: Flowcell = apply_flow_cell_filter(
-            flow_cells=self._get_query(table=Flowcell),
-            flow_cell_name=flow_cell_id,
-            filter_functions=[FlowCellFilter.BY_NAME],
-        ).first()
-
-        if flow_cell:
-            self.session.delete(flow_cell)
-            self.session.commit()
 
     def delete_relationships_sample(self, sample: Sample) -> None:
         """Delete relationships between all cases and the provided sample."""
@@ -44,14 +28,11 @@ class DeleteDataHandler(BaseHandler):
                 self.session.delete(case)
         self.session.commit()
 
-    def delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str
-    ) -> None:
-        """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
-        metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
-        for metric in metrics:
-            if metric:
-                self.session.delete(metric)
-        self.session.commit()
+    def delete_illumina_flow_cell(self, internal_id: str):
+        """Delete an Illumina flow cell."""
+        flow_cell = self.get_illumina_flow_cell_by_internal_id(internal_id=internal_id)
+        if flow_cell:
+            self.session.delete(flow_cell)
+            self.session.commit()
+        else:
+            raise ValueError(f"Illumina flow cell with internal id {internal_id} not found.")

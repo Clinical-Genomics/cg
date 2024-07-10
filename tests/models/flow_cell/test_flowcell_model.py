@@ -63,6 +63,32 @@ def test_copy_complete_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDi
     assert copy_complete.exists()
 
 
+def test_get_sequencing_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the sequencing runs directory."""
+    # GIVEN an Illumina run directory data
+
+    # WHEN getting the path to the sequencing runs directory
+    runs_dir: Path = novaseq_x_flow_cell.get_sequencing_runs_dir()
+
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME in runs_dir.as_posix()
+
+
+def test_get_demultiplexed_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the demultiplexed runs directory."""
+    # GIVEN an Illumina run directory data
+    assert (
+        DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME
+        in novaseq_x_flow_cell.path.as_posix()
+    )
+
+    # WHEN getting the path to the demultiplexed runs directory
+    demux_dir: Path = novaseq_x_flow_cell.get_demultiplexed_runs_dir()
+
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in demux_dir.as_posix()
+
+
 @pytest.mark.parametrize(
     "flow_cell_fixture",
     [
