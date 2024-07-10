@@ -31,3 +31,10 @@ class LoadingAttributesIDs:
     P_0: str = "loading_xml_report.productivity_0_n"
     P_1: str = "loading_xml_report.productivity_1_n"
     P_2: str = "loading_xml_report.productivity_2_n"
+
+
+class PolymeraseDataAttributeIDs:
+    MEAN_READ_LENGTH: str = "raw_data_report.read_length"
+    READ_LENGTH_N50: str = "raw_data_report.read_n50"
+    MEAN_LONGEST_SUBREAD_LENGTH: str = "raw_data_report.insert_length"
+    LONGEST_SUBREAD_LENGTH_N50: str = "raw_data_report.insert_n50"
