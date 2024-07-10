@@ -42,7 +42,7 @@ def test_nipt_statina_upload_case(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id], obj=upload_context, catch_exceptions=False
@@ -82,7 +82,7 @@ def test_nipt_statina_upload_case_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id, "--dry-run"], obj=upload_context
     )
@@ -124,7 +124,7 @@ def test_nipt_statina_upload_auto(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
 
     result = cli_runner.invoke(cli=nipt_upload_all, args=[], obj=upload_context)
@@ -206,7 +206,7 @@ def test_nipt_statina_upload_auto_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     result = cli_runner.invoke(cli=nipt_upload_all, args=["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -241,7 +241,7 @@ def test_nipt_statina_upload_force_failed_case(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=False)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=False)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id, "--force"], obj=upload_context, catch_exceptions=False

@@ -579,22 +579,22 @@ class AnalysisAPI(MetaAPI):
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
 
-    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+    def _is_illumina_run_check_applicable(self, case_id) -> bool:
         """Returns true if the case is neither down sampled nor external."""
         return not (
             self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
-    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
-        """Check if flow cells are on disk for given case. If not, request flow cells."""
-        if not self._is_flow_cell_check_applicable(case_id):
+    def ensure_illumina_run_on_disk(self, case_id: str) -> None:
+        """Check if Illumina sequencing runs are on disk for given case."""
+        if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
-                "Flow cell check is not applicable - "
+                "Illumina run check is not applicable - "
                 "the case is either down sampled or external."
             )
             return
-        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
-            self.status_db.request_flow_cells_for_case(case_id)
+        if not self.status_db.are_all_illumina_runs_on_disk(case_id=case_id):
+            self.status_db.request_sequencing_runs_for_case(case_id)
 
     def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
@@ -610,10 +610,10 @@ class AnalysisAPI(MetaAPI):
 
     def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
-        if self._is_flow_cell_check_applicable(
+        if self._is_illumina_run_check_applicable(
             case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+        ) and not self.status_db.are_all_illumina_runs_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - not all Illumina runs present on disk.")
             return True
         else:
             if not self.are_all_spring_files_present(case_id):
@@ -630,9 +630,9 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):
-        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
-        self.ensure_flow_cells_on_disk(case_id)
+        self.ensure_illumina_run_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
             spring_archive_api = SpringArchiveAPI(

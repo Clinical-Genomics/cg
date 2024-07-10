@@ -7,13 +7,13 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -28,7 +28,7 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSample, caplog
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -48,14 +48,14 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(
+    samples_per_lane: dict[int, list[IlluminaSampleIndexSetting]] = get_samples_by_lane(
         samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
     )
 

@@ -156,15 +156,15 @@ def decompress_case(context: click.Context, case_id, dry_run):
     LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")
 
 
-@click.command("flow-cell")
+@click.command("illumina-run")
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def decompress_flowcell(context: click.Context, flow_cell_id: str, dry_run: bool):
+def decompress_illumina_run(context: click.Context, flow_cell_id: str, dry_run: bool):
     """Decompress SPRING files for flow cell, and include links to FASTQ files in Housekeeper."""
 
     store: Store = context.obj.status_db
-    samples: Iterable[Sample] = store.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
+    samples: Iterable[Sample] = store.get_samples_by_illumina_flow_cell(flow_cell_id)
     decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(
