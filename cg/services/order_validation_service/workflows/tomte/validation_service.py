@@ -3,9 +3,16 @@ from cg.services.order_validation_service.order_validation_service import OrderV
 from cg.services.order_validation_service.workflows.tomte.validation.field_validator import (
     TomteFieldValidator,
 )
+from cg.services.order_validation_service.workflows.tomte.validation.inter_field_validators import (
+    each_case_contains_father,
+    each_case_contains_mother,
+)
 
 
-tomte_validation_rules = []
+tomte_validation_rules = [
+    each_case_contains_mother,
+    each_case_contains_father,
+]
 
 
 class TomteValidationService(OrderValidationService):
