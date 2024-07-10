@@ -4,7 +4,12 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSampleSequencingMetrics, IlluminaSequencingRun
+from cg.store.models import (
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
 
 
@@ -122,3 +127,16 @@ def test_store_illumina_flow_cell_data(
     assert sequencing_run.sample_metrics == sample_metrics
     assert flow_cell.instrument_runs == [sequencing_run]
     assert all(sample_metric.instrument_run == sequencing_run for sample_metric in sample_metrics)
+
+    # THEN samples have sample metrics associated to them
+    assert all(sample_metric.sample_id for sample_metric in sample_metrics)
+
+    # THEN the samples associated to the stored metrics have their reads and last_sequenced_at updated
+    samples: list[Sample] = illumina_post_postprocessing_service.status_db._get_query(Sample).all()
+    for sample in samples:
+        all_sample_metrics: list[IlluminaSampleSequencingMetrics] = sample.sample_run_metrics
+        total_reads_for_sample: int = sum(
+            sample_metric.total_reads_in_lane for sample_metric in all_sample_metrics
+        )
+        assert sample.reads == total_reads_for_sample
+        assert sample.last_sequenced_at == sequencing_run.sequencing_completed_at

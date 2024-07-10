@@ -9,7 +9,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.compress import CompressAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
@@ -42,7 +42,7 @@ class MetaAPI:
                         binary_path=config.dict()["encryption"]["binary_path"]
                     ),
                     hk_api=config.housekeeper_api,
-                    pdc_api=PdcAPI(config.dict()["pdc"]["binary_path"]),
+                    pdc_service=PdcService(config.dict()["pdc"]["binary_path"]),
                 ),
             ),
         )

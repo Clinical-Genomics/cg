@@ -1,7 +1,7 @@
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import get_reverse_complement_dna_seq
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import IndexOverrideCycles
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -22,7 +22,7 @@ def test_validate_inputs_bcl_convert_sample_missing_attribute(lims_sample: dict)
 
     # WHEN validating the sample
     with pytest.raises(AttributeError) as exc_info:
-        FlowCellSample.validate_inputs(lims_sample=lims_sample)
+        IlluminaSampleIndexSetting.validate_inputs(lims_sample=lims_sample)
 
     # THEN a pydantic validation error is raised
     assert "validate_inputs" in str(exc_info.value)
@@ -48,7 +48,7 @@ def test_validate_inputs_bcl_convert_sample_missing_attribute(lims_sample: dict)
 def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expected_index2: str):
     """Test that parsing different kinds of dual-run raw indexes as index and index2 works."""
     # GIVEN a sample sheet with a single sample on one lane
-    sample = FlowCellSample(lane=1, index=lims_index, sample_id="ACC123")
+    sample = IlluminaSampleIndexSetting(lane=1, index=lims_index, sample_id="ACC123")
 
     # WHEN separating the index
     sample.separate_indexes(is_run_single_index=False)
@@ -59,7 +59,7 @@ def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expec
 
 
 def test_separate_indexes_single_run(
-    index1_8_nt_sequence_from_lims: str, bcl_convert_flow_cell_sample: FlowCellSample
+    index1_8_nt_sequence_from_lims: str, bcl_convert_flow_cell_sample: IlluminaSampleIndexSetting
 ):
     """Test index2 is ignored when parsing a double index in a single index run."""
     # GIVEN a sample with a double index
@@ -92,7 +92,7 @@ def test_get_index1_override_cycles(
 ):
     """Test that the returned index 1 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with an index
-    sample = FlowCellSample(lane=1, index=lims_index, sample_id="ACC123")
+    sample = IlluminaSampleIndexSetting(lane=1, index=lims_index, sample_id="ACC123")
 
     # WHEN getting the index1 override cycles
     index1_cycles: str = sample._get_index1_override_cycles(len_index1_cycles=index1_cycles)
@@ -127,7 +127,7 @@ def test_get_index2_override_cycles(
 ):
     """Test that the returned index 2 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with separated indexes
-    sample = FlowCellSample(lane=1, index=lims_index, sample_id="ACC123")
+    sample = IlluminaSampleIndexSetting(lane=1, index=lims_index, sample_id="ACC123")
     is_run_single_index: bool = not bool(index2_cycles)
     sample.separate_indexes(is_run_single_index=is_run_single_index)
 
@@ -153,7 +153,7 @@ def test_get_index2_override_cycles(
     ],
 )
 def test_update_override_cycles(
-    bcl_convert_flow_cell_sample: FlowCellSample,
+    bcl_convert_flow_cell_sample: IlluminaSampleIndexSetting,
     run_parameters_fixture: str,
     request: pytest.FixtureRequest,
 ):
@@ -185,10 +185,10 @@ def test_update_barcode_mismatches_1(
 ):
     """Test that index 1 barcode mismatches values are as expected for different sets of samples."""
     # GIVEN a list of FlowCellSampleBCLConvert
-    sample_list: list[FlowCellSample] = request.getfixturevalue(sample_list_fixture)
+    sample_list: list[IlluminaSampleIndexSetting] = request.getfixturevalue(sample_list_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert
-    sample_to_update: FlowCellSample = sample_list[0]
+    sample_to_update: IlluminaSampleIndexSetting = sample_list[0]
 
     # WHEN updating the value for index 1 barcode mismatches
     sample_to_update._update_barcode_mismatches_1(samples_to_compare=sample_list)
@@ -207,10 +207,10 @@ def test_update_barcode_mismatches_2(
 ):
     """Test that index 2 barcode mismatches values are as expected for different sets of samples."""
     # GIVEN a list of FlowCellSampleBCLConvert
-    sample_list: list[FlowCellSample] = request.getfixturevalue(sample_list_fixture)
+    sample_list: list[IlluminaSampleIndexSetting] = request.getfixturevalue(sample_list_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert
-    sample_to_update: FlowCellSample = sample_list[0]
+    sample_to_update: IlluminaSampleIndexSetting = sample_list[0]
 
     # WHEN updating the value for index 2 barcode mismatches
     sample_to_update._update_barcode_mismatches_2(
@@ -257,10 +257,12 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     """Test that indexes are processed correctly for a BCLConvert sample."""
     # GIVEN a run parameters object and a list of BCLConvert samples from a flow cell
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
-    raw_lims_samples: list[FlowCellSample] = request.getfixturevalue(raw_lims_samples_fixture)
+    raw_lims_samples: list[IlluminaSampleIndexSetting] = request.getfixturevalue(
+        raw_lims_samples_fixture
+    )
 
     # GIVEN a FlowCellSampleBCLConvert
-    sample: FlowCellSample = raw_lims_samples[0]
+    sample: IlluminaSampleIndexSetting = raw_lims_samples[0]
 
     # WHEN processing the sample for a sample sheet
     sample.process_indexes(run_parameters=run_parameters)
@@ -292,7 +294,7 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     ],
 )
 def test_process_indexes_bcl_convert(
-    bcl_convert_flow_cell_sample: FlowCellSample,
+    bcl_convert_flow_cell_sample: IlluminaSampleIndexSetting,
     run_parameters_fixture: str,
     expected_index2: str,
     request: pytest.FixtureRequest,
