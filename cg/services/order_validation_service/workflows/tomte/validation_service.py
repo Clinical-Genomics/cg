@@ -10,8 +10,8 @@ tomte_validation_rules = []
 
 class TomteValidationService(OrderValidationService):
 
-    def __init__(self):
-        self.field_validator = TomteFieldValidator()
+    def __init__(self, field_validator: TomteFieldValidator):
+        self.field_validator = field_validator
 
     def validate(self, order_json: str) -> list[ValidationError]:
         order, field_errors = self.field_validator.validate(order_json)
