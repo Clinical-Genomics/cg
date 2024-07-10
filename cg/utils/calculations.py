@@ -2,7 +2,6 @@
 
 
 def divide_by_thousand_with_one_decimal(number: float | int) -> float:
-    """Divide a given number by a thousand."""
     return round(number / 1_000, 1)
 
 
