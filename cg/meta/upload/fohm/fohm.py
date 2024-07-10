@@ -79,7 +79,7 @@ class FOHMUploadAPI:
                 self._daily_reports_list.append(
                     Path(
                         self.housekeeper_api.get_file_from_latest_version(
-                            bundle_name=case_id, tags={FohmTag.Complementary}
+                            bundle_name=case_id, tags={FohmTag.COMPLEMENTARY}
                         ).full_path
                     )
                 )

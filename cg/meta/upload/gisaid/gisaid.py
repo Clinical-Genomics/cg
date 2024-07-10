@@ -47,10 +47,11 @@ class GisaidAPI:
 
     def get_completion_file_from_hk(self, case_id: str) -> File:
         """Return completion file.
-        Raises: HousekeeperFileMissingError."""
+        Raises:
+            HousekeeperFileMissingError."""
 
         completion_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=[FohmTag.Complementary]
+            bundle_name=case_id, tags={FohmTag.COMPLEMENTARY}
         )
         if not completion_file:
             msg = f"Completion file missing for bundle {case_id}"

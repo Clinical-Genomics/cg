@@ -244,5 +244,5 @@ class JanusTags:
 
 
 class FohmTag(StrEnum):
-    Complementary = "komplettering"
+    COMPLEMENTARY = "komplettering"
     PANGOLIN_TYPING = "pangolin-typing-fohm"
