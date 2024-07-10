@@ -382,25 +382,6 @@ class CaseView(BaseView):
             flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
-class FlowcellView(BaseView):
-    """Admin view for Model.Flowcell"""
-
-    column_default_sort = ("sequenced_at", True)
-    column_editable_list = ["status"]
-    column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name", "status"]
-    column_searchable_list = ["name"]
-
-    @staticmethod
-    def view_flow_cell_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return Markup(
-            "<a href='%s'>%s</a>"
-            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
-        )
-
-
 class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
@@ -733,17 +714,3 @@ class IlluminaSampleSequencingMetricsView(BaseView):
         "sample": SampleView.view_sample_link,
     }
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
-
-
-class SampleLaneSequencingMetricsView(BaseView):
-    """Admin view for the Model.SampleLaneSequencingMetrics."""
-
-    column_filters = ["sample_internal_id", "flow_cell_name"]
-    column_searchable_list = ["sample_internal_id", "flow_cell_name"]
-    create_modal = True
-    edit_modal = True
-
-    column_formatters = {
-        "flowcell": FlowcellView.view_flow_cell_link,
-        "sample": SampleView.view_sample_link,
-    }
