@@ -498,12 +498,9 @@ def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_x_run_parameters_name_node_path(fixtures_dir: Path) -> Path:
+def novaseq_x_run_parameters_name_node_path(run_parameters_dir: Path) -> Path:
     return Path(
-        fixtures_dir,
-        "apps",
-        "demultiplexing",
-        "run_parameters",
+        run_parameters_dir,
         "RunParameters_novaseq_x_flow_cell_name_node.xml",
     )
 
