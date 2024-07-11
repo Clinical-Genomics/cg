@@ -1,7 +1,6 @@
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field_validators import (
-    each_case_contains_father,
-    each_case_contains_mother,
+from cg.services.order_validation_service.validators.inter_field_validators import (
+    validate_ticket_number_required_if_connected,
 )
 
 
-TOMTE_VALIDATION_RULES = []
+TOMTE_VALIDATION_RULES = [validate_ticket_number_required_if_connected]
