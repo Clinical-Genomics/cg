@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.devices import DeviceType
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
 from cg.constants.sequencing import Sequencers
+from cg.utils.calculations import fraction_to_percent
 
 
 class SequencingQualityMetrics(BaseModel):
@@ -65,8 +66,15 @@ class IlluminaSequencingRunDTO(BaseModel):
     demultiplexing_started_at: datetime | None
     demultiplexing_completed_at: datetime | None
 
+    @field_validator("percent_undetermined_reads", "percent_q30", mode="before")
+    def validate_percent_fields(cls, value: float | None) -> float | None:
+        if value is not None:
+            return fraction_to_percent(value)
+        return value
+
     class Config:
         arbitrary_types_allowed = True
+        validate_assignment = True
 
 
 class IlluminaSampleSequencingMetricsDTO(BaseModel):
@@ -82,5 +90,12 @@ class IlluminaSampleSequencingMetricsDTO(BaseModel):
     yield_q30: float
     created_at: datetime
 
+    @field_validator("base_passing_q30_percent", mode="before")
+    def validate_percent_fields(cls, value: float | None) -> float | None:
+        if value is not None:
+            return fraction_to_percent(value)
+        return value
+
     class Config:
         arbitrary_types_allowed = True
+        validate_assignment = True
