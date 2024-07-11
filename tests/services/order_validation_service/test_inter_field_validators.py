@@ -1,23 +1,16 @@
-from cg.constants.constants import DataDelivery, Workflow
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field_validators import (
     validate_ticket_number_required_if_connected,
 )
 
 
-def test_ticket_is_required():
+def test_ticket_is_required(valid_order: Order):
     # GIVEN an order that should be connected to a ticket but is missing a ticket number
-    order = Order(
-        connect_to_ticket=True,
-        delivery_type=DataDelivery.ANALYSIS_FILES,
-        name="name",
-        ticket_number=None,
-        workflow=Workflow.BALSAMIC,
-        customer="customer",
-    )
+    valid_order.connect_to_ticket = True
+    valid_order.ticket_number = None
 
     # WHEN validating the order
-    errors = validate_ticket_number_required_if_connected(order)
+    errors = validate_ticket_number_required_if_connected(valid_order)
 
     # THEN an error should be returned
     assert errors
