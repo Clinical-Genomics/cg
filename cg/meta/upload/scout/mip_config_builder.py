@@ -13,7 +13,11 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
+from cg.models.scout.scout_load_config import (
+    MipLoadConfig,
+    ScoutLoadConfig,
+    ScoutMipIndividual,
+)
 from cg.store.models import Analysis, Case, CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -56,7 +60,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.load_config.rank_model_version = mip_analysis_data.rank_model_version
         self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
-        self.load_config.gene_panels: list[str] | None = (
+        self.load_config.gene_panels = (
             self.mip_analysis_api.get_aggregated_panels(
                 customer_id=self.analysis_obj.case.customer.internal_id,
                 default_panels=set(self.analysis_obj.case.panels),

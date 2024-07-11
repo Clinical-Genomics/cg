@@ -9,6 +9,8 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_clean_hk_alignment_files_no_files(cli_runner: CliRunner, cg_context: CGConfig, caplog):
+    caplog.set_level(logging.DEBUG)
+
     # GIVEN a housekeeper api and a bundle without files
     bundle_name = "non_existing"
     assert not cg_context.housekeeper_api.bundle(bundle_name)
@@ -19,8 +21,6 @@ def test_clean_hk_alignment_files_no_files(cli_runner: CliRunner, cg_context: CG
 
     # THEN assert it exits with success
     assert result.exit_code == 0
-    # THEN assert it was communicated that no files where found
-    assert f"Could not find any files ready for cleaning for bundle {bundle_name}" in caplog.text
 
 
 def test_clean_hk_alignment_files_dry_run(

@@ -6,6 +6,7 @@ from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 from sqlalchemy.orm import scoped_session
 
+from cg.server import admin, api, ext, invoices
 from cg.server.app_config import app_config
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -19,18 +20,16 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
+    IlluminaSampleSequencingMetrics,
 )
-
-from . import admin, api, ext, invoices
 
 
 def create_app():
@@ -115,18 +114,20 @@ def _register_admin_views():
     ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
-    ext.admin.add_view(
-        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
-    )
 
     # Business data views
     ext.admin.add_view(admin.CaseView(Case, ext.db.session))
     ext.admin.add_view(admin.CaseSampleView(CaseSample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
-    ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
+    ext.admin.add_view(
+        admin.IlluminaFlowCellView(IlluminaSequencingRun, ext.db.session, name="Illumina Flow Cell")
+    )
+    ext.admin.add_view(
+        admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
 
 
 def _register_teardowns(app: Flask):

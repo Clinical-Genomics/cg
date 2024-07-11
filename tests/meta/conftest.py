@@ -26,10 +26,10 @@ def mip_hk_store(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     timestamp: datetime,
-    case_id: str,
+    selected_novaseq_x_case_ids: list[str],
 ) -> HousekeeperAPI:
     deliver_hk_bundle_data = {
-        "name": case_id,
+        "name": selected_novaseq_x_case_ids[0],
         "created": timestamp,
         "expires": timestamp,
         "files": [
@@ -95,7 +95,6 @@ def mip_hk_store(
         ],
     }
     helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
-
     return real_housekeeper_api
 
 
@@ -112,50 +111,6 @@ def mip_analysis_api(context_config, mip_hk_store, analysis_store):
 def binary_path() -> str:
     """Return the string of a path to a (fake) binary."""
     return Path("usr", "bin", "binary").as_posix()
-
-
-@pytest.fixture
-def stats_sample_data(
-    sample_id: str,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-) -> dict:
-    return {
-        "samples": [
-            {
-                "name": sample_id,
-                "index": "ACGTACAT",
-                "flowcell": novaseq_6000_pre_1_5_kits_flow_cell_id,
-                "type": Sequencers.NOVASEQ,
-            },
-            {
-                "name": "ADM1136A3",
-                "index": "ACGTACAT",
-                "flowcell": novaseq_6000_post_1_5_kits_flow_cell_id,
-                "type": Sequencers.NOVASEQ,
-            },
-        ]
-    }
-
-
-@pytest.fixture
-def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Store, None, None]:
-    """Setup store with sample data for testing flow cell transfer."""
-    for sample_data in stats_sample_data["samples"]:
-        customer: Customer = (base_store.get_customers())[0]
-        application_version: ApplicationVersion = base_store.get_application_by_tag(
-            "WGSPCFC030"
-        ).versions[0]
-        sample: Sample = base_store.add_sample(
-            name="NA", sex=Sex.MALE, internal_id=sample_data["name"]
-        )
-        sample.customer = customer
-        sample.application_version = application_version
-        sample.received_at = dt.datetime.now()
-        sample.last_sequenced_at = dt.datetime.now()
-        base_store.session.add(sample)
-    base_store.session.commit()
-    yield base_store
 
 
 @pytest.fixture

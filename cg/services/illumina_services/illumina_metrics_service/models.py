@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.devices import DeviceType
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
 from cg.constants.sequencing import Sequencers
@@ -35,7 +35,7 @@ class IlluminaFlowCellDTO(BaseModel):
 
     internal_id: str
     type: DeviceType
-    model: str
+    model: str | None
 
     class Config:
         arbitrary_types_allowed = True
@@ -47,7 +47,7 @@ class IlluminaSequencingRunDTO(BaseModel):
     type: DeviceType
     sequencer_type: Sequencers | None
     sequencer_name: str | None
-    data_availability: FlowCellStatus | None
+    data_availability: SequencingRunDataAvailability | None
     archived_at: datetime | None
     has_backup: bool | None
     total_reads: int | None

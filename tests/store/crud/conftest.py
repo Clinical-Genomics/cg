@@ -246,65 +246,6 @@ def store_with_multiple_pools_for_customer(
 
 
 @pytest.fixture
-def re_sequenced_sample_store(
-    store: Store,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    case_id: str,
-    family_name: str,
-    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    sample_id: str,
-    ticket_id: str,
-    timestamp_now: datetime,
-    helpers,
-) -> Store:
-    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
-    re_sequenced_sample_store: Store = store
-    store_case = helpers.add_case(
-        store=re_sequenced_sample_store,
-        internal_id=case_id,
-        name=family_name,
-        data_analysis=Workflow.FLUFFY,
-    )
-
-    store_sample = helpers.add_sample(
-        store=re_sequenced_sample_store,
-        application_type=PrepCategory.READY_MADE_LIBRARY.value,
-        is_tumour=False,
-        internal_id=sample_id,
-        reads=1200000000,
-        original_ticket=ticket_id,
-        last_sequenced_at=timestamp_now,
-    )
-
-    one_day_ahead_of_now = timestamp_now + timedelta(days=1)
-
-    helpers.add_flow_cell(
-        store=re_sequenced_sample_store,
-        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        samples=[store_sample],
-        date=timestamp_now,
-    )
-
-    helpers.add_flow_cell(
-        store=re_sequenced_sample_store,
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
-        samples=[store_sample],
-        date=one_day_ahead_of_now,
-    )
-
-    helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
-    helpers.ensure_sample_lane_sequencing_metrics(
-        store=re_sequenced_sample_store,
-        sample_internal_id=store_sample.internal_id,
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
-        flow_cell_lane_number=1,
-        sample_total_reads_in_lane=120000000,
-        sample_base_percentage_passing_q30=90,
-    )
-    return re_sequenced_sample_store
-
-
-@pytest.fixture
 def pool_name_1() -> str:
     """Return the name of the first pool."""
     return "pool_1"
