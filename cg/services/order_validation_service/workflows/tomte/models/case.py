@@ -1,17 +1,12 @@
-from pydantic import AfterValidator, model_validator
-
-from cg.constants import DataDelivery, GenePanelMasterList
-from cg.models.orders.orderform_schema import OrderCase
-from cg.services.order_validation_service.validators.case_validators import validate_subject_id
-from cg.services.order_validation_service.workflows.tomte.validators.case_validators import (
-    validate_tomte_delivery_type,
-)
+from cg.constants import GenePanelMasterList
+from cg.services.order_validation_service.models.case import Case
+from cg.services.order_validation_service.workflows.tomte.constants import TomteDeliveryType
+from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 
 
-class TomteCase(OrderCase):
+class TomteCase(Case):
     cohorts: list[str] | None = None
-    data_delivery: [DataDelivery, AfterValidator(validate_tomte_delivery_type)]
+    data_delivery: TomteDeliveryType
     panels: list[GenePanelMasterList]
     synopsis: str | None = None
-
-    _subject_id_validation = model_validator(mode="after")(validate_subject_id)
+    samples: list[TomteSample]

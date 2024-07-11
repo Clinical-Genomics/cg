@@ -1,8 +1,9 @@
-from workflows.tomte.validation_service import TomteOrderValidationService
+from abc import ABC, abstractmethod
+
+from cg.services.order_validation_service.models.validation_error import ValidationError
 
 
-class OrderValidationService:
-    """Service to orchestrate the order validation."""
-
-    def __init__(self, tomte_service: TomteOrderValidationService):
-        self.tomte_service = tomte_service
+class OrderValidationService(ABC):
+    @abstractmethod
+    def validate(self, order_json: str) -> ValidationError:
+        pass
