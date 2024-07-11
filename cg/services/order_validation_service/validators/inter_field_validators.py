@@ -7,7 +7,7 @@ from cg.services.order_validation_service.models.validation_error import (
 
 def validate_ticket_number_required_if_connected(order: Order) -> ValidationErrors | None:
     if _ticket_number_is_missing(order):
-        return _create_missing_ticket_error(order)
+        return _create_missing_ticket_error()
 
 
 def _create_missing_ticket_error() -> ValidationErrors:
