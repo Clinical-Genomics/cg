@@ -4,7 +4,4 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
 )
 
 
-TOMTE_VALIDATION_RULES = [
-    each_case_contains_mother,
-    each_case_contains_father,
-]
+TOMTE_VALIDATION_RULES = []
