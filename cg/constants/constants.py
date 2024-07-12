@@ -221,6 +221,7 @@ class FileExtensions(StrEnum):
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
+    ZIP: str = ".zip"
 
 
 class APIMethods(StrEnum):

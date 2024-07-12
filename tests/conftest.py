@@ -28,13 +28,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    FileFormat,
-    GenomeVersion,
-    Strandedness,
-)
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -55,16 +49,10 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import (
-    RarediseaseParameters,
-    RarediseaseSampleSheetHeaders,
-)
+from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.illumina_services.backup_services.encrypt_service import (
     IlluminaRunEncryptionService,
@@ -128,6 +116,7 @@ pytest_plugins = [
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.smrt_cell_fixtures",
 ]
 
 
