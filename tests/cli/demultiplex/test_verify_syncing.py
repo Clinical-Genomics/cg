@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.cli.demultiplex.demux import create_manifest_files
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.io.csv import read_csv
-from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
+from cg.utils.files import get_all_files_in_directory_tree
 
 
 def test_create_manifest_files_true(

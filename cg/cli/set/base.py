@@ -10,11 +10,11 @@ import click
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.cli_options import SKIP_CONFIRMATION
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
+from cg.store.models import ApplicationVersion, Customer, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 CONFIRM = "Continue?"
@@ -286,23 +286,34 @@ def _update_comment(comment, obj):
             obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + "\n" + obj.comment
 
 
-@set_cmd.command()
-@click.option("-s", "--status", type=click.Choice(FlowCellStatus.statuses()))
-@click.argument("flow_cell_name")
+@set_cmd.command("sequencing-run")
+@click.option(
+    "-d", "--data-availability", type=click.Choice(SequencingRunDataAvailability.statuses())
+)
+@click.argument("flow_cell_id")
 @click.pass_obj
-def flowcell(context: CGConfig, flow_cell_name: str, status: str | None):
-    """Update information about a flow cell."""
+def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: str):
+    """Update data availability information for a sequencing run."""
     status_db: Store = context.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    sequencing_run: IlluminaSequencingRun = (
+        status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+    )
 
-    if flowcell_obj is None:
-        LOG.warning(f"flow cell not found: {flow_cell_name}")
+    if not sequencing_run:
+        LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
-    prev_status: str = flowcell_obj.status
-    flowcell_obj.status = status
+    if not data_availability:
+        LOG.error(
+            f"Please provide a data availability status. Choose from: {SequencingRunDataAvailability.statuses()}"
+        )
+        raise click.Abort
+    prev_status: str = sequencing_run.data_availability
+    sequencing_run.data_availability = data_availability
 
     status_db.session.commit()
-    LOG.info(f"{flow_cell_name} set: {prev_status} -> {status}")
+    LOG.info(
+        f"Changed data availability from {prev_status} to {data_availability} for {flow_cell_id}"
+    )
 
 
 set_cmd.add_command(set_case)

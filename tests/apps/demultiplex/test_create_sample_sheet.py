@@ -5,7 +5,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -18,7 +18,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
     sample_sheet_context_broken_flow_cells: CGConfig,
     tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
     sample_sheet_bcl2fastq_bundle_data: dict[str, Any],
-    hiseq_x_single_index_bcl_convert_lims_samples: list[FlowCellSample],
+    hiseq_x_single_index_bcl_convert_lims_samples: list[IlluminaSampleIndexSetting],
     helpers: StoreHelpers,
     mocker: MockFixture,
 ):
@@ -53,7 +53,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
 def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
     sample_sheet_context_broken_flow_cells: CGConfig,
     tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
-    hiseq_x_single_index_bcl_convert_lims_samples: list[FlowCellSample],
+    hiseq_x_single_index_bcl_convert_lims_samples: list[IlluminaSampleIndexSetting],
     mocker: MockFixture,
     caplog: LogCaptureFixture,
 ):
