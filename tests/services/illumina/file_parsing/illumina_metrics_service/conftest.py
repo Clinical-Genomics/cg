@@ -21,6 +21,7 @@ def bcl_convert_metrics_dir_path() -> Path:
         "tests",
         "fixtures",
         "services",
+        "illumina",
         "file_parsing",
         "230622_A00621_0864_AHY7FFDRX2",
     )

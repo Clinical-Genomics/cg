@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from cg.constants.devices import DeviceType
-from cg.services.illumina.file_parsing.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
 )
 

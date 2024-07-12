@@ -11,7 +11,7 @@ from cg.services.illumina.file_parsing.bcl_convert_metrics_parser import (
 from cg.services.illumina.file_parsing.demux_version_service import (
     IlluminaDemuxVersionService,
 )
-from cg.services.illumina.file_parsing.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
