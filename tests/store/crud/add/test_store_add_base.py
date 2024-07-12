@@ -3,7 +3,7 @@ from datetime import datetime as dt
 import pytest
 
 from cg.constants.subject import Sex
-from cg.services.illumina.file_parsing.models import IlluminaFlowCellDTO
+from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.store.models import (
     ApplicationVersion,
     Collaboration,

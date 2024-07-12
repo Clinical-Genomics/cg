@@ -11,7 +11,7 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina.data_transfer.data_transfer_service import (
     IlluminaDataTransferService,
 )
-from cg.services.illumina.file_parsing.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,

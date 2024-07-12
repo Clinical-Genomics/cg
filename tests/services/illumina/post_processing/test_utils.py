@@ -6,7 +6,7 @@ from _pytest.fixtures import FixtureRequest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.services.illumina.file_parsing.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
 )
 from cg.services.illumina.post_processing.utils import (
