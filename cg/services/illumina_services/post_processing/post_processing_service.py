@@ -16,18 +16,18 @@ from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
-from cg.services.illumina_services.illumina_post_processing_service.housekeeper_storage import (
+from cg.services.illumina_services.post_processing.housekeeper_storage import (
     add_demux_logs_to_housekeeper,
     add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     delete_sequencing_data_from_housekeeper,
     store_undetermined_fastq_files,
 )
-from cg.services.illumina_services.illumina_post_processing_service.utils import (
+from cg.services.illumina_services.post_processing.utils import (
     combine_sample_metrics_with_undetermined,
     create_delivery_file_in_flow_cell_directory,
 )
-from cg.services.illumina_services.illumina_post_processing_service.validation import (
+from cg.services.illumina_services.post_processing.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
 from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun

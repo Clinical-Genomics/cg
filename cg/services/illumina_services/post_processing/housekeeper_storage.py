@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina_services.illumina_post_processing_service.utils import (
+from cg.services.illumina_services.post_processing.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,

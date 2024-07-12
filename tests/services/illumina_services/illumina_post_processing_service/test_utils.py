@@ -9,7 +9,7 @@ from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaSampleSequencingMetricsDTO,
 )
-from cg.services.illumina_services.illumina_post_processing_service.utils import (
+from cg.services.illumina_services.post_processing.utils import (
     _add_flow_cell_name_to_fastq_file_path,
     _combine_metrics,
     _get_valid_sample_fastqs,
