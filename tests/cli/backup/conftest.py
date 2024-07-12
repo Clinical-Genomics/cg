@@ -1,6 +1,6 @@
 import pytest
 
-from cg.services.illumina_services.backup.backup_service import IlluminaBackupService
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig

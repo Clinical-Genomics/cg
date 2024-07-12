@@ -10,7 +10,7 @@ from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.services.illumina_services.backup.backup_service import IlluminaBackupService
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData

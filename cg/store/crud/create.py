@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina.file_parsing.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,

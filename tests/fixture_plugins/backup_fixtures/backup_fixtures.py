@@ -5,7 +5,7 @@ from typing import Callable
 import pytest
 
 from cg.constants import FileExtensions
-from cg.services.illumina_services.backup.backup_service import IlluminaBackupService
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI

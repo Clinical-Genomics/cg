@@ -306,7 +306,7 @@ def test_run_fetch_sequencing_run_dry_run_retrieval_time(
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
     mocker.patch(
-        "cg.services.illumina_services.backup.backup_service.IlluminaBackupService.fetch_sequencing_run",
+        "cg.services.illumina.backup.backup_service.IlluminaBackupService.fetch_sequencing_run",
         return_value=expected_time,
     )
 

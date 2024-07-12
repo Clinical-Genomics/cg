@@ -66,11 +66,11 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.illumina_services.backup.encrypt_service import (
+from cg.services.illumina.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
-from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
-    IlluminaMetricsService,
+from cg.services.illumina.data_transfer.data_transfer_service import (
+    IlluminaDataTransferService,
 )
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
@@ -4038,8 +4038,8 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
 
 
 @pytest.fixture()
-def illumina_metrics_service() -> IlluminaMetricsService:
-    return IlluminaMetricsService()
+def illumina_metrics_service() -> IlluminaDataTransferService:
+    return IlluminaDataTransferService()
 
 
 @pytest.fixture
