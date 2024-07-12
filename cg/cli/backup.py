@@ -28,8 +28,8 @@ from cg.models.run_devices.illumina_run_directory_data import (
     IlluminaRunDirectoryData,
     get_sequencing_runs_from_path,
 )
-from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.backup_service import IlluminaBackupService
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService

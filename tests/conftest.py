@@ -66,7 +66,7 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.illumina_services.backup_services.encrypt_service import (
+from cg.services.illumina_services.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
