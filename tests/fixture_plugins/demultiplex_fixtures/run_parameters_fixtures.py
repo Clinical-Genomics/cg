@@ -90,3 +90,11 @@ def novaseq_x_run_parameters(
 ) -> RunParametersNovaSeqX:
     """Return a NovaSeqX run parameters object."""
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
+
+
+@pytest.fixture
+def novaseq_x_run_parameters_node_name(
+    novaseq_x_run_parameters_name_node_path: Path,
+) -> RunParametersNovaSeqX:
+    """Return a NovaSeqX run parameters object."""
+    return RunParametersNovaSeqX(novaseq_x_run_parameters_name_node_path)
