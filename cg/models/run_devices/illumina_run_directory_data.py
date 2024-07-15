@@ -289,6 +289,10 @@ class IlluminaRunDirectoryData:
             return file_path
         return None
 
+    def get_sequencing_completed_path(self) -> Path:
+        """Return the path to the sequencing completed file."""
+        return Path(self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED)
+
     @property
     def sequencing_started_at(self) -> datetime.datetime | None:
         parser = ParseRunCompletionStatusService()
