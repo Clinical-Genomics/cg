@@ -17,7 +17,7 @@ def test_get_project_root_dir():
     # WHEN getting the project root dir
     root_dir: Path = get_project_root_dir()
 
-    # THEN return the dir name
+    # THEN return the dir path
     assert root_dir.name == "cg"
 
 
