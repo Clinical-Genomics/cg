@@ -1,7 +1,4 @@
 """Test for service dtos."""
-<<<<<<< HEAD
-=======
-
 import pytest
 
 from cg.services.illumina.data_transfer.data_transfer_service import (
