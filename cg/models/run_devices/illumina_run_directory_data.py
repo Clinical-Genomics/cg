@@ -23,8 +23,8 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.run_devices.utils import parse_date
-from cg.services.illumina.file_parsing.run_completion_status_service import (
-    ParseRunCompletionStatusService,
+from cg.services.illumina.file_parsing.sequencing_times.novaseq_x_sequencing_times_service import (
+    NovaseqXSequencingTimesService,
 )
 from cg.utils.files import get_source_creation_time_stamp
 from cg.utils.time import format_time_from_ctime
@@ -83,7 +83,7 @@ class IlluminaRunDirectoryData:
         return self.path.name
 
     @property
-    def sequenced_at(self) -> list[str]:
+    def sequenced_at(self) -> datetime:
         """Return the sequencing date for the sequencing run."""
         date_part: str = self.full_name.split("_")[0]
         return parse_date(date_part)
@@ -203,6 +203,10 @@ class IlluminaRunDirectoryData:
     def is_demultiplexing_complete(self) -> bool:
         return Path(self.demux_complete_path).exists()
 
+    @property
+    def get_sequence_completed_path(self) -> Path:
+        return Path(self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED)
+
     def _parse_date(self):
         """Return the parsed date in the correct format."""
         if len(self.split_sequencing_run_name[0]) == LENGTH_LONG_DATE:
@@ -295,13 +299,13 @@ class IlluminaRunDirectoryData:
 
     @property
     def sequencing_started_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
+        parser = NovaseqXSequencingTimesService()
         file_path: Path = self.get_run_completion_status()
         return parser.get_start_time(file_path) if file_path else None
 
     @property
     def sequencing_completed_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
+        parser = NovaseqXSequencingTimesService()
         file_path: Path = self.get_run_completion_status()
         return parser.get_end_time(file_path) if file_path else None
 

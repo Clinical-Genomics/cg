@@ -43,12 +43,14 @@ class IlluminaPostProcessingService:
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
         demultiplexed_runs_dir: Path,
+        transfer_service: IlluminaDataTransferService,
         dry_run: bool,
     ) -> None:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.demultiplexed_runs_dir = demultiplexed_runs_dir
         self.dry_run: bool = dry_run
+        self.transfer_service = transfer_service
 
     def store_illumina_flow_cell(
         self,
@@ -70,9 +72,9 @@ class IlluminaPostProcessingService:
         flow_cell: IlluminaFlowCell,
     ) -> IlluminaSequencingRun:
         """Store Illumina run metrics in the status database."""
-        metrics_service = IlluminaDataTransferService()
+
         sequencing_run_dto: IlluminaSequencingRunDTO = (
-            metrics_service.create_illumina_sequencing_dto(run_directory_data)
+            self.transfer_service.create_illumina_sequencing_dto(run_directory_data)
         )
         return self.status_db.add_illumina_sequencing_run(
             sequencing_run_dto=sequencing_run_dto, flow_cell=flow_cell
@@ -84,14 +86,14 @@ class IlluminaPostProcessingService:
         sequencing_run: IlluminaSequencingRun,
     ) -> list[IlluminaSampleSequencingMetricsDTO]:
         """Store Illumina sample sequencing metrics in the status database."""
-        metrics_service = IlluminaDataTransferService()
+
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
-            metrics_service.create_sample_sequencing_metrics_dto_for_flow_cell(
+            self.transfer_service.create_sample_sequencing_metrics_dto_for_flow_cell(
                 flow_cell_directory=run_directory_data.get_demultiplexed_runs_dir(),
             )
         )
         undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
-            metrics_service.create_sample_run_dto_for_undetermined_reads(run_directory_data)
+            self.transfer_service.create_sample_run_dto_for_undetermined_reads(run_directory_data)
         )
         combined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
             combine_sample_metrics_with_undetermined(
@@ -229,25 +231,6 @@ class IlluminaPostProcessingService:
                 sequencing_run=sequencing_run, has_backup=has_backup
             )
         create_delivery_file_in_flow_cell_directory(demux_run_dir)
-
-    def get_all_demultiplexed_runs(self) -> list[Path]:
-        """Get all demultiplexed Illumina runs."""
-        return get_directories_in_path(self.demultiplexed_runs_dir)
-
-    def post_process_all_runs(self) -> bool:
-        """Post process all demultiplex illumina runs that need it."""
-        demux_dirs = self.get_all_demultiplexed_runs()
-        is_error_raised: bool = False
-        for demux_dir in demux_dirs:
-            try:
-                self.post_process_illumina_flow_cell(demux_dir.name)
-            except Exception as error:
-                LOG.error(
-                    f"Failed to post process demultiplexed Illumina run {demux_dir.name}: {str(error)}"
-                )
-                is_error_raised = True
-                continue
-        return is_error_raised
 
     def delete_sequencing_run_data(self, flow_cell_id: str):
         """Delete sequencing run entries from Housekeeper and StatusDB."""

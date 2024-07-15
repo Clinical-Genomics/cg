@@ -72,6 +72,17 @@ def get_source_creation_time_stamp(source_path: Path) -> float:
     return os.stat(source_path).st_ctime
 
 
+def get_source_modified_time_stamp(source_path: Path) -> float:
+    """
+    Return time stamp that a source is created.
+    Raises:
+        FileNotFoundError if the source does not exist.
+    """
+    if not source_path.exists():
+        raise FileNotFoundError(f"Directory with path {source_path} is not found.")
+    return os.stat(source_path).st_mtime
+
+
 def remove_directory_and_contents(directory_path):
     """
     Delete a directory and its contents.

@@ -1,4 +1,5 @@
 """Test for service dtos."""
+
 import pytest
 
 from cg.services.illumina.data_transfer.data_transfer_service import (
@@ -51,4 +52,3 @@ def test_percent_validator_sample_sequencing_metrics_dto(
 
     # THEN the value should be converted to a percentage
     assert combined_metric.base_passing_q30_percent == expected
->>>>>>> ff34ed99c425f0fd0380b3db663791b38d28ebf0

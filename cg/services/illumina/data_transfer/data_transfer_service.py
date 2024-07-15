@@ -15,10 +15,23 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
+from cg.services.illumina.file_parsing.sequencing_times.collect_sequencing_times import (
+    CollectSequencingTimes,
+)
 
 
 class IlluminaDataTransferService:
     """Service to generate database models related to Illumina flow cell metrics."""
+
+    def __init__(
+        self,
+        metrics_parser: BCLConvertMetricsParser,
+        sequencing_time_collector: CollectSequencingTimes,
+        software_service: IlluminaDemuxVersionService,
+    ):
+        self.metrics_parser = metrics_parser
+        self.sequencing_time_collector = sequencing_time_collector
+        self.software_service = software_service
 
     @staticmethod
     def create_sample_run_metrics_dto(
@@ -63,17 +76,16 @@ class IlluminaDataTransferService:
         non_pooled_lanes_and_samples: list[tuple[int, str]] = (
             flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
         )
-        metrics_parser = BCLConvertMetricsParser(flow_cell.path)
         undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = []
 
         for lane, sample_internal_id in non_pooled_lanes_and_samples:
-            if not metrics_parser.has_undetermined_reads_in_lane(lane):
+            if not self.metrics_parser.has_undetermined_reads_in_lane(lane):
                 continue
 
             # Passing Undetermined as the sample id is required to extract the undetermined reads data.
             # BclConvert tags undetermined reads in a lane with the sample id "Undetermined".
             metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics_dto(
-                sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=metrics_parser
+                sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=self.metrics_parser
             )
             metrics.sample_id = sample_internal_id
             undetermined_metrics.append(metrics)
@@ -84,48 +96,47 @@ class IlluminaDataTransferService:
         flow_cell_directory: Path,
     ) -> list[IlluminaSampleSequencingMetricsDTO]:
         """Parse the demultiplexing metrics data into the sequencing statistics model."""
-        metrics_parser = BCLConvertMetricsParser(flow_cell_directory)
-        sample_internal_ids: list[str] = metrics_parser.get_sample_internal_ids()
+        sample_internal_ids: list[str] = self.metrics_parser.get_sample_internal_ids()
         sample_lane_sequencing_metrics: list[IlluminaSampleSequencingMetricsDTO] = []
-
         for sample_internal_id in sample_internal_ids:
-            for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
+            for lane in self.metrics_parser.get_lanes_for_sample(
+                sample_internal_id=sample_internal_id
+            ):
                 metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics_dto(
                     sample_internal_id=sample_internal_id,
                     lane=lane,
-                    metrics_parser=metrics_parser,
+                    metrics_parser=self.metrics_parser,
                 )
                 sample_lane_sequencing_metrics.append(metrics)
         return sample_lane_sequencing_metrics
 
-    @staticmethod
     def create_illumina_sequencing_dto(
+        self,
         demultiplexed_run_dir: IlluminaRunDirectoryData,
     ) -> IlluminaSequencingRunDTO:
-        metrics_parser = BCLConvertMetricsParser(demultiplexed_run_dir.path)
-        total_reads: int = metrics_parser.get_total_reads_for_flow_cell()
-        total_undetermined_reads: int = metrics_parser.get_undetermined_reads_for_flow_cell()
+        total_reads: int = self.metrics_parser.get_total_reads_for_flow_cell()
+        total_undetermined_reads: int = self.metrics_parser.get_undetermined_reads_for_flow_cell()
         percent_undetermined_reads: float = (
-            metrics_parser.get_percent_undetermined_reads_for_flow_cell()
+            self.metrics_parser.get_percent_undetermined_reads_for_flow_cell()
         )
-        percent_q30: float = metrics_parser.get_mean_percent_q30_for_flow_cell()
-        mean_quality_score: float = metrics_parser.get_mean_quality_score_sum_for_flow_cell()
-        total_yield: int = metrics_parser.get_yield_for_flow_cell()
-        yield_q30: int = metrics_parser.get_yield_q30_for_flow_cell()
+        percent_q30: float = self.metrics_parser.get_mean_percent_q30_for_flow_cell()
+        mean_quality_score: float = self.metrics_parser.get_mean_quality_score_sum_for_flow_cell()
+        total_yield: int = self.metrics_parser.get_yield_for_flow_cell()
+        yield_q30: int = self.metrics_parser.get_yield_q30_for_flow_cell()
         cycles: int = demultiplexed_run_dir.run_parameters.get_read_1_cycles()
-        software_service = IlluminaDemuxVersionService()
-        demux_software: str = software_service.get_demux_software(
+        demux_software: str = self.software_service.get_demux_software(
             demultiplexed_run_dir.demultiplex_software_info_path
         )
-        demux_software_version: str = software_service.get_demux_software_version(
+        demux_software_version: str = self.software_service.get_demux_software_version(
             demultiplexed_run_dir.demultiplex_software_info_path
         )
-        sequencing_started_at: datetime = demultiplexed_run_dir.sequencing_started_at
-        sequencing_completed_at: datetime = (
-            demultiplexed_run_dir.sequencing_completed_at
-            if demultiplexed_run_dir.sequencing_completed_at
-            else demultiplexed_run_dir.sequenced_at
+        sequencing_started_at: datetime = self.sequencing_time_collector.get_start_time(
+            demultiplexed_run_dir
         )
+        sequencing_completed_at: datetime = self.sequencing_time_collector.get_end_time(
+            demultiplexed_run_dir
+        )
+
         demultiplexing_started_at: datetime = demultiplexed_run_dir.demultiplexing_started_at
         demultiplexing_completed_at: datetime = demultiplexed_run_dir.demultiplexing_completed_at
         sequencer_type: str = demultiplexed_run_dir.sequencer_type

@@ -3,15 +3,15 @@
 from datetime import datetime
 from pathlib import Path
 
-from cg.services.illumina.file_parsing.run_completion_status_service import (
-    ParseRunCompletionStatusService,
+from cg.services.illumina.file_parsing.sequencing_times.novaseq_x_sequencing_times_service import (
+    NovaseqXSequencingTimesService,
 )
 
 
 def test_get_start_time(run_completion_status_path: Path, expected_start_time: datetime):
     """Test to get the start time."""
     # GIVEN a parse run completion status service and a path to the run completion status file
-    parser = ParseRunCompletionStatusService()
+    parser = NovaseqXSequencingTimesService()
 
     # WHEN getting the start time
     start_time: datetime = parser.get_start_time(
@@ -25,7 +25,7 @@ def test_get_start_time(run_completion_status_path: Path, expected_start_time: d
 def test_get_end_time(run_completion_status_path: Path, expected_end_time: datetime):
     """Test to get the end time."""
     # GIVEN a parse run completion status service and a path to the run completion status file
-    parser = ParseRunCompletionStatusService()
+    parser = NovaseqXSequencingTimesService()
 
     # WHEN getting the end time
     end_time: datetime = parser.get_end_time(run_completion_status_path=run_completion_status_path)
