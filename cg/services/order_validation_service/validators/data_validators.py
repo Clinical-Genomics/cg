@@ -1,22 +1,21 @@
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.models.validation_error import ValidationErrors
-from cg.services.order_validation_service.validators.inter_field_validators import (
-    _create_order_error,
+from cg.services.order_validation_service.models.errors import (
+    UserNotAssociatedWithCustomerError,
+    ValidationError,
 )
+from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
 
 
-def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> ValidationErrors | None:
-    has_access: bool = store.user_belongs_to_customer(
+def validate_user_customer_association(
+    order: Order, store: Store, **kwargs
+) -> list[ValidationError]:
+    has_access: bool = store.is_user_associated_with_customer(
         user_id=order.user_id,
         customer_internal_id=order.customer_internal_id,
     )
 
+    errors: list[ValidationError] = []
     if not has_access:
-        return _create_user_not_in_customer_error()
-
-
-def _create_user_not_in_customer_error() -> ValidationErrors:
-    field = "customer"
-    message = "User does not belong to customer"
-    return _create_order_error(message=message, field=field)
+        error = UserNotAssociatedWithCustomerError()
+        errors.append(error)
+    return errors

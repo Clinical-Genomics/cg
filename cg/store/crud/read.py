@@ -1005,13 +1005,13 @@ class ReadHandler(BaseHandler):
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
 
-    def user_belongs_to_customer(self, user_id: int, customer_internal_id: str) -> bool:
+    def is_user_associated_with_customer(self, user_id: int, customer_internal_id: str) -> bool:
         user: User | None = apply_user_filter(
             users=self._get_query(table=User),
             user_id=user_id,
             customer_internal_id=customer_internal_id,
             filter_functions=[UserFilter.BY_ID, UserFilter.BY_CUSTOMER_INTERNAL_ID],
-        )
+        ).first()
         return bool(user)
 
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
