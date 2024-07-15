@@ -11,6 +11,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.illumina.post_processing.post_processing_service import (
     IlluminaPostProcessingService,
 )
+from cg.services.illumina.service_factory import PostProcessServiceFactory
 from cg.utils.files import get_directories_in_path
 
 LOG = logging.getLogger(__name__)
@@ -29,13 +30,18 @@ def post_process_illumina_run(context: CGConfig, demultiplexed_run_dir_name: str
     """Command to post-process an Illumina run after demultiplexing.
 
     demultiplexed-run-dir-name is the full run name, e.g. '230912_A00187_1009_AHK33MDRX3'.
+
     """
-    post_processing_service = IlluminaPostProcessingService(
+
+    factory = PostProcessServiceFactory(
+        run_dir=Path(
+            context.run_instruments.illumina.demultiplexed_runs_dir, demultiplexed_run_dir_name
+        ),
         status_db=context.status_db,
-        housekeeper_api=context.housekeeper_api,
+        hk_api=context.housekeeper_api,
         dry_run=dry_run,
-        demultiplexed_runs_dir=Path(context.run_instruments.illumina.demultiplexed_runs_dir),
     )
+    post_processing_service = factory.create_post_processing_service()
     post_processing_service.post_process_illumina_flow_cell(
         sequencing_run_name=demultiplexed_run_dir_name,
     )
@@ -51,13 +57,14 @@ def post_process_all_illumina_runs(context: CGConfig, dry_run: bool):
     )
     is_error_raised: bool = False
     for directory in directories:
-        post_processing_service = IlluminaPostProcessingService(
-            status_db=context.status_db,
-            housekeeper_api=context.housekeeper_api,
-            dry_run=dry_run,
-            demultiplexed_runs_dir=Path(context.run_instruments.illumina.demultiplexed_runs_dir),
-        )
         try:
+            factory = PostProcessServiceFactory(
+                run_dir=directory,
+                status_db=context.status_db,
+                hk_api=context.housekeeper_api,
+                dry_run=dry_run,
+            )
+            post_processing_service = factory.create_post_processing_service()
             post_processing_service.post_process_illumina_flow_cell(
                 sequencing_run_name=directory.as_posix(),
             )

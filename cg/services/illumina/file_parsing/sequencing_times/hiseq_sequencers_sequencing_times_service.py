@@ -5,7 +5,7 @@ from datetime import datetime
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
-class HiseqSequencersSequencingTimesService:
+class HiseqSequencingTimesService:
 
     def get_end_time(self, run_directory_data: IlluminaRunDirectoryData) -> datetime:
         """Get the end time of the sequencing run."""
