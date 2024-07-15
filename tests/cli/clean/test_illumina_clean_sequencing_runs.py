@@ -35,7 +35,7 @@ def test_clean_illumina_runs_cmd(
     )
     # WHEN running the clean flow cells cli command
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         result = cli_runner.invoke(clean_illumina_runs, obj=clean_illumina_sequencing_runs_context)
@@ -67,7 +67,7 @@ def test_clean_illumina_runs_cmd_dry_run(
     assert tmp_sequencing_run_to_clean_path.exists()
     # WHEN running the clean flow cells cli command
     with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina.cleaning.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         result = cli_runner.invoke(
