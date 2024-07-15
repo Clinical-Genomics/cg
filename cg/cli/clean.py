@@ -29,7 +29,7 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import IlluminaCleanRunError, FlowCellError
 from cg.meta.clean.api import CleanAPI
-from cg.services.illumina_services.cleaning_services.clean_runs_service import (
+from cg.services.illumina.cleaning.clean_runs_service import (
     IlluminaCleanRunsService,
 )
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
