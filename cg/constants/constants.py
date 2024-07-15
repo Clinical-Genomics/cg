@@ -219,6 +219,7 @@ class FileExtensions(StrEnum):
     TMP: str = ".tmp"
     TSV: str = ".tsv"
     VCF: str = ".vcf"
+    XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
 
