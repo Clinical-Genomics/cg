@@ -298,18 +298,6 @@ class IlluminaRunDirectoryData:
         return Path(self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED)
 
     @property
-    def sequencing_started_at(self) -> datetime.datetime | None:
-        parser = NovaseqXSequencingTimesService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_start_time(file_path) if file_path else None
-
-    @property
-    def sequencing_completed_at(self) -> datetime.datetime | None:
-        parser = NovaseqXSequencingTimesService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_end_time(file_path) if file_path else None
-
-    @property
     def demultiplexing_started_at(self) -> datetime.datetime | None:
         """Get the demultiplexing started time stamp from the sequencing run dir."""
         try:

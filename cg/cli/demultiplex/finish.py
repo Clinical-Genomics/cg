@@ -8,9 +8,6 @@ import click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.models.cg_config import CGConfig
-from cg.services.illumina.post_processing.post_processing_service import (
-    IlluminaPostProcessingService,
-)
 from cg.services.illumina.service_factory import PostProcessServiceFactory
 from cg.utils.files import get_directories_in_path
 
