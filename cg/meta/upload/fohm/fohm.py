@@ -333,7 +333,7 @@ class FOHMUploadAPI:
         self.status_db.session.commit()
 
     def parse_and_write_complementary_report(self) -> list[FohmComplementaryReport]:
-        """Create and write a complementary report."""
+        """Parse and write a complementary report."""
         complementary_reports_raw: list[dict] = self.get_reports_contents(self.daily_reports_list)
         unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(
             complementary_reports_raw
@@ -346,7 +346,7 @@ class FOHMUploadAPI:
         )
         self.add_sample_internal_id_to_complementary_reports(sars_cov_complementary_reports)
         self.add_region_lab_to_reports(sars_cov_complementary_reports)
-        self.create_and_write_complementary_report(sars_cov_complementary_reports)
+        self.create_complementary_report(sars_cov_complementary_reports)
         return sars_cov_complementary_reports
 
     def parse_and_write_pangolin_report(self) -> list[FohmPangolinReport]:
