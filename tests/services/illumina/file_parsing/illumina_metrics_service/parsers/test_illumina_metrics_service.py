@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina.data_transfer.data_transfer_service import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
