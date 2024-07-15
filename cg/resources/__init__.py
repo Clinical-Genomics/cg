@@ -3,7 +3,7 @@ from pathlib import Path
 from cg.constants import FileExtensions
 from cg.utils.files import get_project_root_dir
 
-root_dir: str = get_project_root_dir()
+root_dir: Path = get_project_root_dir()
 
 RAREDISEASE_BUNDLE_FILENAMES: str = (
     Path("resources", "raredisease_bundle_filenames").with_suffix(FileExtensions.YAML).as_posix()
