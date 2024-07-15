@@ -6,7 +6,7 @@ from cg.services.order_validation_service.validators.inter_field_validators impo
 from cg.store.store import Store
 
 
-def validate_user_belongs_to_customer(order: Order, store: Store) -> ValidationErrors | None:
+def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> ValidationErrors | None:
     has_access: bool = store.user_belongs_to_customer(
         user_id=order.user_id,
         customer_internal_id=order.customer_internal_id,
