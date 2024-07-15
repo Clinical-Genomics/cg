@@ -997,13 +997,22 @@ class ReadHandler(BaseHandler):
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_user_by_email(self, email: str) -> User | None:
         """Return a user by email from the database."""
         return apply_user_filter(
             users=self._get_query(table=User),
             email=email,
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
+
+    def user_belongs_to_customer(self, user_id: int, customer_internal_id: str) -> bool:
+        user: User | None = apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=user_id,
+            customer_internal_id=customer_internal_id,
+            filter_functions=[UserFilter.BY_ID, UserFilter.BY_CUSTOMER_INTERNAL_ID],
+        )
+        return bool(user)
 
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
         """Return samples to receive."""

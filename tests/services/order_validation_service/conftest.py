@@ -11,5 +11,6 @@ def valid_order() -> Order:
         name="name",
         ticket_number="#12345",
         workflow=Workflow.BALSAMIC,
+        user_id="user",
         customer="customer",
     )
