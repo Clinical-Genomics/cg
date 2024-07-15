@@ -1,16 +1,24 @@
-from datetime import datetime
 from pathlib import Path
 
 import pytest
 
 from cg.utils.files import (
     get_directories_in_path,
-    get_source_creation_time_stamp,
     get_file_in_directory,
+    get_files_in_directory_with_pattern,
+    get_project_root_dir,
+    get_source_creation_time_stamp,
     remove_directory_and_contents,
     rename_file,
-    get_files_in_directory_with_pattern,
 )
+
+
+def test_get_project_root_dir():
+    # WHEN getting the project root dir
+    root_dir: Path = get_project_root_dir()
+
+    # THEN return the dir name
+    assert root_dir.name == "cg"
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):

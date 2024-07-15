@@ -4,6 +4,8 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Border, Font, PatternFill, Side
 from pkg_resources import resource_filename
 
+from cg.utils.files import get_project_root_dir
+
 
 def render_xlsx(data: dict) -> Workbook:
     """Render an Excel invoice template.
@@ -34,10 +36,12 @@ def render_xlsx(data: dict) -> Workbook:
             }]
         }
     """
-    pkg_dir = __name__.rpartition(".")[0]
+    root_dir = get_project_root_dir()
     sample_type = "pool" if data["pooled_samples"] else "sample"
     costcenter = data["cost_center"]
-    template_path = resource_filename(pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx")
+    template_path = resource_filename(
+        root_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx"
+    )
     workbook = load_workbook(template_path)
     if data["pooled_samples"]:
         worksheet = workbook["Bilaga Prover"]

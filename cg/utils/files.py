@@ -8,6 +8,10 @@ from pathlib import Path
 LOG = logging.getLogger(__name__)
 
 
+def get_project_root_dir() -> Path:
+    return Path(__file__).parent.parent
+
+
 def get_file_in_directory(directory: Path, file_name: str) -> Path:
     """Get a file in a directory and subdirectories.
     Raises:
@@ -32,9 +36,7 @@ def get_files_in_directory_with_pattern(directory: Path, pattern: str) -> list[P
     if not directory.is_dir() or not directory.exists():
         raise FileNotFoundError(f"Directory {directory} does not exist")
     for directory_path, _, files in os.walk(directory):
-        for file in files:
-            if pattern in file:
-                files_with_pattern.append(Path(directory_path, file))
+        files_with_pattern.extend(Path(directory_path, file) for file in files if pattern in file)
     if not files_with_pattern:
         raise FileNotFoundError(f"No files with pattern {pattern} found in {directory}")
     return files_with_pattern
