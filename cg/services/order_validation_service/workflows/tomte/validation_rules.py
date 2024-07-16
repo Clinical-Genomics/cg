@@ -1,7 +1,15 @@
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field_validators import (
-    each_case_contains_father,
-    each_case_contains_mother,
+from cg.services.order_validation_service.validators.data_validators import (
+    validate_customer_can_skip_reception_control,
+    validate_customer_exists,
+    validate_user_belongs_to_customer,
+)
+from cg.services.order_validation_service.validators.inter_field_validators import (
+    validate_ticket_number_required_if_connected,
 )
 
-
-TOMTE_VALIDATION_RULES = []
+TOMTE_VALIDATION_RULES = [
+    validate_customer_exists,
+    validate_user_belongs_to_customer,
+    validate_ticket_number_required_if_connected,
+    validate_customer_can_skip_reception_control,
+]

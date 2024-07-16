@@ -2270,6 +2270,16 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, No
 
 
 @pytest.fixture
+def customer_without_users(store_with_users: Store):
+    return store_with_users.add_customer(
+        internal_id="internal_id",
+        name="some_name",
+        invoice_address="some_address",
+        invoice_reference="some_reference",
+    )
+
+
+@pytest.fixture
 def store_with_cases_and_customers(
     store: Store, helpers: StoreHelpers
 ) -> Generator[Store, None, None]:

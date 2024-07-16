@@ -1,15 +1,15 @@
 from typing import Callable
 
+from cg.services.order_validation_service.models.errors import OrderValidationError
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.models.validation_error import ValidationErrors
+from cg.store.store import Store
 
 
-def apply_validation(rules: list[Callable], order: Order) -> ValidationErrors:
-
-    errors = ValidationErrors()
-
+def apply_validation(
+    rules: list[Callable], order: Order, store: Store
+) -> list[OrderValidationError]:
+    errors: list[OrderValidationError] = []
     for rule in rules:
-        rule_errors: ValidationErrors = rule(order)
-        errors.errors.extend(rule_errors.errors)
-
+        rule_errors: list[OrderValidationError] = rule(order=order, store=store)
+        errors.extend(rule_errors)
     return errors
