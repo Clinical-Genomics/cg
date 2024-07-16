@@ -7,7 +7,7 @@ from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
 
 
-def validate_user_customer_association(
+def validate_user_belongs_to_customer(
     order: Order, store: Store, **kwargs
 ) -> list[ValidationError]:
     has_access: bool = store.is_user_associated_with_customer(
