@@ -25,7 +25,7 @@ def validate_name_required_for_new_order(order: Order, **kwargs) -> list[OrderVa
 
 
 def _is_order_name_required(order: Order) -> bool:
-    return not order.connect_to_ticket and not order.name
+    return False if order.connect_to_ticket else not order.name
 
 
 def _is_ticket_number_missing(order: Order) -> bool:
