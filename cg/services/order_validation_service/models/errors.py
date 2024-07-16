@@ -6,11 +6,8 @@ class ValidationError(BaseModel):
     message: str
 
 
-class SampleValidationError(ValidationError):
+class CaseSampleValidationError(ValidationError):
     sample_id: str
-
-
-class CaseValidationError(ValidationError):
     case_id: str
 
 
@@ -37,8 +34,3 @@ class CustomerDoesNotExistError(ValidationError):
 class OrderNameRequiredError(ValidationError):
     field: str = "name"
     message: str = "Order name is required"
-
-
-class OccupiedWellError(SampleValidationError):
-    field: str = "well_position"
-    message: str = "Well is occupied"
