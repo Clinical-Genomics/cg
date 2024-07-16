@@ -1,3 +1,4 @@
+from cg.services.order_validation_service.models.errors import OrderValidationError
 from cg.services.order_validation_service.models.validation_error import ValidationErrors
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.utils import apply_validation
@@ -16,7 +17,7 @@ class TomteValidationService(OrderValidationService):
         self.field_validator = field_validator
         self.store = store
 
-    def validate(self, order_json: str) -> ValidationErrors:
+    def validate(self, order_json: str) -> list[OrderValidationError]:
         order, field_errors = self.field_validator.validate(order_json)
 
         if field_errors:
