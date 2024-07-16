@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.models.errors import (
+    CustomerCannotSkipReceptionControlError,
     UserNotAssociatedWithCustomerError,
     ValidationError,
 )
@@ -17,5 +18,19 @@ def validate_user_customer_association(
     errors: list[ValidationError] = []
     if not has_access:
         error = UserNotAssociatedWithCustomerError()
+        errors.append(error)
+    return errors
+
+
+def validate_customer_can_skip_reception_control(
+    order: Order, store: Store, **kwargs
+) -> list[ValidationError]:
+    errors: list[ValidationError] = []
+
+    if not order.skip_reception_control:
+        return errors
+
+    if not store.is_customer_trusted(order.customer_internal_id):
+        error = CustomerCannotSkipReceptionControlError()
         errors.append(error)
     return errors

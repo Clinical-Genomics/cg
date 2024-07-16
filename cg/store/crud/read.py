@@ -1014,6 +1014,9 @@ class ReadHandler(BaseHandler):
         ).first()
         return bool(user)
 
+    def is_customer_trusted(self, customer_internal_id: str) -> bool:
+        pass
+
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
         """Return samples to receive."""
         records: Query = self._get_join_sample_application_version_query()
