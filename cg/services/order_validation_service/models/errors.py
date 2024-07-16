@@ -24,3 +24,8 @@ class CustomerCannotSkipReceptionControlError(ValidationError):
 class CustomerDoesNotExistError(ValidationError):
     field: str = "customer"
     message: str = "Customer does not exist"
+
+
+class OrderNameRequiredError(ValidationError):
+    field: str = "name"
+    message: str = "Order name is required"
