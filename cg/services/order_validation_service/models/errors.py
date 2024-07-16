@@ -6,6 +6,14 @@ class ValidationError(BaseModel):
     message: str
 
 
+class SampleValidationError(ValidationError):
+    sample_id: str
+
+
+class CaseValidationError(ValidationError):
+    case_id: str
+
+
 class UserNotAssociatedWithCustomerError(ValidationError):
     field: str = "customer"
     message: str = "User does not belong to customer"
@@ -30,6 +38,7 @@ class OrderNameRequiredError(ValidationError):
     field: str = "name"
     message: str = "Order name is required"
 
-class OccupiedWellError(ValidationError):
-    field: str = "well"
+
+class OccupiedWellError(SampleValidationError):
+    field: str = "well_position"
     message: str = "Well is occupied"

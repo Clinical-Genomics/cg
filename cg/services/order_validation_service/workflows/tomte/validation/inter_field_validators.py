@@ -14,7 +14,7 @@ def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[Occupie
 def _get_errors(colliding_samples: list[TomteSample]) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
     for sample in colliding_samples:
-        error = OccupiedWellError()
+        error = OccupiedWellError(sample_id=sample.internal_id)
         errors.append(error)
     return errors
 
