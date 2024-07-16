@@ -12,7 +12,7 @@ from cg.store.store import Store
 
 
 class PostProcessingServiceFactory:
-    def __int__(self, status_db: Store, hk_api: HousekeeperAPI, dry_run: bool, run_dir: Path):
+    def __init__(self, status_db: Store, hk_api: HousekeeperAPI, dry_run: bool, run_dir: Path):
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = hk_api
         self.run_dir: Path = run_dir
