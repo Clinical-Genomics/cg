@@ -1,3 +1,4 @@
+from cg.services.order_validation_service.models.errors import TicketNumberRequiredError
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field_validators import (
     validate_ticket_number_required_if_connected,
@@ -14,3 +15,6 @@ def test_ticket_is_required(valid_order: Order):
 
     # THEN an error should be returned
     assert errors
+
+    # THEN the error should be about the ticket number
+    assert isinstance(errors[0], TicketNumberRequiredError)
