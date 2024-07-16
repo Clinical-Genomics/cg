@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Side>A</Side>
+  <Application>NovaSeqXSeries Control Software</Application>
+  <SystemSuiteVersion>1.2.2.48004</SystemSuiteVersion>
+  <OutputFolder>//cg-nas.scilifelab.se/cg_data/seqdata/20240710_LH00202_0125_A22KJLFLT3</OutputFolder>
+  <CloudUploadMode>RunMonitoring</CloudUploadMode>
+  <RunSetupMode>Manual</RunSetupMode>
+  <SecondaryAnalysisMode>None</SecondaryAnalysisMode>
+  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentSerialNumber>LH00202</InstrumentSerialNumber>
+  <RunId>20240710_LH00202_0125_A22KJLFLT3</RunId>
+  <RunCounter>125</RunCounter>
+  <RecipeName>10B Sequencing</RecipeName>
+  <RecipeVersion>10B-01.02.02</RecipeVersion>
+  <ExperimentName>22KJLFLT3</ExperimentName>
+  <FlowCellName>NovaSeqXSeries B3</FlowCellName>
+  <FlowCellType>NovaSeqXSeriesB3</FlowCellType>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC1047358-LC1</SerialNumber>
+      <LotNumber>1000020786</LotNumber>
+      <PartNumber>20072271</PartNumber>
+      <ExpirationDate>2026-03-24T00:00:00+01:00</ExpirationDate>
+      <Type>SampleTube</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>8 Lane</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2034547-LC1</SerialNumber>
+      <LotNumber>18111201</LotNumber>
+      <PartNumber>20081650</PartNumber>
+      <ExpirationDate>2025-05-31T00:00:00+02:00</ExpirationDate>
+      <Type>Lyo</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>Mid</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>22KJLFLT3</SerialNumber>
+      <LotNumber>20824586</LotNumber>
+      <PartNumber>20080370</PartNumber>
+      <ExpirationDate>2025-07-09T00:00:00+02:00</ExpirationDate>
+      <Type>FlowCell</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>10B</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2403042106-1</SerialNumber>
+      <LotNumber>24022901</LotNumber>
+      <PartNumber>20089853</PartNumber>
+      <ExpirationDate>2025-08-29T00:00:00+02:00</ExpirationDate>
+      <Type>Buffer</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>Universal</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC4102900-LC3</SerialNumber>
+      <LotNumber>20829570</LotNumber>
+      <PartNumber>20066614</PartNumber>
+      <ExpirationDate>2025-08-02T00:00:00+02:00</ExpirationDate>
+      <Type>Reagent</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>10B 300c</Name>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="10" />
+    <Read ReadName="Index2" Cycles="10" />
+    <Read ReadName="Read2" Cycles="151" />
+  </PlannedReads>
+  <SecondaryAnalysisInfo />
+  <DisableBclCopy>false</DisableBclCopy>
+</RunParameters>

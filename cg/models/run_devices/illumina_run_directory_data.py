@@ -23,7 +23,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.run_devices.utils import parse_date
-from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
+from cg.services.illumina.file_parsing.run_completion_status_service import (
     ParseRunCompletionStatusService,
 )
 from cg.utils.files import get_source_creation_time_stamp
