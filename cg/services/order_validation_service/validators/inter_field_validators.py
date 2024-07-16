@@ -6,7 +6,9 @@ from cg.services.order_validation_service.models.errors import (
 )
 
 
-def validate_ticket_number_required_if_connected(order: Order, **kwargs) -> list[OrderValidationError]:
+def validate_ticket_number_required_if_connected(
+    order: Order, **kwargs
+) -> list[OrderValidationError]:
     errors: list[OrderValidationError] = []
     if _is_ticket_number_missing(order):
         error = TicketNumberRequiredError()
