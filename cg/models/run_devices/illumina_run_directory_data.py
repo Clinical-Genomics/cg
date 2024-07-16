@@ -23,9 +23,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.run_devices.utils import parse_date
-from cg.services.illumina.file_parsing.sequencing_times.novaseq_x_sequencing_times_service import (
-    NovaseqXSequencingTimesService,
-)
 from cg.utils.files import get_source_creation_time_stamp
 from cg.utils.time import format_time_from_ctime
 
