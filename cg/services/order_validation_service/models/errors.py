@@ -29,3 +29,7 @@ class CustomerDoesNotExistError(ValidationError):
 class OrderNameRequiredError(ValidationError):
     field: str = "name"
     message: str = "Order name is required"
+
+class OccupiedWellError(ValidationError):
+    field: str = "well"
+    message: str = "Well is occupied"
