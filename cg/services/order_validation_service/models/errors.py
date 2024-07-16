@@ -6,11 +6,6 @@ class ValidationError(BaseModel):
     message: str
 
 
-class CaseSampleValidationError(ValidationError):
-    sample_id: str
-    case_id: str
-
-
 class UserNotAssociatedWithCustomerError(ValidationError):
     field: str = "customer"
     message: str = "User does not belong to customer"
