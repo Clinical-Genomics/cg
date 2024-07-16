@@ -1015,7 +1015,8 @@ class ReadHandler(BaseHandler):
         return bool(user)
 
     def is_customer_trusted(self, customer_internal_id: str) -> bool:
-        pass
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer and customer.is_trusted)
 
     def customer_exists(self, customer_internal_id: str) -> bool:
         customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)

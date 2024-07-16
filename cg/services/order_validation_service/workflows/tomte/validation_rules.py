@@ -10,7 +10,7 @@ from cg.services.order_validation_service.validators.inter_field_validators impo
 
 TOMTE_VALIDATION_RULES = [
     validate_customer_exists,
-    validate_ticket_number_required_if_connected,
     validate_user_belongs_to_customer,
+    validate_ticket_number_required_if_connected,
     validate_customer_can_skip_reception_control,
 ]
