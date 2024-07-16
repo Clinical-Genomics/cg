@@ -5,6 +5,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.io.controller import ReadFile
 from cg.services.pacbio.metrics.models import (
+    BaseMetrics,
     ControlMetrics,
     HiFiMetrics,
     PolymeraseMetrics,
@@ -23,43 +24,35 @@ class MetricsParser:
         self.base_calling_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
         )
-        self.hifi_metrics: HiFiMetrics = self.parse_attributes_to_model(
+        self.hifi_metrics: HiFiMetrics = self.parse_report_to_model(
             report_file=self.base_calling_report_file, data_model=HiFiMetrics
         )
         # For control metrics
         self.control_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
         )
-        self.control_metrics: ControlMetrics = self.parse_attributes_to_model(
+        self.control_metrics: ControlMetrics = self.parse_report_to_model(
             report_file=self.control_report_file, data_model=ControlMetrics
         )
         # For productivity metrics
         self.loading_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.LOADING_REPORT
         )
-        self.productivity_metrics: ProductivityMetrics = self.parse_attributes_to_model(
+        self.productivity_metrics: ProductivityMetrics = self.parse_report_to_model(
             report_file=self.loading_report_file, data_model=ProductivityMetrics
         )
         # For polymerase metrics
         self.raw_data_report_file: Path = get_file_in_directory(
             directory=self.report_dir, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
         )
-        self.polymerase_metrics: PolymeraseMetrics = self.parse_attributes_to_model(
+        self.polymerase_metrics: PolymeraseMetrics = self.parse_report_to_model(
             report_file=self.raw_data_report_file, data_model=PolymeraseMetrics
         )
 
     @staticmethod
-    def _parse_report(report_file: Path) -> list[dict[str, Any]]:
-        """Parse the attribute element of a PacBio report file in JSON format."""
+    def parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> BaseMetrics:
+        """Parse the metrics report to a data model."""
         parsed_json: dict = ReadFile.read_file[FileFormat.JSON](file_path=report_file)
-        return parsed_json.get("attributes")
-
-    def parse_attributes_to_model(
-        self,
-        report_file: Path,
-        data_model: Type[ControlMetrics | HiFiMetrics | PolymeraseMetrics | ProductivityMetrics],
-    ) -> ControlMetrics | HiFiMetrics | PolymeraseMetrics | ProductivityMetrics:
-        """Parse the attributes to a model."""
-        report_content: list[dict[str, Any]] = self._parse_report(report_file=report_file)
-        data: dict = {report_field["id"]: report_field["value"] for report_field in report_content}
+        metrics: list[dict[str, Any]] = parsed_json.get("attributes")
+        data: dict = {report_field["id"]: report_field["value"] for report_field in metrics}
         return data_model.model_validate(data, from_attributes=True)

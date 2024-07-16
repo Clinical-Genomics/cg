@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from pydantic import BaseModel, Field, field_validator
 
 from cg.constants.pacbio import (
@@ -7,6 +9,8 @@ from cg.constants.pacbio import (
     PolymeraseDataAttributeIDs,
 )
 from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
+
+BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
 
 
 class HiFiMetrics(BaseModel):
@@ -101,3 +105,12 @@ class PolymeraseMetrics(BaseModel):
     _validate_longest_subread_length_n50 = field_validator(
         "longest_subread_length_n50", mode="before"
     )(divide_by_thousand_with_one_decimal)
+
+
+class SmrtlinkDatasetsMetrics(BaseModel):
+    """Model to parse metrics in the SMRTlink datasets report."""
+
+    cell_id: str = Field(..., alias="cellId")
+    well_name: str = Field(..., alias="wellName")
+    sample_internal_id: str = Field(..., alias="wellSampleName")
+    movie_name: str = Field(..., alias="metadataContextId")
