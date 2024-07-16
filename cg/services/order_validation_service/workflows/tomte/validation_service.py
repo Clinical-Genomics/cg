@@ -1,11 +1,19 @@
-from cg.services.order_validation_service.models.validation_error import ValidationErrors
+from cg.services.order_validation_service.models.errors import (
+    CaseSampleError,
+    ValidationError,
+    ValidationErrors,
+)
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.order_validation_service.utils import apply_validation
+from cg.services.order_validation_service.utils import (
+    apply_case_sample_validation,
+    apply_order_validation,
+)
 from cg.services.order_validation_service.workflows.tomte.validation.field_validator import (
     TomteFieldValidator,
 )
 from cg.services.order_validation_service.workflows.tomte.validation_rules import (
-    TOMTE_VALIDATION_RULES,
+    TOMTE_CASE_SAMPLE_RULES,
+    TOMTE_ORDER_RULES,
 )
 from cg.store.store import Store
 
@@ -22,4 +30,10 @@ class TomteValidationService(OrderValidationService):
         if field_errors:
             return field_errors
 
-        return apply_validation(rules=TOMTE_VALIDATION_RULES, order=order, store=self.store)
+        order_errors: list[ValidationError] = apply_order_validation(
+            rules=TOMTE_ORDER_RULES, order=order, store=self.store
+        )
+        case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(
+            rules=TOMTE_CASE_SAMPLE_RULES, case=order.cases, store=self.store
+        )
+        return ValidationErrors(order_errors=order_errors, case_sample_errors=case_sample_errors)

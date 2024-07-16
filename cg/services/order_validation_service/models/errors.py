@@ -6,6 +6,26 @@ class ValidationError(BaseModel):
     message: str
 
 
+class CaseError(ValidationError):
+    case_id: str
+
+
+class SampleError(ValidationError):
+    sample_id: str
+
+
+class CaseSampleError(ValidationError):
+    sample_id: str
+    case_id: str
+
+
+class ValidationErrors(BaseModel):
+    order_errors: list[ValidationError] | None = None
+    case_errors: list[CaseError] | None = None
+    sample_errors: list[SampleError] | None = None
+    case_sample_errors: list[CaseSampleError] | None = None
+
+
 class UserNotAssociatedWithCustomerError(ValidationError):
     field: str = "customer"
     message: str = "User does not belong to customer"
@@ -29,3 +49,7 @@ class CustomerDoesNotExistError(ValidationError):
 class OrderNameRequiredError(ValidationError):
     field: str = "name"
     message: str = "Order name is required"
+
+
+class OccupiedWellError(CaseSampleError):
+    message: str = "Well is already occupied"
