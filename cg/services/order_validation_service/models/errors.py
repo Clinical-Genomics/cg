@@ -19,3 +19,8 @@ class TicketNumberRequiredError(ValidationError):
 class CustomerCannotSkipReceptionControlError(ValidationError):
     field: str = "skip_reception_control"
     message: str = "Customer cannot skip reception control"
+
+
+class CustomerDoesNotExistError(ValidationError):
+    field: str = "customer"
+    message: str = "Customer does not exist"
