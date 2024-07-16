@@ -53,3 +53,13 @@ class OrderNameRequiredError(ValidationError):
 
 class OccupiedWellError(CaseSampleError):
     message: str = "Well is already occupied"
+
+
+class InvalidFatherSexError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Fathers must be male"
+
+
+class InvalidMotherSexError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Mothers must be female"

@@ -1,8 +1,37 @@
-from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.models.errors import OccupiedWellError, ValidationError
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
+from cg.services.order_validation_service.models.errors import (
+    InvalidFatherSexError,
+    InvalidMotherSexError,
+    OccupiedWellError,
+)
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
-from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
+
+
+def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
+    return [
+        InvalidFatherSexError(sample_id=sample.internal_id, case_id=case.internal_id)
+        for case in order.cases
+        for sample in case.samples
+        if _invalid_father_sex(sample)
+    ]
+
+
+def _invalid_father_sex(sample: TomteSample) -> bool:
+    return sample.father and sample.sex != SexEnum.male
+
+
+def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError]:
+    return [
+        InvalidMotherSexError(sample_id=sample.internal_id, case_id=case.internal_id)
+        for case in order.cases
+        for sample in case.samples
+        if _invalid_mother_sex(sample)
+    ]
+
+
+def _invalid_mother_sex(sample: TomteSample) -> bool:
+    return sample.mother and sample.sex != SexEnum.female
 
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
