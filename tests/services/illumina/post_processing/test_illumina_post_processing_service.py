@@ -24,7 +24,7 @@ def test_store_illumina_flow_cell(
     assert store._get_query(table=IlluminaFlowCell).count() == 0
 
     # WHEN storing an Illumina flow cell in the status db
-    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
+    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service._store_illumina_flow_cell(
         run_directory_data=novaseq_x_demux_runs_flow_cell
     )
 
@@ -70,7 +70,7 @@ def test_store_illumina_sample_sequencing_metrics(
     assert store._get_query(table=IlluminaSampleSequencingMetrics).count() == 0
 
     # GIVEN a flow cell directory data with samples and an Illumina post processing service
-    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
+    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service._store_illumina_flow_cell(
         novaseq_x_demux_runs_flow_cell
     )
     sequencing_run: IlluminaSequencingRun = (
@@ -80,7 +80,7 @@ def test_store_illumina_sample_sequencing_metrics(
     )
 
     # WHEN storing the Illumina sample sequencing metrics in the status db
-    illumina_post_postprocessing_service.store_illumina_sample_sequencing_metrics(
+    illumina_post_postprocessing_service._store_illumina_sample_sequencing_metrics(
         run_directory_data=novaseq_x_demux_runs_flow_cell,
         sequencing_run=sequencing_run,
     )
@@ -96,7 +96,7 @@ def test_store_illumina_flow_cell_data(
     # GIVEN a flow cell directory data and an Illumina post processing service
 
     # WHEN storing the flow cell data
-    illumina_post_postprocessing_service.store_sequencing_data_in_status_db(
+    illumina_post_postprocessing_service._store_sequencing_data_in_status_db(
         run_directory_data=novaseq_x_demux_runs_flow_cell
     )
 

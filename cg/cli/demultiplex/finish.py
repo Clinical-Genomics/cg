@@ -6,9 +6,9 @@ from pathlib import Path
 import click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.cli_options import DRY_RUN
 from cg.models.cg_config import CGConfig
-from cg.services.illumina.service_factory import PostProcessServiceFactory
+from cg.services.illumina.service_provider import IlluminaPostProcessServiceProvider
 from cg.utils.files import get_directories_in_path
 
 LOG = logging.getLogger(__name__)
@@ -29,8 +29,7 @@ def post_process_illumina_run(context: CGConfig, demultiplexed_run_dir_name: str
     demultiplexed-run-dir-name is the full run name, e.g. '230912_A00187_1009_AHK33MDRX3'.
 
     """
-
-    factory = PostProcessServiceFactory(
+    factory = IlluminaPostProcessServiceProvider(
         run_dir=Path(
             context.run_instruments.illumina.demultiplexed_runs_dir, demultiplexed_run_dir_name
         ),
@@ -39,8 +38,8 @@ def post_process_illumina_run(context: CGConfig, demultiplexed_run_dir_name: str
         dry_run=dry_run,
     )
     post_processing_service = factory.create_post_processing_service()
-    post_processing_service.post_process_illumina_flow_cell(
-        sequencing_run_name=demultiplexed_run_dir_name,
+    post_processing_service.post_process(
+        run_name=demultiplexed_run_dir_name,
     )
 
 
@@ -55,15 +54,15 @@ def post_process_all_illumina_runs(context: CGConfig, dry_run: bool):
     is_error_raised: bool = False
     for directory in directories:
         try:
-            factory = PostProcessServiceFactory(
+            factory = IlluminaPostProcessServiceProvider(
                 run_dir=directory,
                 status_db=context.status_db,
                 hk_api=context.housekeeper_api,
                 dry_run=dry_run,
             )
             post_processing_service = factory.create_post_processing_service()
-            post_processing_service.post_process_illumina_flow_cell(
-                sequencing_run_name=directory.as_posix(),
+            post_processing_service.post_process(
+                run_name=directory.as_posix(),
             )
         except Exception as error:
             LOG.error(

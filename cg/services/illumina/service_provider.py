@@ -1,7 +1,10 @@
-"""Module for the illumina post-processing service factory."""
+"""Module for the illumina post-processing service provider."""
 
 from pathlib import Path
 
+from cg.abstract_classes.post_processing.post_processing_service_provider import (
+    PostProcessingServiceProvider,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.sequencing import Sequencers
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -29,7 +32,8 @@ from cg.services.illumina.post_processing.post_processing_service import (
 from cg.store.store import Store
 
 
-class PostProcessServiceFactory:
+class IlluminaPostProcessServiceProvider(PostProcessingServiceProvider):
+    """Class to provide an illumina post-processing service and the required dependencies."""
 
     def __init__(self, run_dir: Path, status_db: Store, hk_api: HousekeeperAPI, dry_run: bool):
         self.run_dir: Path = run_dir
@@ -57,11 +61,11 @@ class PostProcessServiceFactory:
         return IlluminaDemuxVersionService()
 
     def _create_transfer_service(self) -> IlluminaDataTransferService:
-        metrics_parser: BCLConvertMetricsParser = self.create_metrics_service()
+        metrics_parser: BCLConvertMetricsParser = self._create_metrics_service()
         sequencing_time_collector: CollectSequencingTimes = (
-            self.create_collect_sequencing_time_service(self.create_run_directory_data())
+            self._create_collect_sequencing_time_service(self._create_run_directory_data())
         )
-        software_service: IlluminaDemuxVersionService = self.create_software_service()
+        software_service: IlluminaDemuxVersionService = self._create_software_service()
         return IlluminaDataTransferService(
             metrics_parser=metrics_parser,
             sequencing_time_collector=sequencing_time_collector,
@@ -69,7 +73,7 @@ class PostProcessServiceFactory:
         )
 
     def create_post_processing_service(self) -> IlluminaPostProcessingService:
-        transfer_service: IlluminaDataTransferService = self.create_transfer_service()
+        transfer_service: IlluminaDataTransferService = self._create_transfer_service()
         return IlluminaPostProcessingService(
             status_db=self.status_db,
             housekeeper_api=self.hk_api,
