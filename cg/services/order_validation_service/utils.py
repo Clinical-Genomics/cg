@@ -18,8 +18,8 @@ def apply_order_validation(
 def apply_case_sample_validation(
     rules: list[Callable], case, store: Store
 ) -> list[CaseSampleError]:
-    errors: list[ValidationError] = []
+    errors: list[CaseSampleError] = []
     for rule in rules:
-        rule_errors: list[ValidationError] = rule(case=case, store=store)
+        rule_errors: list[CaseSampleError] = rule(case=case, store=store)
         errors.extend(rule_errors)
     return errors
