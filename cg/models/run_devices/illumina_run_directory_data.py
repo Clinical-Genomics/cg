@@ -83,7 +83,7 @@ class IlluminaRunDirectoryData:
         return self.path.name
 
     @property
-    def sequenced_at(self) -> list[str]:
+    def sequenced_at(self) -> datetime:
         """Return the sequencing date for the sequencing run."""
         date_part: str = self.full_name.split("_")[0]
         return parse_date(date_part)
@@ -95,6 +95,14 @@ class IlluminaRunDirectoryData:
         """
         return Path(
             self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+
+    @property
+    def get_sequencing_completed_path(self) -> Path:
+        """Return the path to the sequencing completed file."""
+        return Path(
+            self.get_sequencing_runs_dir(),
+            DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED,
         )
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
@@ -288,18 +296,6 @@ class IlluminaRunDirectoryData:
         if file_path.exists():
             return file_path
         return None
-
-    @property
-    def sequencing_started_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_start_time(file_path) if file_path else None
-
-    @property
-    def sequencing_completed_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_end_time(file_path) if file_path else None
 
     @property
     def demultiplexing_started_at(self) -> datetime.datetime | None:
