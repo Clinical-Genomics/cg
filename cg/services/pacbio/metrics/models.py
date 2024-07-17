@@ -1,12 +1,14 @@
+import re
 from typing import TypeVar
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from cg.constants.pacbio import (
     CCSAttributeIDs,
     ControlAttributeIDs,
     LoadingAttributesIDs,
     PolymeraseDataAttributeIDs,
+    SmrtLinkDatabasesIDs,
 )
 from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
 
@@ -110,7 +112,26 @@ class PolymeraseMetrics(BaseModel):
 class SmrtlinkDatasetsMetrics(BaseModel):
     """Model to parse metrics in the SMRTlink datasets report."""
 
-    cell_id: str = Field(..., alias="cellId")
-    well_name: str = Field(..., alias="wellName")
-    sample_internal_id: str = Field(..., alias="wellSampleName")
-    movie_name: str = Field(..., alias="metadataContextId")
+    device_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
+    well_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
+    well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
+    sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
+    movie_name: str = Field(..., alias=SmrtLinkDatabasesIDs.MOVIE_NAME)
+    cell_index: int = Field(..., alias=SmrtLinkDatabasesIDs.CELL_INDEX)
+    path: str = Field(..., alias=SmrtLinkDatabasesIDs.PATH)
+
+    @property
+    def plate(self) -> int:
+        """
+        Extract the plate number from the plate_well name in the path.
+        Example:
+            /1_A01/ -> plate = 1
+            /2_D01/ -> plate = 2
+        """
+        match = re.search(r"/(\d)_", self.path)
+        if not match:
+            raise ValidationError("Path should contain the plate-well name")
+        plate = int(match.group(1))
+        if plate not in [1, 2]:
+            raise ValidationError("Value of 'plate' should be 1 or 2")
+        return plate

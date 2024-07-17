@@ -39,3 +39,13 @@ class PolymeraseDataAttributeIDs:
     READ_LENGTH_N50: str = "raw_data_report.read_n50"
     MEAN_LONGEST_SUBREAD_LENGTH: str = "raw_data_report.insert_length"
     LONGEST_SUBREAD_LENGTH_N50: str = "raw_data_report.insert_n50"
+
+
+class SmrtLinkDatabasesIDs:
+    BIO_SAMPLE_NAME: str = "bioSampleName"
+    CELL_ID: str = "cellId"
+    CELL_INDEX: str = "cellIndex"
+    MOVIE_NAME: str = "metadataContextId"
+    PATH: str = "path"
+    WELL_NAME: str = "wellName"
+    WELL_SAMPLE_NAME: str = "wellSampleName"
