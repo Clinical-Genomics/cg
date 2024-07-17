@@ -1,5 +1,5 @@
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.models.errors import OccupiedWellError, ValidationError
+from cg.services.order_validation_service.models.errors import OccupiedWellError, OrderError
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase

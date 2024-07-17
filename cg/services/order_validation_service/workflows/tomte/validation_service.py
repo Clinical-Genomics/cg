@@ -1,6 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     CaseSampleError,
-    ValidationError,
+    OrderError,
     ValidationErrors,
 )
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
@@ -30,7 +30,7 @@ class TomteValidationService(OrderValidationService):
         if field_errors:
             return field_errors
 
-        order_errors: list[ValidationError] = apply_order_validation(
+        order_errors: list[OrderError] = apply_order_validation(
             rules=TOMTE_ORDER_RULES, order=order, store=self.store
         )
         case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(

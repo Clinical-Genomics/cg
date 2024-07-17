@@ -1,52 +1,52 @@
 from pydantic import BaseModel
 
 
-class ValidationError(BaseModel):
+class OrderError(BaseModel):
     field: str
     message: str
 
 
-class CaseError(ValidationError):
+class CaseError(OrderError):
     case_id: str
 
 
-class SampleError(ValidationError):
+class SampleError(OrderError):
     sample_id: str
 
 
-class CaseSampleError(ValidationError):
+class CaseSampleError(OrderError):
     sample_id: str
     case_id: str
 
 
 class ValidationErrors(BaseModel):
-    order_errors: list[ValidationError] | None = None
+    order_errors: list[OrderError] | None = None
     case_errors: list[CaseError] | None = None
     sample_errors: list[SampleError] | None = None
     case_sample_errors: list[CaseSampleError] | None = None
 
 
-class UserNotAssociatedWithCustomerError(ValidationError):
+class UserNotAssociatedWithCustomerError(OrderError):
     field: str = "customer"
     message: str = "User does not belong to customer"
 
 
-class TicketNumberRequiredError(ValidationError):
+class TicketNumberRequiredError(OrderError):
     field: str = "ticket_number"
     message: str = "Ticket number is required"
 
 
-class CustomerCannotSkipReceptionControlError(ValidationError):
+class CustomerCannotSkipReceptionControlError(OrderError):
     field: str = "skip_reception_control"
     message: str = "Customer cannot skip reception control"
 
 
-class CustomerDoesNotExistError(ValidationError):
+class CustomerDoesNotExistError(OrderError):
     field: str = "customer"
     message: str = "Customer does not exist"
 
 
-class OrderNameRequiredError(ValidationError):
+class OrderNameRequiredError(OrderError):
     field: str = "name"
     message: str = "Order name is required"
 
