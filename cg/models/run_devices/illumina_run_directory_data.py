@@ -23,9 +23,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.run_devices.utils import parse_date
-from cg.services.illumina.file_parsing.run_completion_status_service import (
-    ParseRunCompletionStatusService,
-)
 from cg.utils.files import get_source_creation_time_stamp
 from cg.utils.time import format_time_from_ctime
 
@@ -100,9 +97,20 @@ class IlluminaRunDirectoryData:
     @property
     def get_sequencing_completed_path(self) -> Path:
         """Return the path to the sequencing completed file."""
-        return Path(
-            self.get_sequencing_runs_dir(),
-            DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED,
+        sequencing_completed_paths: dict = {
+            Sequencers.NOVASEQ: Path(
+                self.get_sequencing_runs_dir(),
+                DemultiplexingDirsAndFiles.SEQUENCE_COMPLETED,
+            ),
+            Sequencers.HISEQX: Path(
+                self.get_sequencing_runs_dir(),
+                DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED,
+            ),
+        }
+        return (
+            sequencing_completed_paths[self.sequencer_type]
+            if self.sequencer_type in sequencing_completed_paths.keys()
+            else None
         )
 
     def set_sample_sheet_path_hk(self, hk_path: Path):

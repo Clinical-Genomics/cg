@@ -3,6 +3,11 @@
 from datetime import datetime
 
 import pytest
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+
+from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
+    SequencingTimesService,
+)
 
 
 @pytest.mark.parametrize(
@@ -19,17 +24,27 @@ import pytest
             "novaseq_6000_sequencing_start_time",
         ),
         (
+            "hiseq_x_single_index_flow_cell",
+            "hiseq_x_sequencing_times_service",
+            "hiseq_x_sequencing_start_time",
+        ),
+        (
             "hiseq_2500_dual_index_flow_cell",
-            "hiseq_sequencing_times_service",
-            "hiseq_sequencing_start_time",
+            "hiseq_ga_sequencing_times_service",
+            "hiseq_ga_sequencing_start_time",
         ),
     ],
 )
-def test_get_sequencing_start_time(run_dir_data, time_service, expected_time, request):
+def test_get_sequencing_start_time(
+    run_dir_data: str,
+    time_service: str,
+    expected_time: str,
+    request,
+):
     # GIVEN run directory data and a time service
-    run_dir_data = request.getfixturevalue(run_dir_data)
-    time_service = request.getfixturevalue(time_service)
-    expected_time = request.getfixturevalue(expected_time)
+    run_dir_data: IlluminaRunDirectoryData = request.getfixturevalue(run_dir_data)
+    time_service: SequencingTimesService = request.getfixturevalue(time_service)
+    expected_time: datetime = request.getfixturevalue(expected_time)
 
     # WHEN retrieving the start time
     start_time: datetime = time_service.get_start_time(run_dir_data)
@@ -52,20 +67,30 @@ def test_get_sequencing_start_time(run_dir_data, time_service, expected_time, re
             "novaseq_6000_sequencing_end_time",
         ),
         (
+            "hiseq_x_single_index_flow_cell",
+            "hiseq_x_sequencing_times_service",
+            "hiseq_x_sequencing_end_time",
+        ),
+        (
             "hiseq_2500_dual_index_flow_cell",
-            "hiseq_sequencing_times_service",
-            "hiseq_sequencing_end_time",
+            "hiseq_ga_sequencing_times_service",
+            "hiseq_ga_sequencing_end_time",
         ),
     ],
 )
-def test_get_sequencing_end_time(run_dir_data, time_service, expected_time, request):
+def test_get_sequencing_end_time(
+    run_dir_data: str,
+    time_service: str,
+    expected_time: str,
+    request,
+):
     # GIVEN run directory data and a time service
-    run_dir_data = request.getfixturevalue(run_dir_data)
-    time_service = request.getfixturevalue(time_service)
-    expected_time = request.getfixturevalue(expected_time)
+    run_dir_data: IlluminaRunDirectoryData = request.getfixturevalue(run_dir_data)
+    time_service: SequencingTimesService = request.getfixturevalue(time_service)
+    expected_time: datetime = request.getfixturevalue(expected_time)
 
     # WHEN retrieving the start time
-    start_time: datetime = time_service.get_end_time(run_dir_data)
+    end_time: datetime = time_service.get_end_time(run_dir_data)
 
     # THEN the expected start time is returned
-    assert start_time == expected_time
+    assert end_time == expected_time
