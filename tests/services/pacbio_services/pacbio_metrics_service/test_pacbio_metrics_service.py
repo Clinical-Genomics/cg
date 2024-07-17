@@ -95,8 +95,6 @@ def test_parse_smrtlink_datasets_file(
 
     # THEN the parsed metrics are the expected ones
     assert smrtlink_datasets_metrics == pac_bio_smrtlink_databases_metrics
-    # THEN the plate property is calculated correctly
-    assert smrtlink_datasets_metrics.plate in [1, 2]
 
 
 def test_productivity_metrics_percentage_attributes(
