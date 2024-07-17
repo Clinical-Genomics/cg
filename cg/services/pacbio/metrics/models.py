@@ -1,12 +1,18 @@
-from pydantic import BaseModel, Field, field_validator
+import re
+from typing import Any, TypeVar
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from cg.constants.pacbio import (
     CCSAttributeIDs,
     ControlAttributeIDs,
     LoadingAttributesIDs,
     PolymeraseDataAttributeIDs,
+    SmrtLinkDatabasesIDs,
 )
 from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
+
+BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
 
 
 class HiFiMetrics(BaseModel):
@@ -101,3 +107,28 @@ class PolymeraseMetrics(BaseModel):
     _validate_longest_subread_length_n50 = field_validator(
         "longest_subread_length_n50", mode="before"
     )(divide_by_thousand_with_one_decimal)
+
+
+class SmrtlinkDatasetsMetrics(BaseModel):
+    """Model to parse metrics in the SMRTlink datasets report."""
+
+    device_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
+    well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
+    well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
+    sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
+    movie_name: str = Field(..., alias=SmrtLinkDatabasesIDs.MOVIE_NAME)
+    cell_index: int = Field(..., alias=SmrtLinkDatabasesIDs.CELL_INDEX)
+    path: str = Field(..., alias=SmrtLinkDatabasesIDs.PATH)
+    plate: int
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_plate(cls, data: Any):
+        if isinstance(data, dict):
+            path = data.get("path")
+            if path:
+                pattern = r"/([12])_[ABCD]01"
+                match = re.search(pattern, path)
+                if match:
+                    data["plate"] = match.group(1)
+        return data
