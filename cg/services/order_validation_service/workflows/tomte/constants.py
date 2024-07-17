@@ -4,7 +4,7 @@ from cg.constants.constants import DataDelivery
 
 
 class TomteDeliveryType(Enum):
-    DataDelivery.ANALYSIS_FILES,
-    DataDelivery.FASTQ,
-    DataDelivery.FASTQ_ANALYSIS,
-    DataDelivery.NO_DELIVERY,
+    ANALYSIS_FILES = DataDelivery.ANALYSIS_FILES
+    FASTQ = DataDelivery.FASTQ
+    FASTQ_ANALYSIS = DataDelivery.FASTQ_ANALYSIS
+    NO_DELIVERY = DataDelivery.NO_DELIVERY
