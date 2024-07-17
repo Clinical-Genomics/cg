@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.validators.inter_field_validators import (
-=======
 from cg.services.order_validation_service.models.errors import (
     OrderNameRequiredError,
     TicketNumberRequiredError,
@@ -9,7 +5,6 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field_validators import (
     validate_name_required_for_new_order,
->>>>>>> improve-order-flow-main
     validate_ticket_number_required_if_connected,
 )
 
@@ -24,8 +19,6 @@ def test_ticket_is_required(valid_order: Order):
 
     # THEN an error should be returned
     assert errors
-<<<<<<< HEAD
-=======
 
     # THEN the error should be about the ticket number
     assert isinstance(errors[0], TicketNumberRequiredError)
@@ -45,4 +38,3 @@ def test_order_name_is_required(valid_order: Order):
 
     # THEN the error should be about the name
     assert isinstance(errors[0], OrderNameRequiredError)
->>>>>>> improve-order-flow-main
