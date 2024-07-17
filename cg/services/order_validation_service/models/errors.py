@@ -14,9 +14,8 @@ class SampleError(OrderError):
     sample_id: str
 
 
-class CaseSampleError(OrderError):
-    sample_id: str
-    case_id: str
+class CaseSampleError(CaseError, SampleError):
+    pass
 
 
 class ValidationErrors(BaseModel):

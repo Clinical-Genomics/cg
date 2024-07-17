@@ -5,9 +5,7 @@ from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
 
 
-def apply_order_validation(
-    rules: list[Callable], order: Order, store: Store
-) -> list[OrderError]:
+def apply_order_validation(rules: list[Callable], order: Order, store: Store) -> list[OrderError]:
     errors: list[OrderError] = []
     for rule in rules:
         rule_errors: list[OrderError] = rule(order=order, store=store)
