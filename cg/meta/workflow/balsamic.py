@@ -571,7 +571,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
-                "--umi-trim-length": arguments.get("umi_trim_length"),
             },
             exclude_true=True,
         )
