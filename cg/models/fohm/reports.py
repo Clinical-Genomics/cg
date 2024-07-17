@@ -7,10 +7,10 @@ class FohmComplementaryReport(BaseModel):
     """Model for validating FOHM complementary reports."""
 
     gisaid_accession: str = Field(str, alias="GISAID_accession")
-    internal_id: str | None = None
+    internal_id: str | None = Field(None, alias="clinical_genomics_prov_id")
     sample_number: str = Field(str, alias="provnummer")
     selection_criteria: str = Field(str, alias="urvalskriterium")
-    region_lab: str | None = None
+    region_lab: str | None = Field(None, alias="region_laboratorium")
 
 
 class FohmPangolinReport(BaseModel):

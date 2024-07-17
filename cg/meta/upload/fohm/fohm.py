@@ -249,9 +249,9 @@ class FOHMUploadAPI:
                 LOG.info(region_lab_reports)
                 continue
             region_lab_reports_raw: list[dict] = [
-                report.model_dump() for report in region_lab_reports
+                report.model_dump(by_alias=True) for report in region_lab_reports
             ]
-            field_names: list[str] = sorted(region_lab_reports[0].model_dump().keys())
+            field_names: list[str] = sorted(region_lab_reports[0].model_dump(by_alias=True).keys())
             complementary_report_file = Path(
                 self.daily_report_path,
                 f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
