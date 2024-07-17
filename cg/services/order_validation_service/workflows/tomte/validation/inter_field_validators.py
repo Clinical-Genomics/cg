@@ -7,7 +7,7 @@ from cg.services.order_validation_service.workflows.tomte.models.case import Tom
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
     samples_with_cases = _get_plate_samples(order)
-    samples = _get_colliding_samples(samples_with_cases)
+    samples = _get_excess_samples(samples_with_cases)
     return _get_errors(samples)
 
 
@@ -32,15 +32,15 @@ def _is_sample_on_plate(sample: TomteSample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
-def _get_colliding_samples(
+def _get_excess_samples(
     samples_with_cases: list[tuple[TomteSample, TomteCase]]
 ) -> list[tuple[TomteSample, TomteCase]]:
     colliding_samples = []
     sample_well_map = _get_sample_well_map(samples_with_cases)
     for _, well_samples in sample_well_map.items():
         if len(well_samples) > 1:
-            samples_to_reassign = well_samples[1:]
-            colliding_samples.extend(samples_to_reassign)
+            extra_samples_in_well = well_samples[1:]
+            colliding_samples.extend(extra_samples_in_well)
     return colliding_samples
 
 
