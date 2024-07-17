@@ -39,7 +39,8 @@ def _get_colliding_samples(
     sample_well_map = _get_sample_well_map(samples_with_cases)
     for _, well_samples in sample_well_map.items():
         if len(well_samples) > 1:
-            colliding_samples.extend(well_samples[1:])
+            samples_to_reassign = well_samples[1:]
+            colliding_samples.extend(samples_to_reassign)
     return colliding_samples
 
 
