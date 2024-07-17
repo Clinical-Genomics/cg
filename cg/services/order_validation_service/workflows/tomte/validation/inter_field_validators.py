@@ -6,24 +6,22 @@ from cg.services.order_validation_service.workflows.tomte.models.case import Tom
 
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
-    plate_samples_with_cases: list[tuple[TomteSample, str]] = _get_plate_samples(order)
-    colliding_samples: list[tuple[TomteSample, str]] = _get_colliding_samples(
-        plate_samples_with_cases
-    )
-    return _get_errors(colliding_samples)
+    samples_with_cases = _get_plate_samples(order)
+    samples = _get_colliding_samples(samples_with_cases)
+    return _get_errors(samples)
 
 
-def _get_errors(colliding_samples: list[tuple[TomteSample, str]]) -> list[OccupiedWellError]:
-    errors: list[OccupiedWellError] = []
-    for sample, case_id in colliding_samples:
-        error = OccupiedWellError(sample_id=sample.internal_id, case_id=case_id)
+def _get_errors(colliding_samples: list[tuple[TomteSample, TomteCase]]) -> list[OccupiedWellError]:
+    errors = []
+    for sample, case in colliding_samples:
+        error = OccupiedWellError(sample_name=sample.name, case_name=case.name)
         errors.append(error)
     return errors
 
 
-def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, str]]:
+def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, TomteCase]]:
     return [
-        (sample, case.internal_id)
+        (sample, case)
         for case in order.cases
         for sample in case.samples
         if sample.container == ContainerEnum.plate
@@ -31,8 +29,8 @@ def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, str]]:
 
 
 def _get_colliding_samples(
-    samples_with_cases: list[tuple[TomteSample, str]]
-) -> list[tuple[TomteSample, str]]:
+    samples_with_cases: list[tuple[TomteSample, TomteCase]]
+) -> list[tuple[TomteSample, TomteCase]]:
     colliding_samples = []
     sample_well_map = _get_sample_well_map(samples_with_cases)
     for _, well_samples in sample_well_map.items():
@@ -45,8 +43,8 @@ def _get_sample_well_map(
     plate_samples_with_cases: list[tuple[TomteSample, str]]
 ) -> dict[int, list[tuple[TomteSample, str]]]:
     sample_well_map: dict[int, list[tuple[TomteSample, str]]] = {}
-    for sample, case_id in plate_samples_with_cases:
+    for sample, case in plate_samples_with_cases:
         if sample.well_position not in sample_well_map:
             sample_well_map[sample.well_position] = []
-        sample_well_map[sample.well_position].append((sample, case_id))
+        sample_well_map[sample.well_position].append((sample, case))
     return sample_well_map

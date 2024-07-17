@@ -7,11 +7,11 @@ class OrderError(BaseModel):
 
 
 class CaseError(OrderError):
-    case_id: str
+    case_name: str
 
 
 class SampleError(OrderError):
-    sample_id: str
+    sample_name: str
 
 
 class CaseSampleError(CaseError, SampleError):
@@ -51,4 +51,5 @@ class OrderNameRequiredError(OrderError):
 
 
 class OccupiedWellError(CaseSampleError):
+    field: str = "well_position"
     message: str = "Well is already occupied"
