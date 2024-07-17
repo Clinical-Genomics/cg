@@ -24,8 +24,12 @@ def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, TomteCase]]
         (sample, case)
         for case in order.cases
         for sample in case.samples
-        if sample.container == ContainerEnum.plate
+        if _is_sample_on_plate(sample)
     ]
+
+
+def _is_sample_on_plate(sample: TomteSample) -> bool:
+    return sample.container == ContainerEnum.plate
 
 
 def _get_colliding_samples(
@@ -39,10 +43,8 @@ def _get_colliding_samples(
     return colliding_samples
 
 
-def _get_sample_well_map(
-    plate_samples_with_cases: list[tuple[TomteSample, str]]
-) -> dict[int, list[tuple[TomteSample, str]]]:
-    sample_well_map: dict[int, list[tuple[TomteSample, str]]] = {}
+def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, str]]):
+    sample_well_map: dict[str, tuple[TomteSample, TomteCase]] = {}
     for sample, case in plate_samples_with_cases:
         if sample.well_position not in sample_well_map:
             sample_well_map[sample.well_position] = []
