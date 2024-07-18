@@ -18,6 +18,7 @@ class Chanjo2APIClient:
     """
 
     def __init__(self, config: dict[str, str]):
+        self.headers = {"Content-Type": "application/json"}
         self.host = config["chanjo2"]["host"]
 
     def get_coverage(self, coverage_request: CoverageRequest) -> CoverageData | None:
@@ -25,7 +26,7 @@ class Chanjo2APIClient:
         endpoint: str = f"{self.host}/coverage/d4/genes/summary"
         post_data: dict[str, Any] = coverage_request.model_dump()
         try:
-            response = requests.post(endpoint, data=post_data)
+            response = requests.post(url=endpoint, headers=self.headers, data=post_data)
             response.raise_for_status()
             coverage_data = next(iter(response.json().values()), None)
             return CoverageData(**coverage_data)
