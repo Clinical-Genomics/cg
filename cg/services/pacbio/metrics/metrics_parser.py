@@ -70,3 +70,7 @@ class MetricsParser:
         parsed_json: dict = ReadFile.read_file[FileFormat.JSON](self.smrtlink_datasets_report_file)
         data: dict = parsed_json[0]
         return SmrtlinkDatasetsMetrics.model_validate(data, from_attributes=True)
+
+    def get_hifi_metrics(self) -> HiFiMetrics:
+        """Return the HiFi metrics."""
+        return self.hifi_metrics
