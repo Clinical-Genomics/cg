@@ -109,3 +109,14 @@ def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
         subdir = Path(subdir).relative_to(directory)
         files_in_directory.extend([Path(subdir, file) for file in files])
     return files_in_directory
+
+
+def get_source_modified_time_stamp(source_path: Path) -> float:
+    """
+    Return time stamp that a source is modified. Works for files and directories.
+    Raises:
+        FileNotFoundError if the source does not exist.
+    """
+    if not source_path.exists():
+        raise FileNotFoundError(f"Directory with path {source_path} is not found.")
+    return os.stat(source_path).st_mtime
