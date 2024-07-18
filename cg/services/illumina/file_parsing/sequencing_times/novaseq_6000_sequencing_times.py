@@ -1,4 +1,4 @@
-"""Module to get the sequencing completed service."""
+"""Module for the NovaSeq6000 sequencing times service."""
 
 from datetime import datetime
 from pathlib import Path

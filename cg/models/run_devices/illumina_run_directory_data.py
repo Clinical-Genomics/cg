@@ -95,7 +95,7 @@ class IlluminaRunDirectoryData:
         )
 
     @property
-    def get_sequencing_completed_path(self) -> Path:
+    def get_sequencing_completed_path(self) -> Path | None:
         """Return the path to the sequencing completed file."""
         sequencing_completed_paths: dict = {
             Sequencers.NOVASEQ: Path(
