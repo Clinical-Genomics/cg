@@ -12,7 +12,7 @@ from cg.utils.files import get_source_modified_time_stamp
 from cg.utils.time import format_time_from_ctime
 
 
-class Novaseq6000SequencingTimesService((SequencingTimesService)):
+class Novaseq6000SequencingTimesService(SequencingTimesService):
     """Class to get the modified time of the SequenceComplete.txt for novaseq 6000 sequencing runs."""
 
     @staticmethod
