@@ -6,8 +6,8 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina.file_parsing.sequencing_times.collect_sequencing_times import (
     CollectSequencingTimes,
 )
-from cg.services.illumina.file_parsing.sequencing_times.hiseq_ga_sequencing_times_service import (
-    HiseqGASequencingTimesService,
+from cg.services.illumina.file_parsing.sequencing_times.hiseq_2500_sequencing_times_service import (
+    Hiseq2500SequencingTimesService,
 )
 from cg.services.illumina.file_parsing.sequencing_times.hiseq_x_sequencing_times_service import (
     HiseqXSequencingTimesService,
@@ -29,7 +29,7 @@ from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service 
         ("novaseq_x_flow_cell", NovaseqXSequencingTimesService),
         ("novaseq_6000_pre_1_5_kits_flow_cell", Novaseq6000SequencingTimesService),
         ("hiseq_x_single_index_flow_cell", HiseqXSequencingTimesService),
-        ("hiseq_2500_dual_index_flow_cell", HiseqGASequencingTimesService),
+        ("hiseq_2500_dual_index_flow_cell", Hiseq2500SequencingTimesService),
     ],
 )
 def test_collect_sequencing_time_get_service(

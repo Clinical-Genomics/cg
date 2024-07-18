@@ -113,7 +113,7 @@ def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
 
 def get_source_modified_time_stamp(source_path: Path) -> float:
     """
-    Return time stamp that a source is created.
+    Return time stamp that a source is modified. Works for files and directories.
     Raises:
         FileNotFoundError if the source does not exist.
     """

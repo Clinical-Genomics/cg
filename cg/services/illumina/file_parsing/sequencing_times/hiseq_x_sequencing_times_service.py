@@ -1,14 +1,17 @@
-"""Module for the hiseq sequencers sequencing times service."""
+"""Module for the hiseq x sequencing times service."""
 
 from datetime import datetime
 from pathlib import Path
 
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
+    SequencingTimesService,
+)
 from cg.utils.files import get_source_modified_time_stamp
 from cg.utils.time import format_time_from_ctime
 
 
-class HiseqXSequencingTimesService:
+class HiseqXSequencingTimesService(SequencingTimesService):
 
     @staticmethod
     def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:

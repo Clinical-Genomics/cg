@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina.file_parsing.sequencing_times.hiseq_ga_sequencing_times_service import (
-    HiseqGASequencingTimesService,
+from cg.services.illumina.file_parsing.sequencing_times.hiseq_2500_sequencing_times_service import (
+    Hiseq2500SequencingTimesService,
 )
 
 from cg.services.illumina.file_parsing.sequencing_times.hiseq_x_sequencing_times_service import (
@@ -79,19 +79,19 @@ def hiseq_x_sequencing_end_time(
 
 
 @pytest.fixture
-def hiseq_ga_sequencing_times_service() -> HiseqGASequencingTimesService:
-    return HiseqGASequencingTimesService()
+def hiseq_2500_sequencing_times_service() -> Hiseq2500SequencingTimesService:
+    return Hiseq2500SequencingTimesService()
 
 
 @pytest.fixture
-def hiseq_ga_sequencing_start_time(
+def hiseq_2500_sequencing_start_time(
     hiseq_2500_dual_index_flow_cell: IlluminaRunDirectoryData,
 ) -> datetime:
     return hiseq_2500_dual_index_flow_cell.sequenced_at
 
 
 @pytest.fixture
-def hiseq_ga_sequencing_end_time(
+def hiseq_2500_sequencing_end_time(
     hiseq_2500_dual_index_flow_cell: IlluminaRunDirectoryData,
 ) -> datetime:
     return hiseq_2500_dual_index_flow_cell.sequenced_at

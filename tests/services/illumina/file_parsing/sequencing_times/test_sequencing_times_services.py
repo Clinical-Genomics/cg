@@ -30,8 +30,8 @@ from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service 
         ),
         (
             "hiseq_2500_dual_index_flow_cell",
-            "hiseq_ga_sequencing_times_service",
-            "hiseq_ga_sequencing_start_time",
+            "hiseq_2500_sequencing_times_service",
+            "hiseq_2500_sequencing_start_time",
         ),
     ],
 )
@@ -73,8 +73,8 @@ def test_get_sequencing_start_time(
         ),
         (
             "hiseq_2500_dual_index_flow_cell",
-            "hiseq_ga_sequencing_times_service",
-            "hiseq_ga_sequencing_end_time",
+            "hiseq_2500_sequencing_times_service",
+            "hiseq_2500_sequencing_end_time",
         ),
     ],
 )

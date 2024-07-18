@@ -1,10 +1,13 @@
-"""Module to get the sequencing completed service."""
+"""Module for the hiseq 2500 sequencing times service."""
 
 from datetime import datetime
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
+    SequencingTimesService,
+)
 
 
-class HiseqGASequencingTimesService:
+class Hiseq2500SequencingTimesService(SequencingTimesService):
     """Class to get the modified time of the SequenceComplete.txt for novaseq 6000 sequencing runs."""
 
     @staticmethod

@@ -4,12 +4,15 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
+    SequencingTimesService,
+)
 
 from cg.utils.files import get_source_modified_time_stamp
 from cg.utils.time import format_time_from_ctime
 
 
-class Novaseq6000SequencingTimesService:
+class Novaseq6000SequencingTimesService((SequencingTimesService)):
     """Class to get the modified time of the SequenceComplete.txt for novaseq 6000 sequencing runs."""
 
     @staticmethod

@@ -2,8 +2,8 @@
 
 from cg.constants.sequencing import Sequencers
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina.file_parsing.sequencing_times.hiseq_ga_sequencing_times_service import (
-    HiseqGASequencingTimesService,
+from cg.services.illumina.file_parsing.sequencing_times.hiseq_2500_sequencing_times_service import (
+    Hiseq2500SequencingTimesService,
 )
 from cg.services.illumina.file_parsing.sequencing_times.hiseq_x_sequencing_times_service import (
     HiseqXSequencingTimesService,
@@ -28,7 +28,7 @@ class CollectSequencingTimes:
             Sequencers.NOVASEQX: NovaseqXSequencingTimesService,
             Sequencers.NOVASEQ: Novaseq6000SequencingTimesService,
             Sequencers.HISEQX: HiseqXSequencingTimesService,
-            Sequencers.HISEQGA: HiseqGASequencingTimesService,
+            Sequencers.HISEQGA: Hiseq2500SequencingTimesService,
         }
         return sequencer_times_services[run_directory_data.sequencer_type]
 
