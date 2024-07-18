@@ -15,7 +15,7 @@ from xml.etree.ElementTree import ElementTree
 
 
 class NovaseqXSequencingTimesService(SequencingTimesService):
-    """Service get the Novaseqx start and end times for the sequencing run."""
+    """Class to get the sequencing times for NovaSeqX sequencing runs."""
 
     @staticmethod
     def get_start_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:

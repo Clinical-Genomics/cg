@@ -12,6 +12,7 @@ from cg.utils.time import format_time_from_ctime
 
 
 class HiseqXSequencingTimesService(SequencingTimesService):
+    """Class to get the sequencing times for HiSeqX sequencing runs."""
 
     @staticmethod
     def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:

@@ -13,7 +13,7 @@ from cg.utils.time import format_time_from_ctime
 
 
 class Novaseq6000SequencingTimesService(SequencingTimesService):
-    """Class to get the modified time of the SequenceComplete.txt for novaseq 6000 sequencing runs."""
+    """Class to get the sequencing times for NovaSeq6000 sequencing runs."""
 
     @staticmethod
     def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:

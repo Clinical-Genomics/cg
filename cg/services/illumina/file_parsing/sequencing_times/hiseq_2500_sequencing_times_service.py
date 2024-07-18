@@ -8,7 +8,7 @@ from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service 
 
 
 class Hiseq2500SequencingTimesService(SequencingTimesService):
-    """Class to get the modified time of the SequenceComplete.txt for novaseq 6000 sequencing runs."""
+    """Class to get the sequencing times for HiSeq2500 sequencing runs."""
 
     @staticmethod
     def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
