@@ -11,11 +11,11 @@ class Hiseq2500SequencingTimesService(SequencingTimesService):
     """Class to get the sequencing times for HiSeq2500 sequencing runs."""
 
     @staticmethod
-    def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
-        """Get the sequencer end date and time."""
+    def get_start_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
+        """Get the sequencer start date and time."""
         return run_directory_data.sequenced_at
 
     @staticmethod
-    def get_start_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
-        """Get the sequencer start date and time."""
+    def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
+        """Get the sequencer end date and time."""
         return run_directory_data.sequenced_at
