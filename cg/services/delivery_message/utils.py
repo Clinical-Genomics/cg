@@ -16,6 +16,7 @@ from cg.services.delivery_message.messages import (
 )
 from cg.services.delivery_message.messages.analysis_message import AnalysisMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
+from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
@@ -48,6 +49,7 @@ message_map = {
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: ScoutMessage,
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
     DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
     DataDelivery.STATINA: StatinaMessage,
