@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
-from cg.store.models import Base, Sample
+from cg.store.models import Base
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -42,10 +42,3 @@ class Submitter(ABC):
                 internal_id = lims_map[sample["name"]]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
-
-    def _add_missing_reads(self, samples: list[Sample]):
-        """Add expected reads/reads missing."""
-        for sample_obj in samples:
-            LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
-            target_reads = sample_obj.application_version.application.target_reads / 1000000
-            self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)

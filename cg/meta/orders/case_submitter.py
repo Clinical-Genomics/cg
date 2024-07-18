@@ -96,23 +96,15 @@ class CaseSubmitter(Submitter):
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self._process_case_samples(order=order)
-        for case_obj in result["records"]:
-            LOG.info(f"{case_obj.name}: submit family samples")
-            status_samples = [
-                link_obj.sample
-                for link_obj in case_obj.links
-                if link_obj.sample.original_ticket == order.ticket
-            ]
-            self._add_missing_reads(status_samples)
+        for case in result["records"]:
+            LOG.info(f"{case.name}: submit case samples")
         return result
 
     def _process_case_samples(self, order: OrderIn) -> dict:
         """Process samples to be analyzed."""
         project_data = lims_map = None
 
-        # submit new samples to lims
-        new_samples = [sample for sample in order.samples if sample.internal_id is None]
-        if new_samples:
+        if new_samples := [sample for sample in order.samples if sample.internal_id is None]:
             project_data, lims_map = process_lims(
                 lims_api=self.lims, lims_order=order, new_samples=new_samples
             )
