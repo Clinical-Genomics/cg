@@ -40,8 +40,8 @@ def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir: Path) -> Path:
 
 @pytest.fixture
 def pac_bio_run_reports_dir(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio SMRT cell reports directory"""
-    return Path(pac_bio_run_statistics_dir, "reports")
+    """Return the path to the PacBio SMRT cell zipped_reports directory"""
+    return Path(pac_bio_run_statistics_dir, "zipped_reports")
 
 
 # File fixtures

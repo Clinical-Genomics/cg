@@ -132,3 +132,9 @@ class SmrtlinkDatasetsMetrics(BaseModel):
                 if match:
                     data["plate"] = match.group(1)
         return data
+
+
+class FailedReadsMetrics(BaseModel):
+    """Model to parse the failed reads metrics from the unzipped CSS report."""
+
+    pass
