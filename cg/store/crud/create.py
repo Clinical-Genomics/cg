@@ -5,10 +5,10 @@ import petname
 from sqlalchemy import Insert
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
@@ -26,7 +26,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -36,7 +35,6 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
     order_case,
 )
@@ -260,25 +258,6 @@ class CreateHandler(BaseHandler):
         new_record.father = father
         return new_record
 
-    def add_flow_cell(
-        self,
-        flow_cell_name: str,
-        sequencer_name: str,
-        sequencer_type: str,
-        date: datetime,
-        flow_cell_status: str | None = FlowCellStatus.ON_DISK,
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Build a new Flowcell record."""
-        return Flowcell(
-            name=flow_cell_name,
-            sequencer_name=sequencer_name,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
-            status=flow_cell_status,
-            has_backup=has_backup,
-        )
-
     def add_analysis(
         self,
         workflow: Workflow,
@@ -395,16 +374,6 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
-    ) -> SampleLaneSequencingMetrics:
-        """Add a new SampleLaneSequencingMetrics record."""
-        return SampleLaneSequencingMetrics(
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
-            **kwargs,
-        )
-
     def add_order(self, order_data: OrderIn):
         customer: Customer = self.get_customer_by_internal_id(order_data.customer)
         workflow: str = order_data.samples[0].data_analysis
@@ -435,7 +404,7 @@ class CreateHandler(BaseHandler):
             model=flow_cell_dto.model,
         )
         self.session.add(new_flow_cell)
-        LOG.debug(f"Flow cell added to status db: {new_flow_cell.id}.")
+        LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
         return new_flow_cell
 
     def add_illumina_sequencing_run(
@@ -466,7 +435,7 @@ class CreateHandler(BaseHandler):
             demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
         )
         self.session.add(new_sequencing_run)
-        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
+        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.device.internal_id}.")
         return new_sequencing_run
 
     def add_illumina_sample_metrics_entry(

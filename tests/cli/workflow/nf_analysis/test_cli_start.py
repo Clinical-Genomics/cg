@@ -12,7 +12,7 @@ from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from tests.cli.workflow.conftest import mock_analysis_flow_cell
+from tests.cli.workflow.conftest import mock_analysis_illumina_run
 
 
 @pytest.mark.parametrize(
@@ -23,7 +23,7 @@ def test_start(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     request: FixtureRequest,
     mocker,
 ):
@@ -62,7 +62,7 @@ def test_start_available(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     mocker,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     request: FixtureRequest,
     case_id_not_enough_reads: str,
 ):

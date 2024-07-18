@@ -346,14 +346,15 @@ class ReportAPI(MetaAPI):
         return DataAnalysisModel(
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
+            delivered_files=delivered_files,
+            genome_build=self.analysis_api.get_genome_build(case.internal_id),
+            panels=case.panels,
+            pons=self.analysis_api.get_pons(case.internal_id),
+            scout_files=self.get_scout_uploaded_files(case.internal_id),
+            type=self.analysis_api.get_data_analysis_type(case.internal_id),
+            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.analysis_api.get_data_analysis_type(case.internal_id),
-            genome_build=self.analysis_api.get_genome_build(case.internal_id),
-            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
-            panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case.internal_id),
-            delivered_files=delivered_files,
         )
 
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:

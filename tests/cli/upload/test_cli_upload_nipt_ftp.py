@@ -20,7 +20,7 @@ def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplo
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value")
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value")
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
@@ -39,7 +39,7 @@ def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, c
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value")
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value")
     result = cli_runner.invoke(nipt_upload_case, ["--dry-run", case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
@@ -57,7 +57,7 @@ def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value")
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value")
     result = cli_runner.invoke(nipt_upload_all, obj=upload_context)
 
     # THEN the NIPT upload should start and exit without errors
@@ -75,7 +75,7 @@ def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, ca
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value")
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value")
     result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN the NIPT upload should start and exit without errors
@@ -100,7 +100,7 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value")
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value")
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN set analysis.upload_started_at in the database

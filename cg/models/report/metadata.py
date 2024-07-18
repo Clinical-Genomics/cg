@@ -48,8 +48,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            mean_insert_size: mean insert size of the distribution; source: workflow
-            fold_80: fold 80 base penalty; source: workflow
+        mean_insert_size: mean insert size of the distribution; source: workflow
+        fold_80: fold 80 base penalty; source: workflow
     """
 
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -60,28 +60,29 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            bait_set: panel bed used for the analysis; source: LIMS
-            bait_set_version: panel bed version; source: workflow
-            median_target_coverage: median coverage of a target region in bases; source: workflow
-            pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
-            pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
+        bait_set: panel bed used for the analysis; source: LIMS
+        bait_set_version: panel bed version; source: workflow
+        median_target_coverage: median coverage of a target region in bases; source: workflow
+        pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
+        pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            median_coverage: median coverage in bases of the genome territory; source: workflow
-            pct_15x: fraction of bases that attained at least 15X sequence coverage; source: workflow
-            pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        median_coverage: median coverage in bases of the genome territory; source: workflow
+        pct_15x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
 
     median_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
