@@ -63,24 +63,22 @@ class ProductivityMetrics(BaseModel):
     p_0: int = Field(..., alias=LoadingAttributesIDs.P_0)
     p_1: int = Field(..., alias=LoadingAttributesIDs.P_1)
     p_2: int = Field(..., alias=LoadingAttributesIDs.P_2)
+    percentage_p_0: float
+    percentage_p_1: float
+    percentage_p_2: float
 
-    @property
-    def percentage_p_0(self) -> float:
-        return self._calculate_percentage(self.p_0)
-
-    @property
-    def percentage_p_1(self) -> float:
-        return self._calculate_percentage(self.p_1)
-
-    @property
-    def percentage_p_2(self) -> float:
-        return self._calculate_percentage(self.p_2)
-
-    def _calculate_percentage(self, value: int) -> float:
-        """Calculates the percentage of a value to productive_zmws."""
-        if self.productive_zmws == 0:
-            return 0.0
-        return round((value / self.productive_zmws) * 100, 0)
+    @model_validator(mode="before")
+    @classmethod
+    def set_percentages(cls, data: Any):
+        if isinstance(data, dict):
+            productive_zmws = data.get(LoadingAttributesIDs.PRODUCTIVE_ZMWS)
+            p_0 = data.get(LoadingAttributesIDs.P_0)
+            p_1 = data.get(LoadingAttributesIDs.P_1)
+            p_2 = data.get(LoadingAttributesIDs.P_2)
+            data["percentage_p_0"] = round((p_0 / productive_zmws) * 100, 0)
+            data["percentage_p_1"] = round((p_1 / productive_zmws) * 100, 0)
+            data["percentage_p_2"] = round((p_2 / productive_zmws) * 100, 0)
+        return data
 
 
 class PolymeraseMetrics(BaseModel):
