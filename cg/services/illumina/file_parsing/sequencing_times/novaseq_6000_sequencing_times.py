@@ -19,7 +19,7 @@ class Novaseq6000SequencingTimesService((SequencingTimesService)):
     def get_end_time(run_directory_data: IlluminaRunDirectoryData) -> datetime:
         """Get the sequencer end date and time."""
         file_path: Path = run_directory_data.get_sequencing_completed_path
-        modified_time = get_source_modified_time_stamp(file_path)
+        modified_time: float = get_source_modified_time_stamp(file_path)
         return format_time_from_ctime(modified_time)
 
     @staticmethod
