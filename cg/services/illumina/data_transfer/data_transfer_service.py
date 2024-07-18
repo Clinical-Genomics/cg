@@ -127,7 +127,7 @@ class IlluminaDataTransferService:
         sequencing_started_at: datetime = collect_sequencing_times.get_start_time(
             run_directory_data=demultiplexed_run_dir
         )
-        sequencing_completed_at: datetime = collect_sequencing_times.get_start_time(
+        sequencing_completed_at: datetime = collect_sequencing_times.get_end_time(
             run_directory_data=demultiplexed_run_dir
         )
         demultiplexing_started_at: datetime = demultiplexed_run_dir.demultiplexing_started_at
