@@ -55,10 +55,10 @@ message_map = {
 
 
 def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
-    if has_mwx_samples(case):
+    if has_mwx_samples(case) or has_vwg_samples(case):
         return MicrosaltMwxMessage()
 
-    if has_mwr_samples(case) or has_vwg_samples(case):
+    if has_mwr_samples(case):
         return MicrosaltMwrMessage()
 
     app_tag: str = get_case_app_tag(case)
