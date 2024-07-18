@@ -1,4 +1,4 @@
-"""Module for the Novaseq x sequencing times service."""
+"""Module for the NovaSeqX sequencing times service."""
 
 from datetime import datetime
 from pathlib import Path

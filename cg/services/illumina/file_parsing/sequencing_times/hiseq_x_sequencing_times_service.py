@@ -1,4 +1,4 @@
-"""Module for the hiseq x sequencing times service."""
+"""Module for the HiSeqX sequencing times service."""
 
 from datetime import datetime
 from pathlib import Path
