@@ -8,7 +8,7 @@ GENOME_BUILD_37: str = "37"
 GENOME_BUILD_38: str = "GRCh38"
 
 
-class GenomeReferenceBuild(StrEnum):
+class ReferenceGenomeBuild(StrEnum):
     GRCH37: str = "GRCh37"
     GRCH38: str = "GRCh38"
 

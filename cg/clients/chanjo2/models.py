@@ -2,8 +2,6 @@
 
 from pydantic import BaseModel
 
-from cg.constants.gene_panel import GenomeReferenceBuild
-
 
 class Sample(BaseModel):
     """Chanjo2 sample model defined with an ID and a coverage file path."""
@@ -15,7 +13,7 @@ class Sample(BaseModel):
 class CoverageRequest(BaseModel):
     """Chanjo2 coverage POST request model."""
 
-    build: GenomeReferenceBuild
+    build: str
     coverage_threshold: int
     gene_ids: list[int]
     interval_type: str
