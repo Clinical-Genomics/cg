@@ -63,9 +63,9 @@ class ProductivityMetrics(BaseModel):
     p_0: int = Field(..., alias=LoadingAttributesIDs.P_0)
     p_1: int = Field(..., alias=LoadingAttributesIDs.P_1)
     p_2: int = Field(..., alias=LoadingAttributesIDs.P_2)
-    percentage_p_0: float
-    percentage_p_1: float
-    percentage_p_2: float
+    percent_p_0: float
+    percent_p_1: float
+    percent_p_2: float
 
     @model_validator(mode="before")
     @classmethod
@@ -110,7 +110,7 @@ class PolymeraseMetrics(BaseModel):
 class SmrtlinkDatasetsMetrics(BaseModel):
     """Model to parse metrics in the SMRTlink datasets report."""
 
-    device_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
+    cell_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
     well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
     well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
     sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
@@ -130,3 +130,41 @@ class SmrtlinkDatasetsMetrics(BaseModel):
                 if match:
                     data["plate"] = match.group(1)
         return data
+
+
+class PacBioMetrics(BaseModel):
+    """Model that holds all relevant PacBio metrics."""
+
+    device_internal_id: str
+    well: str
+    well_sample_name: str
+    sample_internal_id: str
+    movie_name: str
+    cell_index: int
+    plate: int
+
+    hifi_reads: int
+    hifi_yield: int
+    hifi_mean_read_length: float
+    hifi_median_read_length: int
+    hifi_mean_length_n50: int
+    hifi_median_read_quality: str
+    percent_q30: float
+
+    control_reads: int
+    control_mean_read_length: float
+    control_mean_concordance_reads: float
+    control_mode_concordance_reads: float
+
+    productive_zmws: int
+    p_0: int
+    p_1: int
+    p_2: int
+    percent_p_0: float
+    percent_p_1: float
+    percent_p_2: float
+
+    polymerase_mean_read_length: float
+    polymerase_read_length_n50: float
+    polymerase_mean_longest_subread_length: float
+    polymerase_longest_subread_length_n50: float

@@ -4,7 +4,7 @@ from typing import Type
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.services.pacbio.metrics.metrics_parser import MetricsParser
+from cg.services.pacbio.metrics.metrics_parser import PacBioMetricsParser
 from cg.services.pacbio.metrics.models import (
     BaseMetrics,
     ControlMetrics,
@@ -20,7 +20,7 @@ def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
     # GIVEN a PacBio SMRT cell path
 
     # WHEN initialising the metrics parser
-    parser = MetricsParser(smrt_cell_path=pac_bio_smrt_cell_dir)
+    parser = PacBioMetricsParser(smrt_cell_path=pac_bio_smrt_cell_dir)
 
     # THEN the parser is initialised with the expected attributes
     assert isinstance(parser.hifi_metrics, HiFiMetrics)
@@ -41,7 +41,7 @@ def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
     ids=["Control", "Hi-Fi", "Polymerase", "Productivity"],
 )
 def test_parse_report_to_model(
-    pac_bio_metrics_parser: MetricsParser,
+    pac_bio_metrics_parser: PacBioMetricsParser,
     report_file_path: str,
     model: Type[BaseMetrics],
     metrics_fixture: str,
@@ -57,7 +57,7 @@ def test_parse_report_to_model(
     expected_metrics: BaseMetrics = request.getfixturevalue(metrics_fixture)
 
     # WHEN parsing the attributes to a given metrics model
-    parsed_metrics: BaseMetrics = pac_bio_metrics_parser.parse_report_to_model(
+    parsed_metrics: BaseMetrics = pac_bio_metrics_parser._parse_report_to_model(
         report_file=report_file, data_model=model
     )
 
@@ -66,7 +66,7 @@ def test_parse_report_to_model(
 
 
 def test_parse_smrtlink_datasets_file(
-    pac_bio_metrics_parser: MetricsParser,
+    pac_bio_metrics_parser: PacBioMetricsParser,
     pac_bio_smrtlink_databases_metrics: SmrtlinkDatasetsMetrics,
 ):
     """Test to parse the SMRTlink datasets file."""
@@ -74,7 +74,7 @@ def test_parse_smrtlink_datasets_file(
 
     # WHEN parsing the SMRTlink datasets file
     smrtlink_datasets_metrics: SmrtlinkDatasetsMetrics = (
-        pac_bio_metrics_parser.parse_smrtlink_datasets_file()
+        pac_bio_metrics_parser._parse_smrtlink_datasets_file()
     )
 
     # THEN the parsed metrics are the expected ones
