@@ -135,36 +135,8 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 class PacBioMetrics(BaseModel):
     """Model that holds all relevant PacBio metrics."""
 
-    device_internal_id: str
-    well: str
-    well_sample_name: str
-    sample_internal_id: str
-    movie_name: str
-    cell_index: int
-    plate: int
-
-    hifi_reads: int
-    hifi_yield: int
-    hifi_mean_read_length: float
-    hifi_median_read_length: int
-    hifi_mean_length_n50: int
-    hifi_median_read_quality: str
-    percent_q30: float
-
-    control_reads: int
-    control_mean_read_length: float
-    control_mean_concordance_reads: float
-    control_mode_concordance_reads: float
-
-    productive_zmws: int
-    p_0: int
-    p_1: int
-    p_2: int
-    percent_p_0: float
-    percent_p_1: float
-    percent_p_2: float
-
-    polymerase_mean_read_length: float
-    polymerase_read_length_n50: float
-    polymerase_mean_longest_subread_length: float
-    polymerase_longest_subread_length_n50: float
+    hifi_metrics: HiFiMetrics
+    control_metrics: ControlMetrics
+    productivity_metrics: ProductivityMetrics
+    polymerase_metrics: PolymeraseMetrics
+    dataset_metrics: SmrtlinkDatasetsMetrics
