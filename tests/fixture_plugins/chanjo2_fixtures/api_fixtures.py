@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
+import requests
 
 from cg.clients.chanjo2.api import Chanjo2APIClient
 
@@ -14,7 +15,7 @@ def chanjo2_api_client(context_config: dict[str, Any]) -> Chanjo2APIClient:
 
 
 @pytest.fixture
-def json_coverage_post_response(sample_id: str) -> dict[str, float]:
+def coverage_post_response_json(sample_id: str) -> dict[str, float]:
     return {
         sample_id: {
             "mean_coverage": 55.55,
@@ -24,7 +25,14 @@ def json_coverage_post_response(sample_id: str) -> dict[str, float]:
 
 
 @pytest.fixture
-def successful_coverage_post_response(json_coverage_post_response: dict[str, float]) -> Mock:
+def coverage_post_response_success(coverage_post_response_json: dict[str, float]) -> Mock:
     post_response = Mock()
-    post_response.json.return_value = json_coverage_post_response
+    post_response.json.return_value = coverage_post_response_json
+    return post_response
+
+
+@pytest.fixture
+def coverage_post_response_exception() -> Mock:
+    post_response = Mock()
+    post_response.raise_for_status.side_effect = requests.HTTPError("An error occurred")
     return post_response
