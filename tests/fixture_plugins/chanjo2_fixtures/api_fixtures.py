@@ -36,3 +36,10 @@ def coverage_post_response_exception() -> Mock:
     post_response = Mock()
     post_response.raise_for_status.side_effect = requests.HTTPError("An error occurred")
     return post_response
+
+
+@pytest.fixture
+def coverage_post_response_empty() -> Mock:
+    post_response = Mock()
+    post_response.json.return_value = {}
+    return post_response

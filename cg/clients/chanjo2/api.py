@@ -28,8 +28,11 @@ class Chanjo2APIClient:
         try:
             response = requests.post(url=endpoint, headers=self.headers, data=post_data)
             response.raise_for_status()
-            coverage_data = next(iter(response.json().values()))
-            return CoverageData(**coverage_data)
+            response_content: dict[str, Any] = response.json().values()
+            if not response_content:
+                LOG.error("The POST get coverage response is empty")
+                return None
+            return CoverageData(**next(iter(response_content)))
         except (requests.RequestException, ValueError, ValidationError) as error:
             LOG.error(f"Error during coverage POST request: {error}")
             return None
