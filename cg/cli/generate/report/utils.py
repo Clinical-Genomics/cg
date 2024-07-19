@@ -14,6 +14,7 @@ from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.report.raredisease import RarediseaseReportAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.meta.report.taxprofiler import TaxprofilerReportAPI
@@ -97,6 +98,9 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
         ),
         Workflow.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+        ),
+        Workflow.RAREDISEASE: RarediseaseReportAPI(
+            config=context.obj, analysis_api=RarediseaseReportAPI(config=context.obj)
         ),
         Workflow.RNAFUSION: RnafusionReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
