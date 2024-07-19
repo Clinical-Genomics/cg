@@ -1,20 +1,15 @@
 from enum import StrEnum
 
-from pydantic import BaseModel
-
+from cg.constants.constants import SexOptions
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
 
-class RarediseaseQCMetrics(BaseModel):
-    """Raredisease QC metrics"""
+class RarediseaseQCMetrics(QCMetrics):
+    """Raredisease QC metrics."""
 
-    percentage_mapped_reads: float | None
-    pct_target_bases_10x: float | None
-    median_target_coverage: float | None
-    pct_pf_reads_aligned: float | None
-    pct_pf_reads_improper_pairs: float | None
-    pct_adapter: float | None
-    fraction_duplicates: float | None
+    predicted_sex_sex_check: SexOptions
+    # TODO: identify metrics of interest
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
