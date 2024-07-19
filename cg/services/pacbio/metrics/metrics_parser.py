@@ -19,32 +19,6 @@ from cg.utils.files import get_file_in_directory
 class PacBioMetricsParser:
     """Class for parsing PacBio sequencing metrics."""
 
-    def __init__(self) -> None:
-        self.base_calling_report_file: Path | None = None
-        self.control_report_file: Path | None = None
-        self.loading_report_file: Path | None = None
-        self.raw_data_report_file: Path | None = None
-        self.smrtlink_datasets_report_file: Path | None = None
-
-    def _set_report_paths(self, smrt_cell_path: Path) -> None:
-        """Set the paths for all the sequencing reports."""
-        report_dir = Path(smrt_cell_path, "statistics")
-        self.base_calling_report_file: Path = get_file_in_directory(
-            directory=report_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
-        )
-        self.control_report_file: Path = get_file_in_directory(
-            directory=report_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
-        )
-        self.loading_report_file: Path = get_file_in_directory(
-            directory=report_dir, file_name=PacBioDirsAndFiles.LOADING_REPORT
-        )
-        self.raw_data_report_file: Path = get_file_in_directory(
-            directory=report_dir, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
-        )
-        self.smrtlink_datasets_report_file: Path = get_file_in_directory(
-            directory=report_dir, file_name=PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT
-        )
-
     @staticmethod
     def _parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> BaseMetrics:
         """Parse the metrics report to a data model."""
@@ -53,48 +27,68 @@ class PacBioMetricsParser:
         data: dict = {report_field["id"]: report_field["value"] for report_field in metrics}
         return data_model.model_validate(data, from_attributes=True)
 
-    def _parse_smrtlink_datasets_file(self) -> SmrtlinkDatasetsMetrics:
+    @staticmethod
+    def _parse_smrtlink_datasets_file(
+        smrtlink_datasets_report_file: Path,
+    ) -> SmrtlinkDatasetsMetrics:
         """Parse the SMRTlink datasets report file."""
-        parsed_json: dict = ReadFile.read_file[FileFormat.JSON](self.smrtlink_datasets_report_file)
+        parsed_json: dict = ReadFile.read_file[FileFormat.JSON](smrtlink_datasets_report_file)
         data: dict = parsed_json[0]
         return SmrtlinkDatasetsMetrics.model_validate(data, from_attributes=True)
 
-    def _get_hifi_metrics(self) -> HiFiMetrics:
+    def _get_hifi_metrics(self, reports_dir: Path) -> HiFiMetrics:
         """Return the parsed Hi-Fi metrics in a metrics Pydantic object."""
+        base_calling_report_file: Path = get_file_in_directory(
+            directory=reports_dir, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
+        )
         return self._parse_report_to_model(
-            report_file=self.base_calling_report_file, data_model=HiFiMetrics
+            report_file=base_calling_report_file, data_model=HiFiMetrics
         )
 
-    def _get_control_metrics(self) -> ControlMetrics:
+    def _get_control_metrics(self, reports_dir: Path) -> ControlMetrics:
         """Return the parsed Control metrics in a metrics Pydantic object."""
+        control_report_file: Path = get_file_in_directory(
+            directory=reports_dir, file_name=PacBioDirsAndFiles.CONTROL_REPORT
+        )
         return self._parse_report_to_model(
-            report_file=self.control_report_file, data_model=ControlMetrics
+            report_file=control_report_file, data_model=ControlMetrics
         )
 
-    def _get_productivity_metrics(self) -> ProductivityMetrics:
+    def _get_productivity_metrics(self, reports_dir: Path) -> ProductivityMetrics:
         """Return the parsed Productivity metrics in a metrics Pydantic object."""
+        loading_report_file: Path = get_file_in_directory(
+            directory=reports_dir, file_name=PacBioDirsAndFiles.LOADING_REPORT
+        )
         return self._parse_report_to_model(
-            report_file=self.loading_report_file, data_model=ProductivityMetrics
+            report_file=loading_report_file, data_model=ProductivityMetrics
         )
 
-    def _get_polymerase_metrics(self) -> PolymeraseMetrics:
+    def _get_polymerase_metrics(self, reports_dir: Path) -> PolymeraseMetrics:
         """Return the parsed Polymerase metrics in a metrics Pydantic object."""
+        raw_data_report_file: Path = get_file_in_directory(
+            directory=reports_dir, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
+        )
         return self._parse_report_to_model(
-            report_file=self.raw_data_report_file, data_model=PolymeraseMetrics
+            report_file=raw_data_report_file, data_model=PolymeraseMetrics
         )
 
-    def _get_smrtlink_datasets_metrics(self) -> SmrtlinkDatasetsMetrics:
+    def _get_smrtlink_datasets_metrics(self, reports_dir: Path) -> SmrtlinkDatasetsMetrics:
         """Return the parsed SMRTlink datasets metrics in a metrics Pydantic object."""
-        return self._parse_smrtlink_datasets_file()
+        smrtlink_datasets_report_file: Path = get_file_in_directory(
+            directory=reports_dir, file_name=PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT
+        )
+        return self._parse_smrtlink_datasets_file(smrtlink_datasets_report_file)
 
     def parse_metrics(self, smrt_cell_path: Path) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
-        self._set_report_paths(smrt_cell_path)
-        hifi_metrics: HiFiMetrics = self._get_hifi_metrics()
-        control_metrics: ControlMetrics = self._get_control_metrics()
-        productivity_metrics: ProductivityMetrics = self._get_productivity_metrics()
-        polymerase_metrics: PolymeraseMetrics = self._get_polymerase_metrics()
-        smrtlink_datasets_metrics: SmrtlinkDatasetsMetrics = self._get_smrtlink_datasets_metrics()
+        reports_dir = Path(smrt_cell_path, "statistics")
+        hifi_metrics: HiFiMetrics = self._get_hifi_metrics(reports_dir)
+        control_metrics: ControlMetrics = self._get_control_metrics(reports_dir)
+        productivity_metrics: ProductivityMetrics = self._get_productivity_metrics(reports_dir)
+        polymerase_metrics: PolymeraseMetrics = self._get_polymerase_metrics(reports_dir)
+        smrtlink_datasets_metrics: SmrtlinkDatasetsMetrics = self._get_smrtlink_datasets_metrics(
+            reports_dir
+        )
         return PacBioMetrics(
             device_internal_id=smrtlink_datasets_metrics.cell_id,
             well=smrtlink_datasets_metrics.well,
