@@ -1,4 +1,5 @@
 from cg.apps.lims.api import LimsAPI
+from cg.exc import CgError
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metadata_parser.utils import (
     get_internal_negative_control_id,
@@ -20,7 +21,8 @@ class MetadataParser:
             metadata_for_internal_negative_control = self.parse_metadata_for_internal_negative_control(
                 metadata_for_case=metadata_for_case
             )
-        except:
+        except Exception as exception_object:
+            raise CgError from exception_object
         if not metadata_for_internal_negative_control:
             LOG.error(f"Could not find an internal negative control for {case.internal_id}")
             
@@ -68,5 +70,6 @@ class MetadataParser:
             )
 
             return {internal_negative_control.internal_id: internal_negative_control_metadata}
-        except:
-            
+        except Exception as exception_object:
+            raise CgError from exception_object
+
