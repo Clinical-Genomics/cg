@@ -15,6 +15,9 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
+from cg.services.illumina.file_parsing.sequencing_times.collect_sequencing_times import (
+    CollectSequencingTimes,
+)
 
 
 class IlluminaDataTransferService:
@@ -120,11 +123,12 @@ class IlluminaDataTransferService:
         demux_software_version: str = software_service.get_demux_software_version(
             demultiplexed_run_dir.demultiplex_software_info_path
         )
-        sequencing_started_at: datetime = demultiplexed_run_dir.sequencing_started_at
-        sequencing_completed_at: datetime = (
-            demultiplexed_run_dir.sequencing_completed_at
-            if demultiplexed_run_dir.sequencing_completed_at
-            else demultiplexed_run_dir.sequenced_at
+        collect_sequencing_times = CollectSequencingTimes()
+        sequencing_started_at: datetime = collect_sequencing_times.get_start_time(
+            run_directory_data=demultiplexed_run_dir
+        )
+        sequencing_completed_at: datetime = collect_sequencing_times.get_end_time(
+            run_directory_data=demultiplexed_run_dir
         )
         demultiplexing_started_at: datetime = demultiplexed_run_dir.demultiplexing_started_at
         demultiplexing_completed_at: datetime = demultiplexed_run_dir.demultiplexing_completed_at
