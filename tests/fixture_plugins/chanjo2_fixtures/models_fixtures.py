@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.clients.chanjo2.models import CoverageRequest, Sample
+from cg.clients.chanjo2.models import CoverageData, CoverageRequest, Sample
 from cg.constants.gene_panel import ReferenceGenomeBuild
 
 
@@ -19,4 +19,12 @@ def coverage_request(sample_id: str) -> CoverageRequest:
                 id=sample_id,
             )
         ],
+    )
+
+
+@pytest.fixture
+def coverage_data() -> CoverageData:
+    return CoverageData(
+        mean_coverage=55.55,
+        coverage_completeness_percent=33.33,
     )
