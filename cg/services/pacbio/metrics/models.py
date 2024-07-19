@@ -135,8 +135,8 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 class PacBioMetrics(BaseModel):
     """Model that holds all relevant PacBio metrics."""
 
-    hifi_metrics: HiFiMetrics
-    control_metrics: ControlMetrics
-    productivity_metrics: ProductivityMetrics
-    polymerase_metrics: PolymeraseMetrics
+    hifi: HiFiMetrics
+    control: ControlMetrics
+    productivity: ProductivityMetrics
+    polymerase: PolymeraseMetrics
     dataset_metrics: SmrtlinkDatasetsMetrics
