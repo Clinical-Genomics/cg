@@ -1,4 +1,5 @@
 from cg.constants.constants import ControlOptions
+from cg.exc import CgError
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata
 from cg.store.models import Sample
 from cg.apps.lims.api import LimsAPI
@@ -21,23 +22,25 @@ def get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSampl
     return negative_controls
 
 
-def get_internal_negative_control_id_from_lims(
-    lims: LimsAPI, sample_internal_id: str
-) -> None | str:
-    artifact: Artifact = lims.get_latest_artifact_for_sample(
-        LimsProcess.COVID_POOLING_STEP, LimsArtifactTypes.ANALYTE, sample_internal_id
-    )
-    if not artifact:
-        return None
-    samples = artifact[0].samples
+def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id: str) -> str:
+    """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+    try:
+        artifact: Artifact = lims.get_latest_artifact_for_sample(
+            LimsProcess.COVID_POOLING_STEP, LimsArtifactTypes.ANALYTE, sample_internal_id
+        )
+        samples = artifact[0].samples
 
-    negative_controls: list = get_negative_controls_from_list(samples=samples)
+        negative_controls: list = get_negative_controls_from_list(samples=samples)
 
-    if len(negative_controls) > 1:
-        sample_ids = [sample.id for sample in negative_controls]
-        LOG.warning(f"Several internal negative control samples found: {' '.join(sample_ids)}")
-    else:
-        return negative_controls[0].id
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            LOG.warning(f"Several internal negative control samples found: {' '.join(sample_ids)}")
+        else:
+            return negative_controls[0].id
+    except Exception as exception_object:
+        raise CgError(
+            "It was not possible to retrieve the internal negative control for this case from lims."
+        ) from exception_object
 
 
 def get_internal_negative_control_id(lims: LimsAPI, metadata_for_case: SampleMetadata) -> str:

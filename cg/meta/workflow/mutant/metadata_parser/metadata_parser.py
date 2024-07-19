@@ -14,18 +14,18 @@ class MetadataParser:
         self.status_db = status_db
         self.lims = lims
 
-    def parse_metadata(self, case: Case) -> SamplesMetadataMetrics | None:
-        metadata_for_case = self.parse_metadata_for_case(case)
-        metadata_for_internal_negative_control = self.parse_metadata_for_internal_negative_control(
-            metadata_for_case
-        )
+    def parse_metadata(self, case: Case) -> SamplesMetadataMetrics:
+        metadata_for_case = self.parse_metadata_for_case(case=case)
+        try:
+            metadata_for_internal_negative_control = self.parse_metadata_for_internal_negative_control(
+                metadata_for_case=metadata_for_case
+            )
+        except:
         if not metadata_for_internal_negative_control:
             LOG.error(f"Could not find an internal negative control for {case.internal_id}")
-            return None
-        else:
-            metadata = metadata_for_case | metadata_for_internal_negative_control
-            samples_metadata: dict = {"samples": metadata}
-            return SamplesMetadataMetrics.model_validate(samples_metadata)
+            
+        metadata = metadata_for_case | metadata_for_internal_negative_control
+        return SamplesMetadataMetrics(samples=metadata)
 
     def parse_metadata_for_case(self, case: Case) -> dict[str, SampleMetadata]:
         metadata_for_case: dict[str, SampleMetadata] = {}
@@ -49,18 +49,14 @@ class MetadataParser:
     def parse_metadata_for_internal_negative_control(
         self, metadata_for_case: SamplesMetadataMetrics
     ) -> dict[str, SampleMetadata] | None:
-        internal_negative_control_id: Sample = get_internal_negative_control_id(
-            self.lims, metadata_for_case
-        )
+        try:
+            internal_negative_control_id: Sample = get_internal_negative_control_id(
+                self.lims, metadata_for_case
+            )
 
-        internal_negative_control: Sample = self.status_db.get_sample_by_internal_id(
-            internal_negative_control_id
-        )
-
-        if not internal_negative_control:
-            return None
-
-        else:
+            internal_negative_control: Sample = self.status_db.get_sample_by_internal_id(
+                internal_negative_control_id
+            )
             internal_negative_control_metadata = SampleMetadata(
                 sample_internal_id=internal_negative_control.internal_id,
                 sample_name=internal_negative_control.name,
@@ -72,3 +68,5 @@ class MetadataParser:
             )
 
             return {internal_negative_control.internal_id: internal_negative_control_metadata}
+        except:
+            
