@@ -75,9 +75,9 @@ class ProductivityMetrics(BaseModel):
             p_0 = data.get(LoadingAttributesIDs.P_0)
             p_1 = data.get(LoadingAttributesIDs.P_1)
             p_2 = data.get(LoadingAttributesIDs.P_2)
-            data["percentage_p_0"] = round((p_0 / productive_zmws) * 100, 0)
-            data["percentage_p_1"] = round((p_1 / productive_zmws) * 100, 0)
-            data["percentage_p_2"] = round((p_2 / productive_zmws) * 100, 0)
+            data["percent_p_0"] = round((p_0 / productive_zmws) * 100, 0)
+            data["percent_p_1"] = round((p_1 / productive_zmws) * 100, 0)
+            data["percent_p_2"] = round((p_2 / productive_zmws) * 100, 0)
         return data
 
 
