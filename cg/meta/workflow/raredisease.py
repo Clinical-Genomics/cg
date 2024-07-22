@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from housekeeper.store.models import File
+
 from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSample
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
@@ -149,11 +151,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
-    def get_coverage_file_path(self, case_id: str) -> str:
+    def get_coverage_file_path(self, case_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
-        return self.housekeeper_api.get_file_from_latest_version(
+        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=RAREDISEASE_COVERAGE_FILE_TAGS
-        ).full_path
+        )
+        if coverage_file:
+            return coverage_file.full_path
+        LOG.warning(f"No coverage file found with the tags: {RAREDISEASE_COVERAGE_FILE_TAGS}")
+        return None
 
     def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
         """Return HGNC IDs of genes from specified panels using the Scout API."""
@@ -165,10 +171,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             )
         return gene_ids
 
-    def get_sample_coverage(self, case_id: str, sample_id: str, panels: list[str]) -> CoverageData:
+    def get_sample_coverage(
+        self, case_id: str, sample_id: str, panels: list[str]
+    ) -> CoverageData | None:
         """Return sample coverage data from Chanjo2."""
         genome_version: GenomeVersion = self.get_genome_build()
-        coverage_file_path: str = self.get_coverage_file_path(case_id)
+        coverage_file_path: str | None = self.get_coverage_file_path(case_id)
+        if not coverage_file_path:
+            return None
         coverage_request = CoverageRequest(
             build=self.translate_genome_reference(genome_version),
             coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
