@@ -13,6 +13,12 @@ def pac_bio_fixtures_dir(devices_dir: Path) -> Path:
 
 
 @pytest.fixture
+def pac_bio_wrong_metrics_dir(pac_bio_fixtures_dir: Path) -> Path:
+    """Return the path to the PacBio metrics directory."""
+    return Path(pac_bio_fixtures_dir, "wrong_metrics")
+
+
+@pytest.fixture
 def pac_bio_runs_dir(pac_bio_fixtures_dir: Path) -> Path:
     """Return the path to the PacBio run directory."""
     return Path(pac_bio_fixtures_dir, "SMRTcells")
@@ -34,3 +40,9 @@ def pac_bio_smrt_cell_dir(pac_bio_test_run_dir: Path) -> Path:
 def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir: Path) -> Path:
     """Return the path to the PacBio SMRT cell statistics directory."""
     return Path(pac_bio_smrt_cell_dir, "statistics")
+
+
+@pytest.fixture
+def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
+    """Return the path to a temporary PacBio statistics directory."""
+    return Path(pac_bio_wrong_metrics_dir, "metrics.json")
