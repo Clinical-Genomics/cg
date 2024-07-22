@@ -3,13 +3,13 @@
 import pytest
 
 from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSample
-from cg.constants.gene_panel import ReferenceGenomeBuild
+from cg.constants.constants import GenomeVersion
 
 
 @pytest.fixture
 def coverage_request(sample_id: str) -> CoverageRequest:
     return CoverageRequest(
-        build=ReferenceGenomeBuild.GRCH37,
+        build=GenomeVersion.GRCH37,
         coverage_threshold=10,
         gene_ids=[2861, 3791, 6481, 7436, 30521],
         interval_type="genes",
