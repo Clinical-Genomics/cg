@@ -134,9 +134,10 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 
 class FailedReadsMetrics(BaseModel):
     """Model to parse the failed reads metrics from the unzipped CSS report."""
+
     pass
-  
-  
+
+
 class PacBioMetrics(BaseModel):
     """Model that holds all relevant PacBio metrics."""
 
