@@ -23,6 +23,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
@@ -100,7 +101,7 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
         Workflow.RAREDISEASE: RarediseaseReportAPI(
-            config=context.obj, analysis_api=RarediseaseReportAPI(config=context.obj)
+            config=context.obj, analysis_api=RarediseaseAnalysisAPI(config=context.obj)
         ),
         Workflow.RNAFUSION: RnafusionReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
