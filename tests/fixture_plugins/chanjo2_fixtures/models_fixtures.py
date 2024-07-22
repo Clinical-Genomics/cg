@@ -9,7 +9,7 @@ from cg.constants.constants import GenomeVersion
 @pytest.fixture
 def coverage_request(sample_id: str) -> CoverageRequest:
     return CoverageRequest(
-        build=GenomeVersion.GRCH37,
+        build=GenomeVersion.GRCh37,
         coverage_threshold=10,
         gene_ids=[2861, 3791, 6481, 7436, 30521],
         interval_type="genes",

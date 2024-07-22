@@ -162,8 +162,8 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    GRCH37: str = "GRCh37"
-    GRCH38: str = "GRCh38"
+    GRCh37: str = "GRCh37"
+    GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
     canfam3: str = "canfam3"
     hg19: str = "hg19"
