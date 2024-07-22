@@ -4,10 +4,15 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSample
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
-from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
+from cg.constants.nf_analysis import (
+    RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+    RAREDISEASE_COVERAGE_THRESHOLD,
+    RAREDISEASE_METRIC_CONDITIONS,
+)
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -54,7 +59,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_genome_build(self, case_id: str) -> GenomeVersion:
+    def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg19."""
         return GenomeVersion.hg19
 
@@ -142,3 +147,25 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
+        """Return HGNC IDs of genes from specified panels using the Scout API."""
+        gene_ids = []
+        for panel in panels:
+            genes: list[dict] = self.scout_api.get_genes(panel)
+            gene_ids.extend(
+                gene.get("hgnc_id") for gene in genes if gene.get("hgnc_id") is not None
+            )
+        return gene_ids
+
+    def get_sample_coverage(self, sample_id: str, panels: list[str]) -> CoverageData:
+        """Return sample coverage data from Chanjo2."""
+        genome_version: GenomeVersion = self.get_genome_build()
+        coverage_request = CoverageRequest(
+            build=self.translate_genome_reference(genome_version),
+            coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
+            gene_ids=self.get_gene_ids_from_scout(panels),
+            interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+            samples=[CoverageSample(coverage_path="", id=sample_id)],
+        )
+        return self.chanjo2_api.get_coverage(coverage_request)
