@@ -4,7 +4,6 @@ import logging
 from typing import Any
 
 import requests
-from pydantic import ValidationError
 
 from cg.clients.chanjo2.models import CoverageData, CoverageRequest
 
@@ -33,6 +32,6 @@ class Chanjo2APIClient:
                 LOG.error("The POST get coverage response is empty")
                 return None
             return CoverageData(**next(iter(response_content)))
-        except (requests.RequestException, ValueError, ValidationError) as error:
+        except (requests.RequestException, ValueError) as error:
             LOG.error(f"Error during coverage POST request: {error}")
             return None
