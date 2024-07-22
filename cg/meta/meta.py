@@ -8,13 +8,14 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.clients.chanjo2.api import Chanjo2APIClient
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.compress import CompressAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 
@@ -24,6 +25,7 @@ class MetaAPI:
     def __init__(self, config: CGConfig):
         self.config = config
         self.chanjo_api: ChanjoAPI = config.chanjo_api
+        self.chanjo2_api: Chanjo2APIClient = config.chanjo2_api
         self.crunchy_api: CrunchyAPI = config.crunchy_api
         self.genotype_api: GenotypeAPI = config.genotype_api
         self.hermes_api: HermesApi = config.hermes_api
