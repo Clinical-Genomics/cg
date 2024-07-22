@@ -1,5 +1,5 @@
 from cg.constants.constants import ControlOptions
-from cg.exc import CgError
+from cg.exc import LimsDataError
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata
 from cg.store.models import Sample
 from cg.apps.lims.api import LimsAPI
@@ -38,18 +38,17 @@ def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id
         else:
             return negative_controls[0].id
     except Exception as exception_object:
-        raise CgError(
-            "It was not possible to retrieve the internal negative control for this case from lims."
-        ) from exception_object
+        raise LimsDataError from exception_object
 
 
-def get_internal_negative_control_id(lims: LimsAPI, metadata_for_case: SampleMetadata) -> str:
+def get_internal_negative_control_id(
+    lims: LimsAPI, metadata_for_samples: dict[str, SampleMetadata]
+) -> str:
     """Query lims to retrive internal_negative_control_id."""
-    sample_internal_id = list(metadata_for_case.keys())[0]  # internal_id of sample from covid pool
 
-    print(sample_internal_id)
+    sample_internal_id = list(metadata_for_samples.keys())[0]
 
-    internal_negative_control_id = get_internal_negative_control_id_from_lims(
+    internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
         lims, sample_internal_id
     )
 
