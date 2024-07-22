@@ -9,6 +9,7 @@ from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import (
+    RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS,
@@ -148,6 +149,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
+    def get_coverage_file_path(self, case_id: str) -> str:
+        """Return the Raredisease d4 coverage file path."""
+        return self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=RAREDISEASE_COVERAGE_FILE_TAGS
+        ).full_path
+
     def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
         """Return HGNC IDs of genes from specified panels using the Scout API."""
         gene_ids = []
@@ -158,14 +165,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             )
         return gene_ids
 
-    def get_sample_coverage(self, sample_id: str, panels: list[str]) -> CoverageData:
+    def get_sample_coverage(self, case_id: str, sample_id: str, panels: list[str]) -> CoverageData:
         """Return sample coverage data from Chanjo2."""
         genome_version: GenomeVersion = self.get_genome_build()
+        coverage_file_path: str = self.get_coverage_file_path(case_id)
         coverage_request = CoverageRequest(
             build=self.translate_genome_reference(genome_version),
             coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
             gene_ids=self.get_gene_ids_from_scout(panels),
             interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-            samples=[CoverageSample(coverage_path="", id=sample_id)],
+            samples=[CoverageSample(coverage_path=coverage_file_path, id=sample_id)],
         )
         return self.chanjo2_api.get_coverage(coverage_request)
