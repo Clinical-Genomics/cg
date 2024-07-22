@@ -350,8 +350,8 @@ class CGConfig(BaseModel):
     illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    chanjo2: ClientConfig
-    chanjo2_api_: Chanjo2APIClient
+    chanjo2: ClientConfig | None = None
+    chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
