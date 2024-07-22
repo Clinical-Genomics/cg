@@ -3,7 +3,7 @@
 from pydantic import BaseModel
 
 
-class Chanjo2Sample(BaseModel):
+class CoverageSample(BaseModel):
     """Chanjo2 sample model defined with an ID and a coverage file path."""
 
     coverage_path: str
@@ -17,7 +17,7 @@ class CoverageRequest(BaseModel):
     coverage_threshold: int
     gene_ids: list[int]
     interval_type: str
-    samples: list[Chanjo2Sample]
+    samples: list[CoverageSample]
 
 
 class CoverageData(BaseModel):
