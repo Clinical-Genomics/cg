@@ -1,114 +1,97 @@
-import math
+import shutil
 from pathlib import Path
-from typing import Type
+from typing import Callable
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.constants.pacbio import CCSAttributeIDs, ControlAttributeIDs
-from cg.services.pacbio.metrics.metrics_parser import MetricsParser
-from cg.services.pacbio.metrics.models import (
-    BaseMetrics,
-    ControlMetrics,
-    HiFiMetrics,
-    PolymeraseMetrics,
-    ProductivityMetrics,
-    SmrtlinkDatasetsMetrics,
+from cg.constants.pacbio import PacBioDirsAndFiles
+from cg.exc import PacBioMetricsParsingError
+from cg.services.pacbio.metrics.models import BaseMetrics
+from cg.services.pacbio.metrics.utils import (
+    parse_control_metrics,
+    parse_dataset_metrics,
+    parse_hifi_metrics,
+    parse_polymerase_metrics,
+    parse_productivity_metrics,
 )
-
-
-def test_metrics_parser_initialisation(pac_bio_smrt_cell_dir: Path):
-    """Test the initialisation of the metrics parser."""
-    # GIVEN a PacBio SMRT cell path
-
-    # WHEN initialising the metrics parser
-    parser = MetricsParser(smrt_cell_path=pac_bio_smrt_cell_dir)
-
-    # THEN the parser is initialised with the expected attributes
-    assert isinstance(parser.hifi_metrics, HiFiMetrics)
-    assert isinstance(parser.control_metrics, ControlMetrics)
-    assert isinstance(parser.productivity_metrics, ProductivityMetrics)
-    assert isinstance(parser.polymerase_metrics, PolymeraseMetrics)
-    assert isinstance(parser.smrtlink_datasets_metrics, SmrtlinkDatasetsMetrics)
 
 
 @pytest.mark.parametrize(
-    "report_file_path, model, metrics_fixture, percent_fields",
+    "parsing_function, expected_metrics_fixture",
     [
-        (
-            "pac_bio_control_report",
-            ControlMetrics,
-            "pac_bio_control_metrics",
-            [
-                ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE,
-                ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE,
-            ],
-        ),
-        ("pac_bio_css_report", HiFiMetrics, "pac_bio_hifi_metrics", [CCSAttributeIDs.PERCENT_Q30]),
-        ("pac_bio_raw_data_report", PolymeraseMetrics, "pac_bio_polymerase_metrics", []),
-        ("pac_bio_loading_report", ProductivityMetrics, "pac_bio_productivity_metrics", []),
+        (parse_control_metrics, "pac_bio_control_metrics"),
+        (parse_dataset_metrics, "pac_bio_smrtlink_databases_metrics"),
+        (parse_hifi_metrics, "pac_bio_hifi_metrics"),
+        (parse_productivity_metrics, "pac_bio_productivity_metrics"),
+        (parse_polymerase_metrics, "pac_bio_polymerase_metrics"),
     ],
-    ids=["Control", "Hi-Fi", "Polymerase", "Productivity"],
+    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
 )
-def test_parse_report_to_model(
-    pac_bio_metrics_parser: MetricsParser,
-    report_file_path: str,
-    model: Type[BaseMetrics],
-    metrics_fixture: str,
-    percent_fields: list[str],
+def test_parse_dataset_metrics(
+    parsing_function: Callable,
+    expected_metrics_fixture: str,
+    pac_bio_run_statistics_dir: Path,
     request: FixtureRequest,
 ):
-    """Test to parse the attributes to a metrics model."""
-    # GIVEN a metrics parser
+    """Test the parsing of all PacBio metric files."""
+    # GIVEN a metrics file to parse in an existing statistics directory
 
-    # GIVEN a pac-bio report file
-    report_file: Path = request.getfixturevalue(report_file_path)
-
-    # GIVEN a metrics object with the expected parsed metrics
-    expected_metrics: BaseMetrics = request.getfixturevalue(metrics_fixture)
-
-    # WHEN parsing the attributes to a given metrics model
-    parsed_metrics: BaseMetrics = pac_bio_metrics_parser.parse_report_to_model(
-        report_file=report_file, data_model=model
-    )
-
-    # THEN the model attributes are the expected ones
-    assert parsed_metrics == expected_metrics
-
-    # THEN the percentage fields of the model are not taken as a fraction
-    metrics_dict: dict = parsed_metrics.dict(by_alias=True)
-    for percent_field in percent_fields:
-        assert metrics_dict.get(percent_field) > 1
-
-
-def test_parse_smrtlink_datasets_file(
-    pac_bio_metrics_parser: MetricsParser,
-    pac_bio_smrtlink_databases_metrics: SmrtlinkDatasetsMetrics,
-):
-    """Test to parse the SMRTlink datasets file."""
-    # GIVEN a metrics parser
-
-    # WHEN parsing the SMRTlink datasets file
-    smrtlink_datasets_metrics: SmrtlinkDatasetsMetrics = (
-        pac_bio_metrics_parser.parse_smrtlink_datasets_file()
-    )
+    # WHEN parsing the SMRTlink datasets metrics
+    parsed_metrics: BaseMetrics = parsing_function(report_dir=pac_bio_run_statistics_dir)
 
     # THEN the parsed metrics are the expected ones
-    assert smrtlink_datasets_metrics == pac_bio_smrtlink_databases_metrics
+    expected_metrics: BaseMetrics = request.getfixturevalue(expected_metrics_fixture)
+    assert parsed_metrics == expected_metrics
 
 
-def test_productivity_metrics_percentage_attributes(
-    pac_bio_productivity_metrics: ProductivityMetrics,
+@pytest.mark.parametrize(
+    "parsing_function",
+    [
+        parse_control_metrics,
+        parse_dataset_metrics,
+        parse_hifi_metrics,
+        parse_productivity_metrics,
+        parse_polymerase_metrics,
+    ],
+    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
+)
+def test_parse_dataset_metrics_missing_file(tmp_path: Path, parsing_function: Callable):
+    """Test the parsing of all PacBio metric files with a missing file raises an error."""
+    # GIVEN a directory with no metrics files to parse
+
+    # WHEN parsing the metrics
+    with pytest.raises(PacBioMetricsParsingError) as error:
+        # THEN a PacBioMetricsParsingError is raised
+        parse_dataset_metrics(report_dir=tmp_path)
+    assert "Could not find the metrics file" in str(error.value)
+    assert tmp_path.as_posix() in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "parsing_function, metrics_file_name",
+    [
+        (parse_control_metrics, PacBioDirsAndFiles.CONTROL_REPORT),
+        (parse_dataset_metrics, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
+        (parse_hifi_metrics, PacBioDirsAndFiles.BASECALLING_REPORT),
+        (parse_productivity_metrics, PacBioDirsAndFiles.LOADING_REPORT),
+        (parse_polymerase_metrics, PacBioDirsAndFiles.RAW_DATA_REPORT),
+    ],
+    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
+)
+def test_parse_dataset_metrics_validation_error(
+    tmp_path: Path,
+    parsing_function: Callable,
+    metrics_file_name: str,
+    pac_bio_wrong_metrics_file: Path,
 ):
-    """Test the percentage attributes of the productivity metrics."""
-    # GIVEN a productivity metrics object
+    """Test the parsing of all PacBio metric files with an unexpected error raises an error."""
+    # GIVEN a tmp statistics directory with a metrics file without the expected structure
+    shutil.copyfile(src=pac_bio_wrong_metrics_file, dst=Path(tmp_path, metrics_file_name))
+    assert Path(tmp_path, metrics_file_name).exists()
 
-    # WHEN accessing the percentage attributes
-    percentage_p_0: float = pac_bio_productivity_metrics.percentage_p_0
-    percentage_p_1: float = pac_bio_productivity_metrics.percentage_p_1
-    percentage_p_2: float = pac_bio_productivity_metrics.percentage_p_2
-
-    # THEN the percentage attributes are calculated correctly
-    assert math.isclose(percentage_p_0, 40, abs_tol=1e-9)
-    assert math.isclose(percentage_p_1, 60, abs_tol=1e-9)
-    assert math.isclose(percentage_p_2, 0, abs_tol=1e-9)
+    # WHEN parsing the metrics
+    with pytest.raises(PacBioMetricsParsingError) as error:
+        # THEN a PacBioMetricsParsingError is raised
+        parsing_function(report_dir=tmp_path)
+    assert "An error occurred while parsing the metrics" in str(error.value)
