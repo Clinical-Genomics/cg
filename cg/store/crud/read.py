@@ -1422,6 +1422,23 @@ class ReadHandler(BaseHandler):
             cases_to_exclude=cases_to_exclude,
         ).count()
 
+    def get_case_failed_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_SEQUENCED,
+            CaseSampleFilter.CASES_FAILED_SEQUENCING_QC,
+            CaseSampleFilter.EXCLUDE_CASES,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
+        ).count()
+
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
         return apply_illumina_flow_cell_filters(

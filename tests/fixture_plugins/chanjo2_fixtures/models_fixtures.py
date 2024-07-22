@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.clients.chanjo2.models import CoverageData, CoverageRequest, Sample
+from cg.clients.chanjo2.models import Chanjo2Sample, CoverageData, CoverageRequest
 from cg.constants.gene_panel import ReferenceGenomeBuild
 
 
@@ -14,7 +14,7 @@ def coverage_request(sample_id: str) -> CoverageRequest:
         gene_ids=[2861, 3791, 6481, 7436, 30521],
         interval_type="genes",
         samples=[
-            Sample(
+            Chanjo2Sample(
                 coverage_path=f"/path/to/coverage/{sample_id}.d4",
                 id=sample_id,
             )

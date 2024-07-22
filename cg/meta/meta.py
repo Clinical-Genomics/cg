@@ -23,10 +23,11 @@ class MetaAPI:
     """MetaAPI class initializing all App APIs used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):
-        self.config = config
         self.chanjo_api: ChanjoAPI = config.chanjo_api
         self.chanjo2_api: Chanjo2APIClient = config.chanjo2_api
+        self.config = config
         self.crunchy_api: CrunchyAPI = config.crunchy_api
+        self.delivery_api: DeliveryAPI = config.delivery_api
         self.genotype_api: GenotypeAPI = config.genotype_api
         self.hermes_api: HermesApi = config.hermes_api
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
@@ -48,7 +49,6 @@ class MetaAPI:
                 ),
             ),
         )
-        self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
+        self.status_db: Store = config.status_db
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
-        self.delivery_api: DeliveryAPI = config.delivery_api
