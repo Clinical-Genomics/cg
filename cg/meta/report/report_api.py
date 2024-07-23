@@ -274,7 +274,7 @@ class ReportAPI(MetaAPI):
                     name=sample.name,
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
-                    gender=sample.sex,
+                    sex=sample.sex,
                     source=lims_sample.get("source"),
                     tumour=sample.is_tumour,
                     application=self.get_sample_application(sample=sample, lims_sample=lims_sample),

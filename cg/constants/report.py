@@ -123,7 +123,7 @@ _REQUIRED_SAMPLE_FIELDS: list[str] = [
     "name",
     "id",
     "ticket",
-    "gender",
+    "sex",
     "source",
     "application",
     "methods",
@@ -166,7 +166,7 @@ _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
 ]
 
 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
-    "gender",
+    "sex",
     "mapped_reads",
     "mean_target_coverage",
     "pct_10x",

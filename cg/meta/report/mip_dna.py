@@ -47,7 +47,7 @@ class MipDNAReportAPI(ReportAPI):
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=parsed_metrics.duplicate_reads,
-            gender=parsed_metrics.predicted_sex,
+            sex=parsed_metrics.predicted_sex,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
