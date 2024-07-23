@@ -14,11 +14,11 @@ class RunDataGenerator(ABC):
     """Abstract class for that holds functionality to create a run data model."""
 
     @abstractmethod
-    def _validate_run_path(self) -> None:
+    def _validate_run_name(self, run_name: str) -> None:
         pass
 
     @abstractmethod
-    def get_run_data(self) -> RunData:
+    def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
         pass
 
 
