@@ -15,23 +15,26 @@ class MetadataParser:
         self.lims = lims
 
     def parse_metadata(self, case: Case) -> SamplesMetadataMetrics:
-        metadata_for_samples: dict[str, SampleMetadata] = {}
-
-        for sample in case.samples:
-            if is_sample_external_negative_control(sample):
-                metadata_for_external_negative_control: (
-                    SampleMetadata
-                ) = self.parse_metadata_for_external_negative_control(
-                    external_negative_control_sample=sample
-                )
-
-            metadata_for_samples[sample.internal_id] = self.parse_metadata_for_sample(sample=sample)
-
         try:
-            metadata_for_internal_negative_control: (
-                SampleMetadata
-            ) = self.parse_metadata_for_internal_negative_control(
-                metadata_for_samples=metadata_for_samples
+            metadata_for_samples: dict[str, SampleMetadata] = {}
+
+            for sample in case.samples:
+                if is_sample_external_negative_control(sample):
+                    metadata_for_external_negative_control: SampleMetadata = (
+                        self.parse_metadata_for_sample(sample=sample)
+                    )
+                    continue
+                else:
+                    metadata_for_samples[sample.internal_id] = self.parse_metadata_for_sample(
+                        sample=sample
+                    )
+
+            internal_negative_control_sample: Sample = (
+                self.get_internal_negative_control_sample_for_case(case=case)
+            )
+
+            metadata_for_internal_negative_control = self.parse_metadata_for_sample(
+                sample=internal_negative_control_sample
             )
 
             return SamplesMetadataMetrics(
@@ -51,41 +54,18 @@ class MetadataParser:
             target_reads=sample.application_version.application.target_reads,
             percent_reads_guaranteed=sample.application_version.application.percent_reads_guaranteed,
         )
-
         return sample_metadata
 
-    def parse_metadata_for_external_negative_control(
-        self, external_negative_control_sample: Sample
-    ) -> SampleMetadata:
-        external_negative_control_metadata = SampleMetadata(
-            sample_internal_id=external_negative_control_sample.internal_id,
-            sample_name=external_negative_control_sample.name,
-            reads=external_negative_control_sample.reads,
-            target_reads=external_negative_control_sample.application_version.application.target_reads,
-            percent_reads_guaranteed=external_negative_control_sample.application_version.application.percent_reads_guaranteed,
-        )
-        return external_negative_control_metadata
-
-    def parse_metadata_for_internal_negative_control(
-        self, metadata_for_samples: dict[str, SampleMetadata]
-    ) -> SampleMetadata:
+    def get_internal_negative_control_sample_for_case(self, case: Case) -> Sample:
         try:
-            internal_negative_control_id: Sample = get_internal_negative_control_id(
-                self.lims, metadata_for_samples
+            internal_negative_control_id: str = get_internal_negative_control_id(
+                lims=self.lims, case=case
             )
 
-            internal_negative_control: Sample = self.status_db.get_sample_by_internal_id(
-                internal_negative_control_id
+            internal_negative_control_sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=internal_negative_control_id
             )
 
-            internal_negative_control_metadata = SampleMetadata(
-                sample_internal_id=internal_negative_control.internal_id,
-                sample_name=internal_negative_control.name,
-                reads=internal_negative_control.reads,
-                target_reads=internal_negative_control.application_version.application.target_reads,
-                percent_reads_guaranteed=internal_negative_control.application_version.application.percent_reads_guaranteed,
-            )
-
-            return internal_negative_control_metadata
+            return internal_negative_control_sample
         except Exception as exception_object:
             raise CgError() from exception_object

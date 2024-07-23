@@ -1,7 +1,6 @@
 from cg.constants.constants import ControlOptions
 from cg.exc import LimsDataError
-from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 from cg.apps.lims.api import LimsAPI
 from cg.constants.lims import LimsArtifactTypes, LimsProcess
 from genologics.entities import Artifact
@@ -41,15 +40,13 @@ def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id
         raise LimsDataError from exception_object
 
 
-def get_internal_negative_control_id(
-    lims: LimsAPI, metadata_for_samples: dict[str, SampleMetadata]
-) -> str:
+def get_internal_negative_control_id(lims: LimsAPI, case: Case) -> str:
     """Query lims to retrive internal_negative_control_id."""
 
-    sample_internal_id = list(metadata_for_samples.keys())[0]
+    sample_internal_id = case.sample_ids[0]
 
     internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
-        lims, sample_internal_id
+        lims=lims, sample_internal_id=sample_internal_id
     )
 
     return internal_negative_control_id
