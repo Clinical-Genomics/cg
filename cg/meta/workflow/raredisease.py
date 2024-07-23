@@ -185,7 +185,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         coverage_request = CoverageRequest(
             build=self.translate_genome_reference(genome_version),
             coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-            hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
+            hgnc_gene_ids=[
+                2861,
+                3791,
+                6481,
+                7436,
+                30521,
+            ],  # self.get_gene_ids_from_scout(panels), # TODO
             interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
             samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
         )
