@@ -122,5 +122,5 @@ class RnafusionReportAPI(ReportAPI):
         }
 
     def get_upload_case_tags(self) -> dict:
-        """Return Balsamic UMI upload case tags."""
+        """Return Rnafusion upload case tags."""
         return RNAFUSION_CASE_TAGS

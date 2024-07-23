@@ -743,6 +743,7 @@ class AnalysisAPI(MetaAPI):
         }
         return translation_map.get(genome_version, genome_version)
 
-    def get_sample_coverage(self, sample_id: str, panels: list[str]) -> CoverageData:
+    def get_sample_coverage(
+        self, case_id: str, sample_id: str, panels: list[str]
+    ) -> CoverageData | None:
         """Return sample coverage data from Chanjo2."""
-        raise NotImplementedError

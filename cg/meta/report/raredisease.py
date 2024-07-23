@@ -26,7 +26,7 @@ class RarediseaseReportAPI(ReportAPI):
         """Return Raredisease sample metadata to include in the report."""
         sample_metrics: RarediseaseQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
         coverage_data: CoverageData | None = self.analysis_api.get_sample_coverage(
-            sample_id=sample.internal_id, panels=case.panels
+            case_id=case.internal_id, sample_id=sample.internal_id, panels=case.panels
         )
         return RarediseaseSampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
