@@ -63,9 +63,9 @@ class ProductivityMetrics(BaseModel):
     p_0: int = Field(..., alias=LoadingAttributesIDs.P_0)
     p_1: int = Field(..., alias=LoadingAttributesIDs.P_1)
     p_2: int = Field(..., alias=LoadingAttributesIDs.P_2)
-    percentage_p_0: float
-    percentage_p_1: float
-    percentage_p_2: float
+    percent_p_0: float
+    percent_p_1: float
+    percent_p_2: float
 
     @model_validator(mode="before")
     @classmethod
@@ -75,9 +75,9 @@ class ProductivityMetrics(BaseModel):
             p_0 = data.get(LoadingAttributesIDs.P_0)
             p_1 = data.get(LoadingAttributesIDs.P_1)
             p_2 = data.get(LoadingAttributesIDs.P_2)
-            data["percentage_p_0"] = round((p_0 / productive_zmws) * 100, 0)
-            data["percentage_p_1"] = round((p_1 / productive_zmws) * 100, 0)
-            data["percentage_p_2"] = round((p_2 / productive_zmws) * 100, 0)
+            data["percent_p_0"] = round((p_0 / productive_zmws) * 100, 0)
+            data["percent_p_1"] = round((p_1 / productive_zmws) * 100, 0)
+            data["percent_p_2"] = round((p_2 / productive_zmws) * 100, 0)
         return data
 
 
@@ -110,7 +110,7 @@ class PolymeraseMetrics(BaseModel):
 class SmrtlinkDatasetsMetrics(BaseModel):
     """Model to parse metrics in the SMRTlink datasets report."""
 
-    device_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
+    cell_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
     well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
     well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
     sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
@@ -130,3 +130,13 @@ class SmrtlinkDatasetsMetrics(BaseModel):
                 if match:
                     data["plate"] = match.group(1)
         return data
+
+
+class PacBioMetrics(BaseModel):
+    """Model that holds all relevant PacBio metrics."""
+
+    hifi: HiFiMetrics
+    control: ControlMetrics
+    productivity: ProductivityMetrics
+    polymerase: PolymeraseMetrics
+    dataset_metrics: SmrtlinkDatasetsMetrics
