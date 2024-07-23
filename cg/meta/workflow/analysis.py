@@ -747,3 +747,8 @@ class AnalysisAPI(MetaAPI):
         self, case_id: str, sample_id: str, panels: list[str]
     ) -> CoverageData | None:
         """Return sample coverage data from Chanjo2."""
+        raise NotImplementedError
+
+    def get_scout_upload_case_tags(self):
+        """Return workflow specific upload case tags."""
+        raise NotImplementedError

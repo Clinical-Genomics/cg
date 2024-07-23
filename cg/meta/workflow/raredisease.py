@@ -16,6 +16,7 @@ from cg.constants.raredisease import (
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS,
 )
+from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -187,3 +188,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             samples=[CoverageSample(coverage_path=coverage_file_path, id=sample_id)],
         )
         return self.chanjo2_api.get_coverage(coverage_request)
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Raredisease Scout upload case tags."""
+        return RAREDISEASE_CASE_TAGS

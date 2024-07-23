@@ -18,7 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
-from cg.constants.scout import BALSAMIC_CASE_TAGS, ScoutUploadKey
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -192,7 +192,3 @@ class BalsamicReportAPI(ReportAPI):
                 case=case, required_fields=required_sample_metadata_fields
             ),
         }
-
-    def get_upload_case_tags(self) -> dict:
-        """Return Balsamic upload case tags."""
-        return BALSAMIC_CASE_TAGS

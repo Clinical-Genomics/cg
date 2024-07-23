@@ -418,9 +418,5 @@ class ReportAPI(MetaAPI):
 
     def get_hk_scout_file_tags(self, scout_key: ScoutUploadKey) -> list | None:
         """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
-        tags = self.get_upload_case_tags().get(scout_key.value)
+        tags = self.analysis_api.get_scout_upload_case_tags().get(scout_key.value)
         return list(tags) if tags else None
-
-    def get_upload_case_tags(self):
-        """Return workflow specific upload case tags."""
-        raise NotImplementedError

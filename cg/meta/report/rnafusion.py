@@ -13,7 +13,7 @@ from cg.constants import (
     RNAFUSION_REPORT_ACCREDITED_APPTAGS,
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
 )
-from cg.constants.scout import RNAFUSION_CASE_TAGS, ScoutUploadKey
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
@@ -120,7 +120,3 @@ class RnafusionReportAPI(ReportAPI):
                 case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
             ),
         }
-
-    def get_upload_case_tags(self) -> dict:
-        """Return Rnafusion upload case tags."""
-        return RNAFUSION_CASE_TAGS

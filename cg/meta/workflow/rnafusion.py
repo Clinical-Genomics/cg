@@ -6,9 +6,9 @@ from pathlib import Path
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
@@ -122,3 +122,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Rnafusion Scout upload case tags."""
+        return RNAFUSION_CASE_TAGS
