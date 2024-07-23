@@ -8,6 +8,7 @@ class PacBioDirsAndFiles:
     LOADING_REPORT: str = "loading.report.json"
     RAW_DATA_REPORT: str = "raw_data.report.json"
     SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
+    CCS_REPORT_SUFFIX: str = "ccs_report.json"
 
 
 class CCSAttributeIDs:
