@@ -108,7 +108,6 @@ pytest_plugins = [
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
-    "tests.fixture_plugins.pacbio_fixtures.cell_directory_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
