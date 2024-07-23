@@ -6,11 +6,8 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.post_processing.abstract_models import PostProcessingDTOs, RunMetrics, RunData
 from cg.store.store import Store
-
-
-class RunData(BaseModel):
-    pass
 
 
 class RunDataGenerator(ABC):
@@ -39,19 +36,11 @@ class RunFileManager(ABC):
         pass
 
 
-class RunMetrics(BaseModel):
-    pass
-
-
 class PostProcessingMetricsParser(ABC):
 
     @abstractmethod
     def parse_metrics(self, metrics_paths: list[Path]) -> RunMetrics:
         pass
-
-
-class PostProcessingDTOs(BaseModel):
-    pass
 
 
 class PostProcessingDataTransferService(ABC):
