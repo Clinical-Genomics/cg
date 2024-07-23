@@ -13,7 +13,7 @@ class PacBioCellDirectoryData:
 
     @property
     def ccs_report(self) -> Path:
-        """Finds the json file finishing with ccs_report.json in the statistics dir."""
+        """Returns the CCS report file path."""
         files: list[Path] = get_files_in_directory_with_pattern(
             directory=self.statistics_dir, pattern=PacBioDirsAndFiles.CCS_REPORT_SUFFIX
         )
