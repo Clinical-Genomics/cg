@@ -152,10 +152,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
-    def get_coverage_file_path(self, case_id: str) -> str | None:
+    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
         coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=RAREDISEASE_COVERAGE_FILE_TAGS
+            bundle_name=bundle_name, tags=RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
         )
         if coverage_file:
             return coverage_file.full_path
@@ -177,7 +177,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ) -> CoverageData | None:
         """Return sample coverage data from Chanjo2."""
         genome_version: GenomeVersion = self.get_genome_build()
-        coverage_file_path: str | None = self.get_coverage_file_path(case_id)
+        coverage_file_path: str | None = self.get_sample_coverage_file_path(
+            bundle_name=case_id, sample_id=sample_id
+        )
         if not coverage_file_path:
             return None
         coverage_request = CoverageRequest(
