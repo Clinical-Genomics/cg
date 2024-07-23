@@ -10,7 +10,7 @@ from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSam
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
-from cg.constants.nf_analysis import (
+from cg.constants.raredisease import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
