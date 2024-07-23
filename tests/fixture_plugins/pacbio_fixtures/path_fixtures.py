@@ -4,14 +4,18 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.pacbio import PacBioDirsAndFiles
-
 
 # Directory fixtures
 @pytest.fixture
 def pac_bio_fixtures_dir(devices_dir: Path) -> Path:
     """Return the path to the PacBio fixtures directory."""
     return Path(devices_dir, "pacbio")
+
+
+@pytest.fixture
+def pac_bio_wrong_metrics_dir(pac_bio_fixtures_dir: Path) -> Path:
+    """Return the path to the PacBio metrics directory."""
+    return Path(pac_bio_fixtures_dir, "wrong_metrics")
 
 
 @pytest.fixture
@@ -38,28 +42,7 @@ def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir: Path) -> Path:
     return Path(pac_bio_smrt_cell_dir, "statistics")
 
 
-# File fixtures
-
-
 @pytest.fixture
-def pac_bio_css_report(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio CSS report."""
-    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.BASECALLING_REPORT)
-
-
-@pytest.fixture
-def pac_bio_control_report(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio control report."""
-    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.CONTROL_REPORT)
-
-
-@pytest.fixture
-def pac_bio_loading_report(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio loading report."""
-    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.LOADING_REPORT)
-
-
-@pytest.fixture
-def pac_bio_raw_data_report(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio raw data report."""
-    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.RAW_DATA_REPORT)
+def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
+    """Return the path to a temporary PacBio statistics directory."""
+    return Path(pac_bio_wrong_metrics_dir, "metrics.json")

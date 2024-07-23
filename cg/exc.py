@@ -306,3 +306,7 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class PacBioMetricsParsingError(CgError):
+    """Exception raised when PacBio metric files are not in place."""
