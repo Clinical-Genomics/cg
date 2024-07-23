@@ -9,7 +9,7 @@ import pytest
 @pytest.fixture
 def pac_bio_fixtures_dir(devices_dir: Path) -> Path:
     """Return the path to the PacBio fixtures directory."""
-    return Path(devices_dir, "run_data")
+    return Path(devices_dir, "pacbio")
 
 
 @pytest.fixture

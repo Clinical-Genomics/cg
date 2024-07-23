@@ -72,7 +72,7 @@ def pac_bio_smrtlink_databases_metrics() -> SmrtlinkDatasetsMetrics:
         SmrtLinkDatabasesIDs.CELL_ID: "EA094834",
         SmrtLinkDatabasesIDs.CELL_INDEX: 0,
         SmrtLinkDatabasesIDs.MOVIE_NAME: "m84202_240522_135641_s1",
-        SmrtLinkDatabasesIDs.PATH: "/srv/cg_data/run_data/r84202_20240522_133539/1_A01/pb_formats/m84202_240522_135641_s1.hifi_reads.consensusreadset.xml",
+        SmrtLinkDatabasesIDs.PATH: "/srv/cg_data/pacbio/r84202_20240522_133539/1_A01/pb_formats/m84202_240522_135641_s1.hifi_reads.consensusreadset.xml",
         SmrtLinkDatabasesIDs.WELL_NAME: "A01",
         SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME: "1247014000119",
     }

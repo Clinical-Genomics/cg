@@ -360,7 +360,7 @@ def base_config_dict() -> dict:
         "delivery_path": "path/to/delivery",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
-            "run_data": {
+            "pacbio": {
                 "data_dir": "path/to/data_directory",
                 "systemd_trigger_dir": "path/to/trigger_directory",
             },
