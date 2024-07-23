@@ -6,11 +6,10 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.constants import DRY_RUN
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.meta.deliver import DeliverAPI
-from cg.meta.deliver import DeliverTicketAPI
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.meta.deliver import DeliverAPI, DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (

@@ -20,12 +20,3 @@ OPTION_STARTED_AT = click.option(
     "--analysis-started-at",
     help="Retrieve analysis started at a specific date (i.e. '2020-05-28  12:00:46')",
 )
-
-OPTION_FORCE_REPORT = click.option(
-    "-f",
-    "--force",
-    "force_report",
-    is_flag=True,
-    default=False,
-    help="Overrule report validation",
-)

@@ -2,8 +2,8 @@ import logging
 
 import click
 
-from cg.constants.constants import DRY_RUN
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig

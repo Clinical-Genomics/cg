@@ -66,9 +66,9 @@ class ChecksumFailedError(CgError):
     """
 
 
-class CleanFlowCellFailedError(CgError):
+class IlluminaCleanRunError(CgError):
     """
-    Exception raised when the cleaning of a flow cell failed.
+    Exception raised when the cleaning of an Illumina run failed.
     """
 
 
@@ -98,15 +98,15 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
-class FlowCellsNeededError(CgError):
+class IlluminaRunsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 
-class FlowCellEncryptionError(CgError):
+class IlluminaRunEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
-class FlowCellAlreadyBackedUpError(CgError):
+class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
@@ -188,8 +188,16 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class SampleSheetError(CgError):
+class NfSampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
+
+
+class SampleSheetContentError(CgError):
+    """Raised when something is wrong with the sample sheet content."""
+
+
+class SampleSheetFormatError(CgError):
+    """Raised when something is wrong with the sample sheet format."""
 
 
 class ScoutUploadError(CgError):
@@ -298,3 +306,7 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class PacBioMetricsParsingError(CgError):
+    """Exception raised when PacBio metric files are not in place."""

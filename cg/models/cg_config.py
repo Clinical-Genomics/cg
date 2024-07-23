@@ -7,7 +7,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -22,12 +22,13 @@ from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
-from cg.meta.backup.pdc import PdcAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.pdc_service.pdc_service import PdcService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -73,7 +74,7 @@ class DataInput(BaseModel):
     input_dir_path: str
 
 
-class BackupConfig(BaseModel):
+class IlluminaBackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
@@ -151,15 +152,16 @@ class BalsamicConfig(CommonAppConfig):
     bed_path: str
     binary_path: str
     cadd_path: str
-    genome_interval_path: str
-    gnomad_af5_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
     conda_binary: str
     conda_env: str
+    genome_interval_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    gnomad_af5_path: str
     loqusdb_path: str
     pon_path: str
     root: str
+    sentieon_licence_path: str
     slurm: SlurmConfig
     swegen_path: str
 
@@ -323,32 +325,35 @@ class RunInstruments(BaseModel):
 
 
 class CGConfig(BaseModel):
+    data_input: DataInput | None = None
     database: str
     delivery_path: str
     downsample: DownsampleConfig
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    nanopore_data_directory: str
-    tower_binary_path: str
     max_flowcells: int | None
-    data_input: DataInput | None = None
+    nanopore_data_directory: str
     run_instruments: RunInstruments
+    sentieon_licence_server: str
+    tower_binary_path: str
+
     # Base APIs that always should exist
-    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
+    status_db_: Store | None = None
 
     # App APIs that can be instantiated in CGConfig
-    arnold: ArnoldConfig = Field(None, alias="arnold")
+    arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
-    backup: BackupConfig = None
+    illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
+    delivery_api_: DeliveryAPI | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -359,43 +364,42 @@ class CGConfig(BaseModel):
     gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
+    janus: JanusConfig | None = None
+    janus_api_: JanusAPIClient | None = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
     loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
+    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
-    pdc_api_: PdcAPI | None
-    sample_sheet_api_: SampleSheetAPI | None = None
+    pdc_service_: PdcService | None
+    pigz: CommonAppConfig | None = None
+    sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
-    janus: JanusConfig | None = None
-    janus_api_: JanusAPIClient | None = None
-    delivery_api_: DeliveryAPI | None = None
 
     # Meta APIs that will use the apps from CGConfig
-    balsamic: BalsamicConfig = None
-    statina: StatinaConfig = None
+    balsamic: BalsamicConfig | None = None
+    fluffy: FluffyConfig | None = None
     fohm: FOHMConfig | None = None
-    fluffy: FluffyConfig = None
-    microsalt: MicrosaltConfig = None
-    gisaid: GisaidConfig = None
-    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
-    mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
-    mutant: MutantConfig = None
-    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
-    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
-    taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
-    tomte: TomteConfig = Field(None, alias="tomte")
+    gisaid: GisaidConfig | None = None
+    microsalt: MicrosaltConfig | None = None
+    mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
+    mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
+    mutant: MutantConfig | None = None
+    raredisease: RarediseaseConfig | None = None
+    rnafusion: RnafusionConfig | None = None
+    statina: StatinaConfig | None = None
+    taxprofiler: TaxprofilerConfig | None = None
+    tomte: TomteConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
@@ -415,7 +419,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_api_": "pdc_api",
+            "pdc_service_": "pdc_service",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -545,20 +549,20 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def pdc_api(self) -> PdcAPI:
-        api = self.__dict__.get("pdc_api_")
-        if api is None:
-            LOG.debug("Instantiating PDC api")
-            api = PdcAPI(binary_path=self.pdc.binary_path)
-            self.pdc_api_ = api
-        return api
+    def pdc_service(self) -> PdcService:
+        service = self.__dict__.get("pdc_service_")
+        if service is None:
+            LOG.debug("Instantiating PDC service")
+            service = PdcService(binary_path=self.pdc.binary_path)
+            self.pdc_service_ = service
+        return service
 
     @property
-    def sample_sheet_api(self) -> SampleSheetAPI:
+    def sample_sheet_api(self) -> IlluminaSampleSheetService:
         sample_sheet_api = self.__dict__.get("sample_sheet_api_")
         if sample_sheet_api is None:
             LOG.debug("Instantiating sample sheet API")
-            sample_sheet_api = SampleSheetAPI(
+            sample_sheet_api = IlluminaSampleSheetService(
                 flow_cell_dir=self.run_instruments.illumina.sequencing_runs_dir,
                 hk_api=self.housekeeper_api,
                 lims_api=self.lims_api,
@@ -632,3 +636,7 @@ class CGConfig(BaseModel):
             )
             self.delivery_api_ = api
         return api
+
+    @property
+    def sequencing_qc_service(self) -> SequencingQCService:
+        return SequencingQCService(self.status_db)

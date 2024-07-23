@@ -34,14 +34,14 @@ from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+def add_gene_panel_combo(gene_panels: set[str]) -> set[str]:
     """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
     additional_panels = set()
-    for panel in default_panels:
+    for panel in gene_panels:
         if panel in GenePanelCombo.COMBO_1:
             additional_panels |= GenePanelCombo.COMBO_1.get(panel)
-    default_panels |= additional_panels
-    return default_panels
+    gene_panels |= additional_panels
+    return gene_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -212,10 +212,12 @@ class AnalysisAPI(MetaAPI):
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
-    def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
-        """Storing bundle data in Housekeeper for CASE_ID"""
+    def upload_bundle_housekeeper(
+        self, case_id: str, dry_run: bool = False, force: bool = False
+    ) -> None:
+        """Storing bundle data in Housekeeper for a case."""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
-        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
+        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
@@ -234,7 +236,7 @@ class AnalysisAPI(MetaAPI):
         self.housekeeper_api.add_commit(bundle_object)
         self.housekeeper_api.add_commit(bundle_version)
         LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
     def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
@@ -294,16 +296,19 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         return case.latest_order.id
 
-    def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
+    def get_hermes_transformed_deliverables(self, case_id: str, force: bool = False) -> dict:
+        """Return the Hermes-transformed deliverables bundle to be stored in Housekeeper for a given case."""
         return self.hermes_api.create_housekeeper_bundle(
             bundle_name=case_id,
             deliverables=self.get_deliverables_file_path(case_id=case_id),
             workflow=str(self.workflow),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
+            force=force,
         ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> datetime.date:
+        """Return the creation date of the deliverables file for a given case."""
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_workflow_version(self, case_id: str) -> str:
@@ -532,6 +537,10 @@ class AnalysisAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        return []
+
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
@@ -546,7 +555,9 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -554,7 +565,9 @@ class AnalysisAPI(MetaAPI):
         except FileNotFoundError:
             self.clean_analyses(case_id)
 
-        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+        if skip_confirmation or click.confirm(
+            f"Are you sure you want to remove all files in {case_path}?"
+        ):
             if case_path.is_symlink():
                 LOG.warning(
                     f"Will not automatically delete symlink: {case_path}, delete it manually",
@@ -566,22 +579,22 @@ class AnalysisAPI(MetaAPI):
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
 
-    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+    def _is_illumina_run_check_applicable(self, case_id) -> bool:
         """Returns true if the case is neither down sampled nor external."""
         return not (
             self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
-    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
-        """Check if flow cells are on disk for given case. If not, request flow cells."""
-        if not self._is_flow_cell_check_applicable(case_id):
+    def ensure_illumina_run_on_disk(self, case_id: str) -> None:
+        """Check if Illumina sequencing runs are on disk for given case."""
+        if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
-                "Flow cell check is not applicable - "
+                "Illumina run check is not applicable - "
                 "the case is either down sampled or external."
             )
             return
-        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
-            self.status_db.request_flow_cells_for_case(case_id)
+        if not self.status_db.are_all_illumina_runs_on_disk(case_id=case_id):
+            self.status_db.request_sequencing_runs_for_case(case_id)
 
     def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
@@ -597,10 +610,10 @@ class AnalysisAPI(MetaAPI):
 
     def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
-        if self._is_flow_cell_check_applicable(
+        if self._is_illumina_run_check_applicable(
             case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+        ) and not self.status_db.are_all_illumina_runs_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - not all Illumina runs present on disk.")
             return True
         else:
             if not self.are_all_spring_files_present(case_id):
@@ -617,9 +630,9 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):
-        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
-        self.ensure_flow_cells_on_disk(case_id)
+        self.ensure_illumina_run_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
             spring_archive_api = SpringArchiveAPI(
@@ -686,17 +699,16 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if customer should use the gene panel master list
+        """Check if customer is collaborator for gene panel master list
         and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO.
+        If not, add gene panel combo and broad non-specific gene panels.
         Return an aggregated gene panel."""
-        master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
-            master_list
+        if GenePanelMasterList.is_customer_collaborator_and_panels_in_gene_panels_master_list(
+            customer_id=customer_id, gene_panels=default_panels
         ):
-            return master_list
-        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+            return GenePanelMasterList.get_panel_names()
+        all_panels: set[str] = add_gene_panel_combo(gene_panels=default_panels)
+        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
         return list(all_panels)
 
     def run_analysis(self, *args, **kwargs):

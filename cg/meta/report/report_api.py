@@ -15,7 +15,10 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
+from cg.meta.report.field_validators import (
+    get_empty_report_data,
+    get_missing_report_data,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -27,8 +30,20 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
-from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationLimitations,
+    Case,
+    CaseSample,
+    Sample,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -40,26 +55,24 @@ class ReportAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api: AnalysisAPI = analysis_api
 
-    def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, force_report: bool
-    ) -> str:
-        """Generates the html contents of a delivery report."""
+    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> str:
+        """Generates the HTML content of a delivery report."""
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
         report_data: ReportModel = self.validate_report_fields(
-            case_id=case_id, report_data=report_data, force_report=force_report
+            case_id=case_id, report_data=report_data, force=force
         )
         rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
         """Generates a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
-            case_id=case_id, analysis_date=analysis_date, force_report=force_report
+            case_id=case_id, analysis_date=analysis_date, force=force
         )
         report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
@@ -175,16 +188,14 @@ class ReportAPI(MetaAPI):
             ),
         )
 
-    def validate_report_fields(
-        self, case_id: str, report_data: ReportModel, force_report
-    ) -> ReportModel:
+    def validate_report_fields(self, case_id: str, report_data: ReportModel, force) -> ReportModel:
         """Verifies that the required report fields are not empty."""
         required_fields: dict = self.get_required_fields(case=report_data.case)
         empty_report_fields: dict = get_empty_report_data(report_data=report_data)
         missing_report_fields: dict = get_missing_report_data(
             empty_fields=empty_report_fields, required_fields=required_fields
         )
-        if missing_report_fields and not force_report:
+        if missing_report_fields and not force:
             LOG.error(
                 f"Could not generate report data for {case_id}. "
                 f"Missing data: \n{WriteStream.write_stream_from_content(content=missing_report_fields, file_format=FileFormat.YAML)}"
@@ -335,14 +346,15 @@ class ReportAPI(MetaAPI):
         return DataAnalysisModel(
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
+            delivered_files=delivered_files,
+            genome_build=self.analysis_api.get_genome_build(case.internal_id),
+            panels=case.panels,
+            pons=self.analysis_api.get_pons(case.internal_id),
+            scout_files=self.get_scout_uploaded_files(case.internal_id),
+            type=self.analysis_api.get_data_analysis_type(case.internal_id),
+            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.analysis_api.get_data_analysis_type(case.internal_id),
-            genome_build=self.analysis_api.get_genome_build(case.internal_id),
-            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
-            panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case.internal_id),
-            delivered_files=delivered_files,
         )
 
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:

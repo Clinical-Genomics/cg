@@ -1,9 +1,9 @@
 {% macro qc_metrics(samples, metrics) %}
-  <h4 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h4>
+  <h4 class="mt-4 mb-3">Kvalitetsmått</h4>
   <table class="table w-auto text-center align-middle" aria-describedby="qc-metrics-table">
     <thead class="table-secondary">
       <tr>
-        <th scope="col">Metrik</th>
+        <th scope="col">Kvalitetsmått</th>
         {% for sample in samples %}
           <th scope="col">{{ sample.name }} ({{ sample.id }})</th>
         {% endfor %}

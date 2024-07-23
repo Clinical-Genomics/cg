@@ -7,14 +7,14 @@ from pathlib import Path
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, SequencingRunDataAvailability, Workflow
 from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
@@ -30,7 +30,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -40,7 +39,6 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
 )
 from cg.store.store import Store
@@ -416,16 +414,7 @@ class StoreHelpers:
         sample.ordered_at = datetime.now()
 
         for key, value in kwargs.items():
-            if key == "flowcell":
-                flow_cell: Flowcell = kwargs["flowcell"]
-                metric: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
-                    sample_internal_id=sample.internal_id,
-                    flow_cell_name=flow_cell.name,
-                    **kwargs,
-                )
-                store.session.add(metric)
-
-            elif hasattr(sample, key):
+            if hasattr(sample, key):
                 setattr(sample, key, value)
             else:
                 raise AttributeError(f"Unknown sample attribute/feature: {key}, {value}")
@@ -688,45 +677,6 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flow_cell(
-        store: Store,
-        flow_cell_name: str = "flow_cell_test",
-        archived_at: datetime = None,
-        sequencer_type: str = Sequencers.HISEQX,
-        samples: list[Sample] = None,
-        status: str = None,
-        date: datetime = datetime.now(),
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Utility function to add a flow cell to the store and return an object."""
-        flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
-        if flow_cell:
-            return flow_cell
-        flow_cell: Flowcell = store.add_flow_cell(
-            flow_cell_name=flow_cell_name,
-            sequencer_name="dummy_sequencer",
-            sequencer_type=sequencer_type,
-            date=date,
-            has_backup=has_backup,
-        )
-        flow_cell.archived_at = archived_at
-        if status:
-            flow_cell.status = status
-
-        store.session.add(flow_cell)
-        store.session.commit()
-
-        if samples:
-            for sample in samples:
-                StoreHelpers.ensure_sample_lane_sequencing_metrics(
-                    sample_internal_id=sample.internal_id,
-                    flow_cell_name=flow_cell.name,
-                    store=store,
-                )
-        store.session.commit()
-        return flow_cell
-
-    @staticmethod
     def add_illumina_flow_cell(
         store: Store, flow_cell_id: str = "flow_cell_test", model: str = "10B"
     ) -> IlluminaFlowCell:
@@ -760,9 +710,10 @@ class StoreHelpers:
     def add_illumina_sequencing_run(
         store: Store,
         flow_cell: IlluminaFlowCell,
+        timestamp_now: datetime = datetime.now(),
         sequencer_type: Sequencers = Sequencers.NOVASEQ,
         sequencer_name: str = "dummy_sequencer",
-        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        data_availability: SequencingRunDataAvailability = SequencingRunDataAvailability.ON_DISK,
         archived_at: datetime = None,
         has_backup: bool | None = False,
     ) -> IlluminaSequencingRun:
@@ -774,20 +725,20 @@ class StoreHelpers:
             data_availability=data_availability,
             archived_at=archived_at,
             has_backup=has_backup,
-            total_reads=100,
+            total_reads=100_000_000,
             total_undetermined_reads=10,
             percent_undetermined_reads=0.1,
-            percent_q30=0.9,
+            percent_q30=90,
             mean_quality_score=35,
             total_yield=100,
-            yield_q30=None,
-            cycles=None,
-            demultiplexing_software=None,
-            demultiplexing_software_version=None,
-            sequencing_started_at=None,
-            sequencing_completed_at=None,
-            demultiplexing_started_at=None,
-            demultiplexing_completed_at=None,
+            yield_q30=50,
+            cycles=151,
+            demultiplexing_software="dragen",
+            demultiplexing_software_version="1.0.0",
+            sequencing_started_at=timestamp_now,
+            sequencing_completed_at=timestamp_now,
+            demultiplexing_started_at=timestamp_now,
+            demultiplexing_completed_at=timestamp_now,
         )
         illumina_run: IlluminaSequencingRun = store.add_illumina_sequencing_run(
             sequencing_run_dto=illumina_run_dto, flow_cell=flow_cell
@@ -802,7 +753,7 @@ class StoreHelpers:
         flow_cell: IlluminaFlowCell,
         sequencer_type: Sequencers = Sequencers.NOVASEQ,
         sequencer_name: str = "dummy_sequencer",
-        data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
+        data_availability: SequencingRunDataAvailability = SequencingRunDataAvailability.ON_DISK,
         archived_at: datetime = None,
         has_backup: bool | None = False,
     ) -> IlluminaSequencingRun:
@@ -841,7 +792,7 @@ class StoreHelpers:
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=100,
-            base_passing_q30_percent=0.9,
+            base_passing_q30_percent=90,
             base_mean_quality_score=35,
             yield_=100,
             yield_q30=0.9,
@@ -1105,61 +1056,12 @@ class StoreHelpers:
         return case
 
     @classmethod
-    def ensure_sample_lane_sequencing_metrics(
-        cls,
-        store: Store,
-        sample_internal_id: str,
-        flow_cell_name: str,
-        customer_id: str = "some_customer_007",
-        sample_total_reads_in_lane: int = 500_000_000,
-        sample_base_percentage_passing_q30: int = 90,
-        sample_base_mean_quality_score: int = 35,
-        created_at: datetime = datetime.now(),
-        **kwargs,
-    ) -> SampleLaneSequencingMetrics:
-        """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
-        sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
-        flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
-
-        if not sample:
-            sample = cls.add_sample(
-                store=store, customer_id=customer_id, internal_id=sample_internal_id
-            )
-        if not flow_cell:
-            flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
-
-        metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
-            sample_internal_id=sample.internal_id,
-            flow_cell_name=flow_cell.name,
-            sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score=sample_base_mean_quality_score,
-            created_at=created_at,
-            **kwargs,
-        )
-        metrics.sample = sample
-        metrics.flowcell = flow_cell
-        store.session.add(metrics)
-        store.session.commit()
-        return metrics
-
-    @classmethod
-    def add_flow_cell_and_samples_with_sequencing_metrics(
-        cls, flow_cell_name: str, sequencer: str, sample_ids: list[str], store: Store
-    ) -> None:
-        """Add a flow cell and the given samples with sequencing metrics to a store."""
-        cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name, sequencer_type=sequencer)
-        for i, sample_id in enumerate(sample_ids):
-            cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
-            cls.ensure_sample_lane_sequencing_metrics(
-                store=store,
-                sample_internal_id=sample_id,
-                flow_cell_name=flow_cell_name,
-            )
-
-    @classmethod
     def add_illumina_flow_cell_and_samples_with_sequencing_metrics(
-        cls, run_directory_data: IlluminaRunDirectoryData, sample_ids: list[str], store: Store
+        cls,
+        run_directory_data: IlluminaRunDirectoryData,
+        sample_ids: list[str],
+        case_ids: list[str],
+        store: Store,
     ) -> None:
         """Add an Illumina flow cell and the given samples with sequencing metrics to a store."""
         flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
@@ -1172,32 +1074,16 @@ class StoreHelpers:
             sequencer_type=run_directory_data.sequencer_type,
         )
         for i, sample_id in enumerate(sample_ids):
+            cls.add_case(store=store, internal_id=case_ids[i], name=case_ids[i])
             cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
+            cls.relate_samples(
+                base_store=store,
+                case=store.get_case_by_internal_id(case_ids[i]),
+                samples=[store.get_sample_by_internal_id(sample_id)],
+            )
             cls.add_illumina_sample_sequencing_metrics_object(
                 store=store,
                 sample_id=sample_id,
                 sequencing_run=sequencing_run,
                 lane=i + 1,
-            )
-
-    @classmethod
-    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: list, store) -> None:
-        """Add multiple sample lane sequencing metrics to a store."""
-
-        for (
-            sample_internal_id,
-            flow_cell_name_,
-            flow_cell_lane_number,
-            sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score,
-        ) in metrics_data:
-            cls.ensure_sample_lane_sequencing_metrics(
-                store=store,
-                sample_internal_id=sample_internal_id,
-                flow_cell_name=flow_cell_name_,
-                flow_cell_lane_number=flow_cell_lane_number,
-                sample_total_reads_in_lane=sample_total_reads_in_lane,
-                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-                sample_base_mean_quality_score=sample_base_mean_quality_score,
             )

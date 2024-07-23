@@ -102,7 +102,7 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     samples: list[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
 
     # THEN it should have found the same number of samples
-    assert len(samples) == 5
+    assert len(samples) == 6
     # ... and pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["udfs"]["collection_date"] == "2021-05-05"

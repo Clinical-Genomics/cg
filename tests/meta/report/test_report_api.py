@@ -39,7 +39,7 @@ def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
     delivery_report: str = report_api_mip_dna.create_delivery_report(
         case_id=case_mip_dna.internal_id,
         analysis_date=case_mip_dna.analyses[0].started_at,
-        force_report=False,
+        force=False,
     )
 
     # THEN check if the delivery report has been created
@@ -58,7 +58,7 @@ def test_create_delivery_report_file(
         case_id=case_mip_dna.internal_id,
         directory=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,
-        force_report=False,
+        force=False,
     )
 
     # THEN check if a html report has been created and saved
@@ -97,7 +97,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
 
     # THEN check collection of the nested report data and that the required fields are not empty
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
     recursive_assert(report_data.model_dump())
 
@@ -120,7 +120,7 @@ def test_validate_report_empty_fields(
 
     # THEN check if the empty fields are identified
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
     assert report_data
     assert "version" in caplog.text
@@ -146,7 +146,7 @@ def test_validate_report_missing_fields(
     # THEN test that the DeliveryReportError is raised when the report generation is not forced
     try:
         report_api_mip_dna.validate_report_fields(
-            case_mip_dna.internal_id, report_data, force_report=False
+            case_mip_dna.internal_id, report_data, force=False
         )
     except DeliveryReportError:
         assert "accredited" in caplog.text
@@ -168,7 +168,7 @@ def test_get_validated_report_data_external_sample(
 
     # WHEN validating report fields
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
 
     # THEN the validation should have been completed successfully

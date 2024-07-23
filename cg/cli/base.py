@@ -9,6 +9,7 @@ import coloredlogs
 from sqlalchemy.orm import scoped_session
 
 import cg
+from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
 from cg.cli.validate import validate
 from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
@@ -26,7 +27,9 @@ from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.cli.validate import validate
 from cg.cli.workflow.base import workflow as workflow_cmd
+from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
@@ -81,8 +84,8 @@ def base(
 
 
 @base.command()
-@click.option("--reset", is_flag=True, help="reset database before setting up tables")
-@click.option("--force", is_flag=True, help="bypass manual confirmations")
+@click.option("--reset", is_flag=True, help="Reset database before setting up tables")
+@FORCE
 @click.pass_obj
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
@@ -118,3 +121,4 @@ base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
 base.add_command(validate)
+base.add_command(sequencing_qc)

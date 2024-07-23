@@ -1,11 +1,11 @@
 import click
 from click.core import ParameterSource
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.archiving import DEFAULT_SPRING_ARCHIVE_COUNT
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)

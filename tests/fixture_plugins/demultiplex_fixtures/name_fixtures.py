@@ -101,3 +101,70 @@ def novaseq_x_flow_cell_id() -> str:
 def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def seven_canonical_flow_cell_ids(
+    hiseq_x_single_index_flow_cell_id: str,
+    hiseq_x_dual_index_flow_cell_id: str,
+    hiseq_2500_dual_index_flow_cell_id: str,
+    hiseq_2500_custom_index_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+    novaseq_x_flow_cell_id: str,
+) -> list[str]:
+    """Return a list of seven canonical flow cell ids."""
+    return [
+        hiseq_x_single_index_flow_cell_id,
+        hiseq_x_dual_index_flow_cell_id,
+        hiseq_2500_dual_index_flow_cell_id,
+        hiseq_2500_custom_index_flow_cell_id,
+        novaseq_6000_pre_1_5_kits_flow_cell_id,
+        novaseq_6000_post_1_5_kits_flow_cell_id,
+        novaseq_x_flow_cell_id,
+    ]
+
+
+@pytest.fixture(scope="session")
+def demultiplex_log_file_names(novaseq_6000_post_1_5_kits_flow_cell_id: str) -> list[str]:
+    """Return a list of demultiplex log file names."""
+    return [
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stderr",
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stdout",
+    ]
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_names(
+    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
+) -> list[str]:
+    """Return a list of fastq file names for a NovaSeq6000 post 1.5 kits flow cell."""
+    fastq_files: list[str] = []
+    lanes = [1, 2]
+    for sample_id, lane in zip(selected_novaseq_6000_post_1_5_kits_sample_ids, lanes):
+        fastq_files.extend(
+            [
+                f"{sample_id}_S1_L00{lane}_R1_001.fastq.gz",
+                f"{sample_id}_S1_L00{lane}_R2_001.fastq.gz",
+            ]
+        )
+    return fastq_files
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_lane_1(
+    novaseq_6000_post_1_5_kits_fastq_file_names: list[str],
+) -> str:
+    """Return the fastq file name for lane 1."""
+    return novaseq_6000_post_1_5_kits_fastq_file_names[0]
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_lane_1_with_flow_cell_id(
+    novaseq_6000_post_1_5_kits_fastq_file_lane_1: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> str:
+    """Return the fastq file name for lane 1 with flow cell id."""
+    return (
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_{novaseq_6000_post_1_5_kits_fastq_file_lane_1}"
+    )

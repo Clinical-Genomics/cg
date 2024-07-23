@@ -2,8 +2,6 @@
 
 from enum import Enum, IntEnum, StrEnum, auto
 
-import click
-
 from cg.utils.date import get_date
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
@@ -76,7 +74,7 @@ class CustomerId(StrEnum):
     CUST999: str = "cust999"
 
 
-class FlowCellStatus(StrEnum):
+class SequencingRunDataAvailability(StrEnum):
     ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
@@ -231,22 +229,6 @@ class APIMethods(StrEnum):
     GET: str = "GET"
     DELETE: str = "DELETE"
     PATCH: str = "PATCH"
-
-
-DRY_RUN = click.option(
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Runs the command without making any changes",
-)
-
-SKIP_CONFIRMATION = click.option(
-    "-y",
-    "--yes",
-    is_flag=True,
-    default=False,
-    help="Skip confirmation",
-)
 
 
 class MicrosaltQC:

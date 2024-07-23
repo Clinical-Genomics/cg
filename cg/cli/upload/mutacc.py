@@ -7,7 +7,7 @@ import click
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig
 

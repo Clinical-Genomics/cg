@@ -9,7 +9,8 @@ import click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import FileFormat, DRY_RUN
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FileFormat
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI

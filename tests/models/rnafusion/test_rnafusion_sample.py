@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic.v1 import ValidationError
 
-from cg.exc import SampleSheetError
+from cg.exc import NfSampleSheetError
 from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 
 
@@ -44,7 +44,7 @@ def test_incomplete_fastq_file_pairs(
     # WHEN instantiating a sample object
 
     # THEN throws an error
-    with pytest.raises(SampleSheetError) as error:
+    with pytest.raises(NfSampleSheetError) as error:
         RnafusionSampleSheetEntry(
             name=sample_name,
             fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
@@ -112,7 +112,7 @@ def test_non_existing_fastq_file(
     # GIVEN a sample with a non existing file
 
     # WHEN instantiating a sample object THEN throws an error
-    with pytest.raises(SampleSheetError) as error:
+    with pytest.raises(NfSampleSheetError) as error:
         RnafusionSampleSheetEntry(
             name=sample_name,
             fastq_forward_read_paths=[fastq_forward_read_path],
