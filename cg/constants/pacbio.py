@@ -12,13 +12,13 @@ class PacBioDirsAndFiles:
 
 
 class CCSAttributeIDs:
-    NUMBER_OF_READS: str = "ccs2.number_of_ccs_reads"
-    TOTAL_NUMBER_OF_BASES: str = "ccs2.total_number_of_ccs_bases"
-    MEAN_READ_LENGTH: str = "ccs2.mean_ccs_readlength"
-    MEDIAN_READ_LENGTH: str = "ccs2.median_ccs_readlength"
-    READ_LENGTH_N50: str = "ccs2.ccs_readlength_n50"
-    MEDIAN_ACCURACY: str = "ccs2.median_accuracy"
-    PERCENT_Q30: str = "ccs2.percent_ccs_bases_q30"
+    NUMBER_OF_READS: str = "ccs_processing.number_of_ccs_reads_q20"
+    TOTAL_NUMBER_OF_BASES: str = "ccs_processing.total_number_of_ccs_bases_q20"
+    MEAN_READ_LENGTH: str = "ccs_processing.mean_ccs_readlength_q20"
+    MEDIAN_READ_LENGTH: str = "ccs_processing.median_ccs_readlength_q20"
+    READ_LENGTH_N50: str = "ccs_processing.ccs_readlength_n50_q20"
+    MEDIAN_ACCURACY: str = "ccs_processing.median_qv_q20"
+    PERCENT_Q30: str = "Base quality >=Q30 (%)"
 
 
 class ControlAttributeIDs:
