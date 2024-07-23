@@ -1,6 +1,7 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageData
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -8,6 +9,7 @@ from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.report.metadata import RarediseaseSampleMetadataModel
+from cg.models.report.report import ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -45,3 +47,20 @@ class RarediseaseReportAPI(ReportAPI):
         This method evaluates the accreditation status of each sample's application.
         """
         return all(sample.application.accredited for sample in samples)
+
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+        """Return Raredisease files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+            ),
+            vcf_str=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
+            ),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
+            ),
+        )

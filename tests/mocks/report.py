@@ -8,6 +8,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.coverage import ChanjoAPI
 from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -70,12 +71,12 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         )
         return None
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_key: ScoutUploadKey) -> str:
         """Return mocked uploaded to Scout file."""
         LOG.info(
-            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_tag={scout_tag}"
+            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_key={scout_key}"
         )
-        return f"path/to/{scout_tag}"
+        return f"path/to/{scout_key}"
 
 
 class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):

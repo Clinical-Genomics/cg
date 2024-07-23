@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
 from cg.constants.housekeeper_tags import AlignmentFileTag
@@ -27,6 +27,14 @@ class ScoutCustomCaseReportTags(StrEnum):
     MULTIQC_RNA: str = "multiqc_rna"
     GENE_FUSION: str = "gene_fusion"
     GENE_FUSION_RESEARCH: str = "gene_fusion_research"
+
+
+class ScoutUploadKey(StrEnum):
+    SMN_TSV = auto()
+    SNV_VCF = auto()
+    SV_VCF = auto()
+    VCF_STR = auto()
+    VCF_FUSION = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(

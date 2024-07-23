@@ -13,7 +13,7 @@ from cg.constants import (
     RNAFUSION_REPORT_ACCREDITED_APPTAGS,
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
 )
-from cg.constants.scout import RNAFUSION_CASE_TAGS
+from cg.constants.scout import RNAFUSION_CASE_TAGS, ScoutUploadKey
 from cg.meta.report.field_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
@@ -92,7 +92,9 @@ class RnafusionReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            vcf_fusion=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_fusion")
+            vcf_fusion=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, SCOUT_KEY=ScoutUploadKey.VCF_FUSION
+            )
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:

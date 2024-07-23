@@ -18,7 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
-from cg.constants.scout import BALSAMIC_CASE_TAGS
+from cg.constants.scout import BALSAMIC_CASE_TAGS, ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -139,8 +139,12 @@ class BalsamicReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+            ),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
