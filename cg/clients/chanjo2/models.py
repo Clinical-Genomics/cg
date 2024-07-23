@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class CoverageSample(BaseModel):
     """Chanjo2 sample model defined with an ID and a coverage file path."""
 
-    coverage_path: str
-    id: str
+    coverage_file_path: str
+    name: str
 
 
 class CoverageRequest(BaseModel):
@@ -15,7 +15,7 @@ class CoverageRequest(BaseModel):
 
     build: str
     coverage_threshold: int
-    gene_ids: list[int]
+    hgnc_gene_ids: list[int]
     interval_type: str
     samples: list[CoverageSample]
 
@@ -23,5 +23,5 @@ class CoverageRequest(BaseModel):
 class CoverageData(BaseModel):
     """Coverage data model returned from the POST request."""
 
-    mean_coverage: float
     coverage_completeness_percent: float
+    mean_coverage: float
