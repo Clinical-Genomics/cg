@@ -185,9 +185,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         coverage_request = CoverageRequest(
             build=self.translate_genome_reference(genome_version),
             coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-            gene_ids=self.get_gene_ids_from_scout(panels),
+            hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
             interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-            samples=[CoverageSample(coverage_path=coverage_file_path, id=sample_id)],
+            samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
         )
         return self.chanjo2_api.get_coverage(coverage_request)
 
