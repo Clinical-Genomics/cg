@@ -8,7 +8,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.clients.chanjo2.api import Chanjo2APIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.delivery.delivery import DeliveryAPI

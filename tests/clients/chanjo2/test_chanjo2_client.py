@@ -6,7 +6,7 @@ import requests
 from pytest import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.clients.chanjo2.api import Chanjo2APIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.chanjo2.models import CoverageData, CoverageRequest
 
 

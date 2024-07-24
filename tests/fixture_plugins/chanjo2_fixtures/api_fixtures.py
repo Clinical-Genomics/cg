@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from cg.clients.chanjo2.api import Chanjo2APIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 
 
 @pytest.fixture
