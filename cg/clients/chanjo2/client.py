@@ -6,6 +6,7 @@ from typing import Any
 import requests
 
 from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
+from cg.clients.chanjo2.utils import handle_client_errors
 
 LOG = logging.getLogger(__name__)
 
@@ -23,22 +24,16 @@ class Chanjo2APIClient:
             "accept": "application/json",
         }
 
+    @handle_client_errors
     def get_coverage(
         self, coverage_post_request: CoveragePostRequest
     ) -> CoveragePostResponse | None:
         """Send a POST request to the coverage endpoint to retrieve gene coverage summary data."""
         endpoint: str = f"{self.base_url}/coverage/d4/genes/summary"
         post_data: dict[str, Any] = coverage_post_request.model_dump()
-        try:
-            response: requests.Response = requests.post(
-                url=endpoint, headers=self.headers, json=post_data
-            )
-            response.raise_for_status()
-            response_content: dict[str, Any] = response.json().values()
-            if not response_content:
-                LOG.error("The POST get coverage response is empty")
-                return None
-            return CoveragePostResponse(**next(iter(response_content)))
-        except (requests.RequestException, ValueError) as error:
-            LOG.error(f"Error during coverage POST request: {error}")
-            return None
+        response: requests.Response = requests.post(
+            url=endpoint, headers=self.headers, json=post_data
+        )
+        response.raise_for_status()
+        response_json: dict[str, Any] = response.json()
+        return CoveragePostResponse.model_validate(response_json)

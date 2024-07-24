@@ -20,8 +20,14 @@ class CoveragePostRequest(BaseModel):
     samples: list[CoverageSample]
 
 
-class CoveragePostResponse(BaseModel):
-    """Coverage data model returned from the POST request."""
+class CoverageMetrics(BaseModel):
+    """Chanjo2 sample coverage metrics."""
 
     coverage_completeness_percent: float
     mean_coverage: float
+
+
+class CoveragePostResponse(BaseModel):
+    """Coverage sample data model returned from the POST request."""
+
+    __root__: dict[str, CoverageMetrics]
