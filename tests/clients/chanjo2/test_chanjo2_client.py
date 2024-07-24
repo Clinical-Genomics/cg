@@ -2,74 +2,69 @@
 
 from unittest.mock import Mock
 
+import pytest
 import requests
-from pytest import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
+from cg.exc import Chanjo2RequestError, Chanjo2ResponseError
 
 
-def test_get_coverage_success(
+def test_post_coverage_success(
     chanjo2_api_client: Chanjo2APIClient,
     coverage_post_request: CoveragePostRequest,
     coverage_post_response: CoveragePostResponse,
     coverage_post_response_success: Mock,
     mocker: MockFixture,
 ):
-    """Tests successful get coverage extraction."""
+    """Test successful POST request coverage extraction."""
 
     # GIVEN a mocked POST request
     mocker.patch.object(requests, "post", return_value=coverage_post_response_success)
 
     # WHEN getting the coverage data
-    sample_coverage: CoveragePostResponse | None = chanjo2_api_client.get_coverage(
-        coverage_post_request
-    )
+    sample_coverage: CoveragePostResponse = chanjo2_api_client.get_coverage(coverage_post_request)
 
-    # THEN the return coverage data should match the expected one
+    # THEN the returned coverage data should match the expected one
     assert sample_coverage == coverage_post_response
 
 
-def test_get_coverage_exception(
+def test_get_coverage_http_error(
     chanjo2_api_client: Chanjo2APIClient,
     coverage_post_request: CoveragePostRequest,
-    coverage_post_response_exception: Mock,
+    coverage_post_response_http_error: Mock,
     mocker: MockFixture,
-    caplog: LogCaptureFixture,
 ):
-    """Tests successful get coverage extraction."""
+    """Test the raising of an HTTPError during POST request coverage extraction."""
 
     # GIVEN a mocked POST request raising an exception
-    mocker.patch.object(requests, "post", return_value=coverage_post_response_exception)
+    mocker.patch.object(requests, "post", return_value=coverage_post_response_http_error)
 
     # WHEN getting the coverage data
-    sample_coverage: CoveragePostResponse | None = chanjo2_api_client.get_coverage(
-        coverage_post_request
-    )
 
-    # THEN an exception should have been raised and the sample coverage should be None
-    assert sample_coverage is None
-    assert "Error during coverage POST request" in caplog.text
+    # THEN a Chanjo2 request error should have been raised
+    with pytest.raises(Chanjo2RequestError):
+        chanjo2_api_client.get_coverage(coverage_post_request)
 
 
-def test_get_coverage_empty_return(
+def test_get_coverage_validation_error(
     chanjo2_api_client: Chanjo2APIClient,
     coverage_post_request: CoveragePostRequest,
-    coverage_post_response_empty: Mock,
+    coverage_post_response_invalid: Mock,
     mocker: MockFixture,
-    caplog: LogCaptureFixture,
 ):
-    """Tests successful get coverage extraction."""
+    """Test the raising of a ValidationError during POST request coverage extraction."""
 
-    # GIVEN a mocked POST request returning an empty JSON
-    mocker.patch.object(requests, "post", return_value=coverage_post_response_empty)
+    # GIVEN a mocked POST request returning an invalid JSON
+    mocker.patch.object(requests, "post", return_value=coverage_post_response_invalid)
 
     # WHEN getting the coverage data
-    sample_coverage: CoveragePostResponse | None = chanjo2_api_client.get_coverage(
-        coverage_post_request
-    )
 
-    # THEN an empty data error should have been thrown
-    assert sample_coverage is None
-    assert "The POST get coverage response is empty" in caplog.text
+    # THEN a Chanjo2 response error should have been raised
+    with pytest.raises(Chanjo2ResponseError):
+        chanjo2_api_client.get_coverage(coverage_post_request)
+
+
+# TODO: empty response
+# TODO: attribute error check

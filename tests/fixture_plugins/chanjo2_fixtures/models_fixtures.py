@@ -27,8 +27,5 @@ def coverage_post_request(sample_id: str) -> CoveragePostRequest:
 
 
 @pytest.fixture
-def coverage_post_response() -> CoveragePostResponse:
-    return CoveragePostResponse(
-        coverage_completeness_percent=33.33,
-        mean_coverage=55.55,
-    )
+def coverage_post_response(coverage_post_response_json: dict[str, float]) -> CoveragePostResponse:
+    return CoveragePostResponse.model_validate(coverage_post_response_json)

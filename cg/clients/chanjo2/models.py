@@ -1,6 +1,6 @@
 """Chanjo2 API pydantic models."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
 class CoverageSample(BaseModel):
@@ -27,7 +27,7 @@ class CoverageMetrics(BaseModel):
     mean_coverage: float
 
 
-class CoveragePostResponse(BaseModel):
+class CoveragePostResponse(RootModel):
     """Coverage sample data model returned from the POST request."""
 
-    __root__: dict[str, CoverageMetrics]
+    root: dict[str, CoverageMetrics]
