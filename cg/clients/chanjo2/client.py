@@ -28,7 +28,9 @@ class Chanjo2APIClient:
         endpoint: str = f"{self.host}/coverage/d4/genes/summary"
         post_data: dict[str, Any] = coverage_request.model_dump()
         try:
-            response = requests.post(url=endpoint, headers=self.headers, json=post_data)
+            response: requests.Response = requests.post(
+                url=endpoint, headers=self.headers, json=post_data
+            )
             response.raise_for_status()
             response_content: dict[str, Any] = response.json().values()
             if not response_content:
