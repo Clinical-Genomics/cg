@@ -31,9 +31,14 @@ def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_name: str) -> 
 
 
 @pytest.fixture
-def pac_bio_smrt_cell_dir(pac_bio_test_run_dir: Path) -> Path:
+def pac_bio_smrt_cell_name() -> str:
+    return "1_A01"
+
+
+@pytest.fixture
+def pac_bio_smrt_cell_dir(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_name: str) -> Path:
     """Return the path to a PacBio SMRT cell directory."""
-    return Path(pac_bio_test_run_dir, "1_A01")
+    return Path(pac_bio_test_run_dir, pac_bio_smrt_cell_name)
 
 
 @pytest.fixture
