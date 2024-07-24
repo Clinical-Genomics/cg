@@ -1,7 +1,10 @@
 from pathlib import Path
 from cg.services.post_processing.abstract_classes import RunDataGenerator
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.validators import validate_name_pre_fix, validate_has_well_plate
+from cg.services.post_processing.validators import (
+    validate_name_pre_fix,
+    validate_has_expected_parts,
+)
 from cg.utils.string import get_element_from_split
 
 
@@ -9,7 +12,7 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
     def _validate_run_name(self, run_name) -> None:
         validate_name_pre_fix(run_name)
-        validate_has_well_plate(run_name=run_name, expected_parts=2)
+        validate_has_expected_parts(run_name=run_name, expected_parts=2)
 
     def get_run_data(self, run_name: str, sequencing_dir: str) -> PacBioRunData:
         """
