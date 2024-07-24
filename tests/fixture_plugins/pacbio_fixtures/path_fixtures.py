@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.pacbio import PacBioDirsAndFiles
+
 
 # Directory fixtures
 @pytest.fixture
@@ -39,13 +41,13 @@ def pac_bio_smrt_cell_dir_1_a01(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_na
 @pytest.fixture
 def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir_1_a01: Path) -> Path:
     """Return the path to the PacBio SMRT cell statistics directory."""
-    return Path(pac_bio_smrt_cell_dir_1_a01, "statistics")
+    return Path(pac_bio_smrt_cell_dir_1_a01, PacBioDirsAndFiles.STATISTICS_DIR)
 
 
 @pytest.fixture
 def pac_bio_run_reports_dir(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio SMRT cell zipped_reports directory"""
-    return Path(pac_bio_run_statistics_dir, "zipped_reports")
+    """Return the path to the PacBio SMRT cell unzipped_reports directory"""
+    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR)
 
 
 @pytest.fixture

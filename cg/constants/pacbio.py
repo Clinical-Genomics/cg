@@ -2,15 +2,15 @@
 
 
 class PacBioDirsAndFiles:
-    ADAPTER_REPORT: str = "adapter.report.json"
     BASECALLING_REPORT: str = "ccs.report.json"
     CCS_REPORT_SUFFIX: str = "ccs_report.json"
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
+    HIFI_READS_DIR: str = "hifi_reads"
     RAW_DATA_REPORT: str = "raw_data.report.json"
     SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
     STATISTICS_DIR: str = "statistics"
-    ZIPPED_REPORTS_DIR: str = "zipped_reports"
+    UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
 
 
 class CCSAttributeIDs:
