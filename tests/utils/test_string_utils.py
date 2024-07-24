@@ -11,5 +11,5 @@ def test_get_element_from_split():
     # WHEN getting an element divided by a separator based on the position
     element: str = get_element_from_split(value=separated_string, element_position=2, split="_")
 
-    # THEN the expected element is retured
+    # THEN the expected element is returned
     assert element == "two"
