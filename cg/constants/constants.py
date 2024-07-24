@@ -193,6 +193,7 @@ class HastaSlurmPartitions(StrEnum):
 
 
 class FileExtensions(StrEnum):
+    BAM: str = ".bam"
     BED: str = ".bed"
     COMPLETE: str = ".complete"
     CONFIG: str = ".config"
