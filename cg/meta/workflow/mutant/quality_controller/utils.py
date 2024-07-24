@@ -1,15 +1,18 @@
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
-from cg.exc import CgError
+from cg.constants.lims import LimsArtifactTypes, LimsProcess
+from cg.exc import CgError, LimsDataError
 from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
-from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
-from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
-from cg.meta.workflow.mutant.metrics_parser.models import SamplesResultsMetrics
+from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import (
+    MutantPoolSamples,
     QualityMetrics,
-    SampleQualityResult,
 )
+from genologics.entities import Artifact
+from genologics.entities import Sample as LimsSample
+from cg.models.cg_config import LOG
+from cg.services.sequencing_qc_service.quality_checks.utils import sample_has_enough_reads
 from cg.store.models import Case, Sample
 
 from pathlib import Path
@@ -17,75 +20,121 @@ from pathlib import Path
 from cg.store.store import Store
 
 
-def has_valid_total_reads(sample_metadata: SampleMetadata) -> bool:
-    if sample_metadata.is_external_negative_control:
-        if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
-            return True
-        else:
-            return False
+def has_valid_total_reads(
+    sample: Sample,
+    external_negative_control: bool = False,
+    internal_negative_control: bool = False,
+) -> bool:
+    if external_negative_control:
+        return external_negative_control_sample_has_enough_reads(reads=sample.reads)
 
-    if sample_metadata.is_internal_negative_control:
-        return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
+    if internal_negative_control:
+        return internal_negative_control_sample_has_enough_reads(reads=sample.reads)
 
-    return is_valid_total_reads(
-        reads=sample_metadata.reads,
-        target_reads=sample_metadata.target_reads,
-        threshold_percentage=sample_metadata.percent_reads_guaranteed,
-    )
+    return sample_has_enough_reads(sample=sample)
 
 
-def is_valid_total_reads(reads: int, target_reads: int, threshold_percentage: int) -> bool:
-    return reads > target_reads * threshold_percentage / 100
-
-
-def is_valid_total_reads_for_external_negative_control(reads: int) -> bool:
+def external_negative_control_sample_has_enough_reads(reads: int) -> bool:
     return reads < MutantQC.EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD
 
 
-def is_valid_total_reads_for_internal_negative_control(reads: int) -> bool:
+def internal_negative_control_sample_has_enough_reads(reads: int) -> bool:
     return reads < MutantQC.INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD
 
 
-def internal_negative_control_qc_pass(results: list[SampleQualityResult]) -> bool:
-    for result in results:
-        if result.is_internal_negative_control:
-            internal_negative_control_result = result
-    return internal_negative_control_result.passes_qc
+def get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
+    """Filter and return a list of internal negative controls from a given sample list."""
+    negative_controls = []
+    for sample in samples:
+        if sample.udf.get("Control") == "negative" and sample.udf.get("customer") == "cust000":
+            negative_controls.append(sample)
+    return negative_controls
 
 
-def external_negative_control_qc_pass(results: list[SampleQualityResult]) -> bool:
-    for result in results:
-        if result.is_external_negative_control:
-            external_negative_control_result = result
-    return external_negative_control_result.passes_qc
+def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id: str) -> str:
+    """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+    try:
+        artifact: Artifact = lims.get_latest_artifact_for_sample(
+            LimsProcess.COVID_POOLING_STEP, LimsArtifactTypes.ANALYTE, sample_internal_id
+        )
+        samples = artifact[0].samples
+
+        negative_controls: list = get_negative_controls_from_list(samples=samples)
+
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            LOG.warning(f"Several internal negative control samples found: {' '.join(sample_ids)}")
+        else:
+            return negative_controls[0].id
+    except Exception as exception_object:
+        raise LimsDataError from exception_object
 
 
-def get_sample_target_reads(sample: Sample) -> int:
-    return sample.application_version.application.target_reads
+def get_internal_negative_control_id(lims: LimsAPI, case: Case) -> str:
+    """Query lims to retrive internal_negative_control_id."""
+
+    sample_internal_id = case.sample_ids[0]
+
+    try:
+        internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
+            lims=lims, sample_internal_id=sample_internal_id
+        )
+        return internal_negative_control_id
+    except Exception as exception_object:
+        raise CgError from exception_object
 
 
-def get_percent_reads_guaranteed(sample: Sample) -> int:
-    return sample.application_version.application.percent_reads_guaranteed
+def get_internal_negative_control_sample_for_case(
+    case: Case,
+    status_db: Store,
+    lims: LimsAPI,
+) -> Sample:
+    try:
+        internal_negative_control_id: str = get_internal_negative_control_id(lims=lims, case=case)
+        return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
+    except Exception as exception_object:
+        raise CgError() from exception_object
+
+
+def get_mutant_pool_samples(case: Case, status_db: Store, lims: LimsAPI) -> MutantPoolSamples:
+    samples: list[Sample] = case.samples
+    for sample in samples:
+        if sample.is_negative_control:
+            external_negative_control = samples.pop(sample)
+        break
+
+    try:
+        internal_negative_control = get_internal_negative_control_sample_for_case(
+            case=case, status_db=status_db, lims=lims
+        )
+    except Exception as exception_object:
+        raise CgError from exception_object
+
+    return MutantPoolSamples(
+        samples=samples,
+        external_negative_control=external_negative_control,
+        internal_negative_control=internal_negative_control,
+    )
 
 
 def get_quality_metrics(
     case_results_file_path: Path, case: Case, status_db: Store, lims: LimsAPI
 ) -> QualityMetrics:
     try:
-        samples_results: SamplesResultsMetrics = MetricsParser.parse_samples_results(
+        samples_results: dict[str, SampleResults] = MetricsParser.parse_samples_results(
             case=case, file_path=case_results_file_path
         )
     except Exception as exception_object:
         raise CgError(f"Not possible to retrieve results for case {case}.") from exception_object
 
     try:
-        samples_metadata: SamplesMetadataMetrics = MetadataParser(
-            status_db=status_db, lims=lims
-        ).parse_metadata(case)
+        samples: MutantPoolSamples = get_mutant_pool_samples(
+            case=case, status_db=status_db, lims=lims
+        )
     except Exception as exception_object:
-        raise CgError(f"Not possible to retrieve metadata for case {case}.") from exception_object
+        raise CgError(f"Not possible to retrieve samples for case {case}.") from exception_object
 
-    return QualityMetrics(samples_results=samples_results, samples_metadata=samples_metadata)
+    return QualityMetrics(results=samples_results, pool=samples)
 
 
 def get_report_path(case_path: Path) -> Path:
