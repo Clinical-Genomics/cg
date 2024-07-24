@@ -1,5 +1,12 @@
+from pathlib import Path
+
 from cg.services.post_processing.abstract_models import RunData
 
 
-class PacbioRunData(RunData):
-    pass
+class PacBioRunData(RunData):
+    """Holds information on a single SMRTcell of a PacBio run."""
+
+    full_path: Path
+    sequencing_run_name: str
+    well_name: str
+    plate: int

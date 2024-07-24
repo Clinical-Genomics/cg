@@ -1831,7 +1831,7 @@ def context_config(
         "delivery_path": str(cg_dir),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
-            "run_data": {
+            "pacbio": {
                 "data_dir": "path/to/pacbio_data__directory",
                 "systemd_trigger_dir": "path/to/pacbio_trigger_directory",
             },

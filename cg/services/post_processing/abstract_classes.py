@@ -14,11 +14,11 @@ class RunDataGenerator(ABC):
     """Abstract class for that holds functionality to create a run data model."""
 
     @abstractmethod
-    def _validate_run_path(self) -> None:
+    def _validate_run_name(self, run_name: str) -> None:
         pass
 
     @abstractmethod
-    def get_run_data(self) -> RunData:
+    def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
         pass
 
 
@@ -44,9 +44,8 @@ class PostProcessingMetricsParser(ABC):
 
 
 class PostProcessingDataTransferService(ABC):
-    def __init__(self, metrics_service: PostProcessingMetricsParser, file_manager: RunFileManager):
+    def __init__(self, metrics_service: PostProcessingMetricsParser):
         self.metrics_service = metrics_service
-        self.file_manager = file_manager
 
     def get_post_processing_dtos(self) -> PostProcessingDTOs:
         pass
