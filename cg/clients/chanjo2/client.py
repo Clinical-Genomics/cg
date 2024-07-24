@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from cg.clients.chanjo2.models import CoverageData, CoverageRequest
+from cg.clients.chanjo2.models import CoverageData, CoveragePostRequest
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class Chanjo2APIClient:
             "accept": "application/json",
         }
 
-    def get_coverage(self, coverage_request: CoverageRequest) -> CoverageData | None:
+    def get_coverage(self, coverage_request: CoveragePostRequest) -> CoverageData | None:
         """Send a POST request to the coverage endpoint to retrieve gene coverage summary data."""
         endpoint: str = f"{self.base_url}/coverage/d4/genes/summary"
         post_data: dict[str, Any] = coverage_request.model_dump()

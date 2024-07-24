@@ -2,13 +2,13 @@
 
 import pytest
 
-from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSample
+from cg.clients.chanjo2.models import CoverageData, CoveragePostRequest, CoverageSample
 from cg.constants.gene_panel import ReferenceGenomeBuild
 
 
 @pytest.fixture
-def coverage_request(sample_id: str) -> CoverageRequest:
-    return CoverageRequest(
+def coverage_request(sample_id: str) -> CoveragePostRequest:
+    return CoveragePostRequest(
         build=ReferenceGenomeBuild.GRCH37,
         coverage_threshold=10,
         hgnc_gene_ids=[2861, 3791, 6481, 7436, 30521],

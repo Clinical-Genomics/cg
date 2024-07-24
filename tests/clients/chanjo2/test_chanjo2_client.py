@@ -7,12 +7,12 @@ from pytest import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.clients.chanjo2.client import Chanjo2APIClient
-from cg.clients.chanjo2.models import CoverageData, CoverageRequest
+from cg.clients.chanjo2.models import CoverageData, CoveragePostRequest
 
 
 def test_get_coverage_success(
     chanjo2_api_client: Chanjo2APIClient,
-    coverage_request: CoverageRequest,
+    coverage_request: CoveragePostRequest,
     coverage_data: CoverageData,
     coverage_post_response_success: Mock,
     mocker: MockFixture,
@@ -31,7 +31,7 @@ def test_get_coverage_success(
 
 def test_get_coverage_exception(
     chanjo2_api_client: Chanjo2APIClient,
-    coverage_request: CoverageRequest,
+    coverage_request: CoveragePostRequest,
     coverage_post_response_exception: Mock,
     mocker: MockFixture,
     caplog: LogCaptureFixture,
@@ -51,7 +51,7 @@ def test_get_coverage_exception(
 
 def test_get_coverage_empty_return(
     chanjo2_api_client: Chanjo2APIClient,
-    coverage_request: CoverageRequest,
+    coverage_request: CoveragePostRequest,
     coverage_post_response_empty: Mock,
     mocker: MockFixture,
     caplog: LogCaptureFixture,

@@ -10,7 +10,7 @@ class CoverageSample(BaseModel):
     name: str
 
 
-class CoverageRequest(BaseModel):
+class CoveragePostRequest(BaseModel):
     """Chanjo2 coverage POST request model."""
 
     build: str
