@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -453,7 +454,8 @@ class CGConfig(BaseModel):
         chanjo2_api = self.__dict__.get("chanjo2_api_")
         if chanjo2_api is None:
             LOG.debug("Instantiating Chanjo2 API")
-            chanjo2_api = Chanjo2APIClient(config=self.dict())
+            config: dict[str, Any] = self.dict()
+            chanjo2_api = Chanjo2APIClient(base_url=config["chanjo2"]["host"])
             self.chanjo2_api_ = chanjo2_api
         return chanjo2_api
 

@@ -16,16 +16,16 @@ class Chanjo2APIClient:
     over genomic intervals.
     """
 
-    def __init__(self, config: dict[str, str]):
+    def __init__(self, base_url: str):
+        self.base_url = base_url
         self.headers = {
             "Content-Type": "application/json",
             "accept": "application/json",
         }
-        self.host = config["chanjo2"]["host"]
 
     def get_coverage(self, coverage_request: CoverageRequest) -> CoverageData | None:
         """Send a POST request to the coverage endpoint to retrieve gene coverage summary data."""
-        endpoint: str = f"{self.host}/coverage/d4/genes/summary"
+        endpoint: str = f"{self.base_url}/coverage/d4/genes/summary"
         post_data: dict[str, Any] = coverage_request.model_dump()
         try:
             response: requests.Response = requests.post(
