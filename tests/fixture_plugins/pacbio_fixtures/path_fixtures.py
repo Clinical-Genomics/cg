@@ -31,15 +31,21 @@ def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_name: str) -> 
 
 
 @pytest.fixture
-def pac_bio_smrt_cell_dir(pac_bio_test_run_dir: Path) -> Path:
+def pac_bio_smrt_cell_dir_1_a01(pac_bio_test_run_dir: Path) -> Path:
     """Return the path to a PacBio SMRT cell directory."""
     return Path(pac_bio_test_run_dir, "1_A01")
 
 
 @pytest.fixture
-def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir: Path) -> Path:
+def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir_1_a01: Path) -> Path:
     """Return the path to the PacBio SMRT cell statistics directory."""
-    return Path(pac_bio_smrt_cell_dir, "statistics")
+    return Path(pac_bio_smrt_cell_dir_1_a01, "statistics")
+
+
+@pytest.fixture
+def pac_bio_run_reports_dir(pac_bio_run_statistics_dir: Path) -> Path:
+    """Return the path to the PacBio SMRT cell zipped_reports directory"""
+    return Path(pac_bio_run_statistics_dir, "zipped_reports")
 
 
 @pytest.fixture
