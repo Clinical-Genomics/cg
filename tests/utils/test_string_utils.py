@@ -1,4 +1,4 @@
-"""Test for the string utilities,"""
+"""Test for the string utilities."""
 
 import pytest
 
