@@ -218,6 +218,7 @@ class FileExtensions(StrEnum):
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
+    TXT: str = ".txt"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
