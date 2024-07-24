@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.services.pacbio.metrics.models import (
+from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
     HiFiMetrics,
     PacBioMetrics,
@@ -8,7 +8,7 @@ from cg.services.pacbio.metrics.models import (
     ProductivityMetrics,
     SmrtlinkDatasetsMetrics,
 )
-from cg.services.pacbio.metrics.utils import (
+from cg.services.post_processing.pacbio.metrics_parser.utils import (
     parse_control_metrics,
     parse_dataset_metrics,
     parse_hifi_metrics,

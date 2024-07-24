@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.pacbio.metrics.metrics_parser import PacBioMetricsParser
+from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 
 
 @pytest.fixture

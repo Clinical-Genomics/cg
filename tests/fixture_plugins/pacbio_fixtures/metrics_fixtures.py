@@ -9,7 +9,7 @@ from cg.constants.pacbio import (
     PolymeraseDataAttributeIDs,
     SmrtLinkDatabasesIDs,
 )
-from cg.services.pacbio.metrics.models import (
+from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
     HiFiMetrics,
     PolymeraseMetrics,
