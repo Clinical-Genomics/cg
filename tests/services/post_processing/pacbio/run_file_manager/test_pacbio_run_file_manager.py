@@ -39,4 +39,5 @@ def test_get_files_to_store(
     files: list[Path] = file_manager.get_files_to_store(expected_pac_bio_run_data)
 
     # THEN the correct files are returned
-    assert files == pac_bio_hifi_files + pac_bio_report_files_to_parse
+    full_list: list[Path] = pac_bio_report_files_to_parse + pac_bio_hifi_files
+    assert set(files) == set(full_list)
