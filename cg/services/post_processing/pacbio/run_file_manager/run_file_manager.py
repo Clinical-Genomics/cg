@@ -15,7 +15,7 @@ class PacBioRunFileManager(RunFileManager):
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
         files_to_parse: list[Path] = [self._find_ccs_report_file(run_path)]
-        files_to_parse.extend(self._get_unzipped_report_files(run_path))
+        files_to_parse.extend(self._get_report_files(run_path))
         return files_to_parse
 
     def get_files_to_store(self, run_data: PacBioRunData) -> list[Path]:
@@ -37,7 +37,7 @@ class PacBioRunFileManager(RunFileManager):
         return files[0]
 
     @staticmethod
-    def _get_unzipped_report_files(run_path: Path) -> list[Path]:
+    def _get_report_files(run_path: Path) -> list[Path]:
         """Return the paths to the unzipped report files."""
         unzipped_dir: Path = Path(
             run_path, PacBioDirsAndFiles.STATISTICS_DIR, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR

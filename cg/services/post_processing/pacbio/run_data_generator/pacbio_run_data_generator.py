@@ -1,7 +1,11 @@
 from pathlib import Path
+
 from cg.services.post_processing.abstract_classes import RunDataGenerator
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.validators import validate_name_pre_fix, validate_has_well_plate
+from cg.services.post_processing.validators import (
+    validate_has_expected_parts,
+    validate_name_pre_fix,
+)
 from cg.utils.string import get_element_from_split
 
 
