@@ -20,18 +20,18 @@ class MetadataParser:
 
             for sample in case.samples:
                 if is_sample_external_negative_control(sample):
-                    metadata_for_external_negative_control: SampleMetadata = (
-                        self.parse_metadata_for_sample(sample=sample)
-                    )
+                    metadata_for_external_negative_control: (
+                        SampleMetadata
+                    ) = self.parse_metadata_for_sample(sample=sample)
                     continue
                 else:
                     metadata_for_samples[sample.internal_id] = self.parse_metadata_for_sample(
                         sample=sample
                     )
 
-            internal_negative_control_sample: Sample = (
-                self.get_internal_negative_control_sample_for_case(case=case)
-            )
+            internal_negative_control_sample: (
+                Sample
+            ) = self.get_internal_negative_control_sample_for_case(case=case)
 
             metadata_for_internal_negative_control = self.parse_metadata_for_sample(
                 sample=internal_negative_control_sample
@@ -39,8 +39,8 @@ class MetadataParser:
 
             return SamplesMetadataMetrics(
                 samples=metadata_for_samples,
-                internal_control=metadata_for_internal_negative_control,
-                external_control=metadata_for_external_negative_control,
+                internal_negative_control=metadata_for_internal_negative_control,
+                external_negative_control=metadata_for_external_negative_control,
             )
 
         except Exception as exception_object:

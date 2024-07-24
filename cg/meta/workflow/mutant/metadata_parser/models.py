@@ -11,5 +11,5 @@ class SampleMetadata(BaseModel):
 
 class SamplesMetadataMetrics(BaseModel):
     samples: dict[str, SampleMetadata]
-    internal_control: SampleMetadata
-    external_control: SampleMetadata
+    internal_negative_control: SampleMetadata
+    external_negative_control: SampleMetadata

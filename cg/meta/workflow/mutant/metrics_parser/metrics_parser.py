@@ -1,10 +1,12 @@
 from pathlib import Path
+from cg.exc import CgError
 from cg.io.csv import read_csv
 from typing import Any
 from cg.meta.workflow.mutant.metrics_parser.models import (
     SampleResults,
     SamplesResultsMetrics,
 )
+from cg.store.models import Case
 
 
 class MutantResultsHeaderData:
@@ -51,26 +53,72 @@ class MetricsParser:
     }
 
     @classmethod
-    def alter_metric_keys(cls, metric: dict[str, Any]) -> dict[str, Any]:
-        altered_metric = {}
-        for key, value in metric.items():
-            new_key: str = cls.KEY_MAPPING.get(key, key)
-            altered_metric[new_key] = value
-        return altered_metric
+    def get_raw_results(cls, file_path: Path) -> list[dict[str, Any]]:
+        """Parses raw_results from the results file."""
+        try:
+            raw_results: list[dict[str, Any]] = [
+                metric for metric in read_csv(file_path=file_path, read_to_dict=True)
+            ]
+        except FileNotFoundError as exception_object:
+            raise CgError(f"Results file not found at {file_path}") from exception_object
+        except Exception as exception_object:
+            raise CgError("Not possible to read results file.") from exception_object
+        return raw_results
 
     @classmethod
-    def parse_samples_results(cls, file_path: Path) -> SamplesResultsMetrics:
-        raw_results: list[dict[str, Any]] = [
-            metric for metric in read_csv(file_path=file_path, read_to_dict=True)
-        ]
+    def get_altered_sample_result(cls, sample_result: dict[str, Any]) -> dict[str, Any]:
+        """Takes a raw_sample_result with headers from the results file (MutantResultsHeaderRawData)
+        and returns an altered_sample_result with the corrected headers from MutantResultsHeaderData."""
+        altered_sample_result = {}
+        for header, value in sample_result.items():
+            new_header: str = cls.KEY_MAPPING.get(header, header)
+            altered_sample_result[new_header] = value
+        return altered_sample_result
 
-        results = [cls.alter_metric_keys(metric) for metric in raw_results]
-
-        validated_results: dict[str, SampleResults] = {}
-        for result in results:
-            validated_results[result[MutantResultsHeaderData.SAMPLE_NAME]] = (
-                SampleResults.model_validate(result)
+    @classmethod
+    def get_validated_results(cls, raw_results: list[dict[str, Any]]) -> list[SampleResults]:
+        """Takes raw_results and returns a list of validated SampleResults with the corrected headers."""
+        validated_results = []
+        for sample_result in raw_results:
+            altered_sample_result: dict[str, Any] = cls.get_altered_sample_result(
+                sample_result=sample_result
             )
+            validated_result: SampleResults = SampleResults.model_validate(altered_sample_result)
+            validated_results.append(validated_result)
+        return validated_results
 
-        sample_results_metrics: dict = {"samples": validated_results}
-        return SamplesResultsMetrics.model_validate(sample_results_metrics)
+    @classmethod
+    def get_sample_name_to_id_mapping(cls, case: Case) -> dict[str, str]:
+        sample_name_to_id_mapping: dict[str, str] = {}
+        for sample in case.samples:
+            sample_name_to_id_mapping[sample.name] = sample.internal_id
+
+        return sample_name_to_id_mapping
+
+    @classmethod
+    def get_results_metrics(cls, case: Case, results: list[SampleResults]) -> SamplesResultsMetrics:
+        """Takes a Case object and a list of SampleResults and builds a SamplesResultsMetrics with
+        sample_internal_ids as keys."""
+
+        sample_name_to_id_mapping: dict[str, str] = cls.get_sample_name_to_id_mapping(case=case)
+
+        results_metrics: dict[str, SampleResults] = {}
+        for result in results:
+            sample_internal_id = sample_name_to_id_mapping[result.sample_name]
+            results_metrics[sample_internal_id] = result
+        return SamplesResultsMetrics(samples=results_metrics)
+
+    @classmethod
+    def parse_samples_results(cls, case: Case, file_path: Path) -> SamplesResultsMetrics:
+        try:
+            raw_results: list[dict[str, Any]] = cls.get_raw_results(file_path=file_path)
+        except Exception as exception_object:
+            raise CgError from exception_object
+
+        validated_results: list[SampleResults] = cls.get_validated_results(raw_results=raw_results)
+
+        results_metrics: SamplesResultsMetrics = cls.get_results_metrics(
+            case=case, results=validated_results
+        )
+
+        return results_metrics

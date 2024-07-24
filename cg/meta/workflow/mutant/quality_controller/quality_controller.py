@@ -1,6 +1,7 @@
 from pathlib import Path
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
+from cg.exc import CgError
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
     SampleQualityResult,
@@ -30,30 +31,34 @@ class QualityController:
         self, case: Case, case_path: Path, case_results_file_path: Path
     ) -> QualityResult | None:
         """Perform QC check on a case and generate the QC_report."""
-        quality_metrics: QualityMetrics = get_quality_metrics(
-            case_results_file_path, case, self.status_db, self.lims
+        try:
+            quality_metrics: QualityMetrics = get_quality_metrics(
+                case_results_file_path=case_results_file_path,
+                case=case,
+                status_db=self.status_db,
+                lims=self.lims,
+            )
+        except Exception as exception_object:
+            raise CgError from exception_object
+        
+        sample_results: list[SampleQualityResult] = self.quality_control_samples(
+            quality_metrics
         )
-        if not quality_metrics:
-            return None
-        else:
-            sample_results: list[SampleQualityResult] = self.quality_control_samples(
-                quality_metrics
-            )
-            case_result: CaseQualityResult = self.quality_control_case(sample_results)
+        case_result: CaseQualityResult = self.quality_control_case(sample_results)
 
-            report_file: Path = get_report_path(case_path=case_path)
-            ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
-            ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
-            summary: str = ReportGenerator.get_summary(
-                case=case_result, samples=sample_results, report_path=report_file
-            )
-            return QualityResult(case=case_result, samples=sample_results, summary=summary)
+        report_file: Path = get_report_path(case_path=case_path)
+        ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
+        ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
+        summary: str = ReportGenerator.get_summary(
+            case=case_result, samples=sample_results, report_path=report_file
+        )
+        return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
 
         for sample_id in quality_metrics.sample_id_list:
-            result = self.quality_control_sample(sample_id, quality_metrics)
+            result = self.quality_control_sample(sample_id=sample_id, quality_metrics=quality_metrics)
             sample_results.append(result)
 
         return sample_results

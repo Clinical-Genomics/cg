@@ -1,5 +1,6 @@
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
+from cg.exc import CgError
 from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
@@ -67,41 +68,24 @@ def get_percent_reads_guaranteed(sample: Sample) -> int:
     return sample.application_version.application.percent_reads_guaranteed
 
 
-def translate_samples_results(
-    raw_samples_results: SamplesResultsMetrics, samples_metadata: SamplesMetadataMetrics
-):
-    sample_name_to_id_mapping = {}
-    for sample_metadata in samples_metadata.samples.values():
-        sample_name_to_id_mapping[sample_metadata.sample_name] = sample_metadata.sample_internal_id
-
-    translated_samples_results = {}
-    for key, value in raw_samples_results.samples.items():
-        new_key: str = sample_name_to_id_mapping.get(key, key)
-        translated_samples_results[new_key] = value
-
-    samples_results = {"samples": translated_samples_results}
-
-    return SamplesResultsMetrics.model_validate(samples_results)
-
-
 def get_quality_metrics(
     case_results_file_path: Path, case: Case, status_db: Store, lims: LimsAPI
-) -> QualityMetrics | None:
-    raw_samples_results: SamplesResultsMetrics = MetricsParser.parse_samples_results(
-        case_results_file_path
-    )
+) -> QualityMetrics:
+    try:
+        samples_results: SamplesResultsMetrics = MetricsParser.parse_samples_results(
+            case=case, file_path=case_results_file_path
+        )
+    except Exception as exception_object:
+        raise CgError(f"Not possible to retrieve results for case {case}.") from exception_object
 
-    samples_metadata: SamplesMetadataMetrics = MetadataParser(
-        status_db=status_db, lims=lims
-    ).parse_metadata(case)
+    try:
+        samples_metadata: SamplesMetadataMetrics = MetadataParser(
+            status_db=status_db, lims=lims
+        ).parse_metadata(case)
+    except Exception as exception_object:
+        raise CgError(f"Not possible to retrieve metadata for case {case}.") from exception_object
 
-    samples_results = translate_samples_results(raw_samples_results, samples_metadata)
-
-    if not samples_metadata:
-        return None
-    else:
-        quality_metrics = {"samples_results": samples_results, "samples_metadata": samples_metadata}
-        return QualityMetrics.model_validate(quality_metrics)
+    return QualityMetrics(samples_results=samples_results, samples_metadata=samples_metadata)
 
 
 def get_report_path(case_path: Path) -> Path:

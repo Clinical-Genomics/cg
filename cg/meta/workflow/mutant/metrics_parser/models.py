@@ -2,8 +2,10 @@ from typing import Annotated
 from pydantic import BaseModel, BeforeValidator, ValidationError
 
 
-def empty_str_to_none(v: str) -> str | None:
-    return v or None
+def empty_str_to_none(value: str) -> str | None:
+    if not isinstance(value, str):
+        raise TypeError(f"Expected a string, but got {type(value).__name__}")
+    return value or None
 
 
 def str_to_bool(v: str) -> bool:
@@ -11,8 +13,7 @@ def str_to_bool(v: str) -> bool:
         return True
     elif v == "FALSE":
         return False
-    else:
-        raise ValidationError
+    raise ValidationError
 
 
 class SampleResults(BaseModel):
