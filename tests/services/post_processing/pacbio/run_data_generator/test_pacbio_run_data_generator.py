@@ -1,4 +1,4 @@
-"""Tests for the PacBioRunDataGenerator"""
+"""Tests for the PacBioRunDataGenerator."""
 
 from pathlib import Path
 
@@ -9,7 +9,7 @@ from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBi
 
 
 def test_get_run_data(
-    pac_bio_fixtures_dir: Path,
+    pac_bio_runs_dir: Path,
     pac_bio_test_run_name: str,
     pac_bio_smrt_cell_name: str,
     expected_pac_bio_run_data: PacBioRunData,
@@ -20,7 +20,7 @@ def test_get_run_data(
     # WHEN Generating run data
     run_data_generator = PacBioRunDataGenerator()
     run_data: PacBioRunData = run_data_generator.get_run_data(
-        run_name=run_name, sequencing_dir=pac_bio_fixtures_dir.as_posix()
+        run_name=run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
     )
 
     # THEN the correct run data are returned
