@@ -12,4 +12,4 @@ def test_get_element_from_split():
     element: str = get_element_from_split(value=separated_string, element_position=2, split="_")
 
     # THEN the expected element is retured
-    element == "two"
+    assert element == "two"
