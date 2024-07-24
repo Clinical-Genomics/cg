@@ -2,14 +2,18 @@
 
 import pytest
 
-from cg.clients.chanjo2.models import CoverageData, CoveragePostRequest, CoverageSample
-from cg.constants.gene_panel import ReferenceGenomeBuild
+from cg.clients.chanjo2.models import (
+    CoveragePostRequest,
+    CoveragePostResponse,
+    CoverageSample,
+)
+from cg.constants.constants import GenomeVersion
 
 
 @pytest.fixture
-def coverage_request(sample_id: str) -> CoveragePostRequest:
+def coverage_post_request(sample_id: str) -> CoveragePostRequest:
     return CoveragePostRequest(
-        build=ReferenceGenomeBuild.GRCH37,
+        build=GenomeVersion.GRCh37,
         coverage_threshold=10,
         hgnc_gene_ids=[2861, 3791, 6481, 7436, 30521],
         interval_type="genes",
@@ -23,8 +27,8 @@ def coverage_request(sample_id: str) -> CoveragePostRequest:
 
 
 @pytest.fixture
-def coverage_data() -> CoverageData:
-    return CoverageData(
+def coverage_post_response() -> CoveragePostResponse:
+    return CoveragePostResponse(
         coverage_completeness_percent=33.33,
         mean_coverage=55.55,
     )

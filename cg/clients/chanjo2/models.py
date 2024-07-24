@@ -20,7 +20,7 @@ class CoveragePostRequest(BaseModel):
     samples: list[CoverageSample]
 
 
-class CoverageData(BaseModel):
+class CoveragePostResponse(BaseModel):
     """Coverage data model returned from the POST request."""
 
     coverage_completeness_percent: float
