@@ -20,7 +20,7 @@ def test_get_run_data(
     # WHEN Generating run data
     run_data_generator = PacBioRunDataGenerator()
     run_data: PacBioRunData = run_data_generator.get_run_data(
-        run_name=run_name, sequencing_dir=pac_bio_fixtures_dir
+        run_name=run_name, sequencing_dir=pac_bio_fixtures_dir.as_posix()
     )
 
     # THEN the correct run data are returned

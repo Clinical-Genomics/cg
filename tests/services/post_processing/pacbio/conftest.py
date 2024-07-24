@@ -9,10 +9,10 @@ from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBi
 
 @pytest.fixture
 def expected_pac_bio_run_data(
-    pac_bio_test_run_name: str, pac_bio_fixtures_dir: Path
+    pac_bio_test_run_name: str, pac_bio_fixtures_dir: Path, pac_bio_smrt_cell_name: str
 ) -> PacBioRunData:
     return PacBioRunData(
-        full_path=Path(pac_bio_fixtures_dir, pac_bio_test_run_name),
+        full_path=Path(pac_bio_fixtures_dir, pac_bio_test_run_name, pac_bio_smrt_cell_name),
         sequencing_run_name=pac_bio_test_run_name,
         well_name="A01",
         plate="1",
