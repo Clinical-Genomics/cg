@@ -15,7 +15,7 @@ def chanjo2_api_client(context_config: dict[str, Any]) -> Chanjo2APIClient:
 
 
 @pytest.fixture
-def coverage_post_response_json(sample_id: str) -> dict[str, float]:
+def coverage_post_response_json(sample_id: str) -> dict[str, dict]:
     return {
         sample_id: {
             "mean_coverage": 55.55,
@@ -25,7 +25,7 @@ def coverage_post_response_json(sample_id: str) -> dict[str, float]:
 
 
 @pytest.fixture
-def coverage_post_response_invalid_values_json(sample_id: str) -> dict[str, Any]:
+def coverage_post_response_invalid_values_json(sample_id: str) -> dict[str, dict]:
     return {
         sample_id: {
             "mean_coverage": "I am a string",
@@ -35,7 +35,7 @@ def coverage_post_response_invalid_values_json(sample_id: str) -> dict[str, Any]
 
 
 @pytest.fixture
-def coverage_post_response_invalid_attributes_json(sample_id: str) -> dict[str, float]:
+def coverage_post_response_invalid_attributes_json(sample_id: str) -> dict[str, dict]:
     return {
         sample_id: {
             "not_a_metric": 55.55,
@@ -45,7 +45,7 @@ def coverage_post_response_invalid_attributes_json(sample_id: str) -> dict[str, 
 
 
 @pytest.fixture
-def coverage_post_response_success(coverage_post_response_json: dict[str, float]) -> Mock:
+def coverage_post_response_success(coverage_post_response_json: dict) -> Mock:
     post_response = Mock()
     post_response.json.return_value = coverage_post_response_json
     return post_response

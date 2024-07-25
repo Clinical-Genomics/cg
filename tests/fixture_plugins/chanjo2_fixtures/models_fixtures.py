@@ -23,5 +23,5 @@ def coverage_post_request(sample_id: str) -> CoveragePostRequest:
 
 
 @pytest.fixture
-def coverage_post_response(coverage_post_response_json: dict[str, float]) -> CoveragePostResponse:
+def coverage_post_response(coverage_post_response_json: dict) -> CoveragePostResponse:
     return CoveragePostResponse.model_validate(coverage_post_response_json)
