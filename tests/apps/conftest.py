@@ -31,6 +31,10 @@ def response():
             """Mock reason"""
             return "response reason"
 
+        @property
+        def status_code(self):
+            return ""
+
     return MockResponse()
 
 
