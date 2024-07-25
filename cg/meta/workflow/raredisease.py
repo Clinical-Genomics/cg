@@ -6,7 +6,12 @@ from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.clients.chanjo2.models import CoverageData, CoverageRequest, CoverageSample
+from cg.clients.chanjo2.models import (
+    CoverageMetrics,
+    CoveragePostRequest,
+    CoveragePostResponse,
+    CoverageSample,
+)
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
@@ -174,22 +179,25 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, panels: list[str]
-    ) -> CoverageData | None:
-        """Return sample coverage data from Chanjo2."""
+    ) -> CoverageMetrics | None:
+        """Return sample coverage metrics from Chanjo2."""
         genome_version: GenomeVersion = self.get_genome_build()
         coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
         )
-        if not coverage_file_path:
-            return None
-        coverage_request = CoverageRequest(
+        post_request = CoveragePostRequest(
             build=self.translate_genome_reference(genome_version),
             coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
             hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
             interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
             samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
         )
-        return self.chanjo2_api.get_coverage(coverage_request)
+        try:
+            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
+            return post_response.get_sample_coverage_metrics(sample_id)
+        except Exception as error:
+            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
+            return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""

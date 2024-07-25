@@ -1,6 +1,6 @@
 """Raredisease Delivery Report API."""
 
-from cg.clients.chanjo2.models import CoverageData
+from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants.constants import PrepCategory
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
@@ -38,7 +38,7 @@ class RarediseaseReportAPI(ReportAPI):
     ) -> RarediseaseSampleMetadataModel:
         """Return Raredisease sample metadata to include in the report."""
         sample_metrics: RarediseaseQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
-        coverage_data: CoverageData | None = self.analysis_api.get_sample_coverage(
+        coverage_metrics: CoverageMetrics | None = self.analysis_api.get_sample_coverage(
             case_id=case.internal_id, sample_id=sample.internal_id, panels=case.panels
         )
         return RarediseaseSampleMetadataModel(
@@ -46,9 +46,9 @@ class RarediseaseReportAPI(ReportAPI):
             duplicates=sample_metrics.percent_duplicates,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
-            mean_target_coverage=coverage_data.mean_coverage if coverage_data else None,
+            mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
-            pct_10x=coverage_data.coverage_completeness_percent if coverage_data else None,
+            pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
             sex=sample_metrics.predicted_sex_sex_check,
         )
 

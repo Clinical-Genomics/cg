@@ -10,7 +10,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.clients.chanjo2.models import CoverageData
+from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
@@ -745,7 +745,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, panels: list[str]
-    ) -> CoverageData | None:
+    ) -> CoverageMetrics | None:
         """Return sample coverage data from Chanjo2."""
         raise NotImplementedError
 
