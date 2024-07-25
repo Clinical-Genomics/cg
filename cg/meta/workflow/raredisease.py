@@ -70,7 +70,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg19."""
-        return GenomeVersion.hg19
+        return GenomeVersion.HG19
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""

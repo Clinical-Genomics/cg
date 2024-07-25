@@ -64,7 +64,7 @@ class TomteParameters(WorkflowParameters):
     def restrict_genome_values(cls, genome: str) -> str:
         if genome == GenomeVersion.hg38:
             return "GRCh38"
-        elif genome == GenomeVersion.hg19:
+        elif genome == GenomeVersion.HG19:
             return "GRCh37"
 
 

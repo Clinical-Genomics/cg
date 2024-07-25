@@ -36,7 +36,7 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
         metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
         return MipAnalysis(
             case=family_id or "yellowhog",
-            genome_build=GenomeVersion.hg19.value,
+            genome_build=GenomeVersion.HG19.value,
             sample_id_metrics=metrics.sample_id_metrics,
             mip_version="v4.0.20",
             rank_model_version="1.18",
