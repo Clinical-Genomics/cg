@@ -59,7 +59,7 @@ class OsTicket(object):
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
             return res.text
-        error = f"res.text: {res.text}, reason: {res.reason}"
+        error = f"res.text: {res.text}, reason: {res.reason}, status: {res.status_code}"
         LOG.error(error)
         raise TicketCreationError(error)
 
