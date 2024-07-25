@@ -3,9 +3,8 @@ from pathlib import Path
 
 from pydantic.v1 import validator
 
-from cg.constants.constants import Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.sample_sources import SourceType
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
 from cg.utils.utils import replace_non_alphanumeric
@@ -63,7 +62,10 @@ class TomteParameters(WorkflowParameters):
 
     @validator("genome", pre=True)
     def restrict_genome_values(cls, genome: str) -> str:
-        return AnalysisAPI.translate_genome_reference(genome).value
+        if genome == GenomeVersion.HG38:
+            return GenomeVersion.GRCh38.value
+        elif genome == GenomeVersion.HG19:
+            return GenomeVersion.GRCh37.value
 
 
 class TomteQCMetrics(QCMetrics):
