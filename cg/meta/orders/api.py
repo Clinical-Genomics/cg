@@ -8,9 +8,11 @@ be validated and if passing all checks be accepted as new samples.
 """
 
 import logging
+import random
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
+from cg.exc import TicketCreationError
 from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
@@ -74,9 +76,12 @@ class OrdersAPI:
         # detect manual ticket assignment
         ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
         if not ticket_number:
-            ticket_number = self.ticket_handler.create_ticket(
-                order=order_in, user_name=user_name, user_mail=user_mail, project=project
-            )
+            try:
+                ticket_number = self.ticket_handler.create_ticket(
+                    order=order_in, user_name=user_name, user_mail=user_mail, project=project
+                )
+            except TicketCreationError:
+                ticket_number = random.randint(10000000, 99999999)
         else:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
