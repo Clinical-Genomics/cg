@@ -59,8 +59,9 @@ class OsTicket(object):
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
             return res.text
-        LOG.error(f"res.text: {res.text}, reason: {res.reason}")
-        raise TicketCreationError(res)
+        error = f"res.text: {res.text}, reason: {res.reason}"
+        LOG.error(error)
+        raise TicketCreationError(error)
 
     @staticmethod
     def create_new_ticket_attachment(content: dict, file_name: str) -> dict:
