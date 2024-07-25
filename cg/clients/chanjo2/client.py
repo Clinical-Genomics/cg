@@ -1,7 +1,5 @@
 """Coverage analysis API for human clinical sequencing data."""
 
-from typing import Any
-
 import requests
 
 from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
