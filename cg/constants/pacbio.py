@@ -65,6 +65,11 @@ class PacBioHousekeeperTags:
     DATASETS_REPORT: str = "datasets-report"
 
 
+class PacBioBundleTypes:
+    SAMPLE: str = "sample"
+    SMRT_CELL: str = "smrt_cell"
+
+
 file_pattern_to_tag: dict[str, list[str]] = {
     f"*{PacBioDirsAndFiles.CONTROL_REPORT}*": [PacBioHousekeeperTags.CONTROL_REPORT],
     f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}*": [PacBioHousekeeperTags.CCS_REPORT],
@@ -72,4 +77,13 @@ file_pattern_to_tag: dict[str, list[str]] = {
     f"*{PacBioDirsAndFiles.RAW_DATA_REPORT}*": [PacBioHousekeeperTags.RAWDATA_REPORT],
     f"*{PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT}*": [PacBioHousekeeperTags.DATASETS_REPORT],
     f"*{PacBioDirsAndFiles.HIFI_READS}*{FileExtensions.BAM}*": [AlignmentFileTag.BAM],
+}
+
+file_pattern_to_bundle_type: dict[str, str] = {
+    f"*{PacBioDirsAndFiles.CONTROL_REPORT}*": PacBioBundleTypes.SMRT_CELL,
+    f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}*": PacBioBundleTypes.SMRT_CELL,
+    f"*{PacBioDirsAndFiles.LOADING_REPORT}*": PacBioBundleTypes.SMRT_CELL,
+    f"*{PacBioDirsAndFiles.RAW_DATA_REPORT}*": PacBioBundleTypes.SMRT_CELL,
+    f"*{PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT}*": PacBioBundleTypes.SMRT_CELL,
+    f"*{PacBioDirsAndFiles.HIFI_READS}*{FileExtensions.BAM}*": PacBioBundleTypes.SAMPLE,
 }
