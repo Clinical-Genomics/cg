@@ -52,14 +52,15 @@ class MetricsParser:
     }
 
     @classmethod
-    def get_raw_results(cls, file_path: Path) -> list[dict[str, Any]]:
+    def get_raw_results(cls, results_file_path: Path) -> list[dict[str, Any]]:
         """Parses raw_results from the results file."""
         try:
-            raw_results: list[dict[str, Any]] = [
-                metric for metric in read_csv(file_path=file_path, read_to_dict=True)
+            raw_results: list[dict[Any, Any]] = [
+                sample_results
+                for sample_results in read_csv(file_path=results_file_path, read_to_dict=True)
             ]
         except FileNotFoundError as exception_object:
-            raise CgError(f"Results file not found at {file_path}") from exception_object
+            raise CgError(f"Results file not found at {results_file_path}") from exception_object
         except Exception as exception_object:
             raise CgError("Not possible to read results file.") from exception_object
         return raw_results
@@ -110,9 +111,11 @@ class MetricsParser:
         return samples_results
 
     @classmethod
-    def parse_samples_results(cls, case: Case, file_path: Path) -> dict[str, SampleResults]:
+    def parse_samples_results(cls, case: Case, results_file_path: Path) -> dict[str, SampleResults]:
         try:
-            raw_results: list[dict[str, Any]] = cls.get_raw_results(file_path=file_path)
+            raw_results: list[dict[str, Any]] = cls.get_raw_results(
+                results_file_path=results_file_path
+            )
         except Exception as exception_object:
             raise CgError from exception_object
 

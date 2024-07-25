@@ -1,5 +1,5 @@
 from cg.apps.lims.api import LimsAPI
-from cg.meta.workflow.mutant.metadata_parser.utils import get_internal_negative_control_id_from_lims
+from cg.meta.workflow.mutant.quality_controller.utils import get_internal_negative_control_id_from_lims
 
 
 def test_get_internal_negative_control_id_from_lims(mutant_lims: LimsAPI):

@@ -2,7 +2,7 @@ from pathlib import Path
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
     QualityResult,
-    SampleQualityResult,
+    SampleQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
 from cg.store.models import Case, Sample
@@ -83,7 +83,7 @@ def test_quality_control_samples(
 
     # THEN no error is thrown
     assert isinstance(list_sample_quality_result, list)
-    assert isinstance(list_sample_quality_result[0], SampleQualityResult)
+    assert isinstance(list_sample_quality_result[0], SampleQualityResults)
 
 
 def test_quality_control_sample_pass_qc(
@@ -93,7 +93,7 @@ def test_quality_control_sample_pass_qc(
 ):
     # GIVEN a sample that passes qc and a quality_metrics object for a case containing the sample
     # WHEN performing qc on the sample
-    sample_quality_result: SampleQualityResult = quality_controller.quality_control_sample(
+    sample_quality_result: SampleQualityResults = quality_controller.quality_control_sample(
         sample_id=sample_qc_pass.internal_id, quality_metrics=quality_metrics_case_qc_pass
     )
 
@@ -109,7 +109,7 @@ def test_quality_control_sample_fail_qc(
     # GIVEN a sample that fails qc and a quality_metrics object for a case containing the sample
 
     # WHEN performing qc on the sample
-    sample_quality_result: SampleQualityResult = quality_controller.quality_control_sample(
+    sample_quality_result: SampleQualityResults = quality_controller.quality_control_sample(
         sample_id=sample_qc_fail.internal_id, quality_metrics=quality_metrics_case_qc_fail
     )
 
@@ -118,7 +118,7 @@ def test_quality_control_sample_fail_qc(
 
 
 def test_quality_control_case(
-    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResult]
+    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResults]
 ):
     # GIVEN a case object and a corresponding case_results_file_path
 
@@ -130,7 +130,7 @@ def test_quality_control_case(
 
 
 def test_case_qc_pass(
-    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResult]
+    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResults]
 ):
     # GIVEN a case object and a corresponding case_results_file_path
 

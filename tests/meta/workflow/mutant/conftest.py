@@ -5,7 +5,7 @@ from pathlib import Path
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
     QualityMetrics,
-    SampleQualityResult,
+    SampleQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
 from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics, get_report_path
@@ -289,12 +289,12 @@ def quality_metrics_case_qc_fail(
 @pytest.fixture(name="sample_results_case_qc_pass")
 def sample_results_case_qc_pass(
     quality_controller: QualityController, quality_metrics_case_qc_pass: QualityMetrics
-) -> list[SampleQualityResult]:
+) -> list[SampleQualityResults]:
     return quality_controller.quality_control_samples(quality_metrics_case_qc_pass)
 
 
 @pytest.fixture(name="case_quality_result_qc_pass")
 def case_quality_result_qc_pass(
-    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResult]
+    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResults]
 ) -> CaseQualityResult:
     return quality_controller.quality_control_case(sample_results=sample_results_case_qc_pass)

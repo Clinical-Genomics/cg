@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
-    SampleQualityResult,
+    SampleQualityResults,
 )
 
 LOG = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 class ResultLogger:
     @staticmethod
     def log_results(
-        samples: list[SampleQualityResult], case: CaseQualityResult, report: Path
+        samples: list[SampleQualityResults], case: CaseQualityResult, report: Path
     ) -> None:
         if case.passes_qc:
             LOG.info(f"QC passed, see {report} for details.")
@@ -19,11 +19,11 @@ class ResultLogger:
             message = get_case_fail_message(case)
             LOG.warning(message)
 
-        message = sample_result_message(samples)
+        message = samples_results_message(samples)
         LOG.info(message)
 
     @staticmethod
-    def log_sample_result(result: SampleQualityResult) -> None:
+    def log_sample_result(result: SampleQualityResults) -> None:
         control_message = "Control sample " if result.is_control else ""
         if result.passes_qc:
             message = f"{control_message}{result.sample_id} passed QC."
@@ -51,9 +51,9 @@ def get_case_fail_message(case: CaseQualityResult) -> str:
     return fail_message + "".join(fail_reasons)
 
 
-def sample_result_message(samples: list[SampleQualityResult]) -> str:
-    failed_samples: list[SampleQualityResult] = get_failed_results(samples)
-    passed_samples: list[SampleQualityResult] = get_passed_results(samples)
+def samples_results_message(samples: list[SampleQualityResults]) -> str:
+    failed_samples: list[SampleQualityResults] = get_failed_results(samples)
+    passed_samples: list[SampleQualityResults] = get_passed_results(samples)
 
     failed_count: int = len(failed_samples)
     passed_count: int = len(passed_samples)
@@ -62,9 +62,9 @@ def sample_result_message(samples: list[SampleQualityResult]) -> str:
     return f"Sample results: {failed_count} failed, {passed_count} passed, {total_count} total."
 
 
-def get_failed_results(samples: list[SampleQualityResult]) -> list[str]:
+def get_failed_results(samples: list[SampleQualityResults]) -> list[str]:
     return [result for result in samples if not result.passes_qc]
 
 
-def get_passed_results(samples: list[SampleQualityResult]) -> list[str]:
+def get_passed_results(samples: list[SampleQualityResults]) -> list[str]:
     return [result for result in samples if result.passes_qc]

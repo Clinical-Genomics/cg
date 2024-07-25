@@ -3,13 +3,13 @@ from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
-    SampleQualityResult,
+    SampleQualityResults,
 )
 from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
 
 
 def test_generate_report_with_results(
-    quality_results: list[SampleQualityResult], case_result: CaseQualityResult, tmp_path: Path
+    quality_results: list[SampleQualityResults], case_result: CaseQualityResult, tmp_path: Path
 ):
     # GIVEN quality results
 

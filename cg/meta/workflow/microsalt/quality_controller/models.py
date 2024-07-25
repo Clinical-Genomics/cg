@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class SampleQualityResult(BaseModel):
+class SampleQualityResults(BaseModel):
     sample_id: str
     passes_qc: bool
     is_control: bool
@@ -23,7 +23,7 @@ class CaseQualityResult(BaseModel):
 
 class QualityResult(BaseModel):
     case: CaseQualityResult
-    samples: list[SampleQualityResult]
+    samples: list[SampleQualityResults]
     summary: str
 
     @property

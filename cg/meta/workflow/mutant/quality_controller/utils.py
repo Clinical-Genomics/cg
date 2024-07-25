@@ -122,7 +122,7 @@ def get_quality_metrics(
 ) -> QualityMetrics:
     try:
         samples_results: dict[str, SampleResults] = MetricsParser.parse_samples_results(
-            case=case, file_path=case_results_file_path
+            case=case, results_file_path=case_results_file_path
         )
     except Exception as exception_object:
         raise CgError(f"Not possible to retrieve results for case {case}.") from exception_object
