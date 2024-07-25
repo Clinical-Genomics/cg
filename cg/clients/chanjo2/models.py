@@ -1,6 +1,6 @@
 """Chanjo2 API pydantic models."""
 
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, RootModel, field_validator
 
 
 class CoverageSample(BaseModel):
@@ -31,3 +31,10 @@ class CoveragePostResponse(RootModel):
     """Coverage sample data model returned from the POST request."""
 
     root: dict[str, CoverageMetrics]
+
+    @field_validator("root")
+    @classmethod
+    def root_must_not_be_empty(cls, root: dict[str, CoverageMetrics]):
+        if not root:
+            raise ValueError("Coverage POST response must not be an empty dictionary")
+        return root

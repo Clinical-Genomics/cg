@@ -36,7 +36,7 @@ def test_get_coverage_http_error(
     coverage_post_response_http_error: Mock,
     mocker: MockFixture,
 ):
-    """Test the raising of an HTTPError during POST request coverage extraction."""
+    """Test the handling of an HTTP error when getting coverage."""
 
     # GIVEN a mocked POST request raising an exception
     mocker.patch.object(requests, "post", return_value=coverage_post_response_http_error)
@@ -48,16 +48,16 @@ def test_get_coverage_http_error(
         chanjo2_api_client.get_coverage(coverage_post_request)
 
 
-def test_get_coverage_validation_error(
+def test_get_coverage_invalid_values(
     chanjo2_api_client: Chanjo2APIClient,
     coverage_post_request: CoveragePostRequest,
-    coverage_post_response_invalid: Mock,
+    coverage_post_response_invalid_values: Mock,
     mocker: MockFixture,
 ):
-    """Test the raising of a ValidationError during POST request coverage extraction."""
+    """Test handling of a validation error when getting coverage."""
 
-    # GIVEN a mocked POST request returning an invalid JSON
-    mocker.patch.object(requests, "post", return_value=coverage_post_response_invalid)
+    # GIVEN a mocked POST request returning a JSON with invalid values
+    mocker.patch.object(requests, "post", return_value=coverage_post_response_invalid_values)
 
     # WHEN getting the coverage data
 
@@ -66,5 +66,37 @@ def test_get_coverage_validation_error(
         chanjo2_api_client.get_coverage(coverage_post_request)
 
 
-# TODO: empty response
-# TODO: attribute error check
+def test_get_coverage_invalid_attributes(
+    chanjo2_api_client: Chanjo2APIClient,
+    coverage_post_request: CoveragePostRequest,
+    coverage_post_response_invalid_attributes: Mock,
+    mocker: MockFixture,
+):
+    """Test coverage POST request returning an invalid response with incorrect attributes."""
+
+    # GIVEN a mocked POST request returning a JSON with incorrect attributes
+    mocker.patch.object(requests, "post", return_value=coverage_post_response_invalid_attributes)
+
+    # WHEN getting the coverage data
+
+    # THEN a Chanjo2 response error should have been raised
+    with pytest.raises(Chanjo2ResponseError):
+        chanjo2_api_client.get_coverage(coverage_post_request)
+
+
+def test_get_coverage_empty_response(
+    chanjo2_api_client: Chanjo2APIClient,
+    coverage_post_request: CoveragePostRequest,
+    coverage_post_response_empty: Mock,
+    mocker: MockFixture,
+):
+    """Test coverage POST request returning an empty response."""
+
+    # GIVEN a mocked POST request returning an empty JSON
+    mocker.patch.object(requests, "post", return_value=coverage_post_response_empty)
+
+    # WHEN getting the coverage data
+
+    # THEN a Chanjo2 response error should have been raised
+    with pytest.raises(Chanjo2ResponseError):
+        chanjo2_api_client.get_coverage(coverage_post_request)

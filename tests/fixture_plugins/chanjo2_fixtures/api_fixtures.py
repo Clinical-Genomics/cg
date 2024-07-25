@@ -25,12 +25,22 @@ def coverage_post_response_json(sample_id: str) -> dict[str, float]:
 
 
 @pytest.fixture
-def coverage_post_response_invalid_json(sample_id: str) -> dict[str, float]:
+def coverage_post_response_invalid_values_json(sample_id: str) -> dict[str, Any]:
     return {
         sample_id: {
             "mean_coverage": "I am a string",
             "coverage_completeness_percent": 33.33,
         }
+    }
+
+
+@pytest.fixture
+def coverage_post_response_invalid_attributes_json(sample_id: str) -> dict[str, Any]:
+    return {
+        sample_id: {
+            "not_a_metric": 55.55,
+            "coverage_completeness_percent": 33.33,
+        },
     }
 
 
@@ -49,7 +59,25 @@ def coverage_post_response_http_error() -> Mock:
 
 
 @pytest.fixture
-def coverage_post_response_invalid(coverage_post_response_invalid_json: dict[str, Any]) -> Mock:
+def coverage_post_response_invalid_values(
+    coverage_post_response_invalid_values_json: dict[str, Any]
+) -> Mock:
     post_response = Mock()
-    post_response.json.return_value = coverage_post_response_invalid_json
+    post_response.json.return_value = coverage_post_response_invalid_values_json
+    return post_response
+
+
+@pytest.fixture
+def coverage_post_response_invalid_attributes(
+    coverage_post_response_invalid_attributes_json: dict[str, Any]
+) -> Mock:
+    post_response = Mock()
+    post_response.json.return_value = coverage_post_response_invalid_attributes_json
+    return post_response
+
+
+@pytest.fixture
+def coverage_post_response_empty() -> Mock:
+    post_response = Mock()
+    post_response.json.return_value = {}
     return post_response
