@@ -54,18 +54,14 @@ class MicroSALTQualityController:
         )
         return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
-    def quality_control_samples(
-        self, quality_metrics: QualityMetrics
-    ) -> list[SampleQualityResult]:
+    def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
         for sample_id, metrics in quality_metrics.samples.items():
             result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
         return sample_results
 
-    def quality_control_sample(
-        self, sample_id: str, metrics: SampleMetrics
-    ) -> SampleQualityResult:
+    def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
         """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)

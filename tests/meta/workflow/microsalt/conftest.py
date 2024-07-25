@@ -8,7 +8,7 @@ from cg.meta.workflow.microsalt.metrics_parser.models import (
 )
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
-    SampleQualityResults,
+    SampleQualityResult,
 )
 from cg.meta.workflow.microsalt.quality_controller.quality_controller import (
     MicroSALTQualityController,
@@ -48,8 +48,8 @@ def create_quality_result(
     passes_inserts_qc: bool = True,
     passes_coverage_qc: bool = True,
     passes_10x_coverage_qc: bool = True,
-) -> SampleQualityResults:
-    return SampleQualityResults(
+) -> SampleQualityResult:
+    return SampleQualityResult(
         sample_id=sample_id,
         passes_qc=passes_qc,
         is_control=is_control,
@@ -64,9 +64,9 @@ def create_quality_result(
 
 
 @pytest.fixture
-def quality_results() -> list[SampleQualityResults]:
+def quality_results() -> list[SampleQualityResult]:
     return [
-        SampleQualityResults(
+        SampleQualityResult(
             sample_id="sample_1",
             passes_qc=False,
             is_control=True,
@@ -78,7 +78,7 @@ def quality_results() -> list[SampleQualityResults]:
             passes_coverage_qc=True,
             passes_10x_coverage_qc=True,
         ),
-        SampleQualityResults(
+        SampleQualityResult(
             sample_id="sample_2",
             passes_qc=True,
             is_control=False,
@@ -90,7 +90,7 @@ def quality_results() -> list[SampleQualityResults]:
             passes_coverage_qc=True,
             passes_10x_coverage_qc=True,
         ),
-        SampleQualityResults(
+        SampleQualityResult(
             sample_id="sample_3",
             passes_qc=False,
             is_control=False,

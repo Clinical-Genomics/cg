@@ -22,9 +22,7 @@ class ReportGenerator:
 
     @staticmethod
     def get_summary(
-        case: CaseQualityResult,
-        samples: List[SampleQualityResult],
-        report_path: Path | None = None,
+        case: CaseQualityResult, samples: List[SampleQualityResult], report_path: Path | None = None
     ) -> str:
         case_summary: str = "Case passed QC. " if case.passes_qc else "Case failed QC. "
         if report_path and not case.passes_qc:
