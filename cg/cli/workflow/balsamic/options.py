@@ -14,7 +14,7 @@ OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
     default=GenomeVersion.hg19,
-    type=click.Choice([GenomeVersion.hg19, GenomeVersion.hg38, GenomeVersion.canfam3]),
+    type=click.Choice([GenomeVersion.hg19, GenomeVersion.hg38, GenomeVersion.CANFAM3]),
     help="Type and build version of the reference genome. Set this option to override the default.",
 )
 OPTION_PANEL_BED = click.option(
