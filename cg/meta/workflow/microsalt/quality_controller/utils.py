@@ -5,7 +5,7 @@ from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
-    SampleQualityResults,
+    SampleQualityResult,
 )
 from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.models.orders.sample_base import ControlEnum
@@ -70,42 +70,42 @@ def has_non_microbial_apptag(sample: Sample) -> bool:
     return app_tag not in list(MicrosaltAppTags)
 
 
-def get_negative_control_result(results: list[SampleQualityResults]) -> SampleQualityResults | None:
+def get_negative_control_result(results: list[SampleQualityResult]) -> SampleQualityResult | None:
     for result in results:
         if result.is_control:
             return result
 
 
-def negative_control_pass_qc(results: list[SampleQualityResults]) -> bool:
+def negative_control_pass_qc(results: list[SampleQualityResult]) -> bool:
     if negative_control_result := get_negative_control_result(results):
         return negative_control_result.passes_qc
     return True
 
 
-def get_results_passing_qc(results: list[SampleQualityResults]) -> list[SampleQualityResults]:
+def get_results_passing_qc(results: list[SampleQualityResult]) -> list[SampleQualityResult]:
     return [result for result in results if result.passes_qc]
 
 
-def get_non_urgent_results(results: list[SampleQualityResults]) -> list[SampleQualityResults]:
+def get_non_urgent_results(results: list[SampleQualityResult]) -> list[SampleQualityResult]:
     return [result for result in results if not is_urgent_result(result)]
 
 
-def get_urgent_results(results: list[SampleQualityResults]) -> list[SampleQualityResults]:
+def get_urgent_results(results: list[SampleQualityResult]) -> list[SampleQualityResult]:
     return [result for result in results if is_urgent_result(result)]
 
 
-def is_urgent_result(result: SampleQualityResults) -> bool:
+def is_urgent_result(result: SampleQualityResult) -> bool:
     return result.application_tag == MicrosaltAppTags.MWRNXTR003
 
 
-def urgent_samples_pass_qc(results: list[SampleQualityResults]) -> bool:
-    urgent_results: list[SampleQualityResults] = get_urgent_results(results)
+def urgent_samples_pass_qc(results: list[SampleQualityResult]) -> bool:
+    urgent_results: list[SampleQualityResult] = get_urgent_results(results)
     return all(result.passes_qc for result in urgent_results)
 
 
-def non_urgent_samples_pass_qc(results: list[SampleQualityResults]) -> bool:
-    non_urgent_samples: list[SampleQualityResults] = get_non_urgent_results(results)
-    passing_qc: list[SampleQualityResults] = get_results_passing_qc(non_urgent_samples)
+def non_urgent_samples_pass_qc(results: list[SampleQualityResult]) -> bool:
+    non_urgent_samples: list[SampleQualityResult] = get_non_urgent_results(results)
+    passing_qc: list[SampleQualityResult] = get_results_passing_qc(non_urgent_samples)
 
     if not non_urgent_samples:
         return True
@@ -134,7 +134,7 @@ def get_report_path(metrics_file_path: Path) -> Path:
     return metrics_file_path.parent.joinpath(QUALITY_REPORT_FILE_NAME)
 
 
-def quality_control_case(sample_results: list[SampleQualityResults]) -> CaseQualityResult:
+def quality_control_case(sample_results: list[SampleQualityResult]) -> CaseQualityResult:
     control_pass_qc: bool = negative_control_pass_qc(sample_results)
     urgent_pass_qc: bool = urgent_samples_pass_qc(sample_results)
     non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)

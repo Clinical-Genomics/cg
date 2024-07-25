@@ -10,7 +10,7 @@ from cg.meta.workflow.microsalt.metrics_parser import (
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     QualityResult,
-    SampleQualityResults,
+    SampleQualityResult,
 )
 from cg.meta.workflow.microsalt.quality_controller.report_generator import (
     ReportGenerator,
@@ -44,7 +44,7 @@ class MicroSALTQualityController:
 
     def quality_control(self, case_metrics_file_path: Path) -> QualityResult:
         quality_metrics: QualityMetrics = MetricsParser.parse(case_metrics_file_path)
-        sample_results: list[SampleQualityResults] = self.quality_control_samples(quality_metrics)
+        sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = quality_control_case(sample_results)
         report_file: Path = get_report_path(case_metrics_file_path)
         ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
@@ -56,8 +56,8 @@ class MicroSALTQualityController:
 
     def quality_control_samples(
         self, quality_metrics: QualityMetrics
-    ) -> list[SampleQualityResults]:
-        sample_results: list[SampleQualityResults] = []
+    ) -> list[SampleQualityResult]:
+        sample_results: list[SampleQualityResult] = []
         for sample_id, metrics in quality_metrics.samples.items():
             result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
@@ -65,7 +65,7 @@ class MicroSALTQualityController:
 
     def quality_control_sample(
         self, sample_id: str, metrics: SampleMetrics
-    ) -> SampleQualityResults:
+    ) -> SampleQualityResult:
         """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
@@ -78,7 +78,7 @@ class MicroSALTQualityController:
         application_tag: str = get_application_tag(sample)
 
         if is_control := is_sample_negative_control(sample):
-            sample_quality = SampleQualityResults(
+            sample_quality = SampleQualityResult(
                 sample_id=sample_id,
                 passes_qc=valid_read_count,
                 is_control=is_control,
@@ -100,7 +100,7 @@ class MicroSALTQualityController:
         if has_non_microbial_apptag(sample):
             sample_passes_qc = valid_read_count
 
-        sample_quality = SampleQualityResults(
+        sample_quality = SampleQualityResult(
             sample_id=sample_id,
             passes_qc=sample_passes_qc,
             is_control=is_control,

@@ -496,5 +496,5 @@ class LimsAPI(Lims, OrderHandler):
         )
         try:
             return artifacts[0]
-        except IndexError as e:
-            raise LimsDataError(e)
+        except IndexError as error:
+            raise LimsDataError() from error
