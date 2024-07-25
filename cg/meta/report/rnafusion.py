@@ -93,7 +93,7 @@ class RnafusionReportAPI(ReportAPI):
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
             vcf_fusion=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, SCOUT_KEY=ScoutUploadKey.VCF_FUSION
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_FUSION
             )
         )
 
