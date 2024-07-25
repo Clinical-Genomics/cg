@@ -27,17 +27,3 @@ def handle_client_errors(func):
             raise Chanjo2APIClientError(error) from error
 
     return wrapper
-
-    # try:
-    #     response: requests.Response = requests.post(
-    #         url=endpoint, headers=self.headers, json=post_data
-    #     )
-    #     response.raise_for_status()
-    #     response_content: dict[str, Any] = response.json().values()
-    #     if not response_content:
-    #         LOG.error("The POST get coverage response is empty")
-    #         return None
-    #     return CoveragePostResponse(**next(iter(response_content)))
-    # except (requests.RequestException, ValueError) as error:
-    #     LOG.error(f"Error during coverage POST request: {error}")
-    #     return None
