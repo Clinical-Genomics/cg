@@ -1,12 +1,15 @@
 """Constants related to PacBio sequencing."""
 
+from cg.constants import FileExtensions
+from cg.constants.housekeeper_tags import AlignmentFileTag
+
 
 class PacBioDirsAndFiles:
     BASECALLING_REPORT: str = "ccs.report.json"
     CCS_REPORT_SUFFIX: str = "ccs_report.json"
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
-    HIFI_READS_DIR: str = "hifi_reads"
+    HIFI_READS: str = "hifi_reads"
     RAW_DATA_REPORT: str = "raw_data.report.json"
     SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
     STATISTICS_DIR: str = "statistics"
@@ -52,3 +55,21 @@ class SmrtLinkDatabasesIDs:
     PATH: str = "path"
     WELL_NAME: str = "wellName"
     WELL_SAMPLE_NAME: str = "wellSampleName"
+
+
+class PacBioHousekeeperTags:
+    CCS_REPORT: str = "ccs-report"
+    CONTROL_REPORT: str = "control-report"
+    LOADING_REPORT: str = "loading-report"
+    RAWDATA_REPORT: str = "raw-data-report"
+    DATASETS_REPORT: str = "datasets-report"
+
+
+file_pattern_to_tag: dict[str, list[str]] = {
+    f"*{PacBioDirsAndFiles.CONTROL_REPORT}*": [PacBioHousekeeperTags.CONTROL_REPORT],
+    f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}*": [PacBioHousekeeperTags.CCS_REPORT],
+    f"*{PacBioDirsAndFiles.LOADING_REPORT}*": [PacBioHousekeeperTags.LOADING_REPORT],
+    f"*{PacBioDirsAndFiles.RAW_DATA_REPORT}*": [PacBioHousekeeperTags.RAWDATA_REPORT],
+    f"*{PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT}*": [PacBioHousekeeperTags.DATASETS_REPORT],
+    f"*{PacBioDirsAndFiles.HIFI_READS}*{FileExtensions.BAM}*": [AlignmentFileTag.BAM],
+}

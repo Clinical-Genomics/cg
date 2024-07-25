@@ -70,11 +70,17 @@ class PostProcessingStoreService(ABC):
 
 
 class PostProcessingHKService(ABC):
-    def __init__(self, hk_api: HousekeeperAPI, file_manager: RunFileManager):
+    def __init__(
+        self,
+        hk_api: HousekeeperAPI,
+        file_manager: RunFileManager,
+        metrics_parser: PostProcessingMetricsParser,
+    ):
         self.hk_api: HousekeeperAPI = hk_api
         self.file_manager: RunFileManager = file_manager
+        self.metrics_parser: PostProcessingMetricsParser = metrics_parser
 
-    def store_files_in_housekeeper(self, file_to_store: list[Path]):
+    def store_files_in_housekeeper(self, run_data: RunData):
         pass
 
 

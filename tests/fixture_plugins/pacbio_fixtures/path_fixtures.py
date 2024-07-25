@@ -41,7 +41,7 @@ def pac_bio_smrt_cell_dir_1_a01(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_na
 @pytest.fixture
 def pac_bio_hifi_reads_dir(pac_bio_smrt_cell_dir_1_a01: Path) -> Path:
     """Return the path to a PacBio HiFi reads directory."""
-    return Path(pac_bio_smrt_cell_dir_1_a01, PacBioDirsAndFiles.HIFI_READS_DIR)
+    return Path(pac_bio_smrt_cell_dir_1_a01, PacBioDirsAndFiles.HIFI_READS)
 
 
 @pytest.fixture

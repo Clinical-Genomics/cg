@@ -55,7 +55,7 @@ class PacBioRunFileManager(RunFileManager):
     @staticmethod
     def _find_hifi_files(run_path: Path) -> list[Path]:
         """Return the paths to the HiFi read files."""
-        hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS_DIR)
+        hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS)
         bam_files: list[Path] = get_files_matching_pattern(
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}*"
         )
