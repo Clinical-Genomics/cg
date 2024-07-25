@@ -59,7 +59,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg38."""
-        return GenomeVersion.hg38
+        return GenomeVersion.HG38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""

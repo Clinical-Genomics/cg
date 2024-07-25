@@ -167,7 +167,7 @@ class GenomeVersion(StrEnum):
     T2T_CHM13: str = "T2T-CHM13v2.0"
     CANFAM3 = auto()
     HG19: str = "hg19"
-    hg38: str = "hg38"
+    HG38: str = "hg38"
 
 
 class SampleType(StrEnum):

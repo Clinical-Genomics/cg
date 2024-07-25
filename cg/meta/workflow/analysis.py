@@ -737,9 +737,9 @@ class AnalysisAPI(MetaAPI):
         """Translates a genome reference assembly to its corresponding alternate name."""
         translation_map = {
             GenomeVersion.GRCh37: GenomeVersion.HG19,
-            GenomeVersion.GRCh38: GenomeVersion.hg38,
+            GenomeVersion.GRCh38: GenomeVersion.HG38,
             GenomeVersion.HG19: GenomeVersion.GRCh37,
-            GenomeVersion.hg38: GenomeVersion.GRCh38,
+            GenomeVersion.HG38: GenomeVersion.GRCh38,
         }
         return translation_map.get(genome_version, genome_version)
 
