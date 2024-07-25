@@ -21,7 +21,7 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
 )
-from cg.constants.scout import RAREDISEASE_CASE_TAGS
+from cg.constants.scout import RAREDISEASE_CASE_TAGS, HGNC_ID
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -172,9 +172,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         gene_ids: list[int] = []
         for panel in panels:
             genes: list[dict] = self.scout_api.get_genes(panel)
-            gene_ids.extend(
-                gene.get("hgnc_id") for gene in genes if gene.get("hgnc_id") is not None
-            )
+            gene_ids.extend(gene.get(HGNC_ID) for gene in genes if gene.get(HGNC_ID) is not None)
         return gene_ids
 
     def get_sample_coverage(

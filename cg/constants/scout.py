@@ -4,6 +4,9 @@ from cg.constants import FileExtensions
 from cg.constants.housekeeper_tags import AlignmentFileTag
 
 
+HGNC_ID = "hgnc_id"
+
+
 class GenomeBuild(StrEnum):
     hg19: str = "37"
     hg38: str = "38"
