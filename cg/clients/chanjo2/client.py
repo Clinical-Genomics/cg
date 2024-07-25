@@ -25,10 +25,10 @@ class Chanjo2APIClient:
     def get_coverage(self, coverage_post_request: CoveragePostRequest) -> CoveragePostResponse:
         """Send a POST request to the coverage endpoint to retrieve gene coverage summary data."""
         endpoint: str = f"{self.base_url}/coverage/d4/genes/summary"
-        post_data: dict[str, Any] = coverage_post_request.model_dump()
+        post_data: dict = coverage_post_request.model_dump()
         response: requests.Response = requests.post(
             url=endpoint, headers=self.headers, json=post_data
         )
         response.raise_for_status()
-        response_json: dict[str, Any] = response.json()
+        response_json: dict = response.json()
         return CoveragePostResponse.model_validate(response_json)
