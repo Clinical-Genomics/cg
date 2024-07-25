@@ -1,14 +1,11 @@
 """Coverage analysis API for human clinical sequencing data."""
 
-import logging
 from typing import Any
 
 import requests
 
 from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
 from cg.clients.chanjo2.utils import handle_client_errors
-
-LOG = logging.getLogger(__name__)
 
 
 class Chanjo2APIClient:
