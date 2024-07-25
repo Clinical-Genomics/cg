@@ -34,7 +34,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
         mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_target_coverage: mean coverage of a target region; source: workflow
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: workflow
-        sex: sex estimated by the workflow; source: workflow
+        sex: sex predicted by the workflow; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -52,7 +52,7 @@ class RarediseaseSampleMetadataModel(SampleMetadataModel):
         mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_target_coverage: mean coverage of a target region; source: Chanjo2
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
-        sex: sex estimated by the workflow; source: workflow
+        sex: sex predicted by the workflow; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
