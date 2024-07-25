@@ -6,7 +6,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.exc import PacBioMetricsParsingError
 from cg.io.controller import ReadFile
-from cg.services.pacbio.metrics.models import (
+from cg.services.post_processing.pacbio.metrics_parser.models import (
     BaseMetrics,
     ControlMetrics,
     HiFiMetrics,

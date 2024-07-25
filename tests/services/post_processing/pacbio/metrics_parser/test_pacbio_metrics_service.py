@@ -7,8 +7,8 @@ from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.exc import PacBioMetricsParsingError
-from cg.services.pacbio.metrics.models import BaseMetrics
-from cg.services.pacbio.metrics.utils import (
+from cg.services.post_processing.pacbio.metrics_parser.models import BaseMetrics
+from cg.services.post_processing.pacbio.metrics_parser.utils import (
     parse_control_metrics,
     parse_dataset_metrics,
     parse_hifi_metrics,
