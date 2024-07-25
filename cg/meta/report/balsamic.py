@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -171,24 +171,26 @@ class BalsamicReportAPI(ReportAPI):
             required_sample_metadata_fields: list[str] = (
                 REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
             )
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": required_data_analysis_fields,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
-            ),
-            "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
-            ),
-            "metadata": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=required_data_analysis_fields,
+            metadata=self.get_sample_required_fields(
                 case=case, required_fields=required_sample_metadata_fields
             ),
-        }
+            methods=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+        )
+        return report_required_fields.model_dump()
