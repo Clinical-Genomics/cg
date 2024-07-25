@@ -169,7 +169,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
         """Return HGNC IDs of genes from specified panels using the Scout API."""
-        gene_ids = []
+        gene_ids: list[int] = []
         for panel in panels:
             genes: list[dict] = self.scout_api.get_genes(panel)
             gene_ids.extend(
