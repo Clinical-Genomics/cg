@@ -81,7 +81,7 @@ class OrdersAPI:
                     order=order_in, user_name=user_name, user_mail=user_mail, project=project
                 )
             except TicketCreationError:
-                ticket_number = random.randint(10000000, 99999999)
+                ticket_number = str(random.randint(10000000, 99999999))
         else:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
