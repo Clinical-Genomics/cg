@@ -135,7 +135,3 @@ def get_quality_metrics(
         raise CgError(f"Not possible to retrieve samples for case {case}.") from exception_object
 
     return QualityMetrics(results=samples_results, pool=samples)
-
-
-def get_report_path(case_path: Path) -> Path:
-    return case_path.joinpath(QUALITY_REPORT_FILE_NAME)

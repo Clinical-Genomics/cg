@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.io.json import write_json
+from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
     SamplesQualityResults,
@@ -11,7 +12,7 @@ from cg.meta.workflow.mutant.quality_controller.result_logger import samples_res
 class ReportGenerator:
     @staticmethod
     def write_report(
-        out_file: Path,
+        case_path: Path,
         case_quality_result: CaseQualityResult,
         samples_quality_results: SamplesQualityResults,
     ) -> None:
@@ -23,7 +24,13 @@ class ReportGenerator:
             "case": case_quality_result.model_dump(),
             "samples": samples_quality_results.model_dump(),
         }
-        write_json(file_path=out_file, content=report_content)
+        report_file_path: Path = ReportGenerator.get_report_path(case_path=case_path)
+
+        write_json(file_path=report_file_path, content=report_content)
+
+    @staticmethod
+    def get_report_path(case_path: Path) -> Path:
+        return case_path.joinpath(QUALITY_REPORT_FILE_NAME)
 
     @staticmethod
     def get_summary(

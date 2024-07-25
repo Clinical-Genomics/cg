@@ -33,7 +33,7 @@ class QualityController:
         self.status_db: Store = status_db
         self.lims: LimsAPI = lims
         self.report_generator: ReportGenerator = report_generator
-        self.logger: ResultLogger = result_logger
+        self.result_logger: ResultLogger = result_logger
 
     def quality_control(
         self, case: Case, case_path: Path, case_results_file_path: Path
@@ -54,23 +54,24 @@ class QualityController:
         )
         case_quality_result: CaseQualityResult = self.quality_control_case(samples_quality_results)
 
-        report_file: Path = get_report_path(case_path=case_path)
         self.report_generator.write_report(
-            out_file=report_file,
+            case_path=case_path,
             samples_quality_results=samples_quality_results,
             case_quality_result=case_quality_result,
         )
 
-        ResultLogger.log_results(
+        report_file_path = self.report_generator.get_report_path()
+
+        self.result_logger.log_results(
             case_quality_result=case_quality_result,
             samples_quality_results=samples_quality_results,
-            report=report_file,
+            report_file_path=report_file_path,
         )
 
-        summary: str = ReportGenerator.get_summary(
+        summary: str = self.report_generator.get_summary(
             case_quality_result=case_quality_result,
             samples_quality_results=samples_quality_results,
-            report_path=report_file,
+            report_file_path=report_file_path,
         )
 
         return QualityResult(

@@ -13,6 +13,7 @@ class QualityMetrics(BaseModel):
     results: dict[str, SampleResults]
     pool: MutantPoolSamples
 
+
 class SampleQualityResults(BaseModel):
     sample_id: str
     passes_qc: bool

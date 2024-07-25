@@ -14,10 +14,10 @@ class ResultLogger:
     def log_results(
         case_quality_result: CaseQualityResult,
         samples_quality_results: SamplesQualityResults,
-        report: Path,
+        report_file_path: Path,
     ) -> None:
         if case_quality_result.passes_qc:
-            case_message = f"QC passed, see {report} for details."
+            case_message = f"QC passed, see {report_file_path} for details."
         else:
             case_message = get_case_fail_message(case_quality_result)
         LOG.warning(case_message)
