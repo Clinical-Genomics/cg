@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -19,7 +20,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
-from cg.clients.chanjo2.api import Chanjo2APIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
@@ -453,7 +454,8 @@ class CGConfig(BaseModel):
         chanjo2_api = self.__dict__.get("chanjo2_api_")
         if chanjo2_api is None:
             LOG.debug("Instantiating Chanjo2 API")
-            chanjo2_api = Chanjo2APIClient(config=self.dict())
+            config: dict[str, Any] = self.dict()
+            chanjo2_api = Chanjo2APIClient(base_url=config["chanjo2"]["host"])
             self.chanjo2_api_ = chanjo2_api
         return chanjo2_api
 
