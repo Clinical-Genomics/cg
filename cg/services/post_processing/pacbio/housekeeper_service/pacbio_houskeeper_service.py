@@ -29,6 +29,15 @@ class PacBioHousekeeperService(PostProcessingHKService):
             self.file_manager.get_files_to_parse(run_data)
         )
         file_to_store: list[Path] = self.file_manager.get_files_to_store(run_data)
+        for file_path in file_to_store:
+            bundle_info: PacBioFileData = self._create_bundle_info(
+                file_path=file_path, parsed_metrics=parsed_metrics
+            )
+            self.hk_api.create_bundle_add_file_with_tags(
+                bundle_name=bundle_info.bundle_name,
+                file_path=bundle_info.file_path,
+                tags=bundle_info.tags,
+            )
 
     @staticmethod
     def _get_tags_for_file(file_path: Path) -> list[str]:
@@ -45,25 +54,30 @@ class PacBioHousekeeperService(PostProcessingHKService):
         raise ValueError
 
     @staticmethod
-    def add_smrt_cell_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics)-> list[str]:
-        tags: list[str] = tags.append(parsed_metrics.dataset_metrics.cell_id)
+    def _add_smrt_cell_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics) -> list[str]:
+        tags.append(parsed_metrics.dataset_metrics.cell_id)
         return tags
 
     @staticmethod
-    def add_sample_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics):
-        return tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
+    def _add_sample_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics) -> list[str]:
+        tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
+        return tags
 
-    def create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:
+    def _create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:
         tags: list[str] = self._get_tags_for_file(file_path)
-        if self.is_file_type_smrt_cell(file_path):
-            tags: list[str] = self.add_smrt_cell_id_to_tags(tags=tags,parsed_metrics=parsed_metrics)
-            return PacBioFileData(
-                bundle_name=parsed_metrics.dataset_metrics.cell_id,
-                file_path=file_path,
-                tags=tags
+        if self._is_file_type_smrt_cell(file_path):
+            tags: list[str] = self._add_smrt_cell_id_to_tags(
+                tags=tags, parsed_metrics=parsed_metrics
             )
-        tags: list[str] =
+            return PacBioFileData(
+                bundle_name=parsed_metrics.dataset_metrics.cell_id, file_path=file_path, tags=tags
+            )
+        tags: list[str] = self._add_sample_id_to_tags(tags=tags, parsed_metrics=parsed_metrics)
+        return PacBioFileData(
+            bundle_name=parsed_metrics.dataset_metrics.sample_internal_id,
+            file_path=file_path,
+            tags=tags,
+        )
 
-
-    def is_file_type_smrt_cell(self, file_path: Path) -> bool:
+    def _is_file_type_smrt_cell(self, file_path: Path) -> bool:
         return self._get_bundle_type_for_file(file_path) == PacBioBundleTypes.SMRT_CELL
