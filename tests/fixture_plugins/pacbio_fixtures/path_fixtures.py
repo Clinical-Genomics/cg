@@ -77,12 +77,6 @@ def pac_bio_ccs_report_file(
 
 
 @pytest.fixture
-def pac_bio_basecalling_report_file(pac_bio_run_reports_dir: Path) -> Path:
-    """Return the path to the PacBio basecalling report file."""
-    return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.BASECALLING_REPORT)
-
-
-@pytest.fixture
 def pac_bio_control_report_file(pac_bio_run_reports_dir: Path) -> Path:
     """Return the path to the PacBio control report file."""
     return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.CONTROL_REPORT)
@@ -109,7 +103,6 @@ def pac_bio_smrtlink_datasets_report_file(pac_bio_run_reports_dir: Path) -> Path
 @pytest.fixture
 def pac_bio_report_files_to_parse(
     pac_bio_ccs_report_file: Path,
-    pac_bio_basecalling_report_file: Path,
     pac_bio_control_report_file: Path,
     pac_bio_loading_report_file: Path,
     pac_bio_raw_data_report_file: Path,
@@ -118,7 +111,6 @@ def pac_bio_report_files_to_parse(
     """Return the list of PacBio report files to parse."""
     return [
         pac_bio_ccs_report_file,
-        pac_bio_basecalling_report_file,
         pac_bio_control_report_file,
         pac_bio_loading_report_file,
         pac_bio_raw_data_report_file,
