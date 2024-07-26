@@ -4,7 +4,16 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+    PacBioHousekeeperService,
+)
+from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 
 
 @pytest.fixture

@@ -1,11 +1,14 @@
 """Constants related to PacBio sequencing."""
 
+from cg.constants import FileExtensions
+from cg.constants.housekeeper_tags import AlignmentFileTag
+
 
 class PacBioDirsAndFiles:
     CCS_REPORT_SUFFIX: str = "ccs_report.json"
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
-    HIFI_READS_DIR: str = "hifi_reads"
+    HIFI_READS: str = "hifi_reads"
     RAW_DATA_REPORT: str = "raw_data.report.json"
     SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
     STATISTICS_DIR: str = "statistics"
@@ -54,3 +57,37 @@ class SmrtLinkDatabasesIDs:
     PATH: str = "path"
     WELL_NAME: str = "wellName"
     WELL_SAMPLE_NAME: str = "wellSampleName"
+
+
+class PacBioHousekeeperTags:
+    CCS_REPORT: str = "ccs-report"
+    CONTROL_REPORT: str = "control-report"
+    LOADING_REPORT: str = "loading-report"
+    RAWDATA_REPORT: str = "raw-data-report"
+    DATASETS_REPORT: str = "datasets-report"
+
+
+class PacBioBundleTypes:
+    SAMPLE: str = "sample"
+    SMRT_CELL: str = "smrt_cell"
+
+
+file_pattern_to_tag: dict[str, list[str]] = {
+    PacBioDirsAndFiles.CONTROL_REPORT: [PacBioHousekeeperTags.CONTROL_REPORT],
+    f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": [PacBioHousekeeperTags.CCS_REPORT],
+    PacBioDirsAndFiles.LOADING_REPORT: [PacBioHousekeeperTags.LOADING_REPORT],
+    PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
+    PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": [AlignmentFileTag.BAM, "pbi"],
+}
+
+file_pattern_to_bundle_type: dict[str, str] = {
+    PacBioDirsAndFiles.CONTROL_REPORT: PacBioBundleTypes.SMRT_CELL,
+    f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.LOADING_REPORT: PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.RAW_DATA_REPORT: PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": PacBioBundleTypes.SAMPLE,
+}
