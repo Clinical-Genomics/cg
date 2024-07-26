@@ -1,5 +1,7 @@
 """Module for the PacBioHousekeeperService tests."""
 
+from housekeeper.store.models import File
+
 from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
@@ -26,3 +28,17 @@ def test_store_files_in_housekeeper(
     assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
         expexted_pac_bio_sample_name
     )
+
+    # THEN all expected files are listed under the smrt cell bundle
+    smrt_bundle_files: list[File] = (
+        pac_bio_housekeeper_service.hk_api.get_files_from_latest_version(
+            bundle_name=expected_smrt_cell_bundle_name
+        )
+    )
+    assert smrt_bundle_files
+
+    # THEN all expected files are listed under the sample bundle
+    sample_bundle_files: list[File] = pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
+        bundle_name=expexted_pac_bio_sample_name
+    )
+    assert sample_bundle_files

@@ -13,6 +13,7 @@ from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBi
 from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
+from cg.utils.mapping import get_item_by_pattern
 
 
 class PacBioHousekeeperService(PostProcessingHKService):
@@ -39,19 +40,12 @@ class PacBioHousekeeperService(PostProcessingHKService):
             )
 
     @staticmethod
-    def _get_item_by_pattern(file_path: Path, pattern_map: dict[str, any]) -> any:
-        for pattern in pattern_map.keys():
-            if re.search(pattern, file_path.name):
-                return pattern_map.get(pattern)
-        raise ValueError
+    def _get_bundle_type_for_file(file_path: Path) -> str:
+        return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_bundle_type)
 
-    def _get_bundle_type_for_file(self, file_path: Path) -> str:
-        return self._get_item_by_pattern(
-            file_path=file_path, pattern_map=file_pattern_to_bundle_type
-        )
-
+    @staticmethod
     def _get_tags_for_file(self, file_path: Path) -> list[str]:
-        return self._get_item_by_pattern(file_path=file_path, pattern_map=file_pattern_to_tag)
+        return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_tag)
 
     @staticmethod
     def _add_tag_to_tags(tags: list[str], tag: str) -> list[str]:
