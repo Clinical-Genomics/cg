@@ -17,11 +17,11 @@ from cg.services.post_processing.pacbio.metrics_parser.utils import (
     [
         (PacBioDirsAndFiles.CONTROL_REPORT, "pac_bio_control_metrics"),
         (PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT, "pac_bio_smrtlink_databases_metrics"),
-        (PacBioDirsAndFiles.BASECALLING_REPORT, "pac_bio_hifi_metrics"),
+        (PacBioDirsAndFiles.CCS_REPORT_SUFFIX, "pac_bio_read_metrics"),
         (PacBioDirsAndFiles.LOADING_REPORT, "pac_bio_productivity_metrics"),
         (PacBioDirsAndFiles.RAW_DATA_REPORT, "pac_bio_polymerase_metrics"),
     ],
-    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
+    ids=["Control", "Smrtlink-Dataset", "Read", "Productivity", "Polymerase"],
 )
 def test_get_parsed_metrics_from_file_name(
     file_name: str,
@@ -47,11 +47,11 @@ def test_get_parsed_metrics_from_file_name(
     [
         PacBioDirsAndFiles.CONTROL_REPORT,
         PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT,
-        PacBioDirsAndFiles.BASECALLING_REPORT,
+        PacBioDirsAndFiles.CCS_REPORT_SUFFIX,
         PacBioDirsAndFiles.LOADING_REPORT,
         PacBioDirsAndFiles.RAW_DATA_REPORT,
     ],
-    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
+    ids=["Control", "Smrtlink-Dataset", "Read", "Productivity", "Polymerase"],
 )
 def test_get_parsed_metrics_from_missing_file(tmp_path: Path, file_name: str):
     """Test that providing a list of non-existing files to the parser raises an error."""
@@ -69,11 +69,11 @@ def test_get_parsed_metrics_from_missing_file(tmp_path: Path, file_name: str):
     [
         PacBioDirsAndFiles.CONTROL_REPORT,
         PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT,
-        PacBioDirsAndFiles.BASECALLING_REPORT,
+        PacBioDirsAndFiles.CCS_REPORT_SUFFIX,
         PacBioDirsAndFiles.LOADING_REPORT,
         PacBioDirsAndFiles.RAW_DATA_REPORT,
     ],
-    ids=["Control", "Smrtlink-Dataset", "Hi-Fi", "Productivity", "Polymerase"],
+    ids=["Control", "Smrtlink-Dataset", "Read", "Productivity", "Polymerase"],
 )
 def test_parse_dataset_metrics_validation_error(
     tmp_path: Path,

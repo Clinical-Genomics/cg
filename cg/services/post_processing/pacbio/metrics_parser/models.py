@@ -16,21 +16,26 @@ from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_
 BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
 
 
-class HiFiMetrics(BaseModel):
-    """Model for the HiFi metrics."""
+class ReadMetrics(BaseModel):
+    """Model for the read metrics."""
 
-    reads: int = Field(..., alias=CCSAttributeIDs.NUMBER_OF_READS)
-    yield_: int = Field(..., alias=CCSAttributeIDs.TOTAL_NUMBER_OF_BASES)
-    mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.MEAN_READ_LENGTH)
-    median_read_length: int = Field(..., alias=CCSAttributeIDs.MEDIAN_READ_LENGTH)
-    mean_length_n50: int = Field(..., alias=CCSAttributeIDs.READ_LENGTH_N50)
-    median_read_quality: str = Field(..., alias=CCSAttributeIDs.MEDIAN_ACCURACY)
+    hifi_reads: int = Field(..., alias=CCSAttributeIDs.HIFI_READS)
+    hifi_yield: int = Field(..., alias=CCSAttributeIDs.HIFI_YIELD)
+    hifi_mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.HIFI_MEAN_READ_LENGTH)
+    hifi_median_read_length: int = Field(..., alias=CCSAttributeIDs.HIFI_MEDIAN_READ_LENGTH)
+    hifi_mean_length_n50: int = Field(..., alias=CCSAttributeIDs.HIFI_READ_LENGTH_N50)
+    hifi_median_read_quality: int = Field(..., alias=CCSAttributeIDs.HIFI_MEDIAN_READ_QUALITY)
     percent_q30: float = Field(..., alias=CCSAttributeIDs.PERCENT_Q30)
+    failed_reads: int = Field(..., alias=CCSAttributeIDs.FAILED_READS)
+    failed_yield: int = Field(..., alias=CCSAttributeIDs.FAILED_YIELD)
+    failed_mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.FAILED_MEAN_READ_LENGTH)
 
-    _validate_mean_read_length_kb = field_validator("mean_read_length_kb", mode="before")(
+    _validate_hifi_mean_read_length_kb = field_validator("hifi_mean_read_length_kb", mode="before")(
         divide_by_thousand_with_one_decimal
     )
-    _validate_percent_q30 = field_validator("percent_q30", mode="before")(fraction_to_percent)
+    _validate_failed_mean_read_length_kb = field_validator(
+        "failed_mean_read_length_kb", mode="before"
+    )(divide_by_thousand_with_one_decimal)
 
 
 class ControlMetrics(BaseModel):
@@ -136,7 +141,7 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 
-    hifi: HiFiMetrics
+    read: ReadMetrics
     control: ControlMetrics
     productivity: ProductivityMetrics
     polymerase: PolymeraseMetrics

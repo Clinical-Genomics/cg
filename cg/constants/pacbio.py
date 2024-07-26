@@ -5,7 +5,6 @@ from cg.constants.housekeeper_tags import AlignmentFileTag
 
 
 class PacBioDirsAndFiles:
-    BASECALLING_REPORT: str = "ccs.report.json"
     CCS_REPORT_SUFFIX: str = "ccs_report.json"
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
@@ -17,13 +16,16 @@ class PacBioDirsAndFiles:
 
 
 class CCSAttributeIDs:
-    NUMBER_OF_READS: str = "ccs2.number_of_ccs_reads"
-    TOTAL_NUMBER_OF_BASES: str = "ccs2.total_number_of_ccs_bases"
-    MEAN_READ_LENGTH: str = "ccs2.mean_ccs_readlength"
-    MEDIAN_READ_LENGTH: str = "ccs2.median_ccs_readlength"
-    READ_LENGTH_N50: str = "ccs2.ccs_readlength_n50"
-    MEDIAN_ACCURACY: str = "ccs2.median_accuracy"
-    PERCENT_Q30: str = "ccs2.percent_ccs_bases_q30"
+    HIFI_READS: str = "ccs_processing.number_of_ccs_reads_q20"
+    HIFI_YIELD: str = "ccs_processing.total_number_of_ccs_bases_q20"
+    HIFI_MEAN_READ_LENGTH: str = "ccs_processing.mean_ccs_readlength_q20"
+    HIFI_MEDIAN_READ_LENGTH: str = "ccs_processing.median_ccs_readlength_q20"
+    HIFI_READ_LENGTH_N50: str = "ccs_processing.ccs_readlength_n50_q20"
+    HIFI_MEDIAN_READ_QUALITY: str = "ccs_processing.median_qv_q20"
+    PERCENT_Q30: str = "ccs_processing.base_percentage_q30"
+    FAILED_READS: str = "ccs_processing.number_of_ccs_reads_lq"
+    FAILED_YIELD: str = "ccs_processing.total_number_of_ccs_bases_lq"
+    FAILED_MEAN_READ_LENGTH: str = "ccs_processing.mean_ccs_readlength_lq"
 
 
 class ControlAttributeIDs:

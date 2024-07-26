@@ -43,7 +43,6 @@ class PacBioRunFileManager(RunFileManager):
             run_path, PacBioDirsAndFiles.STATISTICS_DIR, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR
         )
         report_files: list[Path] = [
-            Path(unzipped_dir, PacBioDirsAndFiles.BASECALLING_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
