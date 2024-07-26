@@ -52,7 +52,26 @@ class MetricsParser:
     }
 
     @classmethod
-    def get_raw_results(cls, results_file_path: Path) -> list[dict[str, Any]]:
+    def parse_samples_results(cls, case: Case, results_file_path: Path) -> dict[str, SampleResults]:
+        try:
+            raw_results: list[dict[str, Any]] = cls._get_raw_results(
+                results_file_path=results_file_path
+            )
+        except Exception as exception_object:
+            raise CgError from exception_object
+
+        validated_results_list: list[SampleResults] = cls._get_validated_results_list(
+            raw_results=raw_results
+        )
+
+        samples_results: dict[str, SampleResults] = cls._get_samples_results(
+            case=case, results_list=validated_results_list
+        )
+
+        return samples_results
+
+    @classmethod
+    def _get_raw_results(cls, results_file_path: Path) -> list[dict[str, Any]]:
         """Parses raw_results from the results file."""
         try:
             raw_results: list[dict[Any, Any]] = [
@@ -66,7 +85,7 @@ class MetricsParser:
         return raw_results
 
     @classmethod
-    def get_altered_sample_result(cls, sample_result: dict[str, Any]) -> dict[str, Any]:
+    def _get_altered_sample_result(cls, sample_result: dict[str, Any]) -> dict[str, Any]:
         """Takes a raw_sample_result with headers from the results file (MutantResultsHeaderRawData)
         and returns an altered_sample_result with the corrected headers from MutantResultsHeaderData.
         """
@@ -77,11 +96,11 @@ class MetricsParser:
         return altered_sample_result
 
     @classmethod
-    def get_validated_results_list(cls, raw_results: list[dict[str, Any]]) -> list[SampleResults]:
+    def _get_validated_results_list(cls, raw_results: list[dict[str, Any]]) -> list[SampleResults]:
         """Takes raw_results and returns a list of validated SampleResults with the corrected headers."""
         validated_results_list = []
         for sample_result in raw_results:
-            altered_sample_result: dict[str, Any] = cls.get_altered_sample_result(
+            altered_sample_result: dict[str, Any] = cls._get_altered_sample_result(
                 sample_result=sample_result
             )
             validated_result: SampleResults = SampleResults.model_validate(altered_sample_result)
@@ -89,42 +108,23 @@ class MetricsParser:
         return validated_results_list
 
     @classmethod
-    def get_sample_name_to_id_mapping(cls, case: Case) -> dict[str, str]:
+    def _get_sample_name_to_id_mapping(cls, case: Case) -> dict[str, str]:
         sample_name_to_id_mapping: dict[str, str] = {}
         for sample in case.samples:
             sample_name_to_id_mapping[sample.name] = sample.internal_id
         return sample_name_to_id_mapping
 
     @classmethod
-    def get_samples_results(
+    def _get_samples_results(
         cls, case: Case, results_list: list[SampleResults]
     ) -> dict[str, SampleResults]:
         """Takes a Case object and a list of SampleResults and builds a dict[str, SampleResults] with
         sample_internal_ids as keys."""
 
-        sample_name_to_id_mapping: dict[str, str] = cls.get_sample_name_to_id_mapping(case=case)
+        sample_name_to_id_mapping: dict[str, str] = cls._get_sample_name_to_id_mapping(case=case)
 
         samples_results: dict[str, SampleResults] = {}
         for result in results_list:
             sample_internal_id = sample_name_to_id_mapping[result.sample_name]
             samples_results[sample_internal_id] = result
-        return samples_results
-
-    @classmethod
-    def parse_samples_results(cls, case: Case, results_file_path: Path) -> dict[str, SampleResults]:
-        try:
-            raw_results: list[dict[str, Any]] = cls.get_raw_results(
-                results_file_path=results_file_path
-            )
-        except Exception as exception_object:
-            raise CgError from exception_object
-
-        validated_results_list: list[SampleResults] = cls.get_validated_results_list(
-            raw_results=raw_results
-        )
-
-        samples_results: dict[str, SampleResults] = cls.get_samples_results(
-            case=case, results_list=validated_results_list
-        )
-
         return samples_results

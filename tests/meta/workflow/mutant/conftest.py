@@ -11,8 +11,6 @@ from cg.meta.workflow.mutant.quality_controller.models import (
 )
 
 from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
-from cg.meta.workflow.mutant.quality_controller.report_generator_utils import ReportGenerator
-from cg.meta.workflow.mutant.quality_controller.result_logger_utils import ResultLogger
 # from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics, get_report_path
 
 
@@ -210,12 +208,12 @@ def mutant_results_file_path_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> 
 
 @pytest.fixture
 def mutant_raw_results_qc_pass(mutant_results_file_path_qc_pass: Path) -> list[dict[str, Any]]:
-    return MetricsParser.get_raw_results(results_file_path=mutant_results_file_path_qc_pass)
+    return MetricsParser._get_raw_results(results_file_path=mutant_results_file_path_qc_pass)
 
 
 @pytest.fixture
 def mutant_results_list_qc_pass(mutant_raw_results_qc_pass: list[dict[str, Any]]):
-    return MetricsParser.get_validated_results_list(raw_results=mutant_raw_results_qc_pass)
+    return MetricsParser._get_validated_results_list(raw_results=mutant_raw_results_qc_pass)
 
 
 # @pytest.fixture
