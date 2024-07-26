@@ -13,14 +13,21 @@ from cg.services.post_processing.pacbio.metrics_parser.models import (
 from cg.services.post_processing.pacbio.metrics_parser.utils import (
     get_parsed_metrics_from_file_name,
 )
+from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 
 
 class PacBioMetricsParser(PostProcessingMetricsParser):
     """Class for parsing PacBio sequencing metrics."""
 
-    @staticmethod
-    def parse_metrics(metrics_files: list[Path]) -> PacBioMetrics:
+    def __init__(self, file_manager: PacBioRunFileManager):
+        super().__init__(file_manager=file_manager)
+
+    def parse_metrics(self, run_data: PacBioRunData) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
+        metrics_files: list[Path] = self.file_manager.get_files_to_parse(run_data)
         hifi_metrics: HiFiMetrics = get_parsed_metrics_from_file_name(
             metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
         )

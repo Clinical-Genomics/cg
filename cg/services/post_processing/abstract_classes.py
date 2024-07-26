@@ -36,9 +36,10 @@ class RunFileManager(ABC):
 
 class PostProcessingMetricsParser(ABC):
 
-    @staticmethod
-    @abstractmethod
-    def parse_metrics(metrics_files: list[Path]) -> RunMetrics:
+    def __init__(self, file_manager: RunFileManager):
+        self.file_manager: RunFileManager = file_manager
+
+    def parse_metrics(self, run_data: RunData) -> RunMetrics:
         pass
 
 
