@@ -33,7 +33,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
             bundle_info: PacBioFileData = self._create_bundle_info(
                 file_path=file_path, parsed_metrics=parsed_metrics
             )
-            self.hk_api.create_bundle_add_file_with_tags(
+            self.hk_api.create_bundle_and_add_file_with_tags(
                 bundle_name=bundle_info.bundle_name,
                 file_path=bundle_info.file_path,
                 tags=bundle_info.tags,

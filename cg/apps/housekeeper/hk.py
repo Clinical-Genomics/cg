@@ -570,7 +570,7 @@ class HousekeeperAPI:
         else:
             LOG.debug(f"Bundle with name {bundle_name} already exists")
 
-    def create_bundle_add_file_with_tags(
+    def create_bundle_and_add_file_with_tags(
         self,
         bundle_name: str,
         file_path: Path,

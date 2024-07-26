@@ -78,7 +78,7 @@ def add_sample_fastq_files_to_housekeeper(
                 device_internal_id=run_directory_data.id,
                 store=store,
             ):
-                hk_api.create_bundle_add_file_with_tags(
+                hk_api.create_bundle_and_add_file_with_tags(
                     bundle_name=sample_internal_id,
                     file_path=sample_fastq_path,
                     tags=[run_directory_data.id, sample_internal_id, SequencingFileTag.FASTQ],
@@ -106,7 +106,7 @@ def store_undetermined_fastq_files(
                 device_internal_id=run_directory_data.id,
                 store=store,
             ):
-                hk_api.create_bundle_add_file_with_tags(
+                hk_api.create_bundle_and_add_file_with_tags(
                     bundle_name=sample_id,
                     file_path=fastq_path,
                     tags=[run_directory_data.id, SequencingFileTag.FASTQ, sample_id],
