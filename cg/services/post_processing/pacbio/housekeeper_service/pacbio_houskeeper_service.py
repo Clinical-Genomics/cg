@@ -44,7 +44,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_bundle_type)
 
     @staticmethod
-    def _get_tags_for_file(self, file_path: Path) -> list[str]:
+    def _get_tags_for_file(file_path: Path) -> list[str]:
         return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_tag)
 
     @staticmethod
