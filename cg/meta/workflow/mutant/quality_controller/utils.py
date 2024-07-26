@@ -2,7 +2,6 @@ from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
 from cg.constants.lims import LimsArtifactTypes, LimsProcess
 from cg.exc import CgError, LimsDataError
-from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import (
@@ -98,13 +97,13 @@ def get_internal_negative_control_sample_for_case(
 
 def get_mutant_pool_samples(case: Case, status_db: Store, lims: LimsAPI) -> MutantPoolSamples:
     samples: list[Sample] = case.samples
-    for sample in samples:
-        if sample.is_negative_control:
-            external_negative_control = samples.pop(sample)
+    for index in range(0, len(samples) - 1):
+        if samples[index].is_negative_control:
+            external_negative_control: Sample = samples.pop(index)
         break
 
     try:
-        internal_negative_control = get_internal_negative_control_sample_for_case(
+        internal_negative_control: Sample = get_internal_negative_control_sample_for_case(
             case=case, status_db=status_db, lims=lims
         )
     except Exception as exception_object:

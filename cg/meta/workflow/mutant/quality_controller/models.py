@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.store.models import Sample
 
@@ -7,6 +7,8 @@ class MutantPoolSamples(BaseModel):
     samples: list[Sample]
     external_negative_control: Sample
     internal_negative_control: Sample
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class QualityMetrics(BaseModel):

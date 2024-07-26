@@ -11,11 +11,18 @@ from cg.meta.workflow.mutant.quality_controller.models import (
     SamplesQualityResults,
 )
 
-from cg.meta.workflow.mutant.quality_controller.result_logger import ResultLogger
-from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
+from cg.meta.workflow.mutant.quality_controller.report_generator_utils import (
+    get_report_path,
+    get_summary,
+    write_report,
+)
+from cg.meta.workflow.mutant.quality_controller.result_logger_utils import (
+    log_case_result,
+    log_results,
+    log_sample_result,
+)
 from cg.meta.workflow.mutant.quality_controller.utils import (
     get_quality_metrics,
-    get_report_path,
     has_valid_total_reads,
 )
 from cg.store.models import Case, Sample
@@ -23,17 +30,9 @@ from cg.store.store import Store
 
 
 class QualityController:
-    def __init__(
-        self,
-        status_db: Store,
-        lims: LimsAPI,
-        report_generator: ReportGenerator,
-        result_logger: ResultLogger,
-    ) -> None:
+    def __init__(self, status_db: Store, lims: LimsAPI) -> None:
         self.status_db: Store = status_db
         self.lims: LimsAPI = lims
-        self.report_generator: ReportGenerator = report_generator
-        self.result_logger: ResultLogger = result_logger
 
     def quality_control(
         self, case: Case, case_path: Path, case_results_file_path: Path
@@ -54,21 +53,21 @@ class QualityController:
         )
         case_quality_result: CaseQualityResult = self.quality_control_case(samples_quality_results)
 
-        self.report_generator.write_report(
+        write_report(
             case_path=case_path,
             samples_quality_results=samples_quality_results,
             case_quality_result=case_quality_result,
         )
 
-        report_file_path = self.report_generator.get_report_path()
+        report_file_path = get_report_path(case_path=case_path)
 
-        self.result_logger.log_results(
+        log_results(
             case_quality_result=case_quality_result,
             samples_quality_results=samples_quality_results,
             report_file_path=report_file_path,
         )
 
-        summary: str = self.report_generator.get_summary(
+        summary: str = get_summary(
             case_quality_result=case_quality_result,
             samples_quality_results=samples_quality_results,
             report_file_path=report_file_path,
@@ -138,7 +137,7 @@ class QualityController:
             passes_mutant_qc=sample_results.qc_pass,
         )
 
-        ResultLogger.log_sample_result(sample_quality)
+        log_sample_result(sample_quality)
         return sample_quality
 
     def quality_control_case(
@@ -164,7 +163,7 @@ class QualityController:
             internal_negative_control_passes_qc=internal_negative_control_pass_qc,
             external_negative_control_passes_qc=external_negative_control_pass_qc,
         )
-        ResultLogger.log_case_result(result)
+        log_case_result(result)
         return result
 
     def samples_pass_qc(self, samples_quality_results: SamplesQualityResults) -> bool:

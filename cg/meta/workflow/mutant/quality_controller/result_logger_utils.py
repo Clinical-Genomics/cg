@@ -9,42 +9,40 @@ from cg.meta.workflow.mutant.quality_controller.models import (
 LOG = logging.getLogger(__name__)
 
 
-class ResultLogger:
-    @staticmethod
-    def log_results(
-        case_quality_result: CaseQualityResult,
-        samples_quality_results: SamplesQualityResults,
-        report_file_path: Path,
-    ) -> None:
-        if case_quality_result.passes_qc:
-            case_message = f"QC passed, see {report_file_path} for details."
-        else:
-            case_message = get_case_fail_message(case_quality_result)
-        LOG.warning(case_message)
+def log_results(
+    case_quality_result: CaseQualityResult,
+    samples_quality_results: SamplesQualityResults,
+    report_file_path: Path,
+) -> None:
+    if case_quality_result.passes_qc:
+        case_message = f"QC passed, see {report_file_path} for details."
+    else:
+        case_message = get_case_fail_message(case_quality_result)
+    LOG.warning(case_message)
 
-        samples_message = samples_results_message(samples_quality_results)
-        LOG.info(samples_message)
+    samples_message = samples_results_message(samples_quality_results)
+    LOG.info(samples_message)
 
-    @staticmethod
-    def log_sample_result(result: SampleQualityResults) -> None:
-        control_message = ""
-        if result.is_external_negative_control:
-            control_message = "External negative control sample "
-        if result.is_internal_negative_control:
-            control_message = "Internal negative control sample "
-        if result.passes_qc:
-            message = f"{control_message}{result.sample_id} passed QC."
-            LOG.info(message)
-        else:
-            message = f"{control_message}{result.sample_id} failed QC."
-            LOG.warning(message)
 
-    @staticmethod
-    def log_case_result(result: CaseQualityResult) -> None:
-        if not result.passes_qc:
-            LOG.warning("Case failed QC.")
-        else:
-            LOG.warning("Case passed QC.")
+def log_sample_result(result: SampleQualityResults) -> None:
+    control_message = ""
+    if result.is_external_negative_control:
+        control_message = "External negative control sample "
+    if result.is_internal_negative_control:
+        control_message = "Internal negative control sample "
+    if result.passes_qc:
+        message = f"{control_message}{result.sample_id} passed QC."
+        LOG.info(message)
+    else:
+        message = f"{control_message}{result.sample_id} failed QC."
+        LOG.warning(message)
+
+
+def log_case_result(result: CaseQualityResult) -> None:
+    if not result.passes_qc:
+        LOG.warning("Case failed QC.")
+    else:
+        LOG.warning("Case passed QC.")
 
 
 def get_case_fail_message(case_quality_result: CaseQualityResult) -> str:

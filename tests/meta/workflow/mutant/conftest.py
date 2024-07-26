@@ -1,16 +1,18 @@
+from typing import Any
 import pytest
 
 from pathlib import Path
 
-# from cg.meta.workflow.mutant.quality_controller.models import (
-#     CaseQualityResult,
-#     QualityMetrics,
-#     SamplesQualityResults,
-# )
+from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
+from cg.meta.workflow.mutant.quality_controller.models import (
+    CaseQualityResult,
+    QualityMetrics,
+    SamplesQualityResults,
+)
 
-# from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
-# from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
-# from cg.meta.workflow.mutant.quality_controller.result_logger import ResultLogger
+from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
+from cg.meta.workflow.mutant.quality_controller.report_generator_utils import ReportGenerator
+from cg.meta.workflow.mutant.quality_controller.result_logger_utils import ResultLogger
 # from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics, get_report_path
 
 
@@ -19,46 +21,6 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 from cg.constants.constants import ControlOptions
 from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
-
-
-@pytest.fixture
-def mutant_analysis_dir_case_qc_pass(mutant_analysis_dir: Path) -> Path:
-    return Path(mutant_analysis_dir, "case_qc_pass")
-
-
-# @pytest.fixture
-# def mutant_qc_report_path_case_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> Path:
-#     return get_report_path(case_path=mutant_analysis_dir_case_qc_pass)
-
-
-# @pytest.fixture
-# def mutant_analysis_dir_case_qc_fail(mutant_analysis_dir: Path) -> Path:
-#     return Path(mutant_analysis_dir, "case_qc_fail")
-
-
-@pytest.fixture
-def mutant_analysis_dir_case_qc_fail_with_failing_controls(mutant_analysis_dir: Path) -> Path:
-    return Path(mutant_analysis_dir, "case_qc_fail_with_failing_controls")
-
-
-@pytest.fixture
-def mutant_results_file_path_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> Path:
-    return Path(mutant_analysis_dir_case_qc_pass, "pass_sars-cov-2_208455_results.csv")
-
-
-@pytest.fixture
-def mutant_results_file_path_qc_fail(mutant_analysis_dir_case_qc_fail: Path) -> Path:
-    return Path(mutant_analysis_dir_case_qc_fail, "fail_sars-cov-2_841080_results.csv")
-
-
-@pytest.fixture
-def mutant_results_file_path_qc_fail_with_failing_controls(
-    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
-) -> Path:
-    return Path(
-        mutant_analysis_dir_case_qc_fail_with_failing_controls,
-        "fail_with_failing_controls_sars-cov-2_841080_results.csv",
-    )
 
 
 @pytest.fixture
@@ -232,6 +194,61 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
 
 
 @pytest.fixture
+def mutant_case_qc_pass(mutant_store: Store) -> Case:
+    return mutant_store.get_case_by_internal_id("case_qc_pass")
+
+
+@pytest.fixture
+def mutant_analysis_dir_case_qc_pass(mutant_analysis_dir: Path) -> Path:
+    return Path(mutant_analysis_dir, "case_qc_pass")
+
+
+@pytest.fixture
+def mutant_results_file_path_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> Path:
+    return Path(mutant_analysis_dir_case_qc_pass, "pass_sars-cov-2_208455_results.csv")
+
+
+@pytest.fixture
+def mutant_raw_results_qc_pass(mutant_results_file_path_qc_pass: Path) -> list[dict[str, Any]]:
+    return MetricsParser.get_raw_results(results_file_path=mutant_results_file_path_qc_pass)
+
+
+@pytest.fixture
+def mutant_results_list_qc_pass(mutant_raw_results_qc_pass: list[dict[str, Any]]):
+    return MetricsParser.get_validated_results_list(raw_results=mutant_raw_results_qc_pass)
+
+
+# @pytest.fixture
+# def mutant_qc_report_path_case_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> Path:
+#     return get_report_path(case_path=mutant_analysis_dir_case_qc_pass)
+
+
+@pytest.fixture
+def mutant_analysis_dir_case_qc_fail(mutant_analysis_dir: Path) -> Path:
+    return Path(mutant_analysis_dir, "case_qc_fail")
+
+
+@pytest.fixture
+def mutant_analysis_dir_case_qc_fail_with_failing_controls(mutant_analysis_dir: Path) -> Path:
+    return Path(mutant_analysis_dir, "case_qc_fail_with_failing_controls")
+
+
+@pytest.fixture
+def mutant_results_file_path_qc_fail(mutant_analysis_dir_case_qc_fail: Path) -> Path:
+    return Path(mutant_analysis_dir_case_qc_fail, "fail_sars-cov-2_841080_results.csv")
+
+
+@pytest.fixture
+def mutant_results_file_path_qc_fail_with_failing_controls(
+    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
+) -> Path:
+    return Path(
+        mutant_analysis_dir_case_qc_fail_with_failing_controls,
+        "fail_with_failing_controls_sars-cov-2_841080_results.csv",
+    )
+
+
+@pytest.fixture
 def sample_qc_pass(mutant_store: Store) -> Sample:
     return mutant_store.get_sample_by_internal_id("sample_qc_pass")
 
@@ -256,55 +273,55 @@ def case_qc_fail_with_failing_controls(mutant_store: Store) -> Case:
     return mutant_store.get_case_by_internal_id("case_qc_fail_with_failing_controls")
 
 
-# @pytest.fixture
-# def quality_controller(mutant_store: Store, mutant_lims: MockLimsAPI) -> QualityController:
-#     return QualityController(
-#         status_db=mutant_store,
-#         lims=mutant_lims,
-#         report_generator=ReportGenerator(),
-#         result_logger=ResultLogger(),
-#     )
+@pytest.fixture
+def quality_controller(mutant_store: Store, mutant_lims: MockLimsAPI) -> QualityController:
+    return QualityController(
+        status_db=mutant_store,
+        lims=mutant_lims,
+        report_generator=ReportGenerator(),
+        result_logger=ResultLogger(),
+    )
 
 
-# @pytest.fixture
-# def quality_metrics_case_qc_pass(
-#     mutant_results_file_path_qc_pass: Path,
-#     case_qc_pass: Case,
-#     mutant_store: Store,
-#     mutant_lims: MockLimsAPI,
-# ) -> QualityMetrics:
-#     return get_quality_metrics(
-#         case_results_file_path=mutant_results_file_path_qc_pass,
-#         case=case_qc_pass,
-#         status_db=mutant_store,
-#         lims=mutant_lims,
-#     )
+@pytest.fixture
+def quality_metrics_case_qc_pass(
+    mutant_results_file_path_qc_pass: Path,
+    case_qc_pass: Case,
+    mutant_store: Store,
+    mutant_lims: MockLimsAPI,
+) -> QualityMetrics:
+    return get_quality_metrics(
+        case_results_file_path=mutant_results_file_path_qc_pass,
+        case=case_qc_pass,
+        status_db=mutant_store,
+        lims=mutant_lims,
+    )
 
 
-# @pytest.fixture
-# def quality_metrics_case_qc_fail(
-#     mutant_results_file_path_qc_fail: Path,
-#     case_qc_fail: Case,
-#     mutant_store: Store,
-#     mutant_lims: MockLimsAPI,
-# ) -> QualityMetrics:
-#     return get_quality_metrics(
-#         case_results_file_path=mutant_results_file_path_qc_fail,
-#         case=case_qc_fail,
-#         status_db=mutant_store,
-#         lims=mutant_lims,
-#     )
+@pytest.fixture
+def quality_metrics_case_qc_fail(
+    mutant_results_file_path_qc_fail: Path,
+    case_qc_fail: Case,
+    mutant_store: Store,
+    mutant_lims: MockLimsAPI,
+) -> QualityMetrics:
+    return get_quality_metrics(
+        case_results_file_path=mutant_results_file_path_qc_fail,
+        case=case_qc_fail,
+        status_db=mutant_store,
+        lims=mutant_lims,
+    )
 
 
-# @pytest.fixture
-# def samples_quality_results_case_qc_pass(
-#     quality_controller: QualityController, quality_metrics_case_qc_pass: QualityMetrics
-# ) -> SamplesQualityResults:
-#     return quality_controller.quality_control_samples(quality_metrics=quality_metrics_case_qc_pass)
+@pytest.fixture
+def samples_quality_results_case_qc_pass(
+    quality_controller: QualityController, quality_metrics_case_qc_pass: QualityMetrics
+) -> SamplesQualityResults:
+    return quality_controller.quality_control_samples(quality_metrics=quality_metrics_case_qc_pass)
 
 
-# @pytest.fixture
-# def case_quality_result_qc_pass(
-#     quality_controller: QualityController, samples_quality_results: SamplesQualityResults
-# ) -> CaseQualityResult:
-#     return quality_controller.quality_control_case(samples_quality_results=samples_quality_results)
+@pytest.fixture
+def case_quality_result_qc_pass(
+    quality_controller: QualityController, samples_quality_results: SamplesQualityResults
+) -> CaseQualityResult:
+    return quality_controller.quality_control_case(samples_quality_results=samples_quality_results)
