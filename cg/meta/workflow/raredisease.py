@@ -21,7 +21,7 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
 )
-from cg.constants.scout import RAREDISEASE_CASE_TAGS, HGNC_ID
+from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -167,16 +167,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.warning(f"No coverage file found with the tags: {RAREDISEASE_COVERAGE_FILE_TAGS}")
         return None
 
-    def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
-        """Return HGNC IDs of genes from specified panels using the Scout API."""
-        gene_ids: list[int] = []
-        for panel in panels:
-            genes: list[dict] = self.scout_api.get_genes(panel)
-            gene_ids.extend(gene.get(HGNC_ID) for gene in genes if gene.get(HGNC_ID) is not None)
-        return gene_ids
-
     def get_sample_coverage(
-        self, case_id: str, sample_id: str, panels: list[str]
+        self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
         """Return sample coverage metrics from Chanjo2."""
         genome_version: GenomeVersion = self.get_genome_build()
@@ -187,7 +179,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             post_request = CoveragePostRequest(
                 build=self.translate_genome_reference(genome_version),
                 coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
+                hgnc_gene_ids=gene_ids,
                 interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
                 samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
             )

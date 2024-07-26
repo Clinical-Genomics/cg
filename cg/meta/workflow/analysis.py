@@ -20,7 +20,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.scout import ScoutExportFileName
+from cg.constants.scout import ScoutExportFileName, HGNC_ID
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
@@ -744,7 +744,7 @@ class AnalysisAPI(MetaAPI):
         return translation_map.get(genome_version, genome_version)
 
     def get_sample_coverage(
-        self, case_id: str, sample_id: str, panels: list[str]
+        self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
         """Return sample coverage data from Chanjo2."""
         raise NotImplementedError
@@ -752,3 +752,11 @@ class AnalysisAPI(MetaAPI):
     def get_scout_upload_case_tags(self):
         """Return workflow specific upload case tags."""
         raise NotImplementedError
+
+    def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
+        """Return HGNC IDs of genes from specified panels using the Scout API."""
+        gene_ids: list[int] = []
+        for panel in panels:
+            genes: list[dict] = self.scout_api.get_genes(panel)
+            gene_ids.extend(gene.get(HGNC_ID) for gene in genes if gene.get(HGNC_ID) is not None)
+        return gene_ids
