@@ -159,12 +159,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
+        coverage_file_tags: list[str] = RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
         coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
+            bundle_name=bundle_name, tags=coverage_file_tags
         )
         if coverage_file:
             return coverage_file.full_path
-        LOG.warning(f"No coverage file found with the tags: {RAREDISEASE_COVERAGE_FILE_TAGS}")
+        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
         return None
 
     def get_sample_coverage(
