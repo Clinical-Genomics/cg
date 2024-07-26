@@ -1,5 +1,6 @@
 """Module for the PacBioHousekeeperService used in the Post processing flow."""
 
+import re
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -38,39 +39,38 @@ class PacBioHousekeeperService(PostProcessingHKService):
             )
 
     @staticmethod
-    def _get_tags_for_file(file_path: Path) -> list[str]:
-        for pattern in file_pattern_to_tag.keys():
-            if pattern in file_path.as_posix():
-                return file_pattern_to_tag[pattern]
+    def _get_item_by_pattern(file_path: Path, pattern_map: dict[str, any]) -> any:
+        for pattern in pattern_map.keys():
+            if re.search(pattern, file_path.name):
+                return pattern_map.get(pattern)
         raise ValueError
 
-    @staticmethod
-    def _get_bundle_type_for_file(file_path: Path) -> str:
-        for pattern in file_pattern_to_bundle_type.keys():
-            if pattern in file_path.as_posix():
-                return file_pattern_to_bundle_type[pattern]
-        raise ValueError
+    def _get_bundle_type_for_file(self, file_path: Path) -> str:
+        return self._get_item_by_pattern(
+            file_path=file_path, pattern_map=file_pattern_to_bundle_type
+        )
+
+    def _get_tags_for_file(self, file_path: Path) -> list[str]:
+        return self._get_item_by_pattern(file_path=file_path, pattern_map=file_pattern_to_tag)
 
     @staticmethod
-    def _add_smrt_cell_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics) -> list[str]:
-        tags.append(parsed_metrics.dataset_metrics.cell_id)
-        return tags
-
-    @staticmethod
-    def _add_sample_id_to_tags(tags: list[str], parsed_metrics: PacBioMetrics) -> list[str]:
-        tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
-        return tags
+    def _add_tag_to_tags(tags: list[str], tag: str) -> list[str]:
+        new_tags: list[str] = tags
+        new_tags.append(tag)
+        return new_tags
 
     def _create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:
         tags: list[str] = self._get_tags_for_file(file_path)
         if self._is_file_type_smrt_cell(file_path):
-            tags: list[str] = self._add_smrt_cell_id_to_tags(
-                tags=tags, parsed_metrics=parsed_metrics
+            tags: list[str] = self._add_tag_to_tags(
+                tags=tags, tag=parsed_metrics.dataset_metrics.cell_id
             )
             return PacBioFileData(
                 bundle_name=parsed_metrics.dataset_metrics.cell_id, file_path=file_path, tags=tags
             )
-        tags: list[str] = self._add_sample_id_to_tags(tags=tags, parsed_metrics=parsed_metrics)
+        tags: list[str] = self._add_tag_to_tags(
+            tags=tags, tag=parsed_metrics.dataset_metrics.sample_internal_id
+        )
         return PacBioFileData(
             bundle_name=parsed_metrics.dataset_metrics.sample_internal_id,
             file_path=file_path,

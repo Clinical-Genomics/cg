@@ -71,19 +71,21 @@ class PacBioBundleTypes:
 
 
 file_pattern_to_tag: dict[str, list[str]] = {
-    f"*{PacBioDirsAndFiles.CONTROL_REPORT}*": [PacBioHousekeeperTags.CONTROL_REPORT],
-    f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}*": [PacBioHousekeeperTags.CCS_REPORT],
-    f"*{PacBioDirsAndFiles.LOADING_REPORT}*": [PacBioHousekeeperTags.LOADING_REPORT],
-    f"*{PacBioDirsAndFiles.RAW_DATA_REPORT}*": [PacBioHousekeeperTags.RAWDATA_REPORT],
-    f"*{PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT}*": [PacBioHousekeeperTags.DATASETS_REPORT],
-    f"*{PacBioDirsAndFiles.HIFI_READS}*{FileExtensions.BAM}*": [AlignmentFileTag.BAM],
+    PacBioDirsAndFiles.CONTROL_REPORT: [PacBioHousekeeperTags.CONTROL_REPORT],
+    f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": [PacBioHousekeeperTags.CCS_REPORT],
+    PacBioDirsAndFiles.LOADING_REPORT: [PacBioHousekeeperTags.LOADING_REPORT],
+    PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
+    PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": [AlignmentFileTag.BAM, "pbi"],
 }
 
 file_pattern_to_bundle_type: dict[str, str] = {
-    f"*{PacBioDirsAndFiles.CONTROL_REPORT}*": PacBioBundleTypes.SMRT_CELL,
-    f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}*": PacBioBundleTypes.SMRT_CELL,
-    f"*{PacBioDirsAndFiles.LOADING_REPORT}*": PacBioBundleTypes.SMRT_CELL,
-    f"*{PacBioDirsAndFiles.RAW_DATA_REPORT}*": PacBioBundleTypes.SMRT_CELL,
-    f"*{PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT}*": PacBioBundleTypes.SMRT_CELL,
-    f"*{PacBioDirsAndFiles.HIFI_READS}*{FileExtensions.BAM}*": PacBioBundleTypes.SAMPLE,
+    PacBioDirsAndFiles.CONTROL_REPORT: PacBioBundleTypes.SMRT_CELL,
+    f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.LOADING_REPORT: PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.RAW_DATA_REPORT: PacBioBundleTypes.SMRT_CELL,
+    PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
+    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": PacBioBundleTypes.SAMPLE,
 }
