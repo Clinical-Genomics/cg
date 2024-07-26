@@ -56,17 +56,13 @@ class PacBioHousekeeperService(PostProcessingHKService):
     def _create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:
         tags: list[str] = self._get_tags_for_file(file_path)
         if self._is_file_type_smrt_cell(file_path):
-            tags: list[str] = self._add_tag_to_tags(
-                tags=tags, tag=parsed_metrics.dataset_metrics.cell_id
-            )
-            return PacBioFileData(
-                bundle_name=parsed_metrics.dataset_metrics.cell_id, file_path=file_path, tags=tags
-            )
-        tags: list[str] = self._add_tag_to_tags(
-            tags=tags, tag=parsed_metrics.dataset_metrics.sample_internal_id
-        )
+            tags.append(parsed_metrics.dataset_metrics.cell_id)
+            bundle_name: str = parsed_metrics.dataset_metrics.cell_id
+        else:  
+            tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
+            bundle_name: str = parsed_metrics.dataset_metrics.sample_internal_id
         return PacBioFileData(
-            bundle_name=parsed_metrics.dataset_metrics.sample_internal_id,
+            bundle_name=bundle_name,
             file_path=file_path,
             tags=tags,
         )
