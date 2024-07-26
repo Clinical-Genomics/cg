@@ -32,10 +32,15 @@ def handle_pac_bio_parsing_errors(func):
 
 
 def get_report_file_from_pattern(files: list[Path], pattern: str) -> Path | None:
-    """Return the path whose name matches a pattern from a list of paths."""
+    """
+    Return the path whose name matches a pattern from a list of paths.
+    Raises:
+        FileNotFoundError: If no file matches the pattern.
+    """
     for file in files:
         if pattern in file.name:
             return file
+    raise FileNotFoundError(f"No {pattern} file found in given file list")
 
 
 @handle_pac_bio_parsing_errors
