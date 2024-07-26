@@ -14,7 +14,6 @@ from cg.services.post_processing.pacbio.metrics_parser.models import (
     ProductivityMetrics,
     SmrtlinkDatasetsMetrics,
 )
-from cg.utils.files import get_file_in_directory
 
 
 def handle_pac_bio_parsing_errors(func):
@@ -32,6 +31,13 @@ def handle_pac_bio_parsing_errors(func):
     return wrapper
 
 
+def get_report_file_from_pattern(files: list[Path], pattern: str) -> Path | None:
+    """Return the path whose name matches a pattern from a list of paths."""
+    for file in files:
+        if pattern in file.name:
+            return file
+
+
 @handle_pac_bio_parsing_errors
 def parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> BaseMetrics:
     """Parse the metrics report to a data model."""
@@ -42,37 +48,42 @@ def parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> B
 
 
 @handle_pac_bio_parsing_errors
-def parse_dataset_metrics(report_dir: Path) -> SmrtlinkDatasetsMetrics:
-    file_name = PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT
-    report: Path = get_file_in_directory(directory=report_dir, file_name=file_name)
-    parsed_json: dict = ReadFile.read_file[FileFormat.JSON](report)
+def parse_dataset_metrics(metrics_files: list[Path]) -> SmrtlinkDatasetsMetrics:
+    report_file: Path = get_report_file_from_pattern(
+        files=metrics_files, pattern=PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT
+    )
+    parsed_json: dict = ReadFile.read_file[FileFormat.JSON](report_file)
     data: dict = parsed_json[0]
     return SmrtlinkDatasetsMetrics.model_validate(data, from_attributes=True)
 
 
 @handle_pac_bio_parsing_errors
-def parse_hifi_metrics(report_dir: Path) -> HiFiMetrics:
-    file_name = PacBioDirsAndFiles.BASECALLING_REPORT
-    report: Path = get_file_in_directory(directory=report_dir, file_name=file_name)
-    return parse_report_to_model(report_file=report, data_model=HiFiMetrics)
+def parse_hifi_metrics(metrics_files: list[Path]) -> HiFiMetrics:
+    report_file: Path = get_report_file_from_pattern(
+        files=metrics_files, pattern=PacBioDirsAndFiles.BASECALLING_REPORT
+    )
+    return parse_report_to_model(report_file=report_file, data_model=HiFiMetrics)
 
 
 @handle_pac_bio_parsing_errors
-def parse_control_metrics(report_dir: Path) -> ControlMetrics:
-    file_name = PacBioDirsAndFiles.CONTROL_REPORT
-    report: Path = get_file_in_directory(directory=report_dir, file_name=file_name)
-    return parse_report_to_model(report_file=report, data_model=ControlMetrics)
+def parse_control_metrics(metrics_files: list[Path]) -> ControlMetrics:
+    report_file: Path = get_report_file_from_pattern(
+        files=metrics_files, pattern=PacBioDirsAndFiles.CONTROL_REPORT
+    )
+    return parse_report_to_model(report_file=report_file, data_model=ControlMetrics)
 
 
 @handle_pac_bio_parsing_errors
-def parse_productivity_metrics(report_dir: Path) -> ProductivityMetrics:
-    file_name = PacBioDirsAndFiles.LOADING_REPORT
-    report: Path = get_file_in_directory(directory=report_dir, file_name=file_name)
-    return parse_report_to_model(report_file=report, data_model=ProductivityMetrics)
+def parse_productivity_metrics(metrics_files: list[Path]) -> ProductivityMetrics:
+    report_file: Path = get_report_file_from_pattern(
+        files=metrics_files, pattern=PacBioDirsAndFiles.LOADING_REPORT
+    )
+    return parse_report_to_model(report_file=report_file, data_model=ProductivityMetrics)
 
 
 @handle_pac_bio_parsing_errors
-def parse_polymerase_metrics(report_dir: Path) -> PolymeraseMetrics:
-    file_name = PacBioDirsAndFiles.RAW_DATA_REPORT
-    report: Path = get_file_in_directory(directory=report_dir, file_name=file_name)
-    return parse_report_to_model(report_file=report, data_model=PolymeraseMetrics)
+def parse_polymerase_metrics(metrics_files: list[Path]) -> PolymeraseMetrics:
+    report_file: Path = get_report_file_from_pattern(
+        files=metrics_files, pattern=PacBioDirsAndFiles.RAW_DATA_REPORT
+    )
+    return parse_report_to_model(report_file=report_file, data_model=PolymeraseMetrics)
