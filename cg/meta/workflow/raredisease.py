@@ -183,14 +183,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
         )
-        post_request = CoveragePostRequest(
-            build=self.translate_genome_reference(genome_version),
-            coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-            hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
-            interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-            samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
-        )
         try:
+            post_request = CoveragePostRequest(
+                build=self.translate_genome_reference(genome_version),
+                coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
+                hgnc_gene_ids=self.get_gene_ids_from_scout(panels),
+                interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+                samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
+            )
             post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
             return post_response.get_sample_coverage_metrics(sample_id)
         except Exception as error:
