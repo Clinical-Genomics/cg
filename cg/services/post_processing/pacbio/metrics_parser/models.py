@@ -10,6 +10,7 @@ from cg.constants.pacbio import (
     PolymeraseDataAttributeIDs,
     SmrtLinkDatabasesIDs,
 )
+from cg.services.post_processing.abstract_models import RunMetrics
 from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
 
 BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
@@ -132,7 +133,7 @@ class SmrtlinkDatasetsMetrics(BaseModel):
         return data
 
 
-class PacBioMetrics(BaseModel):
+class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 
     hifi: HiFiMetrics
