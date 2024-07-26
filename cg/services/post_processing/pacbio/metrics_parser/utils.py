@@ -35,7 +35,7 @@ def handle_pac_bio_parsing_errors(func):
 def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
     """Return the data model based on the pattern."""
     pattern_to_model = {
-        PacBioDirsAndFiles.BASECALLING_REPORT: ReadMetrics,
+        PacBioDirsAndFiles.CCS_REPORT_SUFFIX: ReadMetrics,
         PacBioDirsAndFiles.CONTROL_REPORT: ControlMetrics,
         PacBioDirsAndFiles.LOADING_REPORT: ProductivityMetrics,
         PacBioDirsAndFiles.RAW_DATA_REPORT: PolymeraseMetrics,
