@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from cg.constants.pacbio import PacBioDirsAndFiles
+from cg.services.post_processing.abstract_classes import PostProcessingMetricsParser
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
     HiFiMetrics,
@@ -9,26 +11,38 @@ from cg.services.post_processing.pacbio.metrics_parser.models import (
     SmrtlinkDatasetsMetrics,
 )
 from cg.services.post_processing.pacbio.metrics_parser.utils import (
-    parse_control_metrics,
-    parse_dataset_metrics,
-    parse_hifi_metrics,
-    parse_polymerase_metrics,
-    parse_productivity_metrics,
+    get_parsed_metrics_from_file_name,
+)
+from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
 )
 
 
-class PacBioMetricsParser:
+class PacBioMetricsParser(PostProcessingMetricsParser):
     """Class for parsing PacBio sequencing metrics."""
 
-    @staticmethod
-    def parse_metrics(smrt_cell_path: Path) -> PacBioMetrics:
+    def __init__(self, file_manager: PacBioRunFileManager):
+        super().__init__(file_manager=file_manager)
+
+    def parse_metrics(self, run_data: PacBioRunData) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
-        report_dir = Path(smrt_cell_path, "statistics")
-        hifi_metrics: HiFiMetrics = parse_hifi_metrics(report_dir)
-        control_metrics: ControlMetrics = parse_control_metrics(report_dir)
-        productivity_metrics: ProductivityMetrics = parse_productivity_metrics(report_dir)
-        polymerase_metrics: PolymeraseMetrics = parse_polymerase_metrics(report_dir)
-        dataset_metrics: SmrtlinkDatasetsMetrics = parse_dataset_metrics(report_dir)
+        metrics_files: list[Path] = self.file_manager.get_files_to_parse(run_data)
+        hifi_metrics: HiFiMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
+        )
+        control_metrics: ControlMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.CONTROL_REPORT
+        )
+        productivity_metrics: ProductivityMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.LOADING_REPORT
+        )
+        polymerase_metrics: PolymeraseMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.RAW_DATA_REPORT
+        )
+        dataset_metrics: SmrtlinkDatasetsMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT
+        )
 
         return PacBioMetrics(
             hifi=hifi_metrics,

@@ -1,12 +1,10 @@
 """Post-processing service abstract classes."""
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 
-from pydantic import BaseModel
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.post_processing.abstract_models import PostProcessingDTOs, RunMetrics, RunData
+from cg.services.post_processing.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.store.store import Store
 
 
@@ -38,8 +36,10 @@ class RunFileManager(ABC):
 
 class PostProcessingMetricsParser(ABC):
 
-    @abstractmethod
-    def parse_metrics(self, metrics_paths: list[Path]) -> RunMetrics:
+    def __init__(self, file_manager: RunFileManager):
+        self.file_manager: RunFileManager = file_manager
+
+    def parse_metrics(self, run_data: RunData) -> RunMetrics:
         pass
 
 
