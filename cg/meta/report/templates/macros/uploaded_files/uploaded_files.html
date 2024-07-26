@@ -4,6 +4,7 @@
 
 {% macro uploaded_files(case, customer) %}
 {% set data_delivery = case.data_analysis.data_delivery %}
+{% set comment = case.data_analysis.comment %}
   {% if "fastq" in data_delivery or "analysis" in data_delivery or "scout" in data_delivery %}
     <div class="container mb-5">
       <h3 class="mb-4">Uppladdade filer</h3>
@@ -12,6 +13,11 @@
         <a href="https://clinical.scilifelab.se/data-delivery" class="alert-link">
           https://clinical.scilifelab.se/data-delivery</a>.
       </div>
+	    {% if comment != "N/A"%}
+        <div class="alert alert-warning" role="alert">
+	        {{ comment }}
+        </div>
+	    {% endif %}
       <!-- Scout files -->
       {{ scout_files(case=case, customer_id=customer.id, scout_access=customer.scout_access) }}
       <!-- Caesar files -->
