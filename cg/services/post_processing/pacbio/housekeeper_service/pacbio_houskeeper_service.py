@@ -25,9 +25,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         super().__init__(hk_api=hk_api, file_manager=file_manager, metrics_parser=metrics_parser)
 
     def store_files_in_housekeeper(self, run_data: PacBioRunData):
-        parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(
-            self.file_manager.get_files_to_parse(run_data)
-        )
+        parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(run_data)
         file_to_store: list[Path] = self.file_manager.get_files_to_store(run_data)
         for file_path in file_to_store:
             bundle_info: PacBioFileData = self._create_bundle_info(
