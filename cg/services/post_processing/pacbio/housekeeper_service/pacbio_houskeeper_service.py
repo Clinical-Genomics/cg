@@ -13,7 +13,7 @@ from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBi
 from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
-from cg.utils.mapping import get_item_by_pattern
+from cg.utils.mapping import get_item_by_pattern_in_source
 
 
 class PacBioHousekeeperService(PostProcessingHKService):
@@ -41,11 +41,13 @@ class PacBioHousekeeperService(PostProcessingHKService):
 
     @staticmethod
     def _get_bundle_type_for_file(file_path: Path) -> str:
-        return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_bundle_type)
+        return get_item_by_pattern_in_source(
+            source=file_path.name, pattern_map=file_pattern_to_bundle_type
+        )
 
     @staticmethod
     def _get_tags_for_file(file_path: Path) -> list[str]:
-        return get_item_by_pattern(pattern=file_path.name, pattern_map=file_pattern_to_tag)
+        return get_item_by_pattern_in_source(source=file_path.name, pattern_map=file_pattern_to_tag)
 
     @staticmethod
     def _add_tag_to_tags(tags: list[str], tag: str) -> list[str]:
@@ -58,7 +60,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         if self._is_file_type_smrt_cell(file_path):
             tags.append(parsed_metrics.dataset_metrics.cell_id)
             bundle_name: str = parsed_metrics.dataset_metrics.cell_id
-        else:  
+        else:
             tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
             bundle_name: str = parsed_metrics.dataset_metrics.sample_internal_id
         return PacBioFileData(
