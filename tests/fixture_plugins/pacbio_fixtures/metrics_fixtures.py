@@ -11,15 +11,15 @@ from cg.constants.pacbio import (
 )
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
-    HiFiMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
+    ReadMetrics,
     SmrtlinkDatasetsMetrics,
 )
 
 
 @pytest.fixture
-def pac_bio_hifi_metrics() -> HiFiMetrics:
+def pac_bio_read_metrics() -> ReadMetrics:
     data: dict[str, Any] = {
         CCSAttributeIDs.NUMBER_OF_READS: 6580977,
         CCSAttributeIDs.TOTAL_NUMBER_OF_BASES: 106192944185,
@@ -29,7 +29,7 @@ def pac_bio_hifi_metrics() -> HiFiMetrics:
         CCSAttributeIDs.MEDIAN_ACCURACY: "Q34",
         CCSAttributeIDs.PERCENT_Q30: 0.9318790946286002,
     }
-    return HiFiMetrics.model_validate(data, from_attributes=True)
+    return ReadMetrics.model_validate(data, from_attributes=True)
 
 
 @pytest.fixture

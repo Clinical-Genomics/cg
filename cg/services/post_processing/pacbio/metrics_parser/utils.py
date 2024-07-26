@@ -9,9 +9,9 @@ from cg.io.controller import ReadFile
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     BaseMetrics,
     ControlMetrics,
-    HiFiMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
+    ReadMetrics,
     SmrtlinkDatasetsMetrics,
 )
 from cg.utils.files import get_file_with_pattern_from_list
@@ -35,7 +35,7 @@ def handle_pac_bio_parsing_errors(func):
 def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
     """Return the data model based on the pattern."""
     pattern_to_model = {
-        PacBioDirsAndFiles.BASECALLING_REPORT: HiFiMetrics,
+        PacBioDirsAndFiles.BASECALLING_REPORT: ReadMetrics,
         PacBioDirsAndFiles.CONTROL_REPORT: ControlMetrics,
         PacBioDirsAndFiles.LOADING_REPORT: ProductivityMetrics,
         PacBioDirsAndFiles.RAW_DATA_REPORT: PolymeraseMetrics,

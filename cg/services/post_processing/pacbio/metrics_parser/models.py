@@ -16,8 +16,8 @@ from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_
 BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
 
 
-class HiFiMetrics(BaseModel):
-    """Model for the HiFi metrics."""
+class ReadMetrics(BaseModel):
+    """Model for the read metrics."""
 
     reads: int = Field(..., alias=CCSAttributeIDs.NUMBER_OF_READS)
     yield_: int = Field(..., alias=CCSAttributeIDs.TOTAL_NUMBER_OF_BASES)
@@ -136,7 +136,7 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 
-    hifi: HiFiMetrics
+    read: ReadMetrics
     control: ControlMetrics
     productivity: ProductivityMetrics
     polymerase: PolymeraseMetrics
