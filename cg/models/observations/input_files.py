@@ -21,6 +21,13 @@ class MipDNAObservationsInputFiles(ObservationsInputFiles):
     family_ped_path: FilePath
 
 
+class RarediseaseObservationsInputFiles(ObservationsInputFiles):
+    """Model for validating raredisease Loqusdb input files."""
+
+    profile_vcf_path: FilePath
+    family_ped_path: FilePath
+
+
 class BalsamicObservationsInputFiles(ObservationsInputFiles):
     """Model for validating cancer Loqusdb input files."""
 

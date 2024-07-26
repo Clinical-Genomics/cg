@@ -75,6 +75,11 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
+FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
+
+FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"fastq"},
+]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
@@ -133,12 +138,6 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
-]
 
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
@@ -206,6 +205,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
+    },
+    Workflow.RAREDISEASE: {
+        "case_tags": [{HermesFileTag.CLINICAL_DELIVERY}],
+        "sample_tags": [{HermesFileTag.CLINICAL_DELIVERY}],
     },
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,

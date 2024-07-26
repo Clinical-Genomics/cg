@@ -7,9 +7,10 @@ from subprocess import CalledProcessError
 from typing import Iterator
 
 import click
-from housekeeper.store.models import Bundle, Version
+from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
@@ -18,10 +19,11 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
+from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -729,3 +731,30 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
+
+    def _get_genotype_files(self, version_id: int) -> list:
+        return self.hk.files(version=version_id, tags=["genotype"]).all()
+
+    def _is_variant_file(genotype_file: File):
+        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
+
+    def get_bcf_file(self, hk_version_obj: Version) -> File:
+        """Fetch a bcf file and return the file object"""
+        genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
+        for genotype_file in genotype_files:
+            if self._is_variant_file(genotype_file=genotype_file):
+                LOG.debug(f"Found bcf file {genotype_file.full_path}")
+                return genotype_file
+        raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
+
+    def _get_samples_sex(self, case_obj: Case, hk_version: Version) -> dict:
+        """Retrieve sex information from statusDB and from analysis prediction (stored HK QC metrics file)"""
+        raise NotImplementedError
+
+    def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
+        """Fetch a qc_metrics file and return the path"""
+        hk_qcmetrics = self.hk.files(
+            version=hk_version_obj.id, tags=HkAnalysisMetricsTag.QC_METRICS
+        ).first()
+        LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
+        return Path(hk_qcmetrics.full_path)

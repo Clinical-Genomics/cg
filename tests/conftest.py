@@ -1348,6 +1348,16 @@ def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
+def customer(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a random customer."""
+    return Customer(
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture
 def external_wes_application_tag() -> str:
     """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"

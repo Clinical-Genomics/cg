@@ -14,6 +14,7 @@ from cg.constants.constants import Workflow
 from cg.exc import CgError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -28,7 +29,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
     """Upload observations from an analysis to Loqusdb."""
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
     try:
-        observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
+        observations_api: BalsamicObservationsAPI | MipDNAObservationsAPI | RarediseaseObservationsAPI = get_observations_api(
             context=context, case_id=case_id, upload=True
         )
         if dry_run:

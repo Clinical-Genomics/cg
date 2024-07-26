@@ -89,6 +89,10 @@ class BalsamicAnalysisTag:
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
+class HkAnalysisMetricsTag:
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+
+
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
@@ -201,6 +205,21 @@ WORKFLOW_PROTECTED_TAGS = {
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
+    ],
+    Workflow.RAREDISEASE: [
+        ["vcf-snv-clinical"],
+        ["vcf-snv-research"],
+        ["vcf-str"],
+        ["vcf-snv"],
+        ["qc-metrics"],
+        ["smn-calling"],
+        ["vcf-sv"],
+        ["vcf-sv-clinical"],
+        ["vcf-sv-research"],
+        ["vcf2cytosure"],
+        [HK_DELIVERY_REPORT_TAG],
+        [AnalysisTag.MULTIQC_HTML],
+        [HermesFileTag.LONG_TERM_STORAGE],
     ],
     Workflow.RNAFUSION: [
         [AnalysisTag.FUSION, AnalysisTag.ARRIBA],

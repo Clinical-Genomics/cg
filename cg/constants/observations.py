@@ -6,7 +6,7 @@ from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
-LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
+LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.BALSAMIC, Workflow.MIP_DNA, Workflow.RAREDISEASE]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST110,
@@ -19,7 +19,6 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
     CancerAnalysisType.TUMOR_WGS,
     CancerAnalysisType.TUMOR_NORMAL_WGS,
 ]
-
 
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
@@ -50,8 +49,25 @@ class MipDNAObservationsAnalysisTag(StrEnum):
     FAMILY_PED: str = "pedigree"
 
 
+class RarediseaseObservationsAnalysisTag(StrEnum):
+    """Rare disease observations files analysis tags."""
+
+    SNV_VCF: str = "vcf-snv"
+    SV_VCF: str = "vcf-sv"
+    FAMILY_PED: str = "pedigree"
+
+
 class MipDNALoadParameters(Enum):
     """Rare disease Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
+
+
+class RarediseaseLoadParameters(Enum):
+    """Raredisease Loqusdb load command parameters."""
 
     PROFILE_THRESHOLD: float = 0.95
     GQ_THRESHOLD: int = 10
