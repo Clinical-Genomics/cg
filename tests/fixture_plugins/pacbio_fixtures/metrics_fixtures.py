@@ -11,25 +11,28 @@ from cg.constants.pacbio import (
 )
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
-    HiFiMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
+    ReadMetrics,
     SmrtlinkDatasetsMetrics,
 )
 
 
 @pytest.fixture
-def pac_bio_hifi_metrics() -> HiFiMetrics:
+def pac_bio_read_metrics() -> ReadMetrics:
     data: dict[str, Any] = {
-        CCSAttributeIDs.NUMBER_OF_READS: 6580977,
-        CCSAttributeIDs.TOTAL_NUMBER_OF_BASES: 106192944185,
-        CCSAttributeIDs.MEAN_READ_LENGTH: 16136,
-        CCSAttributeIDs.MEDIAN_READ_LENGTH: 16205,
-        CCSAttributeIDs.READ_LENGTH_N50: 18372,
-        CCSAttributeIDs.MEDIAN_ACCURACY: "Q34",
-        CCSAttributeIDs.PERCENT_Q30: 0.9318790946286002,
+        CCSAttributeIDs.HIFI_READS: 6580977,
+        CCSAttributeIDs.HIFI_YIELD: 106275091861,
+        CCSAttributeIDs.HIFI_MEAN_READ_LENGTH: 16148,
+        CCSAttributeIDs.HIFI_MEDIAN_READ_LENGTH: 16218,
+        CCSAttributeIDs.HIFI_READ_LENGTH_N50: 16218,
+        CCSAttributeIDs.HIFI_MEDIAN_READ_QUALITY: 34,
+        CCSAttributeIDs.PERCENT_Q30: 93.2,
+        CCSAttributeIDs.FAILED_READS: 281284,
+        CCSAttributeIDs.FAILED_YIELD: 4862922407,
+        CCSAttributeIDs.FAILED_MEAN_READ_LENGTH: 17288,
     }
-    return HiFiMetrics.model_validate(data, from_attributes=True)
+    return ReadMetrics.model_validate(data, from_attributes=True)
 
 
 @pytest.fixture

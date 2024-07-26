@@ -4,10 +4,10 @@ from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import PostProcessingMetricsParser
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
-    HiFiMetrics,
     PacBioMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
+    ReadMetrics,
     SmrtlinkDatasetsMetrics,
 )
 from cg.services.post_processing.pacbio.metrics_parser.utils import (
@@ -28,8 +28,8 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
     def parse_metrics(self, run_data: PacBioRunData) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
         metrics_files: list[Path] = self.file_manager.get_files_to_parse(run_data)
-        hifi_metrics: HiFiMetrics = get_parsed_metrics_from_file_name(
-            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BASECALLING_REPORT
+        read_metrics: ReadMetrics = get_parsed_metrics_from_file_name(
+            metrics_files=metrics_files, file_name=PacBioDirsAndFiles.CCS_REPORT_SUFFIX
         )
         control_metrics: ControlMetrics = get_parsed_metrics_from_file_name(
             metrics_files=metrics_files, file_name=PacBioDirsAndFiles.CONTROL_REPORT
@@ -45,7 +45,7 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
         )
 
         return PacBioMetrics(
-            hifi=hifi_metrics,
+            read=read_metrics,
             control=control_metrics,
             productivity=productivity_metrics,
             polymerase=polymerase_metrics,
