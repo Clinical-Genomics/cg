@@ -261,22 +261,23 @@ class ApplicationLimitations(Base):
 class Analysis(Base):
     __tablename__ = "analysis"
 
-    case: Mapped["Case"] = orm.relationship(back_populates="analyses")
-    case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-    cleaned_at: Mapped[datetime | None]
-    comment: Mapped[Text | None]
-    completed_at: Mapped[datetime | None]
-    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
-    delivery_report_created_at: Mapped[datetime | None]
     id: Mapped[PrimaryKeyInt]
-    is_primary: Mapped[bool | None] = mapped_column(default=False)
-    started_at: Mapped[datetime | None]
-    upload_started_at: Mapped[datetime | None]
-    uploaded_at: Mapped[datetime | None]
     workflow: Mapped[str | None] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     workflow_version: Mapped[Str32 | None]
+    started_at: Mapped[datetime | None]
+    completed_at: Mapped[datetime | None]
+    delivery_report_created_at: Mapped[datetime | None]
+    upload_started_at: Mapped[datetime | None]
+    uploaded_at: Mapped[datetime | None]
+    cleaned_at: Mapped[datetime | None]
+    # primary analysis is the one originally delivered to the customer
+    is_primary: Mapped[bool | None] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    comment: Mapped[Text | None]
+    case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
+    case: Mapped["Case"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
