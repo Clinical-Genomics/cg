@@ -1,0 +1,28 @@
+from cg.models.lims.sample import LimsSample, Udf
+
+
+def test_instantiate_lims_sample_model(lims_sample_raw: dict[str, str]):
+    """Tests LIMS sample dict against a LIMS sample pydantic model."""
+
+    # GIVEN a LIMS sample
+
+    # WHEN instantiating
+    lims_sample = LimsSample.model_validate(lims_sample_raw)
+
+    # THEN assert that it was successfully created
+    assert isinstance(lims_sample, LimsSample)
+
+
+def test_instantiate_lims_udf_model(lims_udfs_raw: dict[str, str]):
+    """Tests LIMS UDFs dict against a LIMS UDF pydantic model."""
+
+    # GIVEN LIMS UDFs
+
+    # WHEN instantiating
+    lims_udf = Udf.model_validate(lims_udfs_raw)
+
+    # THEN assert that it was successfully created
+    assert isinstance(lims_udf, Udf)
+
+    # THEN the sex should be set
+    assert lims_udf.sex == "M"

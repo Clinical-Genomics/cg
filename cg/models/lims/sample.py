@@ -1,4 +1,6 @@
-from pydantic.v1 import BaseModel, validator
+from typing import Annotated
+
+from pydantic import BaseModel, Field, field_validator
 from typing_extensions import Literal
 
 from cg.constants import Priority
@@ -8,65 +10,66 @@ SEX_MAP = {"male": "M", "female": "F"}
 
 class Udf(BaseModel):
     application: str
-    capture_kit: str | None
-    collection_date: str | None
-    comment: str | None
-    concentration: str | None
-    concentration_sample: str | None
-    concentration_ng_ul: str | None
+    capture_kit: str | None = None
+    collection_date: str | None = None
+    comment: str | None = None
+    concentration: float | None = None
+    concentration_ng_ul: str | None = None
+    concentration_sample: float | None = None
+    control: str | None = None
     customer: str
-    control: str | None
-    data_analysis: str | None
-    data_delivery: str | None
-    elution_buffer: str | None
-    extraction_method: str | None
+    data_analysis: str | None = None
+    data_delivery: str | None = None
+    elution_buffer: str | None = None
+    extraction_method: str | None = None
     family_name: str | None = "NA"
-    formalin_fixation_time: str | None
-    index: str | None
-    index_number: str | None
-    lab_code: str | None
-    organism: str | None
-    organism_other: str | None
-    original_lab: str | None
-    original_lab_address: str | None
-    pool: str | None
-    post_formalin_fixation_time: str | None
-    pre_processing_method: str | None
-    primer: str | None
+    formalin_fixation_time: int | None = None
+    index: str | None = None
+    index_number: str | None = None
+    lab_code: str | None = None
+    organism: str | None = None
+    organism_other: str | None = None
+    original_lab: str | None = None
+    original_lab_address: str | None = None
+    pool: str | None = None
+    post_formalin_fixation_time: int | None = None
+    pre_processing_method: str | None = None
+    primer: str | None = None
     priority: str = Priority.standard.name
-    quantity: str | None
-    reference_genome: str | None
-    region: str | None
-    region_code: str | None
+    quantity: int | None = None
+    reference_genome: str | None = None
+    region: str | None = None
+    region_code: str | None = None
     require_qc_ok: bool = False
-    rml_plate_name: str | None
-    selection_criteria: str | None
-    sex: Literal["M", "F", "unknown"] = "unknown"
+    rml_plate_name: str | None = None
+    selection_criteria: str | None = None
+    sex: Annotated[str, Field(validate_default=True)] = "unknown"
     skip_reception_control: bool | None = None
     source: str = "NA"
-    tissue_block_size: str | None
+    tissue_block_size: str | None = None
     tumour: bool | None = False
-    tumour_purity: str | None
-    volume: str | None
-    well_position_rml: str | None
-    verified_organism: bool | None
+    tumour_purity: int | None = None
+    verified_organism: bool | None = None
+    volume: str | None = None
+    well_position_rml: str | None = None
 
-    @validator("sex", pre=True)
-    def validate_sex(cls, value: str):
-        return SEX_MAP.get(value, "unknown")
+    @field_validator("sex", mode="before")
+    @classmethod
+    def get_udf_sex(cls, sex: Literal["male", "female", "unknown"]) -> str:
+        return SEX_MAP.get(sex, "unknown")
 
 
 class LimsSample(BaseModel):
     name: str
     container: str = "Tube"
-    container_name: str | None
-    well_position: str | None
-    index_sequence: str | None
-    udfs: Udf | None
+    container_name: str | None = None
+    well_position: str | None = None
+    index_sequence: str | None = None
+    udfs: Udf | None = None
 
     @classmethod
-    def parse_obj(cls, obj: dict):
-        parsed_obj: LimsSample = super().parse_obj(obj)
-        udf: Udf = Udf.parse_obj(obj)
+    def parse_obj(cls, sample_raw: dict):
+        parsed_obj: LimsSample = super().model_validate(sample_raw)
+        udf: Udf = Udf.model_validate(sample_raw)
         parsed_obj.udfs = udf
         return parsed_obj
