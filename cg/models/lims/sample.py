@@ -69,7 +69,6 @@ class LimsSample(BaseModel):
 
     @classmethod
     def parse_obj(cls, sample_raw: dict):
-        parsed_obj: LimsSample = super().model_validate(sample_raw)
-        udf: Udf = Udf.model_validate(sample_raw)
-        parsed_obj.udfs = udf
-        return parsed_obj
+        lims_sample: LimsSample = super().model_validate(sample_raw)
+        lims_sample.udfs = Udf.model_validate(sample_raw)
+        return lims_sample
