@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator
@@ -6,6 +7,12 @@ from typing_extensions import Literal
 from cg.constants import Priority
 
 SEX_MAP = {"male": "M", "female": "F"}
+
+
+class LimsProject(BaseModel):
+    id: str
+    name: str
+    date: datetime | None = None
 
 
 class Udf(BaseModel):
@@ -65,6 +72,7 @@ class LimsSample(BaseModel):
     container_name: str | None = None
     well_position: str | None = None
     index_sequence: str | None = None
+    project: LimsProject | None = None
     udfs: Udf | None = None
 
     @classmethod

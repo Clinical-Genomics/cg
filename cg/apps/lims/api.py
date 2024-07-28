@@ -10,7 +10,12 @@ from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
 from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+)
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -88,7 +93,7 @@ class LimsAPI(Lims, OrderHandler):
             "project": self._export_project(lims_sample.project),
             "family": udfs.get("familyID"),
             "customer": udfs.get("customer"),
-            "sex": SEX_MAP.get(udfs.get("Gender"), None),
+            "sex": SEX_MAP.get(udfs.get("Gender")),
             "father": udfs.get("fatherID"),
             "mother": udfs.get("motherID"),
             "source": udfs.get("Source"),

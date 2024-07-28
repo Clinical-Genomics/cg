@@ -1,4 +1,4 @@
-from cg.models.lims.sample import LimsSample, Udf
+from cg.models.lims.sample import LimsProject, LimsSample, Udf
 
 
 def test_instantiate_lims_sample_model(lims_sample_raw: dict[str, str]):
@@ -26,3 +26,15 @@ def test_instantiate_lims_udf_model(lims_udfs_raw: dict[str, str]):
 
     # THEN the sex should be set
     assert lims_udf.sex == "M"
+
+
+def test_instantiate_lims_project_model(lims_project_raw: dict[str, str]):
+    """Tests LIMS projwct dict against a LIMS project pydantic model."""
+
+    # GIVEN LIMS project
+
+    # WHEN instantiating
+    lims_project = LimsProject.model_validate(lims_project_raw)
+
+    # THEN assert that it was successfully created
+    assert isinstance(lims_project, LimsProject)
