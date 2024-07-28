@@ -62,18 +62,34 @@ class Udf(BaseModel):
 
     @field_validator("sex", mode="before")
     @classmethod
-    def get_udf_sex(cls, sex: Literal["male", "female", "unknown"]) -> str:
+    def set_udf_sex(cls, sex: Literal["male", "female", "unknown"]) -> str:
         return SEX_MAP.get(sex, "unknown")
 
 
 class LimsSample(BaseModel):
-    name: str
+    application: str | None = None
+    application_version: str | None = None
+    case: str | None = None
+    comment: str | None = None
+    concentration_ng_ul: str | None = None
     container: str = "Tube"
     container_name: str | None = None
-    well_position: str | None = None
+    customer: str | None = None
+    father: str | None = None
+    id: str | None = None
     index_sequence: str | None = None
+    mother: str | None = None
+    name: str
+    panels: list[str] | None = None
+    passed_initial_qc: str | None = None
+    priority: str | None = None
     project: LimsProject | None = None
+    received: str | None = None
+    sex: str | None = None
+    source: str | None = None
+    status: str | None = None
     udfs: Udf | None = None
+    well_position: str | None = None
 
     @classmethod
     def parse_obj(cls, sample_raw: dict):

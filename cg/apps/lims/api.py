@@ -2,7 +2,6 @@
 
 import logging
 from datetime import date, datetime
-from typing import Any
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Researcher, Sample
@@ -18,6 +17,7 @@ from cg.constants.lims import (
 )
 from cg.exc import LimsDataError
 
+from ...models.lims.sample import LimsProject, LimsSample
 from .order import OrderHandler
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
@@ -54,12 +54,12 @@ class LimsAPI(Lims, OrderHandler):
     def user(self) -> Researcher:
         return self.get_researchers(username=self.username)[0]
 
-    def sample(self, lims_id: str) -> dict[str, Any]:
+    def sample(self, lims_id: str) -> LimsSample:
         """Return sample by ID from the LIMS database."""
         lims_sample = {}
         try:
             sample = Sample(self, id=lims_id)
-            lims_sample: dict[str, Any] = self._export_sample(sample)
+            lims_sample: LimsSample = self._export_sample(sample)
         except HTTPError as error:
             LOG.warning(f"Sample {lims_id} not found in LIMS: {error}")
         return lims_sample
@@ -72,45 +72,45 @@ class LimsAPI(Lims, OrderHandler):
         """Return the source from LIMS for a given sample ID.
         Return 'None' if no source information is set or
         if sample is not found or cannot be fetched from LIMS."""
-        lims_sample: dict[str, Any] = self.sample(lims_id=lims_id)
-        return lims_sample.get("source")
+        lims_sample: LimsSample = self.sample(lims_id=lims_id)
+        return lims_sample.source
 
     @staticmethod
-    def _export_project(lims_project) -> dict:
+    def _export_project(lims_project) -> LimsProject:
         """Fetch relevant information from a lims project object"""
-        return {
-            "id": lims_project.id,
-            "name": lims_project.name,
-            "date": parse_date(lims_project.open_date) if lims_project.open_date else None,
-        }
+        return LimsProject(
+            id=lims_project.id,
+            name=lims_project.name,
+            date=parse_date(lims_project.open_date) if lims_project.open_date else None,
+        )
 
     def _export_sample(self, lims_sample):
         """Get data from a LIMS sample."""
         udfs = lims_sample.udf
-        return {
-            "id": lims_sample.id,
-            "name": lims_sample.name,
-            "project": self._export_project(lims_sample.project),
-            "family": udfs.get("familyID"),
-            "customer": udfs.get("customer"),
-            "sex": SEX_MAP.get(udfs.get("Gender")),
-            "father": udfs.get("fatherID"),
-            "mother": udfs.get("motherID"),
-            "source": udfs.get("Source"),
-            "status": udfs.get("Status"),
-            "panels": udfs.get("Gene List").split(";") if udfs.get("Gene List") else None,
-            "priority": udfs.get("priority"),
-            "received": self.get_received_date(lims_sample.id),
-            "application": udfs.get("Sequencing Analysis"),
-            "application_version": (
+        return LimsSample(
+            id=lims_sample.id,
+            name=lims_sample.name,
+            project=self._export_project(lims_sample.project),
+            case=udfs.get("familyID"),
+            customer=udfs.get("customer"),
+            sex=SEX_MAP.get(udfs.get("Gender")),
+            father=udfs.get("fatherID"),
+            mother=udfs.get("motherID"),
+            source=udfs.get("Source"),
+            status=udfs.get("Status"),
+            panels=udfs.get("Gene List").split(";") if udfs.get("Gene List") else None,
+            priority=udfs.get("priority"),
+            received=self.get_received_date(lims_sample.id),
+            application=udfs.get("Sequencing Analysis"),
+            application_version=(
                 int(udfs["Application Tag Version"])
                 if udfs.get("Application Tag Version")
                 else None
             ),
-            "comment": udfs.get("comment"),
-            "concentration_ng_ul": udfs.get("Concentration (ng/ul)"),
-            "passed_initial_qc": udfs.get("Passed Initial QC"),
-        }
+            comment=udfs.get("comment"),
+            concentration_ng_ul=udfs.get("Concentration (ng/ul)"),
+            passed_initial_qc=udfs.get("Passed Initial QC"),
+        )
 
     def get_received_date(self, lims_id: str) -> date:
         """Get the date when a sample was received."""
@@ -180,21 +180,23 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch information about a family of samples."""
         filters = {"customer": customer, "familyID": family}
         lims_samples = self.get_samples(udf=filters)
-        samples_data = [self._export_sample(lims_sample) for lims_sample in lims_samples]
+        samples_data: list[LimsSample] = [
+            self._export_sample(lims_sample) for lims_sample in lims_samples
+        ]
         # get family level data
         family_data = {"family": family, "customer": customer, "samples": []}
         priorities = set()
         panels = set()
 
         for sample_data in samples_data:
-            priorities.add(sample_data["priority"])
-            if sample_data["panels"]:
-                panels.update(sample_data["panels"])
+            priorities.add(sample_data.priority)
+            if sample_data.panels:
+                panels.update(sample_data.panels)
             family_data["samples"].append(sample_data)
 
         if len(priorities) == 1:
             family_data["priority"] = priorities.pop()
-        elif len(priorities) < 1:
+        elif not priorities:
             raise LimsDataError(f"unable to determine family priority: {priorities}")
         else:
             for prio in [
@@ -221,8 +223,7 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
 
         if sex:
-            lims_gender = REV_SEX_MAP.get(sex)
-            if lims_gender:
+            if lims_gender := REV_SEX_MAP.get(sex):
                 lims_sample.udf[PROP2UDF["sex"]] = lims_gender
         if name:
             lims_sample.name = name
@@ -307,9 +308,7 @@ class LimsAPI(Lims, OrderHandler):
                         )
                     )
 
-            sorted_methods = self._sort_by_date_run(methods)
-
-            if sorted_methods:
+            if sorted_methods := self._sort_by_date_run(methods):
                 method = sorted_methods[METHOD_INDEX]
 
                 if (
@@ -402,18 +401,18 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sample_comment(self, sample_id: str) -> str | None:
         """Return the comment of the sample."""
-        lims_sample: dict[str, Any] = self.sample(sample_id)
+        lims_sample: LimsSample = self.sample(sample_id)
         comment = None
         if lims_sample:
-            comment: str = lims_sample.get("comment")
+            comment: str | None = lims_sample.comment
         return comment
 
     def get_sample_project(self, sample_id: str) -> str | None:
         """Return the LIMS ID of the sample associated project if sample exists in LIMS."""
-        lims_sample: dict[str, Any] = self.sample(sample_id)
+        lims_sample: LimsSample = self.sample(sample_id)
         project_id = None
         if lims_sample:
-            project_id: str = lims_sample.get("project").get("id")
+            project_id: str = lims_sample.project.id
         return project_id
 
     def get_sample_rin(self, sample_id: str) -> float | None:
@@ -438,8 +437,8 @@ class LimsAPI(Lims, OrderHandler):
 
     def has_sample_passed_initial_qc(self, sample_id: str) -> bool | None:
         """Return the outcome of the initial QC protocol of the given sample."""
-        lims_sample: dict[str, Any] = self.sample(sample_id)
-        initial_qc_udf: str | None = lims_sample.get("passed_initial_qc")
+        lims_sample: LimsSample = self.sample(sample_id)
+        initial_qc_udf: str | None = lims_sample.passed_initial_qc
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
         return initial_qc
 
@@ -448,21 +447,17 @@ class LimsAPI(Lims, OrderHandler):
         step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
         input_amounts: list[tuple[datetime, float]] = []
         try:
-            for process_type in step_names_udfs:
+            for process_type, udf_key in step_names_udfs.items():
                 artifacts: list[Artifact] = self.get_artifacts(
                     samplelimsid=sample_id,
                     process_type=process_type,
                     type=LimsArtifactTypes.ANALYTE,
                 )
 
-                udf_key: str = step_names_udfs[process_type]
-                for artifact in artifacts:
-                    input_amounts.append(
-                        (
-                            artifact.parent_process.date_run,
-                            artifact.udf.get(udf_key),
-                        )
-                    )
+                input_amounts.extend(
+                    (artifact.parent_process.date_run, artifact.udf.get(udf_key))
+                    for artifact in artifacts
+                )
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return input_amounts
@@ -472,9 +467,7 @@ class LimsAPI(Lims, OrderHandler):
     ) -> float | None:
         """Return the latest used input amount."""
         sorted_input_amounts: list[tuple[datetime, float]] = self._sort_by_date_run(input_amounts)
-        if not sorted_input_amounts:
-            return None
-        return sorted_input_amounts[0][1]
+        return sorted_input_amounts[0][1] if sorted_input_amounts else None
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float | None:
         """Return the input amount used in the latest preparation of an RNA sample."""
