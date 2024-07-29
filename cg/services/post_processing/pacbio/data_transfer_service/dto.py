@@ -10,27 +10,29 @@ class PacBioSequencingRunDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
-    movie_time_hours: int
+    movie_time_hours: int | None
     hifi_reads: int
     hifi_yield: int
-    hifi_mean_read_length: int
+    hifi_mean_read_length: float
+    hifi_median_read_length: int
+    hifi_mean_length_n50: int
     hifi_median_read_quality: str
     percent_reads_passing_q30: float
     productive_zmws: int
     p0_percent: float
     p1_percent: float
     p2_percent: float
-    polymerase_mean_read_length: int
-    polymerase_read_length_n50: int
-    polymerase_mean_longest_subread: int
-    polymerase_longest_subread_n50: int
+    polymerase_mean_read_length: float
+    polymerase_read_length_n50: float
+    polymerase_mean_longest_subread: float
+    polymerase_longest_subread_n50: float
     control_reads: int
-    control_mean_read_length: int
+    control_mean_read_length: float
     control_mean_read_concordance: float
     control_mode_read_concordance: float
     failed_reads: int
     failed_yield: int
-    failed_mean_read_length: int
+    failed_mean_read_length: float
     movie_name: str
 
 
@@ -42,12 +44,13 @@ class PacBioSMRTCellDTO(BaseModel):
 class PacBioSampleSequencingMetricsDTO(BaseModel):
     hifi_reads: int
     hifi_yield: int
-    hifi_mean_read_length: int
+    hifi_mean_read_length: float
+    hifi_median_read_length: int
     hifi_median_read_quality: str
     percent_reads_passing_q30: float
     failed_reads: int
     failed_yield: int
-    failed_mean_read_length: int
+    failed_mean_read_length: float
 
 
 class PacBioDTOs(PostProcessingDTOs):
