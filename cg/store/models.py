@@ -274,10 +274,9 @@ class Analysis(Base):
     cleaned_at: Mapped[datetime | None]
     # primary analysis is the one originally delivered to the customer
     is_primary: Mapped[bool | None] = mapped_column(default=False)
-
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    comment: Mapped[Text | None]
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
