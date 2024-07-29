@@ -241,7 +241,9 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
+    def upload_bundle_statusdb(
+        self, case_id: str, dry_run: bool = False, force: bool = False
+    ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -250,7 +252,7 @@ class AnalysisAPI(MetaAPI):
         new_analysis: Case = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
-            completed_at=datetime.now(),
+            completed_at=datetime.now() if not force else None,
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
         )

@@ -789,7 +789,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run, force=force)
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
             raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")

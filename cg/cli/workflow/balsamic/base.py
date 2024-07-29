@@ -135,7 +135,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.trailblazer_api.verify_latest_analysis_is_completed(
             case_id=case_id, force=force
         )
@@ -151,8 +151,9 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
 @FORCE
+@DRY_RUN
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str, force: bool):
+def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -161,11 +162,11 @@ def store_housekeeper(context: CGConfig, case_id: str, force: bool):
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id, force=force)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
