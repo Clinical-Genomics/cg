@@ -310,3 +310,15 @@ class OverrideCyclesError(CgError):
 
 class PacBioMetricsParsingError(CgError):
     """Exception raised when PacBio metric files are not in place."""
+
+
+class Chanjo2APIClientError(CgError):
+    """Exception related to the Chanjo2 API client."""
+
+
+class Chanjo2RequestError(Chanjo2APIClientError):
+    """Exception raised when a request to the Chanjo2 API client fails."""
+
+
+class Chanjo2ResponseError(Chanjo2APIClientError):
+    """Exception raised when the response from Chanjo2 API client fails validation."""
