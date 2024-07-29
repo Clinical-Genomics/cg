@@ -25,4 +25,4 @@ def apply_pac_bio_smrt_cell_filters(
 class PacBioSMRTCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    BY_INTERNAL_ID: callable = filter_pac_bio_smrt_cell_by_internal_id()
+    BY_INTERNAL_ID: callable = filter_pac_bio_smrt_cell_by_internal_id
