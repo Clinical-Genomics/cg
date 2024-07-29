@@ -3,6 +3,7 @@ from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
     ReusedCaseNameError,
+    RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -62,3 +63,15 @@ def get_duplicate_case_names(order: TomteOrder) -> list[str]:
 def get_duplicate_case_name_errors(order: TomteOrder) -> list[ReusedCaseNameError]:
     case_names = get_duplicate_case_names(order)
     return [ReusedCaseNameError(name) for name in case_names]
+
+
+def get_duplicate_sample_names(case: TomteCase) -> list[str]:
+    sample_names = [sample.name for sample in case.samples]
+    count = Counter(sample_names)
+    return [name for name, freq in count.items() if freq > 1]
+
+
+def get_duplicate_sample_name_errors(case: TomteCase) -> list[RepeatedSampleNameError]:
+    sample_names = get_duplicate_sample_names(case)
+    return [RepeatedSampleNameError(sample_name=name, case_name=case.name) for name in sample_names]
+
