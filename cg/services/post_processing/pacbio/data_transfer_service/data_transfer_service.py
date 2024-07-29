@@ -12,6 +12,7 @@ from cg.services.post_processing.pacbio.data_transfer_service.utils import (
 )
 from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
+from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
 
 
 class PacBioDataTransferService(PostProcessingDataTransferService):
@@ -19,8 +20,8 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
     def __init__(self, metrics_service: PacBioMetricsParser):
         super().__init__(metrics_service=metrics_service)
 
-    def get_post_processing_dtos(self) -> PacBioDTOs:
-        metrics: PacBioMetrics = self.metrics_service.parse_metrics()
+    def get_post_processing_dtos(self, run_data: PacBioRunData) -> PacBioDTOs:
+        metrics: PacBioMetrics = self.metrics_service.parse_metrics(run_data)
         smrt_cell_dto: PacBioSMRTCellDTO = get_smrt_cell_dto(metrics)
         sequencing_run_dto: PacBioSequencingRunDTO = get_sequencing_run_dto(metrics)
         sample_sequencing_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = (
