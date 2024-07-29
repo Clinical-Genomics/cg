@@ -53,4 +53,4 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
 class PacBioDTOs(PostProcessingDTOs):
     run_device: PacBioSMRTCellDTO
     sequencing_run: PacBioSequencingRunDTO
-    sample_sequencing_metrincs: PacBioSampleSequencingMetricsDTO
+    sample_sequencing_metrics: list[PacBioSampleSequencingMetricsDTO]
