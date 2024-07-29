@@ -330,6 +330,7 @@ class ReportAPI(MetaAPI):
             else None
         )
         return DataAnalysisModel(
+            comment=analysis.comment,
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
             delivered_files=delivered_files,
