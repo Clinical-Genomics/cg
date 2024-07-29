@@ -1,10 +1,9 @@
 """Module for the PacBioHousekeeperService used in the Post processing flow."""
 
-import re
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.pacbio import file_pattern_to_tag, file_pattern_to_bundle_type, PacBioBundleTypes
+from cg.constants.pacbio import PacBioBundleTypes, file_pattern_to_bundle_type, file_pattern_to_tag
 from cg.services.post_processing.abstract_classes import PostProcessingHKService
 from cg.services.post_processing.pacbio.housekeeper_service.models import PacBioFileData
 from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
