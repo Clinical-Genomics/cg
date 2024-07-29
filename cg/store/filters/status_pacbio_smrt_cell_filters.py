@@ -1,4 +1,4 @@
-"""Filters for the Illumina Flow Cells."""
+"""Filters for the PacBio SMRT cell model."""
 
 from enum import Enum
 
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 
 
 def filter_pac_bio_smrt_cell_by_internal_id(smrt_cells: Query, internal_id: str, **kwargs) -> Query:
-    """Get an Illumina Flow Cell by its internal id."""
+    """Get a PacBio SMRT cell by its internal id."""
     return smrt_cells.filter_by(internal_id=internal_id)
 
 
@@ -23,6 +23,6 @@ def apply_pac_bio_smrt_cell_filters(
 
 
 class PacBioSMRTCellFilter(Enum):
-    """Define FlowCell filter functions."""
+    """Define SMRT cell filter functions."""
 
     BY_INTERNAL_ID: callable = filter_pac_bio_smrt_cell_by_internal_id
