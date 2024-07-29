@@ -16,6 +16,7 @@ class PacBioSequencingRunDTO(BaseModel):
     hifi_mean_read_length: int
     hifi_median_read_quality: str
     percent_reads_passing_q30: float
+    productive_zmws: int
     p0_percent: float
     p1_percent: float
     p2_percent: float
@@ -27,6 +28,10 @@ class PacBioSequencingRunDTO(BaseModel):
     control_mean_read_length: int
     control_mean_read_concordance: float
     control_mode_read_concordance: float
+    failed_reads: int
+    failed_yield: int
+    failed_mean_read_length: int
+    movie_name: str
 
 
 class PacBioSMRTCellDTO(BaseModel):
@@ -35,7 +40,14 @@ class PacBioSMRTCellDTO(BaseModel):
 
 
 class PacBioSampleSequencingMetricsDTO(BaseModel):
-    pass
+    hifi_reads: int
+    hifi_yield: int
+    hifi_mean_read_length: int
+    hifi_median_read_quality: str
+    percent_reads_passing_q30: float
+    failed_reads: int
+    failed_yield: int
+    failed_mean_read_length: int
 
 
 class PacBioDTOs(PostProcessingDTOs):
