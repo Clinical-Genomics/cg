@@ -57,16 +57,7 @@ class PostProcessingStoreService(ABC):
         self.store: Store = store
         self.data_transfer_service: PostProcessingDataTransferService = data_transfer_service
 
-    def _create_run_device(self, run_name):
-        pass
-
-    def _create_instrument_run(self, run_name):
-        pass
-
-    def _create_sample_run_metrics(self, run_name):
-        pass
-
-    def store_post_processing_data(self, run_name):
+    def store_post_processing_data(self, run_data: RunData):
         pass
 
 
