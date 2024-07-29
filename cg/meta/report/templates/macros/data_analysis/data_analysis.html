@@ -59,10 +59,10 @@
       </tr>
     </tbody>
   </table>
+	<!--Data analysis comment warning -->
+  {{ data_analysis_comment_alert(comment=case.data_analysis.comment) }}
   <!-- Data analysis alert component -->
   {{ data_analysis_alert(case=case) }}
-	<!--Data analysis comment alert component -->
-  {{ data_analysis_comment_alert(comment=case.data_analysis.comment) }}
 {% endmacro %}
 
 {% macro data_analysis_alert(case) %}
