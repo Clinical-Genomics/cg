@@ -1469,7 +1469,7 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str):
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
             smrt_cells=self._get_query(table=PacBioSMRTCell),
