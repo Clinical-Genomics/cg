@@ -13,6 +13,11 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
+from cg.services.post_processing.pacbio.data_transfer_service.dto import (
+    PacBioSMRTCellDTO,
+    PacBioSequencingRunDTO,
+    PacBioSampleSequencingMetricsDTO,
+)
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
 from cg.store.models import (
@@ -37,6 +42,9 @@ from cg.store.models import (
     Sample,
     User,
     order_case,
+    PacBioSMRTCell,
+    PacBioSequencingRun,
+    PacBioSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -460,3 +468,67 @@ class CreateHandler(BaseHandler):
         )
         self.session.add(new_metric)
         return new_metric
+
+    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacBioSMRTCell:
+        if self.get_pac_bio_smrt_cell_by_internal_id(run_device_dto.internal_id):
+            raise ValueError(f"SMRT cell with {run_device_dto.internal_id} already exists.")
+        new_smrt_cell = PacBioSMRTCell(
+            type=run_device_dto.type, internal_id=run_device_dto.internal_id
+        )
+        self.session.add(new_smrt_cell)
+        return new_smrt_cell
+
+    def create_pac_bio_sequencing_run(
+        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacBioSMRTCell
+    ) -> PacBioSequencingRun:
+        new_sequencing_run = PacBioSequencingRun(
+            type=sequencing_run_dto.type,
+            well=sequencing_run_dto.well,
+            plate=sequencing_run_dto.plate,
+            movie_time_hours=sequencing_run_dto.movie_time_hours,
+            hifi_reads=sequencing_run_dto.hifi_reads,
+            hifi_yield=sequencing_run_dto.hifi_yield,
+            hifi_mean_read_length=sequencing_run_dto.hifi_mean_read_length,
+            hifi_median_read_quality=sequencing_run_dto.hifi_median_read_quality,
+            percent_reads_passing_q30=sequencing_run_dto.percent_reads_passing_q30,
+            productive_zmws=sequencing_run_dto.productive_zmws,
+            p0_percent=sequencing_run_dto.p0_percent,
+            p1_percent=sequencing_run_dto.p1_percent,
+            p2_percent=sequencing_run_dto.p2_percent,
+            polymerase_mean_read_length=sequencing_run_dto.polymerase_mean_read_length,
+            polymerase_read_length_n50=sequencing_run_dto.polymerase_read_length_n50,
+            polymerase_mean_longest_subread=sequencing_run_dto.polymerase_mean_longest_subread,
+            polymerase_longest_subread_n50=sequencing_run_dto.polymerase_longest_subread_n50,
+            control_reads=sequencing_run_dto.control_reads,
+            control_mean_read_length=sequencing_run_dto.control_mean_read_length,
+            control_mean_read_concordance=sequencing_run_dto.control_mean_read_concordance,
+            control_mode_read_concordance=sequencing_run_dto.control_mode_read_concordance,
+            failed_reads=sequencing_run_dto.failed_reads,
+            failed_yield=sequencing_run_dto.failed_yield,
+            failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
+            movie_name=sequencing_run_dto.movie_name,
+            device=smrt_cell,
+        )
+        self.session.add(new_sequencing_run)
+        return new_sequencing_run
+
+    def create_pac_bio_sample_sequencing_run(
+        self,
+        sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
+        sequencing_run: PacBioSequencingRun,
+    ) -> PacBioSampleSequencingMetrics:
+        sample: Sample = self.get_sample_by_internal_id(sample_run_metrics_dto.sample_internal_id)
+        new_sample_sequencing_run = PacBioSampleSequencingMetrics(
+            sample=sample,
+            hifi_reads=sample_run_metrics_dto.hifi_reads,
+            hifi_yield=sample_run_metrics_dto.hifi_yield,
+            hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
+            hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
+            percent_reads_passing_q30=sample_run_metrics_dto.percent_reads_passing_q30,
+            failed_reads=sample_run_metrics_dto.failed_reads,
+            failed_yield=sample_run_metrics_dto.failed_yield,
+            failed_mean_read_length=sample_run_metrics_dto.failed_mean_read_length,
+            instrument_run=sequencing_run,
+        )
+        self.session.add(new_sample_sequencing_run)
+        return new_sample_sequencing_run

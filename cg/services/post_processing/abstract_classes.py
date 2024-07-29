@@ -49,7 +49,7 @@ class PostProcessingDataTransferService(ABC):
 class PostProcessingStoreService(ABC):
     """Abstract class that manages storing data transfer objects in the database."""
 
-    def store_post_processing_data(self, run_name):
+    def store_post_processing_data(self, run_data: RunData):
         pass
 
 
