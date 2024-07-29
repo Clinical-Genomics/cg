@@ -1,6 +1,11 @@
 from typing import Callable
 
-from cg.services.order_validation_service.models.errors import CaseSampleError, OrderError
+from pydantic import ValidationError
+
+from cg.services.order_validation_service.models.errors import (
+    CaseSampleError,
+    OrderError,
+)
 from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
 
@@ -21,3 +26,7 @@ def apply_case_sample_validation(
         rule_errors: list[CaseSampleError] = rule(case=case, store=store)
         errors.extend(rule_errors)
     return errors
+
+
+def convert_errors(pydantic_errors: list[ValidationError], order_errors: list[OrderError]):
+    pass

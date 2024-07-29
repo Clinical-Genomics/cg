@@ -1,8 +1,10 @@
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.models.errors import OccupiedWellError, OrderError
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
+from cg.services.order_validation_service.models.errors import OccupiedWellError
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.order_validation_service.workflows.tomte.models.sample import (
+    TomteSample,
+)
 
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
@@ -44,8 +46,8 @@ def _get_excess_samples(
     return colliding_samples
 
 
-def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, str]]):
-    sample_well_map: dict[str, tuple[TomteSample, TomteCase]] = {}
+def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, TomteCase]]):
+    sample_well_map: dict[str, list[tuple[TomteSample, TomteCase]]] = {}
     for sample, case in plate_samples_with_cases:
         if sample.well_position not in sample_well_map:
             sample_well_map[sample.well_position] = []
