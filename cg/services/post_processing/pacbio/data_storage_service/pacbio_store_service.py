@@ -49,3 +49,4 @@ class PacBioStoreService(PostProcessingStoreService):
         self._create_sample_run_metrics(
             sample_run_metrics_dtos=dtos.sample_sequencing_metrics, sequencing_run=sequencing_run
         )
+        self.store.commit_to_store()
