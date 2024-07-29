@@ -1,10 +1,15 @@
 import pytest
+
 from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.workflows.tomte.constants import TomteDeliveryType
+from cg.services.order_validation_service.workflows.tomte.constants import (
+    TomteDeliveryType,
+)
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
+from cg.services.order_validation_service.workflows.tomte.models.sample import (
+    TomteSample,
+)
 
 
 def create_sample(id: int) -> TomteSample:
@@ -18,7 +23,7 @@ def create_sample(id: int) -> TomteSample:
         source="source",
         status=StatusEnum.affected,
         subject_id="subject1",
-        well_position=f"A{id}",
+        well_position=f"A:{id}",
     )
 
 
