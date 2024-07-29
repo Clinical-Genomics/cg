@@ -1,9 +1,11 @@
 from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
+    RepeatedCaseNameError,
     RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+    validate_unique_case_names,
     validate_unique_sample_names_in_cases,
     validate_wells_contain_at_most_one_sample,
 )
@@ -34,14 +36,27 @@ def test_order_without_multiple_samples_in_well(valid_order: TomteOrder):
     assert not errors
 
 
-def test_duplicate_sample_names_not_allowed(order_with_duplicate_sample_names: TomteOrder):
+def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: TomteOrder):
     # Given an order with samples in a case with the same name
 
     # WHEN validating the order
-    errors = validate_unique_sample_names_in_cases(order_with_duplicate_sample_names)
+    errors = validate_unique_sample_names_in_cases(order_with_repeated_sample_names)
 
     # THEN errors are returned
     assert errors
 
     # THEN the errors are about the sample names
     assert isinstance(errors[0], RepeatedSampleNameError)
+
+
+def test_repeated_case_names_not_allowed(order_with_repeated_case_names: TomteOrder):
+    # GIVEN an order with cases with the same name
+
+    # WHEN validating the order
+    errors = validate_unique_case_names(order_with_repeated_case_names)
+
+    # THEN errors are returned
+    assert errors
+
+    # THEN the errors are about the case names
+    assert isinstance(errors[0], RepeatedCaseNameError)
