@@ -1,17 +1,15 @@
-from cg.services.post_processing.abstract_classes import (
-    PostProcessingStoreService,
-)
+from cg.services.post_processing.abstract_classes import PostProcessingStoreService
 from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
-    PacBioSMRTCellDTO,
-    PacBioSequencingRunDTO,
     PacBioSampleSequencingMetricsDTO,
+    PacBioSequencingRunDTO,
+    PacBioSMRTCellDTO,
 )
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacBioSMRTCell, PacBioSequencingRun
+from cg.store.models import PacBioSequencingRun, PacBioSMRTCell
 from cg.store.store import Store
 
 
@@ -41,7 +39,7 @@ class PacBioStoreService(PostProcessingStoreService):
             )
 
     def store_post_processing_data(self, run_data: PacBioRunData):
-        dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos()
+        dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacBioSMRTCell = self._create_run_device(dtos.run_device)
         sequencing_run: PacBioSequencingRun = self._create_instrument_run(
             instrument_run_dto=dtos.sequencing_run, smrt_cell=smrt_cell
