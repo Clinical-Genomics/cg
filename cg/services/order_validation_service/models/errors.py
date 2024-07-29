@@ -53,3 +53,8 @@ class OrderNameRequiredError(OrderError):
 class OccupiedWellError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well is already occupied"
+
+
+class ReusedCaseNameError(CaseError):
+    field: str = "name"
+    message: str = "Duplicate case name"
