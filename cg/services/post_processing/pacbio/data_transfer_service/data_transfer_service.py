@@ -18,7 +18,7 @@ from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBi
 class PacBioDataTransferService(PostProcessingDataTransferService):
 
     def __init__(self, metrics_service: PacBioMetricsParser):
-        super().__init__(metrics_service=metrics_service)
+        self.metrics_service: PacBioMetricsParser = metrics_service
 
     def get_post_processing_dtos(self, run_data: PacBioRunData) -> PacBioDTOs:
         metrics: PacBioMetrics = self.metrics_service.parse_metrics(run_data)

@@ -23,7 +23,7 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
     """Class for parsing PacBio sequencing metrics."""
 
     def __init__(self, file_manager: PacBioRunFileManager):
-        super().__init__(file_manager=file_manager)
+        self.file_manager: PacBioRunFileManager = file_manager
 
     def parse_metrics(self, run_data: PacBioRunData) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
