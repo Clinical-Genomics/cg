@@ -16,6 +16,7 @@ from cg.services.illumina.data_transfer.models import (
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
     PacBioSMRTCellDTO,
     PacBioSequencingRunDTO,
+    PacBioSampleSequencingMetricsDTO,
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -512,10 +513,13 @@ class CreateHandler(BaseHandler):
         return new_sequencing_run
 
     def create_pac_bio_sample_sequencing_run(
-        self, sample_run_metrics_dto: PacBioSampleRunMetricsDTO, sequencing_run: PacBioSequencingRun
+        self,
+        sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
+        sequencing_run: PacBioSequencingRun,
     ) -> PacBioSampleSequencingMetrics:
-        sample: Sample = self.get_sample_by_internal_id(sample_run_metrics_dto.)
+        sample: Sample = self.get_sample_by_internal_id(sample_run_metrics_dto.sample_internal_id)
         new_sample_sequencing_run = PacBioSampleSequencingMetrics(
+            sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,
             hifi_yield=sample_run_metrics_dto.hifi_yield,
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
@@ -524,5 +528,6 @@ class CreateHandler(BaseHandler):
             failed_reads=sample_run_metrics_dto.failed_reads,
             failed_yield=sample_run_metrics_dto.failed_yield,
             failed_mean_read_length=sample_run_metrics_dto.failed_mean_read_length,
+            sequencing_run=sequencing_run,
         )
         return new_sample_sequencing_run

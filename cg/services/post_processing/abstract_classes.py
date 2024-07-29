@@ -53,10 +53,6 @@ class PostProcessingDataTransferService(ABC):
 
 
 class PostProcessingStoreService(ABC):
-    def __init__(self, store: Store, data_transfer_service: PostProcessingDataTransferService):
-        self.store: Store = store
-        self.data_transfer_service: PostProcessingDataTransferService = data_transfer_service
-
     def store_post_processing_data(self, run_data: RunData):
         pass
 

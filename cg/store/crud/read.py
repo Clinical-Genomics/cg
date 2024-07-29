@@ -46,6 +46,10 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_pacbio_smrt_cell_filters import (
+    apply_pac_bio_smrt_cell_filters,
+    PacBioSMRTCellFilter,
+)
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
@@ -72,6 +76,7 @@ from cg.store.models import (
     Sample,
     SampleRunMetrics,
     User,
+    PacBioSMRTCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -1463,3 +1468,10 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str):
+        return apply_pac_bio_smrt_cell_filters(
+            filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
+            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            internal_id=internal_id,
+        ).first()
