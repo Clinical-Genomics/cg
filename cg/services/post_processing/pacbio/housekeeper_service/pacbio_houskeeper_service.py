@@ -1,6 +1,5 @@
 """Module for the PacBioHousekeeperService used in the Post processing flow."""
 
-import re
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
