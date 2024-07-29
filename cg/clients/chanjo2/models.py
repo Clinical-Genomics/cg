@@ -38,3 +38,9 @@ class CoveragePostResponse(RootModel):
         if not root:
             raise ValueError("Coverage POST response must not be an empty dictionary")
         return root
+
+    def get_sample_coverage_metrics(self, sample_id: str) -> CoverageMetrics:
+        """Return the coverage metrics for the specified sample ID."""
+        if sample_id not in self.root:
+            raise ValueError(f"Sample ID '{sample_id}' not found in the coverage POST response")
+        return self.root[sample_id]

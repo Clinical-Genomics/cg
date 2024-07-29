@@ -10,15 +10,17 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
+from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
     FileFormat,
+    GenomeVersion,
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.scout import ScoutExportFileName
+from cg.constants.scout import ScoutExportFileName, HGNC_ID
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
@@ -729,3 +731,32 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
+
+    @staticmethod
+    def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
+        """Translates a genome reference assembly to its corresponding alternate name."""
+        translation_map = {
+            GenomeVersion.GRCh37: GenomeVersion.HG19,
+            GenomeVersion.GRCh38: GenomeVersion.HG38,
+            GenomeVersion.HG19: GenomeVersion.GRCh37,
+            GenomeVersion.HG38: GenomeVersion.GRCh38,
+        }
+        return translation_map.get(genome_version, genome_version)
+
+    def get_sample_coverage(
+        self, case_id: str, sample_id: str, gene_ids: list[int]
+    ) -> CoverageMetrics | None:
+        """Return sample coverage data from Chanjo2."""
+        raise NotImplementedError
+
+    def get_scout_upload_case_tags(self):
+        """Return workflow specific upload case tags."""
+        raise NotImplementedError
+
+    def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
+        """Return HGNC IDs of genes from specified panels using the Scout API."""
+        gene_ids: list[int] = []
+        for panel in panels:
+            genes: list[dict] = self.scout_api.get_genes(panel)
+            gene_ids.extend(gene.get(HGNC_ID) for gene in genes if gene.get(HGNC_ID) is not None)
+        return gene_ids

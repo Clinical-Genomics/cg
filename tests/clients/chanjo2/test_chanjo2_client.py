@@ -7,7 +7,7 @@ import requests
 from pytest_mock import MockFixture
 
 from cg.clients.chanjo2.client import Chanjo2APIClient
-from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
+from cg.clients.chanjo2.models import CoverageMetrics, CoveragePostRequest, CoveragePostResponse
 from cg.exc import Chanjo2RequestError, Chanjo2ResponseError
 
 
@@ -100,3 +100,35 @@ def test_get_coverage_empty_response(
     # THEN a Chanjo2 response error should have been raised
     with pytest.raises(Chanjo2ResponseError):
         chanjo2_api_client.get_coverage(coverage_post_request)
+
+
+def test_get_sample_coverage_metrics(
+    sample_id: str,
+    coverage_post_response: CoveragePostResponse,
+    coverage_post_response_json: dict[str, dict],
+):
+    """Test sample coverage extraction from a coverage POST response."""
+
+    # GIVEN a mocked POST response
+
+    # WHEN getting the coverage data for a specific sample ID
+    coverage_metrics: CoverageMetrics = coverage_post_response.get_sample_coverage_metrics(
+        sample_id
+    )
+
+    # THEN the returned coverage metrics should match the expected one
+    assert coverage_metrics.model_dump() == coverage_post_response_json[sample_id]
+
+
+def test_get_sample_coverage_metrics_invalid_sample_id(
+    invalid_sample_id: str, coverage_post_response: CoveragePostResponse
+):
+    """Test sample coverage extraction from a coverage POST response providing an invalid sample."""
+
+    # GIVEN a mocked POST response
+
+    # WHEN getting the coverage data for a specific sample ID
+
+    # THEN a validation error should be raised
+    with pytest.raises(ValueError):
+        coverage_post_response.get_sample_coverage_metrics(invalid_sample_id)
