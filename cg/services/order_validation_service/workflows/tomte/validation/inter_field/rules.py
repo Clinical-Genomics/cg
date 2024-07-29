@@ -19,11 +19,11 @@ def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[Occupie
     return _get_errors(samples)
 
 
-def validate_unique_case_names(order: TomteOrder) -> list[RepeatedCaseNameError]:
+def validate_no_repeated_case_names(order: TomteOrder) -> list[RepeatedCaseNameError]:
     return get_repeated_case_name_errors(order)
 
 
-def validate_unique_sample_names_in_cases(order: TomteOrder) -> list[RepeatedSampleNameError]:
+def validate_no_repeated_sample_names(order: TomteOrder) -> list[RepeatedSampleNameError]:
     errors: list[RepeatedSampleNameError] = []
     for case in order.cases:
         case_errors = get_repeated_sample_name_errors(case)

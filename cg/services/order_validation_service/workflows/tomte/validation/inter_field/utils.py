@@ -62,7 +62,7 @@ def get_repeated_case_names(order: TomteOrder) -> list[str]:
 
 def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameError]:
     case_names = get_repeated_case_names(order)
-    return [RepeatedCaseNameError(name) for name in case_names]
+    return [RepeatedCaseNameError(case_name=name) for name in case_names]
 
 
 def get_repeated_sample_names(case: TomteCase) -> list[str]:
