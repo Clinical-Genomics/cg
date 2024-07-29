@@ -31,17 +31,35 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
-        gender: gender estimated by the workflow; source: workflow
         mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_target_coverage: mean coverage of a target region; source: workflow
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: workflow
+        sex: sex predicted by the workflow; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
     mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
+
+
+class RarediseaseSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to a specific MIP DNA sample.
+
+    Attributes:
+        bait_set: panel bed used for the analysis; source: LIMS
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        sex: sex predicted by the workflow; source: workflow
+    """
+
+    bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
