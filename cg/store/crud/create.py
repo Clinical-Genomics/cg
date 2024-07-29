@@ -507,7 +507,7 @@ class CreateHandler(BaseHandler):
             failed_yield=sequencing_run_dto.failed_yield,
             failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
             movie_name=sequencing_run_dto.movie_name,
-            run_device=smrt_cell,
+            device=smrt_cell,
         )
         self.session.add(new_sequencing_run)
         return new_sequencing_run
@@ -528,6 +528,7 @@ class CreateHandler(BaseHandler):
             failed_reads=sample_run_metrics_dto.failed_reads,
             failed_yield=sample_run_metrics_dto.failed_yield,
             failed_mean_read_length=sample_run_metrics_dto.failed_mean_read_length,
-            sequencing_run=sequencing_run,
+            instrument_run=sequencing_run,
         )
+        self.session.add(new_sample_sequencing_run)
         return new_sample_sequencing_run
