@@ -142,3 +142,17 @@ class ReportModel(BaseModel):
     date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
     accredited: bool | None = None
+
+
+class ReportRequiredFields(BaseModel):
+    """Model that defines the mandatory fields of the different sections of the delivery report."""
+
+    applications: dict[str, list[str]]
+    case: list[str]
+    customer: list[str]
+    data_analysis: list[str]
+    metadata: dict[str, list[str]]
+    methods: dict[str, list[str]]
+    report: list[str]
+    samples: dict[str, list[str]]
+    timestamps: dict[str, list[str]]

@@ -4,10 +4,24 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from housekeeper.store.models import File
+
+from cg.clients.chanjo2.models import (
+    CoverageMetrics,
+    CoveragePostRequest,
+    CoveragePostResponse,
+    CoverageSample,
+)
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
-from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
+from cg.constants.nf_analysis import (
+    RAREDISEASE_METRIC_CONDITIONS,
+    RAREDISEASE_COVERAGE_FILE_TAGS,
+    RAREDISEASE_COVERAGE_THRESHOLD,
+    RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+)
+from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -54,9 +68,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_genome_build(self, case_id: str) -> GenomeVersion:
+    def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg19."""
-        return GenomeVersion.hg19
+        return GenomeVersion.HG19
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
@@ -142,3 +156,40 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
+        """Return the Raredisease d4 coverage file path."""
+        coverage_file_tags: list[str] = RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
+        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=bundle_name, tags=coverage_file_tags
+        )
+        if coverage_file:
+            return coverage_file.full_path
+        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
+        return None
+
+    def get_sample_coverage(
+        self, case_id: str, sample_id: str, gene_ids: list[int]
+    ) -> CoverageMetrics | None:
+        """Return sample coverage metrics from Chanjo2."""
+        genome_version: GenomeVersion = self.get_genome_build()
+        coverage_file_path: str | None = self.get_sample_coverage_file_path(
+            bundle_name=case_id, sample_id=sample_id
+        )
+        try:
+            post_request = CoveragePostRequest(
+                build=self.translate_genome_reference(genome_version),
+                coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
+                hgnc_gene_ids=gene_ids,
+                interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+                samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
+            )
+            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
+            return post_response.get_sample_coverage_metrics(sample_id)
+        except Exception as error:
+            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
+            return None
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Raredisease Scout upload case tags."""
+        return RAREDISEASE_CASE_TAGS

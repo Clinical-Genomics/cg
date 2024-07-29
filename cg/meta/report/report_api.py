@@ -12,13 +12,11 @@ from sqlalchemy.orm import Query
 from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
+from cg.constants.scout import ScoutUploadKey
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import (
-    get_empty_report_data,
-    get_missing_report_data,
-)
+from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -30,20 +28,8 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import (
-    ApplicationModel,
-    MethodsModel,
-    SampleModel,
-    TimestampModel,
-)
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -108,17 +94,17 @@ class ReportAPI(MetaAPI):
             return None
         return delivery_report.full_path
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+    def get_scout_uploaded_file_from_hk(
+        self, case_id: str, scout_key: ScoutUploadKey
+    ) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        tags: list = self.get_hk_scout_file_tags(scout_key=scout_key)
         uploaded_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=tags, version=version.id
         )
         if not tags or not uploaded_file:
-            LOG.warning(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
+            LOG.warning(f"No files were found for the following Scout key: {scout_key}")
             return None
         return uploaded_file.full_path
 
@@ -273,7 +259,7 @@ class ReportAPI(MetaAPI):
                     name=sample.name,
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
-                    gender=sample.sex,
+                    sex=sample.sex,
                     source=lims_sample.get("source"),
                     tumour=sample.is_tumour,
                     application=self.get_sample_application(sample=sample, lims_sample=lims_sample),
@@ -416,11 +402,7 @@ class ReportAPI(MetaAPI):
                 break
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
-    def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
+    def get_hk_scout_file_tags(self, scout_key: ScoutUploadKey) -> list | None:
         """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
-        tags = self.get_upload_case_tags().get(scout_tag)
+        tags = self.analysis_api.get_scout_upload_case_tags().get(scout_key.value)
         return list(tags) if tags else None
-
-    def get_upload_case_tags(self):
-        """Return workflow specific upload case tags."""
-        raise NotImplementedError

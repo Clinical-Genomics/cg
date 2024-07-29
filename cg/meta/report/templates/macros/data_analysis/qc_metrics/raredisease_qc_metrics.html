@@ -1,6 +1,6 @@
 {% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
 
-{% macro mip_dna_qc_metrics(samples) %}
+{% macro raredisease_qc_metrics(samples) %}
   {% set 
     metrics = [
       {"name": "Kön",                   "key": "sex",                  "description": "Kön beräknat genom bioinformatisk analys."},
