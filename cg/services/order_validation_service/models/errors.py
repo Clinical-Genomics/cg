@@ -55,6 +55,11 @@ class OccupiedWellError(CaseSampleError):
     message: str = "Well is already occupied"
 
 
+class RepeatedCaseNameError(CaseError):
+    field: str = "name"
+    message: str = "Case name already used"
+
+
 class RepeatedSampleNameError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already used"
