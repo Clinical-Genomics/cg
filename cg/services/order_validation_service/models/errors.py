@@ -53,3 +53,8 @@ class OrderNameRequiredError(OrderError):
 class OccupiedWellError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well is already occupied"
+
+
+class ApplicationNotValidError(SampleError):
+    field: str = "application"
+    message: str = "Application is not valid"

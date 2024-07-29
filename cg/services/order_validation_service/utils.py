@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from cg.services.order_validation_service.models.errors import (
     CaseSampleError,
     OrderError,
+    SampleError,
     ValidationErrors,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -20,11 +21,19 @@ def apply_order_validation(rules: list[Callable], order: Order, store: Store) ->
 
 
 def apply_case_sample_validation(
-    rules: list[Callable], case, store: Store
+    rules: list[Callable], order: Order, store: Store
 ) -> list[CaseSampleError]:
     errors: list[CaseSampleError] = []
     for rule in rules:
-        rule_errors: list[CaseSampleError] = rule(case=case, store=store)
+        rule_errors: list[CaseSampleError] = rule(order=order, store=store)
+        errors.extend(rule_errors)
+    return errors
+
+
+def apply_sample_validation(rules: list[Callable], order: Order, store: Store) -> list[SampleError]:
+    errors: list[SampleError] = []
+    for rule in rules:
+        rule_errors: list[CaseSampleError] = rule(order=order, store=store)
         errors.extend(rule_errors)
     return errors
 
