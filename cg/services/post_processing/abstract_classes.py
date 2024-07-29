@@ -48,7 +48,8 @@ class PostProcessingDataTransferService(ABC):
     def __init__(self, metrics_service: PostProcessingMetricsParser):
         self.metrics_service = metrics_service
 
-    def get_post_processing_dtos(self) -> PostProcessingDTOs:
+    @abstractmethod
+    def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
         pass
 
 
