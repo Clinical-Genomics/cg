@@ -1,9 +1,9 @@
-from cg.services.order_validation_service.validators.data_validators import (
+from cg.services.order_validation_service.validators.data.rules import (
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
     validate_user_belongs_to_customer,
 )
-from cg.services.order_validation_service.validators.inter_field_validators import (
+from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_ticket_number_required_if_connected,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
