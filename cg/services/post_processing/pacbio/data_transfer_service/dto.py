@@ -16,6 +16,7 @@ class PacBioSequencingRunDTO(BaseModel):
     hifi_mean_read_length: int
     hifi_median_read_quality: str
     percent_reads_passing_q30: float
+    productive_zmws: int
     p0_percent: float
     p1_percent: float
     p2_percent: float
