@@ -3,9 +3,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.services.post_processing.abstract_models import PostProcessingDTOs, RunData, RunMetrics
-from cg.store.store import Store
 
 
 class RunDataGenerator(ABC):
@@ -49,6 +47,7 @@ class PostProcessingDataTransferService(ABC):
 class PostProcessingStoreService(ABC):
     """Abstract class that manages storing data transfer objects in the database."""
 
+    @abstractmethod
     def store_post_processing_data(self, run_data: RunData):
         pass
 
@@ -56,6 +55,7 @@ class PostProcessingStoreService(ABC):
 class PostProcessingHKService(ABC):
     """Abstract class that manages storing of files for an instrument run."""
 
+    @abstractmethod
     def store_files_in_housekeeper(self, run_data: RunData):
         pass
 
