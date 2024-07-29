@@ -49,11 +49,23 @@ def upgrade():
         "pacbio_sequencing_run",
         sa.Column("Productive_ZMWS", sa.BigInteger(), nullable=False),
     )
-    op.alter_column("pacbio_sequencing_run", "movie_time_hours", nullable=True)
+    op.alter_column(
+        "pacbio_sequencing_run",
+        "movie_time_hours",
+        existing_type=sa.Integer(),
+        existing_nullable=False,
+        nullable=True,
+    )
 
 
 def downgrade():
-    op.alter_column("pacbio_sequencing_run", "movie_time_hours", nullable=False)
+    op.alter_column(
+        "pacbio_sequencing_run",
+        "movie_time_hours",
+        existing_type=sa.Integer(),
+        existing_nullable=True,
+        nullable=False,
+    )
     op.drop_column("pacbio_sequencing_run", "failed_reads")
     op.drop_column("pacbio_sequencing_run", "failed_yield")
     op.drop_column("pacbio_sequencing_run", "failed_mean_read_length")
