@@ -23,7 +23,9 @@ class PacBioHousekeeperService(PostProcessingHKService):
         file_manager: PacBioRunFileManager,
         metrics_parser: PacBioMetricsParser,
     ):
-        super().__init__(hk_api=hk_api, file_manager=file_manager, metrics_parser=metrics_parser)
+        self.hk_api: HousekeeperAPI = hk_api
+        self.file_manager: PacBioRunFileManager = file_manager
+        self.metrics_parser: PacBioMetricsParser = metrics_parser
 
     def store_files_in_housekeeper(self, run_data: PacBioRunData):
         parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(run_data)

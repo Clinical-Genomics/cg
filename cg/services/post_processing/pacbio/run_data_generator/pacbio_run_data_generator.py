@@ -11,6 +11,7 @@ from cg.utils.string import get_element_from_split
 
 class PacBioRunDataGenerator(RunDataGenerator):
 
+    @staticmethod
     def _validate_run_name(self, run_name) -> None:
         validate_name_pre_fix(run_name)
         validate_has_expected_parts(run_name=run_name, expected_parts=2)

@@ -12,10 +12,6 @@ class RunDataGenerator(ABC):
     """Abstract class for that holds functionality to create a run data model."""
 
     @abstractmethod
-    def _validate_run_name(self, run_name: str) -> None:
-        pass
-
-    @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
         pass
 
@@ -35,9 +31,7 @@ class RunFileManager(ABC):
 
 
 class PostProcessingMetricsParser(ABC):
-
-    def __init__(self, file_manager: RunFileManager):
-        self.file_manager: RunFileManager = file_manager
+    """Abstract class that manages the metrics parsing related to an instrument run."""
 
     @abstractmethod
     def parse_metrics(self, run_data: RunData) -> RunMetrics:
@@ -45,8 +39,7 @@ class PostProcessingMetricsParser(ABC):
 
 
 class PostProcessingDataTransferService(ABC):
-    def __init__(self, metrics_service: PostProcessingMetricsParser):
-        self.metrics_service = metrics_service
+    """Abstract class that manages the data transfer from parsed metrics to the database structure."""
 
     @abstractmethod
     def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
@@ -54,45 +47,21 @@ class PostProcessingDataTransferService(ABC):
 
 
 class PostProcessingStoreService(ABC):
-    def __init__(self, store: Store, data_transfer_service: PostProcessingDataTransferService):
-        self.store: Store = store
-        self.data_transfer_service: PostProcessingDataTransferService = data_transfer_service
-
-    def _create_run_device(self, run_name):
-        pass
-
-    def _create_instrument_run(self, run_name):
-        pass
-
-    def _create_sample_run_metrics(self, run_name):
-        pass
+    """Abstract class that manages storing data transfer objects in the database."""
 
     def store_post_processing_data(self, run_name):
         pass
 
 
 class PostProcessingHKService(ABC):
-    def __init__(
-        self,
-        hk_api: HousekeeperAPI,
-        file_manager: RunFileManager,
-        metrics_parser: PostProcessingMetricsParser,
-    ):
-        self.hk_api: HousekeeperAPI = hk_api
-        self.file_manager: RunFileManager = file_manager
-        self.metrics_parser: PostProcessingMetricsParser = metrics_parser
+    """Abstract class that manages storing of files for an instrument run."""
 
     def store_files_in_housekeeper(self, run_data: RunData):
         pass
 
 
 class PostProcessingService(ABC):
-
-    def __init(
-        self, store_service: PostProcessingStoreService, hk_service: PostProcessingHKService
-    ):
-        self.store_service = store_service
-        self.hk_service = hk_service
+    """Abstract class that encapsulates the logic required for post-processing and instrument run."""
 
     @abstractmethod
     def post_process(self, run_name):
