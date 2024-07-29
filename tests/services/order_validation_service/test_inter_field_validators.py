@@ -3,7 +3,7 @@ from cg.services.order_validation_service.models.errors import (
     TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.validators.inter_field_validators import (
+from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
 )
