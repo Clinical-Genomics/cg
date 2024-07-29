@@ -1,6 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
-    ReusedSampleNameError,
+    RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -44,4 +44,4 @@ def test_duplicate_sample_names_not_allowed(order_with_duplicate_sample_names: T
     assert errors
 
     # THEN the errors are about the sample names
-    assert isinstance(errors[0], ReusedSampleNameError)
+    assert isinstance(errors[0], RepeatedSampleNameError)

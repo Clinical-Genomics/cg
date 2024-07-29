@@ -1,6 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
-    ReusedSampleNameError,
+    RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
@@ -17,8 +17,8 @@ def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[Occupie
     return _get_errors(samples)
 
 
-def validate_unique_sample_names_in_cases(order: TomteOrder) -> list[ReusedSampleNameError]:
-    errors: list[ReusedSampleNameError] = []
+def validate_unique_sample_names_in_cases(order: TomteOrder) -> list[RepeatedSampleNameError]:
+    errors: list[RepeatedSampleNameError] = []
     for case in order.cases:
         case_errors = get_duplicate_sample_name_errors(case)
         errors.extend(case_errors)
