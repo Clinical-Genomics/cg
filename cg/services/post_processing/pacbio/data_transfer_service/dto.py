@@ -42,6 +42,7 @@ class PacBioSMRTCellDTO(BaseModel):
 
 
 class PacBioSampleSequencingMetricsDTO(BaseModel):
+    sample_internal_id: str
     hifi_reads: int
     hifi_yield: int
     hifi_mean_read_length: float
