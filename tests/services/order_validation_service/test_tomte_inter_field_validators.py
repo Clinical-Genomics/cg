@@ -1,6 +1,6 @@
 from cg.services.order_validation_service.models.errors import OccupiedWellError
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field_validators import (
+from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
