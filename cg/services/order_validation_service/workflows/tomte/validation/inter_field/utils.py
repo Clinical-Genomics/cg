@@ -56,7 +56,7 @@ def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, Tomte
 def get_duplicate_sample_names(case: TomteCase) -> list[str]:
     sample_names = [sample.name for sample in case.samples]
     count = Counter(sample_names)
-    return list({name for name, freq in count.items() if freq > 1})
+    return [name for name, freq in count.items() if freq > 1]
 
 
 def get_duplicate_sample_name_errors(case: TomteCase) -> list[ReusedSampleNameError]:
