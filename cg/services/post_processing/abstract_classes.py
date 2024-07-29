@@ -48,7 +48,7 @@ class PostProcessingStoreService(ABC):
     """Abstract class that manages storing data transfer objects in the database."""
 
     @abstractmethod
-    def store_post_processing_data(self, run_data: RunData):
+    def store_post_processing_data(self, run_data: RunData, dry_run: bool = False):
         pass
 
 

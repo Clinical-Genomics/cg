@@ -1,3 +1,5 @@
+import logging
+
 from cg.services.post_processing.abstract_classes import PostProcessingStoreService
 from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
@@ -11,6 +13,8 @@ from cg.services.post_processing.pacbio.data_transfer_service.dto import (
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import PacBioSequencingRun, PacBioSMRTCell
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class PacBioStoreService(PostProcessingStoreService):
@@ -38,7 +42,7 @@ class PacBioStoreService(PostProcessingStoreService):
                 sample_run_metrics_dto=sample_run_metric, sequencing_run=sequencing_run
             )
 
-    def store_post_processing_data(self, run_data: PacBioRunData):
+    def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False):
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacBioSMRTCell = self._create_run_device(dtos.run_device)
         sequencing_run: PacBioSequencingRun = self._create_instrument_run(
@@ -47,4 +51,10 @@ class PacBioStoreService(PostProcessingStoreService):
         self._create_sample_run_metrics(
             sample_run_metrics_dtos=dtos.sample_sequencing_metrics, sequencing_run=sequencing_run
         )
-        self.store.commit_to_store()
+        if dry_run:
+            self.store.rollback()
+            LOG.info(
+                f"Dry run, no entries will be added to database for SMRT cell {run_data.full_path}."
+            )
+        else:
+            self.store.commit_to_store()
