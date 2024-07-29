@@ -1,6 +1,8 @@
 from cg.services.post_processing.abstract_classes import (
     PostProcessingStoreService,
-    PostProcessingDataTransferService,
+)
+from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+    PacBioDataTransferService,
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
@@ -14,7 +16,7 @@ from cg.store.store import Store
 
 
 class PacBioStoreService(PostProcessingStoreService):
-    def __init__(self, store: Store, data_transfer_service: PostProcessingDataTransferService):
+    def __init__(self, store: Store, data_transfer_service: PacBioDataTransferService):
         self.store = store
         self.data_transfer_service = data_transfer_service
 
