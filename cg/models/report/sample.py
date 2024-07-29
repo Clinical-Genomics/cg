@@ -6,6 +6,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
     MipDNASampleMetadataModel,
+    RarediseaseSampleMetadataModel,
     RnafusionSampleMetadataModel,
     TaxprofilerSampleMetadataModel,
     TomteSampleMetadataModel,
@@ -84,7 +85,7 @@ class SampleModel(BaseModel):
         id: sample internal ID; source: StatusDB/sample/internal_id
         ticket: ticket number; source: StatusDB/sample/ticket_number
         status: sample status provided by the customer; source: StatusDB/family-sample/status
-        gender: sample gender provided by the customer; source: StatusDB/sample/sex
+        sex: sample sex provided by the customer; source: StatusDB/sample/sex
         source: sample type/source; source: LIMS/sample/source
         tumour: whether the sample is a tumour or normal one; source: StatusDB/sample/is_tumour
         application: analysis application model
@@ -99,15 +100,16 @@ class SampleModel(BaseModel):
     id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     ticket: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     status: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
     source: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
     metadata: (
-        MipDNASampleMetadataModel
-        | BalsamicTargetedSampleMetadataModel
+        BalsamicTargetedSampleMetadataModel
         | BalsamicWGSSampleMetadataModel
+        | MipDNASampleMetadataModel
+        | RarediseaseSampleMetadataModel
         | RnafusionSampleMetadataModel
         | TaxprofilerSampleMetadataModel
         | TomteSampleMetadataModel
