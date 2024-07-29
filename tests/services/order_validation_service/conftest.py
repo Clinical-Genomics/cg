@@ -88,7 +88,7 @@ def order_with_repeated_sample_names(
     return create_order([case_with_samples_with_repeated_names])
 
 
-@pytest.case
+@pytest.fixture
 def case() -> TomteCase:
     sample: TomteSample = create_sample(1)
     return create_case([sample])
