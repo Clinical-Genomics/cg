@@ -35,7 +35,7 @@ def validate_no_repeated_sample_names(order: TomteOrder) -> list[RepeatedSampleN
     return errors
 
 
-def validate_father_sex(order: TomteOrder) -> list[InvalidFatherSexError]:
+def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for case in order.cases:
         case_errors = get_father_sex_errors(case)

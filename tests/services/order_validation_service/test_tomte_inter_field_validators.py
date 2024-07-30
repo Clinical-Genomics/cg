@@ -6,7 +6,7 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
-    validate_father_sex,
+    validate_fathers_are_male,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_wells_contain_at_most_one_sample,
@@ -68,7 +68,7 @@ def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
     # GIVEN an order with an incorrectly specified father
 
     # WHEN validating the order
-    errors = validate_father_sex(order_with_invalid_father_sex)
+    errors = validate_fathers_are_male(order_with_invalid_father_sex)
 
     # THEN errors are returned
     assert errors
