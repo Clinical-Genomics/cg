@@ -1,6 +1,7 @@
 from cg.constants.subject import Sex
 from cg.services.order_validation_service.models.errors import (
     InvalidFatherSexError,
+    InvalidMotherCaseError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
@@ -41,3 +42,12 @@ def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
         case_errors = get_father_sex_errors(case)
         errors.extend(case_errors)
     return errors
+
+
+def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[InvalidMotherCaseError]:
+    errors = []
+    for case in order.cases:
+        case_errors = get_mother_case_errors(case)
+        errors.extend(case_errors)
+    return errors
+
