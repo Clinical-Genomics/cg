@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.validators.data.rules import (
+    validate_application_exists,
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
     validate_user_belongs_to_customer,
@@ -22,5 +23,6 @@ TOMTE_ORDER_RULES = [
 TOMTE_CASE_SAMPLE_RULES = [
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_application_exists,
     validate_wells_contain_at_most_one_sample,
 ]
