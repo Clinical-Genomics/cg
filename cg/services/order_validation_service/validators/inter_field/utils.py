@@ -12,7 +12,7 @@ def _is_ticket_number_missing(order: Order) -> bool:
     return order.connect_to_ticket and not order.ticket_number
 
 
-def _is_application_allowed(
+def _is_application_compatible(
     allowed_prep_categories: list[PrepCategory], application_tag: str, store: Store
 ):
     application: Application = store.get_application_by_tag(application_tag)

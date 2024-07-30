@@ -8,7 +8,7 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.utils import (
-    _is_application_allowed,
+    _is_application_compatible,
     _is_order_name_required,
     _is_ticket_number_missing,
 )
@@ -39,7 +39,7 @@ def validate_application_compatibility(
     allowed_prep_categories: list[PrepCategory] = WORKFLOW_PREP_CATEGORIES[workflow]
     for case in order.cases:
         for sample in case.samples:
-            if not _is_application_allowed(
+            if not _is_application_compatible(
                 allowed_prep_categories=allowed_prep_categories,
                 application_tag=sample.application,
                 store=store,
