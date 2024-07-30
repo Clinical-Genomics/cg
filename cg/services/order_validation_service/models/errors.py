@@ -62,7 +62,7 @@ class ApplicationNotValidError(CaseSampleError):
 
 class ApplicationNotCompatibleError(CaseSampleError):
     field: str = "application"
-    message: str = "Application is not compatible with the chosen workflow"
+    message: str = "Application is not allowed for the chosen workflow"
 
 
 class RepeatedCaseNameError(CaseError):
