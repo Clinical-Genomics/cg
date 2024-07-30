@@ -23,8 +23,6 @@ TOMTE_ORDER_RULES = [
 TOMTE_CASE_SAMPLE_RULES = [
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_application_exists,
     validate_wells_contain_at_most_one_sample,
 ]
-
-
-TOMTE_SAMPLE_RULES = [validate_application_exists]
