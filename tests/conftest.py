@@ -101,6 +101,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.device_fixtures",
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
