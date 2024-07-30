@@ -76,5 +76,10 @@ class RepeatedSampleNameError(CaseSampleError):
 
 
 class InvalidFatherSexError(CaseSampleError):
-    field: str = "sex"
+    field: str = "father"
     message: str = "Father must be male"
+
+
+class InvalidMotherSexError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Mother must be female"
