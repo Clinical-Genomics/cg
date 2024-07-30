@@ -7,6 +7,7 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_ticket_number_required_if_connected,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+    validate_father_sex,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_wells_contain_at_most_one_sample,
@@ -22,5 +23,6 @@ TOMTE_ORDER_RULES = [
 TOMTE_CASE_SAMPLE_RULES = [
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_father_sex,
     validate_wells_contain_at_most_one_sample,
 ]
