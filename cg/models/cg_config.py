@@ -30,6 +30,23 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
     FastqConcatenationService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+    PacBioStoreService,
+)
+from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+    PacBioDataTransferService,
+)
+from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+    PacBioHousekeeperService,
+)
+from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_generator import (
+    PacBioRunDataGenerator,
+)
+from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -380,6 +397,7 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pacbio_post_processing_service_: PacBioPostProcessingService | None = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None
     pigz: CommonAppConfig | None = None
@@ -562,6 +580,31 @@ class CGConfig(BaseModel):
             api = MutaccAutoAPI(config=self.dict())
             self.mutacc_auto_api_ = api
         return api
+
+    @property
+    def pacbio_post_processing_service(self) -> PacBioPostProcessingService:
+        service = self.__dict__.get("pacbio_post_processing_service_")
+        if service is None:
+            LOG.debug("Instantiating PacBio post-processing service")
+            run_data_generator = PacBioRunDataGenerator()
+            file_manager = PacBioRunFileManager()
+            metrics_parser = PacBioMetricsParser(file_manager=file_manager)
+            transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
+            store_service = PacBioStoreService(
+                store=self.status_db, data_transfer_service=transfer_service
+            )
+            hk_service = PacBioHousekeeperService(
+                hk_api=self.housekeeper_api,
+                file_manager=file_manager,
+                metrics_parser=metrics_parser,
+            )
+            service = PacBioPostProcessingService(
+                run_data_generator=run_data_generator,
+                hk_service=hk_service,
+                store_service=store_service,
+            )
+            self.pacbio_post_processing_service_ = service
+        return service
 
     @property
     def pdc_service(self) -> PdcService:
