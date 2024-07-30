@@ -119,11 +119,6 @@ def pac_bio_report_files_to_parse(
 
 
 @pytest.fixture
-def pac_bio_hifi_files(
-    pac_bio_hifi_reads_dir: Path, pac_bio_1_a01_cell_full_name: str
-) -> list[Path]:
+def pac_bio_hifi_read_file(pac_bio_hifi_reads_dir: Path, pac_bio_1_a01_cell_full_name: str) -> Path:
     """Return the list of PacBio HiFi read files."""
-    return [
-        Path(pac_bio_hifi_reads_dir, f"{pac_bio_1_a01_cell_full_name}.hifi_reads.bam"),
-        Path(pac_bio_hifi_reads_dir, f"{pac_bio_1_a01_cell_full_name}.hifi_reads.bam.pbi"),
-    ]
+    return Path(pac_bio_hifi_reads_dir, f"{pac_bio_1_a01_cell_full_name}.hifi_reads.bam")
