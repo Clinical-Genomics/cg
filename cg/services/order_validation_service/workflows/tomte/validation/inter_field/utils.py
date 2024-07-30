@@ -127,13 +127,17 @@ def get_mother_case_errors(case: TomteCase) -> list[MotherNotInCaseError]:
     for child in children:
         mother: TomteSample | None = case.get_sample(child.mother)
         if not mother:
-            error = create_father_case_error(case=case, sample=child)
+            error = create_mother_case_error(case=case, sample=child)
             errors.append(error)
     return errors
 
 
 def create_father_case_error(case: TomteCase, sample: TomteSample) -> FatherNotInCaseError:
     return FatherNotInCaseError(case_name=case.name, sample_name=sample.name)
+
+
+def create_mother_case_error(case: TomteCase, sample: TomteSample) -> MotherNotInCaseError:
+    return MotherNotInCaseError(case_name=case.name, sample_name=sample.name)
 
 
 def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
