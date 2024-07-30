@@ -57,7 +57,12 @@ class OccupiedWellError(CaseSampleError):
 
 class ApplicationNotValidError(CaseSampleError):
     field: str = "application"
-    message: str = "Application is not valid"
+    message: str = "Chosen application does not exist"
+
+
+class ApplicationNotCompatibleError(CaseSampleError):
+    field: str = "application"
+    message: str = "Application is not compatible with the chosen workflow"
 
 
 class RepeatedCaseNameError(CaseError):
