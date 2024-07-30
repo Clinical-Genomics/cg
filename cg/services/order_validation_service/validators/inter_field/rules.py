@@ -12,6 +12,7 @@ from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_order_name_required,
     _is_ticket_number_missing,
 )
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
 
@@ -32,7 +33,7 @@ def validate_name_required_for_new_order(order: Order, **kwargs) -> list[OrderEr
 
 
 def validate_application_compatibility(
-    order: Order, store: Store, **kwargs
+    order: TomteOrder, store: Store, **kwargs
 ) -> list[ApplicationNotCompatibleError]:
     errors: list[ApplicationNotCompatibleError] = []
     workflow: Workflow = order.workflow
