@@ -3,7 +3,10 @@ from pathlib import Path
 from cg.constants import FileExtensions
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import RunFileManager
-from cg.services.post_processing.exc import PostProcessingFileNotFoundError
+from cg.services.post_processing.error_handlers import (
+    handle_post_processing_errors,
+)
+from cg.services.post_processing.exc import PostProcessingRunFileManagerError
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.post_processing.validators import validate_files_exist
 from cg.utils.files import get_files_matching_pattern
@@ -11,6 +14,9 @@ from cg.utils.files import get_files_matching_pattern
 
 class PacBioRunFileManager(RunFileManager):
 
+    @handle_post_processing_errors(
+        to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
+    )
     def get_files_to_parse(self, run_data: PacBioRunData) -> list[Path]:
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
@@ -18,6 +24,9 @@ class PacBioRunFileManager(RunFileManager):
         files_to_parse.extend(self._get_report_files(run_path))
         return files_to_parse
 
+    @handle_post_processing_errors(
+        to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
+    )
     def get_files_to_store(self, run_data: PacBioRunData) -> list[Path]:
         """Get the files to store for the PostProcessingHKService."""
         run_path: Path = run_data.full_path
@@ -33,7 +42,7 @@ class PacBioRunFileManager(RunFileManager):
             directory=statistics_dir, pattern=f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}"
         )
         if not files:
-            raise PostProcessingFileNotFoundError(f"No CCS report file found in {statistics_dir}")
+            raise FileNotFoundError(f"No CCS report file found in {statistics_dir}")
         return files[0]
 
     @staticmethod
@@ -59,7 +68,7 @@ class PacBioRunFileManager(RunFileManager):
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}*"
         )
         if len(bam_files) != 2:
-            raise PostProcessingFileNotFoundError(
+            raise FileNotFoundError(
                 f"Expected 2 HiFi read files in {hifi_dir}, found {len(bam_files)}"
             )
         validate_files_exist(bam_files)

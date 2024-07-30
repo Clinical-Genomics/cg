@@ -17,21 +17,6 @@ from cg.services.post_processing.pacbio.metrics_parser.models import (
 from cg.utils.files import get_file_with_pattern_from_list
 
 
-def handle_pac_bio_parsing_errors(func):
-    """Decorator to catch any metrics parsing error to raise a PacBioMetricsParsingError instead."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except FileNotFoundError as error:
-            raise PacBioMetricsParsingError(f"Could not find the metrics file: {error}")
-        except Exception as error:
-            raise PacBioMetricsParsingError(f"An error occurred while parsing the metrics: {error}")
-
-    return wrapper
-
-
 def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
     """Return the data model based on the pattern."""
     pattern_to_model = {
@@ -54,7 +39,6 @@ def _parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> 
     return data_model.model_validate(data, from_attributes=True)
 
 
-@handle_pac_bio_parsing_errors
 def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str) -> BaseMetrics:
     report_file: Path = get_file_with_pattern_from_list(files=metrics_files, pattern=file_name)
     data_model: Type[BaseMetrics] = _get_data_model_from_pattern(pattern=file_name)

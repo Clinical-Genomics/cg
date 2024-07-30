@@ -11,7 +11,7 @@ class RunDataGenerator(ABC):
 
     @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
-        pass
+        raise NotImplementedError
 
 
 class RunFileManager(ABC):
@@ -20,12 +20,12 @@ class RunFileManager(ABC):
     @abstractmethod
     def get_files_to_parse(self, run_data: RunData) -> list[Path]:
         """Get the files required for the PostProcessingMetricsService."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def get_files_to_store(self, run_data: RunData) -> list[Path]:
         """Get the files to store for the PostProcessingHKService."""
-        pass
+        raise NotImplementedError
 
 
 class PostProcessingMetricsParser(ABC):
@@ -33,7 +33,7 @@ class PostProcessingMetricsParser(ABC):
 
     @abstractmethod
     def parse_metrics(self, run_data: RunData) -> RunMetrics:
-        pass
+        raise NotImplementedError
 
 
 class PostProcessingDataTransferService(ABC):
@@ -41,7 +41,7 @@ class PostProcessingDataTransferService(ABC):
 
     @abstractmethod
     def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
-        pass
+        raise NotImplementedError
 
 
 class PostProcessingStoreService(ABC):
@@ -49,7 +49,7 @@ class PostProcessingStoreService(ABC):
 
     @abstractmethod
     def store_post_processing_data(self, run_data: RunData):
-        pass
+        raise NotImplementedError
 
 
 class PostProcessingHKService(ABC):
@@ -57,7 +57,7 @@ class PostProcessingHKService(ABC):
 
     @abstractmethod
     def store_files_in_housekeeper(self, run_data: RunData):
-        pass
+        raise NotImplementedError
 
 
 class PostProcessingService(ABC):
@@ -66,4 +66,4 @@ class PostProcessingService(ABC):
     @abstractmethod
     def post_process(self, run_name: str, sequencing_dir: str):
         """Store sequencing metrics in statusdb and relevant files in housekeeper"""
-        pass
+        raise NotImplementedError

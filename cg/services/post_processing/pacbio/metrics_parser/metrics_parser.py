@@ -1,7 +1,14 @@
 from pathlib import Path
 
+from pydantic_core._pydantic_core import ValidationError
+
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import PostProcessingMetricsParser
+from cg.services.post_processing.error_handlers import handle_post_processing_errors
+from cg.services.post_processing.exc import (
+    PostProcessingRunFileManagerError,
+    PostProcessingParsingError,
+)
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,
     PacBioMetrics,
@@ -25,6 +32,10 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
     def __init__(self, file_manager: PacBioRunFileManager):
         self.file_manager: PacBioRunFileManager = file_manager
 
+    @handle_post_processing_errors(
+        to_except=(FileNotFoundError, ValidationError, PostProcessingRunFileManagerError),
+        to_raise=PostProcessingParsingError,
+    )
     def parse_metrics(self, run_data: PacBioRunData) -> PacBioMetrics:
         """Return all the relevant PacBio metrics parsed in a single Pydantic object."""
         metrics_files: list[Path] = self.file_manager.get_files_to_parse(run_data)
