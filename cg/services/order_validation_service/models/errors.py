@@ -89,6 +89,7 @@ class InvalidMotherSexError(CaseSampleError):
     field: str = "mother"
     message: str = "Mother must be female"
 
+
 class MotherNotInCaseError(CaseSampleError):
     field: str = "mother"
     message: str = "Mother must be in the same case"
