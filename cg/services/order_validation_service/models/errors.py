@@ -80,7 +80,7 @@ class InvalidFatherSexError(CaseSampleError):
     message: str = "Father must be male"
 
 
-class InvalidFatherCaseError(CaseSampleError):
+class FatherNotInCaseError(CaseSampleError):
     field: str = "father"
     message: str = "Father must be in the same case"
 
