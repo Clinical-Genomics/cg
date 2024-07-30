@@ -1,6 +1,8 @@
 from collections import Counter
+from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.models.errors import (
+    InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
@@ -74,3 +76,22 @@ def get_repeated_sample_names(case: TomteCase) -> list[str]:
 def get_repeated_sample_name_errors(case: TomteCase) -> list[RepeatedSampleNameError]:
     sample_names = get_repeated_sample_names(case)
     return [RepeatedSampleNameError(sample_name=name, case_name=case.name) for name in sample_names]
+
+
+def get_father_sex_errors(case: TomteCase) -> list[InvalidFatherSexError]:
+    errors = []
+    children: list[TomteSample] = case.get_samples_with_father()
+    for child in children:
+        if is_father_sex_invalid(child=child, case=case):
+            error = create_father_sex_error(case=case, sample=child)
+            errors.append(error)
+    return errors
+
+
+def is_father_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
+    father: TomteSample | None = case.get_sample(child.father)
+    return father and father.sex != Sex.MALE
+
+
+def create_father_sex_error(case: TomteCase, sample: TomteSample) -> InvalidFatherSexError:
+    return InvalidFatherSexError(sample_name=sample.name, case_name=case.name)
