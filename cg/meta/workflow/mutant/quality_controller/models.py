@@ -20,7 +20,7 @@ class SampleQualityResults(BaseModel):
     sample_id: str
     passes_qc: bool
     passes_reads_threshold: bool
-    passes_mutant_qc: bool = False
+    passes_mutant_qc: bool | None = None
 
 
 class SamplesQualityResults(BaseModel):

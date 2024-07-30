@@ -1,1 +1,1 @@
-from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
+from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController

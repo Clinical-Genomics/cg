@@ -73,14 +73,10 @@ def get_internal_negative_control_id(lims: LimsAPI, case: Case) -> str:
     """Query lims to retrive internal_negative_control_id."""
 
     sample_internal_id = case.sample_ids[0]
-
-    try:
-        internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
-            lims=lims, sample_internal_id=sample_internal_id
-        )
-        return internal_negative_control_id
-    except Exception as exception_object:
-        raise CgError from exception_object
+    internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
+        lims=lims, sample_internal_id=sample_internal_id
+    )
+    return internal_negative_control_id
 
 
 def get_internal_negative_control_sample_for_case(
@@ -88,19 +84,22 @@ def get_internal_negative_control_sample_for_case(
     status_db: Store,
     lims: LimsAPI,
 ) -> Sample:
-    try:
-        internal_negative_control_id: str = get_internal_negative_control_id(lims=lims, case=case)
-        return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
-    except Exception as exception_object:
-        raise CgError() from exception_object
+    internal_negative_control_id: str = get_internal_negative_control_id(lims=lims, case=case)
+    return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
 
 
 def get_mutant_pool_samples(case: Case, status_db: Store, lims: LimsAPI) -> MutantPoolSamples:
-    samples: list[Sample] = case.samples
-    for index in range(0, len(samples) - 1):
-        if samples[index].is_negative_control:
-            external_negative_control: Sample = samples.pop(index)
-        break
+    samples = []
+    external_negative_control = None
+
+    for sample in case.samples:
+        if sample.is_negative_control:
+            external_negative_control = sample
+            continue
+        samples.append(sample)
+
+    if not external_negative_control:
+        raise CgError(f"No external negative control sample found for case {case}.")
 
     try:
         internal_negative_control: Sample = get_internal_negative_control_sample_for_case(

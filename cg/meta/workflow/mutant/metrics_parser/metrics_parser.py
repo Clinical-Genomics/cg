@@ -53,6 +53,7 @@ class MetricsParser:
 
     @classmethod
     def parse_samples_results(cls, case: Case, results_file_path: Path) -> dict[str, SampleResults]:
+        """Takes a case object and a results_file_path and resturns dict[str, SampleResults] with sample.internal_id as keys."""
         try:
             raw_results: list[dict[str, Any]] = cls._get_raw_results(
                 results_file_path=results_file_path

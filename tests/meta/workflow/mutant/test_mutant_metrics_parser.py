@@ -53,8 +53,9 @@ def test_parse_samples_results(mutant_case_qc_pass: Case, mutant_results_file_pa
     # GIVEN a case and a valid quality metrics file path
 
     # WHEN parsing the file
-    MetricsParser.parse_samples_results(
+    samples_results: dict[str, SampleResults] = MetricsParser.parse_samples_results(
         case=mutant_case_qc_pass, results_file_path=mutant_results_file_path_qc_pass
     )
 
-    # THEN no error is thrown
+    # THEN no error is thrown and sample_qc_pass passes QC
+    assert samples_results["sample_qc_pass"].qc_pass is True

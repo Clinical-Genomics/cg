@@ -10,7 +10,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.workflow.mutant.quality_controller.models import QualityResult
-from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
+from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -27,9 +27,8 @@ class MutantAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
-        self.quality_checker = QualityController(
-            status_db=config.status_db_,
-            lims=config.lims_api_
+        self.quality_checker = MutantQualityController(
+            status_db=config.status_db_, lims=config.lims_api_
         )
 
     @property

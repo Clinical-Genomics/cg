@@ -1,97 +1,75 @@
-# def get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
-#     """Filter and return a list of internal negative controls from a given sample list."""
-#     negative_controls = []
-#     for sample in samples:
-#         if sample.udf.get("Control") == "negative" and sample.udf.get("customer") == "cust000":
-#             negative_controls.append(sample)
-#     return negative_controls
+from pathlib import Path
+from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
+from cg.meta.workflow.mutant.quality_controller.models import MutantPoolSamples, QualityMetrics
+from cg.meta.workflow.mutant.quality_controller.utils import (
+    get_internal_negative_control_id_from_lims,
+    get_mutant_pool_samples,
+    get_quality_metrics,
+)
+from cg.store.models import Case, Sample
+from cg.store.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
-# def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id: str) -> str:
-#     """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
-#     try:
-#         artifact: Artifact = lims.get_latest_artifact_for_sample(
-#             LimsProcess.COVID_POOLING_STEP, LimsArtifactTypes.ANALYTE, sample_internal_id
-#         )
-#         samples = artifact[0].samples
+def test_test_get_internal_negative_control_id_from_lims(
+    mutant_lims: MockLimsAPI, sample_qc_pass: Sample, internal_negative_control_qc_pass: Sample
+):
+    # GIVEN a sample_id and the internal_id of its corresponding internal_negative_control sample
 
-#         negative_controls: list = get_negative_controls_from_list(samples=samples)
+    sample_internal_id = sample_qc_pass.internal_id
+    internal_negative_control_sample_id = internal_negative_control_qc_pass.internal_id
 
-#         if len(negative_controls) > 1:
-#             sample_ids = [sample.id for sample in negative_controls]
-#             LOG.warning(f"Several internal negative control samples found: {' '.join(sample_ids)}")
-#         else:
-#             return negative_controls[0].id
-#     except Exception as exception_object:
-#         raise LimsDataError from exception_object
+    # WHEN retrieving the internal_negative_control_id_from_lims
+    retrieved_internal_negative_control_sample_id = get_internal_negative_control_id_from_lims(
+        lims=mutant_lims, sample_internal_id=sample_internal_id
+    )
+
+    # THEN no errors are raised and the correct internal_negative_control_id is retrieved
+    assert retrieved_internal_negative_control_sample_id == internal_negative_control_sample_id
 
 
-# def get_internal_negative_control_id(lims: LimsAPI, case: Case) -> str:
-#     """Query lims to retrive internal_negative_control_id."""
+def test_get_mutant_pool_samples(
+    mutant_case_qc_pass: Case,
+    mutant_store: Store,
+    mutant_lims: MockLimsAPI,
+    sample_qc_pass: Sample,
+    external_negative_control_qc_pass: Sample,
+    internal_negative_control_qc_pass: Sample,
+):
+    # WHEN creating a MutantPoolSamples object
+    mutant_pool_samples: MutantPoolSamples = get_mutant_pool_samples(
+        case=mutant_case_qc_pass, status_db=mutant_store, lims=mutant_lims
+    )
 
-#     sample_internal_id = case.sample_ids[0]
+    # THEN the pool is created correctly:
+    #   - the external negative control is identified and separated from the rest of the samples
+    #   - all other samples are present in the list under samples
+    #   - the internal negative control corresponding to the case is fetched from lims and added to the pool
 
-#     try:
-#         internal_negative_control_id: str = get_internal_negative_control_id_from_lims(
-#             lims=lims, sample_internal_id=sample_internal_id
-#         )
-#         return internal_negative_control_id
-#     except Exception as exception_object:
-#         raise CgError from exception_object
-
-
-# def get_internal_negative_control_sample_for_case(
-#     case: Case,
-#     status_db: Store,
-#     lims: LimsAPI,
-# ) -> Sample:
-#     try:
-#         internal_negative_control_id: str = get_internal_negative_control_id(lims=lims, case=case)
-#         return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
-#     except Exception as exception_object:
-#         raise CgError() from exception_object
+    assert mutant_pool_samples.external_negative_control == external_negative_control_qc_pass
+    assert mutant_pool_samples.samples == [sample_qc_pass]
+    assert mutant_pool_samples.internal_negative_control == internal_negative_control_qc_pass
 
 
-# def get_mutant_pool_samples(case: Case, status_db: Store, lims: LimsAPI) -> MutantPoolSamples:
-#     samples: list[Sample] = case.samples
-#     for sample in samples:
-#         if sample.is_negative_control:
-#             external_negative_control = samples.pop(sample)
-#         break
+def test_get_quality_metrics(
+    mutant_results_file_path_qc_pass: Path,
+    mutant_case_qc_pass: Case,
+    mutant_store: Store,
+    mutant_lims: MockLimsAPI,
+    mutant_sample_results_sample_qc_pass: SampleResults,
+    sample_qc_pass: Sample,
+):
+    # GIVEN a case
 
-#     try:
-#         internal_negative_control = get_internal_negative_control_sample_for_case(
-#             case=case, status_db=status_db, lims=lims
-#         )
-#     except Exception as exception_object:
-#         raise CgError from exception_object
+    # WHEN generating the quality_metrics
+    quality_metrics: QualityMetrics = get_quality_metrics(
+        case_results_file_path=mutant_results_file_path_qc_pass,
+        case=mutant_case_qc_pass,
+        status_db=mutant_store,
+        lims=mutant_lims,
+    )  # QualityMetrics:
 
-#     return MutantPoolSamples(
-#         samples=samples,
-#         external_negative_control=external_negative_control,
-#         internal_negative_control=internal_negative_control,
-#     )
-
-
-# def get_quality_metrics(
-#     case_results_file_path: Path, case: Case, status_db: Store, lims: LimsAPI
-# ) -> QualityMetrics:
-#     try:
-#         samples_results: dict[str, SampleResults] = MetricsParser.parse_samples_results(
-#             case=case, results_file_path=case_results_file_path
-#         )
-#     except Exception as exception_object:
-#         raise CgError(f"Not possible to retrieve results for case {case}.") from exception_object
-
-#     try:
-#         samples: MutantPoolSamples = get_mutant_pool_samples(
-#             case=case, status_db=status_db, lims=lims
-#         )
-#     except Exception as exception_object:
-#         raise CgError(f"Not possible to retrieve samples for case {case}.") from exception_object
-
-#     return QualityMetrics(results=samples_results, pool=samples)
-
-
-# def get_report_path(case_path: Path) -> Path:
-#     return case_path.joinpath(QUALITY_REPORT_FILE_NAME)
+    # THEN no errors are raised and the sample_results are created for each sample
+    assert (
+        quality_metrics.results[sample_qc_pass.internal_id] == mutant_sample_results_sample_qc_pass
+    )

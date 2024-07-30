@@ -24,11 +24,15 @@ def log_results(
     LOG.info(samples_message)
 
 
-def log_sample_result(result: SampleQualityResults) -> None:
+def log_sample_result(
+    result: SampleQualityResults,
+    external_negative_control: bool,
+    internal_negative_control: bool,
+) -> None:
     control_message = ""
-    if result.is_external_negative_control:
+    if external_negative_control:
         control_message = "External negative control sample "
-    if result.is_internal_negative_control:
+    if internal_negative_control:
         control_message = "Internal negative control sample "
     if result.passes_qc:
         message = f"{control_message}{result.sample_id} passed QC."
@@ -69,7 +73,9 @@ def samples_results_message(samples_quality_results: SamplesQualityResults) -> s
         else "failed QC. "
     )
 
-    samples_message: str = f"Sample results: {samples_quality_results.total_samples_count} total, {samples_quality_results.failed_samples_count} failed, {samples_quality_results.passed_samples_count} passed."
+    samples_message: str = (
+        f"Sample results: {samples_quality_results.total_samples_count} total, {samples_quality_results.failed_samples_count} failed, {samples_quality_results.passed_samples_count} passed."
+    )
 
     return "\n".join(
         [internal_negative_control_message, external_negative_control_message, samples_message]
