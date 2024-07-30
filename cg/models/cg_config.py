@@ -614,6 +614,7 @@ class CGConfig(BaseModel):
             run_data_generator=run_data_generator,
             hk_service=hk_service,
             store_service=store_service,
+            sequencing_dir=self.run_instruments.pacbio.data_dir,
         )
 
     @property

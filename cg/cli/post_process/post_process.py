@@ -29,6 +29,4 @@ def post_process_sequencing_run(context: CGConfig, run_name: str):
     post_processing_service: PostProcessingService = get_post_processing_service_from_run_name(
         context=context, run_name=run_name
     )
-    post_processing_service.post_process(
-        run_name=run_name, sequencing_dir=context.run_instruments.pacbio.data_dir
-    )
+    post_processing_service.post_process(run_name)
