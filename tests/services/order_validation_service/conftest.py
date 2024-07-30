@@ -71,3 +71,29 @@ def valid_order(valid_case: TomteCase) -> TomteOrder:
 @pytest.fixture
 def order_with_samples_in_same_well(case_with_samples_in_same_well: TomteCase) -> TomteOrder:
     return create_order([case_with_samples_in_same_well])
+
+
+@pytest.fixture
+def case_with_samples_with_repeated_names() -> TomteCase:
+    sample_1: TomteSample = create_sample(1)
+    sample_2: TomteSample = create_sample(1)
+    sample_1.name = sample_2.name
+    return create_case([sample_1, sample_2])
+
+
+@pytest.fixture
+def order_with_repeated_sample_names(
+    case_with_samples_with_repeated_names: TomteCase,
+) -> TomteOrder:
+    return create_order([case_with_samples_with_repeated_names])
+
+
+@pytest.fixture
+def case() -> TomteCase:
+    sample: TomteSample = create_sample(1)
+    return create_case([sample])
+
+
+@pytest.fixture
+def order_with_repeated_case_names(case: TomteCase) -> TomteOrder:
+    return create_order([case, case])

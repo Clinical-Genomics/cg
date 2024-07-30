@@ -1,5 +1,10 @@
+from collections import Counter
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.models.errors import OccupiedWellError
+from cg.services.order_validation_service.models.errors import (
+    OccupiedWellError,
+    RepeatedCaseNameError,
+    RepeatedSampleNameError,
+)
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
@@ -47,3 +52,25 @@ def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, Tomte
             sample_well_map[sample.well_position] = []
         sample_well_map[sample.well_position].append((sample, case))
     return sample_well_map
+
+
+def get_repeated_case_names(order: TomteOrder) -> list[str]:
+    case_names = [case.name for case in order.cases]
+    count = Counter(case_names)
+    return [name for name, freq in count.items() if freq > 1]
+
+
+def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameError]:
+    case_names = get_repeated_case_names(order)
+    return [RepeatedCaseNameError(case_name=name) for name in case_names]
+
+
+def get_repeated_sample_names(case: TomteCase) -> list[str]:
+    sample_names = [sample.name for sample in case.samples]
+    count = Counter(sample_names)
+    return [name for name, freq in count.items() if freq > 1]
+
+
+def get_repeated_sample_name_errors(case: TomteCase) -> list[RepeatedSampleNameError]:
+    sample_names = get_repeated_sample_names(case)
+    return [RepeatedSampleNameError(sample_name=name, case_name=case.name) for name in sample_names]

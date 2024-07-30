@@ -58,3 +58,12 @@ class OccupiedWellError(CaseSampleError):
 class ApplicationNotValidError(SampleError):
     field: str = "application"
     message: str = "Application is not valid"
+
+class RepeatedCaseNameError(CaseError):
+    field: str = "name"
+    message: str = "Case name already used"
+
+
+class RepeatedSampleNameError(CaseSampleError):
+    field: str = "name"
+    message: str = "Sample name already used"
