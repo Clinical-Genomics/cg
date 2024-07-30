@@ -9,6 +9,7 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
     validate_fathers_are_male,
+    validate_mothers_are_female,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_wells_contain_at_most_one_sample,
@@ -25,6 +26,7 @@ TOMTE_CASE_SAMPLE_RULES = [
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_fathers_are_male,
+    validate_mothers_are_female,
     validate_application_exists,
     validate_wells_contain_at_most_one_sample,
 ]
