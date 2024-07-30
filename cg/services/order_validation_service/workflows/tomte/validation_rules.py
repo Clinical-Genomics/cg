@@ -5,6 +5,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_user_belongs_to_customer,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
+    validate_application_compatibility,
     validate_ticket_number_required_if_connected,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -24,5 +25,6 @@ TOMTE_CASE_SAMPLE_RULES = [
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_application_exists,
+    validate_application_compatibility,
     validate_wells_contain_at_most_one_sample,
 ]
