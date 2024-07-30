@@ -98,7 +98,7 @@ def order_with_repeated_sample_names(
 @pytest.fixture
 def case() -> TomteCase:
     sample_1: TomteSample = create_sample(1)
-    sample_2: TomteSample = create_sample(1)
+    sample_2: TomteSample = create_sample(2)
     return create_case([sample_1, sample_2])
 
 
@@ -113,4 +113,13 @@ def order_with_invalid_father_sex(case: TomteCase):
     father = case.samples[1]
     child.father = father.name
     father.sex = SexEnum.female
+    return create_order([case])
+
+
+@pytest.fixture
+def order_with_father_in_wrong_case(case: TomteCase):
+    child = case.samples[0]
+    father = case.samples[1]
+    child.father = father.name
+    case.samples = [child]
     return create_order([case])
