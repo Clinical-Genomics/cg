@@ -5,6 +5,7 @@ from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
     InvalidFatherSexError,
     InvalidMotherSexError,
+    MotherNotInCaseError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
@@ -116,6 +117,17 @@ def get_mother_sex_errors(case: TomteCase) -> list[InvalidMotherSexError]:
     for child in children:
         if is_mother_sex_invalid(child=child, case=case):
             error = create_mother_sex_error(case=case, sample=child)
+            errors.append(error)
+    return errors
+
+
+def get_mother_case_errors(case: TomteCase) -> list[MotherNotInCaseError]:
+    errors = []
+    children: list[TomteSample] = case.get_samples_with_mother()
+    for child in children:
+        mother: TomteSample | None = case.get_sample(child.mother)
+        if not mother:
+            error = create_father_case_error(case=case, sample=child)
             errors.append(error)
     return errors
 
