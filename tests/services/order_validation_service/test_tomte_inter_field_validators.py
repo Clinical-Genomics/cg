@@ -75,3 +75,13 @@ def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
 
     # THEN the errors are about the father sex
     assert isinstance(errors[0], InvalidFatherSexError)
+
+
+def test_no_father_sex_error_when_no_father_present(valid_order: TomteOrder):
+    # GIVEN a valid order
+
+    # WHEN validating the order
+    errors = validate_fathers_are_male(valid_order)
+
+    # THEN no errors are returned
+    assert not errors
