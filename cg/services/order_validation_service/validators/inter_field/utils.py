@@ -16,7 +16,4 @@ def _is_application_compatible(
     allowed_prep_categories: list[PrepCategory], application_tag: str, store: Store
 ):
     application: Application = store.get_application_by_tag(application_tag)
-    if application:
-        if application.prep_category in allowed_prep_categories:
-            return True
-    return False
+    return application and application.prep_category in allowed_prep_categories
