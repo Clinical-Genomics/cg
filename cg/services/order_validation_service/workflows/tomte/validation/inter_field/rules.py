@@ -1,5 +1,6 @@
 from cg.constants.subject import Sex
 from cg.services.order_validation_service.models.errors import (
+    InvalidFatherCaseError,
     InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
@@ -11,6 +12,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     _get_errors,
     _get_excess_samples,
     _get_plate_samples,
+    get_father_case_errors,
     get_father_sex_errors,
     get_repeated_case_name_errors,
     get_repeated_sample_name_errors,
@@ -39,5 +41,13 @@ def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for case in order.cases:
         case_errors = get_father_sex_errors(case)
+        errors.extend(case_errors)
+    return errors
+
+
+def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[InvalidFatherCaseError]:
+    errors = []
+    for case in order.cases:
+        case_errors = get_father_case_errors(case)
         errors.extend(case_errors)
     return errors
