@@ -50,6 +50,6 @@ def validate_application_exists(order: Order, store: Store, **kwargs) -> list[Sa
     for case in order.cases:
         for sample in case.samples:
             if not store.get_application_by_tag(sample.application):
-                error = ApplicationNotValidError(sample_name=sample.name)
+                error = ApplicationNotValidError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors
