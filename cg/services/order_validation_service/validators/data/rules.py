@@ -1,8 +1,10 @@
 from cg.services.order_validation_service.models.errors import (
+    ApplicationNotValidError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
-    UserNotAssociatedWithCustomerError,
     OrderError,
+    SampleError,
+    UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
@@ -40,4 +42,14 @@ def validate_customer_exists(order: Order, store: Store, **kwargs) -> list[Order
     if not store.customer_exists(order.customer_internal_id):
         error = CustomerDoesNotExistError()
         errors.append(error)
+    return errors
+
+
+def validate_application_exists(order: Order, store: Store, **kwargs) -> list[SampleError]:
+    errors: list[SampleError] = []
+    for case in order.cases:
+        for sample in case.samples:
+            if not store.get_application_by_tag(sample.application):
+                error = ApplicationNotValidError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
     return errors

@@ -15,7 +15,7 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 def create_sample(id: int) -> TomteSample:
     return TomteSample(
         name=f"name{id}",
-        application="application",
+        application="WGSPCFC030",
         container=ContainerEnum.plate,
         require_qc_ok=True,
         reference_genome=GenomeVersion.hg19,

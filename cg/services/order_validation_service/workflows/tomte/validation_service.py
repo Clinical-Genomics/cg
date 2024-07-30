@@ -36,6 +36,10 @@ class TomteValidationService(OrderValidationService):
             rules=TOMTE_ORDER_RULES, order=order, store=self.store
         )
         case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(
-            rules=TOMTE_CASE_SAMPLE_RULES, case=order.cases, store=self.store
+            rules=TOMTE_CASE_SAMPLE_RULES, order=order, store=self.store
         )
-        return ValidationErrors(order_errors=order_errors, case_sample_errors=case_sample_errors)
+
+        return ValidationErrors(
+            order_errors=order_errors,
+            case_sample_errors=case_sample_errors,
+        )
