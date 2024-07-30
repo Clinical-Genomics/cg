@@ -14,6 +14,8 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_mothers_are_female,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_sample_is_not_own_father,
+    validate_sample_is_not_own_mother,
     validate_wells_contain_at_most_one_sample,
 )
 
@@ -30,6 +32,8 @@ TOMTE_CASE_SAMPLE_RULES = [
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_mothers_are_female,
+    validate_sample_is_not_own_father,
+    validate_sample_is_not_own_mother,
     validate_application_exists,
     validate_application_compatibility,
     validate_wells_contain_at_most_one_sample,

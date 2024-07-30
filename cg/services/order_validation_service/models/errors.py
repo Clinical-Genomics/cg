@@ -88,3 +88,13 @@ class FatherNotInCaseError(CaseSampleError):
 class InvalidMotherSexError(CaseSampleError):
     field: str = "mother"
     message: str = "Mother must be female"
+
+
+class SampleIsOwnFatherError(CaseSampleError):
+    field: str = "father"
+    message: str = "Sample cannot be its own father"
+
+
+class SampleIsOwnMotherError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Sample cannot be its own mother"

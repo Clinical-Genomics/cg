@@ -8,6 +8,8 @@ from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    SampleIsOwnFatherError,
+    SampleIsOwnMotherError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -16,7 +18,9 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 )
 
 
-def _get_errors(colliding_samples: list[tuple[TomteSample, TomteCase]]) -> list[OccupiedWellError]:
+def get_well_errors(
+    colliding_samples: list[tuple[TomteSample, TomteCase]]
+) -> list[OccupiedWellError]:
     errors = []
     for sample, case in colliding_samples:
         error = OccupiedWellError(sample_name=sample.name, case_name=case.name)
@@ -24,7 +28,7 @@ def _get_errors(colliding_samples: list[tuple[TomteSample, TomteCase]]) -> list[
     return errors
 
 
-def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, TomteCase]]:
+def get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, TomteCase]]:
     return [
         (sample, case)
         for case in order.cases
@@ -120,6 +124,34 @@ def get_mother_sex_errors(case: TomteCase) -> list[InvalidMotherSexError]:
     return errors
 
 
+def get_sample_is_own_mother_errors(case: TomteCase) -> list[SampleIsOwnMotherError]:
+    errors = []
+    children: list[TomteSample] = case.get_samples_with_mother()
+    for child in children:
+        if is_sample_its_own_mother(child):
+            error = create_sample_is_own_mother_error(case=case, sample=child)
+            errors.append(error)
+    return errors
+
+
+def get_sample_is_own_father_errors(case: TomteCase) -> list[SampleIsOwnFatherError]:
+    errors = []
+    children: list[TomteSample] = case.get_samples_with_father()
+    for child in children:
+        if is_sample_its_own_father(child):
+            error = create_sample_is_own_father_error(case=case, sample=child)
+            errors.append(error)
+    return errors
+
+
+def is_sample_its_own_mother(sample: TomteSample):
+    return sample.name == sample.mother
+
+
+def is_sample_its_own_father(sample: TomteSample):
+    return sample.name == sample.father
+
+
 def create_father_case_error(case: TomteCase, sample: TomteSample) -> FatherNotInCaseError:
     return FatherNotInCaseError(case_name=case.name, sample_name=sample.name)
 
@@ -131,3 +163,15 @@ def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
 
 def create_mother_sex_error(case: TomteCase, sample: TomteSample) -> InvalidMotherSexError:
     return InvalidMotherSexError(sample_name=sample.name, case_name=case.name)
+
+
+def create_sample_is_own_mother_error(
+    case: TomteCase, sample: TomteSample
+) -> SampleIsOwnMotherError:
+    return SampleIsOwnMotherError(sample_name=sample.name, case_name=case.name)
+
+
+def create_sample_is_own_father_error(
+    case: TomteCase, sample: TomteSample
+) -> SampleIsOwnFatherError:
+    return SampleIsOwnFatherError(case_name=case.name, sample_name=sample.name)
