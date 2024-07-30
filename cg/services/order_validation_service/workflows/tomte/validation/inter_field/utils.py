@@ -65,12 +65,12 @@ def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameErr
     return [RepeatedCaseNameError(case_name=name) for name in case_names]
 
 
-def get_repeated_sample_names(case: TomteCase) -> list[str]:
-    sample_names = [sample.name for sample in case.samples]
+def get_repeated_sample_names(order: TomteOrder) -> list[str]:
+    sample_names = [sample.name for case in order.cases for sample in case.samples]
     count = Counter(sample_names)
     return [name for name, freq in count.items() if freq > 1]
 
 
-def get_repeated_sample_name_errors(case: TomteCase) -> list[RepeatedSampleNameError]:
-    sample_names = get_repeated_sample_names(case)
-    return [RepeatedSampleNameError(sample_name=name, case_name=case.name) for name in sample_names]
+def get_repeated_sample_name_errors(order: TomteOrder) -> list[RepeatedSampleNameError]:
+    sample_names = get_repeated_sample_names(order)
+    return [RepeatedSampleNameError(sample_name=name) for name in sample_names]

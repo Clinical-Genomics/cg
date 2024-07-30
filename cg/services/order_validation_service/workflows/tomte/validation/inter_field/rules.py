@@ -24,8 +24,4 @@ def validate_no_repeated_case_names(order: TomteOrder) -> list[RepeatedCaseNameE
 
 
 def validate_no_repeated_sample_names(order: TomteOrder) -> list[RepeatedSampleNameError]:
-    errors: list[RepeatedSampleNameError] = []
-    for case in order.cases:
-        case_errors = get_repeated_sample_name_errors(case)
-        errors.extend(case_errors)
-    return errors
+    return get_repeated_sample_name_errors(order)

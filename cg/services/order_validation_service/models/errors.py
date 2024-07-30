@@ -60,6 +60,6 @@ class RepeatedCaseNameError(CaseError):
     message: str = "Case name already used"
 
 
-class RepeatedSampleNameError(CaseSampleError):
+class RepeatedSampleNameError(SampleError):
     field: str = "name"
     message: str = "Sample name already used"
