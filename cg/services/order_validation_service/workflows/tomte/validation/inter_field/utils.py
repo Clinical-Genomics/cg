@@ -106,6 +106,8 @@ def get_father_case_errors(case: TomteCase) -> list[FatherNotInCaseError]:
         father: TomteSample | None = case.get_sample(child.father)
         if not father:
             error = create_father_case_error(case=case, sample=child)
+            errors.append(error)
+    return errors
 
 
 def get_mother_sex_errors(case: TomteCase) -> list[InvalidMotherSexError]:
