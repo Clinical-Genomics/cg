@@ -275,10 +275,9 @@ class Analysis(Base):
     cleaned_at: Mapped[datetime | None]
     # primary analysis is the one originally delivered to the customer
     is_primary: Mapped[bool | None] = mapped_column(default=False)
-
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    comment: Mapped[Text | None]
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
@@ -1097,6 +1096,7 @@ class PacBioSequencingRun(InstrumentRun):
     well: Mapped[Str32]
     plate: Mapped[int]
     movie_time_hours: Mapped[int]
+    movie_name: Mapped[Str32]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1105,6 +1105,7 @@ class PacBioSequencingRun(InstrumentRun):
     p0_percent: Mapped[Num_6_2]
     p1_percent: Mapped[Num_6_2]
     p2_percent: Mapped[Num_6_2]
+    productive_zmws: Mapped[BigInt]
     polymerase_mean_read_length: Mapped[BigInt]
     polymerase_read_length_n50: Mapped[BigInt]
     polymerase_mean_longest_subread: Mapped[BigInt]
@@ -1113,6 +1114,9 @@ class PacBioSequencingRun(InstrumentRun):
     control_mean_read_length: Mapped[BigInt]
     control_mean_read_concordance: Mapped[Num_6_2]
     control_mode_read_concordance: Mapped[Num_6_2]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1148,3 +1152,21 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     yield_q30: Mapped[Num_6_2 | None]
     created_at: Mapped[datetime | None]
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class PacBioSampleSequencingMetrics(SampleRunMetrics):
+    """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
+
+    __tablename__ = "pacbio_sample_sequencing_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    hifi_reads: Mapped[BigInt]
+    hifi_yield: Mapped[BigInt]
+    hifi_mean_read_length: Mapped[BigInt]
+    hifi_median_read_quality: Mapped[Str32]
+    percent_reads_passing_q30: Mapped[Num_6_2]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
