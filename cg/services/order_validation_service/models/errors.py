@@ -59,6 +59,7 @@ class ApplicationNotValidError(SampleError):
     field: str = "application"
     message: str = "Application is not valid"
 
+
 class RepeatedCaseNameError(CaseError):
     field: str = "name"
     message: str = "Case name already used"
