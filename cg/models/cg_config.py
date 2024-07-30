@@ -30,6 +30,23 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
     FastqConcatenationService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+    PacBioStoreService,
+)
+from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+    PacBioDataTransferService,
+)
+from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+    PacBioHousekeeperService,
+)
+from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_generator import (
+    PacBioRunDataGenerator,
+)
+from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -326,6 +343,13 @@ class RunInstruments(BaseModel):
     illumina: IlluminaConfig
 
 
+class PostProcessingServices(BaseModel):
+    pacbio: PacBioPostProcessingService
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -382,6 +406,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None
+    post_processing_services_: PostProcessingServices | None = None
     pigz: CommonAppConfig | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
@@ -425,6 +450,7 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "pdc_service_": "pdc_service",
+            "post_processing_services_": "post_processing_services",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -562,6 +588,38 @@ class CGConfig(BaseModel):
             api = MutaccAutoAPI(config=self.dict())
             self.mutacc_auto_api_ = api
         return api
+
+    @property
+    def post_processing_services(self) -> PostProcessingServices:
+        services = self.__dict__.get("post_processing_services_")
+        if services is None:
+            LOG.debug("Instantiating post-processing services")
+            services = PostProcessingServices(
+                pacbio=self.get_pacbio_post_processing_service,
+            )
+            self.post_processing_services_ = services
+        return services
+
+    def get_pacbio_post_processing_service(self) -> PacBioPostProcessingService:
+        LOG.debug("Instantiating PacBio post-processing service")
+        run_data_generator = PacBioRunDataGenerator()
+        file_manager = PacBioRunFileManager()
+        metrics_parser = PacBioMetricsParser(file_manager=file_manager)
+        transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
+        store_service = PacBioStoreService(
+            store=self.status_db, data_transfer_service=transfer_service
+        )
+        hk_service = PacBioHousekeeperService(
+            hk_api=self.housekeeper_api,
+            file_manager=file_manager,
+            metrics_parser=metrics_parser,
+        )
+        return PacBioPostProcessingService(
+            run_data_generator=run_data_generator,
+            hk_service=hk_service,
+            store_service=store_service,
+            sequencing_dir=self.run_instruments.pacbio.data_dir,
+        )
 
     @property
     def pdc_service(self) -> PdcService:
