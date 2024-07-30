@@ -15,7 +15,7 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 def create_sample(id: int) -> TomteSample:
     return TomteSample(
         name=f"name{id}",
-        application="WGSPCFC030",
+        application="RNAPOAR100",
         container=ContainerEnum.plate,
         require_qc_ok=True,
         reference_genome=GenomeVersion.hg19,
@@ -42,7 +42,7 @@ def create_order(cases: list[TomteCase]) -> TomteOrder:
         delivery_type=TomteDeliveryType.FASTQ,
         name="order_name",
         ticket_number="#12345",
-        workflow=Workflow.BALSAMIC,
+        workflow=Workflow.TOMTE,
         user_id=1,
         customer="customer",
         cases=cases,
@@ -61,6 +61,13 @@ def case_with_samples_in_same_well() -> TomteCase:
     sample_1: TomteSample = create_sample(1)
     sample_2: TomteSample = create_sample(1)
     return create_case([sample_1, sample_2])
+
+
+@pytest.fixture
+def sample_with_non_compatible_application() -> TomteSample:
+    sample: TomteSample = create_sample(1)
+    sample.application = "WGSPCFC030"
+    return sample
 
 
 @pytest.fixture

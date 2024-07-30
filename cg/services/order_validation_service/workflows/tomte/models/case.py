@@ -22,3 +22,10 @@ class TomteCase(Case):
             if sample.father:
                 samples.append(sample)
         return samples
+
+    def get_samples_with_mother(self) -> list[TomteSample]:
+        samples = []
+        for sample in self.samples:
+            if sample.mother:
+                samples.append(sample)
+        return samples

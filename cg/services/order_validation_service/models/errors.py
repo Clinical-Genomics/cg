@@ -57,7 +57,12 @@ class OccupiedWellError(CaseSampleError):
 
 class ApplicationNotValidError(CaseSampleError):
     field: str = "application"
-    message: str = "Application is not valid"
+    message: str = "Chosen application does not exist"
+
+
+class ApplicationNotCompatibleError(CaseSampleError):
+    field: str = "application"
+    message: str = "Application is not allowed for the chosen workflow"
 
 
 class RepeatedCaseNameError(CaseError):
@@ -78,3 +83,8 @@ class InvalidFatherSexError(CaseSampleError):
 class InvalidFatherCaseError(CaseSampleError):
     field: str = "father"
     message: str = "Father must be in the same case"
+
+
+class InvalidMotherSexError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Mother must be female"
