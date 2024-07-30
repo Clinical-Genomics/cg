@@ -346,6 +346,9 @@ class RunInstruments(BaseModel):
 class PostProcessingServices(BaseModel):
     pacbio: PacBioPostProcessingService
 
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
@@ -447,6 +450,7 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "pdc_service_": "pdc_service",
+            "post_processing_services_": "post_processing_services",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
