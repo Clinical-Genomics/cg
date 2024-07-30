@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(name="post-process", context_settings=CLICK_CONTEXT_SETTINGS)
 def post_process_group():
-    """Add sequencing data to the databases."""
+    """Post-processes sequencing runs from the following run instruments: PacBio."""
 
 
 @post_process_group.command(name="run")
