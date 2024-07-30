@@ -68,3 +68,8 @@ class RepeatedCaseNameError(CaseError):
 class RepeatedSampleNameError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already used"
+
+
+class InvalidFatherSexError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Father must be male"

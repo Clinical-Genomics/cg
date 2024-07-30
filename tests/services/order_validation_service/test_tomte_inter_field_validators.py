@@ -1,10 +1,12 @@
 from cg.services.order_validation_service.models.errors import (
+    InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+    validate_fathers_are_male,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
     validate_wells_contain_at_most_one_sample,
@@ -60,3 +62,26 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: TomteOr
 
     # THEN the errors are about the case names
     assert isinstance(errors[0], RepeatedCaseNameError)
+
+
+def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
+    # GIVEN an order with an incorrectly specified father
+
+    # WHEN validating the order
+    errors = validate_fathers_are_male(order_with_invalid_father_sex)
+
+    # THEN errors are returned
+    assert errors
+
+    # THEN the errors are about the father sex
+    assert isinstance(errors[0], InvalidFatherSexError)
+
+
+def test_no_father_sex_error_when_no_father_present(valid_order: TomteOrder):
+    # GIVEN a valid order
+
+    # WHEN validating the order
+    errors = validate_fathers_are_male(valid_order)
+
+    # THEN no errors are returned
+    assert not errors

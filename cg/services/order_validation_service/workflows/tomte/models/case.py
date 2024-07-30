@@ -10,3 +10,15 @@ class TomteCase(Case):
     panels: list[GenePanelMasterList]
     synopsis: str | None = None
     samples: list[TomteSample]
+
+    def get_sample(self, sample_name: str) -> TomteSample | None:
+        for sample in self.samples:
+            if sample.name == sample_name:
+                return sample
+
+    def get_samples_with_father(self) -> list[TomteSample]:
+        samples = []
+        for sample in self.samples:
+            if sample.father:
+                samples.append(sample)
+        return samples
