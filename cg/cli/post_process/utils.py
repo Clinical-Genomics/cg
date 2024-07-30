@@ -13,7 +13,7 @@ def get_post_processing_service_from_run_name(
         NameError if the run name is not recognized.
     """
     if _is_run_pacbio(run_name):
-        return context.pacbio_post_processing_service
+        return context.post_processing_services.pacbio
     raise NameError(f"Could not find a post-processing service for run name: {run_name}")
 
 
