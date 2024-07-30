@@ -4,6 +4,7 @@ from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    SampleIsOwnFatherError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -11,6 +12,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_fathers_in_same_case_as_children,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_sample_is_not_own_father,
     validate_wells_contain_at_most_one_sample,
 )
 
@@ -90,7 +92,6 @@ def test_no_father_sex_error_when_no_father_present(valid_order: TomteOrder):
 
 
 def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
-
     # GIVEN an order with the father sample in the wrong case
 
     # WHEN validating the order
@@ -101,3 +102,18 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
 
     # THEN the error is about the father being in the wrong case
     assert isinstance(errors[0], FatherNotInCaseError)
+
+
+def test_sample_cannot_be_its_own_parent(valid_order: TomteOrder):
+    # GIVEN an order with a sample marked as its own parent
+    sample = valid_order.cases[0].samples[0]
+    sample.father = sample.name
+
+    # WHEN validating the order
+    errors = validate_sample_is_not_own_father(valid_order)
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample being its own father
+    assert isinstance(errors[0], SampleIsOwnFatherError)
