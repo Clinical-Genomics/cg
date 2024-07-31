@@ -1,12 +1,13 @@
 """Module to test the PacBioStoreService."""
 
+from unittest import mock
+
 from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacBioSMRTCell, PacBioSequencingRun, PacBioSampleSequencingMetrics
-from unittest import mock
+from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
 
 
 def test_store_post_processing_data(
