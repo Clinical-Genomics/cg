@@ -98,3 +98,18 @@ class PedigreeError(CaseSampleError):
 class SampleIsOwnFatherError(PedigreeError):
     field: str = "father"
     message: str = "Sample cannot be its own father"
+
+
+class SampleIsOwnMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Sample cannot be its own mother"
+
+
+class OffspringAsMother(PedigreeError):
+    field: str = "mother"
+    message: str = "Offspring sample cannot be mother"
+
+
+class OffspringAsFather(PedigreeError):
+    field: str = "father"
+    message: str = "Offspring sample cannot be father"
