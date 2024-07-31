@@ -31,4 +31,4 @@ class PacBioPostProcessingService(PostProcessingService):
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
-        self.hk_service.store_files_in_housekeeper(run_data=run_data)
+        self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)

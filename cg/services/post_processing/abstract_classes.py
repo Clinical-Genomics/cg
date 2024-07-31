@@ -56,7 +56,7 @@ class PostProcessingHKService(ABC):
     """Abstract class that manages storing of files for an instrument run."""
 
     @abstractmethod
-    def store_files_in_housekeeper(self, run_data: RunData):
+    def store_files_in_housekeeper(self, run_data: RunData, dry_run: bool = False):
         pass
 
 
