@@ -96,7 +96,7 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 @DRY_RUN
 @FORCE
 @click.pass_obj
-def store(context: CGConfig, case_id: str, comment: str, dry_run: bool, force: bool):
+def store(context: CGConfig, case_id: str, comment: str | None, dry_run: bool, force: bool):
     """Store finished analysis files in Housekeeper."""
     validate_force_store_option(force=force, comment=comment)
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -109,7 +109,9 @@ def store(context: CGConfig, case_id: str, comment: str, dry_run: bool, force: b
         return
     try:
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.upload_bundle_statusdb(
+            case_id=case_id, comment=comment, dry_run=dry_run, force=force
+        )
         analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except Exception as exception_object:
         housekeeper_api.rollback()

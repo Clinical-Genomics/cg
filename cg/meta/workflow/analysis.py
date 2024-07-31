@@ -242,7 +242,7 @@ class AnalysisAPI(MetaAPI):
         )
 
     def upload_bundle_statusdb(
-        self, case_id: str, dry_run: bool = False, force: bool = False
+        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
     ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
@@ -255,6 +255,7 @@ class AnalysisAPI(MetaAPI):
             completed_at=datetime.now() if not force else None,
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
+            comment=comment,
         )
         new_analysis.case = case_obj
         if dry_run:

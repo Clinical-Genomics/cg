@@ -286,7 +286,9 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool, force: boo
 @DRY_RUN
 @FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, comment: str, dry_run: bool, force: bool) -> None:
+def store(
+    context: click.Context, case_id: str, comment: str | None, dry_run: bool, force: bool
+) -> None:
     """
     Store deliverable files in Housekeeper after meeting QC metrics criteria.
 
@@ -297,7 +299,7 @@ def store(context: click.Context, case_id: str, comment: str, dry_run: bool, for
     validate_force_store_option(force=force, comment=comment)
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.store(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.store(case_id=case_id, comment=comment, dry_run=dry_run, force=force)
     except Exception as error:
         LOG.error(repr(error))
         raise click.Abort()
