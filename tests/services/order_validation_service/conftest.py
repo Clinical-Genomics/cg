@@ -20,7 +20,7 @@ def create_sample(id: int) -> TomteSample:
         application="RNAPOAR100",
         container=ContainerEnum.plate,
         require_qc_ok=True,
-        reference_genome=GenomeVersion.hg19,
+        reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
         source="source",
         status=StatusEnum.affected,
