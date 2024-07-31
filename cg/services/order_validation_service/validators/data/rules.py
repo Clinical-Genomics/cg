@@ -1,11 +1,13 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    CaseError,
     CaseSampleError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
     InvalidGenePanelsError,
     OrderError,
+    RepeatedGenePanelsError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -70,6 +72,15 @@ def validate_application_not_archived(
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
+    return errors
+
+
+def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
+    errors: list[CaseError] = []
+    for case in order.cases:
+        if not list(set(case.panels)) == case.panels:
+            error = RepeatedGenePanelsError(case_name=case.name)
+            errors.append(error)
     return errors
 
 

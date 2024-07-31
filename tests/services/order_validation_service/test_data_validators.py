@@ -2,11 +2,13 @@ from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
     InvalidGenePanelsError,
+    RepeatedGenePanelsError,
 )
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
     validate_application_not_archived,
     validate_gene_panels_exist,
+    validate_gene_panels_unique,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Application
@@ -60,3 +62,19 @@ def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
 
     # THEN the error should concern invalid gene panels
     assert isinstance(errors[0], InvalidGenePanelsError)
+
+
+def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store):
+
+    # GIVEN an order with repeated gene panels specified
+    panel = store_with_panels.get_panels()[0].abbrev
+    valid_order.cases[0].panels = [panel, panel]
+
+    # WHEN validating that the gene panels are unique
+    errors = validate_gene_panels_unique(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern repeated gene panels
+    assert isinstance(errors[0], RepeatedGenePanelsError)
