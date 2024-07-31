@@ -110,11 +110,11 @@ def pac_bio_report_files_to_parse(
 ) -> list[Path]:
     """Return the list of PacBio report files to parse."""
     return [
-        pac_bio_ccs_report_file,
         pac_bio_control_report_file,
         pac_bio_loading_report_file,
         pac_bio_raw_data_report_file,
         pac_bio_smrtlink_datasets_report_file,
+        pac_bio_ccs_report_file,
     ]
 
 
