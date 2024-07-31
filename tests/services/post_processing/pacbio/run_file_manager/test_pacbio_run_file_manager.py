@@ -50,7 +50,7 @@ def test_get_files_to_store(
 def test_get_files_to_store_error(
     expected_pac_bio_run_data: PacBioRunData,
 ):
-    """Test that the files to be stored are returned"""
+    """Test that the files to be stored are returned."""
 
     # GIVEN a run data object
 
@@ -71,7 +71,7 @@ def test_get_files_to_store_error(
 def test_get_files_to_parse_error(
     expected_pac_bio_run_data: PacBioRunData,
 ):
-    """Test that the files to be stored are returned"""
+    """Test that the files to be stored are returned."""
 
     # GIVEN a run data object
 
