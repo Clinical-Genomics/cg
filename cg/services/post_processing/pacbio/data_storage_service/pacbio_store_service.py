@@ -1,4 +1,9 @@
 from cg.services.post_processing.abstract_classes import PostProcessingStoreService
+from cg.services.post_processing.error_handler import handle_post_processing_errors
+from cg.services.post_processing.exc import (
+    PostProcessingDataTransferError,
+    PostProcessingStoreDataError,
+)
 from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
@@ -38,6 +43,10 @@ class PacBioStoreService(PostProcessingStoreService):
                 sample_run_metrics_dto=sample_run_metric, sequencing_run=sequencing_run
             )
 
+    @handle_post_processing_errors(
+        to_except=(PostProcessingDataTransferError, ValueError),
+        to_raise=PostProcessingStoreDataError,
+    )
     def store_post_processing_data(self, run_data: PacBioRunData):
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacBioSMRTCell = self._create_run_device(dtos.run_device)

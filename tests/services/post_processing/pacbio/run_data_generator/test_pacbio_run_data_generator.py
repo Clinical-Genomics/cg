@@ -2,6 +2,9 @@
 
 from pathlib import Path
 
+import pytest
+
+from cg.services.post_processing.exc import PostProcessingRunDataGeneratorError
 from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
@@ -25,3 +28,20 @@ def test_get_run_data(
 
     # THEN the correct run data are returned
     assert run_data == expected_pac_bio_run_data
+
+
+@pytest.mark.parametrize("run_name", ["rimproper_name", "d_improper_name "])
+def test_get_run_data_improper_name(
+    pac_bio_runs_dir: Path,
+    run_name: str,
+):
+    # GIVEN a PacBioRunDataGenerator and an improper run name
+    run_data_generator = PacBioRunDataGenerator()
+
+    # WHEN Generating run data
+
+    # THEN an PostProcessingRunDataGeneratorError is raised
+    with pytest.raises(PostProcessingRunDataGeneratorError):
+        run_data_generator.get_run_data(
+            run_name=run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
+        )
