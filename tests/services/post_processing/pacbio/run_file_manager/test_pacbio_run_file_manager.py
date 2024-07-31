@@ -28,7 +28,7 @@ def test_get_files_to_parse(
 def test_get_files_to_store(
     expected_pac_bio_run_data: PacBioRunData,
     pac_bio_report_files_to_parse: list[Path],
-    pac_bio_hifi_files: list[Path],
+    pac_bio_hifi_read_file: Path,
 ):
     # GIVEN a run data object
 
@@ -39,7 +39,7 @@ def test_get_files_to_store(
     files: list[Path] = file_manager.get_files_to_store(expected_pac_bio_run_data)
 
     # THEN the correct files are returned
-    full_list: list[Path] = pac_bio_report_files_to_parse + pac_bio_hifi_files
+    full_list: list[Path] = pac_bio_report_files_to_parse + [pac_bio_hifi_read_file]
     assert set(files) == set(full_list)
 
 
@@ -71,7 +71,7 @@ def test_get_files_to_parse_error(
     file_manager = PacBioRunFileManager()
     with mock.patch.object(
         file_manager,
-        attribute="_find_ccs_report_file",
+        attribute="_get_ccs_report_file",
         side_effect=FileNotFoundError,
     ):
         # WHEN getting the files to store

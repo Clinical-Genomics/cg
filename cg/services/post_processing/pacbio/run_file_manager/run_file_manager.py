@@ -20,8 +20,8 @@ class PacBioRunFileManager(RunFileManager):
     def get_files_to_parse(self, run_data: PacBioRunData) -> list[Path]:
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
-        files_to_parse: list[Path] = [self._find_ccs_report_file(run_path)]
-        files_to_parse.extend(self._get_report_files(run_path))
+        files_to_parse: list[Path] = self._get_report_files(run_path)
+        files_to_parse.append(self._get_ccs_report_file(run_path))
         return files_to_parse
 
     @handle_post_processing_errors(
@@ -30,12 +30,12 @@ class PacBioRunFileManager(RunFileManager):
     def get_files_to_store(self, run_data: PacBioRunData) -> list[Path]:
         """Get the files to store for the PostProcessingHKService."""
         run_path: Path = run_data.full_path
-        files_to_store: list[Path] = self._find_hifi_files(run_path)
-        files_to_store.extend(self.get_files_to_parse(run_data))
+        files_to_store: list[Path] = self.get_files_to_parse(run_data)
+        files_to_store.append(self._get_hifi_read_file(run_path))
         return files_to_store
 
     @staticmethod
-    def _find_ccs_report_file(run_path: Path) -> Path:
+    def _get_ccs_report_file(run_path: Path) -> Path:
         """Return the path to the CCS report file."""
         statistics_dir: Path = Path(run_path, PacBioDirsAndFiles.STATISTICS_DIR)
         files: list[Path] = get_files_matching_pattern(
@@ -61,15 +61,11 @@ class PacBioRunFileManager(RunFileManager):
         return report_files
 
     @staticmethod
-    def _find_hifi_files(run_path: Path) -> list[Path]:
-        """Return the paths to the HiFi read files."""
+    def _get_hifi_read_file(run_path: Path) -> Path:
+        """Return the path to the HiFi read file."""
         hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS)
-        bam_files: list[Path] = get_files_matching_pattern(
-            directory=hifi_dir, pattern=f"*{FileExtensions.BAM}*"
-        )
-        if len(bam_files) != 2:
-            raise FileNotFoundError(
-                f"Expected 2 HiFi read files in {hifi_dir}, found {len(bam_files)}"
-            )
-        validate_files_exist(bam_files)
-        return bam_files
+        bam_file: Path = get_files_matching_pattern(
+            directory=hifi_dir, pattern=f"*{FileExtensions.BAM}"
+        )[0]
+        validate_files_exist([bam_file])
+        return bam_file
