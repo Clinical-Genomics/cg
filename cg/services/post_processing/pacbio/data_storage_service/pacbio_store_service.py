@@ -41,7 +41,7 @@ class PacBioStoreService(PostProcessingStoreService):
         self,
         sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
         sequencing_run: PacBioSequencingRun,
-    ):
+    ) -> None:
         for sample_run_metric in sample_run_metrics_dtos:
             self.store.create_pac_bio_sample_sequencing_run(
                 sample_run_metrics_dto=sample_run_metric, sequencing_run=sequencing_run
@@ -51,7 +51,7 @@ class PacBioStoreService(PostProcessingStoreService):
         to_except=(PostProcessingDataTransferError, ValueError),
         to_raise=PostProcessingStoreDataError,
     )
-    def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False):
+    def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacBioSMRTCell = self._create_run_device(dtos.run_device)
         sequencing_run: PacBioSequencingRun = self._create_instrument_run(
@@ -65,5 +65,5 @@ class PacBioStoreService(PostProcessingStoreService):
             LOG.info(
                 f"Dry run, no entries will be added to database for SMRT cell {run_data.full_path}."
             )
-        else:
-            self.store.commit_to_store()
+            return
+        self.store.commit_to_store()

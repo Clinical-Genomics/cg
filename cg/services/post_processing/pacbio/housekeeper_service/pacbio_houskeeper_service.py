@@ -40,7 +40,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         to_except=(PostProcessingRunFileManagerError, PostProcessingParsingError),
         to_raise=PostProcessingStoreFileError,
     )
-    def store_files_in_housekeeper(self, run_data: PacBioRunData, dry_run: bool = False):
+    def store_files_in_housekeeper(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(run_data)
         file_to_store: list[Path] = self.file_manager.get_files_to_store(run_data)
         for file_path in file_to_store:
