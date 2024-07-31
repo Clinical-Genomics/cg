@@ -1,10 +1,10 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    CaseSampleError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
     OrderError,
-    SampleError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -50,8 +50,8 @@ def validate_customer_exists(order: Order, store: Store, **kwargs) -> list[Order
     return errors
 
 
-def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> list[SampleError]:
-    errors: list[SampleError] = []
+def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> list[CaseSampleError]:
+    errors: list[CaseSampleError] = []
     for case in order.cases:
         for sample in case.samples:
             if not store.get_application_by_tag(sample.application):
@@ -62,8 +62,8 @@ def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> li
 
 def validate_application_not_archived(
     order: TomteOrder, store: Store, **kwargs
-) -> list[SampleError]:
-    errors: list[SampleError] = []
+) -> list[CaseSampleError]:
+    errors: list[CaseSampleError] = []
     for case in order.cases:
         for sample in case.samples:
             if is_application_archived(application_tag=sample.application, store=store):
