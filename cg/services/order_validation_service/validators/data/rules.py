@@ -8,9 +8,6 @@ from cg.services.order_validation_service.models.errors import (
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.validators.data.utils import (
-    is_application_archived,
-)
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
@@ -66,7 +63,7 @@ def validate_application_not_archived(
     errors: list[CaseSampleError] = []
     for case in order.cases:
         for sample in case.samples:
-            if is_application_archived(application_tag=sample.application, store=store):
+            if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors
