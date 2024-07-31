@@ -10,15 +10,15 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import T
 class Node:
     def __init__(self, sample: TomteSample):
         self.sample = sample
-        self.father = None
-        self.mother = None
+        self.father: Node | None = None
+        self.mother: Node | None = None
         self.visited = False
         self.in_stack = False
 
 
 class Pedigree:
     def __init__(self, case: TomteCase):
-        self.pedigree = {}
+        self.pedigree: dict[str, Node] = {}
         self.case = case
         self._add_nodes()
         self._add_parents()
