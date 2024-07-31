@@ -4,7 +4,7 @@ from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
-    SampleIsOwnFatherError,
+    SampleIsOwnParentError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -117,4 +117,4 @@ def test_invalid_pedigree_self_as_parent(valid_order: TomteOrder):
     assert errors
 
     # THEN the error is about the sample having itself as a parent
-    assert isinstance(errors[0], SampleIsOwnFatherError)
+    assert isinstance(errors[0], SampleIsOwnParentError)

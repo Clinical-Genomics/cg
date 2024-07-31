@@ -91,25 +91,12 @@ class InvalidMotherSexError(CaseSampleError):
 
 
 class PedigreeError(CaseSampleError):
-    field: str = ""
     message: str = "Invalid pedigree relationship"
 
 
-class SampleIsOwnFatherError(PedigreeError):
-    field: str = "father"
-    message: str = "Sample cannot be its own father"
+class SampleIsOwnParentError(PedigreeError):
+    message: str = "Sample cannot be its own parent"
 
 
-class SampleIsOwnMotherError(PedigreeError):
-    field: str = "mother"
-    message: str = "Sample cannot be its own mother"
-
-
-class OffspringAsMother(PedigreeError):
-    field: str = "mother"
-    message: str = "Offspring sample cannot be mother"
-
-
-class OffspringAsFather(PedigreeError):
-    field: str = "father"
-    message: str = "Offspring sample cannot be father"
+class SampleHasOffspringAsParent(PedigreeError):
+    message: str = "Offspring sample cannot be parent"
