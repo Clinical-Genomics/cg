@@ -50,12 +50,6 @@ class PacBioHousekeeperService(PostProcessingHKService):
     def _get_tags_for_file(file_path: Path) -> list[str]:
         return get_item_by_pattern_in_source(source=file_path.name, pattern_map=file_pattern_to_tag)
 
-    @staticmethod
-    def _add_tag_to_tags(tags: list[str], tag: str) -> list[str]:
-        new_tags: list[str] = tags
-        new_tags.append(tag)
-        return new_tags
-
     def _create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:
         tags: list[str] = self._get_tags_for_file(file_path)
         if self._is_file_type_smrt_cell(file_path):

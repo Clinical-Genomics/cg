@@ -26,7 +26,7 @@ def test_get_files_to_parse(
 def test_get_files_to_store(
     expected_pac_bio_run_data: PacBioRunData,
     pac_bio_report_files_to_parse: list[Path],
-    pac_bio_hifi_files: list[Path],
+    pac_bio_hifi_read_file: Path,
 ):
     """Test that the files to be stored are returned"""
 
@@ -39,5 +39,5 @@ def test_get_files_to_store(
     files: list[Path] = file_manager.get_files_to_store(expected_pac_bio_run_data)
 
     # THEN the correct files are returned
-    full_list: list[Path] = pac_bio_report_files_to_parse + pac_bio_hifi_files
+    full_list: list[Path] = pac_bio_report_files_to_parse + [pac_bio_hifi_read_file]
     assert set(files) == set(full_list)
