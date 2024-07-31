@@ -26,10 +26,12 @@ class PacBioPostProcessingService(PostProcessingService):
         run_data_generator: PacBioRunDataGenerator,
         hk_service: PacBioHousekeeperService,
         store_service: PacBioStoreService,
+        sequencing_dir: str,
     ):
         self.run_data_generator: PacBioRunDataGenerator = run_data_generator
         self.hk_service: PacBioHousekeeperService = hk_service
         self.store_service: PacBioStoreService = store_service
+        self.sequencing_dir: str = sequencing_dir
 
     @handle_post_processing_errors(
         to_except=(
@@ -39,9 +41,10 @@ class PacBioPostProcessingService(PostProcessingService):
         ),
         to_raise=PostProcessingError,
     )
-    def post_process(self, run_name: str, sequencing_dir: str):
+    def post_process(self, run_name: str):
+
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
-            run_name=run_name, sequencing_dir=sequencing_dir
+            run_name=run_name, sequencing_dir=self.sequencing_dir
         )
         self.store_service.store_post_processing_data(run_data=run_data)
         self.hk_service.store_files_in_housekeeper(run_data=run_data)
