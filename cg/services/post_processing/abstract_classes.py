@@ -11,7 +11,8 @@ class RunDataGenerator(ABC):
 
     @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
-        raise NotImplementedError
+        """Get the run data for a sequencing run."""
+        pass
 
 
 class RunFileManager(ABC):
@@ -20,12 +21,12 @@ class RunFileManager(ABC):
     @abstractmethod
     def get_files_to_parse(self, run_data: RunData) -> list[Path]:
         """Get the files required for the PostProcessingMetricsService."""
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def get_files_to_store(self, run_data: RunData) -> list[Path]:
         """Get the files to store for the PostProcessingHKService."""
-        raise NotImplementedError
+        pass
 
 
 class PostProcessingMetricsParser(ABC):
@@ -33,7 +34,8 @@ class PostProcessingMetricsParser(ABC):
 
     @abstractmethod
     def parse_metrics(self, run_data: RunData) -> RunMetrics:
-        raise NotImplementedError
+        """Parse the metrics from the files."""
+        pass
 
 
 class PostProcessingDataTransferService(ABC):
@@ -41,7 +43,8 @@ class PostProcessingDataTransferService(ABC):
 
     @abstractmethod
     def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
-        raise NotImplementedError
+        """Get the data transfer objects for the PostProcessingStoreService."""
+        pass
 
 
 class PostProcessingStoreService(ABC):
@@ -49,7 +52,8 @@ class PostProcessingStoreService(ABC):
 
     @abstractmethod
     def store_post_processing_data(self, run_data: RunData):
-        raise NotImplementedError
+        """Store the data transfer objects in the database."""
+        pass
 
 
 class PostProcessingHKService(ABC):
@@ -57,7 +61,8 @@ class PostProcessingHKService(ABC):
 
     @abstractmethod
     def store_files_in_housekeeper(self, run_data: RunData):
-        raise NotImplementedError
+        """Store the files in housekeeper."""
+        pass
 
 
 class PostProcessingService(ABC):
@@ -66,4 +71,4 @@ class PostProcessingService(ABC):
     @abstractmethod
     def post_process(self, run_name: str):
         """Store sequencing metrics in statusdb and relevant files in housekeeper"""
-        raise NotImplementedError
+        pass

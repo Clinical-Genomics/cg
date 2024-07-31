@@ -1,5 +1,5 @@
 from cg.services.post_processing.abstract_classes import PostProcessingStoreService
-from cg.services.post_processing.error_handlers import handle_post_processing_errors
+from cg.services.post_processing.error_handler import handle_post_processing_errors
 from cg.services.post_processing.exc import (
     PostProcessingDataTransferError,
     PostProcessingStoreDataError,

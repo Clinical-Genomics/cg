@@ -3,7 +3,7 @@ from pathlib import Path
 from cg.constants import FileExtensions
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import RunFileManager
-from cg.services.post_processing.error_handlers import (
+from cg.services.post_processing.error_handler import (
     handle_post_processing_errors,
 )
 from cg.services.post_processing.exc import PostProcessingRunFileManagerError

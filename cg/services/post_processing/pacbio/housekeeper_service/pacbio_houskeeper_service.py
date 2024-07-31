@@ -5,7 +5,7 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.pacbio import PacBioBundleTypes, file_pattern_to_bundle_type, file_pattern_to_tag
 from cg.services.post_processing.abstract_classes import PostProcessingHKService
-from cg.services.post_processing.error_handlers import handle_post_processing_errors
+from cg.services.post_processing.error_handler import handle_post_processing_errors
 from cg.services.post_processing.exc import (
     PostProcessingParsingError,
     PostProcessingRunFileManagerError,
