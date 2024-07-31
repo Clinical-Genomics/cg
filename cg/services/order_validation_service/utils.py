@@ -3,6 +3,7 @@ from typing import Callable
 from pydantic import ValidationError
 
 from cg.services.order_validation_service.models.errors import (
+    CaseError,
     CaseSampleError,
     OrderError,
     ValidationErrors,
@@ -15,6 +16,14 @@ def apply_order_validation(rules: list[Callable], order: Order, store: Store) ->
     errors: list[OrderError] = []
     for rule in rules:
         rule_errors: list[OrderError] = rule(order=order, store=store)
+        errors.extend(rule_errors)
+    return errors
+
+
+def apply_case_validation(rules: list[Callable], order: Order, store: Store) -> list[CaseError]:
+    errors: list[CaseError] = []
+    for rule in rules:
+        rule_errors: list[CaseError] = rule(order=order, store=store)
         errors.extend(rule_errors)
     return errors
 
