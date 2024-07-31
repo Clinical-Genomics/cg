@@ -35,16 +35,16 @@ def test__get_samples_quality_results(
     mutant_quality_controller: MutantQualityController,
     mutant_quality_metrics_qc_pass: QualityMetrics,
 ):
-    # GIVEN
+    # GIVEN a quality metrics objrect from a case where all samples pass QC
 
-    # WHEN
+    # WHEN performing quality control on all the samples
     samples_quality_results: SamplesQualityResults = (
         mutant_quality_controller._get_samples_quality_results(
             quality_metrics=mutant_quality_metrics_qc_pass
         )
     )
 
-    # THEN
+    # THEN no error is raised and the correct quality results are generated
     assert samples_quality_results.internal_negative_control.passes_qc is True
     assert samples_quality_results.external_negative_control.passes_qc is True
     assert len(samples_quality_results.samples) == 1
@@ -74,20 +74,61 @@ def test_get_quality_control_result_case_qc_pass(
     mutant_analysis_dir_case_qc_pass: Path,
     mutant_results_file_path_qc_pass: Path,
 ):
-    # GIVEN
+    # GIVEN a case that passes QC
 
-    # WHEN
+    # WHEN performing QC on the case
 
-    test__get_case_quality_result: QualityResult = (
-        mutant_quality_controller.get_quality_control_result(
-            case=mutant_case_qc_pass,
-            case_path=mutant_analysis_dir_case_qc_pass,
-            case_results_file_path=mutant_results_file_path_qc_pass,
-        )
+    case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
+        case=mutant_case_qc_pass,
+        case_path=mutant_analysis_dir_case_qc_pass,
+        case_results_file_path=mutant_results_file_path_qc_pass,
     )
 
-    # THEN
-    assert test__get_case_quality_result.passes_qc is True
+    # THEN the case passes qc
+    assert case_quality_result.passes_qc is True
+    assert case_quality_result.case_quality_result.external_negative_control_passes_qc is True
+    assert case_quality_result.case_quality_result.internal_negative_control_passes_qc is True
 
 
-# TODO: qc_fail external_fail internal_fail
+def test_get_quality_control_result_case_qc_fail(
+    mutant_quality_controller: MutantQualityController,
+    mutant_case_qc_fail: Case,
+    mutant_analysis_dir_case_qc_fail: Path,
+    mutant_results_file_path_qc_fail: Path,
+):
+    # GIVEN a case that passes QC
+
+    # WHEN performing QC on the case
+
+    case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
+        case=mutant_case_qc_fail,
+        case_path=mutant_analysis_dir_case_qc_fail,
+        case_results_file_path=mutant_results_file_path_qc_fail,
+    )
+
+    # THEN the case passes qc
+    assert case_quality_result.passes_qc is False
+    assert case_quality_result.case_quality_result.external_negative_control_passes_qc is True
+    assert case_quality_result.case_quality_result.internal_negative_control_passes_qc is True
+
+
+def test_get_quality_control_result_case_qc_fail_with_failing_controls(
+    mutant_quality_controller: MutantQualityController,
+    mutant_case_qc_fail_with_failing_controls: Case,
+    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
+    mutant_results_file_path_qc_fail_with_failing_controls: Path,
+):
+    # GIVEN a case that does not passe QC due to failing control samples
+
+    # WHEN performing QC on the case
+
+    case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
+        case=mutant_case_qc_fail_with_failing_controls,
+        case_path=mutant_analysis_dir_case_qc_fail_with_failing_controls,
+        case_results_file_path=mutant_results_file_path_qc_fail_with_failing_controls,
+    )
+
+    # THEN the case does not pass QC and the correct result is retrieved for the control samples
+    assert case_quality_result.passes_qc is False
+    assert case_quality_result.case_quality_result.external_negative_control_passes_qc is False
+    assert case_quality_result.case_quality_result.internal_negative_control_passes_qc is False

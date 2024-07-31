@@ -54,12 +54,10 @@ class MetricsParser:
     @classmethod
     def parse_samples_results(cls, case: Case, results_file_path: Path) -> dict[str, SampleResults]:
         """Takes a case object and a results_file_path and resturns dict[str, SampleResults] with sample.internal_id as keys."""
-        try:
-            raw_results: list[dict[str, Any]] = cls._get_raw_results(
-                results_file_path=results_file_path
-            )
-        except Exception as exception_object:
-            raise CgError from exception_object
+
+        raw_results: list[dict[str, Any]] = cls._get_raw_results(
+            results_file_path=results_file_path
+        )
 
         validated_results_list: list[SampleResults] = cls._get_validated_results_list(
             raw_results=raw_results
@@ -82,7 +80,9 @@ class MetricsParser:
         except FileNotFoundError as exception_object:
             raise CgError(f"Results file not found at {results_file_path}") from exception_object
         except Exception as exception_object:
-            raise CgError("Not possible to read results file.") from exception_object
+            raise CgError(
+                f"Not possible to read results file {results_file_path}."
+            ) from exception_object
         return raw_results
 
     @classmethod

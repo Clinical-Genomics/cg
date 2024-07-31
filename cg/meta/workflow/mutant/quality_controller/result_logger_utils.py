@@ -62,21 +62,21 @@ def get_case_fail_message(case_quality_result: CaseQualityResult) -> str:
 
 
 def samples_results_message(samples_quality_results: SamplesQualityResults) -> str:
-    internal_negative_control_message: str = (
-        "Internal negative control sample " + "passed QC. "
+    internal_negative_control_message: str = "Internal negative control sample " + (
+        "passed QC."
         if samples_quality_results.internal_negative_control.passes_qc
-        else "failed QC. "
+        else "failed QC."
     )
-    external_negative_control_message: str = (
-        "External negative control sample " + "passed QC. "
+    external_negative_control_message: str = "External negative control sample " + (
+        "passed QC."
         if samples_quality_results.external_negative_control.passes_qc
-        else "failed QC. "
+        else "failed QC."
     )
 
     samples_message: str = (
         f"Sample results: {samples_quality_results.total_samples_count} total, {samples_quality_results.failed_samples_count} failed, {samples_quality_results.passed_samples_count} passed."
     )
 
-    return "\n".join(
+    return " ".join(
         [internal_negative_control_message, external_negative_control_message, samples_message]
     )

@@ -101,12 +101,9 @@ def get_mutant_pool_samples(case: Case, status_db: Store, lims: LimsAPI) -> Muta
     if not external_negative_control:
         raise CgError(f"No external negative control sample found for case {case}.")
 
-    try:
-        internal_negative_control: Sample = get_internal_negative_control_sample_for_case(
-            case=case, status_db=status_db, lims=lims
-        )
-    except Exception as exception_object:
-        raise CgError from exception_object
+    internal_negative_control: Sample = get_internal_negative_control_sample_for_case(
+        case=case, status_db=status_db, lims=lims
+    )
 
     return MutantPoolSamples(
         samples=samples,

@@ -1,7 +1,6 @@
 from pathlib import Path
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
-from cg.exc import CgError
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
@@ -10,7 +9,6 @@ from cg.meta.workflow.mutant.quality_controller.models import (
     QualityResult,
     SamplesQualityResults,
 )
-
 from cg.meta.workflow.mutant.quality_controller.report_generator_utils import (
     get_report_path,
     get_summary,
@@ -38,15 +36,12 @@ class MutantQualityController:
         self, case: Case, case_path: Path, case_results_file_path: Path
     ) -> QualityResult:
         """Perform QC check on a case and generate the QC_report."""
-        try:
-            quality_metrics: QualityMetrics = get_quality_metrics(
-                case_results_file_path=case_results_file_path,
-                case=case,
-                status_db=self.status_db,
-                lims=self.lims,
-            )
-        except Exception as exception_object:
-            raise CgError from exception_object
+        quality_metrics: QualityMetrics = get_quality_metrics(
+            case_results_file_path=case_results_file_path,
+            case=case,
+            status_db=self.status_db,
+            lims=self.lims,
+        )
 
         samples_quality_results: SamplesQualityResults = self._get_samples_quality_results(
             quality_metrics=quality_metrics
@@ -84,7 +79,6 @@ class MutantQualityController:
     def _get_samples_quality_results(
         self, quality_metrics: QualityMetrics
     ) -> SamplesQualityResults:
-
         samples_quality_results: list[SampleQualityResults] = []
         for sample in quality_metrics.pool.samples:
             sample_results: SampleResults = quality_metrics.results[sample.internal_id]
@@ -175,6 +169,7 @@ class MutantQualityController:
             ),
             internal_negative_control_passes_qc=internal_negative_control_pass_qc,
             external_negative_control_passes_qc=external_negative_control_pass_qc,
+            samples_pass_qc=samples_pass_qc,
         )
         log_case_result(result)
         return result
