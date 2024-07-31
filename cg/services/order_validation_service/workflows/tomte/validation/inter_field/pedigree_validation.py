@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from cg.services.order_validation_service.models.errors import (
     PedigreeError,
     SampleHasOffspringAsParent,
@@ -9,10 +8,10 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import T
 
 
 class Node:
-    def __init__(self, sample: TomteSample, mother: TomteSample | None, father: TomteSample | None):
+    def __init__(self, sample: TomteSample):
         self.sample = sample
-        self.father = father
-        self.mother = mother
+        self.father = None
+        self.mother = None
         self.visited = False
         self.in_stack = False
 
@@ -21,15 +20,21 @@ class Pedigree:
     def __init__(self, case: TomteCase):
         self.pedigree = {}
         self.case = case
+        self._add_nodes()
+        self._add_parents()
 
-        for sample in case.samples:
-            self._add_node(sample)
+    def _add_nodes(self) -> None:
+        for sample in self.case.samples:
+            node = Node(sample=sample)
+            self.pedigree[sample.name] = node
 
-    def _add_node(self, sample: TomteSample) -> None:
-        mother = self.case.get_sample(sample.mother)
-        father = self.case.get_sample(sample.father)
-        node = Node(sample=sample, mother=mother, father=father)
-        self.pedigree[sample.name] = node
+    def _add_parents(self) -> None:
+        for node in self.pedigree.values():
+            sample: TomteSample = node.sample
+            if sample.mother:
+                node.mother = self.pedigree.get(sample.mother)
+            if sample.father:
+                node.father = self.pedigree.get(sample.father)
 
     def validate(self) -> list[PedigreeError]:
         errors = []
@@ -43,31 +48,25 @@ class Pedigree:
         node.in_stack = True
 
         for parent in [node.mother, node.father]:
-
-            if not parent:
+            if parent is None:
                 continue
 
-            parent_node: Node = self.pedigree.get(parent.name)
-            if parent_node:
-                if parent_node.in_stack:
-                    if parent_node == node:
-                        errors.append(
-                            SampleIsOwnParentError(
-                                field="error",
-                                sample_name=node.sample.name,
-                                case_name=self.case.name,
-                            )
-                        )
-                    else:
-                        errors.append(
-                            SampleHasOffspringAsParent(
-                                field="error",
-                                sample_name=node.sample.name,
-                                case_name=self.case.name,
-                            )
-                        )
-                elif not parent_node.visited:
-                    self._dfs(parent_node, errors)
+            if parent.in_stack:
+                if parent == node:
+                    error = SampleIsOwnParentError(
+                        field="error",
+                        sample_name=node.sample.name,
+                        case_name=self.case.name,
+                    )
+                else:
+                    error = SampleHasOffspringAsParent(
+                        field="error",
+                        sample_name=node.sample.name,
+                        case_name=self.case.name,
+                    )
+                errors.append(error)
+            elif not parent.visited:
+                self._dfs(parent, errors)
 
         node.in_stack = False
 
