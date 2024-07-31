@@ -10,6 +10,8 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 def create_sample(id: int) -> TomteSample:
@@ -68,6 +70,18 @@ def sample_with_non_compatible_application() -> TomteSample:
     sample: TomteSample = create_sample(1)
     sample.application = "WGSPCFC030"
     return sample
+
+
+@pytest.fixture
+def archived_application(base_store: Store) -> Application:
+    return base_store.add_application(
+        tag="archived_application",
+        prep_category="wts",
+        description="This is an archived_application",
+        percent_kth=100,
+        percent_reads_guaranteed=90,
+        is_archived=True,
+    )
 
 
 @pytest.fixture

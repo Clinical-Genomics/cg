@@ -55,6 +55,11 @@ class OccupiedWellError(CaseSampleError):
     message: str = "Well is already occupied"
 
 
+class ApplicationArchivedError(CaseSampleError):
+    field: str = "application"
+    message: str = "Chosen application is archived"
+
+
 class ApplicationNotValidError(CaseSampleError):
     field: str = "application"
     message: str = "Chosen application does not exist"

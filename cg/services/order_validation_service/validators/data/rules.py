@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.models.errors import (
+    ApplicationArchivedError,
     ApplicationNotValidError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
@@ -7,6 +8,10 @@ from cg.services.order_validation_service.models.errors import (
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.validators.data.utils import (
+    is_application_archived,
+)
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
 
@@ -45,11 +50,23 @@ def validate_customer_exists(order: Order, store: Store, **kwargs) -> list[Order
     return errors
 
 
-def validate_application_exists(order: Order, store: Store, **kwargs) -> list[SampleError]:
+def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> list[SampleError]:
     errors: list[SampleError] = []
     for case in order.cases:
         for sample in case.samples:
             if not store.get_application_by_tag(sample.application):
                 error = ApplicationNotValidError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+
+
+def validate_application_not_archived(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[SampleError]:
+    errors: list[SampleError] = []
+    for case in order.cases:
+        for sample in case.samples:
+            if is_application_archived(application_tag=sample.application, store=store):
+                error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors
