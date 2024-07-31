@@ -51,7 +51,7 @@ class PostProcessingStoreService(ABC):
     """Abstract class that manages storing data transfer objects in the database."""
 
     @abstractmethod
-    def store_post_processing_data(self, run_data: RunData):
+    def store_post_processing_data(self, run_data: RunData, dry_run: bool = False):
         """Store the data transfer objects in the database."""
         pass
 
@@ -60,7 +60,7 @@ class PostProcessingHKService(ABC):
     """Abstract class that manages storing of files for an instrument run."""
 
     @abstractmethod
-    def store_files_in_housekeeper(self, run_data: RunData):
+    def store_files_in_housekeeper(self, run_data: RunData, dry_run: bool = False):
         """Store the files in housekeeper."""
         pass
 
@@ -69,6 +69,6 @@ class PostProcessingService(ABC):
     """Abstract class that encapsulates the logic required for post-processing a sequencing run."""
 
     @abstractmethod
-    def post_process(self, run_name: str):
+    def post_process(self, run_name: str, dry_run: bool = False):
         """Store sequencing metrics in statusdb and relevant files in housekeeper"""
         pass

@@ -1,5 +1,6 @@
 """Module for the PacBioHousekeeperService used in the Post processing flow."""
 
+import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -20,6 +21,8 @@ from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import
 )
 from cg.utils.mapping import get_item_by_pattern_in_source
 
+LOG = logging.getLogger(__name__)
+
 
 class PacBioHousekeeperService(PostProcessingHKService):
 
@@ -37,13 +40,16 @@ class PacBioHousekeeperService(PostProcessingHKService):
         to_except=(PostProcessingRunFileManagerError, PostProcessingParsingError),
         to_raise=PostProcessingStoreFileError,
     )
-    def store_files_in_housekeeper(self, run_data: PacBioRunData):
+    def store_files_in_housekeeper(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(run_data)
         file_to_store: list[Path] = self.file_manager.get_files_to_store(run_data)
         for file_path in file_to_store:
             bundle_info: PacBioFileData = self._create_bundle_info(
                 file_path=file_path, parsed_metrics=parsed_metrics
             )
+            if dry_run:
+                LOG.debug(f"Dry run: would have added {bundle_info.file_path} to Housekeeper.")
+                continue
             self.hk_api.create_bundle_and_add_file_with_tags(
                 bundle_name=bundle_info.bundle_name,
                 file_path=bundle_info.file_path,

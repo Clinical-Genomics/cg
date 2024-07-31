@@ -1,5 +1,7 @@
 """Module to test the PacBioStoreService."""
 
+from unittest import mock
+
 import pytest
 
 from cg.services.post_processing.exc import (
@@ -14,8 +16,7 @@ from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_serv
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacBioSMRTCell, PacBioSequencingRun, PacBioSampleSequencingMetrics
-from unittest import mock
+from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
 
 from cg.store.store import Store
 

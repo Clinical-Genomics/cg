@@ -41,10 +41,10 @@ class PacBioPostProcessingService(PostProcessingService):
         ),
         to_raise=PostProcessingError,
     )
-    def post_process(self, run_name: str):
+    def post_process(self, run_name: str, dry_run: bool = False) -> None:
 
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )
-        self.store_service.store_post_processing_data(run_data=run_data)
-        self.hk_service.store_files_in_housekeeper(run_data=run_data)
+        self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
+        self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
