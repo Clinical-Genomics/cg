@@ -30,27 +30,12 @@ def test_get_run_data(
     assert run_data == expected_pac_bio_run_data
 
 
+@pytest.mark.parametrize("run_name", ["rimproper_name", "d_improper_name "])
 def test_get_run_data_improper_name(
     pac_bio_runs_dir: Path,
+    run_name: str,
 ):
     # GIVEN a PacBioRunDataGenerator and an improper run name
-    run_name: str = "rimproper_name"
-    run_data_generator = PacBioRunDataGenerator()
-
-    # WHEN Generating run data
-
-    # THEN an PostProcessingRunDataGeneratorError is raised
-    with pytest.raises(PostProcessingRunDataGeneratorError):
-        run_data_generator.get_run_data(
-            run_name=run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
-        )
-
-
-def test_get_run_data_wrong_suffix(
-    pac_bio_runs_dir: Path,
-):
-    # GIVEN a PacBioRunDataGenerator and an improper run name
-    run_name: str = "d_improper_name"
     run_data_generator = PacBioRunDataGenerator()
 
     # WHEN Generating run data
