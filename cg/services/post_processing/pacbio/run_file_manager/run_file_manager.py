@@ -36,7 +36,7 @@ class PacBioRunFileManager(RunFileManager):
 
     @staticmethod
     def _find_ccs_report_file(run_path: Path) -> Path:
-        """Return the path to the the CCS report file."""
+        """Return the path to the CCS report file."""
         statistics_dir: Path = Path(run_path, PacBioDirsAndFiles.STATISTICS_DIR)
         files: list[Path] = get_files_matching_pattern(
             directory=statistics_dir, pattern=f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}"
