@@ -1499,6 +1499,9 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def is_application_archived(self, application_tag) -> bool:
+    def is_application_archived(self, application_tag: str) -> bool:
         application: Application | None = self.get_application_by_tag(application_tag)
         return application and application.is_archived
+
+    def does_gene_panel_exist(self, abbreviation: str) -> bool:
+        return bool(self.get_panel_by_abbreviation(abbreviation))

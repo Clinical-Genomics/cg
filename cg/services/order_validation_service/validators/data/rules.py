@@ -4,10 +4,14 @@ from cg.services.order_validation_service.models.errors import (
     CaseSampleError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
+    InvalidGenePanelsError,
     OrderError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.validators.data.utils import (
+    validate_panels_for_case,
+)
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
@@ -66,4 +70,14 @@ def validate_application_not_archived(
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
+    return errors
+
+
+def validate_gene_panels_exist(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[InvalidGenePanelsError]:
+    errors: list[InvalidGenePanelsError] = []
+    for case in order.cases:
+        case_errors: list[InvalidGenePanelsError] = validate_panels_for_case(case=case, store=store)
+        errors.extend(case_errors)
     return errors

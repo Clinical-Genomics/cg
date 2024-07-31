@@ -3,6 +3,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_application_not_archived,
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
+    validate_gene_panels_exist,
     validate_user_belongs_to_customer,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
@@ -23,6 +24,10 @@ TOMTE_ORDER_RULES = [
     validate_customer_exists,
     validate_ticket_number_required_if_connected,
     validate_user_belongs_to_customer,
+]
+
+TOMTE_CASE_RULES = [
+    validate_gene_panels_exist,
 ]
 
 TOMTE_CASE_SAMPLE_RULES = [
