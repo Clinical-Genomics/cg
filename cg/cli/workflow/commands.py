@@ -7,8 +7,9 @@ import click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE
+from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE, COMMENT
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import IlluminaRunsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -91,12 +92,13 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 
 @click.command("store")
 @ARGUMENT_CASE_ID
+@COMMENT
 @DRY_RUN
 @FORCE
 @click.pass_obj
-def store(context: CGConfig, case_id: str, dry_run: bool, force: bool):
+def store(context: CGConfig, case_id: str, comment: str, dry_run: bool, force: bool):
     """Store finished analysis files in Housekeeper."""
-
+    validate_force_store_option(force=force, comment=comment)
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db

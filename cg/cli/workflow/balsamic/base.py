@@ -18,8 +18,9 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_QOS,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
+from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -256,12 +257,14 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
+@COMMENT
 @DRY_RUN
 @FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool, force: bool):
+def store(context: click.Context, case_id: str, comment: str, dry_run: bool, force: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
+    validate_force_store_option(force=force, comment=comment)
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run, force=force)
     context.invoke(store_housekeeper, case_id=case_id, force=force)
 
