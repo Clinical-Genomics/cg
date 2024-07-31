@@ -62,7 +62,8 @@ def test_get_files_to_store_error(
         side_effect=FileNotFoundError,
     ):
         # WHEN getting the files to store
-        # THEN an error is raised
+
+        # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
             file_manager.get_files_to_store(expected_pac_bio_run_data)
 
@@ -82,6 +83,7 @@ def test_get_files_to_parse_error(
         side_effect=FileNotFoundError,
     ):
         # WHEN getting the files to store
-        # THEN an error is raised
+
+        # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
             file_manager.get_files_to_parse(expected_pac_bio_run_data)

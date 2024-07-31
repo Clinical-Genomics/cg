@@ -18,9 +18,7 @@ def handle_post_processing_errors(to_except: tuple, to_raise):
                 raise to_raise(error) from error
             except Exception as error:
                 LOG.error(error)
-                raise CgError(
-                    f"An unexpected error occurred during Post-processing: {error}"
-                ) from error
+                raise CgError(f"{error}") from error
 
         return wrapper
 

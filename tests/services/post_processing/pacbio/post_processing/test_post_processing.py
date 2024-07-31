@@ -1,6 +1,7 @@
 """Tests for the PacBioPostprocessingService."""
 
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -55,10 +56,10 @@ def test_pac_bio_post_processing_store_files_error(
     pac_bio_context: CGConfig, pac_bio_sequencing_run_name: str
 ):
     # GIVEN a PacBioPostProcessingService
-
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
+    post_processing_service.store_service = Mock()
 
     # WHEN storing post-processing files raises an error
     with mock.patch.object(

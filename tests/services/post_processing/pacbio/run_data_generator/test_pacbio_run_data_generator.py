@@ -38,7 +38,8 @@ def test_get_run_data_improper_name(
     run_data_generator = PacBioRunDataGenerator()
 
     # WHEN Generating run data
-    # THEN an error is raised
+
+    # THEN an PostProcessingRunDataGeneratorError is raised
     with pytest.raises(PostProcessingRunDataGeneratorError):
         run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
@@ -53,7 +54,8 @@ def test_get_run_data_wrong_suffix(
     run_data_generator = PacBioRunDataGenerator()
 
     # WHEN Generating run data
-    # THEN an error is raised
+
+    # THEN an PostProcessingRunDataGeneratorError is raised
     with pytest.raises(PostProcessingRunDataGeneratorError):
         run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
