@@ -78,7 +78,7 @@ def validate_application_not_archived(
 def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
     errors: list[CaseError] = []
     for case in order.cases:
-        if not list(set(case.panels)) == case.panels:
+        if not len(set(case.panels)) == len(case.panels):
             error = RepeatedGenePanelsError(case_name=case.name)
             errors.append(error)
     return errors
