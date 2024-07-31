@@ -1,4 +1,3 @@
-from cg.constants.subject import Sex
 from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
     InvalidFatherSexError,
@@ -8,7 +7,6 @@ from cg.services.order_validation_service.models.errors import (
     RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
     _get_errors,
     _get_excess_samples,
@@ -27,11 +25,11 @@ def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[Occupie
     return _get_errors(samples)
 
 
-def validate_no_repeated_case_names(order: TomteOrder) -> list[RepeatedCaseNameError]:
+def validate_case_names_not_repeated(order: TomteOrder) -> list[RepeatedCaseNameError]:
     return get_repeated_case_name_errors(order)
 
 
-def validate_no_repeated_sample_names(order: TomteOrder) -> list[RepeatedSampleNameError]:
+def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSampleNameError]:
     errors: list[RepeatedSampleNameError] = []
     for case in order.cases:
         case_errors = get_repeated_sample_name_errors(case)

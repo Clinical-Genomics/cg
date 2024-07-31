@@ -7,10 +7,10 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+    validate_case_names_not_repeated,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_no_repeated_case_names,
-    validate_no_repeated_sample_names,
+    validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
 
@@ -44,7 +44,7 @@ def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: Tom
     # Given an order with samples in a case with the same name
 
     # WHEN validating the order
-    errors = validate_no_repeated_sample_names(order_with_repeated_sample_names)
+    errors = validate_sample_names_not_repeated(order_with_repeated_sample_names)
 
     # THEN errors are returned
     assert errors
@@ -57,7 +57,7 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: TomteOr
     # GIVEN an order with cases with the same name
 
     # WHEN validating the order
-    errors = validate_no_repeated_case_names(order_with_repeated_case_names)
+    errors = validate_case_names_not_repeated(order_with_repeated_case_names)
 
     # THEN errors are returned
     assert errors
