@@ -52,7 +52,7 @@ def test_get_files_to_store_error(
     file_manager = PacBioRunFileManager()
     with mock.patch.object(
         file_manager,
-        attribute="_find_hifi_files",
+        attribute="_get_hifi_read_file",
         side_effect=FileNotFoundError,
     ):
         # WHEN getting the files to store
