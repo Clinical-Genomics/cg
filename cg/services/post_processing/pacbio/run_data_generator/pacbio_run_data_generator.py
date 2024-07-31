@@ -1,6 +1,10 @@
 from pathlib import Path
 
 from cg.services.post_processing.abstract_classes import RunDataGenerator
+from cg.services.post_processing.error_handler import (
+    handle_post_processing_errors,
+)
+from cg.services.post_processing.exc import PostProcessingRunDataGeneratorError
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.post_processing.validators import (
     validate_has_expected_parts,
@@ -13,9 +17,12 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
     @staticmethod
     def _validate_run_name(run_name) -> None:
-        validate_name_pre_fix(run_name)
+        validate_name_pre_fix(run_name, pre_fix="r")
         validate_has_expected_parts(run_name=run_name, expected_parts=2)
 
+    @handle_post_processing_errors(
+        to_except=(ValueError,), to_raise=PostProcessingRunDataGeneratorError
+    )
     def get_run_data(self, run_name: str, sequencing_dir: str) -> PacBioRunData:
         """
         Get the run data for a PacBio SMRT cell run.

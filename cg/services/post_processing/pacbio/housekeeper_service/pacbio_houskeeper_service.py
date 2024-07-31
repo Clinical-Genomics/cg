@@ -6,6 +6,12 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.pacbio import PacBioBundleTypes, file_pattern_to_bundle_type, file_pattern_to_tag
 from cg.services.post_processing.abstract_classes import PostProcessingHKService
+from cg.services.post_processing.error_handler import handle_post_processing_errors
+from cg.services.post_processing.exc import (
+    PostProcessingParsingError,
+    PostProcessingRunFileManagerError,
+    PostProcessingStoreFileError,
+)
 from cg.services.post_processing.pacbio.housekeeper_service.models import PacBioFileData
 from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
@@ -30,6 +36,10 @@ class PacBioHousekeeperService(PostProcessingHKService):
         self.file_manager: PacBioRunFileManager = file_manager
         self.metrics_parser: PacBioMetricsParser = metrics_parser
 
+    @handle_post_processing_errors(
+        to_except=(PostProcessingRunFileManagerError, PostProcessingParsingError),
+        to_raise=PostProcessingStoreFileError,
+    )
     def store_files_in_housekeeper(self, run_data: PacBioRunData, dry_run: bool = False):
         parsed_metrics: PacBioMetrics = self.metrics_parser.parse_metrics(run_data)
         file_to_store: list[Path] = self.file_manager.get_files_to_store(run_data)

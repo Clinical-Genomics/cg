@@ -11,6 +11,7 @@ class RunDataGenerator(ABC):
 
     @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
+        """Get the run data for a sequencing run."""
         pass
 
 
@@ -33,6 +34,7 @@ class PostProcessingMetricsParser(ABC):
 
     @abstractmethod
     def parse_metrics(self, run_data: RunData) -> RunMetrics:
+        """Parse the metrics from the files."""
         pass
 
 
@@ -41,6 +43,7 @@ class PostProcessingDataTransferService(ABC):
 
     @abstractmethod
     def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
+        """Get the data transfer objects for the PostProcessingStoreService."""
         pass
 
 
@@ -49,6 +52,7 @@ class PostProcessingStoreService(ABC):
 
     @abstractmethod
     def store_post_processing_data(self, run_data: RunData, dry_run: bool = False):
+        """Store the data transfer objects in the database."""
         pass
 
 
@@ -57,6 +61,7 @@ class PostProcessingHKService(ABC):
 
     @abstractmethod
     def store_files_in_housekeeper(self, run_data: RunData, dry_run: bool = False):
+        """Store the files in housekeeper."""
         pass
 
 

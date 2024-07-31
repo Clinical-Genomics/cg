@@ -1,4 +1,11 @@
 from cg.services.post_processing.abstract_classes import PostProcessingService
+from cg.services.post_processing.error_handler import handle_post_processing_errors
+from cg.services.post_processing.exc import (
+    PostProcessingStoreDataError,
+    PostProcessingError,
+    PostProcessingStoreFileError,
+    PostProcessingRunDataGeneratorError,
+)
 from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
@@ -26,7 +33,16 @@ class PacBioPostProcessingService(PostProcessingService):
         self.store_service: PacBioStoreService = store_service
         self.sequencing_dir: str = sequencing_dir
 
+    @handle_post_processing_errors(
+        to_except=(
+            PostProcessingStoreDataError,
+            PostProcessingRunDataGeneratorError,
+            PostProcessingStoreFileError,
+        ),
+        to_raise=PostProcessingError,
+    )
     def post_process(self, run_name: str, dry_run: bool = False):
+
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )

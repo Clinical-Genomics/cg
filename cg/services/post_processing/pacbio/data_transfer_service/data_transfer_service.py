@@ -1,4 +1,11 @@
+from pydantic_core._pydantic_core import ValidationError
+
 from cg.services.post_processing.abstract_classes import PostProcessingDataTransferService
+from cg.services.post_processing.error_handler import handle_post_processing_errors
+from cg.services.post_processing.exc import (
+    PostProcessingRunFileManagerError,
+    PostProcessingDataTransferError,
+)
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
@@ -20,6 +27,10 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
     def __init__(self, metrics_service: PacBioMetricsParser):
         self.metrics_service: PacBioMetricsParser = metrics_service
 
+    @handle_post_processing_errors(
+        to_except=(PostProcessingRunFileManagerError, ValidationError),
+        to_raise=PostProcessingDataTransferError,
+    )
     def get_post_processing_dtos(self, run_data: PacBioRunData) -> PacBioDTOs:
         metrics: PacBioMetrics = self.metrics_service.parse_metrics(run_data)
         smrt_cell_dto: PacBioSMRTCellDTO = get_smrt_cell_dto(metrics)

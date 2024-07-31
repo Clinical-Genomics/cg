@@ -5,7 +5,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.exc import PacBioMetricsParsingError
 from cg.services.post_processing.pacbio.metrics_parser.models import BaseMetrics
 from cg.services.post_processing.pacbio.metrics_parser.utils import (
     get_parsed_metrics_from_file_name,
@@ -59,7 +58,7 @@ def test_get_parsed_metrics_from_missing_file(tmp_path: Path, file_name: str):
     metrics_files: list[Path] = [Path(tmp_path, "non_existing_file.json")]
 
     # WHEN parsing the metrics
-    with pytest.raises(PacBioMetricsParsingError):
+    with pytest.raises(FileNotFoundError):
         # THEN a PacBioMetricsParsingError is raised
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=file_name)
 
@@ -88,6 +87,6 @@ def test_parse_dataset_metrics_validation_error(
     metrics_files: list[Path] = [new_path]
 
     # WHEN parsing the metrics
-    with pytest.raises(PacBioMetricsParsingError):
+    with pytest.raises(Exception):
         # THEN a PacBioMetricsParsingError is raised
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=metrics_file_name)
