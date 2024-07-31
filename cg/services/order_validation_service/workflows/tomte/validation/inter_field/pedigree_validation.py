@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from cg.services.order_validation_service.models.errors import InvalidPedigreeError
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 
@@ -25,10 +26,10 @@ class Pedigree:
         node = Node(sample=sample, mother=mother, father=father)
         self.pedigree[sample.name] = node
 
-    def validate_cycles():
-        pass
+    def validate(self) -> list[str]:
+        return []
 
 
-def validate_pedigree(case: TomteCase):
+def get_pedigree_errors(case: TomteCase) -> list[InvalidPedigreeError]:
     pedigree = Pedigree(case)
-    return pedigree.validate_cycles()
+    return pedigree.validate()

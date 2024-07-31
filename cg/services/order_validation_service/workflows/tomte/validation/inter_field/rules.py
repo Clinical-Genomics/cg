@@ -3,12 +3,15 @@ from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
     InvalidFatherSexError,
     InvalidMotherSexError,
+    InvalidPedigreeError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
+from cg.services.order_validation_service.workflows.tomte.validation.inter_field.pedigree_validation import (
+    get_pedigree_errors,
+)
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
     _get_errors,
     _get_excess_samples,
@@ -59,5 +62,13 @@ def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError
     errors: list[InvalidMotherSexError] = []
     for case in order.cases:
         case_errors = get_mother_sex_errors(case)
+        errors.extend(case_errors)
+    return errors
+
+
+def validate_pedigree(order: TomteOrder) -> list[InvalidPedigreeError]:
+    errors = []
+    for case in order.cases:
+        case_errors = get_pedigree_errors(case)
         errors.extend(case_errors)
     return errors

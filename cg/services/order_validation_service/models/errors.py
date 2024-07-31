@@ -88,3 +88,8 @@ class FatherNotInCaseError(CaseSampleError):
 class InvalidMotherSexError(CaseSampleError):
     field: str = "mother"
     message: str = "Mother must be female"
+
+
+class InvalidPedigreeError(CaseSampleError):
+    field: str = ""
+    message: str = "Invalid pedigree relationship"

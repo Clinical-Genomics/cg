@@ -1,6 +1,7 @@
 from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
     InvalidFatherSexError,
+    InvalidPedigreeError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
@@ -11,6 +12,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_fathers_in_same_case_as_children,
     validate_no_repeated_case_names,
     validate_no_repeated_sample_names,
+    validate_pedigree,
     validate_wells_contain_at_most_one_sample,
 )
 
@@ -101,3 +103,18 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
 
     # THEN the error is about the father being in the wrong case
     assert isinstance(errors[0], FatherNotInCaseError)
+
+
+def test_invalid_pedigree_self_as_parent(valid_order: TomteOrder):
+    # GIVEN an order with a sample which has itself as a parent
+    sample = valid_order.cases[0].samples[0]
+    sample.father = sample.name
+
+    # WHEN validating the order
+    errors = validate_pedigree(valid_order)
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample having itself as a parent
+    assert isinstance(errors[0], InvalidPedigreeError)
