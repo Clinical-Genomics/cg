@@ -33,6 +33,18 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
+def view_flow_cell_internal_id(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.internal_id)
+
+
+def view_flow_cell_model(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.model)
+
+
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -370,25 +382,6 @@ class CaseView(BaseView):
             flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
-class FlowcellView(BaseView):
-    """Admin view for Model.Flowcell"""
-
-    column_default_sort = ("sequenced_at", True)
-    column_editable_list = ["status"]
-    column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name", "status"]
-    column_searchable_list = ["name"]
-
-    @staticmethod
-    def view_flow_cell_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return Markup(
-            "<a href='%s'>%s</a>"
-            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
-        )
-
-
 class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
@@ -431,7 +424,7 @@ class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["is_primary"]
+    column_editable_list = ["is_primary", "comment"]
     column_filters = ["workflow", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
@@ -439,6 +432,70 @@ class AnalysisView(BaseView):
         "case.name",
     ]
     form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
+
+
+class IlluminaFlowCellView(BaseView):
+    """Admin view for Model.IlluminaSequencingRun"""
+
+    column_list = (
+        "internal_id",
+        "model",
+        "sequencer_type",
+        "sequencer_name",
+        "data_availability",
+        "has_backup",
+        "total_reads",
+        "total_undetermined_reads",
+        "percent_undetermined_reads",
+        "percent_q30",
+        "mean_quality_score",
+        "total_yield",
+        "yield_q30",
+        "cycles",
+        "demultiplexing_software",
+        "demultiplexing_software_version",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
+    )
+    column_formatters = {"internal_id": view_flow_cell_internal_id, "model": view_flow_cell_model}
+    column_default_sort = ("sequencing_completed_at", True)
+    column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
+    column_editable_list = ["data_availability"]
+    column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
+    column_sortable_list = [
+        ("internal_id", "device.internal_id"),
+        "sequencer_type",
+        "sequencer_name",
+        "data_availability",
+        "has_backup",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
+    ]
+
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                "<a href='%s'>%s</a>"
+                % (
+                    url_for(
+                        "illuminasequencingrun.index_view",
+                        search=model.instrument_run.device.internal_id,
+                    ),
+                    model.instrument_run.device.internal_id,
+                )
+            )
+            if model.instrument_run.device
+            else ""
+        )
 
 
 class OrganismView(BaseView):
@@ -640,15 +697,20 @@ class UserView(BaseView):
     edit_modal = True
 
 
-class SampleLaneSequencingMetricsView(BaseView):
-    """Admin view for the Model.SampleLaneSequencingMetrics."""
-
-    column_filters = ["sample_internal_id", "flow_cell_name"]
-    column_searchable_list = ["sample_internal_id", "flow_cell_name"]
-    create_modal = True
-    edit_modal = True
-
+class IlluminaSampleSequencingMetricsView(BaseView):
+    column_list = [
+        "flow_cell",
+        "sample",
+        "flow_cell_lane",
+        "total_reads_in_lane",
+        "base_passing_q30_percent",
+        "base_mean_quality_score",
+        "yield_",
+        "yield_q30",
+        "created_at",
+    ]
     column_formatters = {
-        "flowcell": FlowcellView.view_flow_cell_link,
+        "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
         "sample": SampleView.view_sample_link,
     }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
