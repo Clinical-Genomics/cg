@@ -90,6 +90,11 @@ class InvalidMotherSexError(CaseSampleError):
     message: str = "Mother must be female"
 
 
-class InvalidPedigreeError(CaseSampleError):
+class PedigreeError(CaseSampleError):
     field: str = ""
     message: str = "Invalid pedigree relationship"
+
+
+class SampleIsOwnFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Sample cannot be its own father"

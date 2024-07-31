@@ -3,7 +3,7 @@ from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
     InvalidFatherSexError,
     InvalidMotherSexError,
-    InvalidPedigreeError,
+    PedigreeError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
@@ -66,7 +66,7 @@ def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError
     return errors
 
 
-def validate_pedigree(order: TomteOrder) -> list[InvalidPedigreeError]:
+def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
     errors = []
     for case in order.cases:
         case_errors = get_pedigree_errors(case)
