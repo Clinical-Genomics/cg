@@ -1,3 +1,4 @@
+from cg.constants.pedigree import Pedigree
 from cg.services.order_validation_service.models.errors import (
     DescendantAsFatherError,
     DescendantAsMotherError,
@@ -24,7 +25,7 @@ def detect_cycles(node: Node, errors: list[PedigreeError]) -> None:
     node.visited = True
     node.in_current_path = True
 
-    parents = {"mother": node.mother, "father": node.father}
+    parents = {Pedigree.MOTHER: node.mother, Pedigree.FATHER: node.father}
 
     for parent_type, parent in parents.items():
         if parent and parent.in_current_path:
@@ -37,9 +38,9 @@ def detect_cycles(node: Node, errors: list[PedigreeError]) -> None:
 
 
 def get_error(node: Node, parent_type: str) -> PedigreeError:
-    if parent_type == "mother":
+    if parent_type == Pedigree.MOTHER:
         return get_mother_error(node)
-    if parent_type == "father":
+    if parent_type == Pedigree.FATHER:
         return get_father_error(node)
 
 
