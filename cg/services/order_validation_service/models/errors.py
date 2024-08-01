@@ -95,6 +95,11 @@ class InvalidMotherSexError(CaseSampleError):
     message: str = "Mother must be female"
 
 
+class MotherNotInCaseError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Mother must be in the same case"
+
+
 class InvalidGenePanelsError(CaseError):
     def __init__(self, case_name: str, panels: list[str]):
         message = "Invalid panels: " + ",".join(panels)
