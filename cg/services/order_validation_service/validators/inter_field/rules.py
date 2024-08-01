@@ -55,14 +55,14 @@ def validate_application_compatibility(
     return errors
 
 
-def validate_skip_rc_buffer_condition(order: TomteOrder) -> list[CaseSampleError]:
+def validate_buffer_skip_rc_condition(order: TomteOrder) -> list[CaseSampleError]:
     errors: list[CaseSampleError] = []
     if order.skip_reception_control:
         validate_buffers_are_allowed(order)
     return errors
 
 
-def validate_buffers_are_allowed(order: Order) -> list[CaseSampleError]:
+def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
     errors = []
     for case in order.cases:
         for sample in case.samples:
