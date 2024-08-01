@@ -150,7 +150,7 @@ def order_with_sample_cycle():
     child.father = father.name
 
     father.mother = grandmother.name
-    father.father = child.name # Cycle introduced here
+    father.father = child.name  # Cycle introduced here
 
     case = create_case([child, father, mother, grandfather, grandmother])
     return create_order([case])
