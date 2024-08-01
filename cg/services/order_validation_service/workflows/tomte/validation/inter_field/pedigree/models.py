@@ -15,7 +15,7 @@ class Node:
         self.father: Node | None = None
         self.mother: Node | None = None
         self.visited = False
-        self.in_stack = False
+        self.in_current_path = False
 
 
 class Pedigree:
@@ -50,19 +50,20 @@ class Pedigree:
         return errors
 
     def _detect_cycles(self, node: Node, errors: list[PedigreeError]) -> None:
+        """Detect cycles in the pedigree graph using depth-first search"""
         node.visited = True
-        node.in_stack = True
+        node.in_current_path = True
 
         parents = {"mother": node.mother, "father": node.father}
 
         for parent_type, parent in parents.items():
-            if parent and parent.in_stack:
+            if parent and parent.in_current_path:
                 error = self._get_error(node=node, parent_type=parent_type)
                 errors.append(error)
             elif parent and not parent.visited:
                 self._detect_cycles(parent, errors)
 
-        node.in_stack = False
+        node.in_current_path = False
 
     def _get_error(self, node: Node, parent_type: str) -> PedigreeError:
         if parent_type == "mother":
