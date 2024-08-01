@@ -21,4 +21,4 @@ def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
 
 
 def contains_duplicates(input_list: list) -> bool:
-    return not len(set(input_list)) == len(input_list)
+    return len(set(input_list)) != len(input_list)
