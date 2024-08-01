@@ -23,14 +23,14 @@ class Pedigree:
         self.graph: dict[str, Node] = {}
         self.case = case
         self._add_nodes()
-        self._add_parents()
+        self.add_edges()
 
     def _add_nodes(self) -> None:
         for sample in self.case.samples:
             node = Node(sample=sample)
             self.graph[sample.name] = node
 
-    def _add_parents(self) -> None:
+    def add_edges(self) -> None:
         for node in self.graph.values():
             sample: TomteSample = node.sample
             if sample.mother:
