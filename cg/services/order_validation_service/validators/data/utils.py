@@ -18,3 +18,7 @@ def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
         if not store.does_gene_panel_exist(panel):
             invalid_panels.append(panel)
     return invalid_panels
+
+
+def does_list_contain_duplicates(elements: list):
+    return not len(set(elements)) == len(elements)

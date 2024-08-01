@@ -12,6 +12,7 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.data.utils import (
+    does_list_contain_duplicates,
     validate_panels_for_case,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -78,7 +79,7 @@ def validate_application_not_archived(
 def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
     errors: list[CaseError] = []
     for case in order.cases:
-        if not len(set(case.panels)) == len(case.panels):
+        if does_list_contain_duplicates(case.panels):
             error = RepeatedGenePanelsError(case_name=case.name)
             errors.append(error)
     return errors
