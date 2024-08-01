@@ -11,9 +11,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_case_names_not_repeated,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_no_repeated_case_names,
-    validate_no_repeated_sample_names,
-    validate_pedigree
+    validate_pedigree,
     validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
