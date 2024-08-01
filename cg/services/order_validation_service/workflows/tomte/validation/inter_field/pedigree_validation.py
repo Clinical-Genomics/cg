@@ -1,7 +1,9 @@
 from cg.services.order_validation_service.models.errors import (
+    DescendantAsFatherError,
     PedigreeError,
-    SampleHasOffspringAsParent,
-    SampleIsOwnParentError,
+    DescendantAsMotherError,
+    SampleIsOwnFatherError,
+    SampleIsOwnMotherError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
@@ -47,28 +49,37 @@ class Pedigree:
         node.visited = True
         node.in_stack = True
 
-        for parent in [node.mother, node.father]:
-            if parent is None:
-                continue
+        parents = {"mother": node.mother, "father": node.father}
 
-            if parent.in_stack:
-                if parent == node:
-                    error = SampleIsOwnParentError(
-                        field="error",
-                        sample_name=node.sample.name,
-                        case_name=self.case.name,
-                    )
-                else:
-                    error = SampleHasOffspringAsParent(
-                        field="error",
-                        sample_name=node.sample.name,
-                        case_name=self.case.name,
-                    )
+        for parent_type, parent in parents.items():
+            if parent and parent.in_stack:
+                error = get_error(node=node, parent_type=parent_type)
                 errors.append(error)
-            elif not parent.visited:
+            elif parent and not parent.visited:
                 self._dfs(parent, errors)
 
         node.in_stack = False
+
+
+def get_error(node: Node, parent_type: str) -> PedigreeError:
+    if parent_type == "mother":
+        return get_mother_error(node)
+    if parent_type == "father":
+        return get_father_error(node)
+
+
+def get_mother_error(node: Node):
+    sample = node.sample
+    if sample.name == sample.mother:
+        return SampleIsOwnMotherError(sample_name=sample.name, case_name="case_name")
+    return DescendantAsMotherError(sample_name=sample.name, case_name="case_name")
+
+
+def get_father_error(node: Node):
+    sample = node.sample
+    if sample.name == sample.father:
+        return SampleIsOwnFatherError(sample_name=sample.name, case_name="case_name")
+    return DescendantAsFatherError(sample_name=sample.name, case_name="case_name")
 
 
 def get_pedigree_errors(case: TomteCase) -> list[PedigreeError]:

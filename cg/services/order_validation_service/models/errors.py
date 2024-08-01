@@ -94,9 +94,21 @@ class PedigreeError(CaseSampleError):
     message: str = "Invalid pedigree relationship"
 
 
-class SampleIsOwnParentError(PedigreeError):
-    message: str = "Sample cannot be its own parent"
-
-
-class SampleHasOffspringAsParent(PedigreeError):
+class DescendantAsMotherError(PedigreeError):
+    field: str = "mother"
     message: str = "Offspring sample cannot be parent"
+
+
+class DescendantAsFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Offspring sample cannot be parent"
+
+
+class SampleIsOwnMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Sample cannot be its own mother"
+
+
+class SampleIsOwnFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Sample cannot be its own father"
