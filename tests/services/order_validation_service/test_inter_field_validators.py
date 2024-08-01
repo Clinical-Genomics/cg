@@ -1,14 +1,17 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
+    InvalidBufferError,
     OrderNameRequiredError,
     TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
+    validate_buffers_are_allowed,
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
 )
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
 
@@ -44,7 +47,7 @@ def test_order_name_is_required(valid_order: Order):
 
 
 def test_application_is_incompatible(
-    valid_order: Order, sample_with_non_compatible_application, base_store: Store
+    valid_order: TomteOrder, sample_with_non_compatible_application, base_store: Store
 ):
 
     # GIVEN an order that has a sample with an application which is incompatible with the workflow
@@ -58,3 +61,18 @@ def test_application_is_incompatible(
 
     # THEN the error should be about the application compatiblity
     assert isinstance(errors[0], ApplicationNotCompatibleError)
+
+
+def test_elution_buffer_is_not_allowed(valid_order: TomteOrder, base_store: Store):
+
+    # GIVEN an order with 'skip reception control' toggled but no buffers specfied
+    valid_order.skip_reception_control = True
+
+    # WHEN validating that the buffers conform to the 'skip reception control' requirements
+    errors = validate_buffers_are_allowed(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the buffer compatability
+    assert isinstance(errors[0], InvalidBufferError)

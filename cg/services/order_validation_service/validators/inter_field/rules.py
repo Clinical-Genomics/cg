@@ -2,6 +2,8 @@ from cg.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
+    CaseSampleError,
+    InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
     TicketNumberRequiredError,
@@ -46,5 +48,24 @@ def validate_application_compatibility(
                 store=store,
             ):
                 error = ApplicationNotCompatibleError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+
+
+def validate_skip_rc_buffer_condition(order: TomteOrder) -> list[CaseSampleError]:
+    errors: list[CaseSampleError] = []
+
+    if order.skip_reception_control:
+        validate_buffers_are_allowed(order)
+    return errors
+
+
+def validate_buffers_are_allowed(order: Order) -> list[CaseSampleError]:
+    errors = []
+    allowed_buffers = ["Nuclease-free water", "Tris-HCl"]
+    for case in order.cases:
+        for sample in case.samples:
+            if sample.elution_buffer not in allowed_buffers:
+                error = InvalidBufferError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors
