@@ -101,6 +101,11 @@ class InvalidGenePanelsError(CaseError):
         super(CaseError, self).__init__(field="panels", case_name=case_name, message=message)
 
 
+class InvalidBufferError(CaseSampleError):
+    field: str = "buffer"
+    message: str = "The chosen buffer is not allowed when skipping reception control"
+
+
 class RepeatedGenePanelsError(CaseError):
     field: str = "panels"
     message: str = "Gene panels must be unique"
