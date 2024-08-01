@@ -12,7 +12,7 @@ from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
-from cg.services.illumina_services.illumina_metrics_service.models import IlluminaFlowCellDTO
+from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.store.models import (
     Analysis,
     Application,

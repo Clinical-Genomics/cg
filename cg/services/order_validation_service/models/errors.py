@@ -55,6 +55,11 @@ class OccupiedWellError(CaseSampleError):
     message: str = "Well is already occupied"
 
 
+class ApplicationArchivedError(CaseSampleError):
+    field: str = "application"
+    message: str = "Chosen application is archived"
+
+
 class ApplicationNotValidError(CaseSampleError):
     field: str = "application"
     message: str = "Chosen application does not exist"
@@ -112,3 +117,14 @@ class SampleIsOwnMotherError(PedigreeError):
 class SampleIsOwnFatherError(PedigreeError):
     field: str = "father"
     message: str = "Sample cannot be its own father"
+
+
+class InvalidGenePanelsError(CaseError):
+    def __init__(self, case_name: str, panels: list[str]):
+        message = "Invalid panels: " + ",".join(panels)
+        super(CaseError, self).__init__(field="panels", case_name=case_name, message=message)
+
+
+class RepeatedGenePanelsError(CaseError):
+    field: str = "panels"
+    message: str = "Gene panels must be unique"
