@@ -95,6 +95,30 @@ class InvalidMotherSexError(CaseSampleError):
     message: str = "Mother must be female"
 
 
+class PedigreeError(CaseSampleError):
+    message: str = "Invalid pedigree relationship"
+
+
+class DescendantAsMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Descendant sample cannot be mother"
+
+
+class DescendantAsFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Descendant sample cannot be father"
+
+
+class SampleIsOwnMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Sample cannot be its own mother"
+
+
+class SampleIsOwnFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Sample cannot be its own father"
+
+
 class MotherNotInCaseError(CaseSampleError):
     field: str = "mother"
     message: str = "Mother must be in the same case"
