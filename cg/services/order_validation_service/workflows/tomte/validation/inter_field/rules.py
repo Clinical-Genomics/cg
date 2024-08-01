@@ -9,7 +9,7 @@ from cg.services.order_validation_service.models.errors import (
     RepeatedSampleNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field.pedigree_validation import (
+from cg.services.order_validation_service.workflows.tomte.validation.inter_field.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
