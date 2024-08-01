@@ -1,10 +1,11 @@
 from cg.services.order_validation_service.models.errors import (
+    CaseSampleError,
     FatherNotInCaseError,
     InvalidFatherSexError,
     InvalidMotherSexError,
-    PedigreeError,
     MotherNotInCaseError,
     OccupiedWellError,
+    PedigreeError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
 )
@@ -22,6 +23,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_mother_sex_errors,
     get_repeated_case_name_errors,
     get_repeated_sample_name_errors,
+    validate_subject_ids_in_case,
 )
 
 
@@ -80,4 +82,11 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
     for case in order.cases:
         case_errors = get_mother_case_errors(case)
         errors.extend(case_errors)
+    return errors
+
+
+def validate_subject_ids_different_from_case_names(order: TomteOrder) -> list[CaseSampleError]:
+    errors = []
+    for case in order.cases:
+        errors.extend(validate_subject_ids_in_case(case))
     return errors

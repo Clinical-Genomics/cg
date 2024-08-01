@@ -138,3 +138,8 @@ class InvalidBufferError(CaseSampleError):
 class RepeatedGenePanelsError(CaseError):
     field: str = "panels"
     message: str = "Gene panels must be unique"
+
+
+class SubjectIdSameAsCaseNameError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "Subject id must be different from the case name"

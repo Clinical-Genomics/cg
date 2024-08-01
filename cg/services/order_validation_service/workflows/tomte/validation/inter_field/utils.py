@@ -1,4 +1,5 @@
 from collections import Counter
+
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.models.errors import (
@@ -9,6 +10,7 @@ from cg.services.order_validation_service.models.errors import (
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    SubjectIdSameAsCaseNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -147,3 +149,12 @@ def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
 
 def create_mother_sex_error(case: TomteCase, sample: TomteSample) -> InvalidMotherSexError:
     return InvalidMotherSexError(sample_name=sample.name, case_name=case.name)
+
+
+def validate_subject_ids_in_case(case: TomteCase):
+    errors = []
+    for sample in case.samples:
+        if sample.subject_id == case.name:
+            error = SubjectIdSameAsCaseNameError(case_name=case.name, sample_name=sample.name)
+            errors.append(error)
+    return errors
