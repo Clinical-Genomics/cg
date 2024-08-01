@@ -9,6 +9,7 @@ from cg.services.order_validation_service.models.errors import (
     InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
+    SubjectIdSameAsSampleNameError,
     TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -68,5 +69,15 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
         for sample in case.samples:
             if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
                 error = InvalidBufferError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+
+
+def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[CaseSampleError]:
+    errors = []
+    for case in order.cases:
+        for sample in case.samples:
+            if sample.name == sample.subject_id:
+                error = SubjectIdSameAsSampleNameError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors

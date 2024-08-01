@@ -1,9 +1,15 @@
 from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
+    InvalidBufferError,
     InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    SubjectIdSameAsSampleNameError,
+)
+from cg.services.order_validation_service.validators.inter_field.rules import (
+    validate_buffers_are_allowed,
+    validate_subject_ids_different_from_sample_names,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -13,6 +19,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
+from cg.store.store import Store
 
 
 def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: TomteOrder):
@@ -101,3 +108,34 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
 
     # THEN the error is about the father being in the wrong case
     assert isinstance(errors[0], FatherNotInCaseError)
+
+
+def test_elution_buffer_is_not_allowed(valid_order: TomteOrder, base_store: Store):
+
+    # GIVEN an order with 'skip reception control' toggled but no buffers specfied
+    valid_order.skip_reception_control = True
+
+    # WHEN validating that the buffers conform to the 'skip reception control' requirements
+    errors = validate_buffers_are_allowed(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the buffer compatability
+    assert isinstance(errors[0], InvalidBufferError)
+
+
+def test_subject_id_same_as_sample_name_is_not_allowed(valid_order: TomteOrder):
+
+    # GIVEN an order with a sample with same name and subject id
+    sample_name = valid_order.cases[0].samples[0].name
+    valid_order.cases[0].samples[0].subject_id = sample_name
+
+    # WHEN validating that the subject ids are different from the sample names
+    errors = validate_subject_ids_different_from_sample_names(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the subject id being the same as the sample name
+    assert isinstance(errors[0], SubjectIdSameAsSampleNameError)
