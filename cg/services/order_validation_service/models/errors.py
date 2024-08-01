@@ -99,3 +99,8 @@ class InvalidGenePanelsError(CaseError):
     def __init__(self, case_name: str, panels: list[str]):
         message = "Invalid panels: " + ",".join(panels)
         super(CaseError, self).__init__(field="panels", case_name=case_name, message=message)
+
+
+class RepeatedGenePanelsError(CaseError):
+    field: str = "panels"
+    message: str = "Gene panels must be unique"
