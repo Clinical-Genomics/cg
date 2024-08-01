@@ -104,3 +104,9 @@ class InvalidGenePanelsError(CaseError):
 class InvalidBufferError(CaseSampleError):
     field: str = "buffer"
     message: str = "The chosen buffer is not allowed when skipping reception control"
+
+      
+class RepeatedGenePanelsError(CaseError):
+    field: str = "panels"
+    message: str = "Gene panels must be unique"
+

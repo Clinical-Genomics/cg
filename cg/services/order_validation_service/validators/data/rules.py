@@ -1,15 +1,18 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    CaseError,
     CaseSampleError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
     InvalidGenePanelsError,
     OrderError,
+    RepeatedGenePanelsError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.data.utils import (
+    contains_duplicates,
     validate_panels_for_case,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -70,6 +73,15 @@ def validate_application_not_archived(
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
+    return errors
+
+
+def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
+    errors: list[CaseError] = []
+    for case in order.cases:
+        if contains_duplicates(case.panels):
+            error = RepeatedGenePanelsError(case_name=case.name)
+            errors.append(error)
     return errors
 
 
