@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -7,7 +8,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -19,15 +20,16 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
-from cg.meta.backup.pdc import PdcAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -74,7 +76,7 @@ class DataInput(BaseModel):
     input_dir_path: str
 
 
-class BackupConfig(BaseModel):
+class IlluminaBackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
@@ -94,7 +96,7 @@ class DownsampleConfig(BaseModel):
     account: str
 
 
-class JanusConfig(BaseModel):
+class ClientConfig(BaseModel):
     host: str
 
 
@@ -346,9 +348,11 @@ class CGConfig(BaseModel):
     # App APIs that can be instantiated in CGConfig
     arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
-    backup: BackupConfig = None
+    illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    chanjo2: ClientConfig | None = None
+    chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -364,7 +368,7 @@ class CGConfig(BaseModel):
     gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
-    janus: JanusConfig | None = None
+    janus: ClientConfig | None = None
     janus_api_: JanusAPIClient | None = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
@@ -377,9 +381,9 @@ class CGConfig(BaseModel):
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
-    pdc_api_: PdcAPI | None
+    pdc_service_: PdcService | None
     pigz: CommonAppConfig | None = None
-    sample_sheet_api_: SampleSheetAPI | None = None
+    sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
@@ -409,6 +413,7 @@ class CGConfig(BaseModel):
         fields = {
             "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
+            "chanjo2_api_": "chanjo2_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
             "genotype_api_": "genotype_api",
@@ -419,7 +424,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_api_": "pdc_api",
+            "pdc_service_": "pdc_service",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -443,6 +448,16 @@ class CGConfig(BaseModel):
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
         return api
+
+    @property
+    def chanjo2_api(self) -> Chanjo2APIClient:
+        chanjo2_api = self.__dict__.get("chanjo2_api_")
+        if chanjo2_api is None:
+            LOG.debug("Instantiating Chanjo2 API")
+            config: dict[str, Any] = self.dict()
+            chanjo2_api = Chanjo2APIClient(base_url=config["chanjo2"]["host"])
+            self.chanjo2_api_ = chanjo2_api
+        return chanjo2_api
 
     @property
     def crunchy_api(self) -> CrunchyAPI:
@@ -549,20 +564,20 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def pdc_api(self) -> PdcAPI:
-        api = self.__dict__.get("pdc_api_")
-        if api is None:
-            LOG.debug("Instantiating PDC api")
-            api = PdcAPI(binary_path=self.pdc.binary_path)
-            self.pdc_api_ = api
-        return api
+    def pdc_service(self) -> PdcService:
+        service = self.__dict__.get("pdc_service_")
+        if service is None:
+            LOG.debug("Instantiating PDC service")
+            service = PdcService(binary_path=self.pdc.binary_path)
+            self.pdc_service_ = service
+        return service
 
     @property
-    def sample_sheet_api(self) -> SampleSheetAPI:
+    def sample_sheet_api(self) -> IlluminaSampleSheetService:
         sample_sheet_api = self.__dict__.get("sample_sheet_api_")
         if sample_sheet_api is None:
             LOG.debug("Instantiating sample sheet API")
-            sample_sheet_api = SampleSheetAPI(
+            sample_sheet_api = IlluminaSampleSheetService(
                 flow_cell_dir=self.run_instruments.illumina.sequencing_runs_dir,
                 hk_api=self.housekeeper_api,
                 lims_api=self.lims_api,
