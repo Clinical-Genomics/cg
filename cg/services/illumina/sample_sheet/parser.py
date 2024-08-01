@@ -1,0 +1,96 @@
+"""Class to parse the content of a sample sheet file into a SampleSheet model."""
+
+from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.services.illumina.sample_sheet.models import (
+    IlluminaSampleIndexSetting,
+    SampleSheet,
+    SampleSheetData,
+    SampleSheetHeader,
+    SampleSheetReads,
+    SampleSheetSettings,
+)
+from cg.services.illumina.sample_sheet.utils import find_line_containing_pattern
+
+
+class SampleSheetParser:
+    def parse(self, content: list[list[str]]) -> SampleSheet:
+        """Parse a sample sheet file content into a SampleSheet model."""
+        header_section, reads_section, settings_section, data_section = (
+            self._separate_content_into_sections(content)
+        )
+        header: SampleSheetHeader = self._get_sample_sheet_header(header_section)
+        reads: SampleSheetReads = self._get_sample_sheet_reads(reads_section)
+        settings: SampleSheetSettings = self._get_sample_sheet_settings(settings_section)
+        data: SampleSheetData = self._get_sample_sheet_data(data_section)
+        return SampleSheet(header=header, reads=reads, settings=settings, data=data)
+
+    @staticmethod
+    def _separate_content_into_sections(content: list[list[str]]) -> tuple:
+        """Separate the content of a sample sheet file into its sections."""
+        header_starts_line: int = find_line_containing_pattern(
+            content=content, pattern=SampleSheetBCLConvertSections.Header.HEADER
+        )
+        reads_starts_line: int = find_line_containing_pattern(
+            content=content, pattern=SampleSheetBCLConvertSections.Reads.HEADER
+        )
+        settings_starts_line: int = find_line_containing_pattern(
+            content=content, pattern=SampleSheetBCLConvertSections.Settings.HEADER
+        )
+        data_starts_line: int = find_line_containing_pattern(
+            content=content, pattern=SampleSheetBCLConvertSections.Data.HEADER
+        )
+        header_section: list[list[str]] = content[header_starts_line:reads_starts_line]
+        reads_section: list[list[str]] = content[reads_starts_line:settings_starts_line]
+        settings_section: list[list[str]] = content[settings_starts_line:data_starts_line]
+        data_section: list[list[str]] = content[data_starts_line:]
+        return header_section, reads_section, settings_section, data_section
+
+    @staticmethod
+    def _get_sample_sheet_header(content: list[list[str]]) -> SampleSheetHeader:
+        """Return the parsed Header section of the sample sheet given its header content."""
+        return SampleSheetHeader(
+            version=content[1],
+            run_name=content[2],
+            instrument=content[3],
+            index_orientation=content[4],
+            index_settings=content[5],
+        )
+
+    @staticmethod
+    def _get_sample_sheet_reads(content: list[list[str]]) -> SampleSheetReads:
+        """Return the parsed Reads section of the sample sheet given its reads content."""
+        reads_section: dict = {
+            "read_1": content[1],
+            "read_2": content[2],
+            "index_1": content[3],
+        }
+        if len(content) > 4:
+            reads_section["index_2"] = content[4]
+        return SampleSheetReads.model_validate(reads_section)
+
+    @staticmethod
+    def _get_sample_sheet_settings(content: list[list[str]]) -> SampleSheetSettings:
+        """Return the parsed Settings section of the sample sheet given its settings content."""
+        return SampleSheetSettings(
+            software_version=content[1],
+            compression_format=content[2],
+        )
+
+    @staticmethod
+    def get_samples_from_data_content(content: list[list[str]]) -> list[IlluminaSampleIndexSetting]:
+        """
+        Return parsed samples from the sample sheet data content.
+        Raises:
+            ValidationError: if the samples do not have the correct model attributes.
+        """
+        samples: list[IlluminaSampleIndexSetting] = []
+        column_names: list[str] = content[1]
+        for line in content[2:]:
+            raw_sample = dict(zip(column_names, line))
+            samples.append(IlluminaSampleIndexSetting.model_validate(raw_sample))
+        return samples
+
+    def _get_sample_sheet_data(self, content: list[list[str]]) -> SampleSheetData:
+        """Return the parsed Data section of the sample sheet given its data content."""
+        samples: list[IlluminaSampleIndexSetting] = self.get_samples_from_data_content(content)
+        return SampleSheetData(columns=content[1], samples=samples)
