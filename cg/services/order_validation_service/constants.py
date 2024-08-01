@@ -9,6 +9,8 @@ class TissueBlockEnum(Enum):
     BLANK: str = ""
 
 
+ALLOWED_SKIP_RC_BUFFERS = ["Nuclease-free water", "Tris-HCl"]
+
 WORKFLOW_PREP_CATEGORIES: dict[Workflow, list[PrepCategory]] = {
     Workflow.TOMTE: [PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING],
 }

@@ -119,10 +119,20 @@ class SampleIsOwnFatherError(PedigreeError):
     message: str = "Sample cannot be its own father"
 
 
+class MotherNotInCaseError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Mother must be in the same case"
+
+
 class InvalidGenePanelsError(CaseError):
     def __init__(self, case_name: str, panels: list[str]):
         message = "Invalid panels: " + ",".join(panels)
         super(CaseError, self).__init__(field="panels", case_name=case_name, message=message)
+
+
+class InvalidBufferError(CaseSampleError):
+    field: str = "buffer"
+    message: str = "The chosen buffer is not allowed when skipping reception control"
 
 
 class RepeatedGenePanelsError(CaseError):
