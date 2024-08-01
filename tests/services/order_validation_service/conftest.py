@@ -52,13 +52,6 @@ def create_order(cases: list[TomteCase]) -> TomteOrder:
 
 
 @pytest.fixture
-def valid_case() -> TomteCase:
-    sample_1: TomteSample = create_sample(1)
-    sample_2: TomteSample = create_sample(2)
-    return create_case([sample_1, sample_2])
-
-
-@pytest.fixture
 def case_with_samples_in_same_well() -> TomteCase:
     sample_1: TomteSample = create_sample(1)
     sample_2: TomteSample = create_sample(1)
@@ -85,8 +78,14 @@ def archived_application(base_store: Store) -> Application:
 
 
 @pytest.fixture
-def valid_order(valid_case: TomteCase) -> TomteOrder:
-    return create_order([valid_case])
+def valid_order() -> TomteOrder:
+    child: TomteSample = create_sample(1)
+    father: TomteSample = create_sample(2)
+    mother: TomteSample = create_sample(3)
+    grandfather: TomteSample = create_sample(4)
+    grandmother: TomteSample = create_sample(5)
+    case = create_case([child, father, mother, grandfather, grandmother])
+    return create_order([case])
 
 
 @pytest.fixture
@@ -136,4 +135,22 @@ def order_with_father_in_wrong_case(case: TomteCase):
     father = case.samples[1]
     child.father = father.name
     case.samples = [child]
+    return create_order([case])
+
+
+@pytest.fixture
+def order_with_sample_cycle():
+    child: TomteSample = create_sample(1)
+    father: TomteSample = create_sample(2)
+    mother: TomteSample = create_sample(3)
+    grandfather: TomteSample = create_sample(4)
+    grandmother: TomteSample = create_sample(5)
+
+    child.mother = mother.name
+    child.father = father.name
+
+    father.mother = grandmother.name
+    father.father = child.name # Cycle introduced here
+
+    case = create_case([child, father, mother, grandfather, grandmother])
     return create_order([case])

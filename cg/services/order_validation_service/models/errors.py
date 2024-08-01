@@ -101,12 +101,12 @@ class PedigreeError(CaseSampleError):
 
 class DescendantAsMotherError(PedigreeError):
     field: str = "mother"
-    message: str = "Offspring sample cannot be mother"
+    message: str = "Descendant sample cannot be mother"
 
 
 class DescendantAsFatherError(PedigreeError):
     field: str = "father"
-    message: str = "Offspring sample cannot be father"
+    message: str = "Descendant sample cannot be father"
 
 
 class SampleIsOwnMotherError(PedigreeError):

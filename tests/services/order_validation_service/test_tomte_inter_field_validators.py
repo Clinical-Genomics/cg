@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.models.errors import (
+    DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidFatherSexError,
     OccupiedWellError,
@@ -105,7 +106,17 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     assert isinstance(errors[0], FatherNotInCaseError)
 
 
-def test_invalid_pedigree_self_as_father(valid_order: TomteOrder):
+def test_valid_pedigree(valid_order: TomteOrder):
+    # GIVEN a valid order with cases and samples
+
+    # WHEN validating the order
+    errors = validate_pedigree(valid_order)
+
+    # THEN no errors are returned
+    assert not errors
+
+
+def test_sample_cannot_be_its_own_father(valid_order: TomteOrder):
     # GIVEN an order with a sample which has itself as a parent
     sample = valid_order.cases[0].samples[0]
     sample.father = sample.name
@@ -118,3 +129,16 @@ def test_invalid_pedigree_self_as_father(valid_order: TomteOrder):
 
     # THEN the error is about the sample having itself as a parent
     assert isinstance(errors[0], SampleIsOwnFatherError)
+
+
+def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
+    # GIVEN an order where a sample is a descendant of itself
+
+    # WHEN validating the order
+    errors = validate_pedigree(order_with_sample_cycle)
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample being a descendant of itself
+    assert isinstance(errors[0], DescendantAsFatherError)
