@@ -142,3 +142,13 @@ def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
 
     # THEN the error is about the sample being a descendant of itself
     assert isinstance(errors[0], DescendantAsFatherError)
+
+
+def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
+    # GIVEN an order with incestuous relationships where parents are siblings
+
+    # WHEN validating the order
+    errors = validate_pedigree(order_with_siblings_as_parents)
+
+    # THEN no error is returned
+    assert not errors

@@ -154,3 +154,26 @@ def order_with_sample_cycle():
 
     case = create_case([child, father, mother, grandfather, grandmother])
     return create_order([case])
+
+
+@pytest.fixture
+def order_with_siblings_as_parents():
+    child: TomteSample = create_sample(1)
+
+    father: TomteSample = create_sample(3)
+    mother: TomteSample = create_sample(4)
+
+    grandfather: TomteSample = create_sample(5)
+    grandmother: TomteSample = create_sample(6)
+
+    child.father = father.name
+    child.mother = mother.name
+
+    father.mother = grandmother.name
+    father.father = grandfather.name
+
+    mother.mother = grandmother.name
+    mother.father = grandfather.name
+
+    case = create_case([child, father, mother, grandfather, grandmother])
+    return create_order([case])
