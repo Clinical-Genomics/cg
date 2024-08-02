@@ -16,8 +16,8 @@ class IlluminaSampleIndexSetting(BaseModel):
     override_cycles: str = Field(
         EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES
     )
-    barcode_mismatches_1: int = Field(
-        1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
+    barcode_mismatches_1: int | None = Field(
+        None, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
     )
     barcode_mismatches_2: int | str | None = Field(
         None, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2

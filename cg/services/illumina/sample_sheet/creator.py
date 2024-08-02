@@ -15,6 +15,8 @@ from cg.services.illumina.sample_sheet.models import (
     SampleSheetReads,
     SampleSheetSettings,
 )
+from cg.services.illumina.sample_sheet.sample_updater import SamplesUpdater
+from cg.services.illumina.sample_sheet.utils import get_sample_column_names, have_sample_indexes
 from cg.services.illumina.sample_sheet.validator import SampleSheetValidator
 
 LOG = logging.getLogger(__name__)
@@ -22,17 +24,24 @@ LOG = logging.getLogger(__name__)
 
 class SampleSheetCreator:
 
-    def __init__(self, sequencing_dir: str, lims_api: LimsAPI, validator: SampleSheetValidator):
+    def __init__(
+        self,
+        sequencing_dir: str,
+        lims_api: LimsAPI,
+        validator: SampleSheetValidator,
+        updater: SamplesUpdater,
+    ):
         self.sequencing_dir = Path(sequencing_dir)
         self.lims_api = lims_api
         self.validator = validator
+        self.updater = updater
 
     def create(self, run_dir: IlluminaRunDirectoryData) -> SampleSheet:
         """Get a sample sheet from Housekeeper, flow cell dir or create a new one."""
         header: SampleSheetHeader = self._create_header_section(run_dir)
         reads: SampleSheetReads = self._create_reads_section(run_dir)
         settings: SampleSheetSettings = self._create_settings_section()
-        data: SampleSheetData = self._create_data_section(lims_samples)
+        data: SampleSheetData = self._create_data_section(run_dir)
         return SampleSheet(header=header, reads=reads, settings=settings, data=data)
 
     @staticmethod
@@ -88,17 +97,18 @@ class SampleSheetCreator:
 
     def _create_data_section(self, run_dir: IlluminaRunDirectoryData) -> SampleSheetData:
         """Create the data section of the sample sheet."""
-        column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
-        if run_dir.run_parameters.is_single_index:
-            column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
-            column_names.remove(SampleSheetBCLConvertSections.Data.INDEX_2)
         lims_samples: list[IlluminaSampleIndexSetting] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=run_dir.id,
             )
         )
+        self.updater.update_all_samples(samples=lims_samples, run_parameters=run_dir.run_parameters)
+        column_names: list[str] = get_sample_column_names(
+            is_run_single_index=run_dir.run_parameters.is_single_index,
+            samples=lims_samples,
+        )
         return SampleSheetData(
-            columns=SampleSheetBCLConvertSections.Data.column_names(),
+            columns=column_names,
             samples=lims_samples,
         )
