@@ -17,7 +17,7 @@ class SampleService:
 
         self.store.mark_sample_as_cancelled(sample_id)
         self.store.delete_sample_from_cases(sample_id)
-        self.store.delete_cases_without_samples()
+        self.store.delete_cases_without_samples(case_ids)
 
         self._add_cancel_comment(sample_id=sample_id, user_email=user_email)
         return case_ids
