@@ -143,8 +143,8 @@ class RepeatedGenePanelsError(CaseError):
 class SubjectIdSameAsCaseNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the case name"
-      
-      
+
+
 class SubjectIdSameAsSampleNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the sample name"

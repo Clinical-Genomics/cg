@@ -113,7 +113,6 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     assert isinstance(errors[0], FatherNotInCaseError)
 
 
-
 def test_elution_buffer_is_not_allowed(valid_order: TomteOrder, base_store: Store):
 
     # GIVEN an order with 'skip reception control' toggled but no buffers specfied
@@ -143,6 +142,7 @@ def test_subject_id_same_as_sample_name_is_not_allowed(valid_order: TomteOrder):
 
     # THEN the error should be about the subject id being the same as the sample name
     assert isinstance(errors[0], SubjectIdSameAsSampleNameError)
+
 
 def test_valid_pedigree(valid_order: TomteOrder):
     # GIVEN a valid order with cases and samples
