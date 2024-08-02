@@ -23,11 +23,7 @@ class UpdateHandler(BaseHandler):
 
     def update_sample_comment(self, sample_id: int, comment: str) -> None:
         """Update comment on sample with the provided comment."""
-        sample: Sample | None = self.get_sample_by_entry_id(sample_id)
-
-        if not sample:
-            return
-
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
         sample.comment = f"{sample.comment} {comment}" if sample.comment else comment
         self.session.commit()
 
@@ -75,10 +71,6 @@ class UpdateHandler(BaseHandler):
         self.session.commit()
 
     def mark_sample_as_cancelled(self, sample_id: int) -> None:
-        sample: Sample | None = self.get_sample_by_entry_id(sample_id)
-
-        if not sample:
-            return
-
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
         sample.is_cancelled = True
         self.session.commit()
