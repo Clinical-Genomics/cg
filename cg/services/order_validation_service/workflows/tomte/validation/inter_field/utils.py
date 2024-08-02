@@ -151,7 +151,7 @@ def create_mother_sex_error(case: TomteCase, sample: TomteSample) -> InvalidMoth
     return InvalidMotherSexError(sample_name=sample.name, case_name=case.name)
 
 
-def validate_subject_ids_in_case(case: TomteCase):
+def validate_subject_ids_in_case(case: TomteCase) -> list[SubjectIdSameAsCaseNameError]:
     errors = []
     for sample in case.samples:
         if sample.subject_id == case.name:
