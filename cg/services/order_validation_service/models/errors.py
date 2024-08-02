@@ -95,6 +95,35 @@ class InvalidMotherSexError(CaseSampleError):
     message: str = "Mother must be female"
 
 
+class PedigreeError(CaseSampleError):
+    message: str = "Invalid pedigree relationship"
+
+
+class DescendantAsMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Descendant sample cannot be mother"
+
+
+class DescendantAsFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Descendant sample cannot be father"
+
+
+class SampleIsOwnMotherError(PedigreeError):
+    field: str = "mother"
+    message: str = "Sample cannot be its own mother"
+
+
+class SampleIsOwnFatherError(PedigreeError):
+    field: str = "father"
+    message: str = "Sample cannot be its own father"
+
+
+class MotherNotInCaseError(CaseSampleError):
+    field: str = "mother"
+    message: str = "Mother must be in the same case"
+
+
 class InvalidGenePanelsError(CaseError):
     def __init__(self, case_name: str, panels: list[str]):
         message = "Invalid panels: " + ",".join(panels)
@@ -111,6 +140,11 @@ class RepeatedGenePanelsError(CaseError):
     message: str = "Gene panels must be unique"
 
 
+class SubjectIdSameAsCaseNameError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "Subject id must be different from the case name"
+      
+      
 class SubjectIdSameAsSampleNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the sample name"

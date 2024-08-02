@@ -1,10 +1,12 @@
 from cg.services.order_validation_service.models.errors import (
+    DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidBufferError,
     InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    SampleIsOwnFatherError,
     SubjectIdSameAsSampleNameError,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
@@ -16,6 +18,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_case_names_not_repeated,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
+    validate_pedigree,
     validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
@@ -110,6 +113,7 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     assert isinstance(errors[0], FatherNotInCaseError)
 
 
+
 def test_elution_buffer_is_not_allowed(valid_order: TomteOrder, base_store: Store):
 
     # GIVEN an order with 'skip reception control' toggled but no buffers specfied
@@ -139,3 +143,50 @@ def test_subject_id_same_as_sample_name_is_not_allowed(valid_order: TomteOrder):
 
     # THEN the error should be about the subject id being the same as the sample name
     assert isinstance(errors[0], SubjectIdSameAsSampleNameError)
+
+def test_valid_pedigree(valid_order: TomteOrder):
+    # GIVEN a valid order with cases and samples
+
+    # WHEN validating the order
+    errors = validate_pedigree(valid_order)
+
+    # THEN no errors are returned
+    assert not errors
+
+
+def test_sample_cannot_be_its_own_father(valid_order: TomteOrder):
+    # GIVEN an order with a sample which has itself as a parent
+    sample = valid_order.cases[0].samples[0]
+    sample.father = sample.name
+
+    # WHEN validating the order
+    errors = validate_pedigree(valid_order)
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample having itself as a parent
+    assert isinstance(errors[0], SampleIsOwnFatherError)
+
+
+def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
+    # GIVEN an order where a sample is a descendant of itself
+
+    # WHEN validating the order
+    errors = validate_pedigree(order_with_sample_cycle)
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample being a descendant of itself
+    assert isinstance(errors[0], DescendantAsFatherError)
+
+
+def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
+    # GIVEN an order where parents are siblings
+
+    # WHEN validating the order
+    errors = validate_pedigree(order_with_siblings_as_parents)
+
+    # THEN no error is returned
+    assert not errors
