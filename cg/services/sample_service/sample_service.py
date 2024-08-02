@@ -1,4 +1,7 @@
-from cg.services.sample_service.utils import get_cancel_comment, get_cancellation_confirmation_message
+from cg.services.sample_service.utils import (
+    get_cancel_comment,
+    get_confirmation_message,
+)
 from cg.store.models import User
 from cg.store.store import Store
 
@@ -29,7 +32,7 @@ class SampleService:
         self.store.delete_cases_without_samples(case_ids)
         remaining_cases = self.store.filter_cases_with_samples(case_ids)
 
-        return get_cancellation_confirmation_message(
+        return get_confirmation_message(
             sample_ids=sample_ids,
             remaining_cases=remaining_cases,
         )
