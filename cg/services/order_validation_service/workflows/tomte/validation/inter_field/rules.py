@@ -1,5 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
+    InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     InvalidMotherSexError,
     MotherNotInCaseError,
@@ -23,6 +24,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_mother_sex_errors,
     get_repeated_case_name_errors,
     get_repeated_sample_name_errors,
+    validate_concentration_in_case,
     validate_subject_ids_in_case,
 )
 
@@ -91,5 +93,15 @@ def validate_subject_ids_different_from_case_names(
     errors = []
     for case in order.cases:
         case_errors = validate_subject_ids_in_case(case)
+        errors.extend(case_errors)
+    return errors
+
+
+def validate_concentration_interval_if_skip_rc(
+    order: TomteOrder,
+) -> list[InvalidConcentrationIfSkipRCError]:
+    errors = []
+    for case in order.cases:
+        case_errors = validate_concentration_in_case(case)
         errors.extend(case_errors)
     return errors
