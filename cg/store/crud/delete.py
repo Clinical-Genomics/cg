@@ -37,7 +37,7 @@ class DeleteDataHandler(BaseHandler):
         else:
             raise ValueError(f"Illumina flow cell with internal id {internal_id} not found.")
 
-    def delete_sample_from_cases(self, sample_id: int) -> None:
+    def decouple_sample_from_cases(self, sample_id: int) -> None:
         sample: Sample = self.get_sample_by_entry_id(sample_id)
         for case_sample in sample.links:
             self.session.delete(case_sample)
