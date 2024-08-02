@@ -1,6 +1,5 @@
 """Module for Flask-Admin views"""
 
-from datetime import datetime
 from gettext import gettext
 
 from flask import flash, redirect, request, session, url_for
@@ -11,7 +10,6 @@ from markupsafe import Markup
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db, sample_service
-from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
