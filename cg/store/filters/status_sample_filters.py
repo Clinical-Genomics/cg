@@ -157,6 +157,10 @@ def filter_samples_by_identifier_name_and_value(
     return samples.filter(getattr(Sample, identifier_name) == identifier_value)
 
 
+def filter_out_cancelled_samples(samples: Query, **kwargs) -> Query:
+    return samples.filter(Sample.is_cancelled.is_(False))
+
+
 def apply_sample_filter(
     filter_functions: list[Callable],
     samples: Query,
@@ -213,6 +217,7 @@ class SampleFilter(Enum):
     BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
     DO_INVOICE: Callable = filter_samples_do_invoice
     HAS_NO_INVOICE_ID: Callable = filter_samples_without_invoice_id
+    IS_NOT_CANCELLED: Callable = filter_out_cancelled_samples
     IS_DELIVERED: Callable = filter_samples_is_delivered
     IS_NOT_DELIVERED: Callable = filter_samples_is_not_delivered
     IS_NOT_DOWN_SAMPLED: Callable = filter_samples_is_not_down_sampled

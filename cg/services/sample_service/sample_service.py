@@ -37,3 +37,6 @@ class SampleService:
             sample_ids=sample_ids,
             case_ids=remaining_cases,
         )
+
+    def get_samples_for_collaborators():
+        pass
