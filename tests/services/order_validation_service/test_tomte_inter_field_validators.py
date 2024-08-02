@@ -22,7 +22,6 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.store.store import Store
 
 
 def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: TomteOrder):
@@ -113,7 +112,7 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     assert isinstance(errors[0], FatherNotInCaseError)
 
 
-def test_elution_buffer_is_not_allowed(valid_order: TomteOrder, base_store: Store):
+def test_elution_buffer_is_not_allowed(valid_order: TomteOrder):
 
     # GIVEN an order with 'skip reception control' toggled but no buffers specfied
     valid_order.skip_reception_control = True
