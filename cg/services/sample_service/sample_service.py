@@ -27,11 +27,11 @@ class SampleService:
         comment = get_cancel_comment(user.name)
         self.store.update_sample_comment(sample_id=sample_id, comment=comment)
 
-    def cancel_samples(self, sample_ids: list[int]) -> str:
+    def cancel_samples(self, sample_ids: list[int], user_email: str) -> str:
         """Cancel multiple samples. Returns a cancellation confirmation message."""
         case_ids = []
         for sample_id in sample_ids:
-            associated_case_ids = self.cancel_sample(sample_id)
+            associated_case_ids = self.cancel_sample(sample_id=sample_id, user_email=user_email)
             case_ids.extend(associated_case_ids)
 
         self.store.delete_cases_without_samples(case_ids)
