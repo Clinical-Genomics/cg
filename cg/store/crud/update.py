@@ -24,6 +24,10 @@ class UpdateHandler(BaseHandler):
     def update_sample_comment(self, sample_id: int, comment: str) -> None:
         """Update comment on sample with the provided comment."""
         sample: Sample | None = self.get_sample_by_entry_id(sample_id)
+
+        if not sample:
+            return
+
         sample.comment = f"{sample.comment} {comment}" if sample.comment else comment
         self.session.commit()
 

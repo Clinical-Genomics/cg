@@ -19,7 +19,6 @@ class SampleService:
         self.store.delete_cases_without_samples(case_ids)
         self._add_cancel_comment(sample_id=sample_id, user_email=user_email)
 
-
     def _add_cancel_comment(self, sample_id: int, user_email: str) -> None:
         user: User | None = self.store.get_user_by_email(user_email)
         comment = get_cancel_comment(user.name)
