@@ -132,12 +132,12 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     sample_qc_fail = LimsSample(id="sample_qc_fail", name="23CS102408")
 
     external_negative_control_qc_pass = LimsSample(
-        id="external_negative_control_qc_pass", name="0PROVSEK", udf=LimsUDF(control="negative")
+        id="external_negative_control_qc_pass", name="0PROVSEK", udfs=LimsUDF(control="negative")
     )
     internal_negative_control_qc_pass = LimsSample(
         id="internal_negative_control_qc_pass",
         name="internal_negative_control_qc_pass",
-        udf=LimsUDF(control="negative", customer="cust000"),
+        udfs=LimsUDF(control="negative", customer="cust000"),
     )
 
     sample_qc_pass_with_failing_controls = LimsSample(
@@ -145,13 +145,13 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     )
 
     external_negative_control_qc_fail = LimsSample(
-        id="external_negative_control_qc_fail", name="0PROVSEK", udf=LimsUDF(control="negative")
+        id="external_negative_control_qc_fail", name="0PROVSEK", udfs=LimsUDF(control="negative")
     )
 
     internal_negative_control_qc_fail = LimsSample(
         id="internal_negative_control_qc_fail",
         name="internal_negative_control_qc_fail",
-        udf=LimsUDF(control="negative", customer="cust000"),
+        udfs=LimsUDF(control="negative", customer="cust000"),
     )
 
     # Create pools

@@ -17,6 +17,7 @@ from cg.constants.lims import (
     LimsProcess,
 )
 from cg.exc import LimsDataError
+from cg.models.lims.sample import LimsSample
 
 from .order import OrderHandler
 
@@ -498,3 +499,32 @@ class LimsAPI(Lims, OrderHandler):
             return artifacts[0]
         except IndexError as error:
             raise LimsDataError() from error
+
+    def get_internal_negative_control_id_from_sample_in_pool(
+        self, sample_internal_id: str, pooling_step: LimsProcess
+    ) -> str:
+        """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+        artifact: Artifact = self.get_latest_artifact_for_sample(
+            process_type=pooling_step,
+            artifact_type=LimsArtifactTypes.ANALYTE,
+            sample_internal_id=sample_internal_id,
+        )
+        samples = artifact.samples
+
+        negative_controls: list = self._get_negative_controls_from_list(samples=samples)
+
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            raise LimsDataError(
+                f"Several internal negative control samples found: {' '.join(sample_ids)}"
+            )
+        return negative_controls[0].id
+
+    @staticmethod
+    def _get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
+        """Filter and return a list of internal negative controls from a given sample list."""
+        negative_controls = []
+        for sample in samples:
+            if sample.udfs.control == "negative" and sample.udfs.customer == "cust000":
+                negative_controls.append(sample)
+        return negative_controls

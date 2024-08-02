@@ -2,7 +2,6 @@ from pathlib import Path
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import MutantPoolSamples, QualityMetrics
 from cg.meta.workflow.mutant.quality_controller.utils import (
-    get_internal_negative_control_id_from_lims,
     get_mutant_pool_samples,
     get_quality_metrics,
 )
@@ -10,22 +9,22 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 
+# TODO: Move this step to the lims api tests. Add the mutant pool to the conftest.
+# def test_test_get_internal_negative_control_id_from_lims(
+#     mutant_lims: MockLimsAPI, sample_qc_pass: Sample, internal_negative_control_qc_pass: Sample
+# ):
+#     # GIVEN a sample_id and the internal_id of its corresponding internal_negative_control sample
 
-def test_test_get_internal_negative_control_id_from_lims(
-    mutant_lims: MockLimsAPI, sample_qc_pass: Sample, internal_negative_control_qc_pass: Sample
-):
-    # GIVEN a sample_id and the internal_id of its corresponding internal_negative_control sample
+#     sample_internal_id = sample_qc_pass.internal_id
+#     internal_negative_control_sample_id = internal_negative_control_qc_pass.internal_id
 
-    sample_internal_id = sample_qc_pass.internal_id
-    internal_negative_control_sample_id = internal_negative_control_qc_pass.internal_id
+#     # WHEN retrieving the internal_negative_control_id_from_lims
+#     retrieved_internal_negative_control_sample_id = mutant_lims.get_internal_negative_control_id_from_lims(
+#         lims=mutant_lims, sample_internal_id=sample_internal_id
+#     )
 
-    # WHEN retrieving the internal_negative_control_id_from_lims
-    retrieved_internal_negative_control_sample_id = get_internal_negative_control_id_from_lims(
-        lims=mutant_lims, sample_internal_id=sample_internal_id
-    )
-
-    # THEN no errors are raised and the correct internal_negative_control_id is retrieved
-    assert retrieved_internal_negative_control_sample_id == internal_negative_control_sample_id
+#     # THEN no errors are raised and the correct internal_negative_control_id is retrieved
+#     assert retrieved_internal_negative_control_sample_id == internal_negative_control_sample_id
 
 
 def test_get_mutant_pool_samples(

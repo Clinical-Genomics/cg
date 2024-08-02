@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from cg.apps.lims import LimsAPI
 
 from cg.constants.lims import LimsArtifactTypes, LimsProcess
+from cg.exc import LimsDataError
 
 
 class LimsProject(BaseModel):
@@ -48,7 +49,7 @@ class LimsSample(BaseModel):
     received: str = None
     source: str = None
     priority: str = None
-    udf: LimsUDF = LimsUDF()
+    udfs: LimsUDF = LimsUDF()
 
 
 class LimsArtifactObject(BaseModel):
@@ -108,9 +109,38 @@ class MockLimsAPI(LimsAPI):
             self.artifacts[sample_id] = [LimsArtifactObject(samples=samples)]
 
     def get_latest_artifact_for_sample(
-        self, parent_process, type, sample_internal_id
-    ) -> list[LimsArtifactObject]:
-        return self.artifacts[sample_internal_id]
+        self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
+    ) -> LimsArtifactObject:
+        return self.artifacts[sample_internal_id][0]
+
+    def get_internal_negative_control_id_from_sample_in_pool(
+        self, sample_internal_id: str, pooling_step: LimsProcess
+    ) -> str:
+        """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+        artifact: LimsArtifactObject = self.get_latest_artifact_for_sample(
+            process_type=pooling_step,
+            artifact_type=LimsArtifactTypes.ANALYTE,
+            sample_internal_id=sample_internal_id,
+        )
+        samples = artifact.samples
+
+        negative_controls: list = self._get_negative_controls_from_list(samples=samples)
+
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            raise LimsDataError(
+                f"Several internal negative control samples found: {' '.join(sample_ids)}"
+            )
+        return negative_controls[0].id
+
+    @staticmethod
+    def _get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
+        """Filter and return a list of internal negative controls from a given sample list."""
+        negative_controls = []
+        for sample in samples:
+            if sample.udfs.control == "negative" and sample.udfs.customer == "cust000":
+                negative_controls.append(sample)
+        return negative_controls
 
     def capture_kit(self, lims_id: str):
         if lims_id in self.sample_vars:
