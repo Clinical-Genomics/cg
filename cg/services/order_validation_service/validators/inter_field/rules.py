@@ -6,7 +6,7 @@ from cg.services.order_validation_service.constants import (
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
     CaseSampleError,
-    ConcentrationRequiredSkipRCError,
+    ConcentrationRequiredIfSkipRCError,
     InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
@@ -76,12 +76,12 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
 
 def validate_concentration_required_if_skip_rc(
     order: TomteOrder,
-) -> list[ConcentrationRequiredSkipRCError]:
+) -> list[ConcentrationRequiredIfSkipRCError]:
     errors = []
     for case in order.cases:
         for sample in case.samples:
             if is_concentration_missing(sample, order.skip_reception_control):
-                error = ConcentrationRequiredSkipRCError(
+                error = ConcentrationRequiredIfSkipRCError(
                     case_name=case.name, sample_name=sample.name
                 )
                 errors.append(error)
