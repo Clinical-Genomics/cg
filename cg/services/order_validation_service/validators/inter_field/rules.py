@@ -6,6 +6,7 @@ from cg.services.order_validation_service.constants import (
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
     CaseSampleError,
+    ConcentrationRequiredSkipRCError,
     InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
@@ -16,6 +17,7 @@ from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_application_not_compatible,
     _is_order_name_required,
     _is_ticket_number_missing,
+    is_concentration_missing,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
@@ -68,5 +70,19 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
         for sample in case.samples:
             if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
                 error = InvalidBufferError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+
+
+def validate_concentration_required_if_skip_rc(
+    order: TomteOrder,
+) -> list[ConcentrationRequiredSkipRCError]:
+    errors = []
+    for case in order.cases:
+        for sample in case.samples:
+            if is_concentration_missing(sample, order.skip_reception_control):
+                error = ConcentrationRequiredSkipRCError(
+                    case_name=case.name, sample_name=sample.name
+                )
                 errors.append(error)
     return errors

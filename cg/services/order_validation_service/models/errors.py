@@ -143,3 +143,8 @@ class RepeatedGenePanelsError(CaseError):
 class SubjectIdSameAsCaseNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the case name"
+
+
+class ConcentrationRequiredSkipRCError(CaseSampleError):
+    field: str = "concentration_ng_ul"
+    message: str = "Concentration is required when skipping reception control"
