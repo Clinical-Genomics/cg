@@ -1,8 +1,9 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
-from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
+from cg.services.illumina.sample_sheet.utils import is_dual_index
 
 
 class IlluminaSampleIndexSetting(BaseModel):
@@ -22,6 +23,17 @@ class IlluminaSampleIndexSetting(BaseModel):
         None, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2
     )
     model_config = ConfigDict(populate_by_name=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def separate_indexes(cls, data: any):
+        if isinstance(data, dict):
+            index = data.get("index")
+            if is_dual_index(index):
+                index1, index2 = index.split("-")
+                data["index"] = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
+                data["index2"] = index2.strip() if index2 else None
+        return data
 
 
 class SampleSheetSection(BaseModel):
