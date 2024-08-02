@@ -41,7 +41,7 @@ def internal_negative_control_sample_has_enough_reads(reads: int) -> bool:
     return reads < MutantQC.INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD
 
 
-def get_internal_negative_control_id(lims: LimsAPI, case: Case) -> str:
+def get_internal_negative_control_id_for_case(lims: LimsAPI, case: Case) -> str:
     """Query lims to retrive internal_negative_control_id for a mutant case sequenced in one pool."""
 
     sample_internal_id = case.sample_ids[0]
@@ -56,7 +56,7 @@ def get_internal_negative_control_sample_for_case(
     status_db: Store,
     lims: LimsAPI,
 ) -> Sample:
-    internal_negative_control_id: str = get_internal_negative_control_id(lims=lims, case=case)
+    internal_negative_control_id: str = get_internal_negative_control_id_for_case(lims=lims, case=case)
     return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
 
 
