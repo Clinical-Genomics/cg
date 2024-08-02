@@ -1,5 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
+    InvalidBufferError,
     OrderNameRequiredError,
     SubjectIdSameAsCaseNameError,
     TicketNumberRequiredError,
@@ -7,6 +8,7 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
+    validate_buffers_are_allowed,
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
 )
@@ -63,6 +65,7 @@ def test_application_is_incompatible(
 
     # THEN the error should be about the application compatiblity
     assert isinstance(errors[0], ApplicationNotCompatibleError)
+
 
 def test_elution_buffer_is_not_allowed(valid_order: TomteOrder):
 
