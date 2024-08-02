@@ -20,9 +20,9 @@ class SampleService:
         self._add_cancel_comment(sample_id=sample_id, user_email=user_email)
 
     def _add_cancel_comment(self, sample_id: int, user_email: str) -> None:
-        user: User | None = self.store.get_user_by_email(user_email)
-        comment = get_cancel_comment(user.name)
-        self.store.update_sample_comment(sample_id=sample_id, comment=comment)
+        if user := self.store.get_user_by_email(user_email):
+            comment = get_cancel_comment(user.name)
+            self.store.update_sample_comment(sample_id=sample_id, comment=comment)
 
     def cancel_samples(self, sample_ids: list[int], user_email: str) -> str:
         """Cancel multiple samples. Returns a cancellation confirmation message."""

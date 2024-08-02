@@ -8,11 +8,9 @@ def get_cancel_comment(user_name: str) -> str:
 
 def get_confirmation_message(sample_ids: list[str], case_ids: list[str]) -> str:
     message = f"Cancelled {len(sample_ids)} samples. "
-
     if case_ids:
         cases = ", ".join(case_ids)
         message += f"Found {len(case_ids)} cases with additional samples: {cases}."
     else:
         message += "No case contained additional samples."
-
     return message
