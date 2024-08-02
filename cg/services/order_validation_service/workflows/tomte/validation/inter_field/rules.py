@@ -88,5 +88,6 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
 def validate_subject_ids_different_from_case_names(order: TomteOrder) -> list[CaseSampleError]:
     errors = []
     for case in order.cases:
-        errors.extend(validate_subject_ids_in_case(case))
+        case_errors = validate_subject_ids_in_case(case)
+        errors.extend(case_errors)
     return errors
