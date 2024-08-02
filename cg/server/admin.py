@@ -599,12 +599,10 @@ class SampleView(BaseView):
     )
     def cancel_samples(self, entry_ids: list[str]) -> None:
         user_email: str | None = session.get("user_email")
-
         message: str = sample_service.cancel_samples(
             sample_ids=entry_ids,
             user_email=user_email,
         )
-
         flash(message)
 
 
