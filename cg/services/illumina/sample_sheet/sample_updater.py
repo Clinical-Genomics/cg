@@ -69,10 +69,7 @@ class SamplesUpdater:
             return f"I{len_index2_cycles};"
         ignored_cycles: str = f"N{len_index2_cycles-len_index_2_sample}"
         considered_cycles: str = f"I{len_index_2_sample}"
-        reverse_cycle: bool = (
-            self.run_parameters.index_settings.are_i5_override_cycles_reverse_complemented
-        )
-        if reverse_cycle:
+        if self.run_parameters.index_settings.are_i5_override_cycles_reverse_complemented:
             return f"{ignored_cycles}{considered_cycles};"
         return f"{considered_cycles}{ignored_cycles};"
 
