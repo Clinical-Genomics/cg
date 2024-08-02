@@ -13,12 +13,17 @@ class SampleService:
 
     def cancel_sample(self, sample_id: int, user_email: str) -> list[str]:
         """Cancel a single sample and return a list of all cases it used to be in."""
-        user: User | None = self.store.get_user_by_email(user_email)
+        case_ids: list[str] = self.store.get_case_ids_with_sample(sample_id)
 
         self.store.mark_sample_as_cancelled(sample_id)
         self.store.delete_sample_from_cases(sample_id)
         self.store.delete_cases_without_samples()
 
+        self._add_cancel_comment(sample_id=sample_id, user_email=user_email)
+        return case_ids
+
+    def _add_cancel_comment(self, sample_id: int, user_email: str) -> None:
+        user: User | None = self.store.get_user_by_email(user_email)
         comment = get_cancel_comment(user.name)
         self.store.update_sample_comment(sample_id=sample_id, comment=comment)
 

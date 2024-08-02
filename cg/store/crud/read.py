@@ -1464,5 +1464,7 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def cancel_sample():
-        pass
+    def get_case_ids_with_sample(self, sample_id: str) -> list[str]:
+        """Return all case ids with a sample."""
+        sample: Sample | None = self.get_sample_by_entry_id(sample_id)
+        return [link.case.internal_id for link in sample.links] if sample else []
