@@ -75,6 +75,10 @@ class UpdateHandler(BaseHandler):
         self.session.commit()
 
     def mark_sample_as_cancelled(self, sample_id: int) -> None:
-        sample: Sample = self.get_sample_by_entry_id(sample_id)
+        sample: Sample | None = self.get_sample_by_entry_id(sample_id)
+
+        if not sample:
+            return
+
         sample.is_cancelled = True
         self.session.commit()
