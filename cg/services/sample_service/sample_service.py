@@ -12,7 +12,6 @@ class SampleService:
         self.store = store
 
     def cancel_sample(self, sample_id: int, user_email: str) -> None:
-        """Cancel a single sample and return a list of all cases it used to be in."""
         case_ids: list[str] = self.store.get_case_ids_with_sample(sample_id)
         self.store.mark_sample_as_cancelled(sample_id)
         self.store.delete_sample_from_cases(sample_id)
