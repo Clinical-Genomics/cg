@@ -1007,7 +1007,7 @@ class ReadHandler(BaseHandler):
             creation_date=date_threshold,
         ).all()
 
-    def get_sample_by_entry_id(self, entry_id: int) -> Sample:
+    def get_sample_by_entry_id(self, entry_id: int) -> Sample | None:
         """Return a sample by entry id."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.BY_ENTRY_ID],
@@ -1463,3 +1463,6 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def cancel_sample():
+        pass
