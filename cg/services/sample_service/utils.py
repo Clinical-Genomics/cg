@@ -6,14 +6,12 @@ def get_cancel_comment(user_name: str) -> str:
     return f"Cancelled {date} by {user_name}"
 
 
-def get_confirmation_message(sample_ids: list[str], remaining_cases: list[str]) -> str:
-    samples = "sample" if len(sample_ids) == 1 else "samples"
-    message = f"Cancelled {len(sample_ids)} {samples}. "
+def get_confirmation_message(sample_ids: list[str], case_ids: list[str]) -> str:
+    message = f"Cancelled {len(sample_ids)} samples. "
 
-    if remaining_cases:
-        cases = "case" if len(remaining_cases) == 1 else "cases"
-        case_message = ", ".join(remaining_cases)
-        message += f"Found {len(remaining_cases)} {cases} with additional samples: {case_message}."
+    if case_ids:
+        cases = ", ".join(case_ids)
+        message += f"Found {len(case_ids)} cases with additional samples: {cases}."
     else:
         message += "No case contained additional samples."
 

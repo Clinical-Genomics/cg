@@ -36,5 +36,5 @@ class SampleService:
 
         return get_confirmation_message(
             sample_ids=sample_ids,
-            remaining_cases=remaining_cases,
+            case_ids=remaining_cases,
         )
