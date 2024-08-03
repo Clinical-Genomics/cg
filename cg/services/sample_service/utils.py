@@ -23,7 +23,7 @@ def create_samples_response(samples: list[Sample]) -> SamplesResponse:
     sample_dtos = []
     for sample in samples:
         sample_dtos.append(create_sample_dto(sample))
-    return sample_dtos
+    return SamplesResponse(samples=sample_dtos, count=len(samples))
 
 
 def create_sample_dto(sample: Sample) -> SampleDTO:
