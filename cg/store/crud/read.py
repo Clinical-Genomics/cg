@@ -616,6 +616,7 @@ class ReadHandler(BaseHandler):
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
             SampleFilter.ORDER_BY_CREATED_AT_DESC,
+            SampleFilter.IS_NOT_CANCELLED,
             SampleFilter.LIMIT,
         ]
         return apply_sample_filter(
