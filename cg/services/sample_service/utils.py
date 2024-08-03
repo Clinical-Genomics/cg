@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from cg.server.dto.samples.samples_response import SampleDTO, SamplesResponse
+from cg.server.dto.samples.samples_response import CustomerDto, SampleDTO, SamplesResponse
 from cg.store.models import Sample
 
 
@@ -27,9 +27,13 @@ def create_samples_response(samples: list[Sample]) -> SamplesResponse:
 
 
 def create_sample_dto(sample: Sample) -> SampleDTO:
+    customer = CustomerDto(
+        internal_id=sample.customer.internal_id,
+        name=sample.customer.name,
+    )
     return SampleDTO(
         comment=sample.comment,
-        customer=sample.customer.internal_id,
+        customer=customer,
         internal_id=sample.internal_id,
         name=sample.name,
         phenotype_groups=sample.phenotype_groups,

@@ -3,6 +3,11 @@ from pydantic import BaseModel
 from cg.constants.subject import Sex
 
 
+class CustomerDto(BaseModel):
+    internal_id: str
+    name: str
+
+
 class SampleDTO(BaseModel):
     name: str | None = None
     internal_id: str | None = None
@@ -38,7 +43,7 @@ class SampleDTO(BaseModel):
     status: str | None = None
     tumour: bool | None = None
     reference_genome: str | None = None
-    customer: str | None = None
+    customer: CustomerDto | None = None
 
 
 class SamplesResponse(BaseModel):
