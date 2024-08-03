@@ -43,8 +43,6 @@ from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpd
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
-from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.ext import (
     db,
@@ -52,7 +50,6 @@ from cg.server.ext import (
     lims,
     order_service,
     osticket,
-    sample_service,
 )
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
@@ -305,14 +302,6 @@ def parse_samples():
     limit = int(request.args.get("limit", 50))
     parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
     return jsonify(samples=parsed_samples, total=len(samples))
-
-
-@BLUEPRINT.route("/samples_in_collaboration")
-def get_samples_in_collaboration():
-    """Return samples in a customer group."""
-    data = CollaboratorSamplesRequest.model_validate(request.args)
-    response: SamplesResponse = sample_service.get_collaborator_samples(data)
-    return jsonify(response.model_dump()), HTTPStatus.OK
 
 
 @BLUEPRINT.route("/samples/<sample_id>")
