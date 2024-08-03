@@ -129,9 +129,11 @@ def filter_samples_by_internal_id_pattern(
 
 
 def filter_samples_by_internal_id_or_name_search(
-    samples: Query, search_pattern: str, **kwargs
+    samples: Query, search_pattern: str | None, **kwargs
 ) -> Query:
     """Return samples matching the internal id or name search."""
+    if search_pattern is None:
+        return samples
     return samples.filter(
         or_(
             Sample.name.contains(search_pattern),
@@ -161,6 +163,10 @@ def filter_out_cancelled_samples(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_cancelled.is_(False))
 
 
+def apply_limit(samples: Query, limit: int, **kwargs) -> Query:
+    return samples.limit(limit)
+
+
 def apply_sample_filter(
     filter_functions: list[Callable],
     samples: Query,
@@ -178,6 +184,7 @@ def apply_sample_filter(
     search_pattern: str | None = None,
     identifier_name: str = None,
     identifier_value: Any = None,
+    limit: int | None = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -198,6 +205,7 @@ def apply_sample_filter(
             search_pattern=search_pattern,
             identifier_name=identifier_name,
             identifier_value=identifier_value,
+            limit=limit,
         )
     return samples
 
@@ -229,6 +237,7 @@ class SampleFilter(Enum):
     IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
     IS_TUMOUR: Callable = filter_samples_is_tumour
     IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
+    LIMIT: Callable = apply_limit
     WITH_LOQUSDB_ID: Callable = filter_samples_with_loqusdb_id
     WITHOUT_LOQUSDB_ID: Callable = filter_samples_without_loqusdb_id
     WITH_TYPE: Callable = filter_samples_with_type

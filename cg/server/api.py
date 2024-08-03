@@ -44,7 +44,7 @@ from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
-from cg.server.dto.samples.collaborator_samples_response import CollaboratorSamplesResponse
+from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.ext import (
     db,
@@ -311,7 +311,7 @@ def parse_samples():
 def get_samples_in_collaboration():
     """Return samples in a customer group."""
     data = CollaboratorSamplesRequest.model_validate(request.args)
-    response: CollaboratorSamplesResponse = sample_service.get_samples_for_collaborators(data)
+    response: SamplesResponse = sample_service.get_collaborator_samples(data)
     return jsonify(response.model_dump()), HTTPStatus.OK
 
 

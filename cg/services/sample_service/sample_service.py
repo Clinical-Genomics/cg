@@ -1,8 +1,11 @@
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.services.sample_service.utils import (
+    create_samples_response,
     get_cancel_comment,
     get_confirmation_message,
 )
-from cg.store.models import User
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 
@@ -38,5 +41,6 @@ class SampleService:
             case_ids=remaining_cases,
         )
 
-    def get_samples_for_collaborators():
-        pass
+    def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> SamplesResponse:
+        samples: list[Sample] = self.store.get_collaborator_samples(request)
+        return create_samples_response(samples)
