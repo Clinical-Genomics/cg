@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.models.errors import (
+    ConcentrationRequiredIfSkipRCError,
     DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidBufferError,
@@ -12,6 +13,7 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_buffers_are_allowed,
+    validate_concentration_required_if_skip_rc,
     validate_subject_ids_different_from_sample_names,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -196,6 +198,20 @@ def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
 
     # THEN no error is returned
     assert not errors
+
+
+def test_concentration_required_if_skip_rc(valid_order: TomteOrder):
+    # GIVEN an order with missing concentration trying to skip reception control
+    valid_order.skip_reception_control = True
+
+    # WHEN validating that concentration is provided
+    errors = validate_concentration_required_if_skip_rc(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing concentration
+    assert isinstance(errors[0], ConcentrationRequiredIfSkipRCError)
 
 
 def test_concentration_not_within_interval_if_skip_rc(
