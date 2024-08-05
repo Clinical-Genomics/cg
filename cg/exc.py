@@ -60,6 +60,12 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.

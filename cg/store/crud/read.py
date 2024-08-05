@@ -9,7 +9,7 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
@@ -1009,11 +1009,16 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
-        return apply_sample_filter(
+        sample: Sample | None = apply_sample_filter(
             filter_functions=[SampleFilter.BY_ENTRY_ID],
             samples=self._get_query(table=Sample),
             entry_id=entry_id,
         ).first()
+
+        if not sample:
+            LOG.error(f"Could not find sample with entry id {entry_id}")
+            raise SampleNotFoundError(f"Could not find sample with entry id {entry_id}")
+        return sample
 
     def get_sample_by_internal_id(self, internal_id: str) -> Sample | None:
         """Return a sample by lims id."""
@@ -1463,3 +1468,14 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def get_case_ids_with_sample(self, sample_id: int) -> list[str]:
+        """Return all case ids with a sample."""
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
+        return [link.case.internal_id for link in sample.links] if sample else []
+
+    def get_case_ids_for_samples(self, sample_ids: list[int]) -> list[str]:
+        case_ids: list[str] = []
+        for sample_id in sample_ids:
+            case_ids.extend(self.get_case_ids_with_sample(sample_id))
+        return list(set(case_ids))
