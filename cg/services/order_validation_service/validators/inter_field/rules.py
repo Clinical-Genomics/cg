@@ -77,10 +77,12 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
 def validate_concentration_required_if_skip_rc(
     order: TomteOrder,
 ) -> list[ConcentrationRequiredIfSkipRCError]:
+    if not order.skip_reception_control:
+        return []
     errors = []
     for case in order.cases:
         for sample in case.samples:
-            if is_concentration_missing(sample, order.skip_reception_control):
+            if is_concentration_missing(sample):
                 error = ConcentrationRequiredIfSkipRCError(
                     case_name=case.name, sample_name=sample.name
                 )

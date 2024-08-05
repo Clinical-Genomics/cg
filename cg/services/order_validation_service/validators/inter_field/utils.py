@@ -22,5 +22,5 @@ def _is_application_not_compatible(
     return application and application.prep_category not in allowed_prep_categories
 
 
-def is_concentration_missing(sample: TomteSample, skip_reception_control: bool) -> bool:
-    return skip_reception_control and not sample.concentration_ng_ul
+def is_concentration_missing(sample: TomteSample) -> bool:
+    return not sample.concentration_ng_ul
