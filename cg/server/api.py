@@ -55,7 +55,6 @@ from cg.store.models import (
     Customer,
     IlluminaSampleSequencingMetrics,
     Pool,
-    Sample,
 )
 
 LOG = logging.getLogger(__name__)
@@ -217,29 +216,6 @@ def parse_family_in_collaboration(family_id):
     if case.customer not in customer.collaborators:
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
-
-
-@BLUEPRINT.route("/samples/<sample_id>")
-def parse_sample(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    if sample is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
-
-
-@BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
-def parse_sample_in_collaboration(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    if sample.customer not in customer.collaborators:
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
 @BLUEPRINT.route("/pools")
