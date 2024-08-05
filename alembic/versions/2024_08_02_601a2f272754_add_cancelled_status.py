@@ -20,7 +20,7 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="sample",
-        column=sa.Column("is_cancelled", sa.Boolean(), nullable=False, default=False),
+        column=sa.Column("is_cancelled", sa.Boolean(), nullable=False, server_default=False),
     )
 
 
