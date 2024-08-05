@@ -3,7 +3,6 @@ from datetime import datetime
 from cg.server.dto.samples.samples_response import CustomerDto, SampleDTO, SamplesResponse
 from cg.store.models import Sample
 
-
 def get_cancel_comment(user_name: str) -> str:
     date: str = datetime.now().strftime("%Y-%m-%d")
     return f"Cancelled {date} by {user_name}"
