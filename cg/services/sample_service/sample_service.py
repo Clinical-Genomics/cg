@@ -23,7 +23,7 @@ class SampleService:
 
     def cancel_samples(self, sample_ids: list[int], user_email: str) -> str:
         """Returns a cancellation confirmation message."""
-        case_ids = self.store.get_case_internal_ids_with_samples(sample_ids)
+        case_ids = self.store.get_case_ids_for_samples(sample_ids)
 
         for sample_id in sample_ids:
             self.cancel_sample(sample_id=sample_id, user_email=user_email)
