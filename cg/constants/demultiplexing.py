@@ -31,6 +31,8 @@ class DemultiplexingDirsAndFiles(StrEnum):
     INTER_OP: str = "InterOp"
     RUN_COMPLETION_STATUS: str = "RunCompletionStatus.xml"
     DEMUX_VERSION_FILE: str = "dragen-replay.json"
+    SEQUENCING_COMPLETED: str = "SequencingComplete.txt"
+    SEQUENCE_COMPLETED: str = "SequenceComplete.txt"
 
 
 class RunParametersXMLNodes(StrEnum):

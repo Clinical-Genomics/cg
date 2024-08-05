@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.pacbio.metrics.metrics_parser import MetricsParser
+from cg.services.pacbio.metrics.metrics_parser import PacBioMetricsParser
 
 
 @pytest.fixture
-def pac_bio_metrics_parser(pac_bio_smrt_cell_dir: Path) -> MetricsParser:
+def pac_bio_metrics_parser(pac_bio_smrt_cell_dir_1_a01: Path) -> PacBioMetricsParser:
     """Return a PacBio metrics parser."""
-    return MetricsParser(pac_bio_smrt_cell_dir)
+    return PacBioMetricsParser(pac_bio_smrt_cell_dir_1_a01)
