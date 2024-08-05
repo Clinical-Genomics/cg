@@ -145,6 +145,11 @@ class SubjectIdSameAsCaseNameError(CaseSampleError):
     message: str = "Subject id must be different from the case name"
 
 
+class ConcentrationRequiredIfSkipRCError(CaseSampleError):
+    field: str = "concentration_ng_ul"
+    message: str = "Concentration is required when skipping reception control"
+
+
 class SubjectIdSameAsSampleNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the sample name"
