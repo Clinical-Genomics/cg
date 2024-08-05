@@ -1,7 +1,10 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
 from cg.constants.housekeeper_tags import AlignmentFileTag
+
+
+HGNC_ID = "hgnc_id"
 
 
 class GenomeBuild(StrEnum):
@@ -29,7 +32,15 @@ class ScoutCustomCaseReportTags(StrEnum):
     GENE_FUSION_RESEARCH: str = "gene_fusion_research"
 
 
-MIP_CASE_TAGS = dict(
+class ScoutUploadKey(StrEnum):
+    SMN_TSV = auto()
+    SNV_VCF = auto()
+    SV_VCF = auto()
+    VCF_STR = auto()
+    VCF_FUSION = auto()
+
+
+RAREDISEASE_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc_report={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
@@ -45,6 +56,8 @@ MIP_CASE_TAGS = dict(
     vcf_mei_research={"mobile-elements", "research", "vcf"},
     vcf_str={"vcf-str"},
 )
+
+MIP_CASE_TAGS: dict[str, set[str]] = RAREDISEASE_CASE_TAGS
 
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
@@ -74,7 +87,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_fusion={"vcf-fusion"},
 )
 
-MIP_SAMPLE_TAGS = dict(
+RAREDISEASE_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
@@ -88,6 +101,8 @@ MIP_SAMPLE_TAGS = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     mitodel_file={"mitodel"},
 )
+
+MIP_SAMPLE_TAGS: dict[str, set[str]] = RAREDISEASE_SAMPLE_TAGS
 
 BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},
