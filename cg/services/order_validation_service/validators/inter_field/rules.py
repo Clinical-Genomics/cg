@@ -10,6 +10,7 @@ from cg.services.order_validation_service.models.errors import (
     InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
+    SubjectIdSameAsSampleNameError,
     TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -84,5 +85,15 @@ def validate_concentration_required_if_skip_rc(
                 error = ConcentrationRequiredIfSkipRCError(
                     case_name=case.name, sample_name=sample.name
                 )
+                errors.append(error)
+    return errors
+                           
+
+def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[CaseSampleError]:
+    errors = []
+    for case in order.cases:
+        for sample in case.samples:
+            if sample.name == sample.subject_id:
+                error = SubjectIdSameAsSampleNameError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors
