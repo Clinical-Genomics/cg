@@ -100,6 +100,8 @@ def validate_subject_ids_different_from_case_names(
 def validate_concentration_interval_if_skip_rc(
     order: TomteOrder,
 ) -> list[InvalidConcentrationIfSkipRCError]:
+    if not order.skip_reception_control:
+        return []
     errors = []
     for case in order.cases:
         case_errors = validate_concentration_in_case(case)
