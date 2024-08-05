@@ -378,43 +378,6 @@ def parse_current_user_information():
     return jsonify(user=g.current_user.to_dict())
 
 
-@BLUEPRINT.route("/applications")
-@is_public
-def parse_applications():
-    """Return application tags."""
-    applications: list[Application] = db.get_applications_is_not_archived()
-    parsed_applications: list[dict] = [application.to_dict() for application in applications]
-    return jsonify(applications=parsed_applications)
-
-
-@BLUEPRINT.route("/applications/<tag>")
-@is_public
-def parse_application(tag: str):
-    """Return an application tag."""
-    application: Application = db.get_application_by_tag(tag=tag)
-    if not application:
-        return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
-
-    application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
-        tag
-    )
-    application_dict: dict[str, Any] = application.to_dict()
-    application_dict["workflow_limitations"] = [
-        limitation.to_dict() for limitation in application_limitations
-    ]
-    return jsonify(**application_dict)
-
-
-@BLUEPRINT.route("/applications/<tag>/workflow_limitations")
-@is_public
-def get_application_workflow_limitations(tag: str):
-    """Return application workflow specific limitations."""
-    if application_limitations := db.get_application_limitations_by_tag(tag):
-        return jsonify([limitation.to_dict() for limitation in application_limitations])
-    else:
-        return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
-
-
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
