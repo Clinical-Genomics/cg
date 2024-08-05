@@ -1494,7 +1494,6 @@ class ReadHandler(BaseHandler):
         sample: Sample = self.get_sample_by_entry_id(sample_id)
         return [link.case.internal_id for link in sample.links] if sample else []
 
-
     def get_case_ids_for_samples(self, sample_ids: list[int]) -> list[str]:
         case_ids: list[str] = []
         for sample_id in sample_ids:
