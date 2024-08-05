@@ -15,7 +15,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
-from cg.constants.scout import MIP_CASE_TAGS
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -23,7 +23,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -47,7 +47,7 @@ class MipDNAReportAPI(ReportAPI):
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=parsed_metrics.duplicate_reads,
-            gender=parsed_metrics.predicted_sex,
+            sex=parsed_metrics.predicted_sex,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
@@ -89,33 +89,42 @@ class MipDNAReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
-            vcf_str=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_str"),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="smn_tsv"),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+            ),
+            vcf_str=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
+            ),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
+            ),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for MIP DNA."""
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
+            metadata=self.get_sample_metadata_required_fields(case=case),
+            methods=self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
             ),
-            "timestamps": self.get_timestamp_required_fields(
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
             ),
-            "metadata": self.get_sample_metadata_required_fields(case=case),
-        }
+        )
+        return report_required_fields.model_dump()
 
     @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:
@@ -130,20 +139,16 @@ class MipDNAReportAPI(ReportAPI):
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
 
-    def get_upload_case_tags(self) -> dict:
-        """Return MIP DNA upload case tags."""
-        return MIP_CASE_TAGS
-
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+    def get_scout_uploaded_file_from_hk(
+        self, case_id: str, scout_key: ScoutUploadKey
+    ) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        tags: list = self.get_hk_scout_file_tags(scout_key=scout_key)
         uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id
         )
         if not tags or not any(uploaded_files):
-            LOG.info(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
+            LOG.info(f"No files were found for the following Scout key: {scout_key}")
             return None
         return uploaded_files[0].full_path
