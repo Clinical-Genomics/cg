@@ -249,7 +249,7 @@ class AnalysisAPI(MetaAPI):
         case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
         analysis_start: datetime.date = self.get_bundle_created_date(case_id)
         workflow_version: str = self.get_workflow_version(case_id)
-        new_analysis: Case = self.status_db.add_analysis(
+        new_analysis: Analysis = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
             completed_at=datetime.now() if not force else None,
