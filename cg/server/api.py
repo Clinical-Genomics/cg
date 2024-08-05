@@ -39,7 +39,7 @@ from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
-from cg.server.endpoints.utils import before_request
+from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import (
     db,
     delivery_message_service,
