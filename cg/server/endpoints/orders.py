@@ -47,7 +47,7 @@ from cg.store.models import (
 )
 
 
-ORDERS_BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
 ORDERS_BLUEPRINT.before_request(before_request)
 
 LOG = logging.getLogger(__name__)
