@@ -82,6 +82,7 @@ def mip_dna_observations_api(
 
     return mip_dna_observations_api
 
+
 @pytest.fixture
 def raredisease_observations_api(
     cg_context: CGConfig,
@@ -95,9 +96,7 @@ def raredisease_observations_api(
     mocker: MockFixture,
 ) -> RarediseaseObservationsAPI:
     """Rare diseases observations API fixture."""
-    raredisease_observations_api = RarediseaseObservationsAPI(
-        cg_context
-    )
+    raredisease_observations_api = RarediseaseObservationsAPI(cg_context)
     raredisease_observations_api.store = analysis_store
     raredisease_observations_api.loqusdb_api = loqusdb_api
 

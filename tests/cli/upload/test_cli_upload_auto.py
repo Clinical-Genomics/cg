@@ -19,8 +19,10 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.RAREDISEASE,
     Workflow.RNAFUSION,
     Workflow.TAXPROFILER,
-    Workflow.TOMTE
+    Workflow.TOMTE,
 ]
+
+
 @pytest.mark.parametrize(
     "workflow",
     WORKFLOWS_TO_TEST,

@@ -117,7 +117,9 @@ def test_get_observations_api_raredisease(cg_context: CGConfig, helpers: StoreHe
     # GIVEN a Loqusdb supported case
     case: Case = helpers.add_case(store, data_analysis=Workflow.RAREDISEASE)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    case_sample: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    case_sample: CaseSample = store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
 
     store.session.add(case_sample)
 
