@@ -11,6 +11,7 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
     validate_buffer_skip_rc_condition,
     validate_concentration_required_if_skip_rc,
+    validate_subject_ids_different_from_sample_names,
     validate_ticket_number_required_if_connected,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
@@ -51,5 +52,6 @@ TOMTE_CASE_SAMPLE_RULES = [
     validate_pedigree,
     validate_sample_names_not_repeated,
     validate_subject_ids_different_from_case_names,
+    validate_subject_ids_different_from_sample_names,
     validate_wells_contain_at_most_one_sample,
 ]
