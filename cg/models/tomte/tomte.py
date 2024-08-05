@@ -62,10 +62,10 @@ class TomteParameters(WorkflowParameters):
 
     @validator("genome", pre=True)
     def restrict_genome_values(cls, genome: str) -> str:
-        if genome == GenomeVersion.hg38:
-            return "GRCh38"
-        elif genome == GenomeVersion.hg19:
-            return "GRCh37"
+        if genome == GenomeVersion.HG38:
+            return GenomeVersion.GRCh38.value
+        elif genome == GenomeVersion.HG19:
+            return GenomeVersion.GRCh37.value
 
 
 class TomteQCMetrics(QCMetrics):

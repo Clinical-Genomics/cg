@@ -19,7 +19,7 @@ from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
@@ -274,10 +274,9 @@ class Analysis(Base):
     cleaned_at: Mapped[datetime | None]
     # primary analysis is the one originally delivered to the customer
     is_primary: Mapped[bool | None] = mapped_column(default=False)
-
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    comment: Mapped[Text | None]
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
@@ -406,9 +405,7 @@ class Customer(Base):
 class Collaboration(Base):
     __tablename__ = "collaboration"
     id: Mapped[PrimaryKeyInt]
-    internal_id: Mapped[Str32] = mapped_column(
-        unique=True,
-    )
+    internal_id: Mapped[Str32] = mapped_column(unique=True)
     name: Mapped[Str128]
     customers: Mapped[list[Customer]] = orm.relationship(
         secondary="customer_collaboration", back_populates="collaborations"
@@ -456,7 +453,7 @@ class Case(Base, PriorityMixin):
         default=Priority.standard,
     )
 
-    sequencing_qc_status: Mapped[SequencingQCStatus] = mapped_column(
+    aggregated_sequencing_qc: Mapped[SequencingQCStatus] = mapped_column(
         types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
@@ -648,7 +645,7 @@ class Flowcell(Base):
     sequencer_name: Mapped[Str32 | None]
     sequenced_at: Mapped[datetime | None]
     status: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+        types.Enum(*(status.value for status in SequencingRunDataAvailability)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
@@ -746,6 +743,7 @@ class Sample(Base, PriorityMixin):
     application_version: Mapped[ApplicationVersion] = orm.relationship(
         foreign_keys=[application_version_id]
     )
+    is_cancelled: Mapped[bool] = mapped_column(default=False, nullable=False)
     capture_kit: Mapped[Str64 | None]
     comment: Mapped[Text | None]
     control: Mapped[str | None] = mapped_column(
@@ -795,7 +793,7 @@ class Sample(Base, PriorityMixin):
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
-    _new_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
+    _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"
     )
 
@@ -857,9 +855,14 @@ class Sample(Base, PriorityMixin):
         return f"Ordered {self.ordered_at.date()}"
 
     @property
-    def _run_devices(self) -> list["RunDevice"]:
+    def run_devices(self) -> list["RunDevice"]:
         """Return the run_devices a sample has been sequenced on."""
-        return list({metric.run_metrics.device for metric in self._new_run_metrics})
+        return list({metric.instrument_run.device for metric in self._sample_run_metrics})
+
+    @property
+    def sample_run_metrics(self) -> list["SampleRunMetrics"]:
+        """Return the sample run metrics for the sample."""
+        return self._sample_run_metrics
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
@@ -987,13 +990,13 @@ class RunDevice(Base):
     )
 
     @property
-    def _samples(self) -> list[Sample]:
+    def samples(self) -> list[Sample]:
         """Return the samples sequenced in this device."""
         return list(
             {
                 sample_run_metric.sample
                 for run in self.instrument_runs
-                for sample_run_metric in run.sample_run_metrics
+                for sample_run_metric in run.sample_metrics
             }
         )
 
@@ -1053,7 +1056,7 @@ class IlluminaSequencingRun(InstrumentRun):
     )
     sequencer_name: Mapped[Str32 | None]
     data_availability: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+        types.Enum(*(status.value for status in SequencingRunDataAvailability)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
@@ -1074,6 +1077,11 @@ class IlluminaSequencingRun(InstrumentRun):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
+    def to_dict(self):
+        """Represent as dictionary"""
+        data = to_dict(model_instance=IlluminaSequencingRun)
+        return data
+
 
 class PacBioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
@@ -1082,6 +1090,7 @@ class PacBioSequencingRun(InstrumentRun):
     well: Mapped[Str32]
     plate: Mapped[int]
     movie_time_hours: Mapped[int]
+    movie_name: Mapped[Str32]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1090,6 +1099,7 @@ class PacBioSequencingRun(InstrumentRun):
     p0_percent: Mapped[Num_6_2]
     p1_percent: Mapped[Num_6_2]
     p2_percent: Mapped[Num_6_2]
+    productive_zmws: Mapped[BigInt]
     polymerase_mean_read_length: Mapped[BigInt]
     polymerase_read_length_n50: Mapped[BigInt]
     polymerase_mean_longest_subread: Mapped[BigInt]
@@ -1098,6 +1108,9 @@ class PacBioSequencingRun(InstrumentRun):
     control_mean_read_length: Mapped[BigInt]
     control_mean_read_concordance: Mapped[Num_6_2]
     control_mode_read_concordance: Mapped[Num_6_2]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1112,7 +1125,7 @@ class SampleRunMetrics(Base):
     type: Mapped[DeviceType]
 
     instrument_run: Mapped[InstrumentRun] = orm.relationship(back_populates="sample_metrics")
-    sample: Mapped[Sample] = orm.relationship(back_populates="_new_run_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="_sample_run_metrics")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
@@ -1133,3 +1146,21 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     yield_q30: Mapped[Num_6_2 | None]
     created_at: Mapped[datetime | None]
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class PacBioSampleSequencingMetrics(SampleRunMetrics):
+    """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
+
+    __tablename__ = "pacbio_sample_sequencing_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    hifi_reads: Mapped[BigInt]
+    hifi_yield: Mapped[BigInt]
+    hifi_mean_read_length: Mapped[BigInt]
+    hifi_median_read_quality: Mapped[Str32]
+    percent_reads_passing_q30: Mapped[Num_6_2]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
