@@ -1,16 +1,11 @@
 import json
 import logging
 import tempfile
-from functools import wraps
 from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
-import cachecontrol
-import requests
-from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import exceptions
-from google.auth.transport import requests as google_requests
+from flask import Blueprint, abort, g, jsonify, make_response, request
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
@@ -44,6 +39,7 @@ from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
+from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
@@ -61,68 +57,11 @@ from cg.store.models import (
     IlluminaSampleSequencingMetrics,
     Pool,
     Sample,
-    User,
 )
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
-
-
-session = requests.session()
-cached_session = cachecontrol.CacheControl(session)
-
-
-def verify_google_token(token):
-    request = google_requests.Request(session=cached_session)
-    return id_token.verify_oauth2_token(id_token=token, request=request)
-
-
-def is_public(route_function):
-    @wraps(route_function)
-    def public_endpoint(*args, **kwargs):
-        return route_function(*args, **kwargs)
-
-    public_endpoint.is_public = True
-    return public_endpoint
-
-
-@BLUEPRINT.before_request
-def before_request():
-    """Authorize API routes with JSON Web Tokens."""
-    if not request.is_secure:
-        return abort(
-            make_response(jsonify(message="Only https requests accepted"), HTTPStatus.FORBIDDEN)
-        )
-
-    if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), HTTPStatus.NO_CONTENT)
-
-    endpoint_func = current_app.view_functions[request.endpoint]
-    if getattr(endpoint_func, "is_public", None):
-        return
-
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        return abort(
-            make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    jwt_token = auth_header.split("Bearer ")[-1]
-    try:
-        user_data = verify_google_token(jwt_token)
-    except (exceptions.OAuthError, ValueError) as e:
-        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
-        return abort(
-            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    user: User = db.get_user_by_email(user_data["email"])
-    if user is None or not user.order_portal_login:
-        message = f"{user_data['email']} doesn't have access"
-        LOG.error(message)
-        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
-
-    g.current_user = user
+BLUEPRINT.before_request(before_request)
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])

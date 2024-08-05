@@ -1,6 +1,6 @@
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
-from cg.store.models import Customer, Sample, User
+from cg.store.models import Sample
 from cg.services.sample_service.utils import (
     create_samples_response,
     get_cancel_comment,
