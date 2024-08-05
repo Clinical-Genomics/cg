@@ -7,9 +7,10 @@ from subprocess import CalledProcessError
 from typing import Iterator
 
 import click
-from housekeeper.store.models import Bundle, Version
+from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,

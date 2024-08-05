@@ -12,6 +12,7 @@ from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -25,9 +26,9 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
-    observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
-        context=context, case_id=case_id, upload=False
-    )
+    observations_api: (
+        BalsamicObservationsAPI | MipDNAObservationsAPI | RarediseaseObservationsAPI
+    ) = get_observations_api(context=context, case_id=case_id, upload=False)
     if dry_run:
         LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case_id}")
         return

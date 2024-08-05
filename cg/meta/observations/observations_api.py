@@ -18,6 +18,7 @@ from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
+    RarediseaseObservationsInputFiles,
 )
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -56,7 +57,11 @@ class ObservationsAPI:
 
     def get_observations_input_files(
         self, case: Case
-    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
+    ) -> (
+        BalsamicObservationsInputFiles
+        | MipDNAObservationsInputFiles
+        | RarediseaseObservationsInputFiles
+    ):
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
