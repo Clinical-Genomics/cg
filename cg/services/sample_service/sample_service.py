@@ -22,7 +22,7 @@ class SampleService:
             self.store.update_sample_comment(sample_id=sample_id, comment=comment)
 
     def cancel_samples(self, sample_ids: list[int], user_email: str) -> str:
-        """Cancel multiple samples. Returns a cancellation confirmation message."""
+        """Returns a cancellation confirmation message."""
         case_ids = self.store.get_case_internal_ids_with_samples(sample_ids)
 
         for sample_id in sample_ids:
@@ -31,7 +31,4 @@ class SampleService:
         self.store.delete_cases_without_samples(case_ids)
         remaining_cases = self.store.filter_cases_with_samples(case_ids)
 
-        return get_confirmation_message(
-            sample_ids=sample_ids,
-            case_ids=remaining_cases,
-        )
+        return get_confirmation_message(sample_ids=sample_ids, case_ids=remaining_cases)

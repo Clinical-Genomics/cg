@@ -11,6 +11,7 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
@@ -605,6 +606,25 @@ class ReadHandler(BaseHandler):
             customer_entry_ids=customer_entry_ids,
             search_pattern=pattern,
             filter_functions=filter_functions,
+        ).all()
+
+    def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
+        customer: Customer | None = self.get_customer_by_internal_id(request.customer)
+        collaborator_ids = [collaborator.id for collaborator in customer.collaborators]
+
+        filters = [
+            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
+            SampleFilter.ORDER_BY_CREATED_AT_DESC,
+            SampleFilter.IS_NOT_CANCELLED,
+            SampleFilter.LIMIT,
+        ]
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            customer_entry_ids=collaborator_ids,
+            search_pattern=request.enquiry,
+            filter_functions=filters,
+            limit=request.limit,
         ).all()
 
     def _get_samples_by_customer_and_subject_id_query(
