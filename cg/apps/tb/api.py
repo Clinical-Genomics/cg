@@ -14,7 +14,11 @@ from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
-from cg.exc import TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
+from cg.exc import (
+    AnalysisNotCompletedError,
+    TrailblazerAnalysisNotFound,
+    TrailblazerAPIHTTPError,
+)
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -180,10 +184,17 @@ class TrailblazerAPI:
         return response_data.summaries
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
-        """Return the analyses in the order which have a 'Completed' status."""
-        endpoint = f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}"
+        """Return the analyses in the order ready to be delivered."""
+        endpoint = (
+            f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
+        )
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
+
+    def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False) -> None:
+        """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed."""
+        if not self.is_latest_analysis_completed(case_id) and not force:
+            raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")

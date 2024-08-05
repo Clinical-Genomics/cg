@@ -67,7 +67,7 @@ def test_upload(
     data = coverage_api.data(analysis_obj=analysis_obj)
 
     # WHEN uploading samples in data dictionary
-    coverage_api.upload(data=data, replace=True)
+    coverage_api.upload(data=data)
 
     # THEN methods sample, and upload should each have been called three times
     assert mock_upload.call_count == len(data["samples"])

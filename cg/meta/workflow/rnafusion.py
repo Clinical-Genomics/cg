@@ -4,18 +4,14 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
-from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.rnafusion.rnafusion import (
-    RnafusionAnalysis,
-    RnafusionParameters,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -61,12 +57,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
 
-    def get_deliverables_template_content(self) -> list[dict]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case. Currently fixed for hg38."""
+        return GenomeVersion.HG38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
@@ -121,20 +114,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
-        """Parse Rnafusion output analysis files and return analysis model."""
-        sample_metrics: dict[str, dict] = {}
-        for metric in qc_metrics_raw:
-            try:
-                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
-            except KeyError:
-                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return RnafusionAnalysis(sample_metrics=sample_metrics)
-
-    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
-        """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
-        return self.parse_analysis(qc_metrics_raw=qc_metrics)
-
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Rnafusion Scout upload case tags."""
+        return RNAFUSION_CASE_TAGS

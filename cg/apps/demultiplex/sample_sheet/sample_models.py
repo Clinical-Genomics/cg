@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -9,106 +8,17 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
     is_dual_index,
-    is_padding_needed,
-    pad_index_one,
-    pad_index_two,
 )
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
-from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import (
-    CUSTOM_INDEX_TAIL,
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
-from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
 
 
-class FlowCellSample(BaseModel):
-    """Base class for flow cell samples."""
-
-    lane: int
-    sample_id: SampleId
-    index: str
-    index2: str = EMPTY_STRING
-    model_config = ConfigDict(populate_by_name=True)
-
-    def separate_indexes(self, is_run_single_index: bool) -> None:
-        """Update values for index and index2 splitting the original LIMS dual index."""
-        if is_dual_index(self.index):
-            index1, index2 = self.index.split("-")
-            self.index = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
-            self.index2 = index2.strip() if not is_run_single_index else EMPTY_STRING
-
-    @abstractmethod
-    def process_indexes(self, run_parameters: RunParameters):
-        """Update index attributes with the final values for the sample sheet."""
-        pass
-
-    @abstractmethod
-    def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
-    ) -> None:
-        """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
-        pass
-
-
-class FlowCellSampleBcl2Fastq(FlowCellSample):
-    """Class that represents a Bcl2Fastq sample."""
-
-    flowcell_id: str = Field("", alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID)
-    lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE)
-    sample_ref: str = Field(
-        GenomeVersion.hg19, alias=SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE
-    )
-    index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1)
-    index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2)
-    sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME)
-    control: str = Field("N", alias=SampleSheetBcl2FastqSections.Data.CONTROL)
-    recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE)
-    operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR)
-
-    sample_id: SampleId = Field(
-        ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ
-    )
-    project: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ)
-
-    def _pad_indexes_if_necessary(self, run_parameters: RunParameters) -> None:
-        index_length: int = len(self.index)
-        if is_padding_needed(
-            index1_cycles=run_parameters.get_index_1_cycles(),
-            index2_cycles=run_parameters.get_index_2_cycles(),
-            sample_index_length=index_length,
-        ):
-            LOG.debug("Padding indexes")
-            self.index = pad_index_one(index_string=self.index)
-            self.index2 = pad_index_two(
-                index_string=self.index2,
-                reverse_complement=run_parameters.index_settings.should_i5_be_reverse_complemented,
-            )
-            return
-        LOG.debug(f"Padding not necessary for sample {self.sample_id}")
-
-    def process_indexes(self, run_parameters: RunParameters):
-        """Parses, pads and reverse complement the indexes if necessary."""
-        reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complemented
-        self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
-        self._pad_indexes_if_necessary(run_parameters=run_parameters)
-        if reverse_index2:
-            self.index2 = get_reverse_complement_dna_seq(self.index2)
-
-    def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
-    ) -> None:
-        """No updating of barcode mismatch values for Bcl2Fastq samples."""
-        LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
-
-
-class FlowCellSampleBCLConvert(FlowCellSample):
-    """Class that represents a BCLConvert sample."""
+class IlluminaSampleIndexSetting(BaseModel):
+    """Class that represents index settings for a sample on an Illumina run."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
     sample_id: SampleId = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID)
@@ -123,6 +33,14 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     barcode_mismatches_2: int | str = Field(
         1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2
     )
+    model_config = ConfigDict(populate_by_name=True)
+
+    def separate_indexes(self, is_run_single_index: bool) -> None:
+        """Update values for index and index2 splitting the original LIMS dual index."""
+        if is_dual_index(self.index):
+            index1, index2 = self.index.split("-")
+            self.index = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
+            self.index2 = index2.strip() if not is_run_single_index else EMPTY_STRING
 
     def _get_index1_override_cycles(self, len_index1_cycles: int) -> str:
         """Create the index 1 sub-string for the override cycles attribute."""
@@ -163,7 +81,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def _update_barcode_mismatches_1(
-        self, samples_to_compare: list["FlowCellSampleBCLConvert"]
+        self, samples_to_compare: list["IlluminaSampleIndexSetting"]
     ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
@@ -180,7 +98,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
     def _update_barcode_mismatches_2(
         self,
-        samples_to_compare: list["FlowCellSampleBCLConvert"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_reverse_complement: bool,
     ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
@@ -214,13 +132,11 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
     def update_barcode_mismatches(
         self,
-        samples_to_compare: list["FlowCellSampleBCLConvert"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_run_single_index: bool,
         is_reverse_complement: bool,
     ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
-        if not samples_to_compare:
-            raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
         if is_run_single_index:
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")

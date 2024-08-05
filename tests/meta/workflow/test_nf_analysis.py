@@ -1,4 +1,4 @@
-"""Module for nf-core analysis API tests."""
+"""Module for nextflow analysis API tests."""
 
 import logging
 from typing import Any
@@ -15,14 +15,14 @@ from tests.cli.workflow.conftest import deliverables_template_content
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_create_metrics_deliverables_content(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
 ):
-    """Test metrics deliverables file content function for Taxprofiler and Rnafusion."""
+    """Test metrics deliverables file content function for nextflow pipelines."""
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
@@ -56,7 +56,7 @@ def test_get_formatted_file_deliverable(
     deliverables_template_content,
     request: FixtureRequest,
 ):
-    """Test the formatted file deliverable with the case and sample attributes for Taxprofiler and Rnafusion."""
+    """Test the formatted file deliverable with the case and sample attributes for nextflow pipelines."""
 
     caplog.set_level(logging.INFO)
 

@@ -188,6 +188,14 @@ def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
+def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example TOMTE order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "tomte.json")
+    )
+
+
+@pytest.fixture(scope="session")
 def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example RNA order."""
     return ReadFile.get_content_from_file(

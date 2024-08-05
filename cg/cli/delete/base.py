@@ -10,11 +10,12 @@ from cg.cli.delete.observations import (
     delete_available_observations,
     delete_observations,
 )
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def delete():
     """delete database records in CG."""
     LOG.info("Running CG delete")

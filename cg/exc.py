@@ -30,6 +30,12 @@ class AnalysisNotReadyError(CgError):
     """
 
 
+class AnalysisNotCompletedError(CgError):
+    """
+    Exception raised when an analysis has not completed.
+    """
+
+
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start.
@@ -54,15 +60,21 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.
     """
 
 
-class CleanFlowCellFailedError(CgError):
+class IlluminaCleanRunError(CgError):
     """
-    Exception raised when the cleaning of a flow cell failed.
+    Exception raised when the cleaning of an Illumina run failed.
     """
 
 
@@ -92,15 +104,15 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
-class FlowCellsNeededError(CgError):
+class IlluminaRunsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 
-class FlowCellEncryptionError(CgError):
+class IlluminaRunEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
-class FlowCellAlreadyBackedUpError(CgError):
+class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
@@ -182,8 +194,16 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class SampleSheetError(CgError):
+class NfSampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
+
+
+class SampleSheetContentError(CgError):
+    """Raised when something is wrong with the sample sheet content."""
+
+
+class SampleSheetFormatError(CgError):
+    """Raised when something is wrong with the sample sheet format."""
 
 
 class ScoutUploadError(CgError):
@@ -292,3 +312,19 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class PacBioMetricsParsingError(CgError):
+    """Exception raised when PacBio metric files are not in place."""
+
+
+class Chanjo2APIClientError(CgError):
+    """Exception related to the Chanjo2 API client."""
+
+
+class Chanjo2RequestError(Chanjo2APIClientError):
+    """Exception raised when a request to the Chanjo2 API client fails."""
+
+
+class Chanjo2ResponseError(Chanjo2APIClientError):
+    """Exception raised when the response from Chanjo2 API client fails validation."""

@@ -4,21 +4,19 @@ from pathlib import Path
 from cg.cli.demultiplex.demux import create_manifest_files
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.io.csv import read_csv
-from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
+from cg.utils.files import get_all_files_in_directory_tree
 
 
 def test_create_manifest_files_true(
-    cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path
+    cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing: Path
 ):
     """Test that manifest files are created for flow cells where the sequencing is complete."""
     # GIVEN two flowcell directories
-    first_flowcell_directory: Path = tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    first_flowcell_directory: Path = tmp_flow_cells_directory_ready_for_demultiplexing
     second_flowcell_directory = Path(
         shutil.copytree(
             first_flowcell_directory,
-            Path(
-                tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell_2"
-            ),
+            Path(tmp_flow_cells_directory_ready_for_demultiplexing.parent, "flowcell_2"),
         )
     )
 
@@ -41,18 +39,16 @@ def test_create_manifest_files_true(
 
 
 def test_create_manifest_files_false(
-    cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path
+    cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing: Path
 ):
     """Test that manifest files are not created for flow cells where the sequencing is not complete."""
     # GIVEN two flowcell directories with missing CopyComplete.txt
-    first_flowcell_directory = tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    first_flowcell_directory = tmp_flow_cells_directory_ready_for_demultiplexing
     Path(first_flowcell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).unlink()
     second_flowcell_directory = Path(
         shutil.copytree(
             first_flowcell_directory,
-            Path(
-                tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell_2"
-            ),
+            Path(tmp_flow_cells_directory_ready_for_demultiplexing.parent, "flowcell_2"),
         )
     )
 

@@ -26,10 +26,10 @@ class OsTicket(object):
     def init_app(self, app: Flask):
         """Initialize the API in Flask"""
         self.setup(
-            api_key=app.config["OSTICKET_API_KEY"],
-            domain=app.config["OSTICKET_DOMAIN"],
-            osticket_email=app.config["SUPPORT_SYSTEM_EMAIL"],
-            email_uri=app.config["EMAIL_URI"],
+            api_key=app.config["osticket_api_key"],
+            domain=app.config["osticket_domain"],
+            osticket_email=app.config["support_system_email"],
+            email_uri=app.config["email_uri"],
         )
 
     def setup(

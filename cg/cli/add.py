@@ -2,8 +2,10 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -26,7 +28,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def add():
     """Add new things to the database."""
     pass
@@ -271,6 +273,10 @@ def add_case(
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
+    if not is_case_name_allowed(name):
+        LOG.error(f"Case name {name} is only allowed to contain letters, digits and dashes.")
+        raise click.Abort
+
     new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
@@ -353,7 +359,7 @@ def link_sample_to_case(
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
@@ -370,12 +376,10 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
-@click.option(
-    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
-)
+@DRY_RUN
+@FORCE
 @click.pass_obj
-def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
+def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force: bool):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)
+    external_data_api.add_external_data_to_housekeeper(ticket=ticket, dry_run=dry_run, force=force)

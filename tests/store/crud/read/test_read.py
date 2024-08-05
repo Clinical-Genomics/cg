@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus, Priority
+from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
@@ -20,13 +20,13 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
 )
 from cg.store.store import Store
@@ -304,44 +304,6 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert new_action == "analyze"
 
 
-def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has an express sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.express
-
-    # WHEN retrieving the sequencing qc property of a express sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be True
-    assert sequencing_qc_ok
-
-
-def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has a normal sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.standard
-
-    # WHEN retrieving the sequencing qc property of a normal sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be False
-    assert not sequencing_qc_ok
-
-
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 
@@ -553,292 +515,122 @@ def test_get_analysis_by_case_entry_id_and_started_at(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
-    """Test function to return the flow cell sample links query from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_join_flow_cell_sample_links_query()
-
-    # THEN a query should be returned
-    assert isinstance(flow_cell_query, Query)
-
-
-def test_get_flow_cells(re_sequenced_sample_store: Store):
-    """Test function to return the flow cells from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the flow cells
-    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
-
-    # THEN a flow cells should be returned
-    assert flow_cells
-
-    # THEN a flow cell model should be returned
-    assert isinstance(flow_cells[0], Flowcell)
-
-
-def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store):
-    """Test returning the latest flow cell from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
-    )
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == bcl2fastq_flow_cell_id
-
-
-def test_get_flow_cells_by_case(
-    base_store: Store,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
-    case: Case,
-    helpers: StoreHelpers,
-    sample: Sample,
+def test_get_illumina_sequencing_runs_by_case(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test returning the latest flow cell from the database by case."""
+    """Test returning a sequencing run from the database by case."""
 
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    # GIVEN a store with a sequencing run
 
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
+    # WHEN fetching the a sequencing run by case
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
+    )
 
-    # WHEN fetching the latest flow cell
-    flow_cells: list[Flowcell] = base_store.get_flow_cells_by_case(case=case)
-
-    # THEN the flow cell samples for the case should be returned
-    for flow_cell in flow_cells:
-        for sample in flow_cell.samples:
-            assert sample in case.samples
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == bcl2fastq_flow_cell_id
+    # THEN a list of sequencing runs should be returned
+    assert sequencing_runs
 
 
-def test_get_flow_cells_by_statuses(
-    bcl_convert_flow_cell_id: str, re_sequenced_sample_store: Store
+def test_get_samples_from_illumina_flow_cell_internal_id(
+    novaseq_x_flow_cell_id: str, store_with_illumina_sequencing_data: Store
 ):
-    """Test returning the latest flow cell from the database by statuses."""
+    """Test getting samples from an Illumina flow cell by internal ID"""
+    # GIVEN a store with an Illumina flow cell and samples
 
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+    # WHEN fetching the samples from the flow cell
+    samples: list[Sample] = store_with_illumina_sequencing_data.get_samples_by_illumina_flow_cell(
+        flow_cell_id=novaseq_x_flow_cell_id
     )
 
-    # THEN the flow cell status should be "ondisk"
-    for flow_cell in flow_cells:
-        assert flow_cell.status == FlowCellStatus.ON_DISK
+    # THEN a list of samples should be returned
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
 
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == bcl_convert_flow_cell_id
-
-
-def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
-    """Test returning the latest flow cell from the database by statuses when multiple matches."""
-
-    # GIVEN a store with two flow cells
-
-    # GIVEN a flow cell that exist in status db with status "requested"
-    flow_cells: list[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
-    flow_cells[0].status = FlowCellStatus.REQUESTED
-    re_sequenced_sample_store.session.add(flow_cells[0])
-    re_sequenced_sample_store.session.commit()
-
-    # WHEN fetching the latest flow cell
-    flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
-    )
-
-    # THEN the flow cell status should be "ondisk" or "requested"
-    for flow_cell in flow_cells:
-        assert flow_cell.status in [FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
-
-    # THEN the returned flow cell should have the same status as the ones in the database
-    assert flow_cells[0].status == FlowCellStatus.REQUESTED
-
-    assert flow_cells[1].status == FlowCellStatus.ON_DISK
+    # THEN the samples should be from the flow cell
+    assert samples[0].run_devices[0].internal_id == novaseq_x_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
-    """Test returning the latest flow cell from the database when no flow cell with incorrect status."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=["does_not_exist"]
-    )
-
-    # THEN no flow cells should be returned
-    assert not list(flow_cells)
-
-
-def test_get_flow_cell_by_enquiry_and_status(
-    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
+def test_is_all_illumina_runs_on_disk_when_no_illumina_run(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test returning the latest flow cell from the database by enquiry and status."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=bcl2fastq_flow_cell_id[:4]
+    """Test check if all sequencing runs for samples on a case are on disk when there are no sequencing runs."""
+    # GIVEN a store with a case that has no sequencing runs
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == bcl2fastq_flow_cell_id
-
-    # THEN the returned flow cell should have the same status as the query
-    assert flow_cell[0].status == FlowCellStatus.ON_DISK
-
-
-def test_get_samples_from_flow_cell(
-    bcl2fastq_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
-):
-    """Test returning samples present on the latest flow cell from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the samples from the latest flow cell
-    samples: list[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
-        flow_cell_id=bcl2fastq_flow_cell_id
+    assert sequencing_runs
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(
+        sequencing_runs[0].device.internal_id
     )
-
-    # THEN the returned sample id should have the same id as the one in the database
-    assert samples[0].internal_id == sample_id
-
-
-def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store, case_id: str, bcl2fastq_flow_cell_id: str
-):
-    """Test returning the latest sequenced flow cell on a case."""
-
-    # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
+    deleted_run: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
+    assert not deleted_run
 
-    # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
-    latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
-        family_id=case_id
+    # WHEN fetching the illumina runs for a case
+    is_on_disk = store_with_illumina_sequencing_data.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
     )
-
-    # THEN the fetched flow cell should have the same name as the other
-    assert latest_flow_cell.name == latest_flow_cell_on_case.name
-
-
-def test_is_all_flow_cells_on_disk_when_no_flow_cell(
-    base_store: Store,
-    caplog,
-    case_id: str,
-):
-    """Test check if all flow cells for samples on a case is on disk when no flow cells."""
-    caplog.set_level(logging.DEBUG)
-
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
-
-    # THEN return false
-    assert is_on_disk is False
-
-    # THEN log no flow cells found
-    assert "No flow cells found" in caplog.text
-
-
-def test_are_all_flow_cells_on_disk_when_not_on_disk(
-    base_store: Store,
-    caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
-):
-    """Test check if all flow cells for samples on a case is on disk when not on disk."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample],
-        status=FlowCellStatus.PROCESSING,
-    )
-
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
-        samples=[sample],
-        status=FlowCellStatus.RETRIEVED,
-    )
-
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
 
 
-def test_are_all_flow_cells_on_disk_when_requested(
-    base_store: Store,
-    caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
-    request,
+def test_are_all_illumina_runs_on_disk_when_not_on_disk(
+    store_with_illumina_sequencing_data_on_disk: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test check if all flow cells for samples on a case is on disk when requested."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample],
-        status=FlowCellStatus.REMOVED,
+    """Test check if all sequencing runs on a case is on disk when not on disk."""
+    # GIVEN a store with two sequencing runs on a case that are not on disk
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
     )
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
-        samples=[sample],
-        status=FlowCellStatus.REQUESTED,
-    )
+    assert sequencing_runs
+    assert len(sequencing_runs) == 2
+    for sequencing_run in sequencing_runs:
+        sequencing_run.data_availability = SequencingRunDataAvailability.RETRIEVED
 
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
+    # WHEN fetching the sequencing runs for a case
+    is_on_disk = store_with_illumina_sequencing_data_on_disk.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
+    )
 
     # THEN return false
     assert is_on_disk is False
 
 
-def test_are_all_flow_cells_on_disk(
-    base_store: Store,
-    caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
-    case_id: str,
-    helpers: StoreHelpers,
-    sample: Sample,
+def test_are_all_illumina_runs_on_disk(
+    store_with_illumina_sequencing_data_on_disk: Store,
+    selected_novaseq_x_case_ids: str,
 ):
-    """Test check if all flow cells for samples on a case is on disk."""
-    caplog.set_level(logging.DEBUG)
+    """Test check if all sequencing runs on a case is on disk."""
+    # GIVEN a store with two sequencing runs on a case that are on disk
+    sequencing_runs: list[IlluminaSequencingRun] = (
+        store_with_illumina_sequencing_data_on_disk.get_illumina_sequencing_runs_by_case(
+            selected_novaseq_x_case_ids[0]
+        )
+    )
+    assert sequencing_runs
+    assert len(sequencing_runs) == 2
+    for sequencing_run in sequencing_runs:
+        assert sequencing_run.data_availability == SequencingRunDataAvailability.ON_DISK
 
-    # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
+    # WHEN fetching the sequencing runs for a case
+    is_on_disk = store_with_illumina_sequencing_data_on_disk.are_all_illumina_runs_on_disk(
+        case_id=selected_novaseq_x_case_ids[0]
+    )
 
-    # WHEN fetching the latest flow cell
-    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
-
-    # THEN return true
+    # THEN return True
     assert is_on_disk is True
 
 
@@ -897,7 +689,7 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 def test_get_application_limitations_by_tag(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag."""
 
     # GIVEN a store with some application limitations
@@ -922,7 +714,7 @@ def test_get_application_limitation_by_tag_and_workflow(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     workflow: Workflow = Workflow.MIP_DNA,
-) -> ApplicationLimitations:
+):
     """Test get application limitations by application tag and workflow."""
 
     # GIVEN a store with some application limitations
@@ -1314,163 +1106,49 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
 
 
-def test_get_total_counts_passing_q30(
-    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+def test_get_illumina_metrics_entry_by_device_sample_and_lane(
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
+    selected_novaseq_x_sample_ids: list[str],
 ):
-    # GIVEN a store with sequencing metrics
+    """Test that Illumina sample sequencing metrics are filtered by sample, device and lane."""
+    # GIVEN a store with Illumina Sample Sequencing Metrics for each sample in the run directories
 
-    total_reads_count_passing_q30 = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=0
-        )
-    )
-    # THEN assert that the total read count is correct
-    assert total_reads_count_passing_q30 == expected_total_reads
+    # GIVEN a sample id and a lane
+    sample_id: str = selected_novaseq_x_sample_ids[0]
+    lane: int = 1
 
-
-def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting a metrics entry by flow cell name, sample internal id and lane
-    metrics_entry: SampleLaneSequencingMetrics = (
-        store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-            sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    # WHEN fetching an Illumina sample sequencing metrics
+    metrics: IlluminaSampleSequencingMetrics = (
+        store_with_illumina_sequencing_data.get_illumina_metrics_entry_by_device_sample_and_lane(
+            device_internal_id=novaseq_x_flow_cell_id, sample_internal_id=sample_id, lane=lane
         )
     )
 
-    assert metrics_entry is not None
-    assert metrics_entry.flow_cell_name == flow_cell_name
-    assert metrics_entry.flow_cell_lane_number == lane
-    assert metrics_entry.sample_internal_id == sample_id
-
-
-def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-    store_with_sequencing_metrics: Store,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    expected_total_reads_flow_cell_bcl2fastq: int,
-):
-    # GIVEN a store with sequencing metrics
-    # WHEN getting total read counts for a flow cell
-    reads = store_with_sequencing_metrics.get_number_of_reads_for_flow_cell(
-        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
-    )
-    # THEN assert that the total read count is correct
-    assert reads == expected_total_reads_flow_cell_bcl2fastq
-
-
-def test_get_average_bases_above_q30_for_sample_from_metrics(
-    store_with_sequencing_metrics: Store,
-    expected_average_q30_for_sample: float,
-    mother_sample_id: str,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting average bases above q30 for a sample
-    average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell(
-        sample_internal_id=mother_sample_id,
-        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
-    )
-
-    # THEN assert that the average bases above q30 is correct
-    assert average_bases_above_q30 == expected_average_q30_for_sample
-
-
-def test_get_average_passing_q30_for_sample_from_metrics(
-    store_with_sequencing_metrics: Store,
-    expected_average_q30_for_flow_cell: float,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting average passing q30 for a sample
-    average_passing_q30 = (
-        store_with_sequencing_metrics.get_average_percentage_passing_q30_for_flow_cell(
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
-        )
-    )
-
-    # THEN assert that the average passing q30 is correct
-    assert average_passing_q30 == expected_average_q30_for_flow_cell
-
-
-def test_get_number_of_reads_for_sample_passing_q30_threshold(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
-):
-    # GIVEN a store with sequencing metrics
-    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-
-    # GIVEN a metric for a specific sample
-    sample_metric: SampleLaneSequencingMetrics | None = metrics.filter(
-        SampleLaneSequencingMetrics.sample_internal_id == sample_id
-    ).first()
-    assert sample_metric
-
-    # GIVEN a Q30 threshold that the sample will pass
-    q30_threshold = int(sample_metric.sample_base_percentage_passing_q30 / 2)
-
-    # WHEN getting the number of reads for the sample that pass the Q30 threshold
-    number_of_reads: int = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=q30_threshold
-        )
-    )
-
-    # THEN assert that the number of reads is an integer
-    assert isinstance(number_of_reads, int)
-
-    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
-    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
-
-
-def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
-    store_with_sequencing_metrics: Store, sample_id: str
-):
-    # GIVEN a store with sequencing metrics
-    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-
-    # GIVEN a metric for a specific sample
-    sample_metrics: list[SampleLaneSequencingMetrics] = metrics.filter(
-        SampleLaneSequencingMetrics.sample_internal_id == sample_id
-    ).all()
-
-    assert sample_metrics
-
-    # GIVEN a Q30 threshold that some of the sample's metrics will not pass
-    q30_values = [metric.sample_base_percentage_passing_q30 for metric in sample_metrics]
-    q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
-
-    # WHEN getting the number of reads for the sample that pass the Q30 threshold
-    number_of_reads: int = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=q30_threshold
-        )
-    )
-
-    # THEN assert that the number of reads is less than the total number of reads for the sample
-    total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
-    assert number_of_reads < total_sample_reads
-
-
-def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting sequencing metrics for a flow cell
-    metrics: list[SampleLaneSequencingMetrics] = (
-        store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-            flow_cell_name=flow_cell_name
-        )
-    )
-
-    # THEN assert that the metrics are returned
+    # THEN assert that the correct metrics object is returned
     assert metrics
-    for metric in metrics:
-        assert metric.flow_cell_name == flow_cell_name
+    assert metrics.sample.internal_id == sample_id
+    assert metrics.instrument_run.device.internal_id == novaseq_x_flow_cell_id
+    assert metrics.flow_cell_lane == lane
+
+
+def test_get_illumina_sequencing_run_by_device_internal_id(
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
+):
+    """Test that a Illumina sequencing run query is filtered by device internal id."""
+    # GIVEN a store with Illumina Sequencing Runs for the canonical Illumina runs
+
+    # WHEN fetching an Illumina sequencing run by device internal id
+    run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            device_internal_id=novaseq_x_flow_cell_id
+        )
+    )
+
+    # THEN assert that the correct run object is returned
+    assert run
+    assert run.device.internal_id == novaseq_x_flow_cell_id
 
 
 def test_case_with_name_exists(

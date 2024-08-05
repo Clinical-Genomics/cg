@@ -5,18 +5,23 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
+from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.report.tomte import TomteReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
+from tests.mocks.report import (
+    MockChanjo,
+    MockHousekeeperMipDNAReportAPI,
+    MockMipDNAAnalysisAPI,
+)
 
 
 @pytest.fixture(scope="function")
@@ -24,9 +29,7 @@ def report_api_mip_dna(
     cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
-    cg_context.meta_apis["analysis_api"] = MockMipAnalysis(
-        config=cg_context, workflow=Workflow.MIP_DNA
-    )
+    cg_context.meta_apis["analysis_api"] = MockMipDNAAnalysisAPI(config=cg_context)
     cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
@@ -51,9 +54,21 @@ def report_api_rnafusion(
     rnafusion_context: CGConfig, lims_samples: list[dict]
 ) -> RnafusionReportAPI:
     """Rnafusion report API fixture."""
-    rnafusion_context.lims_api_ = MockLimsAPI(rnafusion_context, lims_samples)
+    rnafusion_context.lims_api_ = MockLimsAPI(config=rnafusion_context, samples=lims_samples)
     rnafusion_context.scout_api_ = MockScoutApi(rnafusion_context)
-    return RnafusionReportAPI(rnafusion_context, rnafusion_context.meta_apis["analysis_api"])
+    return RnafusionReportAPI(
+        config=rnafusion_context, analysis_api=rnafusion_context.meta_apis["analysis_api"]
+    )
+
+
+@pytest.fixture(scope="function")
+def report_api_tomte(tomte_context: CGConfig, lims_samples: list[dict]) -> TomteReportAPI:
+    """Tomte report API fixture."""
+    tomte_context.lims_api_ = MockLimsAPI(config=tomte_context, samples=lims_samples)
+    tomte_context.scout_api_ = MockScoutApi(tomte_context)
+    return TomteReportAPI(
+        config=tomte_context, analysis_api=tomte_context.meta_apis["analysis_api"]
+    )
 
 
 @pytest.fixture(scope="function")
@@ -75,9 +90,9 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
 
 
 @pytest.fixture(scope="function")
-def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
-    """MIP analysis mock data."""
-    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+def mip_dna_analysis_api(cg_context: CGConfig) -> MockMipDNAAnalysisAPI:
+    """MIP DNA analysis mock data."""
+    return MockMipDNAAnalysisAPI(config=cg_context)
 
 
 @pytest.fixture(scope="session")
@@ -118,21 +133,48 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
 def rnafusion_validated_metrics() -> dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
+        "bias_5_3": "1.12",
+        "duplicates": "14.86",
+        "dv200": "75.0",
         "gc_content": "51.7",
-        "ribosomal_bases": "65.81",
-        "q20_rate": "97.48",
-        "q30_rate": "92.95",
-        "mapped_reads": "96.53",
-        "rin": "10.0",
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "input_amount": "300.0",
-        "insert_size": "N/A",
-        "insert_size_peak": "N/A",
+        "insert_size": NA_FIELD,
+        "insert_size_peak": NA_FIELD,
+        "mapped_reads": "96.53",
         "mean_length_r1": "99.0",
         "million_read_pairs": "75.0",
-        "bias_5_3": "1.12",
-        "pct_adapter": "12.01",
-        "duplicates": "14.86",
         "mrna_bases": "85.97",
+        "pct_adapter": "12.01",
         "pct_surviving": "99.42",
+        "q20_rate": "97.48",
+        "q30_rate": "92.95",
+        "ribosomal_bases": "65.81",
+        "rin": "10.0",
         "uniquely_mapped_reads": "91.02",
+    }
+
+
+@pytest.fixture(scope="session")
+def tomte_validated_metrics() -> dict[str, str]:
+    """Return Tomte analysis validated metrics dictionary."""
+    return {
+        "bias_5_3": "0.86",
+        "duplicates": "28.94",
+        "dv200": "75.0",
+        "gc_content": "55.37",
+        "initial_qc": REPORT_QC_FLAG.get(True),
+        "input_amount": "300.0",
+        "mean_length_r1": "134.0",
+        "million_read_pairs": "85.0",
+        "mrna_bases": "88.17",
+        "pct_adapter": "50.86",
+        "pct_intergenic_bases": "19.19",
+        "pct_intronic_bases": "12.09",
+        "pct_surviving": "99.26",
+        "q20_rate": "96.69",
+        "q30_rate": "90.95",
+        "ribosomal_bases": "55.11",
+        "rin": "10.0",
+        "uniquely_mapped_reads": "67.28",
     }

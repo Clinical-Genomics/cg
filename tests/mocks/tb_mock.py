@@ -24,6 +24,9 @@ class MockTB:
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         return self.get_latest_analysis_response.get(case_id)
 
+    def get_latest_analysis_status(self, *args, **kwargs) -> None:
+        return None
+
     def ensure_analyses_response(self, analyses_list: list) -> None:
         self.analyses_response = [
             TrailblazerAnalysis.model_validate(analysis) for analysis in analyses_list
@@ -48,3 +51,6 @@ class MockTB:
 
     def get_summaries(self, order_ids: list[int]):
         return []
+
+    def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False):
+        return

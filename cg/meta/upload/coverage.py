@@ -37,15 +37,18 @@ class UploadCoverageApi:
             )
         return data
 
-    def upload(self, data: dict, replace: bool = False):
-        """Upload coverage to Chanjo from an analysis."""
+    def upload(self, data: dict):
+        """
+        Upload coverage to Chanjo from an analysis.
+        If a previous coverage exists for a sample, it will be deleted before re-uploading.
+        """
         for sample_data in data["samples"]:
             chanjo_sample = self.chanjo_api.sample(sample_data["sample"])
-            if chanjo_sample and replace:
+            if chanjo_sample:
+                LOG.warning(
+                    f"Sample already loaded, deleting previous entry and re-uploading: {sample_data['sample']}"
+                )
                 self.chanjo_api.delete_sample(sample_data["sample"])
-            elif chanjo_sample:
-                LOG.warning(f"sample already loaded, skipping: {sample_data['sample']}")
-                continue
 
             LOG.debug(f"upload coverage for sample: {sample_data['sample']}")
             self.chanjo_api.upload(

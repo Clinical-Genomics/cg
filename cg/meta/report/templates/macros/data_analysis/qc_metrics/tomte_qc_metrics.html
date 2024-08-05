@@ -1,0 +1,27 @@
+{% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
+
+{% macro tomte_qc_metrics(samples) %}
+  {% set
+    metrics = [
+      {"name": "RNA Integrity Number (RIN)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover. N/A som värde är en varning om att inget tillförlitligt RIN är tillgängligt för det specifika provet."},
+      {"name": "DV200",                                        "key": "dv200",                 "description": "Andelen RNA-fragment längre än 200 nukleotider."},
+      {"name": "Ingående mängd [ng]",                          "key": "input_amount",          "description": "Mängd RNA som används för sekvensering."},
+      {"name": "Läspar [M]",                                   "key": "million_read_pairs",    "description": "Antal sekvenseringsläsningar i miljoner läspar."},
+      {"name": "Unikt mappade sekvenser [%]",                  "key": "uniquely_mapped_reads", "description": "Procentandel sekvenserade läsningar som endast matchar en position i referensgenomet."},
+      {"name": "Duplikat [%]",                                 "key": "duplicates",            "description": "Sekvenseringsläsningar som är duplikat (kopior) och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering. Observera att dupliceringar är vanligt förekommande vid WTS."},
+      {"name": "Adapter [%]",                                  "key": "pct_adapter",           "description": "Andel läsningar som innehåller adaptersekvenser."},
+      {"name": "5'-3' bias",                                   "key": "bias_5_3",              "description": "Bias är förhållandet mellan antalet läsningar vid 3'-änden och antalet läsningar vid 5'-änden av fragmentet. Ett förhållande på 1 indikerar brist på bias, medan värden större eller mindre än 1 indikerar 3'- eller 5'-bias, respektive."},
+      {"name": "Sekvenser som klarar filter [%]",              "key": "pct_surviving",         "description": "Procentandel läsningar som passerar kvalitetskontrollfilter."},
+      {"name": "Genomsnittlig läslängd efter filtrering [bp]", "key": "mean_length_r1",        "description": "Genomsnittlig längd på läsningar som passerar kvalitetskontrollfilter."},
+      {"name": "Q20-baser [%]",                                "key": "q20_rate",              "description": "Andel baser med en Phred-poäng på minst 20."},
+      {"name": "Q30-baser [%]",                                "key": "q30_rate",              "description": "Andel baser med en Phred-poäng på minst 30."},
+      {"name": "GC innehåll [%]",                              "key": "gc_content",            "description": "Andel guanin- och cytosinbaser i ett prov, beräknat på trimmade läsningar."},
+      {"name": "mRNA baser [%]",                               "key": "mrna_bases",            "description": "Andel baser i ett prov som härstammar från budbärar-RNA."},
+      {"name": "Ribosomala baser [%]",                         "key": "ribosomal_bases",       "description": "Andel baser i ett prov som härstammar från ribosomalt RNA."},
+      {"name": "Introniska baser [%]",                         "key": "pct_intronic_bases",    "description": "Procent baser som ligger i intron. Om målet i den laboratoriska processen är att selektera transkript vars intron är borttagna är, så är ett högt värde avvikande."},
+      {"name": "Intergeniska baser [%]",                       "key": "pct_intergenic_bases",  "description": "Procent baser som anses ligga i regioner mellan gener. Om målet i den laboratoriska processen är att selektera ut kodande regioner i genomet, så är ett högt värde avvikande."},
+    ]
+  %}
+  <!-- Quality control metrics -->
+  {{ qc_metrics(samples=samples, metrics=metrics) }}
+{% endmacro %}

@@ -1,0 +1,109 @@
+{% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/raredisease_qc_metrics.html" import raredisease_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/tomte_qc_metrics.html" import tomte_qc_metrics %}
+{% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
+
+{% macro data_analysis(case) %}
+{% set workflow = case.data_analysis.workflow %}
+  <div class="container mb-5">
+  <h3 class="mb-4">Analys</h3>
+    <!-- Workflow analysis data -->
+    {{ workflow_analysis(case=case) }}
+    {% if "balsamic" in workflow %}
+      <!-- BALSAMIC QC metrics -->
+      {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
+    {% elif workflow == "mip-dna" %}
+      <!-- MIP-DNA QC metrics -->
+      {{ mip_dna_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "raredisease" %}
+      <!-- Raredisease QC metrics -->
+      {{ raredisease_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "rnafusion" %}
+      <!-- Rnafusion QC metrics -->
+      {{ rnafusion_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "tomte" %}
+      <!-- Tomte QC metrics -->
+      {{ tomte_qc_metrics(samples=case.samples) }}
+    {% endif %}
+    <!-- Apptag limitations -->
+    {{ apptag_limitations(applications=case.applications) }}
+  </div>
+{% endmacro %}
+
+{% macro workflow_analysis(case) %}
+{% set workflow = case.data_analysis.workflow %}
+  <h4 class="mt-4 mb-3">Dataanalys</h4>
+  <table class="table w-auto text-center align-middle" aria-describedby="data-analysis-table">
+    <thead class="table-secondary">
+      <tr>
+        <th scope="col">Fall</th>
+        <th scope="col">Bioinformatisk analys</th>
+        <th scope="col">Genomversion</th>
+        <th scope="col">{% if "balsamic" in workflow %} Analystyp {% endif %}</th>
+        <th scope="col">{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} Panel of Normals {% endif %}</th>
+        <th scope="col">{% if workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}</th>
+        <th scope="col">{% if workflow in ("mip-dna", "raredisease", "rnafusion", "tomte") %} Genpaneler {% endif %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ case.name }}</th>
+        <td>{{ workflow }} (v{{ case.data_analysis.workflow_version }})</td>
+        <td>{{ case.data_analysis.genome_build }}</td>
+        <td>{% if "balsamic" in workflow %} {{ case.data_analysis.type }} {% endif %}</td>
+        <td>{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} {{ case.data_analysis.pons }} {% endif %}</td>
+        <td class="text-start">{% if workflow in ("balsamic", "balsamic-umi") %} {{ case.data_analysis.variant_callers }} {% endif %}</td>
+        <td>{% if workflow in ("mip-dna", "raredisease", "rnafusion", "tomte") %} {{ case.data_analysis.panels }} {% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+	<!--Data analysis comment warning -->
+  {{ data_analysis_comment_alert(comment=case.data_analysis.comment) }}
+  <!-- Data analysis alert component -->
+  {{ data_analysis_alert(case=case) }}
+{% endmacro %}
+
+{% macro data_analysis_alert(case) %}
+{% set workflow = case.data_analysis.workflow %}
+  {% if workflow in ("balsamic", "balsamic-umi") %}
+    <div class="alert alert-info" role="alert">
+      Den tillämpade variantanropningsfiltrerna finns på:
+      <a href="https://balsamic.readthedocs.io/en/v{{ case.data_analysis.workflow_version }}/balsamic_filters.html" class="alert-link">
+        https://balsamic.readthedocs.io/en/v{{ case.data_analysis.workflow_version }}/balsamic_filters.html</a>.
+    </div>
+  {% elif workflow == "rnafusion" %}
+    {% if case.data_analysis.scout_files.vcf_fusion != "N/A" %}
+      <div class="alert alert-primary" role="alert">
+        Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.
+      </div>
+    {% else %}
+      <div class="alert alert-warning" role="alert">
+        Inga fusionsvarianter upptäcktes.
+      </div>
+    {% endif %}
+    <div class="alert alert-info" role="alert">
+      Workflowinformation och bioinformatiska verktygsversioner:
+      <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>.
+    </div>
+	{% elif workflow == "taxprofiler" %}
+    <div class="alert alert-info" role="alert">
+      Workflowinformation och bioinformatiska verktygsversioner:
+      <a href="https://github.com/nf-core/taxprofiler" class="alert-link">https://github.com/nf-core/taxprofiler</a>.
+    </div>
+  {% elif workflow == "tomte" %}
+    <div class="alert alert-info" role="alert">
+      Workflowinformation och bioinformatiska verktygsversioner:
+      <a href="https://github.com/genomic-medicine-sweden/tomte" class="alert-link">https://github.com/genomic-medicine-sweden/tomte</a>.
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro data_analysis_comment_alert(comment) %}
+	{% if comment != "N/A" %}
+	  <div class="alert alert-warning" role="alert">
+	    {{ comment }}
+	  </div>
+	{% endif %}
+{% endmacro %}

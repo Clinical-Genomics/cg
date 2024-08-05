@@ -10,9 +10,10 @@ from cg.apps.osticket import OsTicket
 from cg.apps.tb.api import TrailblazerAPI
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
-from cg.services.orders.order_status_service.order_summary_service import (
+from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
 )
+from cg.services.sample_service.sample_service import SampleService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -25,9 +26,9 @@ class FlaskLims(LimsAPI):
     def init_app(self, app):
         config = {
             "lims": {
-                "host": app.config["LIMS_HOST"],
-                "username": app.config["LIMS_USERNAME"],
-                "password": app.config["LIMS_PASSWORD"],
+                "host": app.config["lims_host"],
+                "username": app.config["lims_username"],
+                "password": app.config["lims_password"],
             }
         }
         super(FlaskLims, self).__init__(config)
@@ -39,7 +40,7 @@ class FlaskStore(Store):
             self.init_app(app)
 
     def init_app(self, app):
-        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        uri = app.config["cg_sql_database_uri"]
         initialize_database(uri)
         super(FlaskStore, self).__init__()
 
@@ -57,9 +58,9 @@ class AnalysisClient(TrailblazerAPI):
             self.init_app(app)
 
     def init_app(self, app):
-        service_account: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT"]
-        service_account_auth_file: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"]
-        host: str = app.config["TRAILBLAZER_HOST"]
+        service_account: str = app.config["trailblazer_service_account"]
+        service_account_auth_file: str = app.config["trailblazer_service_account_auth_file"]
+        host: str = app.config["trailblazer_host"]
         config = {
             "trailblazer": {
                 "service_account": service_account,
@@ -81,3 +82,4 @@ analysis_client = AnalysisClient()
 delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=analysis_client)
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
+sample_service = SampleService(db)

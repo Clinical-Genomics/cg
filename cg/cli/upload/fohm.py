@@ -2,6 +2,8 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig
@@ -21,12 +23,9 @@ OPTION_CASES = click.option(
     required=True,
     help="CG internal id of cases to aggregate for daily delivery",
 )
-OPTION_DRY_RUN = click.option(
-    "dry_run", "--dry-run", is_flag=True, default=False, help="Run command in dry run"
-)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def fohm(context: CGConfig):
     pass
@@ -34,7 +33,7 @@ def fohm(context: CGConfig):
 
 @fohm.command("aggregate-delivery")
 @OPTION_CASES
-@OPTION_DRY_RUN
+@DRY_RUN
 @ARGUMENT_DATE
 @click.pass_obj
 def aggregate_delivery(
@@ -52,7 +51,7 @@ def aggregate_delivery(
 
 @fohm.command("create-komplettering")
 @OPTION_CASES
-@OPTION_DRY_RUN
+@DRY_RUN
 @ARGUMENT_DATE
 @click.pass_obj
 def create_komplettering(
@@ -68,7 +67,7 @@ def create_komplettering(
 
 @fohm.command("preprocess-all")
 @OPTION_CASES
-@OPTION_DRY_RUN
+@DRY_RUN
 @ARGUMENT_DATE
 @click.pass_obj
 def preprocess_all(
@@ -105,7 +104,7 @@ def preprocess_all(
 
 @fohm.command("upload-rawdata")
 @ARGUMENT_DATE
-@OPTION_DRY_RUN
+@DRY_RUN
 @click.pass_obj
 def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Deliver files in daily upload directory via sftp"""
@@ -115,7 +114,7 @@ def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: str | None
 
 @fohm.command("send-reports")
 @ARGUMENT_DATE
-@OPTION_DRY_RUN
+@DRY_RUN
 @click.pass_obj
 def send_reports(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Send all komplettering reports found in current daily directory to target recipients"""

@@ -96,7 +96,9 @@ def test_dry_run(
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
-    result = cli_runner.invoke(clean_run_dir, [balsamic_case_clean, "-d", "-y"], obj=clean_context)
+    result = cli_runner.invoke(
+        clean_run_dir, [balsamic_case_clean, "--dry-run", "-y"], obj=clean_context
+    )
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
@@ -136,7 +138,7 @@ def test_cleaned_at_invalid(
     assert not base_store.get_case_by_internal_id(balsamic_case_not_clean).analyses[0].cleaned_at
     # WHEN dry running with dry run specified
 
-    result = cli_runner.invoke(past_run_dirs, ["2020-12-01", "-d", "-y"], obj=clean_context)
+    result = cli_runner.invoke(past_run_dirs, ["2020-12-01", "--dry-run", "-y"], obj=clean_context)
 
     # THEN case directory should not have been cleaned
     assert result.exit_code == EXIT_SUCCESS

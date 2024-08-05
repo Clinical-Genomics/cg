@@ -6,8 +6,10 @@ from typing import Any
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import FileFormat
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
@@ -18,12 +20,6 @@ from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
-OPTION_DRY_RUN = click.option(
-    "-d",
-    "--dry-run",
-    help="Print command to console without executing",
-    is_flag=True,
-)
 OPTION_SAMPLE = click.option(
     "-s",
     "--sample",
@@ -39,7 +35,7 @@ OPTION_TICKET = click.option(
 ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=click.STRING)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
@@ -55,7 +51,7 @@ microsalt.add_command(resolve_compression)
 @microsalt.command()
 @OPTION_TICKET
 @OPTION_SAMPLE
-@OPTION_DRY_RUN
+@DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
 def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run: bool) -> None:
@@ -73,7 +69,7 @@ def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run:
 
 
 @microsalt.command("config-case")
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
@@ -108,7 +104,7 @@ def config_case(
 
 
 @microsalt.command()
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
@@ -175,7 +171,7 @@ def run(
 
 @microsalt.command()
 @ARGUMENT_UNIQUE_IDENTIFIER
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @click.pass_context
@@ -193,7 +189,7 @@ def start(
 
 
 @microsalt.command("start-available")
-@OPTION_DRY_RUN
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
@@ -201,9 +197,9 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
-            context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, unique_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

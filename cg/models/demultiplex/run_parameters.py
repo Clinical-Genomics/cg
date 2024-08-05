@@ -3,7 +3,7 @@
 import logging
 from abc import abstractmethod
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, ElementTree
 
 from packaging.version import parse
 
@@ -44,9 +44,7 @@ class RunParameters:
         Raises:
             RunParametersError if the node does not have the expected value."""
         try:
-            application: ElementTree.Element | None = get_tree_node(
-                tree=self.tree, node_name=node_name
-            )
+            application: Element | None = get_tree_node(tree=self.tree, node_name=node_name)
         except XMLError:
             raise RunParametersError(
                 f"Could not find node {node_name} in the run parameters file. "
@@ -129,6 +127,10 @@ class RunParameters:
             return NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS
         return NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS
 
+    @abstractmethod
+    def get_flow_cell_model(self):
+        pass
+
     def __str__(self):
         return f"RunParameters(path={self.path}, sequencer={self.sequencer})"
 
@@ -189,6 +191,10 @@ class RunParametersHiSeq(RunParameters):
         node_name: str = RunParametersXMLNodes.READ_2_HISEQ
         return self._get_node_integer_value(node_name=node_name)
 
+    def get_flow_cell_model(self) -> None:
+        """Return None for run parameters associated with HiSeq sequencing."""
+        return None
+
 
 class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
@@ -210,7 +216,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def reagent_kit_version(self) -> str:
         """Return the reagent kit version if existent, return 'unknown' otherwise."""
         node_name: str = RunParametersXMLNodes.REAGENT_KIT_VERSION
-        xml_node: ElementTree.Element | None = self.tree.find(node_name)
+        xml_node: Element | None = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine reagent kit version")
             LOG.info("Set reagent kit version to 'unknown'")
@@ -242,6 +248,11 @@ class RunParametersNovaSeq6000(RunParameters):
         node_name: str = RunParametersXMLNodes.READ_2_NOVASEQ_6000
         return self._get_node_integer_value(node_name=node_name)
 
+    def get_flow_cell_model(self) -> str:
+        """Return the flow cell model referred to as 'FlowCellMode' in the run parameters file."""
+        node_name: str = RunParametersXMLNodes.FLOW_CELL_MODE
+        return self._get_node_string_value(node_name=node_name)
+
 
 class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters of NovaSeqX sequencing."""
@@ -272,12 +283,10 @@ class RunParametersNovaSeqX(RunParameters):
     def _read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
-        planned_reads_tree: ElementTree.Element = get_tree_node(
+        planned_reads_tree: Element = get_tree_node(
             tree=self.tree, node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X
         )
-        planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
-            RunParametersXMLNodes.INNER_READ
-        )
+        planned_reads: list[Element] = planned_reads_tree.findall(RunParametersXMLNodes.INNER_READ)
         for read_elem in planned_reads:
             read_name: str = read_elem.get(RunParametersXMLNodes.READ_NAME)
             cycles: int = int(read_elem.get(RunParametersXMLNodes.CYCLES))
@@ -299,3 +308,17 @@ class RunParametersNovaSeqX(RunParameters):
     def get_read_2_cycles(self) -> int:
         """Return the number of cycles in the second read."""
         return self._read_parser.get(RunParametersXMLNodes.READ_2_NOVASEQ_X)
+
+    def get_flow_cell_model(self) -> str:
+        """Return the flow cell model referred to as 'Mode' or 'Name' in the run parameters file."""
+        consumable_infos: list[Element] = self.tree.findall(".//ConsumableInfo")
+        for consumable_info in consumable_infos:
+            type_element: Element | None = consumable_info.find("Type")
+            if type_element is not None and type_element.text == "FlowCell":
+                name_element: Element | None = consumable_info.find("Name")
+                if name_element is not None:
+                    return name_element.text
+                else:
+                    mode_element: Element | None = consumable_info.find("Mode")
+                    if mode_element is not None:
+                        return mode_element.text

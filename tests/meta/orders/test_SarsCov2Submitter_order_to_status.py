@@ -34,3 +34,16 @@ def test_order_to_status_control_has_input_value(sarscov2_order_to_submit: dict,
     sample: dict
     for sample in result.get("samples"):
         assert control_value in sample.get("control")
+
+
+def test_mutant_sample_generates_fields(sarscov2_order_to_submit: dict, base_store: Store):
+    """Tests that Mutant orders with region and original_lab set can generate region_code and original_lab_address."""
+    # GIVEN sarscov2 order with six samples, one without region_code and original_lab_address
+
+    # WHEN parsing the order
+    order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
+
+    # THEN all samples should have region_code and original_lab_address set
+    for sample in order.samples:
+        assert sample.region_code
+        assert sample.original_lab_address

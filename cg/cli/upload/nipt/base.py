@@ -5,6 +5,8 @@ import traceback
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
@@ -17,7 +19,7 @@ from .statina import batch, statina
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def nipt():
     """Upload NIPT result files"""
     pass
@@ -25,8 +27,8 @@ def nipt():
 
 @nipt.command("case")
 @click.argument("case_id", required=True)
-@click.option("--dry-run", is_flag=True)
-@click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
+@DRY_RUN
+@FORCE
 @click.pass_context
 def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool, force: bool):
     """Upload NIPT result files for a case"""
@@ -38,7 +40,7 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
-    if force or nipt_upload_api.flowcell_passed_qc_value(
+    if force or nipt_upload_api.sequencing_run_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         nipt_upload_api.update_analysis_upload_started_date(case_id)
@@ -48,15 +50,12 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
         LOG.info(f"{case_id}: analysis uploaded!")
     else:
         LOG.error(f"Uploading case failed: {case_id}")
-        LOG.error(
-            f"Flowcell did not pass one of the following QC parameters:\n"
-            f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"
-        )
+        LOG.error("Sequencing run did not pass QC. Please check the QC values in the database.")
         raise AnalysisUploadError("Upload failed")
 
 
 @nipt.command("all")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def nipt_upload_all(context: click.Context, dry_run: bool):
     """Upload NIPT result files for all cases"""
@@ -75,7 +74,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     for analysis in analyses:
         internal_id = analysis.case.internal_id
 
-        if nipt_upload_api.flowcell_passed_qc_value(
+        if nipt_upload_api.sequencing_run_passed_qc_value(
             case_id=internal_id, q30_threshold=Q30_THRESHOLD
         ):
             LOG.info(f"Uploading case: {internal_id}")

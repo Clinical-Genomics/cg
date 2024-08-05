@@ -16,6 +16,7 @@ class OrderType(StrEnum):
     RML: str = "rml"
     RNAFUSION: str = Workflow.RNAFUSION
     SARS_COV_2: str = "sars-cov-2"
+    TOMTE: str = Workflow.TOMTE
 
 
 class ExcelSampleAliases(StrEnum):

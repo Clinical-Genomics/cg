@@ -31,13 +31,14 @@ from cg.cli.upload.scout import (
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
-from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
+from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -47,7 +48,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option("-c", "--case", "case_id", help="Upload to all apps")
 @click.option(
     "-r",
@@ -77,12 +78,12 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
         if Workflow.BALSAMIC in case.data_analysis:
             upload_api = BalsamicUploadAPI(config_object)
-        elif case.data_analysis == Workflow.RNAFUSION:
-            upload_api = RnafusionUploadAPI(config_object)
         elif case.data_analysis == Workflow.MIP_RNA:
             upload_api = MipRNAUploadAPI(config_object)
         elif case.data_analysis == Workflow.MICROSALT:
             upload_api = MicrosaltUploadAPI(config_object)
+        elif case.data_analysis in {Workflow.RNAFUSION, Workflow.TOMTE, Workflow.TAXPROFILER}:
+            upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)

@@ -1,0 +1,60 @@
+{% macro order(case) %}
+{% set customer_workflow = case.data_analysis.customer_workflow %}
+  <div class="container mb-5">
+    <h3 class="mb-4">Beställning</h3>
+    <table class="table w-auto text-center align-middle" aria-describedby="order-table">
+      <thead class="table-secondary">
+        <tr>
+          <th scope="col">Fall</th>
+          <th scope="col">Bioinformatisk analys</th>
+          <th scope="col">Prov</th>
+          <th scope="col">Beställt</th>
+          <th scope="col">Ticket</th>
+          <th scope="col">Applikation</th>
+          <th scope="col">{% if customer_workflow != "taxprofiler" %} Kön {% endif %}</th>
+          <th scope="col">Provtyp</th>
+          <!-- Sample status -->
+          {{ sample_status(workflow=customer_workflow) }}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" rowspan="{{ case.samples | length + 1}}">
+            {{ case.name }}
+          </th>
+          <td rowspan="{{ case.samples | length + 1}}">
+            {{ case.data_analysis.customer_workflow }}
+          </td>
+        </tr>
+        {% for sample in case.samples %}
+          <tr>
+            <td>{{ sample.name }} ({{ sample.id }})</td>
+            <td>{{ sample.timestamps.ordered_at }}</td>
+            <td>{{ sample.ticket }}</td>
+            <td>{{ sample.application.tag }} (v{{ sample.application.version }})</td>
+            <td>{% if customer_workflow != "taxprofiler" %} {{ sample.sex }} {% endif %}</td>
+            <td>{{ sample.source }}</td>
+            <!-- Sample status value -->
+            {{ sample_status_value(workflow=customer_workflow, sample=sample) }}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}
+
+{% macro sample_status(workflow) %}
+  {% if "balsamic" in workflow or workflow == "rnafusion" %}
+    <th scope="col">Tumör</th>
+  {% elif workflow in ("mip-dna", "raredisease", "tomte") %}
+    <th scope="col">Status</th>
+  {% endif %}
+{% endmacro %}
+
+{% macro sample_status_value(workflow, sample) %}
+  {% if "balsamic" in workflow or workflow == "rnafusion" %}
+    <td>{{ sample.tumour }}</td>
+  {% elif workflow in ("mip-dna", "raredisease", "tomte") %}
+    <td>{{ sample.status }}</td>
+  {% endif %}
+{% endmacro %}

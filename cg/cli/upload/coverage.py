@@ -11,15 +11,9 @@ from .utils import suggest_cases_to_upload
 
 
 @click.command("coverage")
-@click.option(
-    "-r",
-    "--re-upload",
-    is_flag=True,
-    help="re-upload existing analysis",
-)
 @click.argument("family_id", required=False)
 @click.pass_obj
-def upload_coverage(context: CGConfig, re_upload, family_id):
+def upload_coverage(context: CGConfig, family_id):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
@@ -37,4 +31,4 @@ def upload_coverage(context: CGConfig, re_upload, family_id):
         chanjo_api=context.chanjo_api,
     )
     coverage_data = upload_coverage_api.data(case_obj.analyses[0])
-    upload_coverage_api.upload(coverage_data, replace=re_upload)
+    upload_coverage_api.upload(coverage_data)

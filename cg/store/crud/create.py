@@ -3,10 +3,16 @@ from datetime import datetime
 
 import petname
 from sqlalchemy import Insert
+from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
+from cg.services.illumina.data_transfer.models import (
+    IlluminaFlowCellDTO,
+    IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
+)
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
 from cg.store.models import (
@@ -20,15 +26,15 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
-    Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
     order_case,
 )
@@ -175,8 +181,10 @@ class CreateHandler(BaseHandler):
         control: str = None,
         downsampled_to: int = None,
         internal_id: str = None,
+        last_sequenced_at: datetime = None,
         order: str = None,
         ordered: datetime = None,
+        prepared_at: datetime = None,
         priority: Priority = None,
         received: datetime = None,
         original_ticket: str = None,
@@ -193,10 +201,12 @@ class CreateHandler(BaseHandler):
             downsampled_to=downsampled_to,
             internal_id=internal_id,
             is_tumour=tumour,
+            last_sequenced_at=last_sequenced_at,
             name=name,
             order=order,
             ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
+            prepared_at=prepared_at,
             priority=priority,
             received_at=received,
             sex=sex,
@@ -247,25 +257,6 @@ class CreateHandler(BaseHandler):
         new_record.mother = mother
         new_record.father = father
         return new_record
-
-    def add_flow_cell(
-        self,
-        flow_cell_name: str,
-        sequencer_name: str,
-        sequencer_type: str,
-        date: datetime,
-        flow_cell_status: str | None = FlowCellStatus.ON_DISK,
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Build a new Flowcell record."""
-        return Flowcell(
-            name=flow_cell_name,
-            sequencer_name=sequencer_name,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
-            status=flow_cell_status,
-            has_backup=has_backup,
-        )
 
     def add_analysis(
         self,
@@ -336,22 +327,6 @@ class CreateHandler(BaseHandler):
         new_record.application_version = application_version
         return new_record
 
-    def add_delivery(
-        self,
-        destination: str,
-        sample: Sample = None,
-        pool: Pool = None,
-        comment: str = None,
-    ) -> Delivery:
-        """Build a new Delivery record."""
-
-        if not any([sample, pool]):
-            raise ValueError("you have to provide a sample or a pool")
-        new_record: Delivery = Delivery(destination=destination, comment=comment)
-        new_record.sample = sample
-        new_record.pool = pool
-        return new_record
-
     def add_invoice(
         self,
         customer: Customer,
@@ -399,16 +374,6 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
-    ) -> SampleLaneSequencingMetrics:
-        """Add a new SampleLaneSequencingMetrics record."""
-        return SampleLaneSequencingMetrics(
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
-            **kwargs,
-        )
-
     def add_order(self, order_data: OrderIn):
         customer: Customer = self.get_customer_by_internal_id(order_data.customer)
         workflow: str = order_data.samples[0].data_analysis
@@ -417,7 +382,7 @@ class CreateHandler(BaseHandler):
             ticket_id=order_data.ticket,
             workflow=workflow,
         )
-        session = get_session()
+        session: Session = get_session()
         session.add(order)
         session.commit()
         return order
@@ -425,6 +390,73 @@ class CreateHandler(BaseHandler):
     @staticmethod
     def link_case_to_order(order_id: int, case_id: int):
         insert_statement: Insert = order_case.insert().values(order_id=order_id, case_id=case_id)
-        session = get_session()
+        session: Session = get_session()
         session.execute(insert_statement)
         session.commit()
+
+    def add_illumina_flow_cell(self, flow_cell_dto: IlluminaFlowCellDTO) -> IlluminaFlowCell:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        if self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id):
+            raise ValueError(f"Flow cell with {flow_cell_dto.internal_id} already exists.")
+        new_flow_cell = IlluminaFlowCell(
+            internal_id=flow_cell_dto.internal_id,
+            type=flow_cell_dto.type,
+            model=flow_cell_dto.model,
+        )
+        self.session.add(new_flow_cell)
+        LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
+        return new_flow_cell
+
+    def add_illumina_sequencing_run(
+        self, sequencing_run_dto: IlluminaSequencingRunDTO, flow_cell: IlluminaFlowCell
+    ) -> IlluminaSequencingRun:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        new_sequencing_run = IlluminaSequencingRun(
+            type=sequencing_run_dto.type,
+            device=flow_cell,
+            sequencer_type=sequencing_run_dto.sequencer_type,
+            sequencer_name=sequencing_run_dto.sequencer_name,
+            data_availability=sequencing_run_dto.data_availability,
+            archived_at=sequencing_run_dto.archived_at,
+            has_backup=sequencing_run_dto.has_backup,
+            total_reads=sequencing_run_dto.total_reads,
+            total_undetermined_reads=sequencing_run_dto.total_undetermined_reads,
+            percent_undetermined_reads=sequencing_run_dto.percent_undetermined_reads,
+            percent_q30=sequencing_run_dto.percent_q30,
+            mean_quality_score=sequencing_run_dto.mean_quality_score,
+            total_yield=sequencing_run_dto.total_yield,
+            yield_q30=sequencing_run_dto.yield_q30,
+            cycles=sequencing_run_dto.cycles,
+            demultiplexing_software=sequencing_run_dto.demultiplexing_software,
+            demultiplexing_software_version=sequencing_run_dto.demultiplexing_software_version,
+            sequencing_started_at=sequencing_run_dto.sequencing_started_at,
+            sequencing_completed_at=sequencing_run_dto.sequencing_completed_at,
+            demultiplexing_started_at=sequencing_run_dto.demultiplexing_started_at,
+            demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
+        )
+        self.session.add(new_sequencing_run)
+        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.device.internal_id}.")
+        return new_sequencing_run
+
+    def add_illumina_sample_metrics_entry(
+        self, metrics_dto: IlluminaSampleSequencingMetricsDTO, sequencing_run: IlluminaSequencingRun
+    ) -> IlluminaSampleSequencingMetrics:
+        """
+        Add a new Illumina Sample Sequencing Metrics entry to the status database as a pending
+        transaction.
+        """
+        sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
+        new_metric = IlluminaSampleSequencingMetrics(
+            sample=sample,
+            instrument_run=sequencing_run,
+            type=metrics_dto.type,
+            flow_cell_lane=metrics_dto.flow_cell_lane,
+            total_reads_in_lane=metrics_dto.total_reads_in_lane,
+            base_passing_q30_percent=metrics_dto.base_passing_q30_percent,
+            base_mean_quality_score=metrics_dto.base_mean_quality_score,
+            yield_=metrics_dto.yield_,
+            yield_q30=metrics_dto.yield_q30,
+            created_at=metrics_dto.created_at,
+        )
+        self.session.add(new_metric)
+        return new_metric

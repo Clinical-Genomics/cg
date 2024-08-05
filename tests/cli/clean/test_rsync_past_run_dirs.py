@@ -26,7 +26,7 @@ def test_clean_rsync_past_run_dirs_young_process(
     assert rsync_process.exists()
     # WHEN attempting to remove said process same day
     result = cli_runner.invoke(
-        rsync_past_run_dirs, ["-d", "-y", str(timestamp_now)], obj=clean_context
+        rsync_past_run_dirs, ["--dry-run", "-y", str(timestamp_now)], obj=clean_context
     )
     # THEN the command should not fail and notice that the process is not old
     assert result.exit_code == EXIT_SUCCESS

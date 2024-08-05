@@ -7,6 +7,7 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
 from cg.cli.generate.report.utils import get_report_api, get_report_case
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
 
@@ -18,9 +19,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-r", "--re-upload", is_flag=True, default=False, help="Re-upload existing delivery report"
 )
-@click.option(
-    "-d", "--dry-run", is_flag=True, default=False, help="Run command without uploading to Scout"
-)
+@DRY_RUN
 @click.pass_context
 def upload_delivery_report_to_scout(
     context: click.Context, case_id: str, re_upload: bool, dry_run: bool

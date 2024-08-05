@@ -1,20 +1,15 @@
 import logging
-from typing import Type
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 LOG = logging.getLogger(__name__)
 
 
-def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
+def validate_samples_are_unique(samples: list[IlluminaSampleIndexSetting]) -> None:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -22,32 +17,16 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         if sample_id in sample_ids:
             message: str = f"Sample {sample.sample_id} exists multiple times in sample sheet"
             LOG.error(message)
-            raise SampleSheetError(message)
+            raise SampleSheetContentError(message)
         sample_ids.add(sample_id)
 
 
-def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
+def validate_samples_unique_per_lane(samples: list[IlluminaSampleIndexSetting]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
-    sample_by_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(samples)
+    sample_by_lane: dict[int, list[IlluminaSampleIndexSetting]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.debug(f"Validate that samples are unique in lane: {lane}")
         validate_samples_are_unique(samples=lane_samples)
-
-
-def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
-    """Returns the sample type identified from the sample sheet content."""
-    for row in sample_sheet_content:
-        if not row:
-            continue
-        if SampleSheetBCLConvertSections.Data.HEADER in row[0]:
-            LOG.info("Sample sheet was generated for BCL Convert")
-            return FlowCellSampleBCLConvert
-        if SampleSheetBcl2FastqSections.Data.HEADER in row[0]:
-            LOG.info("Sample sheet was generated for BCL2FASTQ")
-            return FlowCellSampleBcl2Fastq
-    message: str = "Could not determine sample sheet type"
-    LOG.error(message)
-    raise SampleSheetError(message)
 
 
 def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
@@ -71,20 +50,20 @@ def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[
     if not header:
         message = "Could not find header in sample sheet"
         LOG.warning(message)
-        raise SampleSheetError(message)
+        raise SampleSheetFormatError(message)
     if not raw_samples:
         message = "Could not find any samples in sample sheet"
         LOG.warning(message)
-        raise SampleSheetError(message)
+        raise SampleSheetFormatError(message)
     return raw_samples
 
 
 def get_samples_by_lane(
-    samples: list[FlowCellSample],
-) -> dict[int, list[FlowCellSample]]:
+    samples: list[IlluminaSampleIndexSetting],
+) -> dict[int, list[IlluminaSampleIndexSetting]]:
     """Group and return samples by lane."""
     LOG.debug("Order samples by lane")
-    sample_by_lane: dict[int, list[FlowCellSample]] = {}
+    sample_by_lane: dict[int, list[IlluminaSampleIndexSetting]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
             sample_by_lane[sample.lane] = []
@@ -92,19 +71,16 @@ def get_samples_by_lane(
     return sample_by_lane
 
 
-def get_flow_cell_samples_from_content(
+def get_samples_from_content(
     sample_sheet_content: list[list[str]],
-    sample_type: Type[FlowCellSample] | None = None,
-) -> list[FlowCellSample]:
+) -> list[IlluminaSampleIndexSetting]:
     """
-    Return the samples in a sample sheet as a list of FlowCellSample objects.
+    Return the samples in a sample sheet as a list of IlluminaIndexSettings objects.
     Raises:
         ValidationError: if the samples do not have the correct attributes based on their model.
     """
-    if not sample_type:
-        sample_type: Type[FlowCellSample] = get_sample_type_from_content(sample_sheet_content)
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )
-    adapter = TypeAdapter(list[sample_type])
+    adapter = TypeAdapter(list[IlluminaSampleIndexSetting])
     return adapter.validate_python(raw_samples)

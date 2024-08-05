@@ -48,7 +48,7 @@ def test_dry_run(
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(
-        clean_run_dir, [microsalt_case_clean_dry, "-d", "-y"], obj=clean_context_microsalt
+        clean_run_dir, [microsalt_case_clean_dry, "--dry-run", "-y"], obj=clean_context_microsalt
     )
 
     # THEN command should say it would have deleted

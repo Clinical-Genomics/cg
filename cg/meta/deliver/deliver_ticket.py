@@ -10,7 +10,9 @@ from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
@@ -25,7 +27,7 @@ class DeliverTicketAPI(MetaAPI):
     def __init__(self, config: CGConfig):
         super().__init__(config)
         self.delivery_path: Path = Path(config.delivery_path)
-        self.fastq_file_service = FastqFileService()
+        self.fastq_concatenation_service = FastqConcatenationService()
 
     def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
@@ -99,7 +101,7 @@ class DeliverTicketAPI(MetaAPI):
             reverse_output_path = generate_reverse_concatenated_fastq_delivery_path(
                 fastq_directory=dir_path, sample_name=dir_path.name
             )
-            self.fastq_file_service.concatenate(
+            self.fastq_concatenation_service.concatenate(
                 fastq_directory=dir_path,
                 forward_output_path=forward_output_path,
                 reverse_output_path=reverse_output_path,

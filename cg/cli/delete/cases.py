@@ -3,6 +3,7 @@ import logging
 import click
 
 from cg.cli.delete.case import delete_case
+from cg.constants.cli_options import DRY_RUN
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -29,7 +30,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
 
 
 @click.command("cases")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option(
     "--sample-identifier",
     "identifiers",

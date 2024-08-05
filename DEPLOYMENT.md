@@ -42,10 +42,11 @@ the title if not.
 9. Deploy master to production
      1. Log in to appropriate server `ssh <server.scilifelab.se>`
      2. `up`
-     3. ```shell
+     3. Make sure the action publishing the most recent version to PyPi is finished.
+     4. ```shell
         bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-prod.sh -e P_cg -t cg -b master -a
         ```
-     4. Make sure that installation was successful
+     5. Make sure that installation was successful
 
 
 11. Take a screenshot or copy log text and post as a comment on the PR. Screenshot should include environment and that it succeeded.

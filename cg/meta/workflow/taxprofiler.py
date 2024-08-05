@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
-from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
@@ -52,11 +51,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
         return False
-
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
@@ -107,9 +101,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         }
         return search_patterns
 
-    def get_deliverables_template_content(self) -> list[dict[str, str]]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the reference genome build version of a Taxprofiler analysis."""
+        return GenomeVersion.T2T_CHM13.value

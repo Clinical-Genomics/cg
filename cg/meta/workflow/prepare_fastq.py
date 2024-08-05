@@ -96,8 +96,7 @@ class PrepareFastqAPI:
     def add_decompressed_fastq_files_to_housekeeper(self, case_id: str) -> None:
         """Adds decompressed FASTQ files to Housekeeper for a case, if there are any."""
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        for link in case.links:
-            sample: Sample = link.sample
+        for sample in case.samples:
             self.add_decompressed_sample(sample=sample, case=case)
 
     def add_decompressed_sample(self, sample: Sample, case: Case) -> None:

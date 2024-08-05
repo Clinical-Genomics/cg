@@ -1,110 +1,170 @@
+"""Module for demultiplex fixtures returning strings."""
+
 import pytest
 
 
 @pytest.fixture
-def tmp_flow_cell_name_malformed_sample_sheet() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet with malformed headers.
-    """
-    return "201203_A00689_0200_AHVKJCDRXY"
+def flow_cell_name() -> str:
+    """Return flow cell name."""
+    return "HVKJCDRXX"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq")
-def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
-    """Returns the name of a flow cell directory ready for demultiplexing with bcl2fastq."""
-    return "211101_D00483_0615_AHLG5GDRXY"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
-    """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
-    return "HHKVCALXX"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with BCL2Fastq."""
-    return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-) -> str:
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_single_index_flow_cell_name() -> str:
-    """Return the full name of a HiSeqX flow cell with only one index."""
-    return "170517_ST-E00266_0210_BHJCFFALXX"
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_dual_index_flow_cell_name() -> str:
-    """Return the full name of a HiSeqX flow cell with two indexes."""
-    return "180508_ST-E00269_0269_AHL32LCCXY"
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_dual_index_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "181005_D00410_0735_BHM2LNBCX2"
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_custom_index_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "180509_D00450_0598_BHGYFNBCX2"
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_full_name() -> str:
-    """Return full flow cell name."""
+@pytest.fixture
+def flow_cell_full_name(flow_cell_name: str) -> str:
+    """Return flow cell full name."""
     return "201203_D00483_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_flow_cell_full_name() -> str:
-    """Return the full name of a bcl_convert flow cell."""
-    return "211101_A00187_0615_AHLG5GDRZZ"
+def hiseq_x_single_index_flow_cell_id() -> str:
+    """Return the id of a HiSeqX flow cell with only one index."""
+    return "HJCFFALXX"
 
 
 @pytest.fixture(scope="session")
-def novaseq_x_flow_cell_full_name() -> str:
+def hiseq_x_single_index_flow_cell_name(hiseq_x_single_index_flow_cell_id) -> str:
+    """Return the full name of a HiSeqX flow cell with only one index."""
+    return f"170517_ST-E00266_0210_B{hiseq_x_single_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_flow_cell_id() -> str:
+    """Return the id of a HiSeqX flow cell with double indexes."""
+    return "HL32LCCXY"
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_flow_cell_name(hiseq_x_dual_index_flow_cell_id: str) -> str:
+    """Return the full name of a HiSeqX flow cell with double indexes."""
+    return f"180508_ST-E00269_0269_A{hiseq_x_dual_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_flow_cell_id() -> str:
+    """Return the id of a HiSeq2500 flow cell with double indexes."""
+    return "HM2LNBCX2"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_flow_cell_name(hiseq_2500_dual_index_flow_cell_id: str) -> str:
+    """Return the full name of a HiSeq2500 flow cell with double indexes."""
+    return f"181005_D00410_0735_B{hiseq_2500_dual_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_id() -> str:
+    """Return the id of a HiSeq2500 flow cell with custom indexes."""
+    return "HGYFNBCX2"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_name(hiseq_2500_custom_index_flow_cell_id) -> str:
+    """Return the full name of a HiSeq2500 flow cell with custom indexes."""
+    return f"180509_D00450_0598_B{hiseq_2500_custom_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_pre_1_5_kits_flow_cell_id() -> str:
+    """Return the id of a pre-1.5 kits NovaSeq6000 flow cell."""
+    return "HLYWYDSXX"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_pre_1_5_kits_flow_cell_full_name(
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+) -> str:
+    """Return the full name of a pre-1.5 kits NovaSeq6000 flow cell."""
+    return f"190927_A00689_0069_B{novaseq_6000_pre_1_5_kits_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_post_1_5_kits_flow_cell_id() -> str:
+    """Return the id of a post-1.5 kits NovaSeq6000 flow cell."""
+    return "HK33MDRX3"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_post_1_5_kits_flow_cell_full_name(
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> str:
+    """Return the full name of a post-1.5 kits NovaSeq6000 flow cell."""
+    return f"230912_A00187_1009_A{novaseq_6000_post_1_5_kits_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def novaseq_x_flow_cell_id() -> str:
+    """Return the id of a NovaSeqX flow cell."""
+    return "22F52TLT3"
+
+
+@pytest.fixture(scope="session")
+def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
     """Return the full name of a NovaSeqX flow cell."""
-    return "20230508_LH00188_0003_A22522YLT3"
+    return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_sample_sheet_file_name() -> str:
-    """Return the name of a BCL2Fastq sample sheet."""
-    return "SampleSheet_bcl2fastq.csv"
-
-
-# Lists
+def seven_canonical_flow_cell_ids(
+    hiseq_x_single_index_flow_cell_id: str,
+    hiseq_x_dual_index_flow_cell_id: str,
+    hiseq_2500_dual_index_flow_cell_id: str,
+    hiseq_2500_custom_index_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+    novaseq_x_flow_cell_id: str,
+) -> list[str]:
+    """Return a list of seven canonical flow cell ids."""
+    return [
+        hiseq_x_single_index_flow_cell_id,
+        hiseq_x_dual_index_flow_cell_id,
+        hiseq_2500_dual_index_flow_cell_id,
+        hiseq_2500_custom_index_flow_cell_id,
+        novaseq_6000_pre_1_5_kits_flow_cell_id,
+        novaseq_6000_post_1_5_kits_flow_cell_id,
+        novaseq_x_flow_cell_id,
+    ]
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
-    """
-    return ["ACC11927A2", "ACC11927A5"]
+def demultiplex_log_file_names(novaseq_6000_post_1_5_kits_flow_cell_id: str) -> list[str]:
+    """Return a list of demultiplex log file names."""
+    return [
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stderr",
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stdout",
+    ]
 
 
-@pytest.fixture(scope="session")
-def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_A00689_0209_BHHKVCALXX.
-    """
-    return ["SVE2528A1"]
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_names(
+    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
+) -> list[str]:
+    """Return a list of fastq file names for a NovaSeq6000 post 1.5 kits flow cell."""
+    fastq_files: list[str] = []
+    lanes = [1, 2]
+    for sample_id, lane in zip(selected_novaseq_6000_post_1_5_kits_sample_ids, lanes):
+        fastq_files.extend(
+            [
+                f"{sample_id}_S1_L00{lane}_R1_001.fastq.gz",
+                f"{sample_id}_S1_L00{lane}_R2_001.fastq.gz",
+            ]
+        )
+    return fastq_files
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_lane_1(
+    novaseq_6000_post_1_5_kits_fastq_file_names: list[str],
+) -> str:
+    """Return the fastq file name for lane 1."""
+    return novaseq_6000_post_1_5_kits_fastq_file_names[0]
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_fastq_file_lane_1_with_flow_cell_id(
+    novaseq_6000_post_1_5_kits_fastq_file_lane_1: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> str:
+    """Return the fastq file name for lane 1 with flow cell id."""
+    return (
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_{novaseq_6000_post_1_5_kits_fastq_file_lane_1}"
+    )

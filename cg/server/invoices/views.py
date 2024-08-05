@@ -154,7 +154,7 @@ def new(record_type):
         count=count,
         records=records,
         record_type=record_type,
-        total_price_threshold=current_app.config["TOTAL_PRICE_THRESHOLD"],
+        total_price_threshold=current_app.config["invoice_max_price"],
         args={"customer": customer_id},
     )
 
@@ -169,8 +169,8 @@ def invoice(invoice_id):
 
     if not (kth_inv and ki_inv):
         flash(" ,".join(list(set(api.log))))
-        undo_invoice(invoice_id)
-        return redirect(request.referrer)
+        url = undo_invoice(invoice_id)
+        return redirect(url)
 
     if not invoice_obj.price:
         final_price = api.total_price()

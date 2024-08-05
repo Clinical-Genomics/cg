@@ -8,18 +8,18 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import (
-    LoqusdbBalsamicCustomers,
-    LoqusdbInstance,
-    LoqusdbMipCustomers,
-)
+from cg.constants.constants import CustomerId
+from cg.constants.observations import LoqusdbInstance
+from cg.constants.sample_sources import SourceType
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
 )
-from cg.store.models import Analysis, Case, Customer
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -28,21 +28,31 @@ LOG = logging.getLogger(__name__)
 class ObservationsAPI:
     """API to manage Loqusdb observations."""
 
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         self.store: Store = config.status_db
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.analysis_api: AnalysisAPI = analysis_api
         self.loqusdb_config: CommonAppConfig = config.loqusdb
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
 
-    def upload(self, case: Case) -> None:
-        """Upload observations to Loqusdb."""
-        self.check_customer_loqusdb_permissions(case.customer)
-        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles = (
-            self.get_observations_input_files(case)
+    def upload(self, case_id: str) -> None:
+        """
+        Upload observations to Loqusdb.
+
+        Raises:
+            LoqusdbUploadCaseError: If case is not eligible for Loqusdb uploads
+        """
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        is_case_eligible_for_observations_upload: bool = (
+            self.is_case_eligible_for_observations_upload(case)
         )
-        self.load_observations(case=case, input_files=input_files)
+        if is_case_eligible_for_observations_upload:
+            self.load_observations(case=case)
+        else:
+            LOG.error(f"Case {case.internal_id} is not eligible for observations upload")
+            raise LoqusdbUploadCaseError
 
     def get_observations_input_files(
         self, case: Case
@@ -51,7 +61,7 @@ class ObservationsAPI:
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
         hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
-        return self.extract_observations_files_from_hk(hk_version)
+        return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
@@ -79,8 +89,8 @@ class ObservationsAPI:
     def is_duplicate(
         case: Case,
         loqusdb_api: LoqusdbAPI,
-        profile_vcf_path: Path | None,
-        profile_threshold: float | None,
+        profile_vcf_path: Path | None = None,
+        profile_threshold: float | None = None,
     ) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
@@ -99,31 +109,53 @@ class ObservationsAPI:
             sample.loqusdb_id = loqusdb_id
         self.store.session.commit()
 
-    def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
-        """Verifies that the customer is whitelisted for Loqusdb uploads."""
-        if customer.internal_id not in [cust_id for cust_id in self.get_loqusdb_customers()]:
-            LOG.error(
-                f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
-            )
-            raise LoqusdbUploadCaseError
-        LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
+    def is_customer_eligible_for_observations_upload(self, customer_id: str) -> bool:
+        """Return whether the customer has been whitelisted for uploading observations."""
+        if customer_id not in self.loqusdb_customers:
+            LOG.error(f"Customer {customer_id} is not whitelisted for Loqusdb uploads")
+            return False
+        return True
 
-    def get_loqusdb_customers(self) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
-        """Returns the customers that are entitled to Loqusdb uploads."""
+    def is_sequencing_method_eligible_for_observations_upload(self, case_id: str) -> bool:
+        """Return whether a sequencing method is valid for observations upload."""
+        sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
+            case_id
+        )
+        if sequencing_method not in self.loqusdb_sequencing_methods:
+            LOG.error(f"Sequencing method {sequencing_method} is not supported by Loqusdb uploads")
+            return False
+        return True
+
+    def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
+        """Check if the sample source is FFPE."""
+        source_type: str | None = self.analysis_api.get_case_source_type(case_id)
+        if source_type and SourceType.FFPE.lower() not in source_type.lower():
+            return True
+        LOG.error(f"Source type {source_type} is not supported for Loqusdb uploads")
+        return False
+
+    @property
+    def loqusdb_customers(self) -> list[CustomerId]:
+        """Customers that are eligible for Loqusdb uploads."""
         raise NotImplementedError
 
-    def load_observations(
-        self,
-        case: Case,
-        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles,
-    ) -> None:
+    @property
+    def loqusdb_sequencing_methods(self) -> list[str]:
+        """Sequencing methods that are eligible for Loqusdb uploads."""
+        raise NotImplementedError
+
+    def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
-    def extract_observations_files_from_hk(
-        self, hk_version: Version
+    def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
+        """Return whether a case is eligible for observations upload."""
+        raise NotImplementedError
+
+    def get_observations_files_from_hk(
+        self, hk_version: Version, case_id: str
     ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
-        """Extract observations files given a housekeeper version."""
+        """Return observations files given a Housekeeper version."""
         raise NotImplementedError
 
     def delete_case(self, case: Case) -> None:

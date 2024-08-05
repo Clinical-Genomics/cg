@@ -1,5 +1,7 @@
 """Helper functions."""
 
+import re
+
 
 def get_string_from_list_by_pattern(strings: list[str], pattern: str) -> str | None:
     """Returns the full string from a list given a specific pattern."""
@@ -29,3 +31,8 @@ def get_hamming_distance(str_1: str, str_2: str) -> int:
     if len(str_1) != len(str_2):
         raise KeyError("The two strings must have the same length to calculate distance!")
     return sum(n1 != n2 for n1, n2 in zip(str_1, str_2))
+
+
+def replace_non_alphanumeric(string: str, replace_by="_") -> str:
+    """Replace non-alphanumeric characters from a string."""
+    return re.sub(r"\W+", replace_by, string)

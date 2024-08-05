@@ -12,7 +12,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
@@ -34,7 +37,7 @@ class DeliverAPI:
         sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
-        fastq_file_service: FastqFileService,
+        fastq_file_service: FastqConcatenationService,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
@@ -61,7 +64,7 @@ class DeliverAPI:
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all
-        self.fastq_file_service = fastq_file_service
+        self.fastq_concatenation_service = fastq_file_service
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -107,7 +110,7 @@ class DeliverAPI:
 
         link: CaseSample
         for link in links:
-            if self.sample_is_deliverable(link):
+            if self.is_sample_deliverable(link):
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
@@ -129,11 +132,16 @@ class DeliverAPI:
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
 
-    def sample_is_deliverable(self, link: CaseSample) -> bool:
+    def is_sample_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
-        sample_passes_qc: bool = link.sample.sequencing_qc
-        return sample_passes_qc or deliver_failed_samples or sample_is_external
+        sample_passes_sequencing_quality_check: bool = (
+            SequencingQCService.sample_pass_sequencing_qc(sample=link.sample)
+        )
+
+        return (
+            sample_passes_sequencing_quality_check or deliver_failed_samples or sample_is_external
+        )
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
@@ -212,7 +220,7 @@ class DeliverAPI:
                 )
                 number_previously_linked_files += 1
         if number_previously_linked_files == 0 and number_linked_files_now == 0:
-            raise MissingFilesError(f"No files were linked for sample {sample_name}")
+            raise MissingFilesError(f"No files were linked for sample {sample_id} ({sample_name}).")
 
         LOG.info(
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
@@ -231,7 +239,7 @@ class DeliverAPI:
         reverse_output_path: Path = generate_reverse_concatenated_fastq_delivery_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
-        self.fastq_file_service.concatenate(
+        self.fastq_concatenation_service.concatenate(
             fastq_directory=sample_directory,
             forward_output_path=forward_output_path,
             reverse_output_path=reverse_output_path,

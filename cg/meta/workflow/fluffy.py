@@ -7,14 +7,14 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
-from cg.constants import Workflow
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Flowcell, Sample
+from cg.store.models import Case, IlluminaSequencingRun, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -80,10 +80,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         super().__init__(workflow, config)
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return False
-
-    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(binary=self.config.fluffy.binary_path)
@@ -143,7 +139,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Links fastq files from Housekeeper to case working directory
         """
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
+        sequencing_run: IlluminaSequencingRun = (
+            self.status_db.get_latest_illumina_sequencing_run_for_nipt_case(case_id)
+        )
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
             LOG.info("Fastq directory exists, removing and re-linking files!")
@@ -152,7 +150,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         for family_sample in case_obj.links:
             sample_id = family_sample.sample.internal_id
             files: Query = self.housekeeper_api.files(
-                bundle=sample_id, tags=["fastq", latest_flow_cell.name]
+                bundle=sample_id, tags=[SequencingFileTag.FASTQ, sequencing_run.device.internal_id]
             )
 
             sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
@@ -178,7 +176,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def create_fluffy_sample_sheet(
         self,
-        samples: list[FlowCellSample],
+        samples: list[IlluminaSampleIndexSetting],
         flow_cell_id: str,
     ) -> FluffySampleSheet:
         fluffy_sample_sheet_rows = []
@@ -207,18 +205,22 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
-        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
-        sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
+        sequencing_run: IlluminaSequencingRun = (
+            self.status_db.get_latest_illumina_sequencing_run_for_nipt_case(case_id)
+        )
+        sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(
+            sequencing_run.device.internal_id
+        )
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+        samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(sample_sheet_content)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
             fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
                 samples=samples,
-                flow_cell_id=flow_cell.name,
+                flow_cell_id=sequencing_run.device.internal_id,
             )
 
             sample_sheet_out_path = Path(self.get_sample_sheet_path(case_id))

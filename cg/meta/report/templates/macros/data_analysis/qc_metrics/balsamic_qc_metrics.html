@@ -1,0 +1,39 @@
+{% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
+
+{% macro balsamic_qc_metrics(samples, analysis_type) %}
+  {% set
+    metrics = [
+      {"name": "Läspar [M]",                  "key": "million_read_pairs", "description": "Antal sekvenseringsläsningar i miljoner läspar."},
+      {"name": "Duplikat [%]",                "key": "duplicates",         "description": "Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
+      {"name": "Medelfragmentlängd [baspar]", "key": "mean_insert_size",   "description": "Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument."},
+      {"name": "Fold 80 base penalty",        "key": "fold_80",            "description": "Jämnhet av täckningsgraden över alla gener i analyspanlen."},
+    ]
+  %}
+  {% if "helgenomsekvensering" in analysis_type %}
+    {% if "normal" in analysis_type %}
+      {% set
+        _ = metrics.extend([
+          {"name": "Täckningsgrad 15x [%]", "key": "pct_15x", "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (15x). Det beräknas efter borttagning av duplikata läsningar."},
+        ])
+      %}
+    {% endif %}
+    {% set
+      _ = metrics.extend([
+        {"name": "Täckningsgrad 60x [%]",           "key": "pct_60x",                  "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (60x). Det beräknas efter borttagning av duplikata läsningar."},
+        {"name": "Mediantäckning [baser]",          "key": "median_coverage",          "description": "Median av täckningen över alla baser inkluderade i analysen. Det beräknas efter borttagning av duplikata läsningar."},
+        {"name": "Läsningar med felaktiga par [%]", "key": "pct_reads_improper_pairs", "description": "Andelen (primära) läsningar som inte är korrekt parvis justerade."},
+      ])
+    %}
+  {% else %}
+    {% set
+      _ = metrics.extend([
+        {"name": "Mediantäckning [baser]", "key": "median_target_coverage", "description": "Median av täckningen över alla baser inkluderade i analysen. Det beräknas efter borttagning av duplikata läsningar."},
+        {"name": "Täckningsgrad 250x [%]", "key": "pct_250x",               "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (250x). Det beräknas efter borttagning av duplikata läsningar."},
+        {"name": "Täckningsgrad 500x [%]", "key": "pct_500x",               "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (500x). Det beräknas efter borttagning av duplikata läsningar."},
+        {"name": "GC Dropout [%]",         "key": "gc_dropout",             "description": "Ett mått på hur dåligt täckta områden, med >= 50% GC innehåll, är i jämförelse med medelvärdet. Om värdet är 5%, innebär det att 5% av alla läsningar som borde ha kartlagts till områden med GC <= 50%, kartlades någon annanstans."},
+      ])
+    %}
+  {% endif %}
+  <!-- Quality control metrics -->
+  {{ qc_metrics(samples=samples, metrics=metrics) }}
+{% endmacro %}

@@ -10,8 +10,6 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
-    OPTION_DRY_RUN,
-    OPTION_FORCE_REPORT,
     OPTION_STARTED_AT,
     OPTION_WORKFLOW,
 )
@@ -22,6 +20,7 @@ from cg.cli.generate.report.utils import (
     get_report_case,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
@@ -31,14 +30,14 @@ LOG = logging.getLogger(__name__)
 
 @click.command("delivery-report")
 @ARGUMENT_CASE_ID
-@OPTION_FORCE_REPORT
-@OPTION_DRY_RUN
+@FORCE
+@DRY_RUN
 @OPTION_STARTED_AT
 @click.pass_context
 def generate_delivery_report(
     context: click.Context,
     case_id: str,
-    force_report: bool,
+    force: bool,
     dry_run: bool,
     analysis_started_at: str = None,
 ) -> None:
@@ -51,7 +50,7 @@ def generate_delivery_report(
     # Dry run: prints the HTML report to console
     if dry_run:
         delivery_report_html: str = report_api.create_delivery_report(
-            case_id, analysis_date, force_report
+            case_id=case_id, analysis_date=analysis_date, force=force
         )
         click.echo(delivery_report_html)
         return
@@ -70,7 +69,7 @@ def generate_delivery_report(
         case_id=case_id,
         directory=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_date,
-        force_report=force_report,
+        force=force,
     )
     report_api.add_delivery_report_to_hk(
         case_id=case_id, delivery_report_file=created_delivery_report, version=version
@@ -86,11 +85,11 @@ def generate_delivery_report(
 
 @click.command("available-delivery-reports")
 @OPTION_WORKFLOW
-@OPTION_FORCE_REPORT
-@OPTION_DRY_RUN
+@FORCE
+@DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
-    context: click.Context, workflow: Workflow, force_report: bool, dry_run: bool
+    context: click.Context, workflow: Workflow, force: bool, dry_run: bool
 ) -> None:
     """Generates delivery reports for all cases that need one and stores them in Housekeeper."""
 
@@ -117,7 +116,7 @@ def generate_available_delivery_reports(
                 context.invoke(
                     generate_delivery_report,
                     case_id=case_id,
-                    force_report=force_report,
+                    force=force,
                     dry_run=dry_run,
                 )
             except FileNotFoundError as error:

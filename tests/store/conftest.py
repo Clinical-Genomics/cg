@@ -8,9 +8,11 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
+from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.store.models import (
     Analysis,
     Application,
@@ -19,6 +21,7 @@ from cg.store.models import (
     Customer,
     Organism,
     Sample,
+    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -31,7 +34,7 @@ class StoreConstants(enum.Enum):
     CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "1"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
     ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
-    LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "locusdb_id"
+    LOQUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "loqusdb_id"
     READS_SAMPLE_WITH_ATTRIBUTES: int = 100
     DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: int = 1
     AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES: float = 45
@@ -227,7 +230,7 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        loqusdb_id=StoreConstants.LOQUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
         age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
@@ -586,3 +589,35 @@ def store_with_samples_for_multiple_customers(
             delivered_at=timestamp_now,
         )
     yield store
+
+
+@pytest.fixture
+def illumina_flow_cell_internal_id() -> str:
+    return "FC123456"
+
+
+@pytest.fixture
+def illumina_flow_cell_model_s1() -> str:
+    return "S1"
+
+
+@pytest.fixture
+def illumina_flow_cell_dto(
+    illumina_flow_cell_internal_id: str, illumina_flow_cell_model_s1: str
+) -> IlluminaFlowCellDTO:
+    return IlluminaFlowCellDTO(
+        internal_id=illumina_flow_cell_internal_id,
+        type=DeviceType.ILLUMINA,
+        model=illumina_flow_cell_model_s1,
+    )
+
+
+@pytest.fixture
+def illumina_flow_cell(
+    illumina_flow_cell_internal_id: str, illumina_flow_cell_model_s1: str
+) -> IlluminaFlowCell:
+    return IlluminaFlowCell(
+        internal_id=illumina_flow_cell_internal_id,
+        type=DeviceType.ILLUMINA,
+        model=illumina_flow_cell_model_s1,
+    )

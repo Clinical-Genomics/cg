@@ -38,7 +38,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class QualityController:
+class MicroSALTQualityController:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 

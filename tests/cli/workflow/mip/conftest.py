@@ -164,8 +164,8 @@ def setup_mocks(
     is_spring_decompression_running: bool = False,
 ) -> None:
     """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(ReadHandler, "cases_to_analyze")
-    ReadHandler.cases_to_analyze.return_value = [case_to_analyze]
+    mocker.patch.object(ReadHandler, "cases_to_analyse")
+    ReadHandler.cases_to_analyse.return_value = [case_to_analyze]
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
@@ -196,5 +196,5 @@ def setup_mocks(
         return_value=["a str"],
     )
 
-    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
-    ReadHandler.are_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(ReadHandler, "are_all_illumina_runs_on_disk")
+    ReadHandler.are_all_illumina_runs_on_disk.return_value = True

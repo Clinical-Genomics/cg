@@ -49,7 +49,9 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-    def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
+    def export_panels(
+        self, panels: list[str], build: str = GENOME_BUILD_37, dry_run: bool = False
+    ) -> list[str]:
         """Pass through to export of a list of gene panels.
 
         Return list of lines in bed format
@@ -61,7 +63,7 @@ class ScoutAPI:
             export_panels_command.extend(["--build", build])
 
         try:
-            self.process.run_command(export_panels_command)
+            self.process.run_command(export_panels_command, dry_run=dry_run)
             if not self.process.stdout:
                 return []
         except CalledProcessError:
@@ -155,7 +157,7 @@ class ScoutAPI:
             get_cases_command.append("--finished")
 
         if reruns:
-            LOG.info("Fetching cases that are reruns")
+            LOG.debug("Fetching cases that are reruns")
             get_cases_command.append("--reruns")
 
         if days_ago:
@@ -173,7 +175,7 @@ class ScoutAPI:
         for case_export in ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
-            LOG.info(f"Validating case {case_export.get('_id')}")
+            LOG.debug(f"Validating case {case_export.get('_id')}")
             cases.append(ScoutExportCase.model_validate(case_export))
         return cases
 

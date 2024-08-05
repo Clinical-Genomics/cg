@@ -6,13 +6,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, FileExtensions, SequencingRunDataAvailability, Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
-from cg.constants import FileExtensions
 
 
 @pytest.fixture
@@ -93,13 +92,6 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
             },
         ],
     }
-
-
-@pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Case:
-    """Case with DNA application"""
-    cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
@@ -236,13 +228,12 @@ def tb_api():
 
 
 @pytest.fixture
-def mock_analysis_flow_cell(mocker) -> None:
-    """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
-    on disk."""
-    flow_cell = Mock()
-    flow_cell.status = FlowCellStatus.ON_DISK
-    mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
-    ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
+def mock_analysis_illumina_run(mocker) -> None:
+    """Mocks the get_flow_cells_by_case method to return a list containing an "ondisk" flow cell."""
+    sequencing_run = Mock()
+    sequencing_run.data_availability = SequencingRunDataAvailability.ON_DISK
+    mocker.patch.object(ReadHandler, "get_illumina_sequencing_runs_by_case")
+    ReadHandler.get_illumina_sequencing_runs_by_case.return_value = [sequencing_run]
 
 
 @pytest.fixture(scope="session")

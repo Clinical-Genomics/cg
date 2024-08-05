@@ -11,6 +11,7 @@ from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
@@ -18,6 +19,7 @@ from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
@@ -29,6 +31,8 @@ from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
+
+MAX_CASES_TO_START_IN_50_MINUTES = 21
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
@@ -67,10 +71,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return True
-
-    @property
     def fastq_handler(self):
         return BalsamicFastqHandler
 
@@ -92,20 +92,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
-        )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze
+    def get_cases_ready_for_analysis(self) -> list[Case]:
+        """Returns a list of cases that are ready for analysis."""
+        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_ready_for_analysis: list[Case] = [
+            case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
+        ]
+        return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.
@@ -135,7 +128,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
-        LOG.debug("Fetch analysis type for %s", case_id)
+        LOG.debug(f"Fetch analysis type for {case_id}")
         number_of_samples: int = len(
             self.status_db.get_case_by_internal_id(internal_id=case_id).links
         )
@@ -149,7 +142,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_type != "wgs":
             application_type = "panel"
         analysis_type = "_".join([sample_type, application_type])
-        LOG.info("Found analysis type %s", analysis_type)
+        LOG.debug(f"Found analysis type {analysis_type}")
         return analysis_type
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
@@ -322,7 +315,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
-        """Get the latest metadata of a specific BALSAMIC case"""
+        """Return the latest metadata of a specific BALSAMIC case."""
 
         config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
         metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
@@ -334,11 +327,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
                 return balsamic_analysis
             except ValidationError as error:
-                LOG.error(
-                    "get_latest_metadata failed for '%s', missing attribute: %s",
-                    case_id,
-                    error,
-                )
+                LOG.error(f"get_latest_metadata failed for '{case_id}', missing attribute: {error}")
                 raise error
         else:
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
@@ -454,6 +443,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
+        verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
@@ -463,7 +454,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+            "exome": verified_exome_argument,
         }
+
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
@@ -511,15 +504,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
-
-    def get_case_application_type(self, case_id: str) -> str:
-        application_types = {
-            self.get_application_type(link_object.sample)
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        if application_types:
-            return application_types.pop().lower()
 
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
@@ -580,12 +564,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--exome": arguments.get("exome"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
-            }
+            },
+            exclude_true=True,
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
@@ -625,3 +611,64 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Returns the reference genome build version of a Balsamic analysis."""
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        return analysis_metadata.config.reference.reference_genome_version
+
+    @staticmethod
+    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
+        """Return the version of a specific Balsamic bioinformatic tool."""
+        for tool_name, versions in var_caller_versions.items():
+            if tool_name in var_caller_name:
+                return versions[0]
+        return None
+
+    def get_variant_callers(self, case_id: str) -> list[str]:
+        """
+        Return list of Balsamic variant-calling filters and their versions (if available) from the
+        config.json file.
+        """
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = analysis_metadata.config.analysis.analysis_type
+        var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        analysis_var_callers = []
+        for var_caller_name, var_caller_attributes in var_callers.items():
+            if (
+                sequencing_type in var_caller_attributes.sequencing_type
+                and analysis_type in var_caller_attributes.analysis_type
+            ):
+                version: str = self.get_variant_caller_version(
+                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
+                )
+                analysis_var_callers.append(
+                    f"{var_caller_name} (v{version})" if version else var_caller_name
+                )
+        return analysis_var_callers
+
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        pons: list[str] = []
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        if analysis_metadata.config.panel:
+            if pon_cnn := analysis_metadata.config.panel.pon_cnn:
+                pons.append(pon_cnn)
+        return pons
+
+    def get_data_analysis_type(self, case_id: str) -> str | None:
+        """Return data analysis type carried out."""
+        return self.get_bundle_deliverables_type(case_id)
+
+    def is_analysis_normal_only(self, case_id: str) -> bool:
+        """Return whether the analysis is normal only."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if case.non_tumour_samples and not case.tumour_samples:
+            return True
+        return False
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Balsamic Scout upload case tags."""
+        return BALSAMIC_CASE_TAGS

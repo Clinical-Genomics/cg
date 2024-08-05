@@ -1,8 +1,8 @@
-"""Functions that handle files in the context of scout uploading"""
+"""Functions that handle files in the context of Scout uploading."""
 
 import logging
+from typing import Any
 
-import requests
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -15,11 +15,8 @@ from cg.store.models import Analysis, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-# Maps keys that are used in scout load config on tags that are used in scout
-
-
 class ScoutConfigBuilder:
-    """Base class for handling files that should be included in Scout upload"""
+    """Base class for handling files that should be included in Scout upload."""
 
     def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
         self.hk_version_obj: Version = hk_version_obj
@@ -32,7 +29,7 @@ class ScoutConfigBuilder:
         )
 
     def add_common_info_to_load_config(self) -> None:
-        """Add the mandatory common information to a scout load config object"""
+        """Add the mandatory common information to a Scout load config object."""
         self.load_config.analysis_date = self.analysis_obj.completed_at
         self.load_config.default_gene_panels = self.analysis_obj.case.panels
         self.load_config.family = self.analysis_obj.case.internal_id
@@ -46,15 +43,10 @@ class ScoutConfigBuilder:
     def add_common_sample_info(
         self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
-        """Add the information to a sample that is common for different analysis types"""
+        """Add the information to a sample that is common for different analysis types."""
         sample_id: str = case_sample.sample.internal_id
-        LOG.info("Building sample %s", sample_id)
-        lims_sample = dict()
-        try:
-            lims_sample = self.lims_api.sample(sample_id) or {}
-        except requests.exceptions.HTTPError as ex:
-            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
-
+        LOG.info(f"Building sample {sample_id}")
+        lims_sample: dict[str, Any] = self.lims_api.sample(sample_id)
         config_sample.sample_id = sample_id
         config_sample.sex = case_sample.sample.sex
         config_sample.phenotype = case_sample.status
@@ -76,58 +68,56 @@ class ScoutConfigBuilder:
         self.include_sample_files(config_sample)
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
-        """Build a sample for the scout load config"""
+        """Build a sample for the Scout load config."""
         raise NotImplementedError
 
     def build_load_config(self) -> ScoutLoadConfig:
-        """Build a load config for uploading a case to scout"""
+        """Build a load config for uploading a case to Scout."""
         raise NotImplementedError
 
     def include_sample_files(self, _config_sample: ScoutIndividual) -> None:
-        """Include all files that are used on sample level in Scout"""
+        """Include all files that are used on sample level in Scout."""
         return None
 
     def include_case_files(self) -> None:
-        """Include all files that are used on case level in scout"""
+        """Include all files that are used on case level in Scout."""
         raise NotImplementedError
 
     def include_phenotype_terms(self) -> None:
-        LOG.info("Adding phenotype terms to scout load config")
+        LOG.info("Adding phenotype terms to Scout load config")
         phenotype_terms: set[str] = set()
         link_obj: CaseSample
         for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_term in sample_obj.phenotype_terms:
                 LOG.debug(
-                    "Adding term %s from sample %s to phenotype terms",
-                    phenotype_term,
-                    sample_obj.internal_id,
+                    f"Adding term {phenotype_term} from sample {sample_obj.internal_id} to "
+                    f"phenotype terms",
                 )
                 phenotype_terms.add(phenotype_term)
         if phenotype_terms:
             self.load_config.phenotype_terms = list(phenotype_terms)
 
     def include_phenotype_groups(self) -> None:
-        LOG.info("Adding phenotype groups to scout load config")
+        LOG.info("Adding phenotype groups to Scout load config")
         phenotype_groups: set[str] = set()
         link_obj: CaseSample
         for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_group in sample_obj.phenotype_groups:
                 LOG.debug(
-                    "Adding group %s from sample %s to phenotype groups",
-                    phenotype_group,
-                    sample_obj.internal_id,
+                    f"Adding group {phenotype_group} from sample { sample_obj.internal_id} to "
+                    f"phenotype groups",
                 )
                 phenotype_groups.add(phenotype_group)
         if phenotype_groups:
             self.load_config.phenotype_groups = list(phenotype_groups)
 
     def include_cohorts(self) -> None:
-        LOG.info("Including cohorts to scout load config")
+        LOG.info("Including cohorts to Scout load config")
         cohorts: list[str] = self.analysis_obj.case.cohorts
         if cohorts:
-            LOG.debug("Adding cohorts %s", ", ".join(cohorts))
+            LOG.debug(f"Adding cohorts {', '.join(cohorts)}")
             self.load_config.cohorts = cohorts
 
     def include_cnv_report(self) -> None:
@@ -158,13 +148,13 @@ class ScoutConfigBuilder:
         )
 
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
-        """Return a file that is specific for a individual from housekeeper"""
+        """Return a file that is specific for an individual from Housekeeper."""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
-        """Get a file from housekeeper and return the path as a string."""
+        """Return the Housekeeper file path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")

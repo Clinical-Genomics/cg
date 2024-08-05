@@ -1,9 +1,17 @@
 from enum import StrEnum
-from pathlib import Path
 
-from pydantic.v1 import Field
+from cg.constants.constants import SexOptions
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
-from cg.models.nf_analysis import NextflowSampleSheetEntry
+
+class RarediseaseQCMetrics(QCMetrics):
+    """Raredisease QC metrics."""
+
+    mapped_reads: int
+    percent_duplicates: float
+    predicted_sex_sex_check: SexOptions
+    total_reads: int
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
@@ -51,3 +59,10 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class RarediseaseParameters(WorkflowParameters):
+    """Model for Raredisease parameters."""
+
+    target_bed: str
+    analysis_type: str

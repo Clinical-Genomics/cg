@@ -8,7 +8,8 @@ from housekeeper.store.models import File
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
@@ -20,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command("gens")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload data from an analysis to Gens."""

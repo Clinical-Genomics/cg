@@ -19,7 +19,7 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
-from cg.store.models import Application, Case, Delivery, Pool, Sample
+from cg.store.models import Application, Case, Pool, Sample
 from cg.store.store import Store
 
 
@@ -121,7 +121,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     data = SarsCov2Submitter.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
-    assert len(data["samples"]) == 5
+    assert len(data["samples"]) == 6
     assert data["customer"] == "cust002"
     assert data["order"] == "Sars-CoV-2 samples"
     assert data["comment"] == "Order comment"
@@ -231,10 +231,6 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket_id: str):
     assert new_pool.application_version.application.tag == "RMLP05R800"
     assert not hasattr(new_pool, "data_analysis")
 
-    # ... and add a delivery
-    assert len(new_pool.deliveries) == 1
-    assert new_pool.deliveries[0].destination == "caesar"
-
     new_case = base_store.get_cases()[0]
     assert new_case.data_analysis == Workflow.FASTQ
     assert new_case.data_delivery == str(DataDelivery.FASTQ)
@@ -269,8 +265,6 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket_id: str
     assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
     assert family_link.case in base_store.get_cases()
-    for sample in new_samples:
-        assert len(sample.deliveries) == 1
     assert family_link.case.data_analysis
     assert family_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
@@ -532,12 +526,6 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
 
     assert new_link.sample.age_at_sampling == 17.18192
 
-    assert base_store._get_query(table=Delivery).count() == len(
-        base_store._get_query(table=Sample).all()
-    )
-    for link in new_case.links:
-        assert len(link.sample.deliveries) == 1
-
 
 def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + rna order
@@ -643,7 +631,7 @@ def test_store_cancer_samples(
         Workflow.BALSAMIC_UMI,
     ]
     assert new_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS_SCOUT)
-    assert set(new_case.panels) == set()
+    assert not set(new_case.panels)
     assert new_case.priority_human == Priority.standard.name
 
     assert len(new_case.links) == 1
@@ -653,12 +641,6 @@ def test_store_cancer_samples(
     assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
-
-    assert base_store._get_query(table=Delivery).count() == len(
-        base_store._get_query(table=Sample).all()
-    )
-    for link in new_case.links:
-        assert len(link.sample.deliveries) == 1
 
 
 def test_store_existing_single_sample_from_trio(

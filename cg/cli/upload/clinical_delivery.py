@@ -9,13 +9,15 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -54,7 +56,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
-            fastq_file_service=FastqFileService(),
+            fastq_file_service=FastqConcatenationService(),
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
@@ -65,7 +67,9 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         case_files_present=is_case_delivery,
     )
     RsyncAPI.write_trailblazer_config(
-        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
+        content={"jobs": [str(job_id)]},
+        config_path=rsync_api.trailblazer_config_path,
+        dry_run=dry_run,
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     order_id: int = case.latest_order.id

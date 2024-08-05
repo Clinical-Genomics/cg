@@ -21,8 +21,15 @@ from tests.cli.workflow.balsamic.conftest import (
     fastq_file_l_2_r_2,
 )
 from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
+
+
+@pytest.fixture(scope="function")
+def analysis_api_balsamic(cg_context: CGConfig) -> MockBalsamicAnalysis:
+    """BALSAMIC ReportAPI fixture."""
+    return MockBalsamicAnalysis(cg_context)
 
 
 @pytest.fixture(scope="function")
@@ -278,12 +285,12 @@ def rnafusion_metrics() -> dict[str, float]:
 
 @pytest.fixture(name="mip_analysis_api")
 def fixture_mip_analysis_api(
-    cg_context: CGConfig, mip_hk_store, analysis_store
+    cg_context: CGConfig, mip_hk_store, store_with_illumina_sequencing_data
 ) -> MipDNAAnalysisAPI:
     """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(cg_context)
     analysis_api.housekeeper_api = mip_hk_store
-    analysis_api.status_db = analysis_store
+    analysis_api.status_db = store_with_illumina_sequencing_data
     return analysis_api
 
 

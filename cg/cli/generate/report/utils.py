@@ -14,13 +14,19 @@ from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.report.raredisease import RarediseaseReportAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.report.taxprofiler import TaxprofilerReportAPI
+from cg.meta.report.tomte import TomteReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -85,17 +91,26 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
         Workflow.BALSAMIC: BalsamicReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
         ),
-        Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
-            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
-        ),
         Workflow.BALSAMIC_QC: BalsamicQCReportAPI(
             config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
+        ),
+        Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
+            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         ),
         Workflow.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
+        Workflow.RAREDISEASE: RarediseaseReportAPI(
+            config=context.obj, analysis_api=RarediseaseAnalysisAPI(config=context.obj)
+        ),
         Workflow.RNAFUSION: RnafusionReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
+        ),
+        Workflow.TAXPROFILER: TaxprofilerReportAPI(
+            config=context.obj, analysis_api=TaxprofilerAnalysisAPI(config=context.obj)
+        ),
+        Workflow.TOMTE: TomteReportAPI(
+            config=context.obj, analysis_api=TomteAnalysisAPI(config=context.obj)
         ),
     }
     return dispatch_report_api.get(workflow)

@@ -11,7 +11,6 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
     OPTION_BWA_MEM,
-    OPTION_DRY,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
@@ -20,6 +19,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("config-case")
-@OPTION_DRY
+@DRY_RUN
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_obj
@@ -50,7 +50,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
 
 
 @click.command()
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
@@ -67,7 +67,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 
 @click.command()
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
@@ -89,7 +89,7 @@ def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @START_WITH_PROGRAM
 @ARGUMENT_CASE_ID
 @OPTION_BWA_MEM
-@OPTION_DRY
+@DRY_RUN
 @OPTION_MIP_DRY_RUN
 @OPTION_SKIP_EVALUATION
 @click.pass_obj
@@ -151,7 +151,7 @@ def run(
 @ARGUMENT_CASE_ID
 @EMAIL_OPTION
 @OPTION_BWA_MEM
-@OPTION_DRY
+@DRY_RUN
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_SKIP_EVALUATION
@@ -198,7 +198,7 @@ def start(
 
 
 @click.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis."""
@@ -206,9 +206,9 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

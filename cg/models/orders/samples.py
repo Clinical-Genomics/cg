@@ -2,7 +2,8 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.models.orders.order import OrderType
+from cg.constants.orderforms import ORIGINAL_LAB_ADDRESSES, REGION_CODES
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
     ContainerEnum,
@@ -162,6 +163,11 @@ class RnafusionSample(Of1508Sample):
     _suitable_project = OrderType.RNAFUSION
 
 
+class TomteSample(MipDnaSample):
+    _suitable_project = OrderType.TOMTE
+    reference_genome: GenomeVersion | None
+
+
 class FastqSample(OrderInSample):
     _suitable_project = OrderType.FASTQ
 
@@ -273,15 +279,27 @@ class SarsCov2Sample(MicrobialSample):
     # 2184 Orderform SARS-COV-2
     # "These fields are required"
     collection_date: str
-    lab_code: str
+    lab_code: str = None
     primer: str
     original_lab: str
-    original_lab_address: str
+    original_lab_address: str = None
     pre_processing_method: str
     region: str
-    region_code: str
+    region_code: str = None
     selection_criteria: str
     volume: str | None
+
+    @validator("lab_code", pre=True, always=True)
+    def set_lab_code(cls, value):
+        return "SE100 Karolinska"
+
+    @validator("region_code", pre=True, always=True)
+    def set_region_code(cls, value, values):
+        return value if value else REGION_CODES[values["region"]]
+
+    @validator("original_lab_address", pre=True, always=True)
+    def set_original_lab_address(cls, value, values):
+        return value if value else ORIGINAL_LAB_ADDRESSES[values["original_lab"]]
 
 
 def sample_class_for(project: OrderType):

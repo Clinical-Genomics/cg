@@ -1,0 +1,5 @@
+Lane,SampleID,Index,# Reads,# Perfect Index Reads,# One Mismatch Index Reads,# Two Mismatch Index Reads,% Reads,% Perfect Index Reads,% One Mismatch Index Reads,% Two Mismatch Index Reads
+1,SVE2648A1,TATCAGCA,188964982,179399926,9565056,0,0.4683,0.9494,0.0506,0.0000
+1,Undetermined,,214560094,214560094,0,0,0.5317,1.0000,0.0000,0.0000
+2,ACC2655A1,TCTCGCGC,272997357,170304960,102692397,0,0.7109,0.6238,0.3762,0.0000
+2,Undetermined,,111020946,111020946,0,0,0.2891,1.0000,0.0000,0.0000

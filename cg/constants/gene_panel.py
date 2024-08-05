@@ -8,6 +8,11 @@ GENOME_BUILD_37: str = "37"
 GENOME_BUILD_38: str = "GRCh38"
 
 
+class GenePanelGenomeBuild(StrEnum):
+    hg19: str = GENOME_BUILD_37
+    hg38: str = GENOME_BUILD_38
+
+
 class GenePanelMasterList(StrEnum):
     BRAIN: str = "BRAIN"
     CARDIOLOGY: str = "Cardiology"
@@ -59,10 +64,22 @@ class GenePanelMasterList(StrEnum):
             CustomerId.CUST042,
         }
 
+    @staticmethod
+    def is_customer_collaborator_and_panels_in_gene_panels_master_list(
+        customer_id: str, gene_panels: set[str]
+    ) -> bool:
+        return customer_id in GenePanelMasterList.collaborators() and gene_panels.issubset(
+            GenePanelMasterList.get_panel_names()
+        )
+
+    @staticmethod
+    def get_non_specific_gene_panels() -> set[str]:
+        return {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+
 
 class GenePanelCombo:
     COMBO_1: dict[str, set[str]] = {
-        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
+        "DSD": {"DSD", "DSD-S", "HYP", "POI"},
         "CM": {"CNM", "CM"},
         "Horsel": {"Horsel", "141217", "141201"},
         "OPHTHALMO": {

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import REPORT_GENDER, Workflow
+from cg.constants import REPORT_SEX, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -39,7 +39,7 @@ def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
     delivery_report: str = report_api_mip_dna.create_delivery_report(
         case_id=case_mip_dna.internal_id,
         analysis_date=case_mip_dna.analyses[0].started_at,
-        force_report=False,
+        force=False,
     )
 
     # THEN check if the delivery report has been created
@@ -58,7 +58,7 @@ def test_create_delivery_report_file(
         case_id=case_mip_dna.internal_id,
         directory=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,
-        force_report=False,
+        force=False,
     )
 
     # THEN check if a html report has been created and saved
@@ -97,7 +97,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
 
     # THEN check collection of the nested report data and that the required fields are not empty
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
     recursive_assert(report_data.model_dump())
 
@@ -120,7 +120,7 @@ def test_validate_report_empty_fields(
 
     # THEN check if the empty fields are identified
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
     assert report_data
     assert "version" in caplog.text
@@ -146,7 +146,7 @@ def test_validate_report_missing_fields(
     # THEN test that the DeliveryReportError is raised when the report generation is not forced
     try:
         report_api_mip_dna.validate_report_fields(
-            case_mip_dna.internal_id, report_data, force_report=False
+            case_mip_dna.internal_id, report_data, force=False
         )
     except DeliveryReportError:
         assert "accredited" in caplog.text
@@ -168,7 +168,7 @@ def test_get_validated_report_data_external_sample(
 
     # WHEN validating report fields
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id, report_data, force_report=False
+        case_mip_dna.internal_id, report_data, force=False
     )
 
     # THEN the validation should have been completed successfully
@@ -220,7 +220,7 @@ def test_get_report_version_version(
 
 def test_get_case_data(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     family_name: str,
 ):
@@ -229,7 +229,7 @@ def test_get_case_data(
     # GIVEN a pre-built case
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN retrieving case specific information
     case_data: CaseModel = report_api_mip_dna.get_case_data(
@@ -245,7 +245,7 @@ def test_get_case_data(
 
 def test_get_samples_data(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     case_samples_data: list[CaseSample],
     lims_samples: list[dict],
@@ -259,7 +259,7 @@ def test_get_samples_data(
     expected_sample_data: CaseSample = case_samples_data[0]
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN extracting the samples of a specific case
     samples_data: SampleModel = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)[0]
@@ -269,7 +269,7 @@ def test_get_samples_data(
     assert samples_data.id == str(expected_sample_data.sample.internal_id)
     assert samples_data.ticket == str(expected_sample_data.sample.original_ticket)
     assert samples_data.status == str(expected_sample_data.status)
-    assert samples_data.gender == REPORT_GENDER.get(str(expected_sample_data.sample.sex))
+    assert samples_data.sex == REPORT_SEX.get(str(expected_sample_data.sample.sex))
     assert samples_data.source == str(expected_lims_data.get("source"))
     assert samples_data.tumour == "Nej"
     assert samples_data.application
@@ -291,13 +291,13 @@ def test_get_lims_sample(
     expected_lims_data: dict = lims_samples[0]
 
     # WHEN getting the sample data from lims
-    lims_data: dict = report_api_mip_dna.get_lims_sample(case_samples_data[0].sample.internal_id)
+    lims_data: dict = report_api_mip_dna.lims_api.sample(case_samples_data[0].sample.internal_id)
 
     # THEN check if the extracted lims information match the expected one
     assert lims_data == expected_lims_data
 
 
-def test_get_sample_application_data(
+def test_get_sample_application(
     report_api_mip_dna: MipDNAReportAPI,
     case_samples_data: list[CaseSample],
     lims_samples: list[dict],
@@ -311,7 +311,7 @@ def test_get_sample_application_data(
     expected_application_data: dict = sample.to_dict().get("application")
 
     # WHEN retrieving application data from status DB
-    application_data: ApplicationModel = report_api_mip_dna.get_sample_application_data(
+    application_data: ApplicationModel = report_api_mip_dna.get_sample_application(
         sample=sample, lims_sample=lims_samples[0]
     )
 
@@ -325,12 +325,12 @@ def test_get_sample_application_data(
 
 
 def test_get_unique_applications(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
+    report_api_mip_dna: MipDNAReportAPI, mip_dna_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests unique applications filtering."""
 
     # GIVEN a list of samples sharing the same application
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
     samples: list[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
 
     # WHEN calling the application filtering function
@@ -363,19 +363,14 @@ def test_get_sample_methods_data(
     assert sample_methods.model_dump() == expected_sample_methods
 
 
-def test_get_case_analysis_data(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
-):
+def test_get_case_analysis_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests data analysis parameters retrieval."""
 
     # GIVEN a pre-built case
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving analysis information
     case_analysis_data: DataAnalysisModel = report_api_mip_dna.get_case_analysis_data(
-        case_mip_dna, case_mip_dna.analyses[0], mip_metadata
+        case_mip_dna, case_mip_dna.analyses[0]
     )
 
     # THEN check if the retrieved analysis data is correct
@@ -385,10 +380,7 @@ def test_get_case_analysis_data(
 
 
 def test_get_case_analysis_data_workflow_match_error(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Test validation error if a customer requested workflow does not match the data analysis."""
 
@@ -396,16 +388,11 @@ def test_get_case_analysis_data_workflow_match_error(
     mip_analysis: Analysis = case_mip_dna.analyses[0]
     mip_analysis.workflow = Workflow.BALSAMIC
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
-        )
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
     assert (
         f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
         f"({mip_analysis.workflow})" in caplog.text
@@ -413,10 +400,7 @@ def test_get_case_analysis_data_workflow_match_error(
 
 
 def test_get_case_analysis_data_workflow_not_supported(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
 
@@ -425,16 +409,11 @@ def test_get_case_analysis_data_workflow_not_supported(
     mip_analysis: Analysis = case_mip_dna.analyses[0]
     mip_analysis.workflow = Workflow.MICROSALT
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving data analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
-        )
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
     assert (
         f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
         in caplog.text

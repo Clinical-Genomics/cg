@@ -87,7 +87,9 @@ def test_dry_sample(
     # GIVEN project, organism and reference genome is specified in lims
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "-s", "--dry-run"], obj=base_context
+    )
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
@@ -105,7 +107,7 @@ def test_dry_order(
     # WHEN dry running a sample name
     result = cli_runner.invoke(
         config_case,
-        [ticket_id, "-t", "-d"],
+        [ticket_id, "-t", "--dry-run"],
         obj=base_context,
     )
 
@@ -135,7 +137,9 @@ def test_gonorrhoeae(cli_runner: CliRunner, base_context: CGConfig, microbial_sa
     sample_obj.organism.internal_id = "gonorrhoeae"
 
     # WHEN getting the case config
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-d", "-s"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "--dry-run", "-s"], obj=base_context
+    )
 
     # THEN the organism should now be  ...
     assert "Neisseria spp." in result.output
@@ -150,7 +154,9 @@ def test_cutibacterium_acnes(cli_runner: CliRunner, base_context: CGConfig, micr
     sample_obj.organism.internal_id = "Cutibacterium acnes"
 
     # WHEN getting the case config
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "-s", "--dry-run"], obj=base_context
+    )
 
     # THEN the organism should now be ....
     assert "Propionibacterium acnes" in result.output
@@ -166,7 +172,9 @@ def test_vre_nc_017960(cli_runner: CliRunner, base_context: CGConfig, microbial_
     sample_obj.organism.reference_genome = "NC_017960.1"
 
     # WHEN getting the case config
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "-s", "--dry-run"], obj=base_context
+    )
 
     # THEN the organism should now be ....
     assert "Enterococcus faecium" in result.output
@@ -182,7 +190,9 @@ def test_vre_nc_004668(cli_runner: CliRunner, base_context: CGConfig, microbial_
     sample_obj.organism.reference_genome = "NC_004668.1"
 
     # WHEN getting the case config
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "-s", "--dry-run"], obj=base_context
+    )
 
     # THEN the organism should now be ....
     assert "Enterococcus faecalis" in result.output
@@ -201,7 +211,9 @@ def test_vre_comment(
     lims_sample.sample_data["comment"] = "ABCD123"
 
     # WHEN getting the case config
-    result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
+    result = cli_runner.invoke(
+        config_case, [microbial_sample_id, "-s", "--dry-run"], obj=base_context
+    )
 
     # THEN the organism should now be ....
     assert "ABCD123" in result.output

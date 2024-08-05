@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
@@ -23,7 +24,7 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""
@@ -33,11 +34,11 @@ def taxprofiler(context: click.Context) -> None:
 
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(config_case)
-taxprofiler.add_command(metrics_deliver)
-taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(run)
 taxprofiler.add_command(start)
 taxprofiler.add_command(start_available)
+taxprofiler.add_command(metrics_deliver)
+taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(store_housekeeper)
 taxprofiler.add_command(store)
 taxprofiler.add_command(store_available)

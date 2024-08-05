@@ -102,12 +102,12 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     samples: list[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
 
     # THEN it should have found the same number of samples
-    assert len(samples) == 5
+    assert len(samples) == 6
     # ... and pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["udfs"]["collection_date"] == "2021-05-05"
     assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
-    assert first_sample["udfs"]["lab_code"] == "SE110 Växjö"
+    assert first_sample["udfs"]["lab_code"] == "SE100 Karolinska"
     assert first_sample["udfs"]["organism"] == "SARS CoV-2"
     assert first_sample["udfs"]["original_lab"] == "Karolinska University Hospital Solna"
     assert first_sample["udfs"]["original_lab_address"] == "171 76 Stockholm"

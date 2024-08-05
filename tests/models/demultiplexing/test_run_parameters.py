@@ -21,7 +21,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
     [
         "hiseq_x_single_index_run_parameters_path",
         "hiseq_2500_dual_index_run_parameters_path",
-        "novaseq_6000_run_parameters_path",
+        "novaseq_6000_run_parameters_pre_1_5_kits_path",
         "novaseq_x_run_parameters_path",
     ],
 )
@@ -51,8 +51,16 @@ def test_run_parameters_parent_class_fails(
     "run_parameters_path, constructor, sequencer",
     [
         ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
-        ("hiseq_2500_dual_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
-        ("novaseq_6000_run_parameters_path", RunParametersNovaSeq6000, Sequencers.NOVASEQ),
+        (
+            "hiseq_2500_dual_index_run_parameters_path",
+            RunParametersHiSeq,
+            Sequencers.HISEQGA,
+        ),
+        (
+            "novaseq_6000_run_parameters_pre_1_5_kits_path",
+            RunParametersNovaSeq6000,
+            Sequencers.NOVASEQ,
+        ),
         ("novaseq_x_run_parameters_path", RunParametersNovaSeqX, Sequencers.NOVASEQX),
     ],
 )
@@ -85,7 +93,7 @@ class RunParametersScenario(BaseModel):
     "scenario",
     [
         RunParametersScenario(
-            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
             constructor=RunParametersHiSeq,
             error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
@@ -110,7 +118,7 @@ class RunParametersScenario(BaseModel):
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
         RunParametersScenario(
-            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
             constructor=RunParametersNovaSeqX,
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
@@ -160,12 +168,16 @@ def test_reagent_kit_version_hiseq_and_novaseq_x(
     assert not run_parameters.reagent_kit_version
 
 
-def test_reagent_kit_version_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
-    """Test that getting reagent kit version from a correct file returns an expected value."""
+def test_reagent_kit_version_novaseq_6000_post_1_5_kits(
+    novaseq_6000_run_parameters_post_1_5_kits: RunParametersNovaSeq6000,
+):
+    """
+    Test that getting reagent kit version from a NovaSeq6000 post 1.5 kits does not return unknown.
+    """
     # GIVEN a valid RunParameters object for NovaSeq6000
 
     # WHEN fetching the reagent kit version
-    reagent_kit_version: str = novaseq_6000_run_parameters.reagent_kit_version
+    reagent_kit_version: str = novaseq_6000_run_parameters_post_1_5_kits.reagent_kit_version
 
     # THEN the reagent kit version exists and is not "unknown"
     assert reagent_kit_version
@@ -194,13 +206,15 @@ def test_control_software_version_hiseq_and_novaseq_x(
 
 
 def test_control_software_version_novaseq_6000(
-    novaseq_6000_run_parameters: RunParametersNovaSeq6000,
+    novaseq_6000_run_parameters_pre_1_5_kits: RunParametersNovaSeq6000,
 ):
     """Test that getting control software version from a correct file returns an expected value."""
     # GIVEN a valid RunParameters object for NovaSeq6000
 
     # WHEN fetching the control software version
-    control_software_version: str = novaseq_6000_run_parameters.control_software_version
+    control_software_version: str = (
+        novaseq_6000_run_parameters_pre_1_5_kits.control_software_version
+    )
 
     # THEN the control software version is a non-empty string
     assert isinstance(control_software_version, str)
@@ -226,9 +240,10 @@ def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, cap
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "hiseq_2500_dual_index_run_parameters",
         "hiseq_x_single_index_run_parameters",
-        "novaseq_6000_run_parameters",
+        "hiseq_2500_dual_index_run_parameters",
+        "novaseq_6000_run_parameters_pre_1_5_kits",
+        "novaseq_6000_run_parameters_post_1_5_kits",
         "novaseq_x_run_parameters",
     ],
 )
@@ -263,7 +278,7 @@ def test_is_novaseq6000_post_1_5_kit(
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters from a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
     # WHEN checking if the flow cell was sequenced after the NovaSeq 6000 1.5 kits
     result: bool = flow_cell.run_parameters._is_novaseq6000_post_1_5_kit()
     # THEN the correct index settings are returned
@@ -271,7 +286,7 @@ def test_is_novaseq6000_post_1_5_kit(
 
 
 @pytest.mark.parametrize(
-    "flow_cell, correct_settings",
+    "sequencing_run, correct_settings",
     [
         ("novaseq_6000_pre_1_5_kits_flow_cell", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
         ("novaseq_6000_post_1_5_kits_flow_cell", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
@@ -280,13 +295,36 @@ def test_is_novaseq6000_post_1_5_kit(
 )
 def test_get_index_settings(
     correct_settings: IndexSettings,
-    flow_cell: str,
+    sequencing_run: str,
     request: FixtureRequest,
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters for a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell)
+    sequencing_run: IlluminaRunDirectoryData = request.getfixturevalue(sequencing_run)
     # WHEN getting the index settings
-    settings: IndexSettings = flow_cell.run_parameters.index_settings
+    settings: IndexSettings = sequencing_run.run_parameters.index_settings
     # THEN the correct index settings are returned
     assert settings == correct_settings
+
+
+@pytest.mark.parametrize(
+    "run_parameters_fixture, expected_result",
+    [
+        ("hiseq_x_single_index_run_parameters", None),
+        ("hiseq_2500_dual_index_run_parameters", None),
+        ("novaseq_6000_run_parameters_pre_1_5_kits", "S4"),
+        ("novaseq_6000_run_parameters_post_1_5_kits", "S1"),
+        ("novaseq_x_run_parameters_node_name", "10B"),
+        ("novaseq_x_run_parameters", "10B"),
+    ],
+)
+def test_get_flow_cell_mode(
+    run_parameters_fixture: str, expected_result: str | None, request: FixtureRequest
+):
+    """Test that the correct flow cell mode is returned for each RunParameters object."""
+    # GIVEN a RunParameters object
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    # WHEN getting the flow cell mode
+    result: str | None = run_parameters.get_flow_cell_model()
+    # THEN the correct flow cell mode is returned
+    assert result == expected_result

@@ -1,21 +1,43 @@
 ---
-name: issue
-about: user story template
+name: User story
+about: Template for user stories
+title: A short, descriptive title.
+labels: User Story, Work Item
+assignees: ''
 
 ---
 
-## Description
+<!--
+Filled in by the Product Owner or the Stakeholders.
+-->
 
-*Describe the problem/suggestion*
+As a [type of user],
+I want [an action or feature],
+So that [benefit or reason].
 
-## Suggested solution
+# Acceptance Criteria
+<!--
+Filled in by the Product Owner or the Stakeholders.
+-->
 
-*Write here if there is a suggested way to solve the issue*
+- [ ] Criteria 1
+- [ ] Criteria 2
+- [ ] Criteria 3
+...
 
-## This can be closed when
+# Notes
+<!--
+Filled in by the Product Owner or the Stakeholders.
+-->
 
-*Describe what needs to be done for this issue to be closed*
+- Additional information.
+- Dependencies.
+- Related user stories.
 
-## Blocked by
+# Implementation plan
+<!--
+This section will be populated by the developers during their technical refinements.
+-->
 
-*If there are any blocking issues/prs/things in this or other repos. Please link to them.*
+- [ ] Work item 1
+- [ ] Work item 2

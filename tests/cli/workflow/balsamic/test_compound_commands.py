@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -12,6 +13,7 @@ from cg.cli.workflow.balsamic.base import (
     store,
     store_available,
 )
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -38,7 +40,7 @@ def test_start(
     mock_config,
     caplog,
     helpers,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
@@ -48,7 +50,7 @@ def test_start(
     case_id = "balsamic_case_wgs_single"
 
     # WHEN dry running and config case already exists
-    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
+    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
@@ -82,7 +84,7 @@ def test_store(
     # Make sure analysis not already stored in ClinicalDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
-    # GIVEN that HermesAPI returns a deliverables output
+    # GIVEN a HermesAPI returning a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -98,7 +100,7 @@ def test_store(
 
 
 def test_start_available(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_flow_cell
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_illumina_run
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
@@ -122,10 +124,8 @@ def test_start_available(
     )
 
     # GIVEN decompression is not needed and config case performed
-    mocker.patch(
-        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.resolve_decompression", return_value=None
-    )
-    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
+    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
@@ -137,7 +137,7 @@ def test_start_available(
     assert f"Starting analysis for {case_id_success}" in caplog.text
 
     # THEN the ineligible case should NOT be run
-    assert case_id_not_enough_reads not in caplog.text
+    assert f"Starting analysis for {case_id_not_enough_reads}" not in caplog.text
 
 
 def test_store_available(
@@ -149,7 +149,7 @@ def test_store_available(
     caplog,
     mocker,
     hermes_deliverables,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
@@ -172,11 +172,10 @@ def test_store_available(
 
     # GIVEN that HermesAPI returns a deliverables output and config case performed
     hermes_deliverables["bundle_id"] = case_id_success
-    mocker.patch(
-        "cg.apps.hermes.hermes_api.HermesApi.convert_deliverables",
-        return_value=CGDeliverables(**hermes_deliverables),
+    mocker.patch.object(
+        HermesApi, "convert_deliverables", return_value=CGDeliverables(**hermes_deliverables)
     )
-    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
+    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)

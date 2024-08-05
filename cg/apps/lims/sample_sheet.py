@@ -7,7 +7,7 @@ from typing import Iterable, Type
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 LOG = logging.getLogger(__name__)
 
@@ -69,8 +69,7 @@ def get_index(lims: Lims, label: str) -> str:
 def get_flow_cell_samples(
     lims: Lims,
     flow_cell_id: str,
-    flow_cell_sample_type: Type[FlowCellSample],
-) -> Iterable[FlowCellSample]:
+) -> Iterable[IlluminaSampleIndexSetting]:
     """Return samples from LIMS for a given flow cell."""
     LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
     containers: list[Container] = lims.get_containers(name=flow_cell_id)
@@ -86,11 +85,8 @@ def get_flow_cell_samples(
             sample: Sample = artifact.samples[0]  # we are assured it only has one sample
             label: str | None = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
-            yield flow_cell_sample_type(
-                flowcell_id=flow_cell_id,
+            yield IlluminaSampleIndexSetting(
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
-                sample_name=sample.name,
-                project=sample.project.name,
             )

@@ -3,7 +3,7 @@ from _pytest.fixtures import FixtureRequest
 
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.demultiplexing import SampleSheetBCLConvertSections
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 
 @pytest.mark.parametrize(
@@ -54,7 +54,7 @@ def test_validate_all_sections_present_missing_section(
     assert len(sample_sheet_validator.content) == 3
 
     # WHEN validating the sections of the sample sheet
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         # THEN a SampleSheetError is raised
         sample_sheet_validator._validate_all_sections_present()
     assert "Sample sheet does not have all the necessary sections" in caplog.text
@@ -101,7 +101,7 @@ def test_get_index_settings_name_missing_index_settings(
     ] not in sample_sheet_validator.content
 
     # WHEN getting the index settings name
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         # THEN a SampleSheetError is raised
         sample_sheet_validator._get_index_settings_name()
     assert "No index settings found in sample sheet" in caplog.text
@@ -167,7 +167,7 @@ def test_get_cycle_missing_cycle(sample_sheet_validator: SampleSheetValidator, c
     sample_sheet_validator.set_sample_sheet_content([["not_a_cycle", 10]])
 
     # WHEN fetching the cycle value
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         # THEN a SampleSheetError is raised
         sample_sheet_validator._get_cycle(
             cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=False
@@ -242,7 +242,7 @@ def test_validate_override_cycles_incorrect_cycles(
     sample_sheet_validator.set_sample_sheet_content(request.getfixturevalue(sample_sheet_content))
 
     # WHEN validating the override cycles
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetContentError):
         # THEN a SampleSheetError is raised
         sample_sheet_validator._validate_override_cycles()
 
@@ -251,33 +251,27 @@ def test_validate_override_cycles_incorrect_cycles(
     "sample_sheet_content",
     [
         "hiseq_x_single_index_sample_sheet_content",
-        "hiseq_x_single_index_bcl2fastq_sample_sheet_content",
         "hiseq_x_dual_index_sample_sheet_content",
-        "hiseq_x_dual_index_bcl2fastq_sample_sheet_content",
         "hiseq_2500_dual_index_sample_sheet_content",
-        "hiseq_2500_dual_index_bcl2fastq_sample_sheet_content",
         "hiseq_2500_custom_index_sample_sheet_content",
-        "hiseq_2500_custom_index_bcl2fastq_sample_sheet_content",
         "novaseq_6000_pre_1_5_kits_sample_sheet_content",
         "novaseq_6000_post_1_5_kits_sample_sheet_content",
         "novaseq_x_sample_sheet_content",
     ],
     ids=[
         "HiSeqXSingleIndex",
-        "HiSeqXSingleIndexBcl2Fastq",
         "HiSeqXDualIndex",
-        "HiSeqXDualIndexBcl2Fastq",
         "HiSeq2500DualIndex",
-        "HiSeq2500DualIndexBcl2Fastq",
         "HiSeq2500CustomIndex",
-        "HiSeq2500CustomIndexBcl2Fastq",
         "NovaSeq6000Pre1.5Kits",
         "NovaSeq6000Post1.5Kits",
         "NovaSeqX",
     ],
 )
 def test_validate_sample_sheet_from_content(
-    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+    sample_sheet_validator: SampleSheetValidator,
+    sample_sheet_content: str,
+    request: FixtureRequest,
 ):
     """Test that a correct sample sheet passes validation."""
     # GIVEN sample sheet validator and a correct sample sheet content

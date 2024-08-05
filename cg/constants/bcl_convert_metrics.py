@@ -2,12 +2,6 @@
 
 from enum import StrEnum
 
-from cg.constants.demultiplexing import (
-    BclConverter,
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
-
 
 class BclConvertQualityMetricsColumnNames(StrEnum):
     """Column names for the BCLConvert quality metrics file."""
@@ -16,24 +10,6 @@ class BclConvertQualityMetricsColumnNames(StrEnum):
     SAMPLE_INTERNAL_ID: str = "SampleID"
     MEAN_QUALITY_SCORE_Q30: str = "Mean Quality Score (PF)"
     Q30_BASES_PERCENT: str = "% Q30"
-
-
-SAMPLE_SHEET_HEADER: dict[str, str] = {
-    BclConverter.BCL2FASTQ: ",".join(
-        [
-            column
-            for column in SampleSheetBcl2FastqSections.Data.column_names()
-            if column != SampleSheetBcl2FastqSections.Data.INDEX_2.value
-        ]
-    ),
-    BclConverter.BCLCONVERT: ",".join(
-        [
-            column
-            for column in SampleSheetBCLConvertSections.Data.column_names()
-            if column != SampleSheetBcl2FastqSections.Data.INDEX_2.value
-        ]
-    ),
-}
 
 
 class BclConvertDemuxMetricsColumnNames(StrEnum):

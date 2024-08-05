@@ -46,4 +46,4 @@ def test_downsample_meta_data_pass_checks(
     # THEN all necessary models to run the down sample command are created
     assert meta_data.downsampled_sample.internal_id == f"{sample.internal_id}DS{number_of_reads}M"
     assert meta_data.downsampled_sample.reads == number_of_reads_in_millions * 1_000_000
-    assert meta_data.downsampled_case.name == f"{downsample_case_name}_downsampled"
+    assert meta_data.downsampled_case.name == f"{downsample_case_name}-downsampled"

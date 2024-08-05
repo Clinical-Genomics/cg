@@ -2,12 +2,14 @@
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.base import balsamic
 from cg.cli.workflow.balsamic.pon import balsamic_pon
 from cg.cli.workflow.balsamic.qc import balsamic_qc
 from cg.cli.workflow.balsamic.umi import balsamic_umi
 from cg.cli.workflow.fastq.base import fastq
 from cg.cli.workflow.fluffy.base import fluffy
+from cg.cli.workflow.jasen.base import jasen
 from cg.cli.workflow.microsalt.base import microsalt
 from cg.cli.workflow.mip_dna.base import mip_dna
 from cg.cli.workflow.mip_rna.base import mip_rna
@@ -18,7 +20,7 @@ from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.tomte.base import tomte
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def workflow():
     """Workflows commands"""
 
@@ -31,6 +33,7 @@ workflow.add_command(microsalt)
 workflow.add_command(mip_dna)
 workflow.add_command(mip_rna)
 workflow.add_command(fluffy)
+workflow.add_command(jasen)
 workflow.add_command(mutant)
 workflow.add_command(raredisease)
 workflow.add_command(rnafusion)

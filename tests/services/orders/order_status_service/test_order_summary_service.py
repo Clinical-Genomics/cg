@@ -1,5 +1,7 @@
-from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
-from cg.services.orders.order_status_service.dto.order_summary import OrderSummary
+from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
+from cg.services.orders.order_summary_service.order_summary_service import (
+    OrderSummaryService,
+)
 from cg.store.models import Order
 
 

@@ -1,39 +1,36 @@
+import datetime
 from pathlib import Path
-from typing import Type
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.utils.flow_cell import get_flow_cell_id
 
 
-def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
-    flowcell_id: str = bcl2fastq_flow_cell_dir.name.split("_")[-1][1:]
+    flowcell_id: str = get_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir.name)
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flowcell_obj = IlluminaRunDirectoryData(sequencing_run_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_position(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = IlluminaRunDirectoryData(sequencing_run_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # WHEN fetching the flow cell position
     position = flow_cell.position
@@ -42,69 +39,54 @@ def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData):
+def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
 
     # WHEN fetching the path to the RTA file
-    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.rta_complete_path
+    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell.rta_complete_path
 
     # THEN assert that the file exists
     assert rta_file.exists()
 
 
-@pytest.mark.parametrize(
-    "flow_cell_fixture_name, model",
-    [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
-        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
-        ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
-    ],
-)
-def test_get_sample_model(
-    flow_cell_fixture_name: str,
-    model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
-    request: FixtureRequest,
-):
-    """Test getting the sample model of a flow cell returns the correct value."""
-    # GIVEN a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture_name)
+def test_copy_complete_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData):
+    """Test return of CopyComplete file."""
+    # GIVEN the path to a finished flow cell
+    # GIVEN a flow cell object
 
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert] = flow_cell.sample_type
+    # WHEN fetching the path to the RTA file
+    copy_complete: Path = novaseq_6000_pre_1_5_kits_flow_cell.copy_complete_path
 
-    # THEN it is the expected model
-    assert sample_model == model
+    # THEN assert that the file exists
+    assert copy_complete.exists()
 
 
-def test_get_bcl_converter_default(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
-):
-    """Test that BCLConvert is the bcl converter set as default when instantiating a flow cell."""
-    # GIVEN a flow cell directory
+def test_get_sequencing_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the sequencing runs directory."""
+    # GIVEN an Illumina run directory data
 
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
+    # WHEN getting the path to the sequencing runs directory
+    runs_dir: Path = novaseq_x_flow_cell.get_sequencing_runs_dir()
 
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME in runs_dir.as_posix()
 
 
-def test_get_bcl_converter_bcl2fastq_flow_cell(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
-):
-    """Test instantiating a flow cell with bcl2fastq as bcl converter."""
-    # GIVEN a Bcl2Fastq flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
-        bcl_converter=BclConverter.BCL2FASTQ,
+def test_get_demultiplexed_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the demultiplexed runs directory."""
+    # GIVEN an Illumina run directory data
+    assert (
+        DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME
+        in novaseq_x_flow_cell.path.as_posix()
     )
 
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
+    # WHEN getting the path to the demultiplexed runs directory
+    demux_dir: Path = novaseq_x_flow_cell.get_demultiplexed_runs_dir()
+
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in demux_dir.as_posix()
 
 
 @pytest.mark.parametrize(
@@ -119,7 +101,7 @@ def test_get_bcl_converter_bcl2fastq_flow_cell(
 def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
     """Test that the run parameters file is being fetched correctly for the HiSeq flow cells."""
     # GIVEN a flow cell with a run parameters
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
 
     # WHEN getting the run parameters file name
     run_parameters_path: Path = flow_cell.run_parameters_path
@@ -135,13 +117,15 @@ def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
 def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_parameters_path: Path):
     """Test that getting the path of the run parameters path fails if the file does not exist."""
     # GIVEN a flowcell object with a directory without a run parameters file
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
+    flow_cell = IlluminaRunDirectoryData(
+        sequencing_run_path=tmp_flow_cell_without_run_parameters_path
+    )
 
     # WHEN fetching the run parameters path
     with pytest.raises(FlowCellError) as exc:
         # THEN a FlowCellError is raised
         flow_cell.run_parameters_path
-    assert "No run parameters file found in flow cell" in str(exc.value)
+    assert "No run parameters file found in sequencing run" in str(exc.value)
 
 
 @pytest.mark.parametrize(
@@ -158,7 +142,7 @@ def test_flow_cell_run_parameters_type(
 ):
     """Test that the run parameters of the flow cell is of the expected type."""
     # GIVEN a flow cell without _run_parameters
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
     assert not flow_cell._run_parameters
 
     # WHEN creating the run parameters of the flow cell
@@ -168,9 +152,9 @@ def test_flow_cell_run_parameters_type(
     assert run_parameters.sequencer == expected_sequencer
 
 
-def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bcl_convert: Path):
     # GIVEN a flow cell without a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_directory_bcl_convert)
     assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
 
     # WHEN checking if the flow cell has started demultiplexing
@@ -181,10 +165,10 @@ def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclcon
 
 
 def test_has_demultiplexing_started_locally_true(
-    tmp_flow_cell_directory_bclconvert: Path,
+    tmp_flow_cell_directory_bcl_convert: Path,
 ):
     # GIVEN a flow cell with a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_directory_bcl_convert)
     Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
 
     # WHEN checking if the flow cell has started demultiplexing
@@ -198,7 +182,7 @@ def test_has_demultiplexing_started_on_sequencer_true(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
 ):
     # GIVEN a flow cell with a BCLConvert folder
-    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    flow_cell = IlluminaRunDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
     Path.mkdir(
         Path(
             flow_cell.path,
@@ -219,7 +203,7 @@ def test_has_demultiplexing_started_on_sequencer_false(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
 ):
     # GIVEN a flow cell without a BCLConvert folder
-    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    flow_cell = IlluminaRunDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
     assert not Path(
         flow_cell.path,
         get_latest_analysis_path(flow_cell.path),

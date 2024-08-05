@@ -11,35 +11,35 @@ from cg.models.observations.input_files import (
 )
 
 
-def test_instantiate_input_files(observations_input_files_raw: dict):
+def test_instantiate_input_files(mip_dna_observations_input_files_raw: dict[str, Path]):
     """Tests input files against a pydantic MipDNAObservationsInputFiles."""
 
     # GIVEN a dictionary with the basic input files
 
     # WHEN instantiating an observations input files object
-    input_files = MipDNAObservationsInputFiles(**observations_input_files_raw)
+    input_files = MipDNAObservationsInputFiles(**mip_dna_observations_input_files_raw)
 
     # THEN assert that it was successfully created
     assert isinstance(input_files, MipDNAObservationsInputFiles)
 
 
 def test_instantiate_input_files_missing_field(
-    observations_input_files_raw: dict, file_does_not_exist: Path
+    mip_dna_observations_input_files_raw: dict[str, Path], file_does_not_exist: Path
 ):
     """Tests input files against a pydantic MipDNAObservationsInputFiles with not existent field."""
 
     # GIVEN a dictionary with the basic input files and a file path that does not exist
-    observations_input_files_raw["snv_vcf_path"] = file_does_not_exist
+    mip_dna_observations_input_files_raw["snv_vcf_path"] = file_does_not_exist
 
     # WHEN checking the observation file
 
     # THEN the file is not successfully validated and an error is returned
     with pytest.raises(ValidationError):
         # WHEN instantiating a ObservationsInputFiles object
-        MipDNAObservationsInputFiles(**observations_input_files_raw)
+        MipDNAObservationsInputFiles(**mip_dna_observations_input_files_raw)
 
 
-def test_instantiate_balsamic_input_files(balsamic_observations_input_files_raw: dict):
+def test_instantiate_balsamic_input_files(balsamic_observations_input_files_raw: dict[str, Path]):
     """Tests input files against a pydantic BalsamicObservationsInputFiles."""
 
     # GIVEN balsamic input files
@@ -52,7 +52,7 @@ def test_instantiate_balsamic_input_files(balsamic_observations_input_files_raw:
 
 
 def test_instantiate_balsamic_input_files_missing_field(
-    balsamic_observations_input_files_raw: dict, file_does_not_exist: Path
+    balsamic_observations_input_files_raw: dict[str, Path], file_does_not_exist: Path
 ):
     """Tests input files against a pydantic BalsamicObservationsInputFiles with not existent field."""
 

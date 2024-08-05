@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.base import (
     config_case,
     report_deliver,
@@ -20,7 +21,11 @@ from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group("balsamic-umi", invoke_without_command=True)
+@click.group(
+    "balsamic-umi",
+    invoke_without_command=True,
+    context_settings=CLICK_CONTEXT_SETTINGS,
+)
 @click.pass_context
 def balsamic_umi(context: click.Context):
     """Cancer analysis workflow"""

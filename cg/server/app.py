@@ -6,6 +6,9 @@ from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 from sqlalchemy.orm import scoped_session
 
+from cg.server import admin, api, ext, invoices
+from cg.server.app_config import app_config
+from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
@@ -18,18 +21,16 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
-    Flowcell,
+    IlluminaSequencingRun,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
+    IlluminaSampleSequencingMetrics,
 )
-
-from . import admin, api, ext, invoices
 
 
 def create_app():
@@ -44,7 +45,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.from_object(__name__.replace("app", "config"))
+    app.config.update(app_config.dict())
+    app.secret_key = app.config["cg_secret_key"]
 
 
 def _configure_extensions(app: Flask):
@@ -57,7 +59,7 @@ def _configure_extensions(app: Flask):
     ext.db.init_app(app)
     ext.lims.init_app(app)
     ext.analysis_client.init_app(app)
-    if app.config["OSTICKET_API_KEY"]:
+    if app.config["osticket_api_key"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
     app.json_provider_class = ext.CustomJSONEncoder
@@ -68,12 +70,9 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-    if not app.config["CG_ENABLE_ADMIN"]:
-        return
-
     oauth_bp = make_google_blueprint(
-        client_id=app.config["GOOGLE_OAUTH_CLIENT_ID"],
-        client_secret=app.config["GOOGLE_OAUTH_CLIENT_SECRET"],
+        client_id=app.config["google_oauth_client_id"],
+        client_secret=app.config["google_oauth_client_secret"],
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
@@ -88,6 +87,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(api.BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
+    app.register_blueprint(SAMPLES_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
@@ -113,21 +113,23 @@ def _register_admin_views():
     ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))
     ext.admin.add_view(admin.CollaborationView(Collaboration, ext.db.session))
     ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
+    ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
-    ext.admin.add_view(
-        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
-    )
 
     # Business data views
     ext.admin.add_view(admin.CaseView(Case, ext.db.session))
     ext.admin.add_view(admin.CaseSampleView(CaseSample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
-    ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
-    ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
+    ext.admin.add_view(
+        admin.IlluminaFlowCellView(IlluminaSequencingRun, ext.db.session, name="Illumina Flow Cell")
+    )
+    ext.admin.add_view(
+        admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
 
 
 def _register_teardowns(app: Flask):

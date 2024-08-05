@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
-from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
 from cg.store.models import Application, Sample
@@ -11,7 +11,7 @@ from tests.store_helpers import StoreHelpers
 PRICES = {"standard": 1_000, "priority": 2_000, "express": 3_000, "research": 4_000}
 
 
-def test_is_valid_total_reads_passes(quality_controller: QualityController):
+def test_is_valid_total_reads_passes(quality_controller: MicroSALTQualityController):
     # GIVEN an application
     store = quality_controller.status_db
     application: Application = StoreHelpers.add_application(store=store, target_reads=1_000)
@@ -36,7 +36,7 @@ def test_is_valid_total_reads_passes(quality_controller: QualityController):
     assert has_valid_reads
 
 
-def test_is_valid_total_reads_fails(quality_controller: QualityController):
+def test_is_valid_total_reads_fails(quality_controller: MicroSALTQualityController):
     # GIVEN an application
     store = quality_controller.status_db
     application: Application = StoreHelpers.add_application(store=store, target_reads=1_000)
@@ -68,7 +68,7 @@ def test_quality_control_fails(qc_microsalt_context: CGConfig, metrics_file_fail
     store: Store = qc_microsalt_context.status_db
 
     # GIVEN a quality controller
-    quality_controller = QualityController(store)
+    quality_controller = MicroSALTQualityController(store)
 
     # WHEN performing the quality control
     result: QualityResult = quality_controller.quality_control(metrics_file_failing_qc)
@@ -87,7 +87,7 @@ def test_quality_control_passes(qc_microsalt_context: CGConfig, metrics_file_pas
     store: Store = qc_microsalt_context.status_db
 
     # GIVEN a quality controller
-    quality_controller = QualityController(store)
+    quality_controller = MicroSALTQualityController(store)
 
     # WHEN performing the quality control
     result: QualityResult = quality_controller.quality_control(metrics_file_passing_qc)

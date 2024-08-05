@@ -13,10 +13,13 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
-from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
+from cg.services.sequencing_qc_service.sequencing_qc_service import (
+    SequencingQCService,
+)
 from cg.store.models import Case, Sample
 from cg.utils import Process
 
@@ -30,11 +33,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         super().__init__(workflow, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
-        self.quality_checker = QualityController(config.status_db)
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        return False
+        self.quality_checker = MicroSALTQualityController(config.status_db)
 
     @property
     def fastq_handler(self):
@@ -54,7 +53,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
@@ -63,9 +64,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
-
+        if isinstance(case_path, Path):
+            case_path: list[Path] = [case_path]
         for analysis_path in case_path:
-            if yes or click.confirm(
+            if skip_confirmation or click.confirm(
                 f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():
@@ -176,15 +178,16 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_parameters(self, sample_obj: Sample) -> dict[str, str]:
         """Fill a dict with case config information for one sample"""
 
-        sample_id = sample_obj.internal_id
-        method_library_prep = self.lims_api.get_prep_method(sample_id)
-        method_sequencing = self.lims_api.get_sequencing_method(sample_id)
+        sample_id: str = sample_obj.internal_id
+        method_library_prep: str | None = self.lims_api.get_prep_method(sample_id)
+        method_sequencing: str | None = self.lims_api.get_sequencing_method(sample_id)
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
+        sequencing_qc: bool = SequencingQCService.sample_pass_sequencing_qc(sample_obj)
 
         return {
-            "CG_ID_project": self.get_project(sample_id),
+            "CG_ID_project": self.lims_api.get_sample_project(sample_id),
             "Customer_ID_project": sample_obj.original_ticket,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
@@ -198,12 +201,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
-            "sequencing_qc_passed": sample_obj.sequencing_qc,
+            "sequencing_qc_passed": sequencing_qc,
         }
-
-    def get_project(self, sample_id: str) -> str:
-        """Get LIMS project for a sample"""
-        return self.lims_api.get_sample_project(sample_id)
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any

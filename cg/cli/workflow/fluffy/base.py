@@ -2,23 +2,22 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
-OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
-)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def fluffy(context: click.Context):
     """
@@ -36,7 +35,7 @@ fluffy.add_command(store_available)
 
 @fluffy.command("create-samplesheet")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
     """
@@ -49,7 +48,7 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 
 @fluffy.command()
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
 @click.pass_obj
@@ -76,7 +75,7 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
 
 @fluffy.command()
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
 @click.pass_context
@@ -101,7 +100,7 @@ def start(
 
 
 @fluffy.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
@@ -109,9 +108,9 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

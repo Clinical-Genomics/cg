@@ -1,0 +1,9 @@
+{% macro ticket_communication(ticket_id) %}
+  <div class="container">
+    <div class="alert alert-info" role="alert">
+      All kommunikation gällande ordern, såsom tillägg, avvikelser eller ev undantag i metoden från
+      Clinical Genomics, finns tillgänglig i SupportSystem och är länkad till ärendets ticket:
+      <a class="alert-link">#{{ ticket_id }}</a>. En stängd ticket kan närsomhelst öppnas upp igen för frågor.
+    </div>
+  </div>
+{% endmacro %}
