@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -19,6 +20,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
@@ -94,7 +96,7 @@ class DownsampleConfig(BaseModel):
     account: str
 
 
-class JanusConfig(BaseModel):
+class ClientConfig(BaseModel):
     host: str
 
 
@@ -349,6 +351,8 @@ class CGConfig(BaseModel):
     illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    chanjo2: ClientConfig | None = None
+    chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -364,7 +368,7 @@ class CGConfig(BaseModel):
     gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
-    janus: JanusConfig | None = None
+    janus: ClientConfig | None = None
     janus_api_: JanusAPIClient | None = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
@@ -409,6 +413,7 @@ class CGConfig(BaseModel):
         fields = {
             "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
+            "chanjo2_api_": "chanjo2_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
             "genotype_api_": "genotype_api",
@@ -443,6 +448,16 @@ class CGConfig(BaseModel):
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
         return api
+
+    @property
+    def chanjo2_api(self) -> Chanjo2APIClient:
+        chanjo2_api = self.__dict__.get("chanjo2_api_")
+        if chanjo2_api is None:
+            LOG.debug("Instantiating Chanjo2 API")
+            config: dict[str, Any] = self.dict()
+            chanjo2_api = Chanjo2APIClient(base_url=config["chanjo2"]["host"])
+            self.chanjo2_api_ = chanjo2_api
+        return chanjo2_api
 
     @property
     def crunchy_api(self) -> CrunchyAPI:

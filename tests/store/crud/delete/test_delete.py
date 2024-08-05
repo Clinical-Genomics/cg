@@ -1,4 +1,10 @@
-from cg.store.models import Case, CaseSample, Sample, IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.models import (
+    Case,
+    CaseSample,
+    IlluminaFlowCell,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
 
 
@@ -23,7 +29,7 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     assert sample_in_multiple_cases
 
     # WHEN removing the relationships between one sample and its cases
-    store_with_multiple_cases_and_samples.delete_relationships_sample(sample=sample_in_single_case)
+    store_with_multiple_cases_and_samples.decouple_sample_from_cases(sample_in_single_case.id)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results: list[CaseSample] = (

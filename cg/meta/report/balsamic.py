@@ -18,7 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
-from cg.constants.scout import BALSAMIC_CASE_TAGS
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -139,8 +139,12 @@ class BalsamicReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+            ),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
@@ -167,28 +171,26 @@ class BalsamicReportAPI(ReportAPI):
             required_sample_metadata_fields: list[str] = (
                 REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
             )
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": required_data_analysis_fields,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
-            ),
-            "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
-            ),
-            "metadata": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=required_data_analysis_fields,
+            metadata=self.get_sample_required_fields(
                 case=case, required_fields=required_sample_metadata_fields
             ),
-        }
-
-    def get_upload_case_tags(self) -> dict:
-        """Return Balsamic upload case tags."""
-        return BALSAMIC_CASE_TAGS
+            methods=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+        )
+        return report_required_fields.model_dump()

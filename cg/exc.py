@@ -60,6 +60,12 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.
@@ -306,3 +312,19 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class PacBioMetricsParsingError(CgError):
+    """Exception raised when PacBio metric files are not in place."""
+
+
+class Chanjo2APIClientError(CgError):
+    """Exception related to the Chanjo2 API client."""
+
+
+class Chanjo2RequestError(Chanjo2APIClientError):
+    """Exception raised when a request to the Chanjo2 API client fails."""
+
+
+class Chanjo2ResponseError(Chanjo2APIClientError):
+    """Exception raised when the response from Chanjo2 API client fails validation."""

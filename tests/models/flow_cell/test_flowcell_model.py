@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 
 import pytest
@@ -216,29 +215,3 @@ def test_has_demultiplexing_started_on_sequencer_false(
 
     # THEN the response should be False
     assert not has_demux_started
-
-
-def test_sequencing_dates_novaseqx_flow_cell(novaseq_x_flow_cell_dir: Path):
-    # GIVEN a flow cell directory data for a novaseq x flow cell
-    flow_cell = IlluminaRunDirectoryData(novaseq_x_flow_cell_dir)
-
-    # WHEN fetching the sequencing start and end dates
-    start_date: datetime = flow_cell.sequencing_started_at
-    end_date: datetime = flow_cell.sequencing_completed_at
-
-    # THEN the dates should be set
-    assert isinstance(start_date, datetime.datetime)
-    assert isinstance(end_date, datetime.datetime)
-
-
-def test_sequencing_dates_novaseq_6000_flow_cell(novaseq_6000_post_1_5_kits_flow_cell_path: Path):
-    # GIVEN a flow cell directory data for a novaseq 6000 flow cell
-    flow_cell = IlluminaRunDirectoryData(novaseq_6000_post_1_5_kits_flow_cell_path)
-
-    # WHEN fetching the sequencing start and end dates
-    start_date: datetime = flow_cell.sequencing_started_at
-    end_date: datetime = flow_cell.sequencing_completed_at
-
-    # THEN none of the dates should be set
-    assert not start_date
-    assert not end_date

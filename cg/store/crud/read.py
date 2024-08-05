@@ -9,11 +9,20 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.store.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -23,14 +32,23 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -45,7 +63,10 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
@@ -607,6 +628,25 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
         ).all()
 
+    def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
+        customer: Customer | None = self.get_customer_by_internal_id(request.customer)
+        collaborator_ids = [collaborator.id for collaborator in customer.collaborators]
+
+        filters = [
+            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
+            SampleFilter.ORDER_BY_CREATED_AT_DESC,
+            SampleFilter.IS_NOT_CANCELLED,
+            SampleFilter.LIMIT,
+        ]
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            customer_entry_ids=collaborator_ids,
+            search_pattern=request.enquiry,
+            filter_functions=filters,
+            limit=request.limit,
+        ).all()
+
     def _get_samples_by_customer_and_subject_id_query(
         self, customer_internal_id: str, subject_id: str
     ) -> Query:
@@ -1009,11 +1049,16 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
-        return apply_sample_filter(
+        sample: Sample | None = apply_sample_filter(
             filter_functions=[SampleFilter.BY_ENTRY_ID],
             samples=self._get_query(table=Sample),
             entry_id=entry_id,
         ).first()
+
+        if not sample:
+            LOG.error(f"Could not find sample with entry id {entry_id}")
+            raise SampleNotFoundError(f"Could not find sample with entry id {entry_id}")
+        return sample
 
     def get_sample_by_internal_id(self, internal_id: str) -> Sample | None:
         """Return a sample by lims id."""
@@ -1422,6 +1467,23 @@ class ReadHandler(BaseHandler):
             cases_to_exclude=cases_to_exclude,
         ).count()
 
+    def get_case_failed_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_SEQUENCED,
+            CaseSampleFilter.CASES_FAILED_SEQUENCING_QC,
+            CaseSampleFilter.EXCLUDE_CASES,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
+        ).count()
+
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
         return apply_illumina_flow_cell_filters(
@@ -1446,3 +1508,14 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def get_case_ids_with_sample(self, sample_id: int) -> list[str]:
+        """Return all case ids with a sample."""
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
+        return [link.case.internal_id for link in sample.links] if sample else []
+
+    def get_case_ids_for_samples(self, sample_ids: list[int]) -> list[str]:
+        case_ids: list[str] = []
+        for sample_id in sample_ids:
+            case_ids.extend(self.get_case_ids_with_sample(sample_id))
+        return list(set(case_ids))
