@@ -56,7 +56,9 @@ def get_internal_negative_control_sample_for_case(
     status_db: Store,
     lims: LimsAPI,
 ) -> Sample:
-    internal_negative_control_id: str = get_internal_negative_control_id_for_case(lims=lims, case=case)
+    internal_negative_control_id: str = get_internal_negative_control_id_for_case(
+        lims=lims, case=case
+    )
     return status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
 
 
