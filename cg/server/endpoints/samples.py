@@ -1,5 +1,4 @@
 from http import HTTPStatus
-import logging
 from flask import Blueprint, jsonify, request
 
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
@@ -8,9 +7,7 @@ from cg.server.endpoints.utils import before_request
 from cg.server.ext import sample_service
 
 
-LOG = logging.getLogger(__name__)
 SAMPLES_BLUEPRINT = Blueprint("samples", __name__, url_prefix="/api/v1")
-
 SAMPLES_BLUEPRINT.before_request(before_request)
 
 
