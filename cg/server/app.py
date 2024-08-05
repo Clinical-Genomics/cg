@@ -8,7 +8,7 @@ from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, api, ext, invoices
 from cg.server.app_config import app_config
-from cg.server.endpoints.sample_endpoints import SAMPLES_BLUEPRINT
+from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
