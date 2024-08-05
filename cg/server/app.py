@@ -90,7 +90,8 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(SAMPLES_BLUEPRINT)
     _register_admin_views()
 
-    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
+    ext.csrf.exempt(api.BLUEPRINT)
+    ext.csrf.exempt(SAMPLES_BLUEPRINT)
 
     @app.route("/")
     def index():
