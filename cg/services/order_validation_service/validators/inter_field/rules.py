@@ -78,6 +78,7 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
 def validate_concentration_required_if_skip_rc(
     order: TomteOrder,
 ) -> list[ConcentrationRequiredIfSkipRCError]:
+
     if not order.skip_reception_control:
         return []
     errors = []
@@ -89,7 +90,7 @@ def validate_concentration_required_if_skip_rc(
                 )
                 errors.append(error)
     return errors
-                           
+
 
 def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[CaseSampleError]:
     errors = []
