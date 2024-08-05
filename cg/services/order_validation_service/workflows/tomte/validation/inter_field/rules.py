@@ -27,6 +27,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_concentration_in_case,
     validate_subject_ids_in_case,
 )
+from cg.store.store import Store
 
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
@@ -98,12 +99,12 @@ def validate_subject_ids_different_from_case_names(
 
 
 def validate_concentration_interval_if_skip_rc(
-    order: TomteOrder,
+    order: TomteOrder, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     if not order.skip_reception_control:
         return []
     errors = []
     for case in order.cases:
-        case_errors = validate_concentration_in_case(case)
+        case_errors = validate_concentration_in_case(case=case, store=store)
         errors.extend(case_errors)
     return errors

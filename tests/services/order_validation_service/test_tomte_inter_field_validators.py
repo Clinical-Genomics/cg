@@ -2,6 +2,7 @@ from cg.services.order_validation_service.models.errors import (
     DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidBufferError,
+    InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     OccupiedWellError,
     RepeatedCaseNameError,
@@ -14,14 +15,20 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_subject_ids_different_from_sample_names,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.order_validation_service.workflows.tomte.models.sample import (
+    TomteSample,
+)
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
     validate_case_names_not_repeated,
+    validate_concentration_interval_if_skip_rc,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_pedigree,
     validate_sample_names_not_repeated,
     validate_wells_contain_at_most_one_sample,
 )
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: TomteOrder):
@@ -189,3 +196,27 @@ def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
 
     # THEN no error is returned
     assert not errors
+
+
+def test_concentration_not_within_interval_if_skip_rc(
+    order_with_invalid_concentration: TomteOrder,
+    sample_with_invalid_concentration: TomteSample,
+    base_store: Store,
+    application_with_concentration_interval: Application,
+):
+
+    # GIVEN an order skipping reception control
+    # GIVEN that the order has a sample with invalid concentration for its application
+    base_store.session.add(application_with_concentration_interval)
+    base_store.session.commit()
+
+    # WHEN validating that the concentration is within the allowed interval
+    errors = validate_concentration_interval_if_skip_rc(
+        order=order_with_invalid_concentration, store=base_store
+    )
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error should concern the application interval
+    assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
