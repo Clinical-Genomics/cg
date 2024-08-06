@@ -1350,7 +1350,7 @@ def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def customer(collaboration_id: str, customer_id: str) -> Customer:
+def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a customer with enabled observation upload."""
     return Customer(
         name="Klinisk Immunologi",
