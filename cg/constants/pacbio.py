@@ -55,6 +55,7 @@ class SmrtLinkDatabasesIDs:
     CELL_INDEX: str = "cellIndex"
     MOVIE_NAME: str = "metadataContextId"
     PATH: str = "path"
+    SEQUENCING_COMPLETED_AT = "updatedAt"
     WELL_NAME: str = "wellName"
     WELL_SAMPLE_NAME: str = "wellSampleName"
 

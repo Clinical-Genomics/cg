@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -120,6 +121,9 @@ class SmrtlinkDatasetsMetrics(BaseModel):
     well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
     well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
     sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
+    sequencing_completed_at: datetime = Field(
+        ..., alias=SmrtLinkDatabasesIDs.SEQUENCING_COMPLETED_AT
+    )
     movie_name: str = Field(..., alias=SmrtLinkDatabasesIDs.MOVIE_NAME)
     cell_index: int = Field(..., alias=SmrtLinkDatabasesIDs.CELL_INDEX)
     path: str = Field(..., alias=SmrtLinkDatabasesIDs.PATH)
