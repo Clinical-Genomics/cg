@@ -14,14 +14,14 @@ def create_sample_dto(sample: Sample) -> SampleDTO:
 
     return SampleDTO(
         comment=sample.comment,
+        control=sample.control,
         customer=customer,
         internal_id=sample.internal_id,
         name=sample.name,
         phenotype_groups=sample.phenotype_groups,
         phenotype_terms=sample.phenotype_terms,
-        priority=sample.priority,
+        priority=sample.priority_human,
         reference_genome=sample.reference_genome,
-        status=sample.state,
         subject_id=sample.subject_id,
         tumour=sample.is_tumour,
         application=application,
