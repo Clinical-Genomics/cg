@@ -29,7 +29,7 @@ class BalsamicObservationsInputFiles(ObservationsInputFiles):
 
 
 class RarediseaseObservationsInputFiles(ObservationsInputFiles):
-    """Model for validating raredisease Loqusdb input files."""
+    """Model for validating RAREDISEASE Loqusdb input files."""
 
     profile_vcf_path: FilePath
     family_ped_path: FilePath
