@@ -1330,7 +1330,7 @@ def collaboration_id() -> str:
 
 
 @pytest.fixture
-def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
+def mip_dna_locusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
         name="Klinisk Immunologi",
@@ -1340,7 +1340,7 @@ def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
+def balsamic_locusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",
@@ -1350,7 +1350,7 @@ def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def raredisease_customer(collaboration_id: str, customer_id: str) -> Customer:
+def raredisease_locusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a customer with enabled observation upload."""
     return Customer(
         name="Klinisk Immunologi",
