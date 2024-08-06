@@ -38,7 +38,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
-        """Customers that are eligible for rare disease Loqusdb uploads."""
+        """Customers that are eligible for RAREDISEASE Loqusdb uploads."""
         return LOQUSDB_RARE_DISEASE_CUSTOMERS
 
     @property
@@ -48,14 +48,14 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     @staticmethod
     def is_sample_type_eligible_for_observations_upload(case: Case) -> bool:
-        """Return whether a rare disease case is free of tumor samples."""
+        """Return whether a RAREDISEASE case is free of tumor samples."""
         if case.tumour_samples:
             LOG.error(f"Sample type {SampleType.TUMOR} is not supported for Loqusdb uploads")
             return False
         return True
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
-        """Return whether a rare disease case is eligible for observations upload."""
+        """Return whether a RAREDISEASE case is eligible for observations upload."""
         return all(
             [
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
@@ -110,7 +110,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     def get_observations_files_from_hk(
         self, hk_version: Version, case_id: str
     ) -> RarediseaseObservationsInputFiles:
-        """Return observations files given a Housekeeper version for rare diseases."""
+        """Return observations files given a Housekeeper version for RAREDISEASE."""
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]

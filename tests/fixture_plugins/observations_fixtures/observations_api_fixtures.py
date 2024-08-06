@@ -22,7 +22,7 @@ def balsamic_observations_api(
     lims_api: LimsAPI,
     loqusdb_api: LoqusdbAPI,
     case_id: str,
-    balsamic_locusdb_customer: Customer,
+    balsamic_loqusdb_customer: Customer,
     number_of_loaded_variants: int,
     loqusdb_id: str,
     mocker: MockFixture,
@@ -35,7 +35,7 @@ def balsamic_observations_api(
 
     # Mocked case scenario for Balsamic uploads
     case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = balsamic_locusdb_customer.internal_id
+    case.customer.internal_id = balsamic_loqusdb_customer.internal_id
     case.samples[0].is_tumour = True
 
     # Mocked Loqusdb API scenario for Balsamic uploads
@@ -57,7 +57,7 @@ def mip_dna_observations_api(
     lims_api: LimsAPI,
     loqusdb_api: LoqusdbAPI,
     case_id: str,
-    mip_dna_locusdb_customer: Customer,
+    mip_dna_loqusdb_customer: Customer,
     number_of_loaded_variants: int,
     loqusdb_id: str,
     mocker: MockFixture,
@@ -69,7 +69,7 @@ def mip_dna_observations_api(
 
     # Mocked case scenario for MIP-DNA uploads
     case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = mip_dna_locusdb_customer.internal_id
+    case.customer.internal_id = mip_dna_loqusdb_customer.internal_id
 
     # Mocked Loqusdb API scenario for MIP-DNA uploads
     mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
@@ -90,7 +90,7 @@ def raredisease_observations_api(
     lims_api: LimsAPI,
     loqusdb_api: LoqusdbAPI,
     case_id: str,
-    raredisease_locusdb_customer: Customer,
+    raredisease_loqusdb_customer: Customer,
     number_of_loaded_variants: int,
     loqusdb_id: str,
     mocker: MockFixture,
@@ -102,7 +102,7 @@ def raredisease_observations_api(
 
     # Mocked case scenario for RAREDISEASE uploads (setup of case and customer ids)
     case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = raredisease_locusdb_customer.internal_id
+    case.customer.internal_id = raredisease_loqusdb_customer.internal_id
 
     # Mocked Loqusdb API scenario for RAREDISEASE uploads
     mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
