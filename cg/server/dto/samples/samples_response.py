@@ -6,7 +6,7 @@ from cg.constants.subject import Sex
 
 class ApplicationVersionDTO(BaseModel):
     id: int
-    version: int | None = (None,)
+    version: int | None = None
     valid_from: datetime | None = None
     price_standard: int | None = None
     price_priority: int | None = None
