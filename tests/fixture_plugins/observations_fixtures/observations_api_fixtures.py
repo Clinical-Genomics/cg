@@ -100,7 +100,7 @@ def raredisease_observations_api(
     raredisease_observations_api.store = analysis_store
     raredisease_observations_api.loqusdb_api = loqusdb_api
 
-    # Mocked case scenario for RAREDISEASE uploads
+    # Mocked case scenario for RAREDISEASE uploads (setup of case and customer ids)
     case: Case = analysis_store.get_case_by_internal_id(case_id)
     case.customer.internal_id = customer.internal_id
 
