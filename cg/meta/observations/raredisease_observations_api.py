@@ -18,7 +18,6 @@ from cg.exc import (
     CaseNotFoundError,
     LoqusdbDuplicateRecordError,
 )
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
