@@ -150,6 +150,13 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
+    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
+    {HK_DELIVERY_REPORT_TAG},
+]
+
+RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
     {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
     {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
     {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
@@ -158,15 +165,8 @@ RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
     {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
     {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
-    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
-    {HK_DELIVERY_REPORT_TAG},
     {AnalysisTag.VCF_FUSION},
     {AnalysisTag.GENE_COUNTS},
-]
-
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {AlignmentFileTag.CRAM},
-    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 NF_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
