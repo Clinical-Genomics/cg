@@ -14,6 +14,7 @@ def create_sample_dto(sample: Sample) -> SampleDTO:
 
     return SampleDTO(
         comment=sample.comment,
+        control=sample.control,
         customer=customer,
         internal_id=sample.internal_id,
         name=sample.name,
