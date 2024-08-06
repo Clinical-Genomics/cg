@@ -19,9 +19,11 @@ LOG = logging.getLogger(__name__)
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, base_url: str, api_key: str, order_email_id: int, env: str):
         self.base_url = base_url
         self.api_key = api_key
+        self.order_email_id = order_email_id
+        self.env= env
         self.session = self._get_session()
 
     def create_ticket(self, ticket: TicketCreate) -> TicketResponse:
