@@ -1,4 +1,4 @@
-"""API for uploading rare disease observations."""
+"""API for uploading RAREDISEASE observations."""
 
 import logging
 
