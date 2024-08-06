@@ -31,7 +31,6 @@ class RarediseaseUploadAPI(UploadAPI):
         """Uploads RAREDISEASE analysis data and files."""
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
-        # Main upload
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
 
         LOG.info(
