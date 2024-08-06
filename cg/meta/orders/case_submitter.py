@@ -95,7 +95,7 @@ class CaseSubmitter(Submitter):
 
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self._process_case_samples(order=order)
+        return self._process_case_samples(order)
 
     def _process_case_samples(self, order: OrderIn) -> dict:
         """Process samples to be analyzed."""
