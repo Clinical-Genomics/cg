@@ -26,6 +26,7 @@ def create_sample_dto(sample: Sample) -> SampleDTO:
         tumour=sample.is_tumour,
         application=application,
         application_version=application_version,
+        sex=sample.sex,
     )
 
 
