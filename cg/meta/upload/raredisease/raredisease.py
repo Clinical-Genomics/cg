@@ -34,6 +34,6 @@ class RarediseaseUploadAPI(UploadAPI):
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
 
         LOG.info(
-            f"Upload of case {case.internal_id} was successful. Upload at {dt.datetime.now()} in database"
+            f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
         self.update_uploaded_at(analysis=analysis)
