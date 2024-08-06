@@ -23,7 +23,7 @@ class FreshdeskClient:
         self.base_url = base_url
         self.api_key = api_key
         self.order_email_id = order_email_id
-        self.env= env
+        self.env = env
         self.session = self._get_session()
 
     def create_ticket(self, ticket: TicketCreate) -> TicketResponse:

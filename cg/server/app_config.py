@@ -27,5 +27,4 @@ class AppConfig(BaseSettings):
     freshdesk_environment: str
 
 
-
 app_config = AppConfig()
