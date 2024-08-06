@@ -1,4 +1,4 @@
-"""Class to create a new sample sheet for a flow cell."""
+"""Class to create a new Illumina sample sheet for a flow cell."""
 
 import logging
 from pathlib import Path
@@ -16,7 +16,6 @@ from cg.services.illumina.sample_sheet.models import (
     SampleSheetSettings,
 )
 from cg.services.illumina.sample_sheet.sample_updater import SamplesUpdater
-from cg.services.illumina.sample_sheet.utils import get_sample_column_names, have_sample_indexes
 from cg.services.illumina.sample_sheet.validator import SampleSheetValidator
 
 LOG = logging.getLogger(__name__)
@@ -104,7 +103,7 @@ class SampleSheetCreator:
             )
         )
         self.updater.update_all_samples(samples=lims_samples, run_parameters=run_dir.run_parameters)
-        column_names: list[str] = get_sample_column_names(
+        column_names: list[str] = self._get_sample_column_names(
             is_run_single_index=run_dir.run_parameters.is_single_index,
             samples=lims_samples,
         )
@@ -112,3 +111,16 @@ class SampleSheetCreator:
             columns=column_names,
             samples=lims_samples,
         )
+
+    @staticmethod
+    def _get_sample_column_names(
+        is_run_single_index: bool, samples: list[IlluminaSampleIndexSetting]
+    ) -> list[str]:
+        """Return the column names of the sample sheet data section given the samples."""
+        column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
+        if is_run_single_index:
+            column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
+            column_names.remove(SampleSheetBCLConvertSections.Data.INDEX_2)
+        if all([not sample.index for sample in samples]):
+            column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1)
+        return column_names

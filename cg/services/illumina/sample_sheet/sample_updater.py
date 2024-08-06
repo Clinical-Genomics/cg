@@ -8,14 +8,13 @@ from cg.services.illumina.sample_sheet.utils import (
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
-    get_samples_by_lane,
 )
 
 LOG = logging.getLogger(__name__)
 
 
 class SamplesUpdater:
-    """Class to update a sample with the override cycles attribute."""
+    """Class to update a sample with the override cycles and barcode mismatches attributes."""
 
     def __init__(self):
         self.samples: list[IlluminaSampleIndexSetting] | None = None
@@ -92,7 +91,7 @@ class SamplesUpdater:
         other sample of the same lane in the sample sheet. Two indexes are too similar if the
         Hamming distance between them is below the minimum allowed by the demultiplexing software.
         """
-        samples_to_compare: list[IlluminaSampleIndexSetting] = get_samples_by_lane(
+        samples_to_compare: list[IlluminaSampleIndexSetting] = self._get_samples_by_lane(
             samples=self.samples, lane=sample.lane
         )
         for sample_to_compare in samples_to_compare:
@@ -126,7 +125,7 @@ class SamplesUpdater:
         is_run_reverse_complement: bool = (
             self.run_parameters.index_settings.should_i5_be_reverse_complemented
         )
-        samples_to_compare: list[IlluminaSampleIndexSetting] = get_samples_by_lane(
+        samples_to_compare: list[IlluminaSampleIndexSetting] = self._get_samples_by_lane(
             samples=self.samples, lane=sample.lane
         )
         for sample_to_compare in samples_to_compare:
@@ -140,3 +139,10 @@ class SamplesUpdater:
             if distance < MINIMUM_HAMMING_DISTANCE:
                 return True
         return False
+
+    @staticmethod
+    def _get_samples_by_lane(
+        samples: list[IlluminaSampleIndexSetting], lane: int
+    ) -> list[IlluminaSampleIndexSetting]:
+        """Return the samples of a given lane."""
+        return [sample for sample in samples if sample.lane == lane]

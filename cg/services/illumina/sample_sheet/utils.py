@@ -1,7 +1,5 @@
 import logging
 
-from cg.constants.demultiplexing import SampleSheetBCLConvertSections
-from cg.services.illumina.sample_sheet.models import IlluminaSampleIndexSetting
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
@@ -64,23 +62,3 @@ def get_hamming_distance_index_2(
             str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )
-
-
-def get_samples_by_lane(
-    samples: list[IlluminaSampleIndexSetting], lane: int
-) -> list[IlluminaSampleIndexSetting]:
-    """Return the samples of a given lane."""
-    return [sample for sample in samples if sample.lane == lane]
-
-
-def get_sample_column_names(
-    is_run_single_index: bool, samples: list[IlluminaSampleIndexSetting]
-) -> list[str]:
-    """Return the column names of the sample sheet data section given the samples."""
-    column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
-    if is_run_single_index:
-        column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
-        column_names.remove(SampleSheetBCLConvertSections.Data.INDEX_2)
-    if not all([sample.index for sample in samples]):
-        column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1)
-    return column_names
