@@ -21,6 +21,11 @@ class AppConfig(BaseSettings):
     trailblazer_host: str
     trailblazer_service_account: str
     trailblazer_service_account_auth_file: str
+    freshdesk_url: str
+    freshdesk_api_key: str
+    freshdesk_order_email_id: int
+    freshdesk_environment: str
+
 
 
 app_config = AppConfig()
