@@ -19,6 +19,7 @@ def create_sample(id: int) -> TomteSample:
         name=f"name{id}",
         application="RNAPOAR100",
         container=ContainerEnum.plate,
+        container_name="ContainerName",
         require_qc_ok=True,
         reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
@@ -183,4 +184,10 @@ def order_with_siblings_as_parents():
 def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
+
+    
+@pytest.fixture
+def sample_with_missing_container_name() -> TomteSample:
+    sample: TomteSample = create_sample(1)
+    sample.container_name = None
     return sample

@@ -7,6 +7,7 @@ from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
     CaseSampleError,
     ConcentrationRequiredIfSkipRCError,
+    ContainerNameMissingError,
     InvalidBufferError,
     OrderError,
     OrderNameRequiredError,
@@ -21,6 +22,7 @@ from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_ticket_number_missing,
     is_concentration_missing,
     is_well_position_missing,
+    is_container_name_missing,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
@@ -102,12 +104,22 @@ def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[
                 errors.append(error)
     return errors
 
-
+  
 def validate_well_positions_required(order: TomteOrder) -> list[WellPositionMissingError]:
     errors: list[WellPositionMissingError] = []
     for case in order.cases:
         for sample in case.samples:
             if is_well_position_missing(sample):
                 error = WellPositionMissingError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+  
+                
+def validate_container_name_required(order: TomteOrder) -> list[ContainerNameMissingError]:
+    errors: list[ContainerNameMissingError] = []
+    for case in order.cases:
+        for sample in case.samples:
+            if is_container_name_missing(sample):
+                error = ContainerNameMissingError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors

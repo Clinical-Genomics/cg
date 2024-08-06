@@ -1,5 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
+    ContainerNameMissingError,
     OrderNameRequiredError,
     SubjectIdSameAsCaseNameError,
     TicketNumberRequiredError,
@@ -8,6 +9,7 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
+    validate_container_name_required,
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
     validate_well_positions_required,
@@ -54,7 +56,7 @@ def test_order_name_is_required(valid_order: Order):
 
 
 def test_application_is_incompatible(
-    valid_order: TomteOrder, sample_with_non_compatible_application, base_store: Store
+    valid_order: TomteOrder, sample_with_non_compatible_application: TomteSample, base_store: Store
 ):
 
     # GIVEN an order that has a sample with an application which is incompatible with the workflow
@@ -101,3 +103,20 @@ def test_well_position_missing(
 
     # THEN the error should concern the missing well position
     assert isinstance(errors[0], WellPositionMissingError)
+
+    
+def test_container_name_missing(
+    valid_order: TomteOrder, sample_with_missing_container_name: TomteSample
+):
+
+    # GIVEN an order with a sample missing its container name
+    valid_order.cases[0].samples.append(sample_with_missing_container_name)
+
+    # WHEN validating that it is not missing any container names
+    errors = validate_container_name_required(order=valid_order)
+
+    # THEN an error should be raised
+    assert errors
+
+    # THEN the error should concern the missing container name
+    assert isinstance(errors[0], ContainerNameMissingError)
