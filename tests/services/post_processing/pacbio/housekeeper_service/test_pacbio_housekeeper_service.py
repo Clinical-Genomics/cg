@@ -6,9 +6,9 @@ import pytest
 from housekeeper.store.models import File
 
 from cg.services.post_processing.exc import (
-    PostProcessingStoreFileError,
-    PostProcessingRunFileManagerError,
     PostProcessingParsingError,
+    PostProcessingRunFileManagerError,
+    PostProcessingStoreFileError,
 )
 from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
@@ -23,7 +23,7 @@ from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import
 def test_store_files_in_housekeeper(
     pac_bio_housekeeper_service: PacBioHousekeeperService,
     expected_pac_bio_run_data: PacBioRunData,
-    expexted_pac_bio_sample_name: str,
+    expected_pac_bio_sample_name: str,
     expected_smrt_cell_bundle_name: str,
 ):
     # GIVEN a PacBioRunData object and a PacBioHousekeeperService
@@ -38,7 +38,7 @@ def test_store_files_in_housekeeper(
 
     # THEN a sample bundle is created
     assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
-        expexted_pac_bio_sample_name
+        expected_pac_bio_sample_name
     )
 
     # THEN all expected files are listed under the smrt cell bundle
@@ -51,8 +51,8 @@ def test_store_files_in_housekeeper(
 
     # THEN all expected files are listed under the sample bundle
     sample_bundle_files: list[File] = pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
-        bundle_name=expexted_pac_bio_sample_name
-    )
+        bundle_name=expected_pac_bio_sample_name
+    ).files
     assert sample_bundle_files
 
 
