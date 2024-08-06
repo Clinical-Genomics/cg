@@ -6,6 +6,8 @@ from typing import Any
 
 from sendmail_container import FormDataRequest
 
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
@@ -20,8 +22,9 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, osticket_api: OsTicket, status_db: Store):
+    def __init__(self, osticket_api: OsTicket, freshdesk_client: FreshdeskClient, status_db: Store):
         self.osticket: OsTicket = osticket_api
+        self.freshdesk_client: FreshdeskClient = freshdesk_client
         self.status_db: Store = status_db
 
     @staticmethod
@@ -46,16 +49,20 @@ class TicketHandler:
             project=project,
         )
         attachment: dict = self.create_attachment(order=order)
-        ticket_nr: str | None = self.osticket.open_ticket(
-            name=user_name,
-            email=user_mail,
-            subject=order.name,
-            message=message,
-            attachment=attachment,
-        )
-        LOG.info(f"{ticket_nr}: opened new ticket")
 
-        return ticket_nr
+        # Create ticket in Freshdesk
+        freshdesk_ticket = TicketCreate(
+            email=user_mail,
+            name=user_name,
+            subject=order.name,
+            attachments=[attachment],
+        )
+        ticket_response: TicketResponse = self.freshdesk_client.create_ticket(
+            ticket=freshdesk_ticket
+        )
+        LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
+
+        return ticket_response.id
 
     def create_attachment(self, order: OrderIn):
         return self.osticket.create_new_ticket_attachment(
