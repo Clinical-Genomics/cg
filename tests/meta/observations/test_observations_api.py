@@ -292,7 +292,7 @@ def test_is_customer_eligible_for_observations_upload(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_locusdb_customer")
+    customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_loqusdb_customer")
     customer_id: str = customer.internal_id
 
     # WHEN verifying if the customer is eligible for Balsamic observations upload
