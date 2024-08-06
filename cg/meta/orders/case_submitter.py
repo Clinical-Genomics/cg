@@ -95,10 +95,7 @@ class CaseSubmitter(Submitter):
 
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self._process_case_samples(order=order)
-        for case in result["records"]:
-            LOG.info(f"{case.name}: submit case samples")
-        return result
+        return self._process_case_samples(order=order)
 
     def _process_case_samples(self, order: OrderIn) -> dict:
         """Process samples to be analyzed."""
