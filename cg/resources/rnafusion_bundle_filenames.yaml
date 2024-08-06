@@ -1,23 +1,23 @@
 - format: tsv
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/fusioncatcher/SAMPLEID.fusioncatcher.fusion-genes.txt
   path_index: ~
   step: fusioncatcher
   tag: fusioncatcher
 - format: txt
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/fusioncatcher/SAMPLEID.fusioncatcher.summary.txt
   path_index: ~
   step: fusioncatcher
   tag: fusioncatcher-summary
 - format: tsv
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/starfusion/SAMPLEID.starfusion.fusion_predictions.tsv
   path_index: ~
   step: star-fusion
   tag: star-fusion
 - format: tsv
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/arriba/SAMPLEID.arriba.fusions.tsv
   path_index: ~
   step: arriba
@@ -35,25 +35,25 @@
   step: star-fusion
   tag: star-fusion-cram-index
 - format: html
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/fusionreport/SAMPLEID/SAMPLEID_fusionreport_index.html
   path_index: ~
   step: report
   tag: fusionreport
 - format: tsv
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/fusioninspector/SAMPLEID.FusionInspector.fusions.tsv
   path_index: ~
   step: report
   tag: fusioninspector
 - format: html
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/fusioninspector/SAMPLEID.fusion_inspector_web.html
   path_index: ~
   step: report
   tag: fusioninspector-html
 - format: pdf
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/arriba_visualisation/SAMPLEID_combined_fusions_arriba_visualisation.pdf
   path_index: ~
   step: arriba
@@ -77,13 +77,13 @@
   step: software-versions
   tag: software-versions
 - format: vcf
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/vcf/SAMPLEID_fusion_data.vcf.gz
   path_index: ~
   step: vcf-collect
   tag: vcf-fusion
 - format: tab
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/star_for_starfusion/SAMPLEID.ReadsPerGene.out.tab
   path_index: ~
   step: star-align
