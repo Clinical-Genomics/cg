@@ -28,6 +28,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store.store import Store
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 
@@ -57,11 +58,15 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
 class OrdersAPI:
     """Orders API for accepting new samples into the system."""
 
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket):
+    def __init__(
+        self, lims: LimsAPI, status: Store, osticket: OsTicket, freshdesk_client: FreshdeskClient
+    ):
         super().__init__()
         self.lims = lims
         self.status = status
-        self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
+        self.ticket_handler: TicketHandler = TicketHandler(
+            osticket_api=osticket, freshdesk_client=freshdesk_client, status_db=status
+        )
 
     def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
