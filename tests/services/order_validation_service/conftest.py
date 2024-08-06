@@ -185,7 +185,7 @@ def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
 
-    
+
 @pytest.fixture
 def sample_with_missing_container_name() -> TomteSample:
     sample: TomteSample = create_sample(1)

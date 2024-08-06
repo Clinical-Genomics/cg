@@ -104,7 +104,7 @@ def test_well_position_missing(
     # THEN the error should concern the missing well position
     assert isinstance(errors[0], WellPositionMissingError)
 
-    
+
 def test_container_name_missing(
     valid_order: TomteOrder, sample_with_missing_container_name: TomteSample
 ):

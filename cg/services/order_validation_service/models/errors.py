@@ -159,7 +159,7 @@ class WellPositionMissingError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well position is required for well plates"
 
-      
+
 class ContainerNameMissingError(CaseSampleError):
     field: str = "container_name"
     message: str = "Container name is required for well plates"
