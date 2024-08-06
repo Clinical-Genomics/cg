@@ -4,23 +4,27 @@ from pydantic_settings import BaseSettings
 class AppConfig(BaseSettings):
     gunicorn_workers: int = 4
     gunicorn_threads: int = 4
-    gunicorn_bind: str
+    gunicorn_bind: str = "0.0.0.0:8000"
     gunicorn_timeout: int = 400
-    cg_sql_database_uri: str
+    cg_sql_database_uri: str = "sqlite:///"
     cg_secret_key: str = "thisIsNotASafeKey"
     invoice_max_price: int = 750_000
-    lims_host: str
-    lims_username: str
-    lims_password: str
-    osticket_api_key: str
-    osticket_domain: str
-    support_system_email: str
-    email_uri: str
-    google_oauth_client_id: str
-    google_oauth_client_secret: str
-    trailblazer_host: str
-    trailblazer_service_account: str
-    trailblazer_service_account_auth_file: str
+    lims_host: str = "lims_host"
+    lims_username: str = "username"
+    lims_password: str = "password"
+    osticket_api_key: str = "api_key"
+    osticket_domain: str = "domain.com"
+    support_system_email: str = "support@mail.com"
+    email_uri: str = "smtp://localhost"
+    google_oauth_client_id: str = "client_id"
+    google_oauth_client_secret: str = "client_secret"
+    trailblazer_host: str = "trailblazer_host"
+    trailblazer_service_account: str = "service_account"
+    trailblazer_service_account_auth_file: str = "auth_file.json"
+    freshdesk_url: str = "https://company.freshdesk.com"
+    freshdesk_api_key: str = "freshdesk_api_key"
+    freshdesk_order_email_id: int = 10
+    freshdesk_environment: str = "development"
 
 
 app_config = AppConfig()
