@@ -19,6 +19,7 @@ def create_sample(id: int) -> TomteSample:
         name=f"name{id}",
         application="RNAPOAR100",
         container=ContainerEnum.plate,
+        container_name="ContainerName",
         require_qc_ok=True,
         reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
@@ -177,3 +178,10 @@ def order_with_siblings_as_parents():
 
     case = create_case([child, father, mother, grandfather, grandmother])
     return create_order([case])
+
+
+@pytest.fixture
+def sample_with_missing_container_name() -> TomteSample:
+    sample: TomteSample = create_sample(1)
+    sample.container_name = None
+    return sample
