@@ -35,7 +35,7 @@ def test_upload_auto_with_workflow(
     upload_context: CGConfig,
     caplog,
 ):
-    """Test upload auto: fetch analyses to upload, test upload completed."""
+    """Test upload auto: get analyses to upload, test upload completed."""
     # GIVEN a store with a workflow
     helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, workflow=workflow)
 
