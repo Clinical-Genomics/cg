@@ -118,7 +118,11 @@ def test_observations_upload(
 
 @pytest.mark.parametrize(
     "workflow, loqusdb_instance",
-    [(Workflow.BALSAMIC, LoqusdbInstance.TUMOR), (Workflow.MIP_DNA, LoqusdbInstance.WES), (Workflow.RAREDISEASE, LoqusdbInstance.WES)],
+    [
+        (Workflow.BALSAMIC, LoqusdbInstance.TUMOR),
+        (Workflow.MIP_DNA, LoqusdbInstance.WES),
+        (Workflow.RAREDISEASE, LoqusdbInstance.WES),
+    ],
 )
 def test_get_loqusdb_api(
     cg_context: CGConfig,
@@ -148,7 +152,11 @@ def test_get_loqusdb_api(
 
 @pytest.mark.parametrize(
     "workflow, loqusdb_instance",
-    [(Workflow.BALSAMIC, LoqusdbInstance.TUMOR), (Workflow.MIP_DNA, LoqusdbInstance.WES), (Workflow.RAREDISEASE, LoqusdbInstance.WES)],
+    [
+        (Workflow.BALSAMIC, LoqusdbInstance.TUMOR),
+        (Workflow.MIP_DNA, LoqusdbInstance.WES),
+        (Workflow.RAREDISEASE, LoqusdbInstance.WES),
+    ],
 )
 def test_is_not_duplicate(
     case_id: str,
@@ -187,7 +195,11 @@ def test_is_not_duplicate(
 
 @pytest.mark.parametrize(
     "workflow, loqusdb_instance",
-    [(Workflow.BALSAMIC, LoqusdbInstance.TUMOR), (Workflow.MIP_DNA, LoqusdbInstance.WES), (Workflow.RAREDISEASE, LoqusdbInstance.WES)],
+    [
+        (Workflow.BALSAMIC, LoqusdbInstance.TUMOR),
+        (Workflow.MIP_DNA, LoqusdbInstance.WES),
+        (Workflow.RAREDISEASE, LoqusdbInstance.WES),
+    ],
 )
 def test_is_duplicate(
     case_id: str,
@@ -226,7 +238,11 @@ def test_is_duplicate(
 
 @pytest.mark.parametrize(
     "workflow, loqusdb_instance",
-    [(Workflow.BALSAMIC, LoqusdbInstance.TUMOR), (Workflow.MIP_DNA, LoqusdbInstance.WES), (Workflow.RAREDISEASE, LoqusdbInstance.WES)],
+    [
+        (Workflow.BALSAMIC, LoqusdbInstance.TUMOR),
+        (Workflow.MIP_DNA, LoqusdbInstance.WES),
+        (Workflow.RAREDISEASE, LoqusdbInstance.WES),
+    ],
 )
 def test_is_duplicate_loqusdb_id(
     case_id: str,
@@ -351,7 +367,6 @@ def test_is_sequencing_method_eligible_for_observations_upload(
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_PANEL),
         (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WTS),
         (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WTS),
-
     ],
 )
 def test_is_sequencing_method_not_eligible_for_observations_upload(
@@ -441,7 +456,6 @@ def test_is_sample_source_not_eligible_for_observations_upload(
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
         (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
         (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WGS),
-
     ],
 )
 def test_delete_case(
