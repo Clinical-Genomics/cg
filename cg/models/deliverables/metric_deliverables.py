@@ -153,7 +153,7 @@ class MetricsDeliverablesCondition(BaseModel):
                         if isinstance(metric.value, float)
                         else metric.value
                     )
-                    failed_metrics.append(f"{metric.name}={metric_value}")
+                    failed_metrics.append(f"{metric.id} - {metric.name}={metric_value} (threshold: {metric.condition.norm} {metric.condition.threshold})")
         if failed_metrics:
             raise MetricsQCError(f"QC failed: {'; '.join(failed_metrics)}")
         return metrics
