@@ -153,3 +153,8 @@ class ConcentrationRequiredIfSkipRCError(CaseSampleError):
 class SubjectIdSameAsSampleNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the sample name"
+
+
+class WellPositionMissingError(CaseSampleError):
+    field: str = "well_position"
+    message: str = "Well position is required for well plates"

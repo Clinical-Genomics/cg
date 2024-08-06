@@ -177,3 +177,10 @@ def order_with_siblings_as_parents():
 
     case = create_case([child, father, mother, grandfather, grandmother])
     return create_order([case])
+
+
+@pytest.fixture
+def sample_with_missing_well_position():
+    sample = create_sample(1)
+    sample.well_position = None
+    return sample

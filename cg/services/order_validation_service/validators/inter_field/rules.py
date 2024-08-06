@@ -12,6 +12,7 @@ from cg.services.order_validation_service.models.errors import (
     OrderNameRequiredError,
     SubjectIdSameAsSampleNameError,
     TicketNumberRequiredError,
+    WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.utils import (
@@ -19,6 +20,7 @@ from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_order_name_required,
     _is_ticket_number_missing,
     is_concentration_missing,
+    is_well_position_missing,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
@@ -97,5 +99,15 @@ def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[
         for sample in case.samples:
             if sample.name == sample.subject_id:
                 error = SubjectIdSameAsSampleNameError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
+    return errors
+
+
+def validate_well_positions_required(order: TomteOrder) -> list[WellPositionMissingError]:
+    errors: list[WellPositionMissingError] = []
+    for case in order.cases:
+        for sample in case.samples:
+            if is_well_position_missing(sample):
+                error = WellPositionMissingError(case_name=case.name, sample_name=sample.name)
                 errors.append(error)
     return errors

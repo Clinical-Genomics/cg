@@ -3,14 +3,19 @@ from cg.services.order_validation_service.models.errors import (
     OrderNameRequiredError,
     SubjectIdSameAsCaseNameError,
     TicketNumberRequiredError,
+    WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
+    validate_well_positions_required,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.order_validation_service.workflows.tomte.models.sample import (
+    TomteSample,
+)
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
     validate_subject_ids_different_from_case_names,
 )
@@ -79,3 +84,20 @@ def test_subject_ids_same_as_case_names_not_allowed(valid_order: TomteOrder):
 
     # THEN the error should be concerning the subject id being the same as the case name
     assert isinstance(errors[0], SubjectIdSameAsCaseNameError)
+
+
+def test_well_position_missing(
+    valid_order: TomteOrder, sample_with_missing_well_position: TomteSample
+):
+
+    # GIVEN an order with a sample with a missing well position
+    valid_order.cases[0].samples.append(sample_with_missing_well_position)
+
+    # WHEN validating that no well positions are missing
+    errors = validate_well_positions_required(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing well position
+    assert isinstance(errors[0], WellPositionMissingError)
