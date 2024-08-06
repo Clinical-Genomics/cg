@@ -132,7 +132,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         return RarediseaseObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case_id: str) -> None:
-        """Delete rare disease case observations from Loqusdb."""
+        """Delete RAREDISEASE case observations from Loqusdb."""
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         self.set_loqusdb_instance(case_id)
         if not self.loqusdb_api.get_case(case_id):
