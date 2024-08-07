@@ -1500,7 +1500,7 @@ class ReadHandler(BaseHandler):
             smrt_cells=self._get_query(table=PacBioSMRTCell),
             internal_id=internal_id,
         ).first()
-      
+
     def get_case_ids_with_sample(self, sample_id: int) -> list[str]:
         """Return all case ids with a sample."""
         sample: Sample = self.get_sample_by_entry_id(sample_id)
