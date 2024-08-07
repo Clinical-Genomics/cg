@@ -28,7 +28,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
         self.quality_checker = MutantQualityController(
-            status_db=config.status_db_, lims=config.lims_api_
+            status_db=config.status_db, lims=config.lims_api
         )
 
     @property
@@ -289,7 +289,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
             self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
 
-            if not qc_result.case.passes_qc:
+            if not qc_result.passes_qc:
                 if not dry_run:
                     self.fail_analysis(case)
             else:
@@ -313,7 +313,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.trailblazer_api.set_analysis_status(
             case_id=case.internal_id, status=AnalysisStatus.FAILED
         )
-        self.set_statusdb_action(case_id=case.internal_id, action=CaseActions.hold)
+        self.set_statusdb_action(case_id=case.internal_id, action=CaseActions.HOLD)
 
     def run_qc(self, case_id: str) -> None:
         LOG.info(f"Running QC on case {case_id}.")

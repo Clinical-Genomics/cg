@@ -18,7 +18,6 @@ from cg.constants.lims import (
     LimsProcess,
 )
 from cg.exc import LimsDataError
-from cg.models.lims.sample import LimsSample
 
 from .order import OrderHandler
 
@@ -512,13 +511,13 @@ class LimsAPI(Lims, OrderHandler):
             process_type=pooling_step,
             sample_internal_id=sample_internal_id,
         )
-        negative_controls: list[LimsSample] = self._get_negative_controls_from_list(
+        negative_controls: list[Sample] = self._get_negative_controls_from_list(
             samples=artifact.samples
         )
 
         if not negative_controls:
             raise LimsDataError(
-                f"No internal negative controls found in the pool of sample {sample_internal_id}"
+                f"No internal negative controls found in the pool of sample {sample_internal_id}."
             )
 
         if len(negative_controls) > 1:
@@ -530,13 +529,13 @@ class LimsAPI(Lims, OrderHandler):
         return negative_controls[0].id
 
     @staticmethod
-    def _get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
+    def _get_negative_controls_from_list(samples: list[Sample]) -> list[Sample]:
         """Filter and return a list of internal negative controls from a given sample list."""
         negative_controls = []
         for sample in samples:
             if (
-                sample.udfs.control == ControlOptions.Negative
-                and sample.udfs.customer == CustomerId.CG_INTERNAL_CUSTOMER
+                sample.udf.get("Control") == ControlOptions.NEGATIVE
+                and sample.udf.get("customer") == CustomerId.CG_INTERNAL_CUSTOMER
             ):
                 negative_controls.append(sample)
         return negative_controls
