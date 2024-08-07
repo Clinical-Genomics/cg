@@ -10,6 +10,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
+
 def test_get_analysis_sex_mip(
     case_qc_metrics_deliverables: Path,
     genotype_analysis_sex: dict,
@@ -102,7 +103,6 @@ def test_get_bcf_file_raredisease(
     # GIVEN a UploadGenotypeAPI populated with some data
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
-
 
     # WHEN fetching the gbcf file with the api
     gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
