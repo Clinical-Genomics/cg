@@ -11,6 +11,7 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
+from cg.clients.freshdesk.models import TicketResponse
 from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -35,7 +36,33 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
+def monkeypatch_process_lims(monkeypatch, order_data):
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    for submitter in SUBMITTERS:
+        monkeypatch.setattr(
+            f"cg.meta.orders.{submitter}.process_lims",
+            lambda **kwargs: (lims_project_data, lims_map),
+        )
+
+
+def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail):
+    """Helper function to mock Freshdesk ticket creation."""
+    mock_create_ticket.return_value = TicketResponse(
+        id=ticket_id,
+        email=user_mail,
+        priority=1,
+        source=2,
+        status=2,
+        subject="Support needed..",
+        created_at=dt.datetime.now(),
+        attachments=[],
+        tags=[],
+    )
+
+
 @patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
+@patch("cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket")
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -52,6 +79,7 @@ def test_too_long_order_name():
     ],
 )
 def test_submit(
+    mock_create_ticket,
     mail_patch,
     all_orders_to_submit: dict,
     base_store: Store,
@@ -62,6 +90,8 @@ def test_submit(
     user_mail: str,
     user_name: str,
 ):
+    mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -69,7 +99,6 @@ def test_submit(
     assert not base_store._get_query(table=Sample).first()
 
     # WHEN submitting the order
-
     result = orders_api.submit(
         project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
@@ -85,33 +114,25 @@ def test_submit(
                 assert link_obj.sample.original_ticket == ticket_id
 
 
-def monkeypatch_process_lims(monkeypatch, order_data):
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
-
-
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
+@patch("cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket")
 def test_submit_ticketexception(
+    mock_create_ticket,
     all_orders_to_submit,
     orders_api: OrdersAPI,
     order_type: OrderType,
     user_mail: str,
     user_name: str,
 ):
+    # Mock Freshdesk ticket creation to raise TicketCreationError
+    mock_create_ticket.side_effect = TicketCreationError("ERROR")
+
     # GIVEN an order that does not have a name (ticket_nr)
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     order_data.name = "dummy_name"
-    with patch("cg.apps.osticket.OsTicket") as os_mock:
-        orders_api.ticket_handler.osticket = os_mock.return_value
-        orders_api.ticket_handler.osticket.open_ticket.side_effect = TicketCreationError("ERROR")
 
     # WHEN the order is submitted and a TicketCreationError raised
     # THEN the TicketCreationError is not excepted
@@ -461,6 +482,7 @@ def test_validate_sex_unknown_new_sex(
 
 
 @patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
+@patch("cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket")
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -476,14 +498,18 @@ def test_validate_sex_unknown_new_sex(
     ],
 )
 def test_submit_unique_sample_name(
+    mock_create_ticket,
     mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
+    mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
@@ -543,6 +569,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
 
 
 @patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
+@patch("cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket")
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -555,6 +582,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     ],
 )
 def test_not_sarscov2_submit_duplicate_sample_name(
+    mock_create_ticket,
     mail_patch,
     all_orders_to_submit: dict,
     helpers: StoreHelpers,
@@ -562,9 +590,12 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
+    mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
@@ -574,5 +605,4 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     orders_api.submit(
         project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
-
     # THEN no OrderError should be raised on duplicate sample name
