@@ -2,6 +2,7 @@ import pytest
 
 from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
+from cg.services.order_validation_service.constants import MINIMUM_VOLUME
 from cg.services.order_validation_service.workflows.tomte.constants import (
     TomteDeliveryType,
 )
@@ -27,6 +28,7 @@ def create_sample(id: int) -> TomteSample:
         status=StatusEnum.affected,
         subject_id="subject1",
         well_position=f"A:{id}",
+        volume=MINIMUM_VOLUME,
     )
 
 

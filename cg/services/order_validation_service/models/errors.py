@@ -163,3 +163,8 @@ class WellPositionMissingError(CaseSampleError):
 class ContainerNameMissingError(CaseSampleError):
     field: str = "container_name"
     message: str = "Container name is required for well plates"
+
+
+class InvalidVolumeError(CaseSampleError):
+    field: str = "volume"
+    message: str = "Volume must be between 20-130 μL"

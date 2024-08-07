@@ -6,6 +6,7 @@ from cg.services.order_validation_service.models.errors import (
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
     InvalidGenePanelsError,
+    InvalidVolumeError,
     OrderError,
     RepeatedGenePanelsError,
     UserNotAssociatedWithCustomerError,
@@ -13,6 +14,7 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.data.utils import (
     contains_duplicates,
+    is_volume_invalid,
     validate_panels_for_case,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -92,4 +94,14 @@ def validate_gene_panels_exist(
     for case in order.cases:
         case_errors: list[InvalidGenePanelsError] = validate_panels_for_case(case=case, store=store)
         errors.extend(case_errors)
+    return errors
+
+
+def validate_volume_interval(order: TomteOrder) -> list[InvalidVolumeError]:
+    errors: list[InvalidVolumeError] = []
+    for case in order.cases:
+        for sample in case.samples:
+            if is_volume_invalid(sample):
+                error = InvalidVolumeError(case_name=case.name, sample_name=sample.name)
+                errors.append(error)
     return errors
