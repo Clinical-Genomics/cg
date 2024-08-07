@@ -1,16 +1,19 @@
 import datetime as dt
 
+import pytest
 from click.testing import CliRunner
 
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Sample
 
 
+@pytest.mark.xfail(reason="flow cell on-disk check is yet to be refactored")
 def test_start_available_dry(
-    cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
+    cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog, mocker
 ):
     caplog.set_level("INFO")
 

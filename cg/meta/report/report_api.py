@@ -12,6 +12,7 @@ from sqlalchemy.orm import Query
 from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
+from cg.constants.scout import ScoutUploadKey
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
@@ -40,26 +41,24 @@ class ReportAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api: AnalysisAPI = analysis_api
 
-    def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, force_report: bool
-    ) -> str:
-        """Generates the html contents of a delivery report."""
+    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> str:
+        """Generates the HTML content of a delivery report."""
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
         report_data: ReportModel = self.validate_report_fields(
-            case_id=case_id, report_data=report_data, force_report=force_report
+            case_id=case_id, report_data=report_data, force=force
         )
         rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
         """Generates a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
-            case_id=case_id, analysis_date=analysis_date, force_report=force_report
+            case_id=case_id, analysis_date=analysis_date, force=force
         )
         report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
@@ -95,17 +94,17 @@ class ReportAPI(MetaAPI):
             return None
         return delivery_report.full_path
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+    def get_scout_uploaded_file_from_hk(
+        self, case_id: str, scout_key: ScoutUploadKey
+    ) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        tags: list = self.get_hk_scout_file_tags(scout_key=scout_key)
         uploaded_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=tags, version=version.id
         )
         if not tags or not uploaded_file:
-            LOG.warning(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
+            LOG.warning(f"No files were found for the following Scout key: {scout_key}")
             return None
         return uploaded_file.full_path
 
@@ -175,16 +174,14 @@ class ReportAPI(MetaAPI):
             ),
         )
 
-    def validate_report_fields(
-        self, case_id: str, report_data: ReportModel, force_report
-    ) -> ReportModel:
+    def validate_report_fields(self, case_id: str, report_data: ReportModel, force) -> ReportModel:
         """Verifies that the required report fields are not empty."""
         required_fields: dict = self.get_required_fields(case=report_data.case)
         empty_report_fields: dict = get_empty_report_data(report_data=report_data)
         missing_report_fields: dict = get_missing_report_data(
             empty_fields=empty_report_fields, required_fields=required_fields
         )
-        if missing_report_fields and not force_report:
+        if missing_report_fields and not force:
             LOG.error(
                 f"Could not generate report data for {case_id}. "
                 f"Missing data: \n{WriteStream.write_stream_from_content(content=missing_report_fields, file_format=FileFormat.YAML)}"
@@ -262,7 +259,7 @@ class ReportAPI(MetaAPI):
                     name=sample.name,
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
-                    gender=sample.sex,
+                    sex=sample.sex,
                     source=lims_sample.get("source"),
                     tumour=sample.is_tumour,
                     application=self.get_sample_application(sample=sample, lims_sample=lims_sample),
@@ -333,16 +330,18 @@ class ReportAPI(MetaAPI):
             else None
         )
         return DataAnalysisModel(
+            comment=analysis.comment,
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
+            delivered_files=delivered_files,
+            genome_build=self.analysis_api.get_genome_build(case.internal_id),
+            panels=case.panels,
+            pons=self.analysis_api.get_pons(case.internal_id),
+            scout_files=self.get_scout_uploaded_files(case.internal_id),
+            type=self.analysis_api.get_data_analysis_type(case.internal_id),
+            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.analysis_api.get_data_analysis_type(case.internal_id),
-            genome_build=self.analysis_api.get_genome_build(case.internal_id),
-            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
-            panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case.internal_id),
-            delivered_files=delivered_files,
         )
 
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
@@ -403,11 +402,7 @@ class ReportAPI(MetaAPI):
                 break
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
-    def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
+    def get_hk_scout_file_tags(self, scout_key: ScoutUploadKey) -> list | None:
         """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
-        tags = self.get_upload_case_tags().get(scout_tag)
+        tags = self.analysis_api.get_scout_upload_case_tags().get(scout_key.value)
         return list(tags) if tags else None
-
-    def get_upload_case_tags(self):
-        """Return workflow specific upload case tags."""
-        raise NotImplementedError

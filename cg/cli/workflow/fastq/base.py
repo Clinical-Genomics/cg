@@ -2,9 +2,11 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.fastq.fastq_service import FastqService
-from cg.constants.constants import DRY_RUN, Workflow
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.store import Store
@@ -12,7 +14,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def fastq(context: click.Context):
     """Function for storing fastq-cases"""

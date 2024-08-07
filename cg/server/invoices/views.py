@@ -154,7 +154,7 @@ def new(record_type):
         count=count,
         records=records,
         record_type=record_type,
-        total_price_threshold=current_app.config["TOTAL_PRICE_THRESHOLD"],
+        total_price_threshold=current_app.config["invoice_max_price"],
         args={"customer": customer_id},
     )
 

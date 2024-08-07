@@ -1,6 +1,8 @@
 import logging
 
 import click
+
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.models.cg_config import CGConfig
 from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
     ValidatePacbioFileTransferService,
@@ -10,7 +12,7 @@ from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_se
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def validate():
     """Validation of processes in cg."""
 

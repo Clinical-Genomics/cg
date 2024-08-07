@@ -10,7 +10,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Workflow
-from cg.constants.constants import DRY_RUN, FileFormat
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FileFormat
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI

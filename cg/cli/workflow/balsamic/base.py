@@ -6,19 +6,21 @@ import click
 from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
+    OPTION_CLUSTER_CONFIG,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
-    OPTION_CLUSTER_CONFIG,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
+from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -28,7 +30,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def balsamic(context: click.Context):
     """Cancer analysis workflow"""
@@ -127,16 +129,17 @@ def run(
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
-    """Create a housekeeper deliverables file for given CASE ID"""
-
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
+    """Create a Housekeeper deliverables file for a given case ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
+        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(
+            case_id=case_id, force=force
+        )
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")
@@ -148,8 +151,13 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@COMMENT
+@DRY_RUN
+@FORCE
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str):
+def store_housekeeper(
+    context: CGConfig, case_id: str, comment: str | None, dry_run: bool, force: bool
+):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -158,11 +166,13 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.upload_bundle_statusdb(
+            case_id=case_id, comment=comment, dry_run=dry_run, force=force
+        )
+        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
@@ -252,13 +262,16 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
+@COMMENT
 @DRY_RUN
+@FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+def store(context: click.Context, case_id: str, comment: str | None, dry_run: bool, force: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id)
+    validate_force_store_option(force=force, comment=comment)
+    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run, force=force)
+    context.invoke(store_housekeeper, case_id=case_id, comment=comment, force=force)
 
 
 @balsamic.command("store-available")

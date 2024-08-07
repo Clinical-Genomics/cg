@@ -5,6 +5,7 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
+from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
@@ -132,22 +133,24 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
 def rnafusion_validated_metrics() -> dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
+        "bias_5_3": "1.12",
+        "duplicates": "14.86",
+        "dv200": "75.0",
         "gc_content": "51.7",
-        "ribosomal_bases": "65.81",
-        "q20_rate": "97.48",
-        "q30_rate": "92.95",
-        "mapped_reads": "96.53",
-        "rin": "10.0",
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "input_amount": "300.0",
-        "insert_size": "N/A",
-        "insert_size_peak": "N/A",
+        "insert_size": NA_FIELD,
+        "insert_size_peak": NA_FIELD,
+        "mapped_reads": "96.53",
         "mean_length_r1": "99.0",
         "million_read_pairs": "75.0",
-        "bias_5_3": "1.12",
-        "pct_adapter": "12.01",
-        "duplicates": "14.86",
         "mrna_bases": "85.97",
+        "pct_adapter": "12.01",
         "pct_surviving": "99.42",
+        "q20_rate": "97.48",
+        "q30_rate": "92.95",
+        "ribosomal_bases": "65.81",
+        "rin": "10.0",
         "uniquely_mapped_reads": "91.02",
     }
 
@@ -158,7 +161,9 @@ def tomte_validated_metrics() -> dict[str, str]:
     return {
         "bias_5_3": "0.86",
         "duplicates": "28.94",
+        "dv200": "75.0",
         "gc_content": "55.37",
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "input_amount": "300.0",
         "mean_length_r1": "134.0",
         "million_read_pairs": "85.0",

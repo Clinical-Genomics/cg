@@ -2,10 +2,11 @@ import logging
 
 import click
 
-from cg.cli.utils import is_case_name_allowed
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import DRY_RUN, StatusOptions
+from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -27,7 +28,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def add():
     """Add new things to the database."""
     pass
@@ -376,11 +377,9 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
     required=True,
 )
 @DRY_RUN
-@click.option(
-    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
-)
+@FORCE
 @click.pass_obj
-def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
+def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force: bool):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
     external_data_api.add_external_data_to_housekeeper(ticket=ticket, dry_run=dry_run, force=force)

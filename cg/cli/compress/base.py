@@ -7,22 +7,23 @@ import click
 from cg.cli.compress.fastq import (
     clean_fastq,
     decompress_case,
-    decompress_flowcell,
+    decompress_illumina_run,
     decompress_sample,
     decompress_ticket,
     fastq_cmd,
     fix_spring,
 )
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
+from cg.services.pdc_service.pdc_service import PdcService
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def compress(context: CGConfig):
     """Compress files"""
@@ -33,7 +34,7 @@ def compress(context: CGConfig):
     compress_api = CompressAPI(
         hk_api=hk_api,
         crunchy_api=crunchy_api,
-        demux_root=context.illumina_demultiplexed_runs_directory,
+        demux_root=context.run_instruments.illumina.demultiplexed_runs_dir,
     )
     context.meta_apis["compress_api"] = compress_api
 
@@ -50,28 +51,28 @@ clean.add_command(clean_fastq)
 clean.add_command(fix_spring)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def decompress(context: CGConfig):
     """Decompress files"""
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    pdc_api: PdcAPI = PdcAPI(binary_path=context.pdc.binary_path)
+    pdc_service: PdcService = PdcService(binary_path=context.pdc.binary_path)
     spring_encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=context.encryption.binary_path,
     )
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=spring_encryption_api,
         hk_api=hk_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
     )
     LOG.debug("Start spring retrieval if not dry run")
 
     compress_api = CompressAPI(
         hk_api=hk_api,
         crunchy_api=crunchy_api,
-        demux_root=context.illumina_demultiplexed_runs_directory,
+        demux_root=context.run_instruments.illumina.demultiplexed_runs_dir,
         backup_api=spring_backup_api,
     )
 
@@ -82,4 +83,4 @@ def decompress(context: CGConfig):
 decompress.add_command(decompress_sample)
 decompress.add_command(decompress_case)
 decompress.add_command(decompress_ticket)
-decompress.add_command(decompress_flowcell)
+decompress.add_command(decompress_illumina_run)

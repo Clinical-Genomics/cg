@@ -8,7 +8,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationInfo
 
-from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Workflow
+from cg.constants import NA_FIELD, NO_FIELD, REPORT_SEX, YES_FIELD, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile
@@ -18,13 +18,13 @@ from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,
-    get_gender_as_string,
+    get_float_as_percentage,
     get_list_as_string,
+    get_number_as_string,
     get_path_as_string,
     get_prep_category_as_string,
     get_report_string,
-    get_number_as_string,
-    get_float_as_percentage,
+    get_sex_as_string,
 )
 
 
@@ -173,20 +173,20 @@ def test_get_path_as_string(filled_file: Path):
     assert path_name == "a_file.txt"
 
 
-def test_get_gender_as_string():
-    """Test report gender parsing."""
+def test_get_sex_as_string():
+    """Test report sex parsing."""
 
-    # GIVEN an invalid gender category
-    gender: Sex = Sex.FEMALE
-    invalid_gender: str = "not_a_gender"
+    # GIVEN an invalid sex category
+    sex = Sex.FEMALE
+    invalid_sex = "not_a_sex"
 
     # WHEN performing the validation
-    validated_gender: str = get_gender_as_string(gender)
-    validated_invalid_gender: str = get_gender_as_string(invalid_gender)
+    validated_sex: str = get_sex_as_string(sex)
+    validated_invalid_sex: str = get_sex_as_string(invalid_sex)
 
-    # THEN check if the gender has been correctly formatted
-    assert validated_gender == REPORT_GENDER.get("female")
-    assert validated_invalid_gender == NA_FIELD
+    # THEN check if the sex has been correctly formatted
+    assert validated_sex == REPORT_SEX.get(sex)
+    assert validated_invalid_sex == NA_FIELD
 
 
 def test_get_prep_category_as_string(caplog: LogCaptureFixture):

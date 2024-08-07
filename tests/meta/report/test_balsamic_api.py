@@ -1,5 +1,6 @@
 import copy
 
+from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
@@ -29,16 +30,17 @@ def test_get_sample_metadata(
 
     # GIVEN the expected output
     expected_metadata: dict[str, str] = {
-        "million_read_pairs": "10.0",
-        "duplicates": "93.1",
-        "mean_insert_size": "178.19",
-        "fold_80": "1.16",
         "bait_set": bed_name,
         "bait_set_version": "3.1",
-        "median_target_coverage": "5323.0",
-        "pct_250x": "N/A",
-        "pct_500x": "N/A",
+        "duplicates": "93.1",
+        "fold_80": "1.16",
         "gc_dropout": "1.01",
+        "initial_qc": REPORT_QC_FLAG.get(True),
+        "mean_insert_size": "178.19",
+        "median_target_coverage": "5323.0",
+        "million_read_pairs": "10.0",
+        "pct_250x": NA_FIELD,
+        "pct_500x": NA_FIELD,
     }
 
     # WHEN retrieving the sample metadata

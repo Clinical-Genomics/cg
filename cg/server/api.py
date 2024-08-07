@@ -1,16 +1,11 @@
 import json
 import logging
 import tempfile
-from functools import wraps
 from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
-import cachecontrol
-import requests
-from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import exceptions
-from google.auth.transport import requests as google_requests
+from flask import Blueprint, abort, g, jsonify, make_response, request
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
@@ -37,89 +32,36 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
+from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
+from cg.server.endpoints.utils import before_request, is_public
+from cg.server.ext import (
+    db,
+    delivery_message_service,
+    lims,
+    order_service,
+    osticket,
+)
+from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Case,
     Customer,
-    Flowcell,
+    IlluminaSampleSequencingMetrics,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
-    User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
-
-
-session = requests.session()
-cached_session = cachecontrol.CacheControl(session)
-
-
-def verify_google_token(token):
-    request = google_requests.Request(session=cached_session)
-    return id_token.verify_oauth2_token(id_token=token, request=request)
-
-
-def is_public(route_function):
-    @wraps(route_function)
-    def public_endpoint(*args, **kwargs):
-        return route_function(*args, **kwargs)
-
-    public_endpoint.is_public = True
-    return public_endpoint
-
-
-@BLUEPRINT.before_request
-def before_request():
-    """Authorize API routes with JSON Web Tokens."""
-    if not request.is_secure:
-        return abort(
-            make_response(jsonify(message="Only https requests accepted"), HTTPStatus.FORBIDDEN)
-        )
-
-    if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), HTTPStatus.NO_CONTENT)
-
-    endpoint_func = current_app.view_functions[request.endpoint]
-    if getattr(endpoint_func, "is_public", None):
-        return
-
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        return abort(
-            make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    jwt_token = auth_header.split("Bearer ")[-1]
-    try:
-        user_data = verify_google_token(jwt_token)
-    except (exceptions.OAuthError, ValueError) as e:
-        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
-        return abort(
-            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    user: User = db.get_user_by_email(user_data["email"])
-    if user is None or not user.order_portal_login:
-        message = f"{user_data['email']} doesn't have access"
-        LOG.error(message)
-        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
-
-    g.current_user = user
+BLUEPRINT.before_request(before_request)
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -301,20 +243,6 @@ def parse_samples():
     return jsonify(samples=parsed_samples, total=len(samples))
 
 
-@BLUEPRINT.route("/samples_in_collaboration")
-def parse_samples_in_collaboration():
-    """Return samples in a customer group."""
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-        pattern=request.args.get("enquiry"), customers=customer.collaborators
-    )
-    limit = int(request.args.get("limit", 50))
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_samples, total=len(samples))
-
-
 @BLUEPRINT.route("/samples/<sample_id>")
 def parse_sample(sample_id):
     """Return a single sample."""
@@ -362,44 +290,21 @@ def parse_pool(pool_id):
     return jsonify(**pool.to_dict())
 
 
-@BLUEPRINT.route("/flowcells")
-def parse_flow_cells() -> Any:
-    """Return flow cells."""
-    flow_cells: list[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[request.args.get("status")],
-        name_pattern=request.args.get("enquiry"),
-    )
-    parsed_flow_cells: list[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
-    return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
-
-
-@BLUEPRINT.route("/flowcells/<flowcell_id>")
-def parse_flow_cell(flowcell_id):
-    """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
-    if flow_cell is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    return jsonify(**flow_cell.to_dict(samples=True))
-
-
 @BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
-
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
-
-    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-        db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    sequencing_metrics: list[IlluminaSampleSequencingMetrics] = (
+        db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_name).sample_metrics
     )
-
     if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             HTTPStatus.NOT_FOUND,
         )
-
-    return jsonify([metric.to_dict() for metric in sequencing_metrics])
+    metrics_dtos: list[SequencingMetricsRequest] = parse_metrics_into_request(sequencing_metrics)
+    return jsonify([metric.model_dump() for metric in metrics_dtos])
 
 
 @BLUEPRINT.route("/analyses")

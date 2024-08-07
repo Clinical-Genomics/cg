@@ -1,12 +1,13 @@
 from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, RIN_MIN_THRESHOLD, RIN_MAX_THRESHOLD
+from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.report.validators import (
     get_float_as_percentage,
-    get_gender_as_string,
-    get_report_string,
+    get_initial_qc_as_string,
     get_number_as_string,
+    get_report_string,
+    get_sex_as_string,
 )
 
 
@@ -15,12 +16,14 @@ class SampleMetadataModel(BaseModel):
     Metrics and trending data model associated to a specific sample.
 
     Attributes:
-        million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
+        million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
+        initial_qc: initial QC protocol flag; source: LIMS
     """
 
-    million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    initial_qc: Annotated[str, BeforeValidator(get_initial_qc_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -28,25 +31,43 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
-        gender: gender estimated by the workflow; source: workflow
         mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_target_coverage: mean coverage of a target region; source: workflow
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: workflow
+        sex: sex predicted by the workflow; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
     mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
+
+
+class RarediseaseSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to a specific MIP DNA sample.
+
+    Attributes:
+        bait_set: panel bed used for the analysis; source: LIMS
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        sex: sex predicted by the workflow; source: workflow
+    """
+
+    bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            mean_insert_size: mean insert size of the distribution; source: workflow
-            fold_80: fold 80 base penalty; source: workflow
+        mean_insert_size: mean insert size of the distribution; source: workflow
+        fold_80: fold 80 base penalty; source: workflow
     """
 
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -57,28 +78,29 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            bait_set: panel bed used for the analysis; source: LIMS
-            bait_set_version: panel bed version; source: workflow
-            median_target_coverage: median coverage of a target region in bases; source: workflow
-            pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
-            pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
+        bait_set: panel bed used for the analysis; source: LIMS
+        bait_set_version: panel bed version; source: workflow
+        median_target_coverage: median coverage of a target region in bases; source: workflow
+        pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
+        pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            median_coverage: median coverage in bases of the genome territory; source: workflow
-            pct_15x: fraction of bases that attained at least 15X sequence coverage; source: workflow
-            pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        median_coverage: median coverage in bases of the genome territory; source: workflow
+        pct_15x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+        pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
 
     median_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -104,6 +126,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
+        dv200: percentage of RNA fragments > 200 nucleotides; source: LIMS
         input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
@@ -116,6 +139,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

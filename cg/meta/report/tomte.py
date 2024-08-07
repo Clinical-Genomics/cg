@@ -17,7 +17,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import TomteSampleMetadataModel
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ReportRequiredFields
 from cg.models.report.sample import SampleModel
 from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
@@ -37,12 +37,12 @@ class TomteReportAPI(ReportAPI):
         return TomteSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
             duplicates=sample_metrics.pct_duplication,
+            dv200=self.lims_api.get_sample_dv200(sample.internal_id),
             gc_content=sample_metrics.after_filtering_gc_content,
+            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
-            million_read_pairs=get_million_read_pairs(
-                reads=sample_metrics.before_filtering_total_reads
-            ),
+            million_read_pairs=get_million_read_pairs(sample_metrics.before_filtering_total_reads),
             mrna_bases=sample_metrics.pct_mrna_bases,
             pct_adapter=sample_metrics.pct_adapter,
             pct_intergenic_bases=sample_metrics.pct_intergenic_bases,
@@ -63,24 +63,25 @@ class TomteReportAPI(ReportAPI):
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return the delivery report required fields for Tomte."""
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TOMTE_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
-            ),
-            "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
-            ),
-            "metadata": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
+            metadata=self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS
             ),
-        }
+            methods=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TOMTE_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+        )
+        return report_required_fields.model_dump()

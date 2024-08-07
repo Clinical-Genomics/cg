@@ -5,21 +5,19 @@ from pathlib import Path
 import pytest
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-)
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 def test_is_sample_sheet_in_housekeeper_exists(
-    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: FlowCellDirectoryData
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData
 ):
     """Test that checking the existence of an existing sample sheet in Housekeeper returns True."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demultiplexing_context_for_demux.illumina_flow_cells_directory = (
+    demultiplexing_context_for_demux.run_instruments.illumina.sequencing_runs_dir = (
         tmp_bcl_convert_flow_cell.path.parent
     )
 
@@ -40,12 +38,12 @@ def test_is_sample_sheet_in_housekeeper_exists(
 
 
 def test_is_sample_sheet_in_housekeeper_not_in_hk(
-    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: FlowCellDirectoryData
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData
 ):
     """Test that checking the existence of a non-existing sample sheet in Housekeeper returns False."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demultiplexing_context_for_demux.illumina_flow_cells_directory = (
+    demultiplexing_context_for_demux.run_instruments.illumina.sequencing_runs_dir = (
         tmp_bcl_convert_flow_cell.path.parent
     )
 
@@ -61,7 +59,7 @@ def test_is_sample_sheet_in_housekeeper_not_in_hk(
 
 
 def test_create_demultiplexing_output_dir_for_bcl_convert(
-    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData,
     tmp_path: Path,
     demultiplexing_api: DemultiplexingAPI,
 ):
@@ -70,8 +68,10 @@ def test_create_demultiplexing_output_dir_for_bcl_convert(
 
     # GIVEN that the demultiplexing output directory does not exist
     demultiplexing_api.demultiplexed_runs_dir = tmp_path
-    output_directory: Path = demultiplexing_api.flow_cell_out_dir_path(tmp_bcl_convert_flow_cell)
-    unaligned_directory: Path = demultiplexing_api.get_flow_cell_unaligned_dir(
+    output_directory: Path = demultiplexing_api.demultiplexed_run_dir_path(
+        tmp_bcl_convert_flow_cell
+    )
+    unaligned_directory: Path = demultiplexing_api.get_sequencing_run_unaligned_dir(
         tmp_bcl_convert_flow_cell
     )
     assert not output_directory.exists()
@@ -87,7 +87,7 @@ def test_create_demultiplexing_output_dir_for_bcl_convert(
 
 def test_is_demultiplexing_possible_true(
     demultiplexing_api: DemultiplexingAPI,
-    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData,
 ):
     """Test demultiplexing pre-check when all criteria are fulfilled."""
     add_and_include_sample_sheet_path_to_housekeeper(
@@ -99,7 +99,7 @@ def test_is_demultiplexing_possible_true(
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(
-        flow_cell=tmp_bcl_convert_flow_cell
+        sequencing_run=tmp_bcl_convert_flow_cell
     )
     # THEN the flow cell is ready for demultiplexing
     assert result is True
@@ -109,7 +109,7 @@ def test_is_demultiplexing_possible_true(
 def test_is_demultiplexing_possible_missing_files(
     demultiplexing_api: DemultiplexingAPI,
     missing_file: str,
-    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData,
 ):
     """Test demultiplexing pre-check when files are missing in flow cell directory."""
     # GIVEN a flow cell with a sample sheet in Housekeeper
@@ -121,7 +121,8 @@ def test_is_demultiplexing_possible_missing_files(
 
     # GIVEN that all other demultiplexing criteria are fulfilled
     assert (
-        demultiplexing_api.is_demultiplexing_possible(flow_cell=tmp_bcl_convert_flow_cell) is True
+        demultiplexing_api.is_demultiplexing_possible(sequencing_run=tmp_bcl_convert_flow_cell)
+        is True
     )
 
     # GIVEN a flow cell with a missing file
@@ -129,7 +130,7 @@ def test_is_demultiplexing_possible_missing_files(
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(
-        flow_cell=tmp_bcl_convert_flow_cell
+        sequencing_run=tmp_bcl_convert_flow_cell
     )
     # THEN the flow cell should not be deemed ready for demultiplexing
     assert result is False
@@ -137,7 +138,7 @@ def test_is_demultiplexing_possible_missing_files(
 
 def is_demultiplexing_possible_no_sample_sheet_in_hk(
     demultiplexing_api: DemultiplexingAPI,
-    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData,
 ):
     """Test demultiplexing pre-check when no sample sheet exists in Housekeeper."""
     # GIVEN a flow cell with no sample sheet in Housekeeper
@@ -148,7 +149,7 @@ def is_demultiplexing_possible_no_sample_sheet_in_hk(
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(
-        flow_cell=tmp_bcl_convert_flow_cell
+        sequencing_run=tmp_bcl_convert_flow_cell
     )
     # THEN the flow cell should not be deemed ready for demultiplexing
     assert result is False
@@ -156,7 +157,7 @@ def is_demultiplexing_possible_no_sample_sheet_in_hk(
 
 def test_is_demultiplexing_possible_already_started(
     demultiplexing_api: DemultiplexingAPI,
-    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData,
 ):
     """Test demultiplexing pre-check demultiplexing has already started."""
     # GIVEN a flow cell with a sample sheet in Housekeeper
@@ -167,7 +168,8 @@ def test_is_demultiplexing_possible_already_started(
     )
     # GIVEN that all other demultiplexing criteria are fulfilled
     assert (
-        demultiplexing_api.is_demultiplexing_possible(flow_cell=tmp_bcl_convert_flow_cell) is True
+        demultiplexing_api.is_demultiplexing_possible(sequencing_run=tmp_bcl_convert_flow_cell)
+        is True
     )
 
     # GIVEN a flow cell where demultiplexing has already started
@@ -175,7 +177,7 @@ def test_is_demultiplexing_possible_already_started(
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(
-        flow_cell=tmp_bcl_convert_flow_cell
+        sequencing_run=tmp_bcl_convert_flow_cell
     )
     # THEN the flow cell should not be deemed ready for demultiplexing
     assert result is False
@@ -184,19 +186,21 @@ def test_is_demultiplexing_possible_already_started(
 def test_remove_demultiplexing_output_directory(
     demultiplexing_api: DemultiplexingAPI,
     tmp_path: Path,
-    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
 ):
     """Test that the demultiplexing output directory is removed."""
     # GIVEN a flow cell with a demultiplexing output directory
     demultiplexing_api.demultiplexed_runs_dir = tmp_path
     demultiplexing_api.create_demultiplexing_output_dir(novaseq_6000_post_1_5_kits_flow_cell)
-    assert demultiplexing_api.flow_cell_out_dir_path(novaseq_6000_post_1_5_kits_flow_cell).exists()
+    assert demultiplexing_api.demultiplexed_run_dir_path(
+        novaseq_6000_post_1_5_kits_flow_cell
+    ).exists()
 
     # WHEN removing the demultiplexing output directory
     demultiplexing_api.remove_demultiplexing_output_directory(
-        flow_cell=novaseq_6000_post_1_5_kits_flow_cell
+        sequencing_run=novaseq_6000_post_1_5_kits_flow_cell
     )
 
-    assert not demultiplexing_api.flow_cell_out_dir_path(
+    assert not demultiplexing_api.demultiplexed_run_dir_path(
         novaseq_6000_post_1_5_kits_flow_cell
     ).exists()

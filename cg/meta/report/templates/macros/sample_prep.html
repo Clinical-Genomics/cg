@@ -15,6 +15,7 @@
             {{ bait_set(workflow=workflow, analysis_type=case.data_analysis.type) }}
           </th>
           <th scope="col">Sekvensering</th>
+          <th scope="col">Mottagningskvalitetskontroll</th>
         </tr>
       </thead>
       <tbody>
@@ -30,6 +31,7 @@
             {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
           <td>{{ sample.methods.sequencing }}</td>
+          <td>{{ sample.metadata.initial_qc }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -44,7 +46,7 @@
 {% macro bait_set(workflow, analysis_type) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
-    (workflow == "mip-dna" and analysis_type == "wes")
+    (workflow in ("mip-dna", "raredisease") and analysis_type == "wes")
   %}
     Bait Set
   {% endif %}
@@ -53,7 +55,7 @@
 {% macro bait_set_value(workflow, analysis_type, sample) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
-    (workflow == "mip-dna" and analysis_type == "wes")
+    (workflow in ("mip-dna", "raredisease") and analysis_type == "wes")
   %}
     {{ sample.metadata.bait_set }}
     {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}

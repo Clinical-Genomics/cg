@@ -17,7 +17,7 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -26,6 +26,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
@@ -37,8 +38,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -50,16 +49,26 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
-    BCLConvertMetricsService,
-)
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Case,
+    Customer,
+    IlluminaSequencingRun,
+    Order,
+    Organism,
+    Sample,
+)
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -78,22 +87,33 @@ multiqc_json_file = "multiqc_data.json"
 software_version_file = "software_versions.yml"
 deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
-    "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.backup_fixtures.backup_fixtures",
+    "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
+    "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
-    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
-    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
+    "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
+    "tests.fixture_plugins.timestamp_fixtures",
 ]
 
 
@@ -324,8 +344,6 @@ def base_config_dict() -> dict:
         "madeline_exe": "path/to/madeline",
         "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
-        "illumina_flow_cells_directory": "path/to/flow_cells",
-        "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
             "pacbio": {
@@ -337,7 +355,7 @@ def base_config_dict() -> dict:
                 "systemd_trigger_dir": "path/to/ptrigger_directory",
             },
             "illumina": {
-                "flow_cell_runs_dir": "path/to/flow_cells",
+                "sequencing_runs_dir": "path/to/sequencing-runs",
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
@@ -356,6 +374,7 @@ def base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "sentieon_licence_server": "127.0.0.1:8080",
     }
 
 
@@ -394,40 +413,44 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
     cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
 @pytest.fixture
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
-    real_housekeeper_api: HousekeeperAPI,
+    illumina_demultiplexed_runs_post_processing_hk_api: HousekeeperAPI,
     cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
+        tmp_illumina_demultiplexed_runs_directory.as_posix()
+    )
+    cg_context.housekeeper_api_ = illumina_demultiplexed_runs_post_processing_hk_api
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
 @pytest.fixture
-def updated_demultiplex_context(
+def new_demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
-    updated_store_with_demultiplexed_samples: Store,
+    store_with_illumina_sequencing_data: Store,
 ) -> CGConfig:
-    """Return cg context with a demultiplex context."""
+    """Return a CG context with populated with data using the Illumina models."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = updated_store_with_demultiplexed_samples
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
@@ -438,21 +461,29 @@ def demultiplex_configs_for_demux(
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
-        "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
+        "run_instruments": {
+            "illumina": {
+                "sequencing_runs_dir": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
+                "demultiplexed_runs_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
+            }
+        },
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
 
 @pytest.fixture(name="demultiplex_configs")
 def demultiplex_configs(
-    tmp_illumina_flow_cells_directory,
+    tmp_illumina_sequencing_runs_directory,
     tmp_illumina_demultiplexed_flow_cells_directory,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
-        "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
+        "run_instruments": {
+            "illumina": {
+                "sequencing_runs_dir": tmp_illumina_sequencing_runs_directory.as_posix(),
+                "demultiplexed_runs_dir": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
+            }
+        },
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
@@ -501,13 +532,13 @@ def sample_sheet_context(
     cg_context: CGConfig,
     lims_api: LimsAPI,
     populated_housekeeper_api: HousekeeperAPI,
-    tmp_illumina_flow_cells_directory: Path,
+    tmp_illumina_sequencing_runs_directory: Path,
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
-    cg_context.sample_sheet_api_ = SampleSheetAPI(
-        flow_cell_dir=tmp_illumina_flow_cells_directory.as_posix(),
+    cg_context.sample_sheet_api_ = IlluminaSampleSheetService(
+        flow_cell_dir=tmp_illumina_sequencing_runs_directory.as_posix(),
         hk_api=cg_context.housekeeper_api,
         lims_api=cg_context.lims_api,
     )
@@ -522,10 +553,12 @@ def sample_sheet_context_broken_flow_cells(
     tmp_broken_flow_cells_directory: Path,
 ) -> CGConfig:
     """Return cg context with broken flow cells."""
-    cg_context.illumina_demultiplexed_runs_directory = tmp_broken_flow_cells_directory.as_posix()
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
+        tmp_broken_flow_cells_directory.as_posix()
+    )
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
-    cg_context.sample_sheet_api_ = SampleSheetAPI(
+    cg_context.sample_sheet_api_ = IlluminaSampleSheetService(
         flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
         hk_api=cg_context.housekeeper_api,
         lims_api=cg_context.lims_api,
@@ -561,25 +594,6 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
-
-
-@pytest.fixture
-def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
-) -> DemuxPostProcessingAPI:
-    api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
-    return api
-
-
-@pytest.fixture
-def updated_demux_post_processing_api(
-    updated_demultiplex_context: CGConfig,
-    tmp_illumina_demultiplexed_flow_cells_directory,
-) -> DemuxPostProcessingAPI:
-    api = DemuxPostProcessingAPI(updated_demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
-    return api
 
 
 @pytest.fixture
@@ -705,6 +719,12 @@ def data_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "data")
 
 
+@pytest.fixture(scope="session")
+def devices_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the device dir."""
+    return Path(fixtures_dir, "devices")
+
+
 @pytest.fixture
 def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
@@ -737,7 +757,7 @@ def content() -> str:
 
 @pytest.fixture
 def filled_file(non_existing_file_path: Path, content: str) -> Path:
-    """Return the path to a existing file with some content."""
+    """Return the path to an existing file with some content."""
     with open(non_existing_file_path, "w") as outfile:
         outfile.write(content)
     return non_existing_file_path
@@ -1197,7 +1217,7 @@ def analysis_store(
     helpers: StoreHelpers,
     timestamp_yesterday: datetime,
 ) -> Generator[Store, None, None]:
-    """Setup a store instance for testing analysis API."""
+    """Set up a store instance for testing analysis API."""
     helpers.ensure_case_from_dict(
         base_store,
         case_info=analysis_family,
@@ -1223,53 +1243,84 @@ def analysis_store_single_case(
 
 
 @pytest.fixture
-def store_with_demultiplexed_samples(
+def store_with_illumina_sequencing_data(
     store: Store,
     helpers: StoreHelpers,
-    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
-    selected_hiseq_x_dual_index_sample_ids: list[str],
-    hiseq_x_dual_index_flow_cell_id: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
+    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+    seven_canonical_sequencing_runs_selected_case_ids: list[list[str]],
 ) -> Store:
-    """Return a store with samples that have been demultiplexed."""
-    helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
-    helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
-    for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
-        )
-
-    for i, sample_internal_id in enumerate(selected_hiseq_x_dual_index_sample_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.ensure_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
+    """Return a store with Illumina flow cells, sequencing runs and sample sequencing metrics."""
+    for run_dir, sample_internal_ids, case_ids in zip(
+        seven_canonical_flow_cells,
+        seven_canonical_flow_cells_selected_sample_ids,
+        seven_canonical_sequencing_runs_selected_case_ids,
+    ):
+        helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+            run_directory_data=run_dir,
+            sample_ids=sample_internal_ids,
+            case_ids=case_ids,
+            store=store,
         )
     return store
 
 
 @pytest.fixture
-def updated_store_with_demultiplexed_samples(
-    store: Store,
+def store_with_illumina_sequencing_data_on_disk(
+    store_with_illumina_sequencing_data: Store,
+    selected_novaseq_x_case_ids: list[str],
     helpers: StoreHelpers,
-    seven_canonical_flow_cells: list[FlowCellDirectoryData],
-    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
 ) -> Store:
-    """Return a store with the 7 canonical flow cells with samples added to store."""
-    for flow_cell, sample_internal_ids in zip(
-        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
-    ):
-        helpers.add_flow_cell_and_samples_with_sequencing_metrics(
-            flow_cell_name=flow_cell.id,
-            sequencer=flow_cell.sequencer_type,
-            sample_ids=sample_internal_ids,
-            store=store,
+    """Store with illumina sequencing data for run on disk tests."""
+    store_with_illumina_sequencing_data.delete_illumina_flow_cell(
+        novaseq_6000_pre_1_5_kits_flow_cell_id
+    )
+    helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+        run_directory_data=novaseq_6000_pre_1_5_kits_flow_cell,
+        sample_ids=[selected_novaseq_6000_pre_1_5_kits_sample_ids[0]],
+        case_ids=[selected_novaseq_x_case_ids[0]],
+        store=store_with_illumina_sequencing_data,
+    )
+    return store_with_illumina_sequencing_data
+
+
+@pytest.fixture
+def re_sequenced_sample_illumina_data_store(
+    store_with_illumina_sequencing_data: Store,
+    sample_id_sequenced_on_multiple_flow_cells: str,
+    flow_cells_with_the_same_sample: list[str],
+    case_id_for_sample_on_multiple_flow_cells: str,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with re-sequenced samples on illumina flow cells for Fluffy case."""
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            flow_cells_with_the_same_sample[1]
         )
-    return store
+    )
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=store_with_illumina_sequencing_data,
+        sample_id=sample_id_sequenced_on_multiple_flow_cells,
+        sequencing_run=sequencing_run,
+        lane=1,
+    )
+    # Add application and tags to case
+    application: Application = helpers.ensure_application(
+        store=store_with_illumina_sequencing_data, tag="RMLO05R800", prep_category="rml"
+    )
+    application_version: ApplicationVersion = helpers.ensure_application_version(
+        store=store_with_illumina_sequencing_data, tag="RMLO05R800", prep_category="rml"
+    )
+    case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
+        case_id_for_sample_on_multiple_flow_cells
+    )
+    case.data_analysis = Workflow.FLUFFY
+    case.links[0].sample.application_version = application_version
+    case.links[0].sample.application_version.application = application
+    return store_with_illumina_sequencing_data
 
 
 @pytest.fixture
@@ -1767,7 +1818,7 @@ def context_config(
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
     tomte_dir: Path,
-    illumina_flow_cells_directory: Path,
+    illumina_sequencing_runs_directory: Path,
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
@@ -1780,8 +1831,6 @@ def context_config(
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
-        "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
             "pacbio": {
@@ -1793,7 +1842,7 @@ def context_config(
                 "systemd_trigger_dir": "path/to/nanopore_trigger_directory",
             },
             "illumina": {
-                "flow_cell_runs_dir": str(illumina_flow_cells_directory),
+                "sequencing_runs_dir": str(illumina_sequencing_runs_directory),
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
         },
@@ -1809,9 +1858,10 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "sentieon_licence_server": "127.0.0.1:8080",
         "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
-        "backup": {
+        "illumina_backup_service": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
@@ -1826,23 +1876,25 @@ def context_config(
             "bed_path": str(cg_dir),
             "binary_path": "echo",
             "cadd_path": str(cg_dir),
-            "genome_interval_path": str(cg_dir),
-            "gnomad_af5_path": str(cg_dir),
-            "gens_coverage_female_path": str(cg_dir),
-            "gens_coverage_male_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
+            "genome_interval_path": str(cg_dir),
+            "gens_coverage_female_path": str(cg_dir),
+            "gens_coverage_male_path": str(cg_dir),
+            "gnomad_af5_path": str(cg_dir),
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": email_address,
                 "account": "development",
+                "mail_user": email_address,
                 "qos": SlurmQos.LOW,
             },
+            "sentieon_licence_path": str(cg_dir),
             "swegen_path": str(cg_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "chanjo2": {"host": "chanjo2_host"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
@@ -1865,7 +1917,7 @@ def context_config(
         },
         "data_input": {"input_dir_path": str(cg_dir)},
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flow_cells/nova_seq_6000",
+            "run_dir": "tests/fixtures/apps/demultiplexing/sequencing-runs/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
@@ -2063,43 +2115,43 @@ def cg_context(
 
 
 @pytest.fixture(scope="session")
-def case_id_with_single_sample():
+def case_id_with_single_sample() -> str:
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(scope="session")
-def case_id_with_multiple_samples():
+def case_id_with_multiple_samples() -> str:
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(scope="session")
-def case_id_without_samples():
+def case_id_without_samples() -> str:
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(scope="session")
-def case_id_not_enough_reads():
+def case_id_not_enough_reads() -> str:
     """Return a case id associated to a sample without enough reads."""
     return "tiredwalrus"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_single_case():
+def sample_id_in_single_case() -> str:
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_multiple_cases():
+def sample_id_in_multiple_cases() -> str:
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(scope="session")
-def sample_id_not_enough_reads():
+def sample_id_not_enough_reads() -> str:
     """Return a sample id without enough reads."""
     return "ASM3"
 
@@ -2347,7 +2399,6 @@ def raredisease_sample_sheet_content(
     raredisease_case_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
-    strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for raredisease."""
     headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
@@ -2365,25 +2416,6 @@ def raredisease_sample_sheet_content(
         ]
     )
     return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="function")
-def hermes_deliverables(deliverable_data: dict, raredisease_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "raredisease", "bundle_id": raredisease_case_id, "files": []}
-    for file_info in deliverable_data["files"]:
-        tags: list[str] = []
-        if "html" in file_info["format"]:
-            tags.append("multiqc-html")
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-    return hermes_output
-
-
-@pytest.fixture(scope="function")
-def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    malformed_deliverable: dict = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
-
-    return malformed_deliverable
 
 
 @pytest.fixture(scope="function")
@@ -2463,17 +2495,19 @@ def raredisease_context(
     sample_id: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
-    apptag_rna: str,
+    wgs_application_tag: str,
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
     mocker,
 ) -> CGConfig:
-    """Context to use in CLI."""
+    """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # NB: the order in which the cases are added matters for the tests of store_available
 
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
@@ -2486,18 +2520,18 @@ def raredisease_context(
         data_analysis=Workflow.RAREDISEASE,
     )
 
-    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+    sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
-        application_tag=apptag_rna,
+        application_tag=wgs_application_tag,
     )
 
     helpers.add_relationship(
         status_db,
         case=case_enough_reads,
-        sample=sample_raredisease_case_enough_reads,
+        sample=sample_enough_reads,
     )
 
     # Create case without enough reads
@@ -2513,7 +2547,7 @@ def raredisease_context(
         internal_id=sample_id_not_enough_reads,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_not_pass,
-        application_tag=apptag_rna,
+        application_tag=wgs_application_tag,
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
@@ -2605,7 +2639,7 @@ def raredisease_mock_analysis_finish(
     Path.mkdir(
         Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
@@ -2664,6 +2698,51 @@ def raredisease_mock_deliverable_dir(
 
 
 @pytest.fixture(scope="function")
+def raredisease_hermes_deliverables(
+    raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> dict:
+    hermes_output: dict = {"workflow": "raredisease", "bundle_id": raredisease_case_id, "files": []}
+    for file_info in raredisease_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(scope="function")
+def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = raredisease_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
+def raredisease_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    raredisease_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", raredisease_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", raredisease_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": raredisease_case_id,
+        }
+    )
+
+
+@pytest.fixture(scope="function")
 def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
@@ -2694,6 +2773,7 @@ def rnafusion_workflow() -> str:
 @pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
+    sample_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
     strandedness: str,
@@ -2702,19 +2782,13 @@ def rnafusion_sample_sheet_content(
     headers: str = ",".join(RnafusionSampleSheetEntry.headers())
     row: str = ",".join(
         [
-            rnafusion_case_id,
+            sample_id,
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
             strandedness,
         ]
     )
     return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="session")
-def strandedness() -> str:
-    """Return a default strandedness."""
-    return Strandedness.REVERSE
 
 
 @pytest.fixture(scope="session")
@@ -2905,26 +2979,10 @@ def rnafusion_context(
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
+    # NB: the order in which the cases are added matters for the tests of store_available
+
     # Create case with no associated samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RNAFUSION,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2947,6 +3005,23 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
@@ -2960,7 +3035,7 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
                 "path_index": "",
                 "step": "report",
                 "tag": ["multiqc-html", "rna"],
-                "id": rnafusion_case_id,
+                "id": sample_id,
                 "format": "html",
                 "mandatory": True,
             },
@@ -2990,7 +3065,6 @@ def rnafusion_mock_deliverable_dir(
         file_format=FileFormat.JSON,
         file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + deliverables_yaml),
     )
-
     return rnafusion_dir
 
 
@@ -3164,6 +3238,12 @@ def tomte_mock_deliverable_dir(
     return tomte_dir
 
 
+@pytest.fixture(scope="session")
+def strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
+
+
 @pytest.fixture(scope="function")
 def tomte_sample_sheet_content(
     tomte_case_id: str,
@@ -3311,6 +3391,8 @@ def tomte_context(
     cg_context.meta_apis["analysis_api"] = TomteAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
+    # NB: the order in which the cases are added matters for the tests of store_available
+
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
@@ -3329,7 +3411,7 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
-        reference_genome=GenomeVersion.hg38,
+        reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(
@@ -3530,26 +3612,10 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
+    # NB: the order in which the cases are added matters for the tests of store_available
+
     # Create case with no associate samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.TAXPROFILER,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=metagenomics_application_tag,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # Create case with associated samples
     taxprofiler_case: Case = helpers.add_case(
@@ -3588,6 +3654,24 @@ def taxprofiler_context(
         case=taxprofiler_case,
         sample=taxprofiler_another_sample,
     )
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TAXPROFILER,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=metagenomics_application_tag,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
@@ -3764,56 +3848,25 @@ def expected_total_reads_hiseq_x_flow_cell() -> int:
 
 
 @pytest.fixture
-def store_with_sequencing_metrics(
-    store: Store,
-    sample_id: str,
-    father_sample_id: str,
-    mother_sample_id: str,
-    expected_total_reads: int,
-    flow_cell_name: str,
-    novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    hiseq_x_dual_index_flow_cell_id: str,
-    helpers: StoreHelpers,
-) -> Store:
-    """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[str | int | float] = [
-        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
-        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
-        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 85.5, 30),
-        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 80.5, 30),
-        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 83.5, 30),
-        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 81.5, 30),
-        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 3, 1_500_000, 80.5, 33),
-        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 2, 1_500_000, 80.5, 33),
-    ]
-    helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
-    helpers.add_sample(
-        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
-    )
-    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
-        metrics_data=sample_sequencing_metrics_details, store=store
-    )
-    return store
-
-
-@pytest.fixture
-def flow_cell_encryption_api(
+def illumina_run_encryption_service(
     cg_context: CGConfig, flow_cell_full_name: str
-) -> FlowCellEncryptionAPI:
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
+) -> IlluminaRunEncryptionService:
+    illumina_run_encryption_service = IlluminaRunEncryptionService(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
+        encryption_dir=Path(cg_context.illumina_backup_service.pdc_archiving_directory.current),
         dry_run=True,
-        flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
+        run_dir_data=IlluminaRunDirectoryData(
+            sequencing_run_path=Path(
+                cg_context.run_instruments.illumina.sequencing_runs_dir, flow_cell_full_name
+            )
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
-        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        sbatch_parameter=cg_context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
     )
-    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
-    return flow_cell_encryption_api
+    illumina_run_encryption_service.slurm_api.set_dry_run(dry_run=True)
+    return illumina_run_encryption_service
 
 
 def create_process_response(
@@ -3973,5 +4026,42 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
 
 
 @pytest.fixture()
-def bcl_convert_metrics_service() -> BCLConvertMetricsService:
-    return BCLConvertMetricsService()
+def illumina_metrics_service() -> IlluminaDataTransferService:
+    return IlluminaDataTransferService()
+
+
+@pytest.fixture
+def completed_status_summary():
+    return StatusSummary(count=1, case_ids=["completed_case_id"])
+
+
+@pytest.fixture
+def delivered_status_summary():
+    return StatusSummary(count=1, case_ids=["delivered_case_id"])
+
+
+@pytest.fixture
+def failed_status_summary():
+    return StatusSummary(count=1, case_ids=["failed_case_id"])
+
+
+@pytest.fixture
+def empty_status_summary():
+    return StatusSummary()
+
+
+@pytest.fixture
+def analysis_summary(
+    empty_status_summary: StatusSummary,
+    completed_status_summary: StatusSummary,
+    delivered_status_summary: StatusSummary,
+    failed_status_summary: StatusSummary,
+):
+    return AnalysisSummary(
+        order_id=1,
+        cancelled=empty_status_summary,
+        completed=completed_status_summary,
+        running=empty_status_summary,
+        delivered=delivered_status_summary,
+        failed=failed_status_summary,
+    )

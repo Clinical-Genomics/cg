@@ -3,7 +3,8 @@
 {% macro tomte_qc_metrics(samples) %}
   {% set
     metrics = [
-      {"name": "RNA Integrity Number (RIN)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
+      {"name": "RNA Integrity Number (RIN)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover. N/A som värde är en varning om att inget tillförlitligt RIN är tillgängligt för det specifika provet."},
+      {"name": "DV200",                                        "key": "dv200",                 "description": "Andelen RNA-fragment längre än 200 nukleotider."},
       {"name": "Ingående mängd [ng]",                          "key": "input_amount",          "description": "Mängd RNA som används för sekvensering."},
       {"name": "Läspar [M]",                                   "key": "million_read_pairs",    "description": "Antal sekvenseringsläsningar i miljoner läspar."},
       {"name": "Unikt mappade sekvenser [%]",                  "key": "uniquely_mapped_reads", "description": "Procentandel sekvenserade läsningar som endast matchar en position i referensgenomet."},

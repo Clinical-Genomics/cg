@@ -1,4 +1,4 @@
-"""Enums for devices."""
+"""Enums for run_devices."""
 
 from enum import Enum, auto
 

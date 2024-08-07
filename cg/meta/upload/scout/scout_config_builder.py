@@ -30,7 +30,9 @@ class ScoutConfigBuilder:
 
     def add_common_info_to_load_config(self) -> None:
         """Add the mandatory common information to a Scout load config object."""
-        self.load_config.analysis_date = self.analysis_obj.completed_at
+        self.load_config.analysis_date = (
+            self.analysis_obj.completed_at or self.analysis_obj.started_at
+        )
         self.load_config.default_gene_panels = self.analysis_obj.case.panels
         self.load_config.family = self.analysis_obj.case.internal_id
         self.load_config.family_name = self.analysis_obj.case.name

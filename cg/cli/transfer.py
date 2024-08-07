@@ -5,6 +5,7 @@ import logging
 import click
 
 from cg.apps.lims import LimsAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.transfer import PoolState, SampleState, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -12,7 +13,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="transfer")
+@click.group(name="transfer", context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def transfer_group(context: CGConfig):
     """Transfer results to the status interface."""

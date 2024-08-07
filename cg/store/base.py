@@ -6,20 +6,16 @@ from typing import Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    ApplicationVersion,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
     Case,
     CaseSample,
     Customer,
-    Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Sample,
-    SampleLaneSequencingMetrics,
 )
 
 
@@ -74,15 +70,6 @@ class BaseHandler:
         """Return join sample and customer query."""
         return self._get_query(table=Sample).join(Customer)
 
-    def _get_join_flow_cell_sample_links_query(self) -> Query:
-        """Return join flow cell samples and relationship query."""
-        return (
-            self._get_query(table=Flowcell)
-            .join(Flowcell.sequencing_metrics)
-            .join(SampleLaneSequencingMetrics.sample)
-            .join(Sample.links)
-        )
-
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""
         return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)
@@ -125,4 +112,13 @@ class BaseHandler:
         """Return a join query for all application limitations."""
         return self._get_query(table=ApplicationLimitations).join(
             ApplicationLimitations.application
+        )
+
+    def _get_joined_illumina_sample_tables(self) -> Query:
+        """Return a join query for all Illumina tables and Sample."""
+        return (
+            self._get_query(table=IlluminaSampleSequencingMetrics)
+            .join(Sample)
+            .join(IlluminaSequencingRun)
+            .join(IlluminaFlowCell)
         )

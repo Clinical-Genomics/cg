@@ -3,7 +3,8 @@ from pathlib import Path
 
 import click
 
-from cg.constants.constants import DRY_RUN
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt.nipt import NiptUploadAPI
@@ -12,7 +13,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def ftp():
     """Upload NIPT result files to ftp-server"""
     pass
@@ -21,14 +22,14 @@ def ftp():
 @ftp.command("case")
 @click.argument("case_id", required=True)
 @DRY_RUN
-@click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
+@FORCE
 @click.pass_obj
 def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     """Upload the results file of a NIPT case"""
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    if force or nipt_upload_api.flowcell_passed_qc_value(
+    if force or nipt_upload_api.sequencing_run_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         LOG.info("*** NIPT FTP UPLOAD START ***")

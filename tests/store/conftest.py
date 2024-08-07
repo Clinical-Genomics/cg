@@ -12,6 +12,7 @@ from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
+from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.store.models import (
     Analysis,
     Application,
@@ -598,6 +599,17 @@ def illumina_flow_cell_internal_id() -> str:
 @pytest.fixture
 def illumina_flow_cell_model_s1() -> str:
     return "S1"
+
+
+@pytest.fixture
+def illumina_flow_cell_dto(
+    illumina_flow_cell_internal_id: str, illumina_flow_cell_model_s1: str
+) -> IlluminaFlowCellDTO:
+    return IlluminaFlowCellDTO(
+        internal_id=illumina_flow_cell_internal_id,
+        type=DeviceType.ILLUMINA,
+        model=illumina_flow_cell_model_s1,
+    )
 
 
 @pytest.fixture

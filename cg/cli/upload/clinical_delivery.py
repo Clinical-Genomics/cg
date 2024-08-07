@@ -9,7 +9,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI

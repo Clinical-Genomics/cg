@@ -4,8 +4,9 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
-    ensure_flow_cells_on_disk,
+    ensure_illumina_runs_on_disk,
     link,
     resolve_compression,
     store,
@@ -25,7 +26,11 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group("mip-dna", invoke_without_command=True)
+@click.group(
+    "mip-dna",
+    invoke_without_command=True,
+    context_settings=CLICK_CONTEXT_SETTINGS,
+)
 @click.pass_context
 def mip_dna(
     context: click.Context,
@@ -38,7 +43,7 @@ def mip_dna(
 
 for sub_cmd in [
     config_case,
-    ensure_flow_cells_on_disk,
+    ensure_illumina_runs_on_disk,
     link,
     managed_variants,
     panel,

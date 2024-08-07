@@ -8,6 +8,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.coverage import ChanjoAPI
 from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -35,7 +36,7 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
         metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
         return MipAnalysis(
             case=family_id or "yellowhog",
-            genome_build=GenomeVersion.hg19.value,
+            genome_build=GenomeVersion.HG19.value,
             sample_id_metrics=metrics.sample_id_metrics,
             mip_version="v4.0.20",
             rank_model_version="1.18",
@@ -70,12 +71,12 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         )
         return None
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_key: ScoutUploadKey) -> str:
         """Return mocked uploaded to Scout file."""
         LOG.info(
-            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_tag={scout_tag}"
+            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_key={scout_key}"
         )
-        return f"path/to/{scout_tag}"
+        return f"path/to/{scout_key}"
 
 
 class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
@@ -84,22 +85,20 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, force_report: bool
-    ) -> None:
+    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> None:
         """Mocked create_delivery_report method."""
         LOG.info(
             f"create_delivery_report called with the following args: case={case_id}, analysis_date={analysis_date}, "
-            f"force_report={force_report}",
+            f"force={force}",
         )
 
     def create_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
         """Return mocked delivery report file path."""
         LOG.info(
             f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
-            f"analysis_date={analysis_date}, force_report={force_report}"
+            f"analysis_date={analysis_date}, force={force}"
         )
         return directory
 

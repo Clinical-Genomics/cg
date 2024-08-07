@@ -18,7 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
-from cg.constants.scout import BALSAMIC_CASE_TAGS
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -53,22 +53,29 @@ class BalsamicReportAPI(ReportAPI):
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
-        million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
+        million_read_pairs: float = get_million_read_pairs(sample.reads)
+        passed_initial_qc: bool | None = self.lims_api.has_sample_passed_initial_qc(
+            sample.internal_id
+        )
         if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
             case.internal_id
         ):
             return self.get_wgs_metadata(
-                million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
+                million_read_pairs=million_read_pairs,
+                passed_initial_qc=passed_initial_qc,
+                sample_metrics=sample_metrics,
             )
         return self.get_panel_metadata(
-            million_read_pairs=million_read_pairs,
-            sample_metrics=sample_metrics,
             analysis_metadata=analysis_metadata,
+            million_read_pairs=million_read_pairs,
+            passed_initial_qc=passed_initial_qc,
+            sample_metrics=sample_metrics,
         )
 
     def get_panel_metadata(
         self,
         million_read_pairs: float,
+        passed_initial_qc: bool | None,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
@@ -80,31 +87,35 @@ class BalsamicReportAPI(ReportAPI):
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
-            million_read_pairs=million_read_pairs,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
+            initial_qc=passed_initial_qc,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_target_coverage=(
                 sample_metrics.median_target_coverage if sample_metrics else None
             ),
+            million_read_pairs=million_read_pairs,
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
         )
 
     @staticmethod
     def get_wgs_metadata(
-        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        million_read_pairs: float,
+        passed_initial_qc: bool | None,
+        sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
-            million_read_pairs=million_read_pairs,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            initial_qc=passed_initial_qc,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
+            million_read_pairs=million_read_pairs,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             pct_reads_improper_pairs=(
                 sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
             ),
@@ -128,8 +139,12 @@ class BalsamicReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+            ),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
@@ -156,28 +171,26 @@ class BalsamicReportAPI(ReportAPI):
             required_sample_metadata_fields: list[str] = (
                 REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
             )
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": required_data_analysis_fields,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
-            ),
-            "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
-            ),
-            "metadata": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=required_data_analysis_fields,
+            metadata=self.get_sample_required_fields(
                 case=case, required_fields=required_sample_metadata_fields
             ),
-        }
-
-    def get_upload_case_tags(self) -> dict:
-        """Return Balsamic upload case tags."""
-        return BALSAMIC_CASE_TAGS
+            methods=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+        )
+        return report_required_fields.model_dump()

@@ -7,7 +7,7 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
 from cg.cli.generate.report.utils import get_report_api, get_report_case
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
 

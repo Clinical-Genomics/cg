@@ -13,7 +13,7 @@ from cg.constants import (
     RNAFUSION_REPORT_ACCREDITED_APPTAGS,
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
 )
-from cg.constants.scout import RNAFUSION_CASE_TAGS
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
@@ -23,14 +23,14 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
 from cg.models.report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
-    """API to create RNAfusion delivery reports."""
+    """API to create Rnafusion delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -43,18 +43,16 @@ class RnafusionReportAPI(ReportAPI):
         return RnafusionSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
             duplicates=sample_metrics.pct_duplication,
+            dv200=self.lims_api.get_sample_dv200(sample.internal_id),
             gc_content=sample_metrics.after_filtering_gc_content,
+            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
-            insert_size=None,
-            insert_size_peak=None,
             mapped_reads=get_mapped_reads_fraction(
                 mapped_reads=sample_metrics.read_pairs_examined * 2,
                 total_reads=sample_metrics.before_filtering_total_reads,
             ),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
-            million_read_pairs=get_million_read_pairs(
-                reads=sample_metrics.before_filtering_total_reads
-            ),
+            million_read_pairs=get_million_read_pairs(sample_metrics.before_filtering_total_reads),
             mrna_bases=sample_metrics.pct_mrna_bases,
             pct_adapter=sample_metrics.pct_adapter,
             pct_surviving=sample_metrics.pct_surviving,
@@ -94,33 +92,32 @@ class RnafusionReportAPI(ReportAPI):
     def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            vcf_fusion=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_fusion")
+            vcf_fusion=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_FUSION
+            )
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for Rnafusion."""
-        return {
-            "report": REQUIRED_REPORT_FIELDS,
-            "customer": REQUIRED_CUSTOMER_FIELDS,
-            "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(
+        report_required_fields = ReportRequiredFields(
+            applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
-            "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_RNAFUSION_FIELDS
-            ),
-            "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
-            ),
-            "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
-            ),
-            "metadata": self.get_sample_required_fields(
+            case=REQUIRED_CASE_FIELDS,
+            customer=REQUIRED_CUSTOMER_FIELDS,
+            data_analysis=REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
+            metadata=self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
             ),
-        }
-
-    def get_upload_case_tags(self) -> dict:
-        """Return Balsamic UMI upload case tags."""
-        return RNAFUSION_CASE_TAGS
+            methods=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            report=REQUIRED_REPORT_FIELDS,
+            samples=self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_RNAFUSION_FIELDS
+            ),
+            timestamps=self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+        )
+        return report_required_fields.model_dump()

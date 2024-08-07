@@ -10,10 +10,11 @@ from cg.constants import (
     NA_FIELD,
     NO_FIELD,
     PRECISION,
-    REPORT_GENDER,
+    REPORT_SEX,
     YES_FIELD,
 )
 from cg.constants.constants import PrepCategory, Workflow
+from cg.constants.report import REPORT_QC_FLAG
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType
@@ -75,9 +76,9 @@ def get_path_as_string(file_path: str | None) -> str:
     return Path(file_path).name if file_path and Path(file_path).is_file() else NA_FIELD
 
 
-def get_gender_as_string(gender: Sex | None) -> str:
-    """Return a report adapted gender."""
-    return get_report_string(REPORT_GENDER.get(gender))
+def get_sex_as_string(sex: Sex | None) -> str:
+    """Return a report adapted sex."""
+    return get_report_string(REPORT_SEX.get(sex))
 
 
 def get_prep_category_as_string(prep_category: PrepCategory | None) -> str:
@@ -93,3 +94,8 @@ def get_analysis_type_as_string(analysis_type: str | None, info: ValidationInfo)
     if analysis_type and Workflow.BALSAMIC in info.data.get("workflow"):
         analysis_type: str = BALSAMIC_ANALYSIS_TYPE.get(analysis_type)
     return get_report_string(analysis_type)
+
+
+def get_initial_qc_as_string(qc_flag: bool | None) -> str:
+    """Return a report adapted initial quality control flag."""
+    return get_report_string(REPORT_QC_FLAG.get(qc_flag))

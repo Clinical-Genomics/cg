@@ -1,4 +1,6 @@
-from cg.constants import REPORT_GENDER
+from cg.constants import REPORT_SEX
+from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
+from cg.constants.subject import Sex
 from tests.store_helpers import StoreHelpers
 
 
@@ -14,12 +16,13 @@ def test_get_sample_metadata(
 
     # GIVEN the expected output
     expected_metadata = {
-        "million_read_pairs": "N/A",
+        "bait_set": NA_FIELD,
         "duplicates": "4.01",
-        "bait_set": "N/A",
-        "gender": REPORT_GENDER.get("male"),
+        "sex": REPORT_SEX.get(Sex.MALE),
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",
+        "million_read_pairs": NA_FIELD,
         "pct_10x": "99.1",
     }
 

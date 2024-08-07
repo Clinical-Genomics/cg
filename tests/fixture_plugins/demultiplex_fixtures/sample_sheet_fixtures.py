@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.constants import FileFormat
@@ -75,6 +76,19 @@ def novaseq_6000_post_1_5_kits_sample_sheet_content(
     return ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=novaseq_6000_post_1_5_kits_correct_sample_sheet_path
     )
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_sample_sheet_with_selected_samples(
+    novaseq_6000_post_1_5_kits_bcl_convert_lims_samples: list[IlluminaSampleIndexSetting],
+    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
+) -> SampleSheet:
+    """Return a NovaSeq 6000 sample sheet with selected samples."""
+    selected_samples: list[IlluminaSampleIndexSetting] = []
+    for sample in novaseq_6000_post_1_5_kits_bcl_convert_lims_samples:
+        if sample.sample_id in selected_novaseq_6000_post_1_5_kits_sample_ids:
+            selected_samples.append(sample)
+    return SampleSheet(samples=selected_samples)
 
 
 @pytest.fixture

@@ -21,7 +21,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 @pytest.mark.parametrize(
@@ -278,7 +278,7 @@ def test_is_novaseq6000_post_1_5_kit(
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters from a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
     # WHEN checking if the flow cell was sequenced after the NovaSeq 6000 1.5 kits
     result: bool = flow_cell.run_parameters._is_novaseq6000_post_1_5_kit()
     # THEN the correct index settings are returned
@@ -286,7 +286,7 @@ def test_is_novaseq6000_post_1_5_kit(
 
 
 @pytest.mark.parametrize(
-    "flow_cell, correct_settings",
+    "sequencing_run, correct_settings",
     [
         ("novaseq_6000_pre_1_5_kits_flow_cell", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
         ("novaseq_6000_post_1_5_kits_flow_cell", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
@@ -295,14 +295,14 @@ def test_is_novaseq6000_post_1_5_kit(
 )
 def test_get_index_settings(
     correct_settings: IndexSettings,
-    flow_cell: str,
+    sequencing_run: str,
     request: FixtureRequest,
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters for a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell)
+    sequencing_run: IlluminaRunDirectoryData = request.getfixturevalue(sequencing_run)
     # WHEN getting the index settings
-    settings: IndexSettings = flow_cell.run_parameters.index_settings
+    settings: IndexSettings = sequencing_run.run_parameters.index_settings
     # THEN the correct index settings are returned
     assert settings == correct_settings
 
@@ -314,6 +314,7 @@ def test_get_index_settings(
         ("hiseq_2500_dual_index_run_parameters", None),
         ("novaseq_6000_run_parameters_pre_1_5_kits", "S4"),
         ("novaseq_6000_run_parameters_post_1_5_kits", "S1"),
+        ("novaseq_x_run_parameters_node_name", "10B"),
         ("novaseq_x_run_parameters", "10B"),
     ],
 )

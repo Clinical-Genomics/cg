@@ -3,10 +3,10 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.exc import SampleSheetError
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.exc import SampleSheetFormatError
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 def test_are_necessary_files_in_flow_cell_passes(
@@ -15,10 +15,12 @@ def test_are_necessary_files_in_flow_cell_passes(
 ):
     """Test that a flow cell with sample sheet and run parameters has necessary files."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell with a sample sheet
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaRunDirectoryData(
+        sequencing_run_path=tmp_flow_cell_with_bcl2fastq_sample_sheet
+    )
 
     # WHEN checking if the flow cell has the necessary files
     result: bool = api._are_necessary_files_in_flow_cell(flow_cell=flow_cell)
@@ -34,10 +36,12 @@ def test_are_necessary_files_in_flow_cell_no_run_params(
 ):
     """Test that a flow cell without run parameters can't have its sample sheet translated."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without run parameters
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
+    flow_cell = IlluminaRunDirectoryData(
+        sequencing_run_path=tmp_flow_cell_without_run_parameters_path
+    )
 
     # WHEN checking if the flow cell has the necessary files
     result: bool = api._are_necessary_files_in_flow_cell(flow_cell)
@@ -54,11 +58,11 @@ def test_are_necessary_files_in_flow_cell_no_sample_sheet(
 ):
     """Test that a flow cell without sample sheet can not be translated."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without a sample sheet
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=tmp_novaseq_x_without_sample_sheet_flow_cell_path
+    flow_cell = IlluminaRunDirectoryData(
+        sequencing_run_path=tmp_novaseq_x_without_sample_sheet_flow_cell_path
     )
 
     # WHEN checking if the flow cell has the necessary files
@@ -76,7 +80,7 @@ def test_replace_sample_sheet_header_bcl2fastq(
 ):
     """Test that the header is replaced to BCLConvert format for a Bcl2Fastq sample sheet."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context.sample_sheet_api
 
     # GIVEN a Bcl2Fastq sample sheet content
 
@@ -93,12 +97,12 @@ def test_replace_sample_sheet_header_bcl_convert(
 ):
     """Test that the header of a BCLConvert sample sheet can not be replaced."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context.sample_sheet_api
 
     # GIVEN a BCLConvert sample sheet content
 
     # WHEN replacing the header
-    with pytest.raises(SampleSheetError) as error:
+    with pytest.raises(SampleSheetFormatError) as error:
         # THEN an error is raised
         api._replace_sample_header(sample_sheet_bcl_convert_data_header)
     assert "Could not find BCL2FASTQ data header in sample sheet" in str(error.value)
@@ -110,10 +114,12 @@ def test_translate_sample_sheet(
 ):
     """Test that a Bcl2Fastq sample sheet is translated to BCLConvert format."""
     # GIVEN a sample sheet API
-    api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
+    api: IlluminaSampleSheetService = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell with a translatable sample sheet
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaRunDirectoryData(
+        sequencing_run_path=tmp_flow_cell_with_bcl2fastq_sample_sheet
+    )
 
     # WHEN translating the sample sheet
     api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)

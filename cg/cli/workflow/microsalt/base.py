@@ -6,9 +6,11 @@ from typing import Any
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import FileFormat, DRY_RUN
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FileFormat
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -33,7 +35,7 @@ OPTION_TICKET = click.option(
 ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=click.STRING)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
