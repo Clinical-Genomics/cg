@@ -83,7 +83,6 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Pa
 
 
 def test_get_bcf_file_mip(
-    analysis_api: AnalysisAPI,
     upload_genotypes_api: UploadGenotypesAPI,
     case_id: str,
     cg_context: CGConfig,
