@@ -39,7 +39,9 @@ def test_get_analysis_sex_raredisease(
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = RarediseaseAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
+    sex: dict = RarediseaseAnalysisAPI._get_analysis_sex(
+        qc_metrics_file=case_qc_metrics_deliverables
+    )
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
@@ -50,9 +52,7 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     # GIVEN an AnalysisAPI and qcmetrics data
 
     # WHEN fetching the predicted sex
-    metrics_object = MipDNAAnalysisAPI._get_parsed_qc_metrics_data(
-        case_qc_metrics_deliverables
-    )
+    metrics_object = MipDNAAnalysisAPI._get_parsed_qc_metrics_data(case_qc_metrics_deliverables)
 
     # THEN assert that it was successfully created
     assert isinstance(metrics_object, MIPMetricsDeliverables)
