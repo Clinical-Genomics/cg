@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
@@ -11,9 +12,9 @@ from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_serv
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
-    PacBioSMRTCellDTO,
-    PacBioSequencingRunDTO,
     PacBioSampleSequencingMetricsDTO,
+    PacBioSequencingRunDTO,
+    PacBioSMRTCellDTO,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -30,6 +31,8 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
         "type": DeviceType.PACBIO,
         "well": "A1",
         "plate": 1,
+        "run_started_at": datetime.now(),
+        "run_completed_at": datetime.now(),
         "movie_time_hours": 10,
         "hifi_reads": 500000,
         "hifi_yield": 3000000000,

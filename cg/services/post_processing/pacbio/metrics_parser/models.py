@@ -121,8 +121,8 @@ class SmrtlinkDatasetsMetrics(BaseModel):
     well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
     well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
     sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
-    sequencing_started_at: datetime
-    data_consolidated_at: datetime = Field(..., alias=SmrtLinkDatabasesIDs.SEQUENCING_COMPLETED_AT)
+    run_started_at: datetime
+    run_completed_at: datetime = Field(..., alias=SmrtLinkDatabasesIDs.RUN_COMPLETED_AT)
     movie_name: str = Field(..., alias=SmrtLinkDatabasesIDs.MOVIE_NAME)
     cell_index: int = Field(..., alias=SmrtLinkDatabasesIDs.CELL_INDEX)
     path: str = Field(..., alias=SmrtLinkDatabasesIDs.PATH)
@@ -147,7 +147,7 @@ class SmrtlinkDatasetsMetrics(BaseModel):
             movie_name = data.get(SmrtLinkDatabasesIDs.MOVIE_NAME)
             if movie_name:
                 date: str = movie_name.split("_")[1] + movie_name.split("_")[2]
-                data["sequencing_started_at"] = datetime.strptime(date, "%y%m%d%H%M%S")
+                data["run_started_at"] = datetime.strptime(date, "%y%m%d%H%M%S")
         return data
 
 

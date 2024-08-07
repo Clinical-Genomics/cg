@@ -1,5 +1,7 @@
 """Data transfer objects for the PacbioDataTransferService."""
 
+from datetime import datetime
+
 from pydantic import BaseModel
 
 from cg.constants.devices import DeviceType
@@ -10,6 +12,8 @@ class PacBioSequencingRunDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
+    run_started_at: datetime
+    run_completed_at: datetime
     movie_time_hours: int | None
     hifi_reads: int
     hifi_yield: int

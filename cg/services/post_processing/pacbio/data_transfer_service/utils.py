@@ -18,6 +18,8 @@ def get_sequencing_run_dto(metrics: PacBioMetrics) -> PacBioSequencingRunDTO:
         type=DeviceType.PACBIO,
         well=metrics.dataset_metrics.well,
         plate=metrics.dataset_metrics.plate,
+        run_started_at=metrics.dataset_metrics.run_started_at,
+        run_completed_at=metrics.dataset_metrics.run_completed_at,
         movie_time_hours=None,
         hifi_reads=metrics.read.hifi_reads,
         hifi_yield=metrics.read.hifi_yield,
