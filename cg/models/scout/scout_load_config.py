@@ -23,6 +23,11 @@ class Reviewer(BaseModel):
     catalog: str | None = None
 
 
+class OmicsFiles(BaseModel):
+    fraser: str | None = None
+    outrider: str | None = None
+
+
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
@@ -104,7 +109,6 @@ class ScoutLoadConfig(BaseModel):
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )
-
     model_config = ConfigDict(validate_assignment=True)
 
 
@@ -153,8 +157,7 @@ class RnafusionLoadConfig(ScoutLoadConfig):
 
 
 class TomteLoadConfig(ScoutLoadConfig):
-    fraser_tsv: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    outrider_tsv: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    omics_files: Annotated[OmicsFiles | None, BeforeValidator(field_not_none)] = None
     multiqc_rna: str | None = None
     samples: list[ScoutRnaIndividual] = []
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
