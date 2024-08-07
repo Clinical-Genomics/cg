@@ -23,10 +23,9 @@ def test_get_analysis_sex_mip(
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
-    analysis_api: AnalysisAPI = MipDNAAnalysisAPI
 
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = analysis_api._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
+    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
@@ -38,9 +37,9 @@ def test_get_analysis_sex_raredisease(
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
-    analysis_api: AnalysisAPI = RarediseaseAnalysisAPI
+
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = analysis_api._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
+    sex: dict = RarediseaseAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
@@ -51,7 +50,7 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     # GIVEN an AnalysisAPI and qcmetrics data
 
     # WHEN fetching the predicted sex
-    metrics_object: MIPMetricsDeliverables = MipDNAAnalysisAPI.get_parsed_qc_metrics_data(
+    metrics_object: MIPMetricsDeliverables = AnalysisAPI.get_parsed_qc_metrics_data(
         case_qc_metrics_deliverables
     )
 
