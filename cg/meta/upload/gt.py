@@ -52,13 +52,14 @@ class UploadGenotypesAPI(object):
             analysis_api = RarediseaseAnalysisAPI
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
-        gt_data["samples_sex"] = analysis_api.get_samples_sex(case_obj=analysis.case, hk_version=hk_version)
+        gt_data["samples_sex"] = analysis_api.get_samples_sex(
+            case_obj=analysis.case, hk_version=hk_version
+        )
         return gt_data
 
     def upload(self, gt_data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
         self.gt.upload(str(gt_data["bcf"]), gt_data["samples_sex"], force=replace)
-
 
     @staticmethod
     def is_suitable_for_genotype_upload(case_obj: Case) -> bool:

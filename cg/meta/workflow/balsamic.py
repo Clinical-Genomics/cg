@@ -669,7 +669,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return True
         return False
 
-    def get_samples_sex(self, case: Case, hk_version = None) -> dict[str, dict[str, str]]:
+    def get_samples_sex(self, case: Case, hk_version=None) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
