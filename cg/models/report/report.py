@@ -46,6 +46,8 @@ class ScoutReportFiles(BaseModel):
         vcf_str: Short Tandem Repeat variants file (MIP-DNA specific); source: HK
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
         vcf_fusion: Converted RNA fusion file to SV VCF (RNAfusion specific); source: HK
+        fraser_tsv: Clinical aberrant splicing (Tomte specific); source: HK
+        outrider_tsv: Clinical expression outliers (Tomte specific); source: HK
     """
 
     snv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
@@ -55,6 +57,8 @@ class ScoutReportFiles(BaseModel):
     vcf_str: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     smn_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     vcf_fusion: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    fraser_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    outrider_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):

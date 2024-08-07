@@ -32,11 +32,14 @@ class ScoutCustomCaseReportTags(StrEnum):
 
 
 class ScoutUploadKey(StrEnum):
+    FRASER_TSV = auto()
+    OUTRIDER_TSV = auto()
     SMN_TSV = auto()
+    SNV_RESEARCH_VCF = auto()
     SNV_VCF = auto()
     SV_VCF = auto()
-    VCF_STR = auto()
     VCF_FUSION = auto()
+    VCF_STR = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(

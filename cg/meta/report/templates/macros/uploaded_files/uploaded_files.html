@@ -2,6 +2,7 @@
 {% from "/macros/uploaded_files/mip_dna_uploaded_files.html" import mip_dna_scout_files %}
 {% from "/macros/uploaded_files/raredisease_uploaded_files.html" import raredisease_scout_files %}
 {% from "/macros/uploaded_files/rnafusion_uploaded_files.html" import rnafusion_scout_files %}
+{% from "/macros/uploaded_files/tomte_uploaded_files.html" import tomte_scout_files %}
 
 {% macro uploaded_files(case, customer) %}
 {% set data_delivery = case.data_analysis.data_delivery %}
@@ -42,6 +43,9 @@
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion Scout files -->
       {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif workflow == "tomte" %}
+      <!-- Tomte Scout files -->
+      {{ tomte_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
     {% endif %}
   {% endif %}
 {% endmacro %}

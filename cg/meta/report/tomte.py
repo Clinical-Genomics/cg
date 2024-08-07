@@ -11,13 +11,14 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_TOMTE_FIELDS,
 )
+from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import TomteSampleMetadataModel
-from cg.models.report.report import CaseModel, ReportRequiredFields
+from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
@@ -85,3 +86,20 @@ class TomteReportAPI(ReportAPI):
             ),
         )
         return report_required_fields.model_dump()
+
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+            ),
+            snv_research_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.SNV_RESEARCH_VCF
+            ),
+            fraser_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.FRASER_TSV
+            ),
+            outrider_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case_id, scout_key=ScoutUploadKey.OUTRIDER_TSV
+            ),
+        )
