@@ -747,7 +747,7 @@ class AnalysisAPI(MetaAPI):
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
-            if self._is_variant_file(self, genotype_file=genotype_file):
+            if self._is_variant_file(genotype_file=genotype_file):
                 LOG.debug(f"Found BCF file {genotype_file.full_path}")
                 return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for bundle {hk_version_obj.bundle_id}")
