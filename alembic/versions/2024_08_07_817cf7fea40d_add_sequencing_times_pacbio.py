@@ -25,8 +25,13 @@ def upgrade():
         "pacbio_sequencing_run",
         sa.Column("run_completed_at", sa.DateTime(), nullable=True),
     )
+    op.drop_column("pacbio_sequencing_run", "movie_time_hours")
 
 
 def downgrade():
+    op.add_column(
+        "pacbio_sequencing_run",
+        sa.Column("movie_time_hours", sa.Integer(), nullable=True),
+    )
     op.drop_column("pacbio_sequencing_run", "run_completed_at")
     op.drop_column("pacbio_sequencing_run", "run_started_at")
