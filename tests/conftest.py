@@ -2775,6 +2775,7 @@ def rnafusion_workflow() -> str:
 @pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
+    sample_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
     strandedness: str,
@@ -2783,7 +2784,7 @@ def rnafusion_sample_sheet_content(
     headers: str = ",".join(RnafusionSampleSheetEntry.headers())
     row: str = ",".join(
         [
-            rnafusion_case_id,
+            sample_id,
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
             strandedness,
@@ -3036,7 +3037,7 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
                 "path_index": "",
                 "step": "report",
                 "tag": ["multiqc-html", "rna"],
-                "id": rnafusion_case_id,
+                "id": sample_id,
                 "format": "html",
                 "mandatory": True,
             },
