@@ -21,7 +21,7 @@ class MockReagentType:
         self.sequence: str = sequence
 
 
-class MockLimsUDF(BaseModel):
+class LimsUDF(BaseModel):
     control: str | None = None
     customer: str = None
 

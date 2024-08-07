@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.io.json import write_json
-from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
     SamplesQualityResults,
