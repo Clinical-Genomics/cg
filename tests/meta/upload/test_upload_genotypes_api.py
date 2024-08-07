@@ -20,12 +20,13 @@ from cg.store.models import Analysis
 def test_get_analysis_sex_mip(
     case_qc_metrics_deliverables: Path,
     genotype_analysis_sex: dict,
+    cg_context: CGConfig,
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
-
+    mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables, sample_id=)
+    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables, sample_id=mip_analysis_api.sample_id_in_single_case)
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
