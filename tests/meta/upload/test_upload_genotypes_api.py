@@ -83,6 +83,7 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Pa
 
 
 def test_get_bcf_file_mip(
+    analysis_api: AnalysisAPI,
     upload_genotypes_api: UploadGenotypesAPI,
     case_id: str,
     cg_context: CGConfig,
@@ -90,8 +91,8 @@ def test_get_bcf_file_mip(
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
-    analysis_api = MipDNAAnalysisAPI(config=cg_context)
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
+    analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # WHEN fetching the gbcf file with the api
     gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
@@ -103,12 +104,13 @@ def test_get_bcf_file_raredisease(
     upload_genotypes_api: UploadGenotypesAPI,
     case_id: str,
     timestamp: datetime,
+    cg_context: CGConfig,
 ):
     """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
     # GIVEN a UploadGenotypeAPI populated with some data
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
-    analysis_api: AnalysisAPI = MipDNAAnalysisAPI
+    analysis_api: AnalysisAPI = RarediseaseAnalysisAPI(config=cg_context)
 
     # WHEN fetching the gbcf file with the api
     gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
