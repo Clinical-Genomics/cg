@@ -27,5 +27,9 @@ def is_concentration_missing(sample: TomteSample) -> bool:
     return not sample.concentration_ng_ul
 
 
+def is_well_position_missing(sample: TomteSample) -> bool:
+    return sample.container == ContainerEnum.plate and not sample.well_position
+
+
 def is_container_name_missing(sample: TomteSample) -> bool:
     return sample.container == ContainerEnum.plate and not sample.container_name
