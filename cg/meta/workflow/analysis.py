@@ -10,7 +10,7 @@ import click
 from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.environ import environ_email
-from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI as hk
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -737,8 +737,8 @@ class AnalysisAPI(MetaAPI):
             )
         return analysis_types.pop() if analysis_types else None
 
-    def _get_genotype_files(self, version_id: int) -> list:
-        return self.hk.files(version=version_id, tags=["genotype"]).all()
+    def _get_genotype_files(version_id: int) -> list:
+        return hk.files(version=version_id, tags=["genotype"]).all()
 
     def _is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")

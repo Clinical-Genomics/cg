@@ -1,7 +1,4 @@
 import logging
-from pathlib import Path
-
-from housekeeper.store.models import File, Version
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
