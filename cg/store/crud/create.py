@@ -14,9 +14,9 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSequencingRunDTO,
 )
 from cg.services.post_processing.pacbio.data_transfer_service.dto import (
-    PacBioSMRTCellDTO,
-    PacBioSequencingRunDTO,
     PacBioSampleSequencingMetricsDTO,
+    PacBioSequencingRunDTO,
+    PacBioSMRTCellDTO,
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -37,14 +37,14 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
+    PacBioSampleSequencingMetrics,
+    PacBioSequencingRun,
+    PacBioSMRTCell,
     Panel,
     Pool,
     Sample,
     User,
     order_case,
-    PacBioSMRTCell,
-    PacBioSequencingRun,
-    PacBioSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -487,7 +487,8 @@ class CreateHandler(BaseHandler):
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
             plate=sequencing_run_dto.plate,
-            movie_time_hours=sequencing_run_dto.movie_time_hours,
+            started_at=sequencing_run_dto.run_started_at,
+            completed_at=sequencing_run_dto.run_completed_at,
             hifi_reads=sequencing_run_dto.hifi_reads,
             hifi_yield=sequencing_run_dto.hifi_yield,
             hifi_mean_read_length=sequencing_run_dto.hifi_mean_read_length,

@@ -14,7 +14,6 @@ class PacBioSequencingRunDTO(BaseModel):
     plate: int
     run_started_at: datetime
     run_completed_at: datetime
-    movie_time_hours: int | None
     hifi_reads: int
     hifi_yield: int
     hifi_mean_read_length: float
