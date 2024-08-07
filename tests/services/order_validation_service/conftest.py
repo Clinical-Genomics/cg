@@ -184,6 +184,7 @@ def order_with_siblings_as_parents():
 def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
+    return sample
 
 
 @pytest.fixture
