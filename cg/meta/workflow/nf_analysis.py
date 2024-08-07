@@ -745,7 +745,8 @@ class NfAnalysisAPI(AnalysisAPI):
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id):
+            samples = self.status_db.get_samples_by_case_id(case_id=case_id)
+            for sample in samples:
                 trailblazer_comment = str(error).replace(
                     f"{sample.internal_id} - ", f"{sample.name} ({sample.internal_id}) - "
                 )
