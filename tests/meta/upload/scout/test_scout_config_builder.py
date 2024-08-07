@@ -222,7 +222,7 @@ def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
 
 def test_tomte_config_builder(
     hk_version: Version,
-        tomte_analysis: Analysis,
+    tomte_analysis: Analysis,
     lims_api: MockLimsAPI,
     tomte_context: CGConfig,
 ):
