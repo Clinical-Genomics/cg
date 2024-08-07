@@ -203,6 +203,18 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-csv"],
     ],
     Workflow.RAREDISEASE: [
+        ["vcf-snv-clinical"],
+        ["vcf-snv-research"],
+        ["vcf-str"],
+        ["vcf-snv"],
+        ["qc-metrics"],
+        ["smn-calling"],
+        ["vcf-sv"],
+        ["vcf-sv-clinical"],
+        ["vcf-sv-research"],
+        ["vcf2cytosure"],
+        [HK_DELIVERY_REPORT_TAG],
+        [AnalysisTag.MULTIQC_HTML],
         [HermesFileTag.LONG_TERM_STORAGE],
     ],
     Workflow.RNAFUSION: [
