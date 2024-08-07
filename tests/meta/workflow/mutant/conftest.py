@@ -36,7 +36,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     sample_qc_pass = helpers.add_sample(
         store=store,
         internal_id="sample_qc_pass",
-        name="23CS503186",
+        name="sample_qc_pass",
         control=ControlOptions.EMPTY,
         reads=861966,
         application_tag=application.tag,
@@ -45,7 +45,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     sample_qc_fail = helpers.add_sample(
         store=store,
         internal_id="sample_qc_fail",
-        name="23CS102408",
+        name="sample_qc_fail",
         control=ControlOptions.EMPTY,
         reads=438776,
         application_tag=application.tag,
@@ -54,7 +54,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     external_negative_control_qc_pass = helpers.add_sample(
         store=store,
         internal_id="external_negative_control_qc_pass",
-        name="0PROVSEK",
+        name="external_negative_control_qc_pass",
         control=ControlOptions.NEGATIVE,
         reads=20674,
         application_tag=application.tag,
@@ -72,7 +72,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     sample_qc_pass_with_failing_controls = helpers.add_sample(
         store=store,
         internal_id="sample_qc_pass_with_failing_controls",
-        name="23CS503186",
+        name="sample_qc_pass",
         control=ControlOptions.EMPTY,
         reads=861966,
         application_tag=application.tag,
@@ -90,7 +90,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     external_negative_control_qc_fail = helpers.add_sample(
         store=store,
         internal_id="external_negative_control_qc_fail",
-        name="0PROVSEK",
+        name="external_negative_control_qc_fail",
         control=ControlOptions.NEGATIVE,
         reads=200000,
         application_tag=application.tag,
@@ -127,12 +127,14 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 @pytest.fixture
 def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     # Get samples
-    sample_qc_pass = LimsSample(id="sample_qc_pass", name="23CS503186")
+    sample_qc_pass = LimsSample(id="sample_qc_pass", name="sample_qc_pass")
 
-    sample_qc_fail = LimsSample(id="sample_qc_fail", name="23CS102408")
+    sample_qc_fail = LimsSample(id="sample_qc_fail", name="sample_qc_fail")
 
     external_negative_control_qc_pass = LimsSample(
-        id="external_negative_control_qc_pass", name="0PROVSEK", udfs=LimsUDF(control="negative")
+        id="external_negative_control_qc_pass",
+        name="external_negative_control_qc_pass",
+        udfs=LimsUDF(control="negative"),
     )
     internal_negative_control_qc_pass = LimsSample(
         id="internal_negative_control_qc_pass",
@@ -141,11 +143,13 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     )
 
     sample_qc_pass_with_failing_controls = LimsSample(
-        id="sample_qc_pass_with_failing_controls", name="23CS503186"
+        id="sample_qc_pass_with_failing_controls", name="sample_qc_pass"
     )
 
     external_negative_control_qc_fail = LimsSample(
-        id="external_negative_control_qc_fail", name="0PROVSEK", udfs=LimsUDF(control="negative")
+        id="external_negative_control_qc_fail",
+        name="external_negative_control_qc_fail",
+        udfs=LimsUDF(control="negative"),
     )
 
     internal_negative_control_qc_fail = LimsSample(

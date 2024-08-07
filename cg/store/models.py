@@ -798,8 +798,6 @@ class Sample(Base, PriorityMixin):
         back_populates="sample", cascade="all, delete"
     )
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 

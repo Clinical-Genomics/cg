@@ -66,7 +66,7 @@ def test_get_quality_metrics(
         case=mutant_case_qc_pass,
         status_db=mutant_store,
         lims=mutant_lims,
-    )  # QualityMetrics:
+    )
 
     # THEN no errors are raised and the sample_results are created for each sample
     assert (

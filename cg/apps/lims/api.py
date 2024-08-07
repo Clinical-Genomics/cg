@@ -9,6 +9,7 @@ from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
+from cg.constants.constants import ControlOptions, CustomerId
 from cg.constants.lims import (
     MASTER_STEPS_UDFS,
     PROP2UDF,
@@ -486,7 +487,10 @@ class LimsAPI(Lims, OrderHandler):
         return input_amount
 
     def get_latest_artifact_for_sample(
-        self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
+        self,
+        process_type: LimsProcess,
+        sample_internal_id: str,
+        artifact_type: LimsArtifactTypes | None = LimsArtifactTypes.ANALYTE,
     ) -> Artifact:
         """Return latest artifact for a given sample, process and artifact type."""
 
@@ -503,21 +507,26 @@ class LimsAPI(Lims, OrderHandler):
     def get_internal_negative_control_id_from_sample_in_pool(
         self, sample_internal_id: str, pooling_step: LimsProcess
     ) -> str:
-        """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+        """Retrieve from LIMS the sample ID for the internal negative control sample present in the same pool as the given sample."""
         artifact: Artifact = self.get_latest_artifact_for_sample(
             process_type=pooling_step,
-            artifact_type=LimsArtifactTypes.ANALYTE,
             sample_internal_id=sample_internal_id,
         )
-        samples = artifact.samples
+        negative_controls: list[LimsSample] = self._get_negative_controls_from_list(
+            samples=artifact.samples
+        )
 
-        negative_controls: list = self._get_negative_controls_from_list(samples=samples)
+        if not negative_controls:
+            raise LimsDataError(
+                f"No internal negative controls found in the pool of sample {sample_internal_id}"
+            )
 
         if len(negative_controls) > 1:
             sample_ids = [sample.id for sample in negative_controls]
             raise LimsDataError(
-                f"Several internal negative control samples found: {' '.join(sample_ids)}"
+                f"Multiple internal negative control samples found: {' '.join(sample_ids)}"
             )
+
         return negative_controls[0].id
 
     @staticmethod
@@ -525,6 +534,9 @@ class LimsAPI(Lims, OrderHandler):
         """Filter and return a list of internal negative controls from a given sample list."""
         negative_controls = []
         for sample in samples:
-            if sample.udfs.control == "negative" and sample.udfs.customer == "cust000":
+            if (
+                sample.udfs.control == ControlOptions.Negative
+                and sample.udfs.customer == CustomerId.CG_INTERNAL_CUSTOMER
+            ):
                 negative_controls.append(sample)
         return negative_controls

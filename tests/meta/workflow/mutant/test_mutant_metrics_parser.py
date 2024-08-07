@@ -32,8 +32,11 @@ def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
 
     # THEN the correct associations are present in the dict
     assert len(sample_name_to_id_mapping) == 2
-    assert sample_name_to_id_mapping["23CS503186"] == "sample_qc_pass"
-    assert sample_name_to_id_mapping["0PROVSEK"] == "external_negative_control_qc_pass"
+    assert sample_name_to_id_mapping["sample_qc_pass"] == "sample_qc_pass"
+    assert (
+        sample_name_to_id_mapping["external_negative_control_qc_pass"]
+        == "external_negative_control_qc_pass"
+    )
 
 
 def test__get_samples_results(
