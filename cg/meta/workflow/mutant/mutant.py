@@ -57,7 +57,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_case_results_file_path(self, case: Case) -> Path:
         case_output_path: Path = self.get_case_output_path(case.internal_id)
-        return Path(case_output_path.as_posix, f"/sars-cov-2_{case.latest_ticket}_results.csv")
+        return Path(case_output_path, f"/sars-cov-2_{case.latest_ticket}_results.csv")
 
     def get_case_fastq_dir(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "fastq")
@@ -300,7 +300,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_qc_result(self, case: Case) -> QualityResult:
         case_path: Path = self.get_case_path(case.internal_id)
         case_results_file_path: Path = self.get_case_results_file_path(case.internal_id)
-        qc_result: QualityResult = self.quality_checker.quality_control(
+        qc_result: QualityResult = self.quality_checker.get_quality_control_result(
             case=case, case_path=case_path, case_results_file_path=case_results_file_path
         )
         return qc_result

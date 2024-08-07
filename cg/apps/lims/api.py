@@ -498,10 +498,10 @@ class LimsAPI(Lims, OrderHandler):
             type=artifact_type,
             samplelimsid=sample_internal_id,
         )
-        try:
-            return artifacts[0]
-        except IndexError as error:
-            raise LimsDataError() from error
+
+        if not artifacts:
+            raise LimsDataError(f"No artifacts were found for process {process_type}, type {artifact_type} and sample {sample_internal_id}.")
+        return artifacts[0]
 
     def get_internal_negative_control_id_from_sample_in_pool(
         self, sample_internal_id: str, pooling_step: LimsProcess

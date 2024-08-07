@@ -112,8 +112,8 @@ class MutantQualityController:
             external_negative_control=external_negative_control_quality_metrics,
         )
 
+    @staticmethod
     def _get_sample_quality_results(
-        self,
         sample: Sample,
         sample_results: SampleResults | None = None,
         external_negative_control: bool = False,
@@ -174,7 +174,8 @@ class MutantQualityController:
         log_case_result(result)
         return result
 
-    def _samples_pass_qc(self, samples_quality_results: SamplesQualityResults) -> bool:
+    @staticmethod
+    def _samples_pass_qc(samples_quality_results: SamplesQualityResults) -> bool:
         return (
             samples_quality_results.failed_samples_count
             / samples_quality_results.total_samples_count

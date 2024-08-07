@@ -13,7 +13,7 @@ def str_to_bool(value: str) -> bool:
         return True
     elif value == "FALSE":
         return False
-    raise ValidationError
+    raise ValidationError(f"String {value} cannot be turned to bool.")
 
 
 class SampleResults(BaseModel):
