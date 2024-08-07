@@ -233,13 +233,10 @@ def mutant_results_file_path_qc_pass(mutant_analysis_dir_case_qc_pass: Path) -> 
 
 
 @pytest.fixture
-def mutant_raw_results_qc_pass(mutant_results_file_path_qc_pass: Path) -> list[dict[str, Any]]:
-    return MetricsParser._get_raw_results(results_file_path=mutant_results_file_path_qc_pass)
-
-
-@pytest.fixture
-def mutant_results_list_qc_pass(mutant_raw_results_qc_pass: list[dict[str, Any]]):
-    return MetricsParser._get_validated_results_list(raw_results=mutant_raw_results_qc_pass)
+def mutant_results_list_qc_pass(mutant_results_file_path_qc_pass: Path):
+    return MetricsParser._get_validated_results_list(
+        results_file_path=mutant_results_file_path_qc_pass
+    )
 
 
 @pytest.fixture

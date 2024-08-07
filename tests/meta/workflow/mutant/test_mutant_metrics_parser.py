@@ -4,20 +4,11 @@ from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.store.models import Case
 
 
-def test__get_raw_results(mutant_results_file_path_qc_pass: Path):
-    # GIVEN a path to a valid results file
-
-    # WHEN parsing the file
-    MetricsParser._get_raw_results(results_file_path=mutant_results_file_path_qc_pass)
-
-    # THEN no error is thrown
-
-
-def test__get_validated_results_list(mutant_raw_results_qc_pass):
+def test__get_validated_results_list(mutant_results_file_path_qc_pass: Path):
     # GIVEN a valid raw_results: list[dict[str, Any]] objects
 
     # WHEN parsing the file
-    MetricsParser._get_validated_results_list(raw_results=mutant_raw_results_qc_pass)
+    MetricsParser._get_validated_results_list(results_file_path=mutant_results_file_path_qc_pass)
 
     # THEN no error is thrown
 
