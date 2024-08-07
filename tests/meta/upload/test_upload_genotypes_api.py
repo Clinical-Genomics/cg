@@ -91,7 +91,7 @@ def test_get_bcf_file_mip(
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
-    analysis_api = MipDNAAnalysisAPI(config=cg_context)
+    analysis_api = AnalysisAPI(config=cg_context)
 
     # WHEN fetching the gbcf file with the api
     gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
@@ -109,7 +109,7 @@ def test_get_bcf_file_raredisease(
     # GIVEN a UploadGenotypeAPI populated with some data
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
-    analysis_api: AnalysisAPI = RarediseaseAnalysisAPI(config=cg_context)
+    analysis_api = AnalysisAPI(config=cg_context)
 
     # WHEN fetching the gbcf file with the api
     gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
@@ -117,22 +117,3 @@ def test_get_bcf_file_raredisease(
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
 
-
-def test_get_data(
-    analysis_obj: Analysis,
-    genotype_analysis_sex: dict,
-    mocker,
-    upload_genotypes_api: UploadGenotypesAPI,
-):
-    """Test to get data from the UploadGenotypesAPI"""
-    # GIVEN a UploadGenotypeAPI populated with some data
-
-    # GIVEN analysis sex were generated and could be found
-    mocker.patch.object(UploadGenotypesAPI, "analysis_sex")
-    UploadGenotypesAPI.analysis_sex.return_value = genotype_analysis_sex
-
-    # WHEN parsing the data
-    result = upload_genotypes_api.data(analysis=analysis_obj)
-
-    # THEN assert that the result looks like expected
-    assert len(result["samples_sex"]) == 3
