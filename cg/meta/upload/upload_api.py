@@ -44,7 +44,7 @@ class UploadAPI(MetaAPI):
     def update_uploaded_at(self, analysis: Analysis) -> None:
         """Updates the uploaded_at field with the current local date and time"""
 
-        analysis.uploaded_at: datetime = datetime.now()
+        analysis.uploaded_at = datetime.now()
 
         self.status_db.session.commit()
         self.trailblazer_api.set_analysis_uploaded(
