@@ -207,7 +207,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def _get_analysis_sex(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_data(qc_metrics_file)
         return str(
             next(
                 metric.value
@@ -217,7 +217,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
 
     @staticmethod
-    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsBase:
+    def _get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsBase:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics

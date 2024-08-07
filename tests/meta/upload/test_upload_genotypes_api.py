@@ -50,7 +50,7 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     # GIVEN an AnalysisAPI and qcmetrics data
 
     # WHEN fetching the predicted sex
-    metrics_object: MIPMetricsDeliverables = AnalysisAPI.get_parsed_qc_metrics_data(
+    metrics_object = MipDNAAnalysisAPI._get_parsed_qc_metrics_data(
         case_qc_metrics_deliverables
     )
 
@@ -63,7 +63,7 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Pa
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex
-    metrics_object: list[MetricsBase] = RarediseaseAnalysisAPI.get_parsed_qc_metrics_data(
+    metrics_object: list[MetricsBase] = RarediseaseAnalysisAPI._get_parsed_qc_metrics_data(
         case_qc_metrics_deliverables
     )
 
