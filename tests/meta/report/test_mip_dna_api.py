@@ -18,7 +18,7 @@ def test_get_sample_metadata(
     expected_metadata = {
         "bait_set": NA_FIELD,
         "duplicates": "4.01",
-        "gender": REPORT_SEX.get(Sex.MALE),
+        "sex": REPORT_SEX.get(Sex.MALE),
         "initial_qc": REPORT_QC_FLAG.get(True),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",

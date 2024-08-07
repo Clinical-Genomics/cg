@@ -1,60 +1,60 @@
 - format: tsv
-  id: CASEID
-  path: PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.fusion-genes.txt
+  id: SAMPLEID
+  path: PATHTOCASE/fusioncatcher/SAMPLEID.fusioncatcher.fusion-genes.txt
   path_index: ~
   step: fusioncatcher
   tag: fusioncatcher
 - format: txt
-  id: CASEID
-  path: PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.summary.txt
+  id: SAMPLEID
+  path: PATHTOCASE/fusioncatcher/SAMPLEID.fusioncatcher.summary.txt
   path_index: ~
   step: fusioncatcher
   tag: fusioncatcher-summary
 - format: tsv
-  id: CASEID
-  path: PATHTOCASE/starfusion/CASEID.starfusion.fusion_predictions.tsv
+  id: SAMPLEID
+  path: PATHTOCASE/starfusion/SAMPLEID.starfusion.fusion_predictions.tsv
   path_index: ~
   step: star-fusion
   tag: star-fusion
 - format: tsv
-  id: CASEID
-  path: PATHTOCASE/arriba/CASEID.arriba.fusions.tsv
+  id: SAMPLEID
+  path: PATHTOCASE/arriba/SAMPLEID.arriba.fusions.tsv
   path_index: ~
   step: arriba
   tag: arriba
 - format: cram
   id: SAMPLEID
-  path: PATHTOCASE/cram_starfusion/CASEID.star_for_starfusion.Aligned.sortedByCoord.out.cram
+  path: PATHTOCASE/cram_starfusion/SAMPLEID.star_for_starfusion.Aligned.sortedByCoord.out.cram
   path_index: ~
   step: star-fusion
   tag: star-fusion-cram
 - format: cram
   id: SAMPLEID
-  path: PATHTOCASE/cram_starfusion/CASEID.star_for_starfusion.Aligned.sortedByCoord.out.cram.crai
+  path: PATHTOCASE/cram_starfusion/SAMPLEID.star_for_starfusion.Aligned.sortedByCoord.out.cram.crai
   path_index: ~
   step: star-fusion
   tag: star-fusion-cram-index
 - format: html
-  id: CASEID
-  path: PATHTOCASE/fusionreport/CASEID/CASEID_fusionreport_index.html
+  id: SAMPLEID
+  path: PATHTOCASE/fusionreport/SAMPLEID/SAMPLEID_fusionreport_index.html
   path_index: ~
   step: report
   tag: fusionreport
 - format: tsv
-  id: CASEID
-  path: PATHTOCASE/fusioninspector/CASEID.FusionInspector.fusions.tsv
+  id: SAMPLEID
+  path: PATHTOCASE/fusioninspector/SAMPLEID.FusionInspector.fusions.tsv
   path_index: ~
   step: report
   tag: fusioninspector
 - format: html
-  id: CASEID
-  path: PATHTOCASE/fusioninspector/CASEID.fusion_inspector_web.html
+  id: SAMPLEID
+  path: PATHTOCASE/fusioninspector/SAMPLEID.fusion_inspector_web.html
   path_index: ~
   step: report
   tag: fusioninspector-html
 - format: pdf
-  id: CASEID
-  path: PATHTOCASE/arriba_visualisation/CASEID_combined_fusions_arriba_visualisation.pdf
+  id: SAMPLEID
+  path: PATHTOCASE/arriba_visualisation/SAMPLEID_combined_fusions_arriba_visualisation.pdf
   path_index: ~
   step: arriba
   tag: arriba-visualisation
@@ -77,14 +77,14 @@
   step: software-versions
   tag: software-versions
 - format: vcf
-  id: CASEID
-  path: PATHTOCASE/vcf/CASEID_fusion_data.vcf.gz
+  id: SAMPLEID
+  path: PATHTOCASE/vcf/SAMPLEID_fusion_data.vcf.gz
   path_index: ~
   step: vcf-collect
   tag: vcf-fusion
 - format: tab
-  id: CASEID
-  path: PATHTOCASE/star_for_starfusion/CASEID.ReadsPerGene.out.tab
+  id: SAMPLEID
+  path: PATHTOCASE/star_for_starfusion/SAMPLEID.ReadsPerGene.out.tab
   path_index: ~
   step: star-align
   tag: star-align-gene-counts

@@ -1,5 +1,6 @@
 {% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/raredisease_qc_metrics.html" import raredisease_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/tomte_qc_metrics.html" import tomte_qc_metrics %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
@@ -16,6 +17,9 @@
     {% elif workflow == "mip-dna" %}
       <!-- MIP-DNA QC metrics -->
       {{ mip_dna_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "raredisease" %}
+      <!-- Raredisease QC metrics -->
+      {{ raredisease_qc_metrics(samples=case.samples) }}
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion QC metrics -->
       {{ rnafusion_qc_metrics(samples=case.samples) }}
@@ -40,7 +44,7 @@
         <th scope="col">{% if "balsamic" in workflow %} Analystyp {% endif %}</th>
         <th scope="col">{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} Panel of Normals {% endif %}</th>
         <th scope="col">{% if workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}</th>
-        <th scope="col">{% if workflow in ("mip-dna", "rnafusion", "tomte") %} Genpaneler {% endif %}</th>
+        <th scope="col">{% if workflow in ("mip-dna", "raredisease", "rnafusion", "tomte") %} Genpaneler {% endif %}</th>
       </tr>
     </thead>
     <tbody>
@@ -49,12 +53,14 @@
         <td>{{ workflow }} (v{{ case.data_analysis.workflow_version }})</td>
         <td>{{ case.data_analysis.genome_build }}</td>
         <td>{% if "balsamic" in workflow %} {{ case.data_analysis.type }} {% endif %}</td>
-        <td>{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} {{ case.data_analysis.pons }} {% endif %}</th>
+        <td>{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} {{ case.data_analysis.pons }} {% endif %}</td>
         <td class="text-start">{% if workflow in ("balsamic", "balsamic-umi") %} {{ case.data_analysis.variant_callers }} {% endif %}</td>
-        <td>{% if workflow in ("mip-dna", "rnafusion", "tomte") %} {{ case.data_analysis.panels }} {% endif %}</td>
+        <td>{% if workflow in ("mip-dna", "raredisease", "rnafusion", "tomte") %} {{ case.data_analysis.panels }} {% endif %}</td>
       </tr>
     </tbody>
   </table>
+	<!--Data analysis comment warning -->
+  {{ data_analysis_comment_alert(comment=case.data_analysis.comment) }}
   <!-- Data analysis alert component -->
   {{ data_analysis_alert(case=case) }}
 {% endmacro %}
@@ -92,4 +98,12 @@
       <a href="https://github.com/genomic-medicine-sweden/tomte" class="alert-link">https://github.com/genomic-medicine-sweden/tomte</a>.
     </div>
   {% endif %}
+{% endmacro %}
+
+{% macro data_analysis_comment_alert(comment) %}
+	{% if comment != "N/A" %}
+	  <div class="alert alert-warning" role="alert">
+	    {{ comment }}
+	  </div>
+	{% endif %}
 {% endmacro %}

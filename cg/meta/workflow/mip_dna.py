@@ -4,10 +4,11 @@ from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
+from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.store.models import CaseSample, Case
+from cg.store.models import Case, CaseSample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -94,3 +95,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             )
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return MIP DNA Scout upload case tags."""
+        return MIP_CASE_TAGS

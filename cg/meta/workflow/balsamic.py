@@ -11,6 +11,7 @@ from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
@@ -669,3 +670,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if case.non_tumour_samples and not case.tumour_samples:
             return True
         return False
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Balsamic Scout upload case tags."""
+        return BALSAMIC_CASE_TAGS
