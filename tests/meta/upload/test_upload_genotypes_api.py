@@ -25,7 +25,7 @@ def test_get_analysis_sex_mip(
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables)
+    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(qc_metrics_file=case_qc_metrics_deliverables, sample_id=)
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
@@ -34,13 +34,15 @@ def test_get_analysis_sex_mip(
 def test_get_analysis_sex_raredisease(
     case_qc_metrics_deliverables: Path,
     genotype_analysis_sex: dict,
+    raredisease_context: CGConfig,
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
-    # GIVEN an AnalysisAPI and some qcmetrics data
+    # GIVEN an analysis API
+    analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
 
     # WHEN fetching the predicted sex by the analysis
     sex: dict = RarediseaseAnalysisAPI._get_analysis_sex(
-        qc_metrics_file=case_qc_metrics_deliverables
+        qc_metrics_file=case_qc_metrics_deliverables, sample_id=analysis_api.sample_enough_reads
     )
 
     # THEN assert that the the predicted sex per sample_id is returned
