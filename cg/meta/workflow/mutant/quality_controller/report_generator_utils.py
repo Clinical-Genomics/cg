@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from cg.constants.constants import MutantQC
 from cg.io.json import write_json
-from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
     SamplesQualityResults,
@@ -10,7 +10,7 @@ from cg.meta.workflow.mutant.quality_controller.result_logger_utils import sampl
 
 
 def get_report_path(case_path: Path) -> Path:
-    return case_path.joinpath(QUALITY_REPORT_FILE_NAME)
+    return case_path.joinpath(MutantQC.QUALITY_REPORT_FILE_NAME)
 
 
 def write_report(
