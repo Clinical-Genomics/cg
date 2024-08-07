@@ -54,6 +54,10 @@ class CaseTags(BaseModel):
     vcf_mei_research: set[str] | None = Field(
         None, description="VCF with mobile element insertions, research"
     )
+    fraser_tsv: set[str] | None = Field(None, description="TSV with aberrant splicing, clinical")
+    outrider_tsv: set[str] | None = Field(
+        None, description="TSV with expression outliers, clinical"
+    )
 
 
 class SampleTags(BaseModel):

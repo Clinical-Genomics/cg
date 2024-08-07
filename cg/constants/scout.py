@@ -91,6 +91,8 @@ TOMTE_CASE_TAGS: dict[str, set[str]] = dict(
     delivery_report={HK_DELIVERY_REPORT_TAG},
     snv_research_vcf={AnalysisTag.RESEARCH, AnalysisTag.VCF, AnalysisTag.SNV},
     snv_vcf={AnalysisTag.CLINICAL, AnalysisTag.VCF, AnalysisTag.SNV},
+    fraser_tsv={AnalysisTag.CLINICAL, AnalysisTag.FRASER},
+    outrider_tsv={AnalysisTag.CLINICAL, AnalysisTag.OUTRIDER},
 )
 
 

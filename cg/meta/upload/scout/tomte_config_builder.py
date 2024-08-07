@@ -65,6 +65,8 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
         self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
         self.load_config.multiqc_rna = self.get_file_from_hk(self.case_tags.multiqc_rna)
+        self.load_config.fraser_tsv = self.get_file_from_hk(self.case_tags.fraser_tsv)
+        self.load_config.outrider_tsv = self.get_file_from_hk(self.case_tags.outrider_tsv)
 
     def include_sample_files(self, config_sample: ScoutRnaIndividual) -> None:
         """Include sample level files that are optional."""

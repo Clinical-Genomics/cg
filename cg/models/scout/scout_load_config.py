@@ -153,6 +153,8 @@ class RnafusionLoadConfig(ScoutLoadConfig):
 
 
 class TomteLoadConfig(ScoutLoadConfig):
+    fraser_tsv: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    outrider_tsv: Annotated[str | None, BeforeValidator(field_not_none)] = None
     multiqc_rna: str | None = None
     samples: list[ScoutRnaIndividual] = []
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None

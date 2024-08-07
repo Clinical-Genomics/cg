@@ -514,6 +514,16 @@ def tomte_analysis_hk_bundle_data(
                 "archive": False,
                 "tags": [AnalysisTag.CLINICAL, AnalysisTag.VCF, AnalysisTag.SNV],
             },
+            {
+                "path": str(tomte_analysis_dir / "fraser_top_hits_clinical.tsv"),
+                "archive": False,
+                "tags": [AnalysisTag.CLINICAL, AnalysisTag.FRASER],
+            },
+            {
+                "path": str(tomte_analysis_dir / "outrider_top_hits_clinical.tsv"),
+                "archive": False,
+                "tags": [AnalysisTag.CLINICAL, AnalysisTag.OUTRIDER],
+            },
         ],
     }
 

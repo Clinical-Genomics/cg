@@ -145,7 +145,7 @@ def test_generate_config_adds_case_paths(
 
 
 def test_generate_tomte_load_config(
-        tomte_analysis: Analysis,
+    tomte_analysis: Analysis,
     upload_tomte_analysis_scout_api: UploadScoutAPI,
     mocker: MockFixture,
 ):
@@ -157,7 +157,7 @@ def test_generate_tomte_load_config(
     # GIVEN an upload Scout API with some Tomte information
 
     # GIVEN a genome build
-    mocker.patch.object(TomteAnalysisAPI, "get_genome_build", return_value=GenomeVersion.hg19)
+    mocker.patch.object(TomteAnalysisAPI, "get_genome_build", return_value=GenomeVersion.HG19)
 
     # WHEN generating a load config
     config: ScoutLoadConfig = upload_tomte_analysis_scout_api.generate_config(
