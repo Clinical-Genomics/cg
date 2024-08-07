@@ -22,3 +22,10 @@ FORCE = click.option(
     is_flag=True,
     help="Override any warnings or confirmation prompts",
 )
+
+COMMENT = click.option(
+    "--comment",
+    type=str,
+    required=False,
+    help="A comment providing an explanation for the forced action",
+)

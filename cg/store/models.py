@@ -743,6 +743,7 @@ class Sample(Base, PriorityMixin):
     application_version: Mapped[ApplicationVersion] = orm.relationship(
         foreign_keys=[application_version_id]
     )
+    is_cancelled: Mapped[bool] = mapped_column(default=False, nullable=False)
     capture_kit: Mapped[Str64 | None]
     comment: Mapped[Text | None]
     control: Mapped[str | None] = mapped_column(

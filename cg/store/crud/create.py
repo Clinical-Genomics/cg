@@ -274,6 +274,7 @@ class CreateHandler(BaseHandler):
         primary: bool = False,
         uploaded: datetime = None,
         started_at: datetime = None,
+        comment: str | None = None,
         **kwargs,
     ) -> Analysis:
         """Build a new Analysis record."""
@@ -284,6 +285,7 @@ class CreateHandler(BaseHandler):
             is_primary=primary,
             uploaded_at=uploaded,
             started_at=started_at,
+            comment=comment,
             **kwargs,
         )
 
