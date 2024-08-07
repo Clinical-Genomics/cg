@@ -116,4 +116,3 @@ def test_get_bcf_file_raredisease(
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
-
