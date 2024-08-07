@@ -5,10 +5,7 @@ import logging
 
 import click
 
-from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.genotype import upload_genotypes
-from cg.cli.upload.gens import upload_to_gens
-from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -30,7 +27,7 @@ class RarediseaseUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
         ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         LOG.info(
-            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
         self.update_uploaded_at(analysis=analysis)
 

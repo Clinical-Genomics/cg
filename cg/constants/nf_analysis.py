@@ -14,6 +14,7 @@ class NfTowerStatus(StrEnum):
     CANCELLED: str = "CANCELLED"
     UNKNOWN: str = "UNKNOWN"
 
+RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "percent_duplicates": {"norm": "lt", "threshold": 20},
@@ -21,7 +22,7 @@ RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 26},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "PCT_EXC_ADAPTER": {"norm": "lt", "threshold": 0.0005},
-    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+    RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
 }
 
 RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {

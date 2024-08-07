@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from housekeeper.store.models import File
+from housekeeper.store.models import File, Version
 
 from cg.clients.chanjo2.models import (
     CoverageMetrics,
@@ -13,7 +13,8 @@ from cg.clients.chanjo2.models import (
     CoverageSample,
 )
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.constants import AnalysisType, FileFormat, GenomeVersion
+from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import (
     RAREDISEASE_METRIC_CONDITIONS,
@@ -23,15 +24,17 @@ from cg.constants.nf_analysis import (
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -155,7 +158,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+        metric_conditions[RAREDISEASE_PREDICTED_SEX_METRIC]["threshold"] = sample.sex
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
@@ -190,6 +193,37 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
             return None
 
-    def get_scout_upload_case_tags(self) -> dict:
+    def get_samples_sex(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
+        """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
+        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
+        samples_sex: dict[str, dict[str, str]] = {}
+        for case_sample in case.links:
+            sample_id: str = case_sample.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": case_sample.sample.sex,
+                "analysis": self._get_analysis_sex(qc_metrics_file, sample_id=sample_id),
+            }
+        return samples_sex
+
+    def _get_analysis_sex(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
+        """Return analysis sex for each sample of an analysis."""
+        qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        return str(
+            next(
+                metric.value
+                for metric in qc_metrics
+                if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id
+            )
+        )
+
+    @staticmethod
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsBase:
+        """Parse and return a QC metrics file."""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
+
+    def get_scout_upload_case_tags(self) -> dict[str, dict[str, str]]:
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS

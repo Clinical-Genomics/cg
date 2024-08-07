@@ -25,11 +25,10 @@ class UploadGenotypesAPI(object):
         self.hk = hk_api
         self.gt = gt_api
 
-    def data(self, analysis: Analysis) -> dict:
+    def get_gt_data(self, analysis: Analysis) -> dict:
         """Fetch data about an analysis to load genotypes.
 
         Returns: dict on form
-
         {
             "bcf": path_to_bcf,
             "samples_sex": [
@@ -39,13 +38,12 @@ class UploadGenotypesAPI(object):
                     }
             ]
         }
-
         """
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
         hk_bcf = AnalysisAPI.get_bcf_file(self, hk_version_obj=hk_version)
-        data = {"bcf": hk_bcf.full_path}
+        gt_data: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             analysis_api = BalsamicAnalysisAPI
         elif analysis.workflow == Workflow.MIP_DNA:
@@ -54,12 +52,13 @@ class UploadGenotypesAPI(object):
             analysis_api = RarediseaseAnalysisAPI
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
-        data["samples_sex"] = analysis_api._get_samples_sex(case_obj=analysis.case, hk_version=hk_version)
-        return data
+        gt_data["samples_sex"] = analysis_api.get_samples_sex(case_obj=analysis.case, hk_version=hk_version)
+        return gt_data
 
-    def upload(self, data: dict, replace: bool = False):
+    def upload(self, gt_data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
-        self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
+        self.gt.upload(str(gt_data["bcf"]), gt_data["samples_sex"], force=replace)
+
 
     @staticmethod
     def is_suitable_for_genotype_upload(case_obj: Case) -> bool:
