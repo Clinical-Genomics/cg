@@ -154,7 +154,7 @@ class SubjectIdSameAsSampleNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the sample name"
 
-      
+
 class InvalidConcentrationIfSkipRCError(CaseSampleError):
     def __init__(self, case_name: str, sample_name: str, allowed_interval: tuple[int, int]):
         field: str = "concentration_ng_ul"
@@ -165,7 +165,7 @@ class InvalidConcentrationIfSkipRCError(CaseSampleError):
             case_name=case_name, sample_name=sample_name, field=field, message=message
         )
 
-        
+
 class WellPositionMissingError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well position is required for well plates"

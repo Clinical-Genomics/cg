@@ -187,8 +187,8 @@ def sample_with_invalid_concentration():
     sample: TomteSample = create_sample(1)
     sample.concentration_ng_ul = 1
     return sample
-  
-  
+
+
 def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
@@ -215,6 +215,7 @@ def order_with_invalid_concentration(sample_with_invalid_concentration) -> Tomte
     order.skip_reception_control = True
     return order
 
+
 @pytest.fixture
 def sample_with_missing_container_name() -> TomteSample:
     sample: TomteSample = create_sample(1)
@@ -225,4 +226,3 @@ def sample_with_missing_container_name() -> TomteSample:
 @pytest.fixture
 def tomte_validation_service(base_store: Store) -> TomteValidationService:
     return TomteValidationService(base_store)
-
