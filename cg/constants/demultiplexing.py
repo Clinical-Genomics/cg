@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from pydantic import BaseModel
 
