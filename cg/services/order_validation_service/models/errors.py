@@ -19,10 +19,10 @@ class CaseSampleError(CaseError, SampleError):
 
 
 class ValidationErrors(BaseModel):
-    order_errors: list[OrderError] | None = None
-    case_errors: list[CaseError] | None = None
-    sample_errors: list[SampleError] | None = None
-    case_sample_errors: list[CaseSampleError] | None = None
+    order_errors: list[OrderError] = []
+    case_errors: list[CaseError] = []
+    sample_errors: list[SampleError] = []
+    case_sample_errors: list[CaseSampleError] = []
 
 
 class UserNotAssociatedWithCustomerError(OrderError):
