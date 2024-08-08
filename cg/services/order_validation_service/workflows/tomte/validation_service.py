@@ -16,9 +16,6 @@ from cg.services.order_validation_service.utils import (
     convert_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.validation.field.model_validator import (
-    TomteModelValidator,
-)
 from cg.services.order_validation_service.workflows.tomte.validation_rules import (
     TOMTE_CASE_RULES,
     TOMTE_CASE_SAMPLE_RULES,
@@ -34,7 +31,7 @@ class TomteValidationService(OrderValidationService):
 
     def validate(self, order_json: str) -> ValidationErrors:
         try:
-            order: TomteOrder = TomteModelValidator.validate(order_json)
+            order = TomteOrder.model_validate_json(order_json)
         except ValidationError as error:
             return convert_errors(error.errors())
 
