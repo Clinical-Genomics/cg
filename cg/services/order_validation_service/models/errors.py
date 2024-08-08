@@ -1,5 +1,10 @@
 from pydantic import BaseModel
 
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
+
 
 class OrderError(BaseModel):
     field: str
@@ -167,4 +172,4 @@ class ContainerNameMissingError(CaseSampleError):
 
 class InvalidVolumeError(CaseSampleError):
     field: str = "volume"
-    message: str = "Volume must be between 20-130 μL"
+    message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
