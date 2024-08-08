@@ -15,13 +15,13 @@
       {% endif %}
       {% if scout_files.fraser_tsv != "N/A" %}
         <tr>
-          <th scope="row">Aberrant splicing</th>
+          <th scope="row">Kliniskt avvikande splitsningar</th>
           <td>{{ scout_files.fraser_tsv.replace(case_id, case_name) }}</td>
         </tr>
       {% endif %}
       {% if scout_files.outrider_tsv != "N/A" %}
         <tr>
-          <th scope="row">Expression Outliers</th>
+          <th scope="row">Kliniskt avvikande genuttryck</th>
           <td>{{ scout_files.outrider_tsv.replace(case_id, case_name) }}</td>
         </tr>
       {% endif %}
