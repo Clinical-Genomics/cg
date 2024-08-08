@@ -64,7 +64,7 @@ class OrdersAPI:
         super().__init__()
         self.lims = lims
         self.status = status
-        self.ticket_handler: TicketHandler = TicketHandler(
+        self.ticket_handler = TicketHandler(
             osticket_api=osticket, freshdesk_client=freshdesk_client, status_db=status
         )
 
