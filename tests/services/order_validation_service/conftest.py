@@ -10,6 +10,9 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
+from cg.services.order_validation_service.workflows.tomte.validation_service import (
+    TomteValidationService,
+)
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -19,6 +22,7 @@ def create_sample(id: int) -> TomteSample:
         name=f"name{id}",
         application="RNAPOAR100",
         container=ContainerEnum.plate,
+        container_name="ContainerName",
         require_qc_ok=True,
         reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
@@ -179,10 +183,15 @@ def order_with_siblings_as_parents():
     return create_order([case])
 
 
-@pytest.fixture
 def sample_with_invalid_concentration():
     sample: TomteSample = create_sample(1)
     sample.concentration_ng_ul = 1
+    return sample
+  
+  
+def sample_with_missing_well_position():
+    sample = create_sample(1)
+    sample.well_position = None
     return sample
 
 
@@ -205,3 +214,15 @@ def order_with_invalid_concentration(sample_with_invalid_concentration) -> Tomte
     order = create_order([case])
     order.skip_reception_control = True
     return order
+
+@pytest.fixture
+def sample_with_missing_container_name() -> TomteSample:
+    sample: TomteSample = create_sample(1)
+    sample.container_name = None
+    return sample
+
+
+@pytest.fixture
+def tomte_validation_service(base_store: Store) -> TomteValidationService:
+    return TomteValidationService(base_store)
+
