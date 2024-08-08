@@ -2,10 +2,14 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
-from cg.store.store import Store
 
 
-def test_valid_order(valid_order: TomteOrder, base_store: Store):
-    tomte_validation_service = TomteValidationService(store=base_store)
+def test_valid_order(valid_order: TomteOrder, tomte_validation_service: TomteValidationService):
+
+    # GIVEN a valid order
+
+    # WHEN validating the order
     errors = tomte_validation_service.validate(valid_order.model_dump_json())
+
+    # THEN no errors should be raised
     assert not errors
