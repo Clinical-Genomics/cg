@@ -197,6 +197,7 @@ class FOHMUploadAPI:
         """Hardlink samples raw data files to FOHM delivery folder."""
         for report in reports:
             for sample_id in report.internal_id:
+                print(sample_id)
                 sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
                 bundle_name: str = sample.links[0].case.internal_id
                 version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
