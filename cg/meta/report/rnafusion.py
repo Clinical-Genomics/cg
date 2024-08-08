@@ -23,7 +23,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
+from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Case, Sample

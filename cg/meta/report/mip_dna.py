@@ -23,7 +23,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
+from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
