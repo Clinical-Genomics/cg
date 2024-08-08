@@ -183,12 +183,14 @@ def order_with_siblings_as_parents():
     return create_order([case])
 
 
+@pytest.fixture
 def sample_with_invalid_concentration():
     sample: TomteSample = create_sample(1)
     sample.concentration_ng_ul = 1
     return sample
 
 
+@pytest.fixture
 def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
