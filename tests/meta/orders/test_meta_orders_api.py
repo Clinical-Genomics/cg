@@ -46,7 +46,7 @@ def monkeypatch_process_lims(monkeypatch, order_data):
         )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail):
+def mock_freshdesk_ticket_creation(mock_create_ticket: patch, ticket_id: str, user_mail: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
         id=ticket_id,
@@ -77,8 +77,6 @@ def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail):
     ],
 )
 def test_submit(
-    mock_create_ticket,
-    mail_patch,
     all_orders_to_submit: dict,
     base_store: Store,
     monkeypatch,
@@ -90,29 +88,29 @@ def test_submit(
 ):
     with patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None), patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ):
+    ) as mock_create_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
 
-    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    monkeypatch_process_lims(monkeypatch, order_data)
+        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+        monkeypatch_process_lims(monkeypatch, order_data)
 
-    # GIVEN an order and an empty store
-    assert not base_store._get_query(table=Sample).first()
+        # GIVEN an order and an empty store
+        assert not base_store._get_query(table=Sample).first()
 
-    # WHEN submitting the order
-    result = orders_api.submit(
-        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
-    )
+        # WHEN submitting the order
+        result = orders_api.submit(
+            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+        )
 
-    # THEN the result should contain the ticket number for the order
-    for record in result["records"]:
-        if isinstance(record, Pool):
-            assert record.ticket == ticket_id
-        elif isinstance(record, Sample):
-            assert record.original_ticket == ticket_id
-        elif isinstance(record, Case):
-            for link_obj in record.links:
-                assert link_obj.sample.original_ticket == ticket_id
+        # THEN the result should contain the ticket number for the order
+        for record in result["records"]:
+            if isinstance(record, Pool):
+                assert record.ticket == ticket_id
+            elif isinstance(record, Sample):
+                assert record.original_ticket == ticket_id
+            elif isinstance(record, Case):
+                for link_obj in record.links:
+                    assert link_obj.sample.original_ticket == ticket_id
 
 
 @pytest.mark.parametrize(
@@ -386,7 +384,7 @@ def test_validate_sex_inconsistent_sex(
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
-    # WHEN calling _validate_sex
+    # WHEN calling _validate_subject_sex
     # THEN an OrderError should be raised on non-matching sex
     with pytest.raises(OrderError):
         submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
@@ -447,7 +445,7 @@ def test_validate_sex_unknown_existing_sex(
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
-    # WHEN calling _validate_sex
+    # WHEN calling _validate_subject_sex
     submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
@@ -480,7 +478,7 @@ def test_validate_sex_unknown_new_sex(
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
-    # WHEN calling _validate_sex
+    # WHEN calling _validate_subject_sex
     submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
