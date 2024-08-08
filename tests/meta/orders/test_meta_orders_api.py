@@ -2,7 +2,6 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-
 from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
@@ -36,7 +35,10 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
-def monkeypatch_process_lims(monkeypatch, order_data):
+def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order_data: OrderIn):
+    """
+    Helper function to mock LIMS processing.
+    """
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
     for submitter in SUBMITTERS:
@@ -79,7 +81,7 @@ def mock_freshdesk_ticket_creation(mock_create_ticket: patch, ticket_id: str, us
 def test_submit(
     all_orders_to_submit: dict,
     base_store: Store,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     ticket_id: str,
@@ -150,7 +152,7 @@ def test_submit_ticketexception(
 )
 def test_submit_illegal_sample_customer(
     all_orders_to_submit: dict,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
@@ -251,7 +253,7 @@ def test_submit_scout_legal_sample_customer(
 )
 def test_submit_duplicate_sample_case_name(
     all_orders_to_submit: dict,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     ticket_id: str,
@@ -537,7 +539,7 @@ def test_submit_unique_sample_name(
 def test_sarscov2_submit_duplicate_sample_name(
     all_orders_to_submit: dict,
     helpers: StoreHelpers,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     user_mail: str,
