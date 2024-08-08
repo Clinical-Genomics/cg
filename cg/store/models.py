@@ -743,6 +743,7 @@ class Sample(Base, PriorityMixin):
     application_version: Mapped[ApplicationVersion] = orm.relationship(
         foreign_keys=[application_version_id]
     )
+    is_cancelled: Mapped[bool] = mapped_column(default=False, nullable=False)
     capture_kit: Mapped[Str64 | None]
     comment: Mapped[Text | None]
     control: Mapped[str | None] = mapped_column(
@@ -1088,7 +1089,8 @@ class PacBioSequencingRun(InstrumentRun):
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
-    movie_time_hours: Mapped[int]
+    started_at: Mapped[datetime | None]
+    completed_at: Mapped[datetime | None]
     movie_name: Mapped[Str32]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]

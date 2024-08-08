@@ -1,17 +1,11 @@
 import json
 import logging
 import tempfile
-from functools import wraps
 from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
-import cachecontrol
-import requests
-from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import exceptions
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token
+from flask import Blueprint, abort, g, jsonify, make_response, request
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -23,11 +17,9 @@ from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
-    CaseNotFoundError,
     OrderError,
     OrderExistsError,
     OrderFormError,
-    OrderMismatchError,
     OrderNotDeliverableError,
     OrderNotFoundError,
     TicketCreationError,
@@ -37,86 +29,39 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
+from cg.server.dto.sequencing_metrics.sequencing_metrics_request import (
+    SequencingMetricsRequest,
+)
+from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationLimitations,
-    Case,
     Customer,
     IlluminaSampleSequencingMetrics,
     Pool,
     Sample,
-    User,
 )
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
-
-
-session = requests.session()
-cached_session = cachecontrol.CacheControl(session)
-
-
-def verify_google_token(token):
-    request = google_requests.Request(session=cached_session)
-    return id_token.verify_oauth2_token(id_token=token, request=request)
-
-
-def is_public(route_function):
-    @wraps(route_function)
-    def public_endpoint(*args, **kwargs):
-        return route_function(*args, **kwargs)
-
-    public_endpoint.is_public = True
-    return public_endpoint
-
-
-@BLUEPRINT.before_request
-def before_request():
-    """Authorize API routes with JSON Web Tokens."""
-    if not request.is_secure:
-        return abort(
-            make_response(jsonify(message="Only https requests accepted"), HTTPStatus.FORBIDDEN)
-        )
-
-    if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), HTTPStatus.NO_CONTENT)
-
-    endpoint_func = current_app.view_functions[request.endpoint]
-    if getattr(endpoint_func, "is_public", None):
-        return
-
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        return abort(
-            make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    jwt_token = auth_header.split("Bearer ")[-1]
-    try:
-        user_data = verify_google_token(jwt_token)
-    except (exceptions.OAuthError, ValueError) as e:
-        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
-        return abort(
-            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    user: User = db.get_user_by_email(user_data["email"])
-    if user is None or not user.order_portal_login:
-        message = f"{user_data['email']} doesn't have access"
-        LOG.error(message)
-        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
-
-    g.current_user = user
+BLUEPRINT.before_request(before_request)
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -180,101 +125,6 @@ def submit_order(order_type):
         return abort(make_response(jsonify(message=error_message), http_error_response))
 
 
-@BLUEPRINT.route("/cases")
-def get_cases():
-    """Return cases with links for a customer from the database."""
-    enquiry: str = request.args.get("enquiry")
-    action: str = request.args.get("action")
-
-    customers: list[Customer] = _get_current_customers()
-    cases: list[Case] = _get_cases(enquiry=enquiry, action=action, customers=customers)
-
-    nr_cases: int = len(cases)
-    cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=cases_with_links, total=nr_cases)
-
-
-def _get_current_customers() -> list[Customer] | None:
-    """Return customers if the current user is not an admin."""
-    return g.current_user.customers if not g.current_user.is_admin else None
-
-
-def _get_cases(
-    enquiry: str | None, action: str | None, customers: list[Customer] | None
-) -> list[Case]:
-    """Get cases based on the provided filters."""
-    return db.get_cases_by_customers_action_and_case_search(
-        case_search=enquiry,
-        customers=customers,
-        action=action,
-    )
-
-
-@BLUEPRINT.route("/cases/<case_id>")
-def parse_case(case_id):
-    """Return a case with links."""
-    case: Case = db.get_case_by_internal_id(internal_id=case_id)
-    if case is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
-
-
-@BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
-def get_cases_delivery_message():
-    delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
-    try:
-        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
-            delivery_message_request
-        )
-        return jsonify(response.model_dump()), HTTPStatus.OK
-    except (CaseNotFoundError, OrderMismatchError) as error:
-        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
-
-
-@BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
-def get_case_delivery_message(case_id: str):
-    delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
-    try:
-        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
-            delivery_message_request
-        )
-        return jsonify(response.model_dump()), HTTPStatus.OK
-    except CaseNotFoundError as error:
-        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
-
-
-@BLUEPRINT.route("/families_in_collaboration")
-def parse_families_in_collaboration():
-    """Return cases in collaboration."""
-
-    customer_internal_id = request.args.get("customer")
-    workflow = request.args.get("data_analysis")
-    case_search_pattern = request.args.get("enquiry")
-
-    customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
-
-    cases = db.get_cases_by_customer_workflow_and_case_search(
-        customer=customer, workflow=workflow, case_search=case_search_pattern
-    )
-
-    case_dicts = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=case_dicts, total=len(cases))
-
-
-@BLUEPRINT.route("/families_in_collaboration/<family_id>")
-def parse_family_in_collaboration(family_id):
-    """Return a family with links."""
-    case: Case = db.get_case_by_internal_id(internal_id=family_id)
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    if case.customer not in customer.collaborators:
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
-
-
 @BLUEPRINT.route("/samples")
 def parse_samples():
     """Return samples."""
@@ -293,20 +143,6 @@ def parse_samples():
         samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
             pattern=request.args.get("enquiry"), customers=customers
         )
-    limit = int(request.args.get("limit", 50))
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_samples, total=len(samples))
-
-
-@BLUEPRINT.route("/samples_in_collaboration")
-def parse_samples_in_collaboration():
-    """Return samples in a customer group."""
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-        pattern=request.args.get("enquiry"), customers=customer.collaborators
-    )
     limit = int(request.args.get("limit", 50))
     parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
     return jsonify(samples=parsed_samples, total=len(samples))

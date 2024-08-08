@@ -7,7 +7,11 @@ import requests
 from pytest_mock import MockFixture
 
 from cg.clients.chanjo2.client import Chanjo2APIClient
-from cg.clients.chanjo2.models import CoverageMetrics, CoveragePostRequest, CoveragePostResponse
+from cg.clients.chanjo2.models import (
+    CoverageMetrics,
+    CoveragePostRequest,
+    CoveragePostResponse,
+)
 from cg.exc import Chanjo2RequestError, Chanjo2ResponseError
 
 

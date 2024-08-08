@@ -1,6 +1,7 @@
 """Module for the HiSeq2500 sequencing times service."""
 
 from datetime import datetime
+
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
     SequencingTimesService,
