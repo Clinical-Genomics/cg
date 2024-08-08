@@ -1,11 +1,11 @@
 from datetime import datetime
 
 import pytest
+
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.file_parsing.sequencing_times.hiseq_2500_sequencing_times_service import (
     Hiseq2500SequencingTimesService,
 )
-
 from cg.services.illumina.file_parsing.sequencing_times.hiseq_x_sequencing_times_service import (
     HiseqXSequencingTimesService,
 )
@@ -16,7 +16,7 @@ from cg.services.illumina.file_parsing.sequencing_times.novaseq_x_sequencing_tim
     NovaseqXSequencingTimesService,
 )
 from cg.utils.files import get_source_modified_time_stamp
-from cg.utils.time import format_time_from_string, format_time_from_ctime
+from cg.utils.time import format_time_from_ctime, format_time_from_string
 
 
 @pytest.fixture
