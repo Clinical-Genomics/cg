@@ -28,7 +28,13 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -49,13 +55,21 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
+from cg.models.raredisease.raredisease import (
+    RarediseaseParameters,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
+from cg.services.illumina.data_transfer.data_transfer_service import (
+    IlluminaDataTransferService,
+)
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -103,6 +117,8 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
     "tests.fixture_plugins.device_fixtures",
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
+    "tests.fixture_plugins.fohm.fohm_fixtures",
+    "tests.fixture_plugins.io.csv_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
@@ -1332,7 +1348,7 @@ def collaboration_id() -> str:
 
 
 @pytest.fixture
-def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
+def mip_dna_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
         name="Klinisk Immunologi",
@@ -1342,11 +1358,21 @@ def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
+def balsamic_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",
         internal_id=CustomerId.CUST110,
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture
+def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a customer with enabled observation upload."""
+    return Customer(
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
 

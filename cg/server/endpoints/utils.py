@@ -9,7 +9,6 @@ from google.auth import exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 
-
 from cg.server.ext import db
 from cg.store.models import User
 
