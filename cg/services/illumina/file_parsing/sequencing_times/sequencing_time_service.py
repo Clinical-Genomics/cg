@@ -1,6 +1,6 @@
 """Abstract class for the sequencing times service."""
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
