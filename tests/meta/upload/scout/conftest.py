@@ -488,7 +488,7 @@ def tomte_analysis_hk_bundle_data(
     tomte_analysis_dir: Path,
     delivery_report_html: Path,
 ) -> dict:
-    """Get some bundle data for Housekeeper."""
+    """Return Tomte Housekeeper bundle data."""
     return {
         "name": case_id,
         "created": timestamp,
