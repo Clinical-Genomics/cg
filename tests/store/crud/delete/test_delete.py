@@ -1,4 +1,10 @@
-from cg.store.models import Case, CaseSample, Sample, IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.models import (
+    Case,
+    CaseSample,
+    IlluminaFlowCell,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
 
 
