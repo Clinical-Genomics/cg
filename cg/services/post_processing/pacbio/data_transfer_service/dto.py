@@ -12,8 +12,8 @@ class PacBioSequencingRunDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
-    run_started_at: datetime
-    run_completed_at: datetime
+    started_at: datetime
+    completed_at: datetime
     hifi_reads: int
     hifi_yield: int
     hifi_mean_read_length: float
