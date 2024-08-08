@@ -92,17 +92,15 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(api.BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
-    app.register_blueprint(SAMPLES_BLUEPRINT)
-    app.register_blueprint(ORDERS_BLUEPRINT)
     app.register_blueprint(CASES_BLUEPRINT)
+    app.register_blueprint(ORDERS_BLUEPRINT)
+    app.register_blueprint(SAMPLES_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(api.BLUEPRINT)
-    ext.csrf.exempt(SAMPLES_BLUEPRINT)
     ext.csrf.exempt(CASES_BLUEPRINT)
     ext.csrf.exempt(ORDERS_BLUEPRINT)
-
-    _register_admin_views()
+    ext.csrf.exempt(SAMPLES_BLUEPRINT)
 
     @app.route("/")
     def index():
