@@ -1,13 +1,11 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
-from cg.meta.workflow.mutant.quality_controller.models import MutantPoolSamples, QualityMetrics
-from cg.meta.workflow.mutant.quality_controller.utils import (
-    get_mutant_pool_samples,
-    get_quality_metrics,
+from cg.meta.workflow.mutant.quality_controller.models import (
+    MutantPoolSamples,
+    QualityMetrics,
+    SampleResults,
 )
+from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
 from cg.store.models import Case, Sample
-from cg.store.store import Store
-from tests.mocks.limsmock import MockLimsAPI
 
 # TODO: Move this step to the lims api tests. Add the mutant pool to the conftest.
 # def test_test_get_internal_negative_control_id_from_lims(
@@ -28,16 +26,15 @@ from tests.mocks.limsmock import MockLimsAPI
 
 
 def test_get_mutant_pool_samples(
+    mutant_quality_controller: MutantQualityController,
     mutant_case_qc_pass: Case,
-    mutant_store: Store,
-    mutant_lims: MockLimsAPI,
     sample_qc_pass: Sample,
     external_negative_control_qc_pass: Sample,
     internal_negative_control_qc_pass: Sample,
 ):
     # WHEN creating a MutantPoolSamples object
-    mutant_pool_samples: MutantPoolSamples = get_mutant_pool_samples(
-        case=mutant_case_qc_pass, status_db=mutant_store, lims=mutant_lims
+    mutant_pool_samples: MutantPoolSamples = mutant_quality_controller._get_mutant_pool_samples(
+        case=mutant_case_qc_pass
     )
 
     # THEN the pool is created correctly:
@@ -51,21 +48,18 @@ def test_get_mutant_pool_samples(
 
 
 def test_get_quality_metrics(
-    mutant_results_file_path_qc_pass: Path,
+    mutant_quality_controller: MutantQualityController,
+    mutant_results_file_path_case_qc_pass: Path,
     mutant_case_qc_pass: Case,
-    mutant_store: Store,
-    mutant_lims: MockLimsAPI,
     mutant_sample_results_sample_qc_pass: SampleResults,
     sample_qc_pass: Sample,
 ):
     # GIVEN a case
 
     # WHEN generating the quality_metrics
-    quality_metrics: QualityMetrics = get_quality_metrics(
-        case_results_file_path=mutant_results_file_path_qc_pass,
+    quality_metrics: QualityMetrics = mutant_quality_controller._get_quality_metrics(
+        case_results_file_path=mutant_results_file_path_case_qc_pass,
         case=mutant_case_qc_pass,
-        status_db=mutant_store,
-        lims=mutant_lims,
     )
 
     # THEN no errors are raised and the sample_results are created for each sample

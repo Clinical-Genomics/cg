@@ -3,6 +3,7 @@ from pydantic import BaseModel, BeforeValidator, Field, ValidationError, ConfigD
 from cg.store.models import Sample
 
 
+# Validators
 def empty_str_to_none(value: str) -> str | None:
     if not isinstance(value, str):
         raise TypeError(f"Expected a string, but got {type(value).__name__}")
@@ -17,6 +18,7 @@ def str_to_bool(value: str) -> bool:
     raise ValidationError(f"String {value} cannot be turned to bool.")
 
 
+# Models
 class SampleResults(BaseModel):
     sample_name: str = Field(alias="Sample")
     selection: str = Field(alias="Selection")

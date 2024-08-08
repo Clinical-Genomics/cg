@@ -1,10 +1,10 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityResult,
     CaseQualityResult,
     QualityMetrics,
     SampleQualityResults,
+    SampleResults,
     SamplesQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.quality_controller import (
@@ -21,11 +21,11 @@ def test__get_sample_quality_results(
     # GIVEN a sample that passes qc and its corresponding SampleResults
 
     # WHEN peforming quality control on the sample
-    sample_quality_results_sample_qc_pass: SampleQualityResults = (
-        mutant_quality_controller._get_sample_quality_results(
-            sample=sample_qc_pass,
-            sample_results=mutant_sample_results_sample_qc_pass,
-        )
+    sample_quality_results_sample_qc_pass: (
+        SampleQualityResults
+    ) = mutant_quality_controller._get_sample_quality_results(
+        sample=sample_qc_pass,
+        sample_results=mutant_sample_results_sample_qc_pass,
     )
     # THEN the sample passes qc
     assert sample_quality_results_sample_qc_pass.passes_qc is True
@@ -38,10 +38,10 @@ def test__get_samples_quality_results(
     # GIVEN a quality metrics objrect from a case where all samples pass QC
 
     # WHEN performing quality control on all the samples
-    samples_quality_results: SamplesQualityResults = (
-        mutant_quality_controller._get_samples_quality_results(
-            quality_metrics=mutant_quality_metrics_qc_pass
-        )
+    samples_quality_results: (
+        SamplesQualityResults
+    ) = mutant_quality_controller._get_samples_quality_results(
+        quality_metrics=mutant_quality_metrics_qc_pass
     )
 
     # THEN no error is raised and the correct quality results are generated
@@ -71,8 +71,8 @@ def test__get_case_quality_result(
 def test_get_quality_control_result_case_qc_pass(
     mutant_quality_controller: MutantQualityController,
     mutant_case_qc_pass: Case,
-    mutant_analysis_dir_case_qc_pass: Path,
-    mutant_results_file_path_qc_pass: Path,
+    mutant_results_file_path_case_qc_pass: Path,
+    mutant_qc_report_path_case_qc_pass: Path,
 ):
     # GIVEN a case that passes QC
 
@@ -80,8 +80,8 @@ def test_get_quality_control_result_case_qc_pass(
 
     case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
         case=mutant_case_qc_pass,
-        case_path=mutant_analysis_dir_case_qc_pass,
-        case_results_file_path=mutant_results_file_path_qc_pass,
+        case_results_file_path=mutant_results_file_path_case_qc_pass,
+        case_qc_report_path=mutant_qc_report_path_case_qc_pass,
     )
 
     # THEN the case passes qc
@@ -93,8 +93,8 @@ def test_get_quality_control_result_case_qc_pass(
 def test_get_quality_control_result_case_qc_fail(
     mutant_quality_controller: MutantQualityController,
     mutant_case_qc_fail: Case,
-    mutant_analysis_dir_case_qc_fail: Path,
     mutant_results_file_path_qc_fail: Path,
+    mutant_qc_report_path_case_qc_fail: Path,
 ):
     # GIVEN a case that passes QC
 
@@ -102,8 +102,8 @@ def test_get_quality_control_result_case_qc_fail(
 
     case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
         case=mutant_case_qc_fail,
-        case_path=mutant_analysis_dir_case_qc_fail,
         case_results_file_path=mutant_results_file_path_qc_fail,
+        case_qc_report_path=mutant_qc_report_path_case_qc_fail,
     )
 
     # THEN the case passes qc
@@ -115,8 +115,8 @@ def test_get_quality_control_result_case_qc_fail(
 def test_get_quality_control_result_case_qc_fail_with_failing_controls(
     mutant_quality_controller: MutantQualityController,
     mutant_case_qc_fail_with_failing_controls: Case,
-    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
     mutant_results_file_path_qc_fail_with_failing_controls: Path,
+    mutant_qc_report_path_case_qc_fail_with_failing_controls: Path,
 ):
     # GIVEN a case that does not passe QC due to failing control samples
 
@@ -124,8 +124,8 @@ def test_get_quality_control_result_case_qc_fail_with_failing_controls(
 
     case_quality_result: QualityResult = mutant_quality_controller.get_quality_control_result(
         case=mutant_case_qc_fail_with_failing_controls,
-        case_path=mutant_analysis_dir_case_qc_fail_with_failing_controls,
         case_results_file_path=mutant_results_file_path_qc_fail_with_failing_controls,
+        case_qc_report_path=mutant_qc_report_path_case_qc_fail_with_failing_controls,
     )
 
     # THEN the case does not pass QC and the correct result is retrieved for the control samples

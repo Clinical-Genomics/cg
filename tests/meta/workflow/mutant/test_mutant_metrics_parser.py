@@ -1,14 +1,19 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import MetricsParser
-from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
+from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import (
+    _get_sample_name_to_id_mapping,
+    _get_samples_results,
+    _get_validated_results_list,
+    parse_samples_results,
+)
+from cg.meta.workflow.mutant.quality_controller.models import SampleResults
 from cg.store.models import Case, Sample
 
 
-def test__get_validated_results_list(mutant_results_file_path_qc_pass: Path):
+def test__get_validated_results_list(mutant_results_file_path_case_qc_pass: Path):
     # GIVEN a valid raw_results: list[dict[str, Any]] objects
 
     # WHEN parsing the file
-    MetricsParser._get_validated_results_list(results_file_path=mutant_results_file_path_qc_pass)
+    _get_validated_results_list(results_file_path=mutant_results_file_path_case_qc_pass)
 
     # THEN no error is thrown
 
@@ -17,7 +22,7 @@ def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
     # GIVEN a case
 
     # WHEN creating a sample_name_to_id_mapping dict
-    sample_name_to_id_mapping: dict[str, str] = MetricsParser._get_sample_name_to_id_mapping(
+    sample_name_to_id_mapping: dict[str, str] = _get_sample_name_to_id_mapping(
         case=mutant_case_qc_pass
     )
 
@@ -38,7 +43,7 @@ def test__get_samples_results(
     # GIVEN a case and corresponding results_list
 
     # WHEN creating a sample_name_to_id_mapping dict
-    samples_results: dict[str, SampleResults] = MetricsParser._get_samples_results(
+    samples_results: dict[str, SampleResults] = _get_samples_results(
         case=mutant_case_qc_pass, results_list=mutant_results_list_qc_pass
     )
 
@@ -47,12 +52,14 @@ def test__get_samples_results(
     assert isinstance(samples_results[sample_qc_pass.internal_id], SampleResults)
 
 
-def test_parse_samples_results(mutant_case_qc_pass: Case, mutant_results_file_path_qc_pass: Path):
+def test_parse_samples_results(
+    mutant_case_qc_pass: Case, mutant_results_file_path_case_qc_pass: Path
+):
     # GIVEN a case and a valid quality metrics file path
 
     # WHEN parsing the file
-    samples_results: dict[str, SampleResults] = MetricsParser.parse_samples_results(
-        case=mutant_case_qc_pass, results_file_path=mutant_results_file_path_qc_pass
+    samples_results: dict[str, SampleResults] = parse_samples_results(
+        case=mutant_case_qc_pass, results_file_path=mutant_results_file_path_case_qc_pass
     )
 
     # THEN no error is thrown and sample_qc_pass passes QC
