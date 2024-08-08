@@ -20,7 +20,7 @@ def log_results(
         case_message = get_case_fail_message(case_quality_result)
     LOG.warning(case_message)
 
-    samples_message = samples_results_message(samples_quality_results)
+    samples_message = get_samples_results_message(samples_quality_results)
     LOG.info(samples_message)
 
 
@@ -61,7 +61,7 @@ def get_case_fail_message(case_quality_result: CaseQualityResult) -> str:
     return fail_message + "\n".join(fail_reasons)
 
 
-def samples_results_message(samples_quality_results: SamplesQualityResults) -> str:
+def get_samples_results_message(samples_quality_results: SamplesQualityResults) -> str:
     internal_negative_control_message: str = "Internal negative control sample " + (
         "passed QC."
         if samples_quality_results.internal_negative_control.passes_qc

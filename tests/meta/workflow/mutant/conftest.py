@@ -3,7 +3,7 @@ import pytest
 
 from pathlib import Path
 
-from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
+from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import MetricsParser
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
 from cg.meta.workflow.mutant.quality_controller.models import QualityMetrics, SamplesQualityResults
 from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController

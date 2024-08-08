@@ -17,7 +17,7 @@
             "sample_id": "external_negative_control_qc_pass",
             "passes_qc": true,
             "passes_reads_threshold": true,
-            "passes_mutant_qc": null
+            "passes_mutant_qc": false
         },
         "samples": [
             {

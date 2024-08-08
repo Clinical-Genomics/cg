@@ -1,12 +1,16 @@
 from pathlib import Path
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
-from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
+from cg.constants.lims import LimsProcess
+from cg.exc import CgError
+from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import parse_samples_results
 from cg.meta.workflow.mutant.quality_controller.models import (
+    MutantPoolSamples,
     QualityMetrics,
     SampleQualityResults,
     CaseQualityResult,
     QualityResult,
+    SampleResults,
     SamplesQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator_utils import (
@@ -125,14 +129,18 @@ class MutantQualityController:
             internal_negative_control=internal_negative_control,
         )
 
-        if internal_negative_control or external_negative_control:
+        if internal_negative_control:
             sample_quality = SampleQualityResults(
                 sample_id=sample.internal_id,
                 passes_qc=sample_has_valid_total_reads,
                 passes_reads_threshold=sample_has_valid_total_reads,
             )
         else:
-            sample_passes_qc: bool = sample_has_valid_total_reads and sample_results.qc_pass
+            if external_negative_control:
+                sample_passes_qc: bool = sample_has_valid_total_reads and not sample_results.qc_pass
+            else:
+                sample_passes_qc: bool = sample_has_valid_total_reads and sample_results.qc_pass
+
             sample_quality = SampleQualityResults(
                 sample_id=sample.internal_id,
                 passes_qc=sample_passes_qc,
@@ -181,3 +189,65 @@ class MutantQualityController:
             / samples_quality_results.total_samples_count
             < MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD
         )
+
+    def get_internal_negative_control_id_for_case(self, case: Case) -> str:
+        """Query lims to retrive internal_negative_control_id for a mutant case sequenced in one pool."""
+
+        sample_internal_id = case.sample_ids[0]
+        internal_negative_control_id: str = (
+            self.lims.get_internal_negative_control_id_from_sample_in_pool(
+                sample_internal_id=sample_internal_id, pooling_step=LimsProcess.COVID_POOLING_STEP
+            )
+        )
+        return internal_negative_control_id
+
+    def get_internal_negative_control_sample_for_case(
+        self,
+        case: Case,
+    ) -> Sample:
+        internal_negative_control_id: str = self.get_internal_negative_control_id_for_case(
+            lims=self.lims, case=case
+        )
+        return self.status_db.get_sample_by_internal_id(internal_id=internal_negative_control_id)
+
+    def get_mutant_pool_samples(self, case: Case) -> MutantPoolSamples:
+        samples = []
+        external_negative_control = None
+
+        for sample in case.samples:
+            if sample.is_negative_control:
+                external_negative_control = sample
+                continue
+            samples.append(sample)
+
+        if not external_negative_control:
+            raise CgError(f"No external negative control sample found for case {case}.")
+
+        internal_negative_control: Sample = self.get_internal_negative_control_sample_for_case(
+            case=case
+        )
+
+        return MutantPoolSamples(
+            samples=samples,
+            external_negative_control=external_negative_control,
+            internal_negative_control=internal_negative_control,
+        )
+
+    def get_quality_metrics(self, case_results_file_path: Path, case: Case) -> QualityMetrics:
+        try:
+            samples_results: dict[str, SampleResults] = parse_samples_results(
+                case=case, results_file_path=case_results_file_path
+            )
+        except Exception as exception_object:
+            raise CgError(
+                f"Not possible to retrieve results for case {case}."
+            ) from exception_object
+
+        try:
+            samples: MutantPoolSamples = self.get_mutant_pool_samples(case=case)
+        except Exception as exception_object:
+            raise CgError(
+                f"Not possible to retrieve samples for case {case}."
+            ) from exception_object
+
+        return QualityMetrics(results=samples_results, pool=samples)

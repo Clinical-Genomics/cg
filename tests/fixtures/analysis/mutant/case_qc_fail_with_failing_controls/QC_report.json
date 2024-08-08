@@ -1,5 +1,5 @@
 {
-    "summary": "Case failed QC. Internal negative control sample failed QC. External negative control sample failed QC. Sample results: 1 total, 0 failed, 1 passed. QC report: tests/fixtures/analysis/mutant/case_qc_fail_with_failing_controls/QC_report.json",
+    "summary": "Case failed QC. Internal negative control sample failed QC. External negative control sample failed QC. Sample results: 1 total, 0 failed, 1 passed.",
     "case": {
         "passes_qc": false,
         "internal_negative_control_passes_qc": false,
@@ -17,7 +17,7 @@
             "sample_id": "external_negative_control_qc_fail",
             "passes_qc": false,
             "passes_reads_threshold": false,
-            "passes_mutant_qc": null
+            "passes_mutant_qc": false
         },
         "samples": [
             {

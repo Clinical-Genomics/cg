@@ -4,9 +4,12 @@ from cg.constants.constants import MutantQC
 from cg.io.json import write_json
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
+    Report,
     SamplesQualityResults,
 )
-from cg.meta.workflow.mutant.quality_controller.result_logger_utils import samples_results_message
+from cg.meta.workflow.mutant.quality_controller.result_logger_utils import (
+    get_samples_results_message,
+)
 
 
 def get_report_path(case_path: Path) -> Path:
@@ -25,13 +28,13 @@ def write_report(
         samples_quality_results=samples_quality_results,
         report_file_path=report_file_path,
     )
-    report_content = {
-        "summary": summary,
-        "case": case_quality_result.model_dump(),
-        "samples": samples_quality_results.model_dump(),
-    }
+    report = Report(
+        summary=summary,
+        case=case_quality_result.model_dump(),
+        samples=samples_quality_results.model_dump(),
+    )
 
-    write_json(file_path=report_file_path, content=report_content)
+    write_json(file_path=report_file_path, content=report.model_dump())
 
 
 def get_summary(
@@ -40,8 +43,8 @@ def get_summary(
     report_file_path: Path,
 ) -> str:
     case_summary: str = "Case passed QC. " if case_quality_result.passes_qc else "Case failed QC. "
-    sample_summary: str = samples_results_message(samples_quality_results=samples_quality_results)
+    sample_summary: str = get_samples_results_message(
+        samples_quality_results=samples_quality_results
+    )
     summary = case_summary + sample_summary
-    if not case_quality_result.passes_qc:
-        summary += f" QC report: {report_file_path}"
     return summary

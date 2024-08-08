@@ -8,6 +8,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
+from cg.meta.workflow.mutant.quality_controller.report_generator_utils import get_report_path
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.workflow.mutant.quality_controller.models import QualityResult
 from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
@@ -306,7 +307,12 @@ class MutantAnalysisAPI(AnalysisAPI):
         return qc_result
 
     def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:
-        self.trailblazer_api.add_comment(case_id=case.internal_id, comment=qc_result.summary)
+        case_path: Path = self.get_case_path(case.internal_id)
+        report_file_path: Path = get_report_path(case_path=case_path)
+
+        if not qc_result.passes_qc:
+            comment = qc_result.summary + f" QC report: {report_file_path}"
+        self.trailblazer_api.add_comment(case_id=case.internal_id, comment=comment)
 
     def fail_analysis(self, case: Case) -> None:
         """Fail analysis on TB and set case status to hold in StatusDB."""

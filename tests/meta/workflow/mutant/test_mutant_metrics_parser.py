@@ -1,7 +1,7 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
+from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import MetricsParser
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResults
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 
 
 def test__get_validated_results_list(mutant_results_file_path_qc_pass: Path):
@@ -31,16 +31,20 @@ def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
 
 
 def test__get_samples_results(
-    mutant_case_qc_pass: Case, mutant_results_list_qc_pass: list[SampleResults]
+    mutant_case_qc_pass: Case,
+    mutant_results_list_qc_pass: list[SampleResults],
+    sample_qc_pass: Sample,
 ):
     # GIVEN a case and corresponding results_list
 
     # WHEN creating a sample_name_to_id_mapping dict
-    MetricsParser._get_samples_results(
+    samples_results: dict[str, SampleResults] = MetricsParser._get_samples_results(
         case=mutant_case_qc_pass, results_list=mutant_results_list_qc_pass
     )
 
-    # THEN #TODO: Should I create a SampleResults object to assert if it is created correctly?
+    # THEN the samples_results object has the correct structure
+    assert isinstance(samples_results, dict)
+    assert isinstance(samples_results[sample_qc_pass.internal_id], SampleResults)
 
 
 def test_parse_samples_results(mutant_case_qc_pass: Case, mutant_results_file_path_qc_pass: Path):
