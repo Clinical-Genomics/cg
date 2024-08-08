@@ -2,16 +2,15 @@
 
 from datetime import datetime
 from pathlib import Path
-
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from xml.etree.ElementTree import ElementTree
 
 from cg.constants.demultiplexing import RunCompletionStatusNodes
 from cg.io.xml import read_xml
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
     SequencingTimesService,
 )
 from cg.utils.time import format_time_from_string
-from xml.etree.ElementTree import ElementTree
 
 
 class NovaseqXSequencingTimesService(SequencingTimesService):

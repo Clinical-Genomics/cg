@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from flask import Blueprint, abort, g, jsonify, make_response, request
-from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -32,21 +31,23 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
-from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import (
-    db,
-    delivery_message_service,
-    lims,
-    order_service,
-    osticket,
+from cg.server.dto.sequencing_metrics.sequencing_metrics_request import (
+    SequencingMetricsRequest,
 )
+from cg.server.endpoints.utils import before_request, is_public
+from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,

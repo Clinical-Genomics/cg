@@ -49,12 +49,6 @@ def yaml_stream() -> str:
 
 
 @pytest.fixture
-def csv_file_path(fixtures_dir: Path) -> Path:
-    """Return a file path to example CSV file."""
-    return Path(fixtures_dir, "io", "example.csv")
-
-
-@pytest.fixture
 def tsv_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example TSV file."""
     return Path(fixtures_dir, "io", "example.tsv")
@@ -88,18 +82,6 @@ def config_dict() -> dict:
 def txt_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing text files."""
     return Path(cg_dir, "write.txt")
-
-
-@pytest.fixture
-def csv_stream() -> str:
-    """Return string with CSV format."""
-    return """Lorem,ipsum,sit,amet"""
-
-
-@pytest.fixture
-def csv_temp_path(cg_dir: Path) -> Path:
-    """Return a temp file path to use when writing csv."""
-    return Path(cg_dir, "write.csv")
 
 
 @pytest.fixture
