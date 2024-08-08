@@ -196,20 +196,19 @@ class FOHMUploadAPI:
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
         for report in reports:
-            for sample_id in report.internal_id:
-                print(sample_id)
-                print(report)
-                sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-                bundle_name: str = sample.links[0].case.internal_id
-                version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-                files = self.housekeeper_api.files(version=version.id, tags={sample_id}).all()
-                for file in files:
-                    if self._dry_run:
-                        LOG.info(
-                            f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                        )
-                        continue
-                    shutil.copy(file.full_path, Path(self.daily_rawdata_path))
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=report.internal_id
+            )
+            bundle_name: str = sample.links[0].case.internal_id
+            version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+            files = self.housekeeper_api.files(version=version.id, tags={report.internal_id}).all()
+            for file in files:
+                if self._dry_run:
+                    LOG.info(
+                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                    )
+                    continue
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def create_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
