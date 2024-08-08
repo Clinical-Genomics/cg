@@ -36,7 +36,7 @@ class RarediseaseUploadAPI(UploadAPI):
 
         # Clinical delivery upload
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
-      
+
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
