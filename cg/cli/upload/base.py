@@ -83,9 +83,13 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = MipRNAUploadAPI(config_object)
         elif case.data_analysis == Workflow.MICROSALT:
             upload_api = MicrosaltUploadAPI(config_object)
-        elif case.data_analysis in Workflow.RAREDISEASE:
+        elif case.data_analysis == Workflow.RAREDISEASE:
             upload_api = RarediseaseUploadAPI(config_object)
-        elif case.data_analysis in {Workflow.RNAFUSION, Workflow.TOMTE, Workflow.TAXPROFILER}:
+        elif case.data_analysis in {
+            Workflow.RNAFUSION,
+            Workflow.TOMTE,
+            Workflow.TAXPROFILER,
+        }:
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
 
         context.obj.meta_apis["upload_api"] = upload_api

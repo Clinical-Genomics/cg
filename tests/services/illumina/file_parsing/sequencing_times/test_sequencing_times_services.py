@@ -3,8 +3,8 @@
 from datetime import datetime
 
 import pytest
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
     SequencingTimesService,
 )

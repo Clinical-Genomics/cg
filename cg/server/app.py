@@ -21,6 +21,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
     Order,
@@ -29,7 +30,6 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
-    IlluminaSampleSequencingMetrics,
 )
 
 
