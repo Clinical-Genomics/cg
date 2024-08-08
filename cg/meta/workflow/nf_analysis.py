@@ -745,7 +745,12 @@ class NfAnalysisAPI(AnalysisAPI):
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
-            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            samples = self.status_db.get_samples_by_case_id(case_id=case_id)
+            for sample in samples:
+                trailblazer_comment = str(error).replace(
+                    f"{sample.internal_id} - ", f"{sample.name} ({sample.internal_id}) - "
+                )
+            self.trailblazer_api.add_comment(case_id=case_id, comment=trailblazer_comment)
             raise MetricsQCError from error
         except CgError as error:
             LOG.error(f"Could not create metrics deliverables file: {error}")
