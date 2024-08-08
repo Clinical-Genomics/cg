@@ -12,11 +12,10 @@ from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
-from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.constants.constants import SARS_COV_REGEX
 from cg.constants.housekeeper_tags import FohmTag
 from cg.exc import CgError
-from cg.io.controller import ReadFile
-from cg.io.csv import write_csv_from_dict
+from cg.io.csv import read_csv, write_csv_from_dict
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
@@ -106,9 +105,7 @@ class FOHMUploadAPI:
     def get_reports_contents(file_paths: list[Path]) -> list[dict]:
         """Return a list of dicts with all CSV files reports."""
         csv_reports = [
-            ReadFile.get_content_from_file(
-                file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
-            )
+            read_csv(file_path=file_path, read_to_dict=True, ignore_suffix=True)
             for file_path in file_paths
         ]
         reports: list[dict] = []
@@ -196,18 +193,19 @@ class FOHMUploadAPI:
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
         for report in reports:
-            for sample_id in report.internal_id:
-                sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-                bundle_name: str = sample.links[0].case.internal_id
-                version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-                files = self.housekeeper_api.files(version=version.id, tags={sample_id}).all()
-                for file in files:
-                    if self._dry_run:
-                        LOG.info(
-                            f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                        )
-                        continue
-                    shutil.copy(file.full_path, Path(self.daily_rawdata_path))
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=report.internal_id
+            )
+            bundle_name: str = sample.links[0].case.internal_id
+            version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+            files = self.housekeeper_api.files(version=version.id, tags={report.internal_id}).all()
+            for file in files:
+                if self._dry_run:
+                    LOG.info(
+                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                    )
+                    continue
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def create_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
