@@ -150,29 +150,7 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
-RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
-    {HK_DELIVERY_REPORT_TAG},
-]
-
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {AlignmentFileTag.CRAM},
-    {AlignmentFileTag.CRAM_INDEX},
-    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
-    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
-    {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
-    {AnalysisTag.FUSIONCATCHER_SUMMARY},
-    {AnalysisTag.FUSIONINSPECTOR},
-    {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
-    {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
-    {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
-    {AnalysisTag.VCF_FUSION},
-    {AnalysisTag.GENE_COUNTS},
-]
-
-NF_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
-
-NF_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
+CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
@@ -207,21 +185,21 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.RNAFUSION: {
-        "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
-        "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
-    },
     Workflow.RAREDISEASE: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
+    },
+    Workflow.RNAFUSION: {
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
     Workflow.TAXPROFILER: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
     Workflow.TOMTE: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
 }
 
