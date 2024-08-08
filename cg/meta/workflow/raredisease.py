@@ -109,6 +109,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
             analysis_type=analysis_type,
             target_bed=Path(self.references, target_bed).as_posix(),
+            save_mapped_as_cram=True
         )
 
     @staticmethod
