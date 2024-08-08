@@ -1,10 +1,8 @@
-from functools import wraps
 from pathlib import Path
 from typing import Any, Type
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.exc import PacBioMetricsParsingError
 from cg.io.controller import ReadFile
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     BaseMetrics,

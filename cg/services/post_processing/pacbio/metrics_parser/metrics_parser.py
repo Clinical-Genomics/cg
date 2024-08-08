@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from pydantic_core._pydantic_core import ValidationError
+from pydantic import ValidationError
 
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import PostProcessingMetricsParser
 from cg.services.post_processing.error_handler import handle_post_processing_errors
 from cg.services.post_processing.exc import (
-    PostProcessingRunFileManagerError,
     PostProcessingParsingError,
+    PostProcessingRunFileManagerError,
 )
 from cg.services.post_processing.pacbio.metrics_parser.models import (
     ControlMetrics,

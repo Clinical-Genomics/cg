@@ -45,7 +45,7 @@ def expected_smrt_cell_bundle_name(
 
 
 @pytest.fixture
-def expexted_pac_bio_sample_name(
+def expected_pac_bio_sample_name(
     pac_bio_metrics_parser: PacBioMetricsParser, expected_pac_bio_run_data
 ):
     parsed_metrics: PacBioMetrics = pac_bio_metrics_parser.parse_metrics(expected_pac_bio_run_data)
