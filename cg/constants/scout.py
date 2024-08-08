@@ -134,6 +134,6 @@ RNAFUSION_SAMPLE_TAGS = dict(
 
 TOMTE_SAMPLE_TAGS = dict(
     alignment_file={AlignmentFileTag.CRAM},
-    splice_junctions_bed={"junction", "bed"},
-    rna_coverage_bigwig={"coverage", "bigwig"},
+    splice_junctions_bed={AnalysisTag.JUNCTION, AnalysisTag.BED},
+    rna_coverage_bigwig={AnalysisTag.COVERAGE, AnalysisTag.BIGWIG},
 )

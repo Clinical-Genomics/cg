@@ -64,7 +64,10 @@ class AnalysisTag(StrEnum):
 
     ARRIBA: str = "arriba"
     ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    BED: str = "bed"
+    BIGWIG: str = "bigwig"
     CLINICAL: str = "clinical"
+    COVERAGE: str = "coverage"
     FRASER: str = "fraser"
     FUSION: str = "fusion"
     FUSIONCATCHER: str = "fusioncatcher"
@@ -73,6 +76,7 @@ class AnalysisTag(StrEnum):
     FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
     FUSIONREPORT: str = "fusionreport"
     GENE_COUNTS: str = "gene-counts"
+    JUNCTION: str = "junction"
     MULTIQC_HTML: str = "multiqc-html"
     OUTRIDER: str = "outrider"
     RESEARCH: str = "research"
