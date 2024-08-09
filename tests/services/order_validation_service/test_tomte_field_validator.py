@@ -15,10 +15,38 @@ def test_valid_order_is_parsed(
     order, errors = tomte_model_validator.validate(order)
 
     # THEN the parsed order is returned
-    assert order is not None
+    assert order
 
     # THEN the errors are empty
     assert not errors.case_errors
     assert not errors.case_sample_errors
     assert not errors.order_errors
     assert not errors.sample_errors
+
+
+def test_order_field_error(
+    valid_order: TomteOrder,
+    tomte_model_validator: TomteModelValidator,
+):
+    pass
+
+
+def test_case_field_error(
+    valid_order: TomteOrder,
+    tomte_model_validator: TomteModelValidator,
+):
+    pass
+
+
+def test_sample_case_field_error(
+    valid_order: TomteOrder,
+    tomte_model_validator: TomteModelValidator,
+):
+    pass
+
+
+def test_sample_field_error(
+    valid_order: TomteOrder,
+    tomte_model_validator: TomteModelValidator,
+):
+    pass
