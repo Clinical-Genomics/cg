@@ -1,83 +1,24 @@
 import logging
 from http import HTTPStatus
-from typing import Any
 
-from flask import Blueprint, abort, g, jsonify, make_response, request
+from flask import Blueprint, abort, g, jsonify, request
 
-from cg.exc import (
-    CaseNotFoundError,
-    OrderMismatchError,
-)
-from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
-from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import (
-    db,
-    delivery_message_service,
-)
-from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
+from cg.server.endpoints.utils import before_request
+from cg.server.ext import db
+from cg.server.endpoints.utils import before_request
+from cg.server.ext import db
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
-    Application,
-    ApplicationLimitations,
     Customer,
     IlluminaSampleSequencingMetrics,
     Pool,
-    Sample,
 )
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 BLUEPRINT.before_request(before_request)
-
-
-@BLUEPRINT.route("/samples")
-def parse_samples():
-    """Return samples."""
-    if request.args.get("status") and not g.current_user.is_admin:
-        return abort(HTTPStatus.FORBIDDEN)
-    if request.args.get("status") == "incoming":
-        samples: list[Sample] = db.get_samples_to_receive()
-    elif request.args.get("status") == "labprep":
-        samples: list[Sample] = db.get_samples_to_prepare()
-    elif request.args.get("status") == "sequencing":
-        samples: list[Sample] = db.get_samples_to_sequence()
-    else:
-        customers: list[Customer] | None = (
-            None if g.current_user.is_admin else g.current_user.customers
-        )
-        samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-            pattern=request.args.get("enquiry"), customers=customers
-        )
-    limit = int(request.args.get("limit", 50))
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_samples, total=len(samples))
-
-
-@BLUEPRINT.route("/samples/<sample_id>")
-def parse_sample(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    if sample is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
-
-
-@BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
-def parse_sample_in_collaboration(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    if sample.customer not in customer.collaborators:
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
 @BLUEPRINT.route("/pools")
@@ -122,7 +63,7 @@ def get_sequencing_metrics(flow_cell_name: str):
 
 
 @BLUEPRINT.route("/analyses")
-def parse_analyses():
+def get_analyses():
     """Return analyses."""
     if request.args.get("status") == "delivery":
         analyses: list[Analysis] = db.get_analyses_to_deliver_for_pipeline()
@@ -135,7 +76,7 @@ def parse_analyses():
 
 
 @BLUEPRINT.route("/me")
-def parse_current_user_information():
+def get_user_information():
     """Return information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
         LOG.error(
@@ -144,40 +85,3 @@ def parse_current_user_information():
         return abort(HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
-
-
-@BLUEPRINT.route("/applications")
-@is_public
-def parse_applications():
-    """Return application tags."""
-    applications: list[Application] = db.get_applications_is_not_archived()
-    parsed_applications: list[dict] = [application.to_dict() for application in applications]
-    return jsonify(applications=parsed_applications)
-
-
-@BLUEPRINT.route("/applications/<tag>")
-@is_public
-def parse_application(tag: str):
-    """Return an application tag."""
-    application: Application = db.get_application_by_tag(tag=tag)
-    if not application:
-        return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
-
-    application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
-        tag
-    )
-    application_dict: dict[str, Any] = application.to_dict()
-    application_dict["workflow_limitations"] = [
-        limitation.to_dict() for limitation in application_limitations
-    ]
-    return jsonify(**application_dict)
-
-
-@BLUEPRINT.route("/applications/<tag>/workflow_limitations")
-@is_public
-def get_application_workflow_limitations(tag: str):
-    """Return application workflow specific limitations."""
-    if application_limitations := db.get_application_limitations_by_tag(tag):
-        return jsonify([limitation.to_dict() for limitation in application_limitations])
-    else:
-        return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
