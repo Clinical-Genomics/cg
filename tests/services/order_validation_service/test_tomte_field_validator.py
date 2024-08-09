@@ -29,7 +29,7 @@ def test_order_field_error(
     tomte_model_validator: TomteModelValidator,
 ):
     # GIVEN an order with an order field error
-    valid_order.name = None
+    valid_order.name = ""
     order = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
