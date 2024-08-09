@@ -3,12 +3,10 @@ from pathlib import Path
 from cg.constants import FileExtensions
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.post_processing.abstract_classes import RunFileManager
-from cg.services.post_processing.error_handler import (
-    handle_post_processing_errors,
-)
+from cg.services.post_processing.error_handler import handle_post_processing_errors
 from cg.services.post_processing.exc import PostProcessingRunFileManagerError
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.validators import validate_files_exist
+from cg.services.post_processing.validators import validate_files_or_directories_exist
 from cg.utils.files import get_files_matching_pattern
 
 
@@ -20,6 +18,7 @@ class PacBioRunFileManager(RunFileManager):
     def get_files_to_parse(self, run_data: PacBioRunData) -> list[Path]:
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
+        validate_files_or_directories_exist([run_path])
         files_to_parse: list[Path] = self._get_report_files(run_path)
         files_to_parse.append(self._get_ccs_report_file(run_path))
         return files_to_parse
@@ -57,7 +56,7 @@ class PacBioRunFileManager(RunFileManager):
             Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
         ]
-        validate_files_exist(report_files)
+        validate_files_or_directories_exist(report_files)
         return report_files
 
     @staticmethod
@@ -67,5 +66,5 @@ class PacBioRunFileManager(RunFileManager):
         bam_file: Path = get_files_matching_pattern(
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}"
         )[0]
-        validate_files_exist([bam_file])
+        validate_files_or_directories_exist([bam_file])
         return bam_file
