@@ -9,6 +9,7 @@ from sqlalchemy.orm import scoped_session
 from cg.server import admin, api, ext, invoices
 from cg.server.app_config import app_config
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
+from cg.server.endpoints.cases import CASES_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -22,6 +23,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
     Order,
@@ -30,7 +32,6 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
-    IlluminaSampleSequencingMetrics,
 )
 
 
@@ -89,12 +90,12 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
     app.register_blueprint(SAMPLES_BLUEPRINT)
+    app.register_blueprint(CASES_BLUEPRINT)
     app.register_blueprint(APPLICATIONS_BLUEPRINT)
-
     _register_admin_views()
 
-    # Protected with Auth header already
     ext.csrf.exempt(api.BLUEPRINT)
+    ext.csrf.exempt(CASES_BLUEPRINT)
     ext.csrf.exempt(APPLICATIONS_BLUEPRINT)
 
     @app.route("/")

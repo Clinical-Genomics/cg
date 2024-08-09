@@ -380,23 +380,22 @@ class StoreHelpers:
         **kwargs,
     ) -> Sample:
         """Utility function to add a sample to use in tests."""
-        customer_id = customer_id or "cust000"
-        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
-        application_version = StoreHelpers.ensure_application_version(
+        customer_id: str = customer_id or "cust000"
+        customer: Customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+        application_version: ApplicationVersion = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
             prep_category=application_type,
             is_external=is_external,
             is_rna=is_rna,
         )
-        application_version_id = application_version.id
+        application_version_id: int = application_version.id
 
         if internal_id:
-            existing_sample: Sample = store.get_sample_by_internal_id(internal_id=internal_id)
-            if existing_sample:
+            if existing_sample := store.get_sample_by_internal_id(internal_id=internal_id):
                 return existing_sample
 
-        sample = store.add_sample(
+        sample: Sample = store.add_sample(
             name=name,
             sex=sex,
             control=control,
