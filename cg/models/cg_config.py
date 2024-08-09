@@ -595,7 +595,7 @@ class CGConfig(BaseModel):
         if services is None:
             LOG.debug("Instantiating post-processing services")
             services = PostProcessingServices(
-                pacbio=self.get_pacbio_post_processing_service,
+                pacbio=self.get_pacbio_post_processing_service(),
             )
             self.post_processing_services_ = services
         return services
