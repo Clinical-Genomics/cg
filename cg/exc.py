@@ -314,10 +314,6 @@ class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
 
 
-class PacBioMetricsParsingError(CgError):
-    """Exception raised when PacBio metric files are not in place."""
-
-
 class Chanjo2APIClientError(CgError):
     """Exception related to the Chanjo2 API client."""
 
