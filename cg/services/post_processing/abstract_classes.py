@@ -39,7 +39,7 @@ class PostProcessingMetricsParser(ABC):
 
 
 class PostProcessingDataTransferService(ABC):
-    """Abstract class that manages the data transfer from parsed metrics to the database structure."""
+    """Abstract class that manages data transfer from parsed metrics to the database structure."""
 
     @abstractmethod
     def get_post_processing_dtos(self, run_data: RunData) -> PostProcessingDTOs:
@@ -61,7 +61,7 @@ class PostProcessingHKService(ABC):
 
     @abstractmethod
     def store_files_in_housekeeper(self, run_data: RunData, dry_run: bool = False):
-        """Store the files in housekeeper."""
+        """Store the files in Housekeeper."""
         pass
 
 
@@ -70,5 +70,5 @@ class PostProcessingService(ABC):
 
     @abstractmethod
     def post_process(self, run_name: str, dry_run: bool = False):
-        """Store sequencing metrics in statusdb and relevant files in housekeeper"""
+        """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass

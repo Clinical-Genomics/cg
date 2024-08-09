@@ -1,3 +1,5 @@
+import logging
+
 from cg.services.post_processing.abstract_classes import PostProcessingService
 from cg.services.post_processing.error_handler import handle_post_processing_errors
 from cg.services.post_processing.exc import (
@@ -16,6 +18,8 @@ from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_gener
     PacBioRunDataGenerator,
 )
 from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+
+LOG = logging.getLogger(__name__)
 
 
 class PacBioPostProcessingService(PostProcessingService):
@@ -42,7 +46,7 @@ class PacBioPostProcessingService(PostProcessingService):
         to_raise=PostProcessingError,
     )
     def post_process(self, run_name: str, dry_run: bool = False) -> None:
-
+        LOG.info(f"Starting PacBio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )
