@@ -1,4 +1,3 @@
-import logging
 from http import HTTPStatus
 from typing import Any
 
@@ -11,7 +10,6 @@ from cg.store.models import (
     ApplicationLimitations,
 )
 
-LOG = logging.getLogger(__name__)
 APPLICATIONS_BLUEPRINT = Blueprint("applications", __name__, url_prefix="/api/v1")
 APPLICATIONS_BLUEPRINT.before_request(before_request)
 
