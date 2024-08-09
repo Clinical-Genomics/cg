@@ -5,9 +5,12 @@ from pydantic import BaseModel, Field
 
 class CaseTags(BaseModel):
     snv_vcf: set[str] | None = Field(
-        None, description="vcf_snv for rare disease and vcf_cancer for cancer"
+        None,
+        description="VCF with SNVs, clinical. vcf_snv for rare disease and vcf_cancer for cancer",
     )
-    snv_research_vcf: set[str] | None = Field(None, description="vcf_snv_research for rare disease")
+    snv_research_vcf: set[str] | None = Field(
+        None, description="VCF with SNVs, research. vcf_snv_research for rare disease"
+    )
     sv_vcf: set[str] | None = Field(
         None, description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
     )
@@ -51,6 +54,10 @@ class CaseTags(BaseModel):
     vcf_mei_research: set[str] | None = Field(
         None, description="VCF with mobile element insertions, research"
     )
+    fraser_tsv: set[str] | None = Field(None, description="TSV with aberrant splicing, clinical")
+    outrider_tsv: set[str] | None = Field(
+        None, description="TSV with expression outliers, clinical"
+    )
 
 
 class SampleTags(BaseModel):
@@ -67,3 +74,5 @@ class SampleTags(BaseModel):
     reviewer_alignment_index: set[str] | None = None
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
+    splice_junctions_bed: set[str] | None = None
+    rna_coverage_bigwig: set[str] | None = None

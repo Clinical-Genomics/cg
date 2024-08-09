@@ -10,7 +10,7 @@ from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
@@ -481,6 +481,53 @@ def rnafusion_analysis_hk_bundle_data(
     }
 
 
+@pytest.fixture(scope="function")
+def tomte_analysis_hk_bundle_data(
+    case_id: str,
+    timestamp: datetime,
+    tomte_analysis_dir: Path,
+    delivery_report_html: Path,
+) -> dict:
+    """Return Tomte Housekeeper bundle data."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(tomte_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+            {
+                "path": str(tomte_analysis_dir / "vep_research.vcf.gz"),
+                "archive": False,
+                "tags": [AnalysisTag.RESEARCH, AnalysisTag.VCF, AnalysisTag.SNV],
+            },
+            {
+                "path": str(tomte_analysis_dir / "vep_clinical.vcf.gz"),
+                "archive": False,
+                "tags": [AnalysisTag.CLINICAL, AnalysisTag.VCF, AnalysisTag.SNV],
+            },
+            {
+                "path": str(tomte_analysis_dir / "fraser_top_hits_clinical.tsv"),
+                "archive": False,
+                "tags": [AnalysisTag.CLINICAL, AnalysisTag.FRASER],
+            },
+            {
+                "path": str(tomte_analysis_dir / "outrider_top_hits_clinical.tsv"),
+                "archive": False,
+                "tags": [AnalysisTag.CLINICAL, AnalysisTag.OUTRIDER],
+            },
+        ],
+    }
+
+
 @pytest.fixture
 def balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
@@ -530,6 +577,15 @@ def rnafusion_analysis_hk_api(
 ) -> MockHousekeeperAPI:
     """Return a housekeeper api populated with some rnafusion analysis files"""
     helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
+def tomte_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, tomte_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with some Tomte analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, tomte_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -595,6 +651,19 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
         )
         link_object.case.data_analysis = Workflow.RNAFUSION
         link_object.case.panels = None
+    return analysis_obj
+
+
+@pytest.fixture
+def tomte_analysis(analysis_obj: Analysis) -> Analysis:
+    """Set and return a Tomte analysis object."""
+    analysis_obj.workflow = Workflow.TOMTE
+    for case_sample in analysis_obj.case.links:
+        case_sample.sample.application_version.application.prep_category = (
+            PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+        )
+        case_sample.case.data_analysis = Workflow.TOMTE
+        case_sample.case.panels = None
     return analysis_obj
 
 
@@ -765,6 +834,30 @@ def upload_rnafusion_analysis_scout_api(
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
+        lims_api=lims_api,
+        status_db=store,
+    )
+
+    return _api
+
+
+@pytest.fixture
+def upload_tomte_analysis_scout_api(
+    tomte_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> UploadScoutAPI:
+    """Fixture of an upload to Scout API for Tomte."""
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    _api = UploadScoutAPI(
+        hk_api=tomte_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=tomte_context.meta_apis["analysis_api"],
         lims_api=lims_api,
         status_db=store,
     )

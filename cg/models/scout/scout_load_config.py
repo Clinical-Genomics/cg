@@ -23,6 +23,11 @@ class Reviewer(BaseModel):
     catalog: str | None = None
 
 
+class OmicsFiles(BaseModel):
+    fraser: str | None = None
+    outrider: str | None = None
+
+
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
@@ -75,6 +80,11 @@ class ScoutCancerIndividual(ScoutIndividual):
     vcf2cytosure: str | None = None
 
 
+class ScoutRnaIndividual(ScoutIndividual):
+    splice_junctions_bed: str | None = None
+    rna_coverage_bigwig: str | None = None
+
+
 class ScoutLoadConfig(BaseModel):
     owner: Annotated[str, BeforeValidator(field_not_none)] = None
     family: Annotated[str, BeforeValidator(field_not_none)] = None
@@ -99,7 +109,6 @@ class ScoutLoadConfig(BaseModel):
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )
-
     model_config = ConfigDict(validate_assignment=True)
 
 
@@ -145,3 +154,11 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_report_research: str | None = None
     samples: list[ScoutCancerIndividual] = []
     vcf_fusion: str | None = None
+
+
+class TomteLoadConfig(ScoutLoadConfig):
+    omics_files: Annotated[OmicsFiles | None, BeforeValidator(field_not_none)] = None
+    multiqc_rna: str | None = None
+    samples: list[ScoutRnaIndividual] = []
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None

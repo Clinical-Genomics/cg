@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
 
 HGNC_ID = "hgnc_id"
 
@@ -32,11 +32,14 @@ class ScoutCustomCaseReportTags(StrEnum):
 
 
 class ScoutUploadKey(StrEnum):
+    FRASER_TSV = auto()
+    OUTRIDER_TSV = auto()
     SMN_TSV = auto()
+    SNV_RESEARCH_VCF = auto()
     SNV_VCF = auto()
     SV_VCF = auto()
-    VCF_STR = auto()
     VCF_FUSION = auto()
+    VCF_STR = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(
@@ -86,6 +89,16 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_fusion={"vcf-fusion"},
 )
 
+TOMTE_CASE_TAGS: dict[str, set[str]] = dict(
+    multiqc_rna={AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
+    delivery_report={HK_DELIVERY_REPORT_TAG},
+    snv_research_vcf={AnalysisTag.RESEARCH, AnalysisTag.VCF, AnalysisTag.SNV},
+    snv_vcf={AnalysisTag.CLINICAL, AnalysisTag.VCF, AnalysisTag.SNV},
+    fraser_tsv={AnalysisTag.CLINICAL, AnalysisTag.FRASER},
+    outrider_tsv={AnalysisTag.CLINICAL, AnalysisTag.OUTRIDER},
+)
+
+
 RAREDISEASE_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -117,4 +130,10 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 
 RNAFUSION_SAMPLE_TAGS = dict(
     alignment_file={AlignmentFileTag.CRAM},
+)
+
+TOMTE_SAMPLE_TAGS = dict(
+    alignment_file={AlignmentFileTag.CRAM},
+    splice_junctions_bed={AnalysisTag.JUNCTION, AnalysisTag.BED},
+    rna_coverage_bigwig={AnalysisTag.COVERAGE, AnalysisTag.BIGWIG},
 )

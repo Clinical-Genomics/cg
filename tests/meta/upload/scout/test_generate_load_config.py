@@ -1,16 +1,20 @@
-"""Test the methods that generate a scout load config"""
+"""Test the methods that generate a Scout load config"""
 
 import pytest
+from pytest_mock import MockFixture
 
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     BalsamicUmiLoadConfig,
     RnafusionLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
+    TomteLoadConfig,
 )
 from cg.store.models import Analysis
 
@@ -138,3 +142,23 @@ def test_generate_config_adds_case_paths(
 
     # THEN the config should contain the multiqc file path
     assert result_data.multiqc
+
+
+def test_generate_tomte_load_config(
+    tomte_analysis: Analysis,
+    upload_tomte_analysis_scout_api: UploadScoutAPI,
+):
+    """Test that a Tomte config is generated."""
+
+    # GIVEN an analysis object that has been run with Tomte
+    assert tomte_analysis.workflow == Workflow.TOMTE
+
+    # GIVEN an upload Scout API with some Tomte information
+
+    # WHEN generating a load config
+    config: ScoutLoadConfig = upload_tomte_analysis_scout_api.generate_config(
+        analysis=tomte_analysis
+    )
+
+    # THEN assert that the config is a tomte config
+    assert isinstance(config, TomteLoadConfig)

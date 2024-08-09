@@ -6,6 +6,7 @@ from pathlib import Path
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
+from cg.constants.scout import TOMTE_CASE_TAGS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetEntry, TomteSampleSheetHeaders
@@ -82,3 +83,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Tomte Scout upload case tags."""
+        return TOMTE_CASE_TAGS
