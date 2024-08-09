@@ -6,7 +6,7 @@ from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
-LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
+LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.BALSAMIC, Workflow.MIP_DNA, Workflow.RAREDISEASE]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST110,
@@ -21,6 +21,22 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
 ]
 
 
+class BalsamicLoadParameters(Enum):
+    """Cancer Loqusdb load command parameters."""
+
+    QUAL_THRESHOLD: int = 0
+    QUAL_GERMLINE_THRESHOLD: int = 10
+
+
+class BalsamicObservationsAnalysisTag(StrEnum):
+    """Cancer observations files analysis tags."""
+
+    SNV_GERMLINE_VCF: str = "vcf-snv-germline-tumor"
+    SNV_VCF: str = "vcf-snv-clinical"
+    SV_GERMLINE_VCF: str = "vcf-sv-germline-tumor"
+    SV_VCF: str = "vcf-sv-clinical"
+
+
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
@@ -28,6 +44,24 @@ class LoqusdbInstance(StrEnum):
     WES: str = "loqusdb-wes"
     SOMATIC: str = "loqusdb-somatic"
     TUMOR: str = "loqusdb-tumor"
+
+
+class MipDNALoadParameters(Enum):
+    """Rare disease Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
+
+
+class MipDNAObservationsAnalysisTag(StrEnum):
+    """Rare disease observations files analysis tags."""
+
+    SNV_VCF: str = "deepvariant"
+    SV_VCF: str = "vcf-sv-research"
+    PROFILE_GBCF: str = "snv-gbcf"
+    FAMILY_PED: str = "pedigree"
 
 
 class ObservationsFileWildcards(StrEnum):
@@ -41,35 +75,18 @@ class ObservationsFileWildcards(StrEnum):
     CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 
 
-class MipDNAObservationsAnalysisTag(StrEnum):
+class RarediseaseObservationsAnalysisTag(StrEnum):
     """Rare disease observations files analysis tags."""
 
-    SNV_VCF: str = "deepvariant"
-    SV_VCF: str = "vcf-sv-research"
-    PROFILE_GBCF: str = "snv-gbcf"
+    SNV_VCF: str = "vcf-snv"
+    SV_VCF: str = "vcf-sv"
     FAMILY_PED: str = "pedigree"
 
 
-class MipDNALoadParameters(Enum):
-    """Rare disease Loqusdb load command parameters."""
+class RarediseaseLoadParameters(Enum):
+    """Raredisease Loqusdb load command parameters."""
 
     PROFILE_THRESHOLD: float = 0.95
     GQ_THRESHOLD: int = 10
     HARD_THRESHOLD: float = 0.95
     SOFT_THRESHOLD: float = 0.90
-
-
-class BalsamicObservationsAnalysisTag(StrEnum):
-    """Cancer observations files analysis tags."""
-
-    SNV_GERMLINE_VCF: str = "vcf-snv-germline-tumor"
-    SNV_VCF: str = "vcf-snv-clinical"
-    SV_GERMLINE_VCF: str = "vcf-sv-germline-tumor"
-    SV_VCF: str = "vcf-sv-clinical"
-
-
-class BalsamicLoadParameters(Enum):
-    """Cancer Loqusdb load command parameters."""
-
-    QUAL_THRESHOLD: int = 0
-    QUAL_GERMLINE_THRESHOLD: int = 10

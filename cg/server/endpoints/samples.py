@@ -1,13 +1,12 @@
 from http import HTTPStatus
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.server.api import BLUEPRINT
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import sample_service
 from cg.store.models import Customer, Sample
-
 from cg.server.ext import db
 
 SAMPLES_BLUEPRINT = Blueprint("samples", __name__, url_prefix="/api/v1")
