@@ -250,3 +250,10 @@ class JanusTags:
 class FohmTag(StrEnum):
     COMPLEMENTARY = "komplettering"
     PANGOLIN_TYPING = "pangolin-typing-fohm"
+
+
+class GisaidTag(StrEnum):
+    FASTA = "gisaid-fasta"
+    CONSENSUS_SAMPLE = "consensus-sample"
+    CSV = "gisaid-csv"
+    LOG = "gisaid-log"

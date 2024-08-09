@@ -1,4 +1,4 @@
-"""Code for uploading genotype data via CLI"""
+"""Code for uploading genotype data via CLI."""
 
 import logging
 
@@ -18,7 +18,7 @@ def upload_to_gisaid(context: CGConfig, case_id: str):
 
     LOG.info("----------------- GISAID UPLOAD -------------------")
 
-    gisaid_api = GisaidAPI(config=context)
+    gisaid_api = GisaidAPI(context)
 
-    gisaid_api.upload(case_id=case_id)
+    gisaid_api.upload_to_gisaid(case_id)
     LOG.info("Upload to GISAID successful")

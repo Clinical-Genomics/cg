@@ -118,6 +118,8 @@ pytest_plugins = [
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
     "tests.fixture_plugins.fohm.fohm_fixtures",
     "tests.fixture_plugins.io.csv_fixtures",
+    "tests.fixture_plugins.io.csv_fixtures",
+    "tests.fixture_plugins.gisaid_fixtures.gisaid_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
