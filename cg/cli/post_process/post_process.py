@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(name="post-process", context_settings=CLICK_CONTEXT_SETTINGS)
 def post_process_group():
-    """Post-processes sequencing runs from the following run instruments: PacBio."""
+    """Post-process sequencing runs from the sequencing run instruments."""
     LOG.info("Running cg post-processing.")
 
 
@@ -24,7 +24,7 @@ def post_process_group():
 @click.argument("run-name")
 @click.pass_obj
 def post_process_sequencing_run(context: CGConfig, run_name: str, dry_run: bool):
-    """Command to post-process a sequencing run from any device.
+    """Post-process a sequencing run from any device.
 
     run-name is the full name of the sequencing unit of run. For example:
         PacBio: 'r84202_20240522_133539/1_A01'
