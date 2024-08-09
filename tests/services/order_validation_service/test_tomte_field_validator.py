@@ -15,7 +15,10 @@ def test_valid_order_is_parsed(
     order, errors = tomte_model_validator.validate(order_json)
 
     # THEN the parsed order is returned
-    assert order
+    assert order is not None
 
-    # THEN no errors should be returned
-    assert not errors
+    # THEN the errors are empty
+    assert not errors.case_errors
+    assert not errors.case_sample_errors
+    assert not errors.order_errors
+    assert not errors.sample_errors

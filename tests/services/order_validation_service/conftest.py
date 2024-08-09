@@ -201,7 +201,7 @@ def sample_with_missing_container_name() -> TomteSample:
 
 
 @pytest.fixture
-def tomte_model_validator():
+def tomte_model_validator() -> TomteModelValidator:
     return TomteModelValidator()
 
 
