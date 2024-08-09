@@ -1,5 +1,3 @@
-from pydantic import ValidationError
-
 from cg.services.order_validation_service.models.errors import (
     CaseError,
     CaseSampleError,
@@ -14,7 +12,6 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
     TomteModelValidator,
 )
@@ -32,8 +29,8 @@ class TomteValidationService(OrderValidationService):
         self.store = store
         self.model_validator = model_validator
 
-    def validate(self, order_json: str) -> ValidationErrors:
-        order, field_errors = self.model_validator.validate(order_json)
+    def validate(self, raw_order: dict) -> ValidationErrors:
+        order, field_errors = self.model_validator.validate(raw_order)
 
         if field_errors:
             return field_errors

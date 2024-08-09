@@ -214,8 +214,3 @@ def tomte_validation_service(
         store=base_store,
         model_validator=tomte_model_validator,
     )
-
-
-@pytest.fixture
-def tomte_model_validator():
-    pass
