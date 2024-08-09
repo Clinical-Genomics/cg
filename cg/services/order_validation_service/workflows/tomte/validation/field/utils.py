@@ -22,23 +22,6 @@ def convert_errors(pydantic_errors: ValidationError, order: dict) -> ValidationE
     )
 
 
-def convert_sample_errors(error_details: list[ErrorDetails], order: dict) -> list[SampleError]:
-    errors: list[SampleError] = []
-    sample_details = get_sample_error_details(error_details)
-    for error in sample_details:
-        error = create_sample_error(error=error, order=order)
-        errors.append(error)
-    return errors
-
-
-def create_sample_error(error: ErrorDetails, order: dict) -> SampleError:
-    sample_name = get_sample_name(error=error, order=order)
-    field_name = get_sample_field_name(error)
-    message = get_error_message(error)
-    error = SampleError(sample_name=sample_name, field=field_name, message=message)
-    return error
-
-
 def convert_order_errors(error_details: list[ErrorDetails]) -> list[OrderError]:
     errors: list[OrderError] = []
     order_details = get_order_error_details(error_details)
@@ -57,6 +40,23 @@ def convert_case_errors(error_details: list[ErrorDetails], order: dict) -> list[
         error = create_case_error(error=error, order=order)
         errors.append(error)
     return errors
+
+
+def convert_sample_errors(error_details: list[ErrorDetails], order: dict) -> list[SampleError]:
+    errors: list[SampleError] = []
+    sample_details = get_sample_error_details(error_details)
+    for error in sample_details:
+        error = create_sample_error(error=error, order=order)
+        errors.append(error)
+    return errors
+
+
+def create_sample_error(error: ErrorDetails, order: dict) -> SampleError:
+    sample_name = get_sample_name(error=error, order=order)
+    field_name = get_sample_field_name(error)
+    message = get_error_message(error)
+    error = SampleError(sample_name=sample_name, field=field_name, message=message)
+    return error
 
 
 def create_case_error(error: ErrorDetails, order: dict) -> CaseError:
