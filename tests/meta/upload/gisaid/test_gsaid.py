@@ -13,7 +13,7 @@ def test_get_complementary_report_content(gisaid_api: GisaidAPI, csv_file_path: 
     # THEN each file is a list of dicts where each dict represents a row in a CSV file
     assert isinstance(content[0], dict)
 
-    # THEN the file ise added as a list of dicts
+    # THEN the file is added as a list of dicts
     assert len(content) == 3
 
 
