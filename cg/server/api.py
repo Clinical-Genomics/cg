@@ -8,6 +8,7 @@ LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 BLUEPRINT.before_request(before_request)
 
+
 @BLUEPRINT.route("/me")
 def get_user_information():
     """Return information about current user."""
