@@ -1,4 +1,5 @@
 from pydantic_core import ErrorDetails, ValidationError
+
 from cg.services.order_validation_service.models.errors import (
     CaseError,
     CaseSampleError,
@@ -91,7 +92,7 @@ def create_case_sample_error(error: ErrorDetails, order: dict) -> CaseSampleErro
     error = CaseSampleError(
         case_name=case_name,
         sample_name=sample_name,
-        field_name=field_name,
+        field=field_name,
         message=message,
     )
     return error
