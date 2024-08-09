@@ -11,6 +11,9 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
+from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
+    TomteModelValidator,
+)
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
@@ -228,5 +231,16 @@ def sample_with_missing_container_name() -> TomteSample:
 
 
 @pytest.fixture
-def tomte_validation_service(base_store: Store) -> TomteValidationService:
-    return TomteValidationService(base_store)
+def tomte_model_validator() -> TomteModelValidator:
+    return TomteModelValidator()
+
+
+@pytest.fixture
+def tomte_validation_service(
+    base_store: Store,
+    tomte_model_validator: TomteModelValidator,
+) -> TomteValidationService:
+    return TomteValidationService(
+        store=base_store,
+        model_validator=tomte_model_validator,
+    )
