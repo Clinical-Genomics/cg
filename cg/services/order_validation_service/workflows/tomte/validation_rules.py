@@ -16,6 +16,7 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
     validate_case_names_not_repeated,
+    validate_concentration_interval_if_skip_rc,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_mothers_are_female,
@@ -44,6 +45,7 @@ TOMTE_CASE_SAMPLE_RULES = [
     validate_application_not_archived,
     validate_buffer_skip_rc_condition,
     validate_case_names_not_repeated,
+    validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,

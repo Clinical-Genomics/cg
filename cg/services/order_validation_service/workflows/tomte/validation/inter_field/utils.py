@@ -1,9 +1,11 @@
 from collections import Counter
 
+from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.models.errors import (
     FatherNotInCaseError,
+    InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     InvalidMotherSexError,
     MotherNotInCaseError,
@@ -17,6 +19,8 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 def _get_errors(colliding_samples: list[tuple[TomteSample, TomteCase]]) -> list[OccupiedWellError]:
@@ -158,3 +162,53 @@ def validate_subject_ids_in_case(case: TomteCase) -> list[SubjectIdSameAsCaseNam
             error = SubjectIdSameAsCaseNameError(case_name=case.name, sample_name=sample.name)
             errors.append(error)
     return errors
+
+
+def validate_concentration_in_case(case: TomteCase, store: Store):
+    errors = []
+    for sample in case.samples:
+        if has_sample_invalid_concentration(sample=sample, store=store):
+            error = create_invalid_concentration_error(
+                case_name=case.name, sample=sample, store=store
+            )
+            errors.append(error)
+    return errors
+
+
+def create_invalid_concentration_error(case_name: str, sample: TomteSample, store: Store):
+    application: Application = store.get_application_by_tag(sample.application)
+    is_cfdna = is_sample_cfdna(sample)
+    allowed_interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
+    return InvalidConcentrationIfSkipRCError(
+        case_name=case_name, sample_name=sample.name, allowed_interval=allowed_interval
+    )
+
+
+def has_sample_invalid_concentration(sample: TomteSample, store: Store) -> bool:
+    application: Application | None = store.get_application_by_tag(sample.application)
+    return not is_sample_concentration_allowed(sample=sample, application=application)
+
+
+def is_sample_concentration_allowed(sample: TomteSample, application: Application):
+    concentration = sample.concentration_ng_ul
+    is_cfdna = is_sample_cfdna(sample)
+    interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
+    return is_sample_concentration_within_interval(concentration=concentration, interval=interval)
+
+
+def is_sample_cfdna(sample: TomteSample):
+    source = sample.source
+    return source == SourceType.CELL_FREE_DNA
+
+
+def get_concentration_interval(application: Application, is_cfdna: bool) -> tuple[int, int]:
+    if is_cfdna:
+        return (
+            application.sample_concentration_minimum_cfdna,
+            application.sample_concentration_maximum_cfdna,
+        )
+    return application.sample_concentration_minimum, application.sample_concentration_maximum
+
+
+def is_sample_concentration_within_interval(concentration: float, interval: tuple[int, int]):
+    return interval[0] <= concentration <= interval[1]

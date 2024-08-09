@@ -155,6 +155,17 @@ class SubjectIdSameAsSampleNameError(CaseSampleError):
     message: str = "Subject id must be different from the sample name"
 
 
+class InvalidConcentrationIfSkipRCError(CaseSampleError):
+    def __init__(self, case_name: str, sample_name: str, allowed_interval: tuple[int, int]):
+        field: str = "concentration_ng_ul"
+        message: str = (
+            f"Concentration must be between {allowed_interval[0]} ng/μL and {allowed_interval[1]} ng/μL if reception control should be skipped"
+        )
+        super(CaseSampleError, self).__init__(
+            case_name=case_name, sample_name=sample_name, field=field, message=message
+        )
+
+
 class WellPositionMissingError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well position is required for well plates"

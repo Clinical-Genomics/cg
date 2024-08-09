@@ -184,10 +184,38 @@ def order_with_siblings_as_parents():
 
 
 @pytest.fixture
+def sample_with_invalid_concentration():
+    sample: TomteSample = create_sample(1)
+    sample.concentration_ng_ul = 1
+    return sample
+
+
+@pytest.fixture
 def sample_with_missing_well_position():
     sample = create_sample(1)
     sample.well_position = None
     return sample
+
+
+@pytest.fixture
+def application_with_concentration_interval(base_store: Store) -> Application:
+    return base_store.add_application(
+        tag="RNAPOAR100",
+        prep_category="wts",
+        description="This is an application with concentration interval",
+        percent_kth=100,
+        percent_reads_guaranteed=90,
+        sample_concentration_minimum=50,
+        sample_concentration_maximum=250,
+    )
+
+
+@pytest.fixture
+def order_with_invalid_concentration(sample_with_invalid_concentration) -> TomteOrder:
+    case = create_case([sample_with_invalid_concentration])
+    order = create_order([case])
+    order.skip_reception_control = True
+    return order
 
 
 @pytest.fixture
