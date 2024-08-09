@@ -1,12 +1,18 @@
+import pytest
+
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
     ContainerNameMissingError,
+    InvalidVolumeError,
     OrderNameRequiredError,
     SubjectIdSameAsCaseNameError,
     TicketNumberRequiredError,
     WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.validators.data.rules import (
+    validate_volume_interval,
+)
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
     validate_container_name_required,
@@ -120,3 +126,30 @@ def test_container_name_missing(
 
     # THEN the error should concern the missing container name
     assert isinstance(errors[0], ContainerNameMissingError)
+
+
+@pytest.mark.parametrize("sample_volume", [1, 200])
+def test_volume_out_of_bounds(valid_order: TomteOrder, sample_volume: int):
+
+    # GIVEN an order containing a sample with an invalid volume
+    valid_order.cases[0].samples[0].volume = sample_volume
+
+    # WHEN validating that the volume is within bounds
+    errors = validate_volume_interval(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid volume
+    assert isinstance(errors[0], InvalidVolumeError)
+
+
+def test_volume_in_bounds(valid_order: TomteOrder):
+
+    # GIVEN a valid order
+
+    # WHEN validating that the volume is within bounds
+    errors = validate_volume_interval(valid_order)
+
+    # THEN no error should be returned
+    assert not errors

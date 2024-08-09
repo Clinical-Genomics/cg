@@ -1,4 +1,10 @@
+from cg.models.orders.sample_base import ContainerEnum
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
 from cg.services.order_validation_service.models.errors import InvalidGenePanelsError
+from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.store.store import Store
 
@@ -22,3 +28,17 @@ def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
 
 def contains_duplicates(input_list: list) -> bool:
     return len(set(input_list)) != len(input_list)
+
+
+def is_volume_invalid(sample: Sample):
+    return is_in_container(sample.container) and not is_volume_within_allowed_interval(
+        sample.volume
+    )
+
+
+def is_in_container(container: ContainerEnum):
+    return container != ContainerEnum.no_container
+
+
+def is_volume_within_allowed_interval(volume: int):
+    return MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME

@@ -1,5 +1,10 @@
 from pydantic import BaseModel
 
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
+
 
 class OrderError(BaseModel):
     field: str
@@ -174,3 +179,8 @@ class WellPositionMissingError(CaseSampleError):
 class ContainerNameMissingError(CaseSampleError):
     field: str = "container_name"
     message: str = "Container name is required for well plates"
+
+
+class InvalidVolumeError(CaseSampleError):
+    field: str = "volume"
+    message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
