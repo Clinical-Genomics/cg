@@ -8,11 +8,8 @@ from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, api, ext, invoices
 from cg.server.app_config import app_config
-<<<<<<< HEAD
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
-=======
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
->>>>>>> master
 from cg.server.endpoints.cases import CASES_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
