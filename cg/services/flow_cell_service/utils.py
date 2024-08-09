@@ -3,9 +3,14 @@ from cg.store.models import IlluminaSampleSequencingMetrics
 
 
 def create_metrics_dto(
-    metrics: list[IlluminaSampleSequencingMetrics],
+    metrics: list[IlluminaSampleSequencingMetrics] | None,
 ) -> list[SequencingMetrics]:
+
+    if not metrics:
+        return []
+
     parsed_metrics = []
+
     for metric in metrics:
         parsed_metric = SequencingMetrics(
             flow_cell_name=metric.instrument_run.device.internal_id,
