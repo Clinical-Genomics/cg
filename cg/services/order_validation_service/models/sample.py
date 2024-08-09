@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
 
@@ -12,3 +13,5 @@ class Sample(BaseModel):
     require_qc_ok: bool
     volume: int | None = None
     well_position: str | None = None
+
+    model_config = ConfigDict(str_min_length=1)
