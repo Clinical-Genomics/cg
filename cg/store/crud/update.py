@@ -4,14 +4,16 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-
 from cg.constants import SequencingRunDataAvailability
-from cg.store.base import BaseHandler
-from cg.store.models import IlluminaSequencingRun, IlluminaSampleSequencingMetrics, SampleRunMetrics
-
 from cg.constants.constants import SequencingQCStatus
 from cg.store.base import BaseHandler
-from cg.store.models import Case, Order, Sample
+from cg.store.models import (
+    Case,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+    Order,
+    Sample,
+)
 
 
 class UpdateHandler(BaseHandler):
