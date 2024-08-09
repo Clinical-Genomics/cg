@@ -1,4 +1,5 @@
 from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
 
@@ -20,4 +21,4 @@ class OrdersRequest(BaseModel):
     sort_order: SortOrder | None = Field(alias="sortOrder", default=SortOrder.DESC)
     search: str | None = None
     workflow: str | None = None
-    delivered: bool | None = None
+    open: bool | None = None
