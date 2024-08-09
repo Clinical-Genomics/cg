@@ -1,7 +1,6 @@
 import pytest
 
 from cg.cli.post_process.utils import get_post_processing_service_from_run_name
-from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
 
@@ -40,7 +39,7 @@ def test_get_post_processing_service_from_wrong_run_name(
     assert pac_bio_context.post_processing_services.pacbio
 
     # WHEN getting the post-processing service from the run name
-    with pytest.raises(CgError):
+    with pytest.raises(NameError):
         get_post_processing_service_from_run_name(context=pac_bio_context, run_name=wrong_run_name)
 
     # THEN an error is raised
