@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.group(name="post-process", context_settings=CLICK_CONTEXT_SETTINGS)
 def post_process_group():
     """Post-processes sequencing runs from the following run instruments: PacBio."""
+    LOG.info("Running cg post-processing.")
 
 
 @post_process_group.command(name="run")
@@ -32,3 +33,7 @@ def post_process_sequencing_run(context: CGConfig, run_name: str, dry_run: bool)
         context=context, run_name=run_name
     )
     post_processing_service.post_process(run_name=run_name, dry_run=dry_run)
+
+
+post_process_group: click.Group
+post_process_group.add_command(post_process_sequencing_run)
