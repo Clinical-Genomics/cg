@@ -26,9 +26,7 @@ def convert_order_errors(error_details: list[ErrorDetails]) -> list[OrderError]:
     errors: list[OrderError] = []
     order_details = get_order_error_details(error_details)
     for error in order_details:
-        field_name = get_order_field_name(error)
-        message = get_error_message(error)
-        error = OrderError(field=field_name, message=message)
+        error = create_order_error(error)
         errors.append(error)
     return errors
 
@@ -49,6 +47,13 @@ def convert_sample_errors(error_details: list[ErrorDetails], order: dict) -> lis
         error = create_sample_error(error=error, order=order)
         errors.append(error)
     return errors
+
+
+def create_order_error(error: ErrorDetails) -> OrderError:
+    field_name = get_order_field_name(error)
+    message = get_error_message(error)
+    error = OrderError(field=field_name, message=message)
+    return error
 
 
 def create_sample_error(error: ErrorDetails, order: dict) -> SampleError:
