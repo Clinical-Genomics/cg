@@ -9,7 +9,6 @@ from cg.cli.workflow.commands import (
     link,
     resolve_compression,
     store,
-    store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN
@@ -32,7 +31,6 @@ def mutant(context: click.Context) -> None:
 mutant.add_command(resolve_compression)
 mutant.add_command(link)
 mutant.add_command(store)
-mutant.add_command(store_available)
 
 
 @mutant.command("config-case")
@@ -100,3 +98,37 @@ def start_available(context: click.Context, dry_run: bool = False):
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
+
+
+@mutant.command("store-available")
+@DRY_RUN
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Run QC checks and store bundles for all finished analyses in Housekeeper."""
+
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    exit_code: int = EXIT_SUCCESS
+
+    analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
+
+    for case_obj in analysis_api.get_cases_to_store():
+        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
+        try:
+            store(context=context, case_id=case_obj.internal_id, dry_run=dry_run)
+        except Exception as exception_object:
+            LOG.error(f"Error storing {case_obj.internal_id}:{exception_object}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
+
+
+@mutant.command("run-qc")
+@click.pass_context
+def run_qc(context: click.Context, case_id: str) -> None:
+    """
+    Run QC on case and generate QC_report file.
+    """
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    analysis_api.run_qc(case_id=case_id)

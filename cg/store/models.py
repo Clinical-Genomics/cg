@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
+from pydantic import ConfigDict
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -813,6 +814,10 @@ class Sample(Base, PriorityMixin):
     @property
     def has_reads(self) -> bool:
         return bool(self.reads)
+
+    @property
+    def is_negative_control(self) -> bool:
+        return self.control == ControlOptions.NEGATIVE
 
     @property
     def flow_cells(self) -> list[Flowcell]:

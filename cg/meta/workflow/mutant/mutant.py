@@ -1,13 +1,16 @@
 import logging
 import shutil
 from pathlib import Path
-
 from cg.constants import SequencingFileTag, Workflow
-from cg.constants.constants import FileFormat
+from cg.constants.constants import CaseActions, FileFormat, MutantQC
+from cg.constants.tb import AnalysisStatus
+from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
+from cg.meta.workflow.mutant.quality_controller.models import QualityResult
+from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -24,6 +27,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
+        self.quality_checker = MutantQualityController(
+            status_db=config.status_db, lims=config.lims_api
+        )
 
     @property
     def conda_binary(self) -> str:
@@ -49,8 +55,16 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_case_output_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "results")
 
+    def get_case_results_file_path(self, case: Case) -> Path:
+        case_output_path: Path = self.get_case_output_path(case.internal_id)
+        return Path(case_output_path, f"/sars-cov-2_{case.latest_ticket}_results.csv")
+
     def get_case_fastq_dir(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "fastq")
+
+    def get_case_qc_report_path(self, case_id: str) -> Path:
+        case_path: Path = self.get_case_path(case_id=case_id)
+        return case_path.joinpath(MutantQC.QUALITY_REPORT_FILE_NAME)
 
     def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
@@ -187,12 +201,20 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def get_cases_to_store(self) -> list[Case]:
-        """Return cases where analysis has a deliverables file,
-        and is ready to be stored in Housekeeper."""
+    def get_completed_cases(self) -> list[Case]:
+        """Return cases that are completed in trailblazer."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
+            for case in self.status_db.get_running_cases_in_workflow(self.workflow)
+            if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
+        ]
+
+    def get_cases_to_store(self) -> list[Case]:
+        """Return cases with completed analysis on Trailblazer, a deliverables file in the case directory,
+        and ready to be stored in Housekeeper."""
+        return [
+            case
+            for case in self.get_completed_cases()
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
@@ -249,3 +271,63 @@ class MutantAnalysisAPI(AnalysisAPI):
         LOG.info(f"Concatenation in progress for sample {sample.internal_id}.")
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)
+
+    def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
+        """Run qc check, report qc summaries on Trailblazer and fail analyses that fail QC."""
+        cases_qc_ready: list[Case] = self.get_completed_cases()
+        LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
+
+        for case in cases_qc_ready:
+            self.trailblazer_api.set_analysis_status(
+                case_id=case.internal_id, status=AnalysisStatus.QC
+            )
+
+            try:
+                qc_result: QualityResult = self.get_qc_result(case=case)
+            except Exception:
+                LOG.error(f"Could not run QC for case {case.internal_id}")
+                self.trailblazer_api.set_analysis_status(
+                    case_id=case.internal_id, status=AnalysisStatus.ERROR
+                )
+                raise CgError(f"Could not run QC for case {case.internal_id}")
+
+            self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
+
+            if not qc_result.passes_qc:
+                if not dry_run:
+                    self.fail_analysis(case)
+            else:
+                self.trailblazer_api.set_analysis_status(
+                    case_id=case.internal_id, status=AnalysisStatus.COMPLETED
+                )
+
+    def get_qc_result(self, case: Case) -> QualityResult:
+        case_results_file_path: Path = self.get_case_results_file_path(case=case)
+        case_qc_report_path: Path = self.get_case_qc_report_path(case_id=case.internal_id)
+        qc_result: QualityResult = self.quality_checker.get_quality_control_result(
+            case=case,
+            case_results_file_path=case_results_file_path,
+            case_qc_report_path=case_qc_report_path,
+        )
+        return qc_result
+
+    def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:
+        report_file_path: Path = self.get_case_qc_report_path(case_id=case.internal_id)
+
+        if not qc_result.passes_qc:
+            comment = qc_result.summary + f" QC report: {report_file_path}"
+        self.trailblazer_api.add_comment(case_id=case.internal_id, comment=comment)
+
+    def fail_analysis(self, case: Case) -> None:
+        """Fail analysis on TB and set case status to hold in StatusDB."""
+        self.trailblazer_api.set_analysis_status(
+            case_id=case.internal_id, status=AnalysisStatus.FAILED
+        )
+        self.set_statusdb_action(case_id=case.internal_id, action=CaseActions.HOLD)
+
+    def run_qc(self, case_id: str) -> None:
+        LOG.info(f"Running QC on case {case_id}.")
+
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+
+        self.get_qc_result(case=case)

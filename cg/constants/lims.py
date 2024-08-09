@@ -157,3 +157,7 @@ class DocumentationMethod(StrEnum):
 class LimsArtifactTypes(StrEnum):
     ANALYTE: str = "Analyte"
     RESULT_FILE: str = "ResultFile"
+
+
+class LimsProcess(StrEnum):
+    COVID_POOLING_STEP: str = "Pooling and Clean-up (Cov) v1"
