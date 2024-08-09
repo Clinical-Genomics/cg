@@ -3,7 +3,6 @@ import logging
 import tempfile
 from http import HTTPStatus
 from pathlib import Path
-from typing import Any
 
 from flask import Blueprint, abort, g, jsonify, make_response, request
 from pydantic.v1 import ValidationError
@@ -31,9 +30,6 @@ from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
@@ -46,17 +42,15 @@ from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import (
     SequencingMetricsRequest,
 )
-from cg.server.endpoints.utils import before_request, is_public
+from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
     Application,
-    ApplicationLimitations,
     Customer,
     IlluminaSampleSequencingMetrics,
     Pool,
-    Sample,
 )
 
 LOG = logging.getLogger(__name__)
@@ -123,52 +117,6 @@ def submit_order(order_type):
 
     if error_message:
         return abort(make_response(jsonify(message=error_message), http_error_response))
-
-
-@BLUEPRINT.route("/samples")
-def parse_samples():
-    """Return samples."""
-    if request.args.get("status") and not g.current_user.is_admin:
-        return abort(HTTPStatus.FORBIDDEN)
-    if request.args.get("status") == "incoming":
-        samples: list[Sample] = db.get_samples_to_receive()
-    elif request.args.get("status") == "labprep":
-        samples: list[Sample] = db.get_samples_to_prepare()
-    elif request.args.get("status") == "sequencing":
-        samples: list[Sample] = db.get_samples_to_sequence()
-    else:
-        customers: list[Customer] | None = (
-            None if g.current_user.is_admin else g.current_user.customers
-        )
-        samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-            pattern=request.args.get("enquiry"), customers=customers
-        )
-    limit = int(request.args.get("limit", 50))
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_samples, total=len(samples))
-
-
-@BLUEPRINT.route("/samples/<sample_id>")
-def parse_sample(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    if sample is None:
-        return abort(HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
-
-
-@BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
-def parse_sample_in_collaboration(sample_id):
-    """Return a single sample."""
-    sample: Sample = db.get_sample_by_internal_id(sample_id)
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    if sample.customer not in customer.collaborators:
-        return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
 @BLUEPRINT.route("/pools")
