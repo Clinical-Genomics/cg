@@ -11,6 +11,7 @@ from cg.server.app_config import app_config
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -94,6 +95,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(CASES_BLUEPRINT)
     app.register_blueprint(ORDERS_BLUEPRINT)
     app.register_blueprint(SAMPLES_BLUEPRINT)
+    app.register_blueprint(POOLS_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(api.BLUEPRINT)
@@ -101,6 +103,7 @@ def _register_blueprints(app: Flask):
     ext.csrf.exempt(CASES_BLUEPRINT)
     ext.csrf.exempt(APPLICATIONS_BLUEPRINT)
     ext.csrf.exempt(ORDERS_BLUEPRINT)
+    ext.csrf.exempt(POOLS_BLUEPRINT)
 
     @app.route("/")
     def index():
