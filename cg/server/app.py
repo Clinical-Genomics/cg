@@ -100,11 +100,6 @@ def _register_blueprints(app: Flask):
     _register_admin_views()
 
     ext.csrf.exempt(api.BLUEPRINT)
-    ext.csrf.exempt(CASES_BLUEPRINT)
-    ext.csrf.exempt(ORDERS_BLUEPRINT)
-    ext.csrf.exempt(SAMPLES_BLUEPRINT)
-
-    ext.csrf.exempt(api.BLUEPRINT)
     ext.csrf.exempt(SAMPLES_BLUEPRINT)
     ext.csrf.exempt(CASES_BLUEPRINT)
     ext.csrf.exempt(APPLICATIONS_BLUEPRINT)
