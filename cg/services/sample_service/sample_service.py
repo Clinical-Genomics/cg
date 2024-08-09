@@ -1,6 +1,7 @@
 from cg.server.dto.samples.collaborator_samples_request import (
     CollaboratorSamplesRequest,
 )
+from cg.server.dto.samples.samples_request import SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.services.sample_service.utils import (
     create_samples_response,
@@ -39,3 +40,9 @@ class SampleService:
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> SamplesResponse:
         samples: list[Sample] = self.store.get_collaborator_samples(request)
         return create_samples_response(samples)
+
+    def get_samples(self, request: SamplesRequest) -> SamplesResponse:
+        pass
+    # Get samples by status
+    # If status not provided, get samples by pattern and customers (if not admin) <- then get all samples?
+    # Limit the result
