@@ -202,18 +202,22 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
+    Workflow.RAREDISEASE: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
     Workflow.RNAFUSION: [
-        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
-        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
-        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],
-        [AnalysisTag.FUSIONINSPECTOR],
-        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],
-        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],
-        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],
-        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
-        [HK_DELIVERY_REPORT_TAG],
-        [AnalysisTag.VCF_FUSION],
-        [AnalysisTag.GENE_COUNTS],
+        [HermesFileTag.LONG_TERM_STORAGE],
+        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],  # legacy
+        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],  # legacy
+        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],  # legacy
+        [AnalysisTag.FUSIONINSPECTOR],  # legacy
+        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],  # legacy
+        [HK_DELIVERY_REPORT_TAG],  # legacy
+        [AnalysisTag.VCF_FUSION],  # legacy
+        [AnalysisTag.GENE_COUNTS],  # legacy
     ],
     Workflow.TAXPROFILER: [
         [HermesFileTag.LONG_TERM_STORAGE],
@@ -241,6 +245,11 @@ class JanusTags:
         "star",
         "general-stats",
     ]
+
+
+class FohmTag(StrEnum):
+    COMPLEMENTARY = "komplettering"
+    PANGOLIN_TYPING = "pangolin-typing-fohm"
 
 
 class GisaidTag(StrEnum):

@@ -104,6 +104,28 @@ def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
 
 
 @pytest.fixture(scope="session")
+def seven_canonical_flow_cell_ids(
+    hiseq_x_single_index_flow_cell_id: str,
+    hiseq_x_dual_index_flow_cell_id: str,
+    hiseq_2500_dual_index_flow_cell_id: str,
+    hiseq_2500_custom_index_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+    novaseq_x_flow_cell_id: str,
+) -> list[str]:
+    """Return a list of seven canonical flow cell ids."""
+    return [
+        hiseq_x_single_index_flow_cell_id,
+        hiseq_x_dual_index_flow_cell_id,
+        hiseq_2500_dual_index_flow_cell_id,
+        hiseq_2500_custom_index_flow_cell_id,
+        novaseq_6000_pre_1_5_kits_flow_cell_id,
+        novaseq_6000_post_1_5_kits_flow_cell_id,
+        novaseq_x_flow_cell_id,
+    ]
+
+
+@pytest.fixture(scope="session")
 def demultiplex_log_file_names(novaseq_6000_post_1_5_kits_flow_cell_id: str) -> list[str]:
     """Return a list of demultiplex log file names."""
     return [

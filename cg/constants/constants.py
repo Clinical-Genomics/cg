@@ -74,7 +74,7 @@ class CustomerId(StrEnum):
     CUST999: str = "cust999"
 
 
-class FlowCellStatus(StrEnum):
+class SequencingRunDataAvailability(StrEnum):
     ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
@@ -162,10 +162,12 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    hg19: str = "hg19"
-    hg38: str = "hg38"
-    canfam3: str = "canfam3"
+    GRCh37: str = "GRCh37"
+    GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
+    CANFAM3 = auto()
+    HG19 = auto()
+    HG38 = auto()
 
 
 class SampleType(StrEnum):
@@ -219,6 +221,7 @@ class FileExtensions(StrEnum):
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
+    TXT: str = ".txt"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"

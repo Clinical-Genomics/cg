@@ -11,7 +11,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
-from cg.constants.housekeeper_tags import GisaidTag
+from cg.constants.housekeeper_tags import FohmTag, GisaidTag
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.csv import write_csv_from_dict
@@ -98,7 +98,7 @@ class GisaidAPI:
     def get_complementary_file_from_hk(self, case_id: str) -> File:
         """Return complementary file from Housekeeper."""
         complementary_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["komplettering"]
+            bundle_name=case_id, tags={FohmTag.COMPLEMENTARY}
         )
         if not complementary_file:
             msg = f"Complementary file missing for bundle: {case_id}"

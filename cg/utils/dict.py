@@ -19,8 +19,4 @@ def get_list_from_dictionary(dictionary: dict) -> list:
 
 def get_full_path_dictionary(dictionary: dict) -> dict:
     """Return a full path of the values of the passed dictionary."""
-    full_path_dict: dict = {}
-    for key, value in dictionary.items():
-        full_path_dict[key] = value.full_path if value else None
-
-    return full_path_dict
+    return {key: value.full_path if value else None for key, value in dictionary.items()}

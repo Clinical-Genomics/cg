@@ -1,10 +1,10 @@
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 
 def test_is_valid_sample_internal_id(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples with valid internal IDs
@@ -16,8 +16,8 @@ def test_is_valid_sample_internal_id(
 
 
 def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples with valid internal IDs

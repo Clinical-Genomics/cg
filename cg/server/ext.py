@@ -13,6 +13,7 @@ from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
 )
+from cg.services.sample_service.sample_service import SampleService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -81,3 +82,4 @@ analysis_client = AnalysisClient()
 delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=analysis_client)
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
+sample_service = SampleService(db)
