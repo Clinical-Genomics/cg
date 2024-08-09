@@ -2,11 +2,9 @@ import logging
 from http import HTTPStatus
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.ext import db
 from cg.server.endpoints.utils import before_request
-from cg.server.utils import parse_metrics_into_request
-from cg.store.models import Analysis, IlluminaSampleSequencingMetrics
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
