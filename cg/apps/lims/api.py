@@ -10,7 +10,12 @@ from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
 from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+)
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -216,8 +221,7 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
 
         if sex:
-            lims_gender = REV_SEX_MAP.get(sex)
-            if lims_gender:
+            if lims_gender := REV_SEX_MAP.get(sex):
                 lims_sample.udf[PROP2UDF["sex"]] = lims_gender
         if name:
             lims_sample.name = name

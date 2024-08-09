@@ -45,7 +45,6 @@ class MetagenomeSubmitter(Submitter):
             ticket_id=order.ticket,
             items=status_data["families"],
         )
-        self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
     @staticmethod
