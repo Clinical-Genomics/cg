@@ -6,9 +6,9 @@ from typing import Any
 
 from sendmail_container import FormDataRequest
 
+from cg.apps.osticket import OsTicket
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -53,6 +53,7 @@ class TicketHandler:
         # Create ticket in Freshdesk
         freshdesk_ticket = TicketCreate(
             email=user_mail,
+            description=message,
             name=user_name,
             subject=order.name,
             attachments=[attachment],

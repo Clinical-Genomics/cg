@@ -28,7 +28,7 @@ class FreshdeskClient:
 
     def create_ticket(self, ticket: TicketCreate) -> TicketResponse:
         """Create a ticket."""
-        LOG.debug(ticket.model_dump_json())
+        LOG.info(ticket.model_dump_json(exclude_none=True))
         try:
             response: Response = self.session.post(
                 url=self._url(EndPoints.TICKETS),
@@ -38,6 +38,7 @@ class FreshdeskClient:
             return TicketResponse.model_validate(response.json())
         except RequestException as error:
             LOG.error(f"Could not create ticket: {error}")
+            LOG.error(f"Response: {response.text}")
             raise FreshdeskAPIException(error) from error
         except ValidationError as error:
             LOG.error(f"Response from Freshdesk does not fit model: {TicketResponse}.\n{error}")
