@@ -9,6 +9,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.apps.tb.api import TrailblazerAPI
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.flow_cell_service.flow_cell_service import FlowCellService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
@@ -83,3 +84,4 @@ delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=anal
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
+flow_cell_service = FlowCellService(db)

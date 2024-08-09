@@ -380,7 +380,7 @@ class ReadHandler(BaseHandler):
 
     def get_illumina_sequencing_run_by_device_internal_id(
         self, device_internal_id: str
-    ) -> IlluminaSequencingRun:
+    ) -> IlluminaSequencingRun | None:
         """Get Illumina sequencing run entry by device internal id."""
         return apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),

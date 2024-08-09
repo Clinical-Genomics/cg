@@ -1,14 +1,13 @@
-from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
+from cg.services.flow_cell_service.dtos import SequencingMetrics
 from cg.store.models import IlluminaSampleSequencingMetrics
 
 
-def parse_metrics_into_request(
+def create_metrics_dto(
     metrics: list[IlluminaSampleSequencingMetrics],
-) -> list[SequencingMetricsRequest]:
-    """Parse sequencing metrics into a request."""
-    parsed_metrics: list[SequencingMetricsRequest] = []
+) -> list[SequencingMetrics]:
+    parsed_metrics = []
     for metric in metrics:
-        parsed_metric = SequencingMetricsRequest(
+        parsed_metric = SequencingMetrics(
             flow_cell_name=metric.instrument_run.device.internal_id,
             flow_cell_lane_number=metric.flow_cell_lane,
             sample_internal_id=metric.sample.internal_id,
