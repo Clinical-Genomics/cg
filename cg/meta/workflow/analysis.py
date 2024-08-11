@@ -737,8 +737,8 @@ class AnalysisAPI(MetaAPI):
             )
         return analysis_types.pop() if analysis_types else None
 
-    def _get_genotype_files(version_id: int) -> list:
-        return hk.files(version=version_id, tags=["genotype"]).all()
+    def _get_genotype_files(self, version_id: int) -> list:
+        return hk.files(version=version_id, tags=(["genotype"])).all()
 
     def _is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
