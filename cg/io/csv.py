@@ -12,13 +12,16 @@ DELIMITER_TO_SUFFIX = {",": FileExtensions.CSV, "\t": FileExtensions.TSV}
 
 
 def read_csv(
-    file_path: Path, read_to_dict: bool = False, delimiter: str = ","
+    file_path: Path, read_to_dict: bool = False, delimiter: str = ",", ignore_suffix: bool = False
 ) -> list[list[str]] | list[dict]:
     """
     Read content in a CSV file to a list of list or list of dict.
     The delimiter parameter can be used to read TSV files.
     """
-    validate_file_suffix(path_to_validate=file_path, target_suffix=DELIMITER_TO_SUFFIX[delimiter])
+    if not ignore_suffix:
+        validate_file_suffix(
+            path_to_validate=file_path, target_suffix=DELIMITER_TO_SUFFIX[delimiter]
+        )
     with open(file_path, "r") as file:
         csv_reader = (
             csv.DictReader(file, delimiter=delimiter)
