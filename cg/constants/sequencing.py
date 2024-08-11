@@ -55,10 +55,6 @@ class SequencingMethod(StrEnum):
     WGS: str = "wgs"
     WTS: str = "wts"
 
-    @property
-    def dna(self) -> set[str]:
-        return {self.WGS, self.WES, self.TGS}
-
 
 class Variants(StrEnum):
     """Type of variants."""
