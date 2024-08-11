@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from cg.server.dto.samples.samples_response import CustomerDto, SampleDTO, SamplesResponse
+from cg.server.dto.samples.samples_response import SamplesResponse
+from cg.services.sample_service.dto_mappers import create_sample_dto
 from cg.store.models import Sample
 
 
@@ -24,23 +25,3 @@ def create_samples_response(samples: list[Sample]) -> SamplesResponse:
     for sample in samples:
         sample_dtos.append(create_sample_dto(sample))
     return SamplesResponse(samples=sample_dtos, total=len(samples))
-
-
-def create_sample_dto(sample: Sample) -> SampleDTO:
-    customer = CustomerDto(
-        internal_id=sample.customer.internal_id,
-        name=sample.customer.name,
-    )
-    return SampleDTO(
-        comment=sample.comment,
-        customer=customer,
-        internal_id=sample.internal_id,
-        name=sample.name,
-        phenotype_groups=sample.phenotype_groups,
-        phenotype_terms=sample.phenotype_terms,
-        priority=sample.priority,
-        reference_genome=sample.reference_genome,
-        status=sample.state,
-        subject_id=sample.subject_id,
-        tumour=sample.is_tumour,
-    )

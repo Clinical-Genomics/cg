@@ -16,7 +16,9 @@ from cg.services.delivery_message.messages import (
 )
 from cg.services.delivery_message.messages.analysis_message import AnalysisMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
+from cg.services.delivery_message.messages.fastq_analysis_message import (
+    FastqAnalysisMessage,
+)
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )

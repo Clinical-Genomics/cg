@@ -2,7 +2,11 @@
 
 import pytest
 
-from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse, CoverageSample
+from cg.clients.chanjo2.models import (
+    CoveragePostRequest,
+    CoveragePostResponse,
+    CoverageSample,
+)
 from cg.constants.constants import GenomeVersion
 
 
