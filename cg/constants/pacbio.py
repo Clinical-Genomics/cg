@@ -7,6 +7,8 @@ class PacBioDirsAndFiles:
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
     RAW_DATA_REPORT: str = "raw_data.report.json"
+    SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
+    CCS_REPORT_SUFFIX: str = "ccs_report.json"
 
 
 class CCSAttributeIDs:
@@ -38,3 +40,13 @@ class PolymeraseDataAttributeIDs:
     READ_LENGTH_N50: str = "raw_data_report.read_n50"
     MEAN_LONGEST_SUBREAD_LENGTH: str = "raw_data_report.insert_length"
     LONGEST_SUBREAD_LENGTH_N50: str = "raw_data_report.insert_n50"
+
+
+class SmrtLinkDatabasesIDs:
+    BIO_SAMPLE_NAME: str = "bioSampleName"
+    CELL_ID: str = "cellId"
+    CELL_INDEX: str = "cellIndex"
+    MOVIE_NAME: str = "metadataContextId"
+    PATH: str = "path"
+    WELL_NAME: str = "wellName"
+    WELL_SAMPLE_NAME: str = "wellSampleName"

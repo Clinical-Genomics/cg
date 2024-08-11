@@ -6,14 +6,14 @@ from pathlib import Path
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg38."""
-        return GenomeVersion.hg38
+        return GenomeVersion.HG38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
@@ -76,7 +76,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             sample=case_sample.sample
         )
         sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_sample.case.internal_id,
+            name=case_sample.sample.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             strandedness=Strandedness.REVERSE,
@@ -100,12 +100,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return genomes_base.absolute()
         return Path(self.references).absolute()
 
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
-        """Return search patterns for MultiQC for Rnafusion."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
-        return search_patterns
-
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present.
@@ -122,3 +116,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Rnafusion Scout upload case tags."""
+        return RNAFUSION_CASE_TAGS

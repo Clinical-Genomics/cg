@@ -66,9 +66,7 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import (
     IlluminaDataTransferService,
 )
@@ -103,31 +101,35 @@ multiqc_json_file = "multiqc_data.json"
 software_version_file = "software_versions.yml"
 deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
-    "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.backup_fixtures.backup_fixtures",
+    "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
+    "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
-    "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
-    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
-    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
+    "tests.fixture_plugins.fohm.fohm_fixtures",
+    "tests.fixture_plugins.io.csv_fixtures",
+    "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
-    "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
-    "tests.fixture_plugins.backup_fixtures.backup_fixtures",
-    "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
+    "tests.fixture_plugins.timestamp_fixtures",
 ]
 
 
@@ -1344,7 +1346,7 @@ def collaboration_id() -> str:
 
 
 @pytest.fixture
-def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
+def mip_dna_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
         name="Klinisk Immunologi",
@@ -1354,11 +1356,21 @@ def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
+def balsamic_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",
         internal_id=CustomerId.CUST110,
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture
+def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a customer with enabled observation upload."""
+    return Customer(
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
 
@@ -1908,6 +1920,7 @@ def context_config(
             "swegen_path": str(cg_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "chanjo2": {"host": "chanjo2_host"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
@@ -2786,6 +2799,7 @@ def rnafusion_workflow() -> str:
 @pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
+    sample_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
     strandedness: str,
@@ -2794,7 +2808,7 @@ def rnafusion_sample_sheet_content(
     headers: str = ",".join(RnafusionSampleSheetEntry.headers())
     row: str = ",".join(
         [
-            rnafusion_case_id,
+            sample_id,
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
             strandedness,
@@ -3047,7 +3061,7 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
                 "path_index": "",
                 "step": "report",
                 "tag": ["multiqc-html", "rna"],
-                "id": rnafusion_case_id,
+                "id": sample_id,
                 "format": "html",
                 "mandatory": True,
             },
@@ -3423,7 +3437,7 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
-        reference_genome=GenomeVersion.hg38,
+        reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(

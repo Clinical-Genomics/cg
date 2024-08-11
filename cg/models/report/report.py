@@ -62,6 +62,7 @@ class DataAnalysisModel(BaseModel):
     Model that describes the workflow attributes used for the data analysis
 
     Attributes:
+        comment: prod bioinfo comment regarding the data analysis; source: StatusDB/analysis/comment
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
         delivered_files: list of analysis case files to be delivered
@@ -75,6 +76,7 @@ class DataAnalysisModel(BaseModel):
         workflow_version: workflow version; source: statusDB/analysis/workflow_version
     """
 
+    comment: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     delivered_files: Annotated[
@@ -140,3 +142,17 @@ class ReportModel(BaseModel):
     date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
     accredited: bool | None = None
+
+
+class ReportRequiredFields(BaseModel):
+    """Model that defines the mandatory fields of the different sections of the delivery report."""
+
+    applications: dict[str, list[str]]
+    case: list[str]
+    customer: list[str]
+    data_analysis: list[str]
+    metadata: dict[str, list[str]]
+    methods: dict[str, list[str]]
+    report: list[str]
+    samples: dict[str, list[str]]
+    timestamps: dict[str, list[str]]
