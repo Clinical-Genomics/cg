@@ -5,15 +5,15 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.data_transfer.models import (
+    IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
+)
 from cg.services.illumina.file_parsing.bcl_convert_metrics_parser import (
     BCLConvertMetricsParser,
 )
 from cg.services.illumina.file_parsing.demux_version_service import (
     IlluminaDemuxVersionService,
-)
-from cg.services.illumina.data_transfer.models import (
-    IlluminaSampleSequencingMetricsDTO,
-    IlluminaSequencingRunDTO,
 )
 from cg.services.illumina.file_parsing.sequencing_times.collect_sequencing_times import (
     CollectSequencingTimes,

@@ -16,10 +16,10 @@ from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import (
-    RAREDISEASE_METRIC_CONDITIONS,
     RAREDISEASE_COVERAGE_FILE_TAGS,
-    RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+    RAREDISEASE_COVERAGE_THRESHOLD,
+    RAREDISEASE_METRIC_CONDITIONS,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex

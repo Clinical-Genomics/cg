@@ -1,8 +1,8 @@
 """Module to test the collect sequencing times class."""
 
 import pytest
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.file_parsing.sequencing_times.collect_sequencing_times import (
     CollectSequencingTimes,
 )

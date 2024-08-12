@@ -39,7 +39,7 @@ fluffy.add_command(store_available)
 @click.pass_obj
 def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
     """
-    Write modified samplesheet file to case folder
+    Write modified sample sheet file to case folder
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)

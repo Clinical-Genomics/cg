@@ -26,3 +26,10 @@ class BalsamicObservationsInputFiles(ObservationsInputFiles):
 
     snv_germline_vcf_path: FilePath
     sv_germline_vcf_path: FilePath | None = None
+
+
+class RarediseaseObservationsInputFiles(ObservationsInputFiles):
+    """Model for validating RAREDISEASE Loqusdb input files."""
+
+    profile_vcf_path: FilePath
+    family_ped_path: FilePath
