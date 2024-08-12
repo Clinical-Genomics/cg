@@ -1,4 +1,4 @@
-from cg.services.flow_cell_service.dtos import SequencingMetrics
+from cg.services.sample_run_metrics_service.dtos import SequencingMetrics
 from cg.store.models import IlluminaSampleSequencingMetrics
 
 
