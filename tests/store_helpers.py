@@ -19,6 +19,7 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -696,7 +697,7 @@ class StoreHelpers:
             flow_cell: IlluminaFlowCell | None = store.get_illumina_flow_cell_by_internal_id(
                 internal_id=flow_cell_id
             )
-        except ValueError:
+        except EntryNotFoundError:
             flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
                 store=store, flow_cell_id=flow_cell_id, model=model
             )
@@ -762,7 +763,7 @@ class StoreHelpers:
                     device_internal_id=flow_cell.internal_id
                 )
             )
-        except ValueError:
+        except EntryNotFoundError:
             illumina_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
                 store=store,
                 flow_cell=flow_cell,

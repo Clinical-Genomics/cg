@@ -13,6 +13,7 @@ from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoun
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
+from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
@@ -388,7 +389,7 @@ class ReadHandler(BaseHandler):
             device_internal_id=device_internal_id,
         ).first()
         if not sequencing_run:
-            raise ValueError(f"No sequencing run found for device {device_internal_id}")
+            raise EntryNotFoundError(f"No sequencing run found for device {device_internal_id}")
         return sequencing_run
 
     def get_latest_illumina_sequencing_run_for_nipt_case(
@@ -1475,7 +1476,9 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
         if not flow_cell:
-            raise ValueError(f"Could not find Illumina flow cell with internal id {internal_id}")
+            raise EntryNotFoundError(
+                f"Could not find Illumina flow cell with internal id {internal_id}"
+            )
         return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:

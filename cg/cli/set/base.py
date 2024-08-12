@@ -14,6 +14,7 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.cli_options import SKIP_CONFIRMATION
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import ApplicationVersion, Customer, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
@@ -299,7 +300,7 @@ def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: 
         sequencing_run: IlluminaSequencingRun = (
             status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
         )
-    except ValueError:
+    except EntryNotFoundError:
         LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
 

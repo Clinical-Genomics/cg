@@ -1,3 +1,4 @@
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import (
     Case,
     CaseSample,
@@ -136,11 +137,11 @@ def test_delete_illumina_flow_cell(
     store_with_illumina_sequencing_data.delete_illumina_flow_cell(novaseq_x_flow_cell_id)
 
     # THEN the flow cell should no longer be found in the store
-    with pytest.raises(ValueError):
+    with pytest.raises(EntryNotFoundError):
         store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
             novaseq_x_flow_cell_id
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(EntryNotFoundError):
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
         )

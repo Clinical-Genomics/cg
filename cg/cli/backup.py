@@ -33,6 +33,7 @@ from cg.services.illumina.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
@@ -83,7 +84,7 @@ def backup_illumina_runs(context: CGConfig, dry_run: bool):
                 pigz_binary_path=context.pigz.binary_path,
                 sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             )
-        except ValueError as error:
+        except EntryNotFoundError as error:
             logging.error(f"{error}")
             continue
         except (
@@ -109,7 +110,7 @@ def encrypt_illumina_runs(context: CGConfig, dry_run: bool):
             sequencing_run: IlluminaSequencingRun = (
                 status_db.get_illumina_sequencing_run_by_device_internal_id(run.id)
             )
-        except ValueError as error:
+        except EntryNotFoundError as error:
             LOG.error(f"{error}")
             continue
         if sequencing_run.has_backup:
@@ -162,7 +163,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
             sequencing_run: IlluminaSequencingRun = (
                 status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
             )
-    except ValueError as error:
+    except EntryNotFoundError as error:
         LOG.error(f"{error}")
         raise click.Abort
 

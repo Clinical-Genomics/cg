@@ -15,6 +15,7 @@ from cg.services.illumina.data_transfer.models import (
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
+from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
 from cg.store.models import (
     Analysis,
     Application,
@@ -400,7 +401,7 @@ class CreateHandler(BaseHandler):
         """Add a new Illumina flow cell to the status database as a pending transaction."""
         try:
             self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id)
-        except ValueError:
+        except EntryNotFoundError:
             new_flow_cell = IlluminaFlowCell(
                 internal_id=flow_cell_dto.internal_id,
                 type=flow_cell_dto.type,
@@ -409,7 +410,7 @@ class CreateHandler(BaseHandler):
             self.session.add(new_flow_cell)
             LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
             return new_flow_cell
-        raise ValueError(f"Flow cell already exists: {flow_cell_dto.internal_id}")
+        raise EntryAlreadyExistsError(f"Flow cell already exists: {flow_cell_dto.internal_id}")
 
     def add_illumina_sequencing_run(
         self, sequencing_run_dto: IlluminaSequencingRunDTO, flow_cell: IlluminaFlowCell

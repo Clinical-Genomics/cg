@@ -15,6 +15,7 @@ from cg.exc import IlluminaCleanRunError, HousekeeperFileMissingError
 from cg.services.illumina.cleaning.clean_runs_service import (
     IlluminaCleanRunsService,
 )
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import (
     Sample,
     IlluminaSequencingRun,
@@ -364,7 +365,7 @@ def test_get_sequencing_run_from_statusdb_does_not_exist(
     # WHEN retrieving the sequencing run from statusDB
 
     # THEN a ValueError is raised
-    with pytest.raises(ValueError):
+    with pytest.raises(EntryNotFoundError):
         illumina_clean_service_can_not_be_removed.get_sequencing_run_from_status_db()
 
 
