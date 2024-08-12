@@ -1469,11 +1469,14 @@ class ReadHandler(BaseHandler):
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
-        return apply_illumina_flow_cell_filters(
+        flow_cell: IlluminaFlowCell = apply_illumina_flow_cell_filters(
             filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+        if not flow_cell:
+            raise ValueError(f"Could not find Illumina flow cell with internal id {internal_id}")
+        return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """Return all cases that are ready for sequencing QC."""

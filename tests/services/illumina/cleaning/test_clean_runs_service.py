@@ -361,10 +361,6 @@ def test_get_sequencing_run_from_statusdb_does_not_exist(
         "flow_cell_does_not_exist"
     )
 
-    assert not illumina_clean_service_can_not_be_removed.status_db.get_illumina_sequencing_run_by_device_internal_id(
-        illumina_clean_service_can_not_be_removed.sequencing_run_dir_data.id
-    )
-
     # WHEN retrieving the sequencing run from statusDB
 
     # THEN a ValueError is raised

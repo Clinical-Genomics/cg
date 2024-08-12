@@ -127,7 +127,8 @@ def test_add_illumina_flow_cell(
     store: Store,
 ):
     # GIVEN an Illumina flow cell not in store
-    assert not store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
+    with pytest.raises(ValueError):
+        store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
 
     # WHEN adding the flow cell to the store
     store.add_illumina_flow_cell(illumina_flow_cell_dto)

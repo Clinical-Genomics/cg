@@ -692,14 +692,14 @@ class StoreHelpers:
         model: str = "10B",
     ) -> IlluminaFlowCell:
         """Return an Illumina flow cell if exists, otherwise add it to the store and return it."""
-        flow_cell: IlluminaFlowCell | None = store.get_illumina_flow_cell_by_internal_id(
-            internal_id=flow_cell_id
-        )
-        if flow_cell:
-            return flow_cell
-        flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
-            store=store, flow_cell_id=flow_cell_id, model=model
-        )
+        try:
+            flow_cell: IlluminaFlowCell | None = store.get_illumina_flow_cell_by_internal_id(
+                internal_id=flow_cell_id
+            )
+        except ValueError:
+            flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
+                store=store, flow_cell_id=flow_cell_id, model=model
+            )
         return flow_cell
 
     @staticmethod
@@ -756,22 +756,22 @@ class StoreHelpers:
         """
         Return an Illumina sequencing run if exists, otherwise add it to the store and return it.
         """
-        illumina_run: IlluminaSequencingRun | None = (
-            store.get_illumina_sequencing_run_by_device_internal_id(
-                device_internal_id=flow_cell.internal_id
+        try:
+            illumina_run: IlluminaSequencingRun | None = (
+                store.get_illumina_sequencing_run_by_device_internal_id(
+                    device_internal_id=flow_cell.internal_id
+                )
             )
-        )
-        if illumina_run:
-            return illumina_run
-        illumina_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
-            store=store,
-            flow_cell=flow_cell,
-            sequencer_type=sequencer_type,
-            sequencer_name=sequencer_name,
-            data_availability=data_availability,
-            archived_at=archived_at,
-            has_backup=has_backup,
-        )
+        except ValueError:
+            illumina_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
+                store=store,
+                flow_cell=flow_cell,
+                sequencer_type=sequencer_type,
+                sequencer_name=sequencer_name,
+                data_availability=data_availability,
+                archived_at=archived_at,
+                has_backup=has_backup,
+            )
         return illumina_run
 
     @staticmethod
