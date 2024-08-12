@@ -1,5 +1,6 @@
 from pathlib import Path
 from cg.meta.workflow.mutant.quality_controller.models import (
+    MutantPoolSamples,
     QualityResult,
     CaseQualityResult,
     QualityMetrics,
@@ -13,6 +14,49 @@ from cg.meta.workflow.mutant.quality_controller.quality_controller import (
 from cg.store.models import Case, Sample
 
 
+def test__get_mutant_pool_samples(
+    mutant_quality_controller: MutantQualityController,
+    mutant_case_qc_pass: Case,
+    sample_qc_pass: Sample,
+    external_negative_control_qc_pass: Sample,
+    internal_negative_control_qc_pass: Sample,
+):
+    # WHEN creating a MutantPoolSamples object
+    mutant_pool_samples: MutantPoolSamples = mutant_quality_controller._get_mutant_pool_samples(
+        case=mutant_case_qc_pass
+    )
+
+    # THEN the pool is created correctly:
+    #   - the external negative control is identified and separated from the rest of the samples
+    #   - all other samples are present in the list under samples
+    #   - the internal negative control corresponding to the case is fetched from lims and added to the pool
+
+    assert mutant_pool_samples.external_negative_control == external_negative_control_qc_pass
+    assert mutant_pool_samples.samples == [sample_qc_pass]
+    assert mutant_pool_samples.internal_negative_control == internal_negative_control_qc_pass
+
+
+def test_get_quality_metrics(
+    mutant_quality_controller: MutantQualityController,
+    mutant_results_file_path_case_qc_pass: Path,
+    mutant_case_qc_pass: Case,
+    mutant_sample_results_sample_qc_pass: SampleResults,
+    sample_qc_pass: Sample,
+):
+    # GIVEN a case
+
+    # WHEN generating the quality_metrics
+    quality_metrics: QualityMetrics = mutant_quality_controller._get_quality_metrics(
+        case_results_file_path=mutant_results_file_path_case_qc_pass,
+        case=mutant_case_qc_pass,
+    )
+
+    # THEN no errors are raised and the sample_results are created for each sample
+    assert (
+        quality_metrics.results[sample_qc_pass.internal_id] == mutant_sample_results_sample_qc_pass
+    )
+
+
 def test__get_sample_quality_results(
     mutant_quality_controller: MutantQualityController,
     sample_qc_pass: Sample,
@@ -21,11 +65,11 @@ def test__get_sample_quality_results(
     # GIVEN a sample that passes qc and its corresponding SampleResults
 
     # WHEN peforming quality control on the sample
-    sample_quality_results_sample_qc_pass: SampleQualityResults = (
-        mutant_quality_controller._get_sample_quality_results(
-            sample=sample_qc_pass,
-            sample_results=mutant_sample_results_sample_qc_pass,
-        )
+    sample_quality_results_sample_qc_pass: (
+        SampleQualityResults
+    ) = mutant_quality_controller._get_sample_quality_results(
+        sample=sample_qc_pass,
+        sample_results=mutant_sample_results_sample_qc_pass,
     )
     # THEN the sample passes qc
     assert sample_quality_results_sample_qc_pass.passes_qc is True
@@ -38,10 +82,10 @@ def test__get_samples_quality_results(
     # GIVEN a quality metrics objrect from a case where all samples pass QC
 
     # WHEN performing quality control on all the samples
-    samples_quality_results: SamplesQualityResults = (
-        mutant_quality_controller._get_samples_quality_results(
-            quality_metrics=mutant_quality_metrics_qc_pass
-        )
+    samples_quality_results: (
+        SamplesQualityResults
+    ) = mutant_quality_controller._get_samples_quality_results(
+        quality_metrics=mutant_quality_metrics_qc_pass
     )
 
     # THEN no error is raised and the correct quality results are generated

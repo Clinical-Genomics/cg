@@ -9,13 +9,21 @@ from cg.meta.workflow.mutant.quality_controller.models import SampleResults
 from cg.store.models import Case, Sample
 
 
-def test__get_validated_results_list(mutant_results_file_path_case_qc_pass: Path):
-    # GIVEN a valid raw_results: list[dict[str, Any]] objects
+def test__get_samples_results(
+    mutant_case_qc_pass: Case,
+    mutant_results_list_qc_pass: list[SampleResults],
+    sample_qc_pass: Sample,
+):
+    # GIVEN a case and corresponding results_list
 
-    # WHEN parsing the file
-    _get_validated_results_list(results_file_path=mutant_results_file_path_case_qc_pass)
+    # WHEN creating a sample_name_to_id_mapping dict
+    samples_results: dict[str, SampleResults] = _get_samples_results(
+        case=mutant_case_qc_pass, results_list=mutant_results_list_qc_pass
+    )
 
-    # THEN no error is thrown
+    # THEN the samples_results object has the correct structure
+    assert isinstance(samples_results, dict)
+    assert isinstance(samples_results[sample_qc_pass.internal_id], SampleResults)
 
 
 def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
@@ -35,23 +43,14 @@ def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
     )
 
 
-def test__get_samples_results(
-    mutant_case_qc_pass: Case,
-    mutant_results_list_qc_pass: list[SampleResults],
-    sample_qc_pass: Sample,
-):
-    # GIVEN a case and corresponding results_list
+def test__get_validated_results_list(mutant_results_file_path_case_qc_pass: Path):
+    # GIVEN a valid raw_results: list[dict[str, Any]] objects
 
-    # WHEN creating a sample_name_to_id_mapping dict
-    samples_results: dict[str, SampleResults] = _get_samples_results(
-        case=mutant_case_qc_pass, results_list=mutant_results_list_qc_pass
-    )
+    # WHEN parsing the file
+    _get_validated_results_list(results_file_path=mutant_results_file_path_case_qc_pass)
 
-    # THEN the samples_results object has the correct structure
-    assert isinstance(samples_results, dict)
-    assert isinstance(samples_results[sample_qc_pass.internal_id], SampleResults)
-
-
+    # THEN no error is thrown
+    
 def test_parse_samples_results(
     mutant_case_qc_pass: Case, mutant_results_file_path_case_qc_pass: Path
 ):
