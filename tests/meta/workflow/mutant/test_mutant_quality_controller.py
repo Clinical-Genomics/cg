@@ -65,11 +65,11 @@ def test__get_sample_quality_results(
     # GIVEN a sample that passes qc and its corresponding SampleResults
 
     # WHEN peforming quality control on the sample
-    sample_quality_results_sample_qc_pass: (
-        SampleQualityResults
-    ) = mutant_quality_controller._get_sample_quality_results(
-        sample=sample_qc_pass,
-        sample_results=mutant_sample_results_sample_qc_pass,
+    sample_quality_results_sample_qc_pass: SampleQualityResults = (
+        mutant_quality_controller._get_sample_quality_results(
+            sample=sample_qc_pass,
+            sample_results=mutant_sample_results_sample_qc_pass,
+        )
     )
     # THEN the sample passes qc
     assert sample_quality_results_sample_qc_pass.passes_qc is True
@@ -82,10 +82,10 @@ def test__get_samples_quality_results(
     # GIVEN a quality metrics objrect from a case where all samples pass QC
 
     # WHEN performing quality control on all the samples
-    samples_quality_results: (
-        SamplesQualityResults
-    ) = mutant_quality_controller._get_samples_quality_results(
-        quality_metrics=mutant_quality_metrics_qc_pass
+    samples_quality_results: SamplesQualityResults = (
+        mutant_quality_controller._get_samples_quality_results(
+            quality_metrics=mutant_quality_metrics_qc_pass
+        )
     )
 
     # THEN no error is raised and the correct quality results are generated

@@ -50,7 +50,8 @@ def test__get_validated_results_list(mutant_results_file_path_case_qc_pass: Path
     _get_validated_results_list(results_file_path=mutant_results_file_path_case_qc_pass)
 
     # THEN no error is thrown
-    
+
+
 def test_parse_samples_results(
     mutant_case_qc_pass: Case, mutant_results_file_path_case_qc_pass: Path
 ):
