@@ -50,14 +50,16 @@ def validate_application_compatibility(
     errors: list[ApplicationNotCompatibleError] = []
     workflow: Workflow = order.workflow
     allowed_prep_categories: list[PrepCategory] = WORKFLOW_PREP_CATEGORIES[workflow]
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if _is_application_not_compatible(
                 allowed_prep_categories=allowed_prep_categories,
                 application_tag=sample.application,
                 store=store,
             ):
-                error = ApplicationNotCompatibleError(case_name=case.name, sample_name=sample.name)
+                error = ApplicationNotCompatibleError(
+                    case_index=case_index, sample_index=sample_index
+                )
                 errors.append(error)
     return errors
 
@@ -71,10 +73,10 @@ def validate_buffer_skip_rc_condition(order: TomteOrder) -> list[CaseSampleError
 
 def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
     errors = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
-                error = InvalidBufferError(case_name=case.name, sample_name=sample.name)
+                error = InvalidBufferError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 
@@ -85,11 +87,11 @@ def validate_concentration_required_if_skip_rc(
     if not order.skip_reception_control:
         return []
     errors = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if is_concentration_missing(sample):
                 error = ConcentrationRequiredIfSkipRCError(
-                    case_name=case.name, sample_name=sample.name
+                    case_index=case_index, sample_index=sample_index
                 )
                 errors.append(error)
     return errors
@@ -97,29 +99,31 @@ def validate_concentration_required_if_skip_rc(
 
 def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[CaseSampleError]:
     errors = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if sample.name == sample.subject_id:
-                error = SubjectIdSameAsSampleNameError(case_name=case.name, sample_name=sample.name)
+                error = SubjectIdSameAsSampleNameError(
+                    case_index=case_index, sample_index=sample_index
+                )
                 errors.append(error)
     return errors
 
 
 def validate_well_positions_required(order: TomteOrder) -> list[WellPositionMissingError]:
     errors: list[WellPositionMissingError] = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if is_well_position_missing(sample):
-                error = WellPositionMissingError(case_name=case.name, sample_name=sample.name)
+                error = WellPositionMissingError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 
 
 def validate_container_name_required(order: TomteOrder) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if is_container_name_missing(sample):
-                error = ContainerNameMissingError(case_name=case.name, sample_name=sample.name)
+                error = ContainerNameMissingError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors

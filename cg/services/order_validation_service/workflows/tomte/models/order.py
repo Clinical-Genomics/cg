@@ -4,3 +4,7 @@ from cg.services.order_validation_service.workflows.tomte.models.case import Tom
 
 class TomteOrder(Order):
     cases: list[TomteCase]
+
+    @property
+    def enumerated_cases(self) -> enumerate[TomteCase]:
+        return enumerate(self.cases)

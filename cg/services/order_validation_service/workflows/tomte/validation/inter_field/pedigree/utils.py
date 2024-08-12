@@ -47,12 +47,12 @@ def get_error(node: Node, parent_type: str) -> PedigreeError:
 def get_mother_error(node: Node) -> PedigreeError:
     sample = node.sample
     if sample.name == sample.mother:
-        return SampleIsOwnMotherError(sample_name=sample.name, case_name=node.case_name)
-    return DescendantAsMotherError(sample_name=sample.name, case_name=node.case_name)
+        return SampleIsOwnMotherError(sample_index=node.sample_index, case_index=node.case_index)
+    return DescendantAsMotherError(sample_index=node.sample_index, case_index=node.case_index)
 
 
 def get_father_error(node: Node) -> PedigreeError:
     sample = node.sample
     if sample.name == sample.father:
-        return SampleIsOwnFatherError(sample_name=sample.name, case_name=node.case_name)
-    return DescendantAsFatherError(sample_name=sample.name, case_name=node.case_name)
+        return SampleIsOwnFatherError(sample_index=node.sample_index, case_index=node.case_index)
+    return DescendantAsFatherError(sample_index=node.sample_index, case_index=node.case_index)

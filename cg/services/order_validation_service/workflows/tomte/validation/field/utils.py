@@ -9,12 +9,12 @@ from cg.services.order_validation_service.models.errors import (
 )
 
 
-def convert_errors(pydantic_errors: ValidationError, order: dict) -> ValidationErrors:
+def convert_errors(pydantic_errors: ValidationError) -> ValidationErrors:
     error_details: list[ErrorDetails] = pydantic_errors.errors()
     order_errors = convert_order_errors(error_details)
-    case_errors = convert_case_errors(error_details=error_details, order=order)
-    case_sample_errors = convert_case_sample_errors(error_details=error_details, order=order)
-    sample_errors = convert_sample_errors(error_details=error_details, order=order)
+    case_errors = convert_case_errors(error_details=error_details)
+    case_sample_errors = convert_case_sample_errors(error_details=error_details)
+    sample_errors = convert_sample_errors(error_details=error_details)
     return ValidationErrors(
         order_errors=order_errors,
         case_errors=case_errors,
@@ -32,20 +32,20 @@ def convert_order_errors(error_details: list[ErrorDetails]) -> list[OrderError]:
     return errors
 
 
-def convert_case_errors(error_details: list[ErrorDetails], order: dict) -> list[CaseError]:
+def convert_case_errors(error_details: list[ErrorDetails]) -> list[CaseError]:
     errors: list[CaseError] = []
     case_details = get_case_error_details(error_details)
     for error in case_details:
-        error = create_case_error(error=error, order=order)
+        error = create_case_error(error=error)
         errors.append(error)
     return errors
 
 
-def convert_sample_errors(error_details: list[ErrorDetails], order: dict) -> list[SampleError]:
+def convert_sample_errors(error_details: list[ErrorDetails]) -> list[SampleError]:
     errors: list[SampleError] = []
     sample_details = get_sample_error_details(error_details)
     for error in sample_details:
-        error = create_sample_error(error=error, order=order)
+        error = create_sample_error(error=error)
         errors.append(error)
     return errors
 
@@ -57,41 +57,39 @@ def create_order_error(error: ErrorDetails) -> OrderError:
     return error
 
 
-def create_sample_error(error: ErrorDetails, order: dict) -> SampleError:
-    sample_name = get_sample_name(error=error, order=order)
+def create_sample_error(error: ErrorDetails) -> SampleError:
+    sample_index = get_sample_index(error=error)
     field_name = get_sample_field_name(error)
     message = get_error_message(error)
-    error = SampleError(sample_name=sample_name, field=field_name, message=message)
+    error = SampleError(sample_index=sample_index, field=field_name, message=message)
     return error
 
 
-def create_case_error(error: ErrorDetails, order: dict) -> CaseError:
-    case_name = get_case_name(error=error, order=order)
+def create_case_error(error: ErrorDetails) -> CaseError:
+    case_index = get_case_index(error=error)
     field_name = get_case_field_name(error)
     message = get_error_message(error)
-    error = CaseError(case_name=case_name, field=field_name, message=message)
+    error = CaseError(case_index=case_index, field=field_name, message=message)
     return error
 
 
-def convert_case_sample_errors(
-    error_details: list[ErrorDetails], order: dict
-) -> list[CaseSampleError]:
+def convert_case_sample_errors(error_details: list[ErrorDetails]) -> list[CaseSampleError]:
     errors: list[CaseSampleError] = []
     case_sample_details = get_case_sample_error_details(error_details)
     for error in case_sample_details:
-        error = create_case_sample_error(error=error, order=order)
+        error = create_case_sample_error(error=error)
         errors.append(error)
     return errors
 
 
-def create_case_sample_error(error: ErrorDetails, order: dict) -> CaseSampleError:
-    case_name = get_case_name(error=error, order=order)
-    sample_name = get_case_sample_name(error=error, order=order)
+def create_case_sample_error(error: ErrorDetails) -> CaseSampleError:
+    case_index = get_case_index(error=error)
+    sample_index = get_case_sample_index(error=error)
     field_name = get_case_sample_field_name(error)
     message = get_error_message(error)
     error = CaseSampleError(
-        case_name=case_name,
-        sample_name=sample_name,
+        case_index=case_index,
+        sample_index=sample_index,
         field=field_name,
         message=message,
     )
@@ -150,13 +148,13 @@ def get_order_field_name(error: ErrorDetails) -> str:
     return error["loc"][0]
 
 
-def get_sample_name(error: ErrorDetails, order: dict) -> str:
-    return order["samples"][error["loc"][1]]["name"]
+def get_sample_index(error: ErrorDetails) -> int:
+    return error["loc"][1]
 
 
-def get_case_name(error: ErrorDetails, order: dict) -> str:
-    return order["cases"][error["loc"][1]]["name"]
+def get_case_index(error: ErrorDetails) -> int:
+    return error["loc"][1]
 
 
-def get_case_sample_name(error: ErrorDetails, order: dict) -> str:
-    return order["cases"][error["loc"][1]]["samples"][error["loc"][3]]["name"]
+def get_case_sample_index(error: ErrorDetails) -> int:
+    return error["loc"][3]
