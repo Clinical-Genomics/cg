@@ -13,6 +13,7 @@ from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
+from pytest_mock import MockFixture
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
