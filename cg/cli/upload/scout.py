@@ -158,7 +158,6 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
 
 @click.command(name="validate-case-samples-is-rna")
-@DRY_RUN
 @click.argument("case_id")
 @click.pass_obj
 def validate_case_samples_is_rna(context: CGConfig, case_id: str) -> None:
