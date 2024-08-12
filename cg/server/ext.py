@@ -9,7 +9,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.apps.tb.api import TrailblazerAPI
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.sample_run_metrics_service.sample_run_metrics_service import SampleRunMetricsService
+from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
+    SampleRunMetricsService,
+)
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
