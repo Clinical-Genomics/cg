@@ -164,7 +164,9 @@ def validate_subject_ids_in_case(case: TomteCase) -> list[SubjectIdSameAsCaseNam
     return errors
 
 
-def validate_concentration_in_case(case: TomteCase, store: Store):
+def validate_concentration_in_case(
+    case: TomteCase, store: Store
+) -> list[InvalidConcentrationIfSkipRCError]:
     errors = []
     for sample in case.samples:
         if has_sample_invalid_concentration(sample=sample, store=store):
@@ -175,7 +177,9 @@ def validate_concentration_in_case(case: TomteCase, store: Store):
     return errors
 
 
-def create_invalid_concentration_error(case_name: str, sample: TomteSample, store: Store):
+def create_invalid_concentration_error(
+    case_name: str, sample: TomteSample, store: Store
+) -> InvalidConcentrationIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna = is_sample_cfdna(sample)
     allowed_interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
