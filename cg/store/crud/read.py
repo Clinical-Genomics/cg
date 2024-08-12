@@ -382,11 +382,14 @@ class ReadHandler(BaseHandler):
         self, device_internal_id: str
     ) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
-        return apply_illumina_sequencing_run_filter(
+        sequencing_run: IlluminaSequencingRun = apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
         ).first()
+        if not sequencing_run:
+            raise ValueError(f"No sequencing run found for device {device_internal_id}")
+        return sequencing_run
 
     def get_latest_illumina_sequencing_run_for_nipt_case(
         self, case_internal_id: str
