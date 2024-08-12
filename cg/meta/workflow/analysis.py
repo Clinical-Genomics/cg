@@ -737,17 +737,17 @@ class AnalysisAPI(MetaAPI):
             )
         return analysis_types.pop() if analysis_types else None
 
-    def _get_genotype_files(self, version_id: int) -> list:
-        return hk.files(version=version_id, tags=(["genotype"])).all()
+    def get_genotype_files(self, version_id: int) -> list:
+        return hk.files(version=version_id, tags={"genotype"}).all()
 
-    def _is_variant_file(self, genotype_file: File):
+    def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
-        genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
+        genotype_files: list = self.get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
-            if self._is_variant_file(genotype_file=genotype_file):
+            if self.is_variant_file(genotype_file=genotype_file):
                 LOG.debug(f"Found BCF file {genotype_file.full_path}")
                 return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for bundle {hk_version_obj.bundle_id}")
