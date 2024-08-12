@@ -154,12 +154,14 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
     backup_api: IlluminaBackupService = context.meta_apis["backup_api"]
 
     status_db: Store = context.status_db
+    sequencing_run: IlluminaSequencingRun | None = None
     if not flow_cell_id:
         LOG.info("Fetching first sequencing run in queue")
     try:
-        sequencing_run: IlluminaSequencingRun = (
-            status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
-        )
+        if flow_cell_id:
+            sequencing_run: IlluminaSequencingRun = (
+                status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+            )
     except ValueError as error:
         LOG.error(f"{error}")
         raise click.Abort
@@ -171,7 +173,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
         LOG.info(f"Retrieval time: {hours:.1}h")
         return
 
-    if not dry_run:
+    if not dry_run and sequencing_run:
         LOG.info(
             f"{sequencing_run}: updating sequencing run data availability to {SequencingRunDataAvailability.REQUESTED}"
         )
