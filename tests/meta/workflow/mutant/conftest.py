@@ -333,7 +333,7 @@ def mutant_results_file_path_qc_fail_with_failing_controls(
 
 @pytest.fixture
 def mutant_qc_report_path_case_qc_fail_with_failing_controls(
-    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path
+    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
 ) -> Path:
     return mutant_analysis_dir_case_qc_fail_with_failing_controls.joinpath(
         MutantQC.QUALITY_REPORT_FILE_NAME

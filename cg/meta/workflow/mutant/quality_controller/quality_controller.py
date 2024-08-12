@@ -85,22 +85,22 @@ class MutantQualityController:
             samples_quality_results.append(sample_quality_results)
 
         internal_negative_control_sample: Sample = quality_metrics.pool.internal_negative_control
-        internal_negative_control_quality_metrics: (
-            SampleQualityResults
-        ) = self._get_sample_quality_results(
-            sample=internal_negative_control_sample, internal_negative_control=True
+        internal_negative_control_quality_metrics: SampleQualityResults = (
+            self._get_sample_quality_results(
+                sample=internal_negative_control_sample, internal_negative_control=True
+            )
         )
 
         external_negative_control_sample: Sample = quality_metrics.pool.external_negative_control
         external_negative_control_sample_results: SampleResults = quality_metrics.results[
             external_negative_control_sample.internal_id
         ]
-        external_negative_control_quality_metrics: (
-            SampleQualityResults
-        ) = self._get_sample_quality_results(
-            sample=external_negative_control_sample,
-            sample_results=external_negative_control_sample_results,
-            external_negative_control=True,
+        external_negative_control_quality_metrics: SampleQualityResults = (
+            self._get_sample_quality_results(
+                sample=external_negative_control_sample,
+                sample_results=external_negative_control_sample_results,
+                external_negative_control=True,
+            )
         )
 
         return SamplesQualityResults(
@@ -151,12 +151,12 @@ class MutantQualityController:
     def _get_case_quality_result(
         self, samples_quality_results: SamplesQualityResults
     ) -> CaseQualityResult:
-        external_negative_control_pass_qc: (
-            bool
-        ) = samples_quality_results.external_negative_control.passes_qc
-        internal_negative_control_pass_qc: (
-            bool
-        ) = samples_quality_results.internal_negative_control.passes_qc
+        external_negative_control_pass_qc: bool = (
+            samples_quality_results.external_negative_control.passes_qc
+        )
+        internal_negative_control_pass_qc: bool = (
+            samples_quality_results.internal_negative_control.passes_qc
+        )
 
         samples_pass_qc: bool = self._samples_pass_qc(
             samples_quality_results=samples_quality_results
@@ -187,10 +187,10 @@ class MutantQualityController:
         """Query lims to retrive internal_negative_control_id for a mutant case sequenced in one pool."""
 
         sample_internal_id = case.sample_ids[0]
-        internal_negative_control_id: (
-            str
-        ) = self.lims.get_internal_negative_control_id_from_sample_in_pool(
-            sample_internal_id=sample_internal_id, pooling_step=LimsProcess.COVID_POOLING_STEP
+        internal_negative_control_id: str = (
+            self.lims.get_internal_negative_control_id_from_sample_in_pool(
+                sample_internal_id=sample_internal_id, pooling_step=LimsProcess.COVID_POOLING_STEP
+            )
         )
         return internal_negative_control_id
 
