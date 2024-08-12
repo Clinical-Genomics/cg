@@ -36,7 +36,7 @@ def convert_case_errors(error_details: list[ErrorDetails]) -> list[CaseError]:
     errors: list[CaseError] = []
     case_details = get_case_error_details(error_details)
     for error in case_details:
-        error = create_case_error(error=error)
+        error = create_case_error(error)
         errors.append(error)
     return errors
 
@@ -45,7 +45,7 @@ def convert_sample_errors(error_details: list[ErrorDetails]) -> list[SampleError
     errors: list[SampleError] = []
     sample_details = get_sample_error_details(error_details)
     for error in sample_details:
-        error = create_sample_error(error=error)
+        error = create_sample_error(error)
         errors.append(error)
     return errors
 
