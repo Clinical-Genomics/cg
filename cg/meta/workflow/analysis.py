@@ -22,7 +22,7 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
-from cg.constants.scout import ScoutExportFileName, HGNC_ID
+from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
