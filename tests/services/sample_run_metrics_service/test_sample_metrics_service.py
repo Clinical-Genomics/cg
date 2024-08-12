@@ -1,4 +1,4 @@
-from cg.services.flow_cell_service.sample_run_metrics_service import SampleRunMetricsService
+from cg.services.sample_run_metrics_service.sample_run_metrics_service import SampleRunMetricsService
 
 
 def test_get_metrics_for_flow_cell(

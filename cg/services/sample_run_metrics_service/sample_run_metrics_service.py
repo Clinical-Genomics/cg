@@ -1,5 +1,5 @@
-from cg.services.flow_cell_service.dtos import SequencingMetrics
-from cg.services.flow_cell_service.utils import create_metrics_dto
+from cg.services.sample_run_metrics_service.dtos import SequencingMetrics
+from cg.services.sample_run_metrics_service.utils import create_metrics_dto
 from cg.store.store import Store
 
 
