@@ -61,7 +61,6 @@ BLUEPRINT.before_request(before_request)
 def submit_order(order_type):
     """Submit an order for samples."""
 
-    api = orders_api
     error_message: str
     try:
         request_json = request.get_json()
@@ -77,7 +76,7 @@ def submit_order(order_type):
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
-        result: dict = api.submit(
+        result: dict = orders_api.submit(
             project=project,
             order_in=order_in,
             user_name=g.current_user.name,
