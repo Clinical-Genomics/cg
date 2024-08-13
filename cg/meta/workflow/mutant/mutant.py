@@ -205,11 +205,11 @@ class MutantAnalysisAPI(AnalysisAPI):
         """Return cases for which the analysis is complete on Traiblazer and a QC report has been generated."""
         return [
             case
-            for case in self.get_cases_with_completed_analysis_and_not_stored()
+            for case in self.get_cases_with_completed_not_stored_analysis()
             if self.get_case_qc_report_path(case_id=case.internal_id).exists()
         ]
 
-    def get_cases_with_completed_analysis_and_not_stored(self) -> list[Case]:
+    def get_cases_with_completed_not_stored_analysis(self) -> list[Case]:
         """Return cases with a completed analysis that are not yet stored."""
         return [
             case
@@ -273,7 +273,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
         """Run qc check, report qc summaries on Trailblazer and fail analyses that fail QC."""
-        cases_ready_for_qc: list[Case] = self.get_cases_with_completed_analysis_and_not_stored()
+        cases_ready_for_qc: list[Case] = self.get_cases_with_completed_not_stored_analysis()
         LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
 
         for case in cases_ready_for_qc:
