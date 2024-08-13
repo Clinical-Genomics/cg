@@ -32,22 +32,19 @@ class FreshdeskClient:
         """Create a ticket."""
         LOG.info(ticket.model_dump_json(exclude_none=True))
 
-        # Prepare the ticket fields
         ticket_data = ticket.model_dump(exclude_none=True)
 
         if attachments:
-            # Multipart form-data
             files = [
                 ("attachments[]", (attachment.name, open(attachment, "rb")))
                 for attachment in attachments
             ]
             response: Response = self.session.post(
-                url=self._url(EndPoints.TICKETS), data=ticket_data, files=files  # Form fields
+                url=self._url(EndPoints.TICKETS), data=ticket_data, files=files
             )
         else:
-            # JSON payload
             response: Response = self.session.post(
-                url=self._url(EndPoints.TICKETS), json=ticket_data  # JSON data
+                url=self._url(EndPoints.TICKETS), json=ticket_data
             )
 
         response.raise_for_status()
