@@ -1,21 +1,17 @@
 import logging
 from http import HTTPStatus
-from tempfile import TemporaryDirectory
-from cg.constants.constants import FileFormat
 from pathlib import Path
-from pydantic import ValidationError
-from requests import RequestException, Response, Session
+from tempfile import TemporaryDirectory
+
+from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.exceptions import (
-    FreshdeskAPIException,
-    FreshdeskModelException,
-)
+from cg.clients.freshdesk.utils import handle_client_errors
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile, WriteStream
-
 
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
@@ -31,43 +27,37 @@ class FreshdeskClient:
         self.env = env
         self.session = self._get_session()
 
+    @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket."""
         LOG.info(ticket.model_dump_json(exclude_none=True))
-        try:
-            # Prepare the ticket fields
-            ticket_data = ticket.model_dump(exclude_none=True)
 
-            if attachments:
-                # Multipart form-data
-                files = [
-                    ("attachments[]", (attachment.name, open(attachment, "rb")))
-                    for attachment in attachments
-                ]
-                response: Response = self.session.post(
-                    url=self._url(EndPoints.TICKETS), data=ticket_data, files=files  # Form fields
-                )
-            else:
-                # JSON payload
-                response: Response = self.session.post(
-                    url=self._url(EndPoints.TICKETS), json=ticket_data  # JSON data
-                )
+        # Prepare the ticket fields
+        ticket_data = ticket.model_dump(exclude_none=True)
 
-            response.raise_for_status()
-            return TicketResponse.model_validate(response.json())
+        if attachments:
+            # Multipart form-data
+            files = [
+                ("attachments[]", (attachment.name, open(attachment, "rb")))
+                for attachment in attachments
+            ]
+            response: Response = self.session.post(
+                url=self._url(EndPoints.TICKETS), data=ticket_data, files=files  # Form fields
+            )
+        else:
+            # JSON payload
+            response: Response = self.session.post(
+                url=self._url(EndPoints.TICKETS), json=ticket_data  # JSON data
+            )
 
-        except RequestException as error:
-            LOG.error(f"Could not create ticket: {error}")
-            LOG.error(f"Response: {error.response.text if error.response else 'No response'}")
-            raise FreshdeskAPIException(error) from error
-        except ValidationError as error:
-            LOG.error(f"Could not validate ticket response: {error}")
-            raise FreshdeskModelException(error) from error
+        response.raise_for_status()
+        return TicketResponse.model_validate(response.json())
 
     def _url(self, endpoint: str) -> str:
         """Get the full URL for the endpoint."""
         return f"{self.base_url}{endpoint}"
 
+    @handle_client_errors
     def _get_session(self) -> Session:
         session = Session()
         session.auth = (self.api_key, "X")
