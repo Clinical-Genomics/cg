@@ -56,9 +56,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
 class OrdersAPI:
     """Orders API for accepting new samples into the system."""
 
-    def __init__(
-        self, lims: LimsAPI, status: Store, ticket_handler: TicketHandler
-    ):
+    def __init__(self, lims: LimsAPI, status: Store, ticket_handler: TicketHandler):
         super().__init__()
         self.lims = lims
         self.status = status
