@@ -2,11 +2,10 @@ import logging
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, List
 
 from sendmail_container import FormDataRequest
 
-from cg.apps.osticket import OsTicket
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.models.orders.order import OrderIn
@@ -22,9 +21,13 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, osticket_api: OsTicket, freshdesk_client: FreshdeskClient, status_db: Store):
-        self.osticket: OsTicket = osticket_api
-        self.freshdesk_client: FreshdeskClient = freshdesk_client
+    def __init__(self, status_db: Store, base_url: str, api_key: str, order_email_id: int, env: str):
+        self.client=FreshdeskClient(
+            base_url=base_url,
+            api_key=api_key,
+            order_email_id=order_email_id,
+            env=env
+        )
         self.status_db: Store = status_db
 
     @staticmethod
@@ -48,27 +51,34 @@ class TicketHandler:
             order=order,
             project=project,
         )
-        attachment: dict = self.create_attachment(order=order)
 
-        # Create ticket in Freshdesk
-        freshdesk_ticket = TicketCreate(
-            email=user_mail,
-            description=message,
-            name=user_name,
-            subject=order.name,
-            attachments=[attachment],
-        )
-        ticket_response: TicketResponse = self.freshdesk_client.create_ticket(
-            ticket=freshdesk_ticket
-        )
-        LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
+        with TemporaryDirectory() as temp_dir:
+            attachments: List[Path] = self.create_attachments(order=order, temp_dir=temp_dir)
+
+            # Create ticket in Freshdesk
+            freshdesk_ticket = TicketCreate(
+                email=user_mail,
+                description=message,
+                name=user_name,
+                subject=order.name,
+                attachments=[],
+            )
+            ticket_response: TicketResponse = self.client.create_ticket(
+                ticket=freshdesk_ticket,
+                attachments=attachments
+            )
+            LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
 
         return ticket_response.id
 
-    def create_attachment(self, order: OrderIn):
-        return self.osticket.create_new_ticket_attachment(
-            content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
-        )
+    def create_attachments(self, order: OrderIn, temp_dir: str) -> List[Path]:
+        """Create attachments for the ticket"""
+        attachments = []
+        order_file_path = Path(temp_dir) / "order.json"
+        with order_file_path.open("w") as order_file:
+            order_file.write(order.json())
+        attachments.append(order_file_path)
+        return attachments
 
     def create_xml_sample_list(self, order: OrderIn, user_name: str) -> str:
         message = ""
@@ -196,14 +206,14 @@ class TicketHandler:
             project=project,
         )
         sender_prefix, email_server_alias = user_mail.split("@")
-        temp_dir: TemporaryDirectory = self.osticket.create_connecting_ticket_attachment(
+        temp_dir: TemporaryDirectory = self.client.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
-            request_uri=self.osticket.email_uri,
-            recipients=self.osticket.osticket_email,
+            request_uri=self.client.base_url,
+            recipients=user_mail,
             mail_title=f"[#{ticket_number}]",
             mail_body=message,
             attachments=[Path(f"{temp_dir.name}/order.json")],
