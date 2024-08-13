@@ -218,7 +218,7 @@ class IlluminaPostProcessingService:
             )
             has_backup: bool = sequencing_run.has_backup
         except EntryNotFoundError as error:
-            LOG.info(f"Run {sequencing_run_name} not found in StatusDB")
+            LOG.info(f"Run {sequencing_run_name} not found in StatusDB: {str(error)}")
         self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
