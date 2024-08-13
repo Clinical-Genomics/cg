@@ -51,13 +51,11 @@ def create_well_position_to_sample_map(
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if _is_sample_on_plate(sample):
-                if not well_position_to_sample_map.get(
-                    (sample.container_name, sample.well_position)
-                ):
-                    well_position_to_sample_map[(sample.container_name, sample.well_position)] = []
-                well_position_to_sample_map[(sample.container_name, sample.well_position)].append(
-                    (case_index, sample_index)
-                )
+                key: tuple[str, str] = (sample.container_name, sample.well_position)
+                value: tuple[int, int] = (case_index, sample_index)
+                if not well_position_to_sample_map.get(key):
+                    well_position_to_sample_map[key] = []
+                well_position_to_sample_map[key].append(value)
     return well_position_to_sample_map
 
 
