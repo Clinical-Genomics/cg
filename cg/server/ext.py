@@ -85,7 +85,7 @@ delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=anal
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
-freshdesk_client = FreshdeskClient(
+ticket_client = FreshdeskClient(
     base_url=app_config.freshdesk_url,
     api_key=app_config.freshdesk_api_key,
     order_email_id=app_config.freshdesk_order_email_id,
