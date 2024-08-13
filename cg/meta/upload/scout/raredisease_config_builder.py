@@ -22,7 +22,7 @@ from cg.store.models import Analysis, Case, CaseSample
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseBuilder(ScoutConfigBuilder):
+class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
         hk_version_obj: Version,
