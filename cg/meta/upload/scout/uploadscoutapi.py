@@ -19,6 +19,7 @@ from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -427,6 +428,13 @@ class UploadScoutAPI:
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
+            Workflow.RAREDISEASE: RarediseaseConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
@@ -493,9 +501,10 @@ class UploadScoutAPI:
             if (
                 case.data_analysis
                 in [
-                    Workflow.MIP_DNA,
                     Workflow.BALSAMIC,
                     Workflow.BALSAMIC_UMI,
+                    Workflow.MIP_DNA,
+                    Workflow.RAREDISEASE,
                 ]
                 and case.customer in collaborators
             ):

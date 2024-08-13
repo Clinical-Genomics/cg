@@ -67,6 +67,20 @@ class ScoutMipIndividual(ScoutIndividual):
     mitodel_file: str | None = None
 
 
+class ScoutRarediseaseIndividual(ScoutIndividual):
+    mt_bam: str | None = None
+    chromograph_images: ChromographImages = ChromographImages()
+    reviewer: Reviewer = Reviewer()
+    rhocall_bed: str | None = None
+    rhocall_wig: str | None = None
+    tiddit_coverage_wig: str | None = None
+    upd_regions_bed: str | None = None
+    upd_sites_bed: str | None = None
+    vcf2cytosure: str | None = None
+    mitodel_file: str | None = None
+
+
+
 class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: str | None = None
     tmb: str | None = None
@@ -117,6 +131,25 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
+    chromograph_image_files: list[str] | None = None
+    chromograph_prefixes: list[str] | None = None
+    madeline: str | None = None
+    peddy_check: str | None = None
+    peddy_ped: str | None = None
+    peddy_sex: str | None = None
+    samples: list[ScoutMipIndividual] = []
+    smn_tsv: str | None = None
+    variant_catalog: str | None = None
+    vcf_mei: str | None = None
+    vcf_mei_research: str | None = None
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_str: str | None = None
+    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+
+
+class RarediseaseLoadConfig(ScoutLoadConfig):
     chromograph_image_files: list[str] | None = None
     chromograph_prefixes: list[str] | None = None
     madeline: str | None = None
