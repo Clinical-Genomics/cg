@@ -10,7 +10,6 @@ be validated and if passing all checks be accepted as new samples.
 import logging
 
 from cg.apps.lims import LimsAPI
-from cg.apps.osticket import OsTicket
 from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
@@ -28,7 +27,6 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store.store import Store
-from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 
@@ -59,14 +57,12 @@ class OrdersAPI:
     """Orders API for accepting new samples into the system."""
 
     def __init__(
-        self, lims: LimsAPI, status: Store, osticket: OsTicket, freshdesk_client: FreshdeskClient
+        self, lims: LimsAPI, status: Store, ticket_handler: TicketHandler
     ):
         super().__init__()
         self.lims = lims
         self.status = status
-        self.ticket_handler = TicketHandler(
-            osticket_api=osticket, freshdesk_client=freshdesk_client, status_db=status
-        )
+        self.ticket_handler = ticket_handler
 
     def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
@@ -77,7 +73,7 @@ class OrdersAPI:
         submit_handler.validate_order(order=order_in)
 
         # detect manual ticket assignment
-        ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        ticket_number: str | None = self.ticket_handler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
