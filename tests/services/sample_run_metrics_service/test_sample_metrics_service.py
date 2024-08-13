@@ -4,13 +4,13 @@ from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
 
 
 def test_get_metrics_for_flow_cell(
-    flow_cell_service: SampleRunMetricsService,
+    sample_run_metrics_service: SampleRunMetricsService,
     novaseq_x_flow_cell_id: str,
 ):
     # GIVEN an existing flow cell with sequencing metrics
 
     # WHEN fetching the metrics for the flow cell
-    metrics = flow_cell_service.get_metrics(novaseq_x_flow_cell_id)
+    metrics = sample_run_metrics_service.get_metrics(novaseq_x_flow_cell_id)
 
     # THEN the metrics should be returned
     assert metrics
