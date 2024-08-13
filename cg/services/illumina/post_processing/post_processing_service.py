@@ -211,11 +211,11 @@ class IlluminaPostProcessingService:
             return
         has_backup: bool = False
         try:
-            sequencing_run: IlluminaSequencingRun | None = (
+            sequencing_run: IlluminaSequencingRun = (
                 self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
             )
             has_backup: bool = sequencing_run.has_backup
-        except EntryNotFoundError as e:
+        except EntryNotFoundError as error:
             LOG.info(f"Run {sequencing_run_name} not found in StatusDB")
         self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
         try:
