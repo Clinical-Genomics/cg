@@ -40,17 +40,17 @@ class FreshdeskClient:
 
             if attachments:
                 # Multipart form-data
-                files = [('attachments[]', (attachment.name, open(attachment, 'rb'))) for attachment in attachments]
+                files = [
+                    ("attachments[]", (attachment.name, open(attachment, "rb")))
+                    for attachment in attachments
+                ]
                 response: Response = self.session.post(
-                    url=self._url(EndPoints.TICKETS),
-                    data=ticket_data,  # Form fields
-                    files=files
+                    url=self._url(EndPoints.TICKETS), data=ticket_data, files=files  # Form fields
                 )
             else:
                 # JSON payload
                 response: Response = self.session.post(
-                    url=self._url(EndPoints.TICKETS),
-                    json=ticket_data  # JSON data
+                    url=self._url(EndPoints.TICKETS), json=ticket_data  # JSON data
                 )
 
             response.raise_for_status()
@@ -70,9 +70,9 @@ class FreshdeskClient:
 
     def _get_session(self) -> Session:
         session = Session()
-        session.auth = (self.api_key, 'X')
+        session.auth = (self.api_key, "X")
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
-        session.mount('https://', HTTPAdapter(max_retries=retries))
+        session.mount("https://", HTTPAdapter(max_retries=retries))
         return session
 
     @staticmethod
