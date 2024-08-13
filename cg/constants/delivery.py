@@ -75,6 +75,11 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
+FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
+
+FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"fastq"},
+]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
@@ -133,12 +138,6 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
-]
 
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
