@@ -383,7 +383,7 @@ class ReadHandler(BaseHandler):
         self, device_internal_id: str
     ) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
-        sequencing_run: IlluminaSequencingRun = apply_illumina_sequencing_run_filter(
+        sequencing_run: IlluminaSequencingRun | None = apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
@@ -1470,7 +1470,7 @@ class ReadHandler(BaseHandler):
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
-        flow_cell: IlluminaFlowCell = apply_illumina_flow_cell_filters(
+        flow_cell: IlluminaFlowCell | None = apply_illumina_flow_cell_filters(
             filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
