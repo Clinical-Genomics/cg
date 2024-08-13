@@ -18,15 +18,15 @@ def contains_duplicates(input_list: list) -> bool:
     return len(set(input_list)) != len(input_list)
 
 
-def is_volume_invalid(sample: Sample):
+def is_volume_invalid(sample: Sample) -> bool:
     return is_in_container(sample.container) and not is_volume_within_allowed_interval(
         sample.volume
     )
 
 
-def is_in_container(container: ContainerEnum):
+def is_in_container(container: ContainerEnum) -> bool:
     return container != ContainerEnum.no_container
 
 
-def is_volume_within_allowed_interval(volume: int):
+def is_volume_within_allowed_interval(volume: int) -> bool:
     return MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME

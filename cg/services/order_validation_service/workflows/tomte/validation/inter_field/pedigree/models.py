@@ -6,9 +6,9 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 
 class Node:
     def __init__(self, sample: TomteSample, case_index: int, sample_index: int):
-        self.sample = sample
-        self.sample_index = sample_index
-        self.case_index = case_index
+        self.sample: TomteSample = sample
+        self.sample_index: int = sample_index
+        self.case_index: int = case_index
         self.father: Node | None = None
         self.mother: Node | None = None
         self.visited = False
@@ -18,8 +18,8 @@ class Node:
 class FamilyTree:
     def __init__(self, case: TomteCase, case_index: int):
         self.graph: dict[str, Node] = {}
-        self.case = case
-        self.case_index = case_index
+        self.case: TomteCase = case
+        self.case_index: int = case_index
         self._add_nodes()
         self.add_edges()
 
@@ -38,4 +38,4 @@ class FamilyTree:
 
     @property
     def nodes(self) -> list[Node]:
-        return self.graph.values()
+        return list(self.graph.values())

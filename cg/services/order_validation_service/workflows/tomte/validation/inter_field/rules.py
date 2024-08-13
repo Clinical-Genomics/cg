@@ -30,8 +30,10 @@ from cg.store.store import Store
 
 
 def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
-    errors = []
-    well_position_to_sample_map = create_well_position_to_sample_map(order)
+    errors: list[OccupiedWellError] = []
+    well_position_to_sample_map: dict[tuple[str, str], list[tuple[int, int]]] = (
+        create_well_position_to_sample_map(order)
+    )
     for indices in well_position_to_sample_map.values():
         if len(indices) > 1:
             well_errors = get_occupied_well_errors(indices[1:])
@@ -66,7 +68,9 @@ def validate_case_names_not_repeated(order: TomteOrder) -> list[RepeatedCaseName
 def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSampleNameError]:
     errors: list[RepeatedSampleNameError] = []
     for index, case in order.enumerated_cases:
-        case_errors = get_repeated_sample_name_errors(case=case, case_index=index)
+        case_errors: list[RepeatedSampleNameError] = get_repeated_sample_name_errors(
+            case=case, case_index=index
+        )
         errors.extend(case_errors)
     return errors
 
@@ -74,15 +78,19 @@ def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSample
 def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for index, case in order.enumerated_cases:
-        case_errors = get_father_sex_errors(case=case, case_index=index)
+        case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
+            case=case, case_index=index
+        )
         errors.extend(case_errors)
     return errors
 
 
 def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherNotInCaseError]:
-    errors = []
+    errors: list[FatherNotInCaseError] = []
     for index, case in order.enumerated_cases:
-        case_errors = get_father_case_errors(case=case, case_index=index)
+        case_errors: list[FatherNotInCaseError] = get_father_case_errors(
+            case=case, case_index=index
+        )
         errors.extend(case_errors)
     return errors
 
@@ -90,23 +98,27 @@ def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherN
 def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     for index, case in order.enumerated_cases:
-        case_errors = get_mother_sex_errors(case=case, case_index=index)
-        errors.extend(case_errors)
-    return errors
-
-
-def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
-    errors = []
-    for case_index, case in order.enumerated_cases:
-        case_errors = get_pedigree_errors(case=case, case_index=case_index)
+        case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
+            case=case, case_index=index
+        )
         errors.extend(case_errors)
     return errors
 
 
 def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherNotInCaseError]:
-    errors = []
+    errors: list[MotherNotInCaseError] = []
     for index, case in order.enumerated_cases:
-        case_errors = get_mother_case_errors(case=case, case_index=index)
+        case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
+            case=case, case_index=index
+        )
+        errors.extend(case_errors)
+    return errors
+
+
+def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
+    errors: list[PedigreeError] = []
+    for case_index, case in order.enumerated_cases:
+        case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
         errors.extend(case_errors)
     return errors
 
@@ -114,9 +126,11 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
 def validate_subject_ids_different_from_case_names(
     order: TomteOrder,
 ) -> list[SubjectIdSameAsCaseNameError]:
-    errors = []
+    errors: list[SubjectIdSameAsCaseNameError] = []
     for index, case in order.enumerated_cases:
-        case_errors = validate_subject_ids_in_case(case=case, case_index=index)
+        case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
+            case=case, case_index=index
+        )
         errors.extend(case_errors)
     return errors
 
@@ -126,8 +140,10 @@ def validate_concentration_interval_if_skip_rc(
 ) -> list[InvalidConcentrationIfSkipRCError]:
     if not order.skip_reception_control:
         return []
-    errors = []
+    errors: list[InvalidConcentrationIfSkipRCError] = []
     for index, case in order.enumerated_cases:
-        case_errors = validate_concentration_in_case(case=case, case_index=index, store=store)
+        case_errors: list[InvalidConcentrationIfSkipRCError] = validate_concentration_in_case(
+            case=case, case_index=index, store=store
+        )
         errors.extend(case_errors)
     return errors

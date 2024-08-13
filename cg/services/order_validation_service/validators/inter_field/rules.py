@@ -5,11 +5,9 @@ from cg.services.order_validation_service.constants import (
 )
 from cg.services.order_validation_service.models.errors import (
     ApplicationNotCompatibleError,
-    CaseSampleError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     InvalidBufferError,
-    OrderError,
     OrderNameRequiredError,
     SubjectIdSameAsSampleNameError,
     TicketNumberRequiredError,
@@ -18,7 +16,7 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_application_not_compatible,
-    _is_order_name_required,
+    _is_order_name_missing,
     _is_ticket_number_missing,
     is_concentration_missing,
     is_container_name_missing,
@@ -28,17 +26,19 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.store.store import Store
 
 
-def validate_ticket_number_required_if_connected(order: Order, **kwargs) -> list[OrderError]:
-    errors: list[OrderError] = []
+def validate_ticket_number_required_if_connected(
+    order: Order, **kwargs
+) -> list[TicketNumberRequiredError]:
+    errors: list[TicketNumberRequiredError] = []
     if _is_ticket_number_missing(order):
         error = TicketNumberRequiredError()
         errors.append(error)
     return errors
 
 
-def validate_name_required_for_new_order(order: Order, **kwargs) -> list[OrderError]:
-    errors: list[OrderError] = []
-    if _is_order_name_required(order):
+def validate_name_required_for_new_order(order: Order, **kwargs) -> list[OrderNameRequiredError]:
+    errors: list[OrderNameRequiredError] = []
+    if _is_order_name_missing(order):
         error = OrderNameRequiredError()
         errors.append(error)
     return errors
@@ -64,14 +64,14 @@ def validate_application_compatibility(
     return errors
 
 
-def validate_buffer_skip_rc_condition(order: TomteOrder) -> list[CaseSampleError]:
-    errors: list[CaseSampleError] = []
+def validate_buffer_skip_rc_condition(order: TomteOrder) -> list[InvalidBufferError]:
+    errors: list[InvalidBufferError] = []
     if order.skip_reception_control:
         errors.extend(validate_buffers_are_allowed(order))
     return errors
 
 
-def validate_buffers_are_allowed(order: TomteOrder) -> list[CaseSampleError]:
+def validate_buffers_are_allowed(order: TomteOrder) -> list[InvalidBufferError]:
     errors = []
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
@@ -86,7 +86,7 @@ def validate_concentration_required_if_skip_rc(
 ) -> list[ConcentrationRequiredIfSkipRCError]:
     if not order.skip_reception_control:
         return []
-    errors = []
+    errors: list[ConcentrationRequiredIfSkipRCError] = []
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if is_concentration_missing(sample):
@@ -97,8 +97,10 @@ def validate_concentration_required_if_skip_rc(
     return errors
 
 
-def validate_subject_ids_different_from_sample_names(order: TomteOrder) -> list[CaseSampleError]:
-    errors = []
+def validate_subject_ids_different_from_sample_names(
+    order: TomteOrder,
+) -> list[SubjectIdSameAsSampleNameError]:
+    errors: list[SubjectIdSameAsSampleNameError] = []
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if sample.name == sample.subject_id:
