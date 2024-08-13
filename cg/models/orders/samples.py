@@ -270,7 +270,7 @@ class MicrobialSample(OrderInSample):
 
 class MicrobialFastqSample(OrderInSample):
     _suitable_project = OrderType.MICROBIAL_FASTQ
-    # 1603 Orderform Microbial WGS
+
     # "These fields are required"
     organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
