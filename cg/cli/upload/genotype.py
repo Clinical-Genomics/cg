@@ -7,6 +7,7 @@ import click
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -38,7 +39,7 @@ def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
     case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
-    upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
+    upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api, context=context)
     results: dict = upload_genotypes_api.get_gt_data(case.analyses[0])
 
     if not results:
