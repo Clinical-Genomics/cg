@@ -198,7 +198,7 @@ class IlluminaPostProcessingService:
         run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
         sequencing_run: IlluminaSequencingRun | None = None
         has_backup: bool = False
-        
+
         LOG.debug("Set path for Housekeeper sample sheet in run directory")
         try:
             is_flow_cell_ready_for_postprocessing(
@@ -233,8 +233,8 @@ class IlluminaPostProcessingService:
         if sequencing_run:
             self.status_db.update_illumina_sequencing_run_has_backup(
                 sequencing_run=sequencing_run, has_backup=has_backup
-                )
-            
+            )
+
         create_delivery_file_in_flow_cell_directory(demux_run_dir)
 
     def get_all_demultiplexed_runs(self) -> list[Path]:
