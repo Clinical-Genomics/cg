@@ -212,7 +212,9 @@ class IlluminaPostProcessingService:
         has_backup: bool = False
         try:
             sequencing_run: IlluminaSequencingRun = (
-                self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
+                self.status_db.get_illumina_sequencing_run_by_device_internal_id(
+                    run_directory_data.id
+                )
             )
             has_backup: bool = sequencing_run.has_backup
         except EntryNotFoundError as error:
