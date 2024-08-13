@@ -45,8 +45,7 @@ from cg.server.ext import (
     delivery_message_service,
     lims,
     order_service,
-    osticket,
-    freshdesk_client,
+    ticket_service,
 )
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
@@ -68,7 +67,18 @@ BLUEPRINT.before_request(before_request)
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(lims=lims, status=db, osticket=osticket, freshdesk_client=freshdesk_client)
+    ticket_handler = TicketHandler(
+        status_db=db,
+        base_url=ticket_service.base_url,
+        api_key=ticket_service.api_key,
+        order_email_id=ticket_service.order_email_id,
+        env=ticket_service.env,
+    )
+    api = OrdersAPI(
+        lims=lims,
+        status=db,
+        ticket_handler=ticket_handler,
+    )
     error_message: str
     try:
         request_json = request.get_json()
