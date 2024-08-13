@@ -21,13 +21,8 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, status_db: Store, base_url: str, api_key: str, order_email_id: int, env: str):
-        self.client=FreshdeskClient(
-            base_url=base_url,
-            api_key=api_key,
-            order_email_id=order_email_id,
-            env=env
-        )
+    def __init__(self, status_db: Store, client: FreshdeskClient):
+        self.client: FreshdeskClient = client
         self.status_db: Store = status_db
 
     @staticmethod
@@ -64,8 +59,7 @@ class TicketHandler:
                 attachments=[],
             )
             ticket_response: TicketResponse = self.client.create_ticket(
-                ticket=freshdesk_ticket,
-                attachments=attachments
+                ticket=freshdesk_ticket, attachments=attachments
             )
             LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
 
