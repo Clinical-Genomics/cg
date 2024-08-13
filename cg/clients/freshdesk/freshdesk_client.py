@@ -30,8 +30,6 @@ class FreshdeskClient:
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket."""
-        LOG.info(ticket.model_dump_json(exclude_none=True))
-
         ticket_data = ticket.model_dump(exclude_none=True)
 
         if attachments:
