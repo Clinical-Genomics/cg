@@ -23,76 +23,57 @@ from cg.store.models import Application
 from cg.store.store import Store
 
 
-def _get_errors(colliding_samples: list[tuple[TomteSample, TomteCase]]) -> list[OccupiedWellError]:
+def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[OccupiedWellError]:
     errors = []
-    for sample, case in colliding_samples:
-        error = OccupiedWellError(sample_name=sample.name, case_name=case.name)
+    for sample_index, case_index in colliding_samples:
+        error = OccupiedWellError(case_index=case_index, sample_index=sample_index)
         errors.append(error)
     return errors
-
-
-def _get_plate_samples(order: TomteOrder) -> list[tuple[TomteSample, TomteCase]]:
-    return [
-        (sample, case)
-        for case in order.cases
-        for sample in case.samples
-        if _is_sample_on_plate(sample)
-    ]
 
 
 def _is_sample_on_plate(sample: TomteSample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
-def _get_excess_samples(
-    samples_with_cases: list[tuple[TomteSample, TomteCase]]
-) -> list[tuple[TomteSample, TomteCase]]:
-    colliding_samples = []
-    sample_well_map = _get_sample_well_map(samples_with_cases)
-    for _, well_samples in sample_well_map.items():
-        if len(well_samples) > 1:
-            extra_samples_in_well = well_samples[1:]
-            colliding_samples.extend(extra_samples_in_well)
-    return colliding_samples
-
-
-def _get_sample_well_map(plate_samples_with_cases: list[tuple[TomteSample, TomteCase]]):
-    sample_well_map: dict[str, list[tuple[TomteSample, TomteCase]]] = {}
-    for sample, case in plate_samples_with_cases:
-        if sample.well_position not in sample_well_map:
-            sample_well_map[sample.well_position] = []
-        sample_well_map[sample.well_position].append((sample, case))
-    return sample_well_map
-
-
-def get_repeated_case_names(order: TomteOrder) -> list[str]:
+def get_indices_for_repeated_case_names(order: TomteOrder) -> list[int]:
     case_names = [case.name for case in order.cases]
     count = Counter(case_names)
-    return [name for name, freq in count.items() if freq > 1]
+    return [
+        case_index for case_index, case_name in enumerate(case_names) if count.get(case_name) > 1
+    ]
 
 
 def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameError]:
-    case_names = get_repeated_case_names(order)
-    return [RepeatedCaseNameError(case_name=name) for name in case_names]
+    case_indices = get_indices_for_repeated_case_names(order)
+    return [RepeatedCaseNameError(case_index=case_index) for case_index in case_indices]
 
 
-def get_repeated_sample_names(case: TomteCase) -> list[str]:
+def get_indices_for_repeated_sample_names(case: TomteCase) -> list[int]:
     sample_names = [sample.name for sample in case.samples]
     count = Counter(sample_names)
-    return [name for name, freq in count.items() if freq > 1]
+    return [
+        sample_index
+        for sample_index, sample_name in enumerate(sample_names)
+        if count.get(sample_name) > 1
+    ]
 
 
-def get_repeated_sample_name_errors(case: TomteCase) -> list[RepeatedSampleNameError]:
-    sample_names = get_repeated_sample_names(case)
-    return [RepeatedSampleNameError(sample_name=name, case_name=case.name) for name in sample_names]
+def get_repeated_sample_name_errors(
+    case: TomteCase, case_index: int
+) -> list[RepeatedSampleNameError]:
+    sample_indices = get_indices_for_repeated_sample_names(case)
+    return [
+        RepeatedSampleNameError(sample_index=sample_index, case_index=case_index)
+        for sample_index in sample_indices
+    ]
 
 
-def get_father_sex_errors(case: TomteCase) -> list[InvalidFatherSexError]:
+def get_father_sex_errors(case: TomteCase, case_index: int) -> list[InvalidFatherSexError]:
     errors = []
-    children: list[TomteSample] = case.get_samples_with_father()
-    for child in children:
+    children: list[tuple[TomteSample, int]] = case.get_samples_with_father()
+    for child, child_index in children:
         if is_father_sex_invalid(child=child, case=case):
-            error = create_father_sex_error(case=case, sample=child)
+            error = create_father_sex_error(case_index=case_index, sample_index=child_index)
             errors.append(error)
     return errors
 
@@ -102,48 +83,48 @@ def is_father_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
     return father and father.sex != Sex.MALE
 
 
-def create_father_sex_error(case: TomteCase, sample: TomteSample) -> InvalidFatherSexError:
-    return InvalidFatherSexError(sample_name=sample.name, case_name=case.name)
+def create_father_sex_error(case_index: int, sample_index: int) -> InvalidFatherSexError:
+    return InvalidFatherSexError(case_index=case_index, sample_index=sample_index)
 
 
-def get_father_case_errors(case: TomteCase) -> list[FatherNotInCaseError]:
+def get_father_case_errors(case: TomteCase, case_index: int) -> list[FatherNotInCaseError]:
     errors = []
-    children: list[TomteSample] = case.get_samples_with_father()
-    for child in children:
+    children: list[tuple[TomteSample, int]] = case.get_samples_with_father()
+    for child, child_index in children:
         father: TomteSample | None = case.get_sample(child.father)
         if not father:
-            error = create_father_case_error(case=case, sample=child)
+            error = create_father_case_error(case_index=case_index, sample_index=child_index)
             errors.append(error)
     return errors
 
 
-def get_mother_sex_errors(case: TomteCase) -> list[InvalidMotherSexError]:
+def get_mother_sex_errors(case: TomteCase, case_index: int) -> list[InvalidMotherSexError]:
     errors = []
-    children: list[TomteSample] = case.get_samples_with_mother()
-    for child in children:
+    children: list[tuple[TomteSample, int]] = case.get_samples_with_mother()
+    for child, child_index in children:
         if is_mother_sex_invalid(child=child, case=case):
-            error = create_mother_sex_error(case=case, sample=child)
+            error = create_mother_sex_error(case_index=case_index, sample_index=child_index)
             errors.append(error)
     return errors
 
 
-def get_mother_case_errors(case: TomteCase) -> list[MotherNotInCaseError]:
+def get_mother_case_errors(case: TomteCase, case_index: int) -> list[MotherNotInCaseError]:
     errors = []
-    children: list[TomteSample] = case.get_samples_with_mother()
-    for child in children:
+    children: list[tuple[TomteSample, int]] = case.get_samples_with_mother()
+    for child, child_index in children:
         mother: TomteSample | None = case.get_sample(child.mother)
         if not mother:
-            error = create_mother_case_error(case=case, sample=child)
+            error = create_mother_case_error(case_index=case_index, sample_index=child_index)
             errors.append(error)
     return errors
 
 
-def create_father_case_error(case: TomteCase, sample: TomteSample) -> FatherNotInCaseError:
-    return FatherNotInCaseError(case_name=case.name, sample_name=sample.name)
+def create_father_case_error(case_index: int, sample_index: int) -> FatherNotInCaseError:
+    return FatherNotInCaseError(case_index=case_index, sample_index=sample_index)
 
 
-def create_mother_case_error(case: TomteCase, sample: TomteSample) -> MotherNotInCaseError:
-    return MotherNotInCaseError(case_name=case.name, sample_name=sample.name)
+def create_mother_case_error(case_index: int, sample_index: int) -> MotherNotInCaseError:
+    return MotherNotInCaseError(case_index=case_index, sample_index=sample_index)
 
 
 def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
@@ -151,53 +132,53 @@ def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
     return mother and mother.sex != Sex.FEMALE
 
 
-def create_mother_sex_error(case: TomteCase, sample: TomteSample) -> InvalidMotherSexError:
-    return InvalidMotherSexError(sample_name=sample.name, case_name=case.name)
+def create_mother_sex_error(case_index: int, sample_index: int) -> InvalidMotherSexError:
+    return InvalidMotherSexError(case_index=case_index, sample_index=sample_index)
 
 
-def validate_subject_ids_in_case(case: TomteCase) -> list[SubjectIdSameAsCaseNameError]:
+def validate_subject_ids_in_case(
+    case: TomteCase, case_index: int
+) -> list[SubjectIdSameAsCaseNameError]:
     errors = []
-    for sample in case.samples:
+    for sample_index, sample in case.enumerated_samples:
         if sample.subject_id == case.name:
-            error = SubjectIdSameAsCaseNameError(case_name=case.name, sample_name=sample.name)
+            error = SubjectIdSameAsCaseNameError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
     return errors
 
 
 def validate_concentration_in_case(
-    case: TomteCase, store: Store
+    case: TomteCase, case_index: int, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors = []
-    for sample in case.samples:
+    for sample_index, sample in case.enumerated_samples:
         if has_sample_invalid_concentration(sample=sample, store=store):
             error = create_invalid_concentration_error(
-                case_name=case.name, sample=sample, store=store
+                case_index=case_index, sample=sample, sample_index=sample_index, store=store
             )
             errors.append(error)
     return errors
 
 
 def create_invalid_concentration_error(
-    case_name: str, sample: TomteSample, store: Store
+    case_index: int, sample: TomteSample, sample_index: int, store: Store
 ) -> InvalidConcentrationIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna = is_sample_cfdna(sample)
     allowed_interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
     return InvalidConcentrationIfSkipRCError(
-        case_name=case_name, sample_name=sample.name, allowed_interval=allowed_interval
+        case_index=case_index, sample_index=sample_index, allowed_interval=allowed_interval
     )
 
 
 def has_sample_invalid_concentration(sample: TomteSample, store: Store) -> bool:
     application: Application | None = store.get_application_by_tag(sample.application)
-    return not is_sample_concentration_allowed(sample=sample, application=application)
-
-
-def is_sample_concentration_allowed(sample: TomteSample, application: Application):
     concentration = sample.concentration_ng_ul
     is_cfdna = is_sample_cfdna(sample)
-    interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
-    return is_sample_concentration_within_interval(concentration=concentration, interval=interval)
+    allowed_interval = get_concentration_interval(application=application, is_cfdna=is_cfdna)
+    return not is_sample_concentration_within_interval(
+        concentration=concentration, interval=allowed_interval
+    )
 
 
 def is_sample_cfdna(sample: TomteSample):

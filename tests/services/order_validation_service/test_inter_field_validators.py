@@ -74,7 +74,7 @@ def test_application_is_incompatible(
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should be about the application compatiblity
+    # THEN the error should be about the application compatability
     assert isinstance(errors[0], ApplicationNotCompatibleError)
 
 

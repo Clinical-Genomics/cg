@@ -14,8 +14,8 @@ from cg.services.order_validation_service.models.errors import (
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.data.utils import (
     contains_duplicates,
+    get_invalid_panels,
     is_volume_invalid,
-    validate_panels_for_case,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
@@ -58,10 +58,10 @@ def validate_customer_exists(order: Order, store: Store, **kwargs) -> list[Order
 
 def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> list[CaseSampleError]:
     errors: list[CaseSampleError] = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if not store.get_application_by_tag(sample.application):
-                error = ApplicationNotValidError(case_name=case.name, sample_name=sample.name)
+                error = ApplicationNotValidError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 
@@ -70,19 +70,19 @@ def validate_application_not_archived(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[CaseSampleError]:
     errors: list[CaseSampleError] = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if store.is_application_archived(sample.application):
-                error = ApplicationArchivedError(case_name=case.name, sample_name=sample.name)
+                error = ApplicationArchivedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 
 
 def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
     errors: list[CaseError] = []
-    for case in order.cases:
+    for case_index, case in order.enumerated_cases:
         if contains_duplicates(case.panels):
-            error = RepeatedGenePanelsError(case_name=case.name)
+            error = RepeatedGenePanelsError(case_index=case_index)
             errors.append(error)
     return errors
 
@@ -91,17 +91,20 @@ def validate_gene_panels_exist(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[InvalidGenePanelsError]:
     errors: list[InvalidGenePanelsError] = []
-    for case in order.cases:
-        case_errors: list[InvalidGenePanelsError] = validate_panels_for_case(case=case, store=store)
-        errors.extend(case_errors)
+    for case_index, case in order.enumerated_cases:
+        if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
+            case_error: InvalidGenePanelsError = InvalidGenePanelsError(
+                case_index=case_index, panels=invalid_panels
+            )
+            errors.append(case_error)
     return errors
 
 
 def validate_volume_interval(order: TomteOrder) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
-    for case in order.cases:
-        for sample in case.samples:
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
             if is_volume_invalid(sample):
-                error = InvalidVolumeError(case_name=case.name, sample_name=sample.name)
+                error = InvalidVolumeError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors

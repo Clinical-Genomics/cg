@@ -15,4 +15,4 @@ class TomteModelValidator:
             order = TomteOrder.model_validate(raw_order)
             return order, ValidationErrors()
         except ValidationError as error:
-            return None, convert_errors(pydantic_errors=error, order=raw_order)
+            return None, convert_errors(pydantic_errors=error)

@@ -8,6 +8,6 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
 )
 
 
-def get_pedigree_errors(case: TomteCase) -> list[PedigreeError]:
-    pedigree = FamilyTree(case)
+def get_pedigree_errors(case: TomteCase, case_index: int) -> list[PedigreeError]:
+    pedigree = FamilyTree(case=case, case_index=case_index)
     return validate_tree(pedigree)

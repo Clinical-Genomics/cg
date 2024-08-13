@@ -12,11 +12,11 @@ class OrderError(BaseModel):
 
 
 class CaseError(OrderError):
-    case_name: str
+    case_index: int
 
 
 class SampleError(OrderError):
-    sample_name: str
+    sample_index: int
 
 
 class CaseSampleError(CaseError, SampleError):
@@ -130,9 +130,9 @@ class MotherNotInCaseError(CaseSampleError):
 
 
 class InvalidGenePanelsError(CaseError):
-    def __init__(self, case_name: str, panels: list[str]):
+    def __init__(self, case_index: int, panels: list[str]):
         message = "Invalid panels: " + ",".join(panels)
-        super(CaseError, self).__init__(field="panels", case_name=case_name, message=message)
+        super(CaseError, self).__init__(field="panels", case_index=case_index, message=message)
 
 
 class InvalidBufferError(CaseSampleError):
@@ -161,13 +161,13 @@ class SubjectIdSameAsSampleNameError(CaseSampleError):
 
 
 class InvalidConcentrationIfSkipRCError(CaseSampleError):
-    def __init__(self, case_name: str, sample_name: str, allowed_interval: tuple[int, int]):
+    def __init__(self, case_index: int, sample_index: int, allowed_interval: tuple[int, int]):
         field: str = "concentration_ng_ul"
         message: str = (
             f"Concentration must be between {allowed_interval[0]} ng/μL and {allowed_interval[1]} ng/μL if reception control should be skipped"
         )
         super(CaseSampleError, self).__init__(
-            case_name=case_name, sample_name=sample_name, field=field, message=message
+            case_index=case_index, sample_index=sample_index, field=field, message=message
         )
 
 
