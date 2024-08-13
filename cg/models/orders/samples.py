@@ -277,7 +277,6 @@ class MicrobialFastqSample(OrderInSample):
     container_name: str | None
     well_position: str | None
     # "These fields are not required"
-    concentration_sample: float | None
     control: str | None
 
 
