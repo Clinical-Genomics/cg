@@ -28,7 +28,6 @@ from cg.exc import (
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
-from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
@@ -40,13 +39,7 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import (
-    db,
-    delivery_message_service,
-    lims,
-    order_service,
-    ticket_service,
-)
+from cg.server.ext import db, delivery_message_service, order_service, orders_api
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
@@ -67,18 +60,8 @@ BLUEPRINT.before_request(before_request)
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    ticket_handler = TicketHandler(
-        status_db=db,
-        base_url=ticket_service.base_url,
-        api_key=ticket_service.api_key,
-        order_email_id=ticket_service.order_email_id,
-        env=ticket_service.env,
-    )
-    api = OrdersAPI(
-        lims=lims,
-        status=db,
-        ticket_handler=ticket_handler,
-    )
+
+    api = orders_api
     error_message: str
     try:
         request_json = request.get_json()
