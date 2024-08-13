@@ -30,6 +30,7 @@ from cg.services.illumina.post_processing.utils import (
 from cg.services.illumina.post_processing.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.files import get_directories_in_path
@@ -208,12 +209,14 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
-        sequencing_run: IlluminaSequencingRun | None = (
-            self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
-        )
         has_backup: bool = False
-        if sequencing_run:
+        try:
+            sequencing_run: IlluminaSequencingRun | None = (
+                self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
+            )
             has_backup: bool = sequencing_run.has_backup
+        except EntryNotFoundError as e:
+            LOG.info(f"Run {sequencing_run_name} not found in StatusDB")
         self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
