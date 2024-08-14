@@ -50,7 +50,6 @@ def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, som
 
 
 def test_get_files_matching_pattern(nested_directory_with_file: Path, some_file: str):
-
     # GIVEN a directory with a subdirectory containing a .txt file
     directory_with_file = Path(nested_directory_with_file, "sub_directory")
 
@@ -64,7 +63,6 @@ def test_get_files_matching_pattern(nested_directory_with_file: Path, some_file:
 
 
 def test_get_files_matching_pattern_no_files(nested_directory_with_file: Path, some_file: str):
-
     # GIVEN a directory with a subdirectory containing a .txt file
 
     # WHEN getting the file from the directory
