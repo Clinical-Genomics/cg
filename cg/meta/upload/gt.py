@@ -4,6 +4,7 @@ from pathlib import Path
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat, PrepCategory, Workflow
+from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
@@ -51,19 +52,22 @@ class UploadGenotypesAPI(object):
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
-        if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            analysis_api = BalsamicAnalysisAPI
-        elif analysis.workflow == Workflow.MIP_DNA:
-            analysis_api = MipDNAAnalysisAPI
-        elif analysis.workflow == Workflow.RAREDISEASE:
-            analysis_api = RarediseaseAnalysisAPI
-        else:
-            raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
-        gt_data["samples_sex"] = self.get_samples_sex(
-            case=analysis.case, hk_version=hk_version, analysis_api=analysis_api
-        )
+        if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
+            gt_data["samples_sex"] = self.get_samples_sex_balsamic(
+                case=analysis.case, hk_version=hk_version,
+            )
+        elif analysis.workflow == Workflow.MIP_DNA:
+            gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
+                case=analysis.case, hk_version=hk_version
+            )
+        elif analysis.workflow == Workflow.RAREDISEASE:
+            gt_data["samples_sex"] = self.get_samples_sex_raredisease(
+                case=analysis.case, hk_version=hk_version
+            )
+        else:
+            raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return gt_data
 
     def upload(self, gt_data: dict, replace: bool = False):
@@ -98,14 +102,6 @@ class UploadGenotypesAPI(object):
                 return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for bundle {hk_version_obj.bundle_id}")
 
-    def get_samples_sex(self, case: Case, hk_version: Version, analysis_api: AnalysisAPI) -> dict:
-        if analysis_api == Workflow.BALSAMIC or analysis_api == Workflow.BALSAMIC_UMI:
-            return self.get_samples_sex_balsamic(case)
-        elif analysis_api == Workflow.MIP_DNA:
-            return self.get_samples_sex_mip_dna(case, hk_version, analysis_api)
-        elif analysis_api == Workflow.RAREDISEASE:
-            return self.get_samples_sex_raredisease(case, hk_version, analysis_api)
-
     def get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
         samples_sex: dict[str, dict[str, str]] = {}
@@ -120,10 +116,10 @@ class UploadGenotypesAPI(object):
         return samples_sex
 
     def get_samples_sex_mip_dna(
-        self, case: Case, hk_version: Version, analysis_api: MipDNAAnalysisAPI
+        self, case: Case, hk_version: Version
     ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = analysis_api.get_qcmetrics_file(hk_version)
+        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
         analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
@@ -151,10 +147,10 @@ class UploadGenotypesAPI(object):
 
 
     def get_samples_sex_raredisease(
-        self, case: Case, hk_version: Version, analysis_api: RarediseaseAnalysisAPI
+        self, case: Case, hk_version: Version
     ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = analysis_api.get_qcmetrics_file(hk_version)
+        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
@@ -182,3 +178,12 @@ class UploadGenotypesAPI(object):
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
 
+    def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
+        """Return a QC metrics file path."""
+        hk_qcmetrics: Path = self.hk.files(
+            version=hk_version_obj.id, tags=HkAnalysisMetricsTag.QC_METRICS
+        ).first()
+        if hk_qcmetrics is None:
+            raise FileNotFoundError("QC metrics file not found for the given hk version.")
+        LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")
+        return Path(hk_qcmetrics.full_path)
