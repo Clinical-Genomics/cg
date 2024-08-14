@@ -2,7 +2,7 @@ import pytest
 
 from cg.cli.post_process.utils import get_post_processing_service_from_run_name
 from cg.models.cg_config import CGConfig
-from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 
 
 def test_get_post_processing_service_from_run_name(

@@ -1,6 +1,6 @@
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
-from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 from cg.utils.mapping import get_item_by_pattern_in_source
 
 PATTERN_TO_DEVICE_MAP: dict[str, str] = {

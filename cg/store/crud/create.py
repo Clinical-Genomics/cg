@@ -13,7 +13,7 @@ from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.dto import (
+from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,

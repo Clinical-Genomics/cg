@@ -3,8 +3,8 @@
 import pytest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 
 
 @pytest.fixture
