@@ -49,7 +49,7 @@ class TicketHandler:
         )
 
         with TemporaryDirectory() as temp_dir:
-            attachments: List[Path] = self.create_attachments(order=order, temp_dir=temp_dir)
+            attachment: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
             freshdesk_ticket = TicketCreate(
                 email=user_mail,
@@ -59,20 +59,18 @@ class TicketHandler:
                 attachments=[],
             )
             ticket_response: TicketResponse = self.client.create_ticket(
-                ticket=freshdesk_ticket, attachments=attachments
+                ticket=freshdesk_ticket, attachments=[attachment]
             )
             LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
 
         return ticket_response.id
 
-    def create_attachments(self, order: OrderIn, temp_dir: str) -> List[Path]:
-        """Create attachments for the ticket"""
-        attachments = []
+    def create_attachment_file(self, order: OrderIn, temp_dir: str) -> Path:
+        """Create a single attachment file for the ticket"""
         order_file_path = Path(temp_dir) / "order.json"
         with order_file_path.open("w") as order_file:
             order_file.write(order.json())
-        attachments.append(order_file_path)
-        return attachments
+        return order_file_path
 
     def create_xml_sample_list(self, order: OrderIn, user_name: str) -> str:
         message = ""
@@ -197,11 +195,11 @@ class TicketHandler:
             project=project,
         )
         sender_prefix, email_server_alias = user_mail.split("@")
-        directory = TemporaryDirectory()
-        file_path = Path(directory.name, "order.json")
-        temp_dir: TemporaryDirectory = create_file_attachment(
-            content=self.replace_empty_string_with_none(obj=order.dict()), file_path=file_path
-        )
+        with TemporaryDirectory() as directory:
+            temp_dir: TemporaryDirectory = create_file_attachment(
+                content=self.replace_empty_string_with_none(obj=order.dict()),
+                file_path=Path(directory.name, "order.json"),
+            )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
