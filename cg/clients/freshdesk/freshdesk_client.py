@@ -31,16 +31,16 @@ class FreshdeskClient:
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket."""
         ticket_data = ticket.model_dump(exclude_none=True)
-        endpint_url = self.base_url + EndPoints.TICKETS
+        endpoint_url = self.base_url + EndPoints.TICKETS
 
         if attachments:
             files = [
                 ("attachments[]", (attachment.name, open(attachment, "rb")))
                 for attachment in attachments
             ]
-            response: Response = self.session.post(url=endpint_url, data=ticket_data, files=files)
+            response: Response = self.session.post(url=endpoint_url, data=ticket_data, files=files)
         else:
-            response: Response = self.session.post(url=endpint_url, json=ticket_data)
+            response: Response = self.session.post(url=endpoint_url, json=ticket_data)
 
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
