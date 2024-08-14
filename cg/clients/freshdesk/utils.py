@@ -45,8 +45,11 @@ def prepare_attachments(attachments: List[Path]) -> List[Tuple[str, Tuple[str, b
 
 def create_file_attachment(content: dict, file_path: Path) -> None:
     """Create a file-based attachment."""
-    WriteFile.write_file_from_content(
-        content=content,
-        file_format=FileFormat.JSON,
-        file_path=file_path,
-    )
+    if content and file_path:
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.JSON,
+            file_path=file_path,
+        )
+    else:
+        LOG.error("Content or file path is None. Cannot create file attachment.")
