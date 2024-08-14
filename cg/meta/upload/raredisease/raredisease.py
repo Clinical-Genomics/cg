@@ -33,10 +33,11 @@ class RarediseaseUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
-
+        ctx.invoke(upload_to_gens, case_id=case.internal_id)
+        
         # Clinical delivery upload
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
-
+        
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
