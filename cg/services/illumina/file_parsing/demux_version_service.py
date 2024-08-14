@@ -11,7 +11,6 @@ class DemuxSoftware(BaseModel):
 
 
 class IlluminaDemuxVersionService:
-
     @staticmethod
     def _parse_demux_version_file(demux_version_file: Path) -> DemuxSoftware:
         """Parse the demultiplexing log file."""
