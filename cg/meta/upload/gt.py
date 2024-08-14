@@ -59,7 +59,7 @@ class UploadGenotypesAPI(UploadAPI):
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
         gt_data["samples_sex"] = self.get_samples_sex(
-            case_obj=analysis.case, hk_version=hk_version, analysis_api=analysis_api
+            case=analysis.case, hk_version=hk_version, analysis_api=analysis_api
         )
         return gt_data
 
@@ -68,10 +68,10 @@ class UploadGenotypesAPI(UploadAPI):
         self.gt.upload(str(gt_data["bcf"]), gt_data["samples_sex"], force=replace)
 
     @staticmethod
-    def is_suitable_for_genotype_upload(case_obj: Case) -> bool:
+    def is_suitable_for_genotype_upload(case: Case) -> bool:
         """Check if a cancer case is contains WGS and normal sample."""
 
-        samples: list[Sample] = case_obj.samples
+        samples: list[Sample] = case.samples
         return any(
             (not sample.is_tumour and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category)
             for sample in samples
@@ -88,7 +88,7 @@ class UploadGenotypesAPI(UploadAPI):
         hk_version_obj: Version,
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
-        genotype_files: list = self.get_genotype_files(self, version_id=hk_version_obj.id)
+        genotype_files: list = self.get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
             if self.is_variant_file(genotype_file=genotype_file):
                 LOG.debug(f"Found BCF file {genotype_file.full_path}")
@@ -97,11 +97,11 @@ class UploadGenotypesAPI(UploadAPI):
 
     def get_samples_sex(self, case: Case, hk_version: Version, analysis_api: AnalysisAPI) -> dict:
         if analysis_api in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            self.get_samples_sex_balsamic(self, case, hk_version, analysis_api)
+            self.get_samples_sex_balsamic(case, hk_version, analysis_api)
         elif analysis_api == Workflow.MIP_DNA:
-            self.get_samples_sex_mip_dna(self, case, hk_version, analysis_api)
+            self.get_samples_sex_mip_dna( case, hk_version, analysis_api)
         elif analysis_api == Workflow.RAREDISEASE:
-            self.get_samples_sex_raredisease(self, case, hk_version, analysis_api)
+            self.get_samples_sex_raredisease(case, hk_version, analysis_api)
 
     def get_samples_sex_balsamic(
         self, case: Case, hk_version=None, analysis_api: AnalysisAPI = BalsamicAnalysisAPI
