@@ -20,6 +20,7 @@ LOG = logging.getLogger(__name__)
 
 class UploadGenotypesAPI(UploadAPI):
     """Genotype upload API"""
+
     def __init__(
         self,
         hk_api: HousekeeperAPI,
@@ -28,7 +29,6 @@ class UploadGenotypesAPI(UploadAPI):
         LOG.info("Initializing UploadGenotypesAPI")
         self.hk = hk_api
         self.gt = gt_api
-
 
     def get_gt_data(self, analysis: Analysis) -> dict[dict[str, dict[str, str]]]:
         """Fetch data about an analysis to load genotypes.
@@ -83,7 +83,10 @@ class UploadGenotypesAPI(UploadAPI):
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
-    def get_bcf_file(self, hk_version_obj: Version, ) -> File:
+    def get_bcf_file(
+        self,
+        hk_version_obj: Version,
+    ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         genotype_files: list = self.get_genotype_files(self, version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
@@ -100,7 +103,9 @@ class UploadGenotypesAPI(UploadAPI):
         elif analysis_api == Workflow.RAREDISEASE:
             self.get_samples_sex_raredisease(self, case, hk_version, analysis_api)
 
-    def get_samples_sex_balsamic(self, case: Case, hk_version=None, analysis_api: AnalysisAPI=BalsamicAnalysisAPI) -> dict[str, dict[str, str]]:
+    def get_samples_sex_balsamic(
+        self, case: Case, hk_version=None, analysis_api: AnalysisAPI = BalsamicAnalysisAPI
+    ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
@@ -113,7 +118,9 @@ class UploadGenotypesAPI(UploadAPI):
             }
         return samples_sex
 
-    def get_samples_sex_mip_dna(self, case: Case, hk_version: Version, analysis_api: AnalysisAPI= MipDNAAnalysisAPI) -> dict[str, dict[str, str]]:
+    def get_samples_sex_mip_dna(
+        self, case: Case, hk_version: Version, analysis_api: AnalysisAPI = MipDNAAnalysisAPI
+    ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = MipDNAAnalysisAPI.get_qcmetrics_file(hk_version)
         analysis_sexes: dict = MipDNAAnalysisAPI.get_analysis_sex(qc_metrics_file)
@@ -126,7 +133,9 @@ class UploadGenotypesAPI(UploadAPI):
             }
         return samples_sex
 
-    def get_samples_sex_raredisease(self, case: Case, hk_version: Version, analysis_api: AnalysisAPI=RarediseaseAnalysisAPI) -> dict[str, dict[str, str]]:
+    def get_samples_sex_raredisease(
+        self, case: Case, hk_version: Version, analysis_api: AnalysisAPI = RarediseaseAnalysisAPI
+    ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
         samples_sex: dict[str, dict[str, str]] = {}
@@ -134,6 +143,8 @@ class UploadGenotypesAPI(UploadAPI):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": RarediseaseAnalysisAPI.get_analysis_sex(qc_metrics_file, sample_id=sample_id),
+                "analysis": RarediseaseAnalysisAPI.get_analysis_sex(
+                    qc_metrics_file, sample_id=sample_id
+                ),
             }
         return samples_sex
