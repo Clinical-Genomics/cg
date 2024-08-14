@@ -1152,7 +1152,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
 class PacBioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
-    __tablename__ = "pacbio_sample_sequencing_metrics"
+    __tablename__ = "pacbio_sample_run_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
     hifi_reads: Mapped[BigInt]
