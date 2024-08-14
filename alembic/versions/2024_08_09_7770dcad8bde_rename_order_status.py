@@ -7,6 +7,7 @@ Create Date: 2024-08-09 09:47:47.814700
 """
 
 import sqlalchemy as sa
+from sqlalchemy import orm
 
 from alembic import op
 
@@ -18,8 +19,20 @@ depends_on = None
 
 
 def upgrade():
-    pass
+    op.alter_column(
+        table_name="order", column_name="is_delivered", type_=sa.Boolean, new_column_name="is_open"
+    )
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+    for order in session.query("order").all():
+        order.is_open = not order.is_open
 
 
 def downgrade():
-    pass
+    op.alter_column(
+        table_name="order", new_column_name="is_delivered", type_=sa.Boolean, column_name="is_open"
+    )
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+    for order in session.query("order").all():
+        order.is_delivered = not order.is_delivered
