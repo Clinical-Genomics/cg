@@ -162,8 +162,8 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.pass_obj
 def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    is_all_samples_rna: bool = scout_upload_api.mip_analysis_api.are_case_samples_rna(case_id)
-    if not is_all_samples_rna:
+    are_all_samples_rna: bool = scout_upload_api.mip_analysis_api.are_case_samples_rna(case_id)
+    if not are_all_samples_rna:
         LOG.error(f"{case_id} has non-RNA samples - aborting.")
         raise click.Abort
 
