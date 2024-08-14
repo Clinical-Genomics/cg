@@ -7,7 +7,7 @@ from subprocess import CalledProcessError
 from typing import Iterator
 
 import click
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.apps.housekeeper.hk import HousekeeperAPI as hk
@@ -736,25 +736,6 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
-
-    def get_genotype_files(self, version_id: int) -> list:
-        return hk.files(self, version=version_id, tags={"genotype"}).all()
-
-    def is_variant_file(self, genotype_file: File):
-        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
-
-    def get_bcf_file(self, hk_version_obj: Version) -> File:
-        """Return a BCF file object. Raises error if nothing is found in the bundle"""
-        genotype_files: list = self.get_genotype_files(self, version_id=hk_version_obj.id)
-        for genotype_file in genotype_files:
-            if self.is_variant_file(genotype_file=genotype_file):
-                LOG.debug(f"Found BCF file {genotype_file.full_path}")
-                return genotype_file
-        raise FileNotFoundError(f"No VCF or BCF file found for bundle {hk_version_obj.bundle_id}")
-
-    def get_samples_sex(self, case_obj: Case, hk_version: Version) -> dict:
-        """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file). Raise not implemented error."""
-        raise NotImplementedError
 
     def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
         """Return a QC metrics file path."""
