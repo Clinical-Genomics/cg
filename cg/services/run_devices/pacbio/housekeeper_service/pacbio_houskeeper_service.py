@@ -16,9 +16,7 @@ from cg.services.run_devices.pacbio.housekeeper_service.models import PacBioFile
 from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
-    PacBioRunFileManager,
-)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 from cg.utils.mapping import get_item_by_pattern_in_source
 
 LOG = logging.getLogger(__name__)
@@ -48,7 +46,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
                 file_path=file_path, parsed_metrics=parsed_metrics
             )
             if dry_run:
-                LOG.debug(f"Dry run: would have added {bundle_info.file_path} to Housekeeper.")
+                LOG.info(f"Dry run: would have added {bundle_info.file_path} to Housekeeper.")
                 continue
             self.hk_api.create_bundle_and_add_file_with_tags(
                 bundle_name=bundle_info.bundle_name,
