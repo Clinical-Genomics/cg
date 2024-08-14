@@ -17,4 +17,5 @@ def backup_context(cg_context: CGConfig, store_with_illumina_sequencing_data: St
         pdc_service=cg_context.pdc_service,
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context

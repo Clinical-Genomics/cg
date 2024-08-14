@@ -20,6 +20,7 @@ from cg.services.post_processing.pacbio.data_transfer_service.dto import (
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
+from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
 from cg.store.models import (
     Analysis,
     Application,
@@ -406,16 +407,18 @@ class CreateHandler(BaseHandler):
 
     def add_illumina_flow_cell(self, flow_cell_dto: IlluminaFlowCellDTO) -> IlluminaFlowCell:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
-        if self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id):
-            raise ValueError(f"Flow cell with {flow_cell_dto.internal_id} already exists.")
-        new_flow_cell = IlluminaFlowCell(
-            internal_id=flow_cell_dto.internal_id,
-            type=flow_cell_dto.type,
-            model=flow_cell_dto.model,
-        )
-        self.session.add(new_flow_cell)
-        LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
-        return new_flow_cell
+        try:
+            self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id)
+        except EntryNotFoundError:
+            new_flow_cell = IlluminaFlowCell(
+                internal_id=flow_cell_dto.internal_id,
+                type=flow_cell_dto.type,
+                model=flow_cell_dto.model,
+            )
+            self.session.add(new_flow_cell)
+            LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
+            return new_flow_cell
+        raise EntryAlreadyExistsError(f"Flow cell already exists: {flow_cell_dto.internal_id}")
 
     def add_illumina_sequencing_run(
         self, sequencing_run_dto: IlluminaSequencingRunDTO, flow_cell: IlluminaFlowCell
