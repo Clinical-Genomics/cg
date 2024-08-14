@@ -3,13 +3,13 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.post_processing.abstract_classes import PostProcessingMetricsParser
-from cg.services.post_processing.error_handler import handle_post_processing_errors
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.abstract_classes import PostProcessingMetricsParser
+from cg.services.run_devices.error_handler import handle_post_processing_errors
+from cg.services.run_devices.exc import (
     PostProcessingParsingError,
     PostProcessingRunFileManagerError,
 )
-from cg.services.post_processing.pacbio.metrics_parser.models import (
+from cg.services.run_devices.pacbio.metrics_parser.models import (
     ControlMetrics,
     PacBioMetrics,
     PolymeraseMetrics,
@@ -17,11 +17,11 @@ from cg.services.post_processing.pacbio.metrics_parser.models import (
     ReadMetrics,
     SmrtlinkDatasetsMetrics,
 )
-from cg.services.post_processing.pacbio.metrics_parser.utils import (
+from cg.services.run_devices.pacbio.metrics_parser.utils import (
     get_parsed_metrics_from_file_name,
 )
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
 

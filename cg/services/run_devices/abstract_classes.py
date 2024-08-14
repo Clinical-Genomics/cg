@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from cg.services.post_processing.abstract_models import PostProcessingDTOs, RunData, RunMetrics
+from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 
 
 class RunDataGenerator(ABC):
@@ -71,4 +71,13 @@ class PostProcessingService(ABC):
     @abstractmethod
     def post_process(self, run_name: str, dry_run: bool = False):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
+        pass
+
+
+class FileTransferValidationService(ABC):
+    """Abstract class that encapsulautes the logic to validate file transfers for intrument runs from NAS to Hasta."""
+
+    @abstractmethod
+    def validate_file_transfer(self, run_data: RunData):
+        """Validate an instrument run."""
         pass

@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from cg.services.post_processing.abstract_classes import RunDataGenerator
-from cg.services.post_processing.error_handler import (
+from cg.services.run_devices.abstract_classes import RunDataGenerator
+from cg.services.run_devices.error_handler import (
     handle_post_processing_errors,
 )
-from cg.services.post_processing.exc import PostProcessingRunDataGeneratorError
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.validators import (
+from cg.services.run_devices.exc import PostProcessingRunDataGeneratorError
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.validators import (
     validate_has_expected_parts,
     validate_name_pre_fix,
 )

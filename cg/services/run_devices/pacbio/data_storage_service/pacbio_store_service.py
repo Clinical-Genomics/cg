@@ -1,21 +1,21 @@
 import logging
 
-from cg.services.post_processing.abstract_classes import PostProcessingStoreService
-from cg.services.post_processing.error_handler import handle_post_processing_errors
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.abstract_classes import PostProcessingStoreService
+from cg.services.run_devices.error_handler import handle_post_processing_errors
+from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
     PostProcessingStoreDataError,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.dto import (
+from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import PacBioSequencingRun, PacBioSMRTCell
 from cg.store.store import Store
 

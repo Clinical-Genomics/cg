@@ -1,10 +1,10 @@
 from cg.constants.devices import DeviceType
-from cg.services.post_processing.pacbio.data_transfer_service.dto import (
+from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
-from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
+from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 
 
 def get_smrt_cell_dto(metrics: PacBioMetrics) -> PacBioSMRTCellDTO:

@@ -5,18 +5,18 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.pacbio import PacBioBundleTypes, file_pattern_to_bundle_type, file_pattern_to_tag
-from cg.services.post_processing.abstract_classes import PostProcessingHKService
-from cg.services.post_processing.error_handler import handle_post_processing_errors
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.abstract_classes import PostProcessingHKService
+from cg.services.run_devices.error_handler import handle_post_processing_errors
+from cg.services.run_devices.exc import (
     PostProcessingParsingError,
     PostProcessingRunFileManagerError,
     PostProcessingStoreFileError,
 )
-from cg.services.post_processing.pacbio.housekeeper_service.models import PacBioFileData
-from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.post_processing.pacbio.metrics_parser.models import PacBioMetrics
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+from cg.services.run_devices.pacbio.housekeeper_service.models import PacBioFileData
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
 from cg.utils.mapping import get_item_by_pattern_in_source

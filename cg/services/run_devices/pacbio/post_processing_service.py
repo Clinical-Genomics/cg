@@ -1,23 +1,23 @@
 import logging
 
-from cg.services.post_processing.abstract_classes import PostProcessingService
-from cg.services.post_processing.error_handler import handle_post_processing_errors
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.abstract_classes import PostProcessingService
+from cg.services.run_devices.error_handler import handle_post_processing_errors
+from cg.services.run_devices.exc import (
     PostProcessingError,
     PostProcessingRunDataGeneratorError,
     PostProcessingStoreDataError,
     PostProcessingStoreFileError,
 )
-from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
-from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_generator import (
+from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 LOG = logging.getLogger(__name__)
 

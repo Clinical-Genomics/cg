@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.services.post_processing.abstract_models import RunData
+from cg.services.run_devices.abstract_models import RunData
 
 
 class PacBioRunData(RunData):

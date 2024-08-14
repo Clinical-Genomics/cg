@@ -3,7 +3,7 @@
 import pytest
 
 from cg.models.cg_config import PostProcessingServices
-from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 
 
 @pytest.fixture

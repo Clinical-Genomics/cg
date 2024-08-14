@@ -4,18 +4,18 @@ from unittest import mock
 
 import pytest
 
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.exc import (
     PostProcessingStoreDataError,
     PostProcessingDataTransferError,
 )
-from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.dto import PacBioDTOs
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
 
 from cg.store.store import Store
@@ -32,7 +32,7 @@ def test_store_post_processing_data(
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(
-        "cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
+        "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
     ):
         pac_bio_store_service.store_post_processing_data(expected_pac_bio_run_data)
@@ -71,7 +71,7 @@ def test_store_post_processing_data_error_database(
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(
-        "cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
+        "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
     ), mock.patch.object(Store, "create_pac_bio_smrt_cell", side_effect=ValueError):
         with pytest.raises(PostProcessingStoreDataError):
@@ -89,7 +89,7 @@ def test_store_post_processing_data_error_parser(
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(
-        "cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
+        "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
     ), mock.patch.object(
         PacBioDataTransferService,

@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.post_processing.exc import PostProcessingRunDataGeneratorError
-from cg.services.post_processing.pacbio.run_data_generator.pacbio_run_data_generator import (
+from cg.services.run_devices.exc import PostProcessingRunDataGeneratorError
+from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 
 def test_get_run_data(

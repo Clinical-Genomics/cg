@@ -4,13 +4,13 @@ from unittest.mock import Mock
 import pytest
 
 from cg.constants.devices import DeviceType
-from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.data_transfer_service import (
+from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
-from cg.services.post_processing.pacbio.data_transfer_service.dto import (
+from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,

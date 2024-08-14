@@ -5,17 +5,17 @@ from unittest import mock
 import pytest
 from housekeeper.store.models import File
 
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.exc import (
     PostProcessingParsingError,
     PostProcessingRunFileManagerError,
     PostProcessingStoreFileError,
 )
-from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.post_processing.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
 

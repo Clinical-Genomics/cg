@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from cg.constants.devices import DeviceType
-from cg.services.post_processing.abstract_models import PostProcessingDTOs
+from cg.services.run_devices.abstract_models import PostProcessingDTOs
 
 
 class PacBioSequencingRunDTO(BaseModel):

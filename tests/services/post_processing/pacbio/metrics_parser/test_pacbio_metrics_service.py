@@ -5,8 +5,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.post_processing.pacbio.metrics_parser.models import BaseMetrics
-from cg.services.post_processing.pacbio.metrics_parser.utils import (
+from cg.services.run_devices.pacbio.metrics_parser.models import BaseMetrics
+from cg.services.run_devices.pacbio.metrics_parser.utils import (
     get_parsed_metrics_from_file_name,
 )
 

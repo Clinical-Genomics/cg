@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 
 @pytest.fixture

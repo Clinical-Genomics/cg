@@ -6,18 +6,18 @@ from unittest.mock import Mock
 import pytest
 
 from cg.models.cg_config import CGConfig
-from cg.services.post_processing.exc import (
+from cg.services.run_devices.exc import (
     PostProcessingError,
     PostProcessingStoreDataError,
     PostProcessingStoreFileError,
 )
-from cg.services.post_processing.pacbio.data_storage_service.pacbio_store_service import (
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
 )
-from cg.services.post_processing.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.post_processing.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 
 
 def test_pac_bio_post_processing_run_name_error(pac_bio_context):

@@ -4,7 +4,7 @@ from typing import Any, Type
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.io.controller import ReadFile
-from cg.services.post_processing.pacbio.metrics_parser.models import (
+from cg.services.run_devices.pacbio.metrics_parser.models import (
     BaseMetrics,
     ControlMetrics,
     PolymeraseMetrics,

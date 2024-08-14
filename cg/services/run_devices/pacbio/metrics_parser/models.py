@@ -11,7 +11,7 @@ from cg.constants.pacbio import (
     PolymeraseDataAttributeIDs,
     SmrtLinkDatabasesIDs,
 )
-from cg.services.post_processing.abstract_models import RunMetrics
+from cg.services.run_devices.abstract_models import RunMetrics
 from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
 
 BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)

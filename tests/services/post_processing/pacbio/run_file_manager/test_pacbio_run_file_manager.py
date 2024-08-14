@@ -3,9 +3,9 @@ from unittest import mock
 import pytest
 from pathlib import Path
 
-from cg.services.post_processing.exc import PostProcessingRunFileManagerError
-from cg.services.post_processing.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.post_processing.pacbio.run_file_manager.run_file_manager import (
+from cg.services.run_devices.exc import PostProcessingRunFileManagerError
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
 
