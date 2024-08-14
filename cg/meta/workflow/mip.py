@@ -5,12 +5,12 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import FileExtensions, GenePanelMasterList, Workflow
+from cg.constants import FileExtensions, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
