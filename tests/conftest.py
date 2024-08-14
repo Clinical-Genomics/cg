@@ -2140,6 +2140,16 @@ def cg_context(
     return cg_config
 
 
+@pytest.fixture
+def context_with_illumina_data(
+    context_config: dict, store_with_illumina_sequencing_data, housekeeper_api: MockHousekeeperAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = store_with_illumina_sequencing_data
+    cg_config.housekeeper_api_ = housekeeper_api
+    return cg_config
+
+
 @pytest.fixture(scope="session")
 def case_id_with_single_sample() -> str:
     """Return a case id that should only be associated with one sample."""
@@ -2508,6 +2518,7 @@ def raredisease_parameters_default(
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
         analysis_type=AnalysisTypes.WES,
+        save_mapped_as_cram=True,
     )
 
 
