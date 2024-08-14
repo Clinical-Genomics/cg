@@ -20,7 +20,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
-from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
+from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -490,6 +490,7 @@ class CreateHandler(BaseHandler):
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
             plate=sequencing_run_dto.plate,
+            movie_name=sequencing_run_dto.movie_name,
             started_at=sequencing_run_dto.started_at,
             completed_at=sequencing_run_dto.completed_at,
             hifi_reads=sequencing_run_dto.hifi_reads,
@@ -512,7 +513,6 @@ class CreateHandler(BaseHandler):
             failed_reads=sequencing_run_dto.failed_reads,
             failed_yield=sequencing_run_dto.failed_yield,
             failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
-            movie_name=sequencing_run_dto.movie_name,
             device=smrt_cell,
         )
         self.session.add(new_sequencing_run)

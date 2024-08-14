@@ -12,6 +12,7 @@ class PacBioSequencingRunDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
+    movie_name: str
     started_at: datetime
     completed_at: datetime
     hifi_reads: int
@@ -36,7 +37,6 @@ class PacBioSequencingRunDTO(BaseModel):
     failed_reads: int
     failed_yield: int
     failed_mean_read_length: float
-    movie_name: str
 
 
 class PacBioSMRTCellDTO(BaseModel):
