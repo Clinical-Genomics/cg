@@ -1,12 +1,21 @@
 import logging
 from functools import wraps
+from pathlib import Path
+from typing import List, Tuple
+
 from pydantic import ValidationError
 from requests import ConnectionError, HTTPError
 from requests.exceptions import MissingSchema
+from cg.constants.constants import FileFormat
 
-from cg.clients.freshdesk.exceptions import FreshdeskAPIException, FreshdeskModelException
+from cg.clients.freshdesk.exceptions import (
+    FreshdeskAPIException,
+    FreshdeskModelException,
+)
+from cg.io.controller import WriteFile
 
 LOG = logging.getLogger(__name__)
+TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 def handle_client_errors(func):
@@ -25,3 +34,19 @@ def handle_client_errors(func):
             raise FreshdeskAPIException(error) from error
 
     return wrapper
+
+
+def prepare_attachments(attachments: List[Path]) -> List[Tuple[str, Tuple[str, bytes]]]:
+    """Prepare the attachments for a request."""
+    return [
+        ("attachments[]", (attachment.name, open(attachment, "rb"))) for attachment in attachments
+    ]
+
+
+def create_file_attachment(content: dict, file_path: Path) -> None:
+    """Create a file-based attachment."""
+    WriteFile.write_file_from_content(
+        content=content,
+        file_format=FileFormat.JSON,
+        file_path=file_path,
+    )
