@@ -102,9 +102,7 @@ class UploadGenotypesAPI(object):
         elif analysis_api == Workflow.RAREDISEASE:
             return self.get_samples_sex_raredisease(case, hk_version, analysis_api)
 
-    def get_samples_sex_balsamic(
-        self, case: Case
-    ) -> dict[str, dict[str, str]]:
+    def get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
@@ -142,8 +140,6 @@ class UploadGenotypesAPI(object):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": analysis_api.get_analysis_sex(
-                    qc_metrics_file, sample_id=sample_id
-                ),
+                "analysis": analysis_api.get_analysis_sex(qc_metrics_file, sample_id=sample_id),
             }
         return samples_sex
