@@ -194,7 +194,7 @@ class AnalysisAPI(MetaAPI):
 
         return application_types.pop()
 
-    def is_case_samples_rna(self, case_id: str) -> bool:
+    def are_case_samples_rna(self, case_id: str) -> bool:
         analysis_type: str = self.get_case_application_type(case_id)
         return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
 
