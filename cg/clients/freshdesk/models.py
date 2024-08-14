@@ -21,14 +21,6 @@ class TicketCreate(BaseModel):
     type: str | None = None
 
 
-class Attachment(BaseModel):
-    id: int
-    name: str
-    content_type: str
-    size: int
-    created_at: str
-
-
 class TicketResponse(BaseModel):
     id: int
     description: str
@@ -36,4 +28,3 @@ class TicketResponse(BaseModel):
     to_emails: Optional[List[str]] = None
     status: int
     priority: int
-    attachments: Optional[List[Attachment]] = None

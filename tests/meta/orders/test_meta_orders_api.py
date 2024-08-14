@@ -56,7 +56,6 @@ def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str, user_mail
         subject="Support needed..",
         status=2,
         priority=1,
-        attachments=[],
     )
 
 
