@@ -15,14 +15,9 @@ from cg.server.dto.samples.collaborator_samples_request import (
     CollaboratorSamplesRequest,
 )
 from cg.store.base import BaseHandler
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
-)
-from cg.store.filters.status_application_filters import (
-    ApplicationFilter,
-    apply_application_filter,
-)
+from cg.store.exc import EntryNotFoundError
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -402,11 +397,14 @@ class ReadHandler(BaseHandler):
         self, device_internal_id: str
     ) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
-        return apply_illumina_sequencing_run_filter(
+        sequencing_run: IlluminaSequencingRun | None = apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
         ).first()
+        if not sequencing_run:
+            raise EntryNotFoundError(f"No sequencing run found for device {device_internal_id}")
+        return sequencing_run
 
     def get_latest_illumina_sequencing_run_for_nipt_case(
         self, case_internal_id: str
@@ -1486,11 +1484,16 @@ class ReadHandler(BaseHandler):
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
-        return apply_illumina_flow_cell_filters(
+        flow_cell: IlluminaFlowCell | None = apply_illumina_flow_cell_filters(
             filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+        if not flow_cell:
+            raise EntryNotFoundError(
+                f"Could not find Illumina flow cell with internal id {internal_id}"
+            )
+        return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """Return all cases that are ready for sequencing QC."""
