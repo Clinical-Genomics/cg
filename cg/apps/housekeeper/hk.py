@@ -7,11 +7,7 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Tag, Version
 from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
@@ -576,7 +572,7 @@ class HousekeeperAPI:
         file_path: Path,
         tags: list[str],
     ) -> None:
-        """Add the fastq file path with tags to a bundle and version in Housekeeper."""
+        """Add a file path with tags to a bundle and version in Housekeeper."""
         self.add_bundle_and_version_if_non_existent(bundle_name)
         self.add_tags_if_non_existent([bundle_name])
         self.add_file_to_bundle_if_non_existent(

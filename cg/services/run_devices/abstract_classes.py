@@ -7,7 +7,7 @@ from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData,
 
 
 class RunDataGenerator(ABC):
-    """Abstract class for that holds functionality to create a run data model."""
+    """Abstract class that holds functionality to create a run data object."""
 
     @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
@@ -34,7 +34,7 @@ class PostProcessingMetricsParser(ABC):
 
     @abstractmethod
     def parse_metrics(self, run_data: RunData) -> RunMetrics:
-        """Parse the metrics from the files."""
+        """Parse the sequencing run metrics."""
         pass
 
 
@@ -75,9 +75,9 @@ class PostProcessingService(ABC):
 
 
 class FileTransferValidationService(ABC):
-    """Abstract class that encapsulautes the logic to validate file transfers for intrument runs from NAS to Hasta."""
+    """Abstract class that validates file transfers for instrument runs from NAS to Hasta."""
 
     @abstractmethod
     def validate_file_transfer(self, run_data: RunData):
-        """Validate an instrument run."""
+        """Validate an instrument run transfer."""
         pass

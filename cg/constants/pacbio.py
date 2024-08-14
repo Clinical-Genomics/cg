@@ -80,7 +80,6 @@ file_pattern_to_tag: dict[str, list[str]] = {
     PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
     PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
     f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
-    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": [AlignmentFileTag.BAM, "pbi"],
 }
 
 file_pattern_to_bundle_type: dict[str, str] = {
@@ -90,5 +89,4 @@ file_pattern_to_bundle_type: dict[str, str] = {
     PacBioDirsAndFiles.RAW_DATA_REPORT: PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
     f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
-    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}.pbi": PacBioBundleTypes.SAMPLE,
 }
