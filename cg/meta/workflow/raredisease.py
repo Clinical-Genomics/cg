@@ -201,11 +201,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": self._get_analysis_sex(qc_metrics_file, sample_id=sample_id),
+                "analysis": self.get_analysis_sex(qc_metrics_file, sample_id=sample_id),
             }
         return samples_sex
 
-    def _get_analysis_sex(self, qc_metrics_file: Path, sample_id: Sample) -> str:
+    def get_analysis_sex(self, qc_metrics_file: Path, sample_id: Sample) -> str:
         """Return analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_data(qc_metrics_file)
         return str(

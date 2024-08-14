@@ -669,19 +669,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return True
         return False
 
-    def get_samples_sex(self, case: Case, hk_version=None) -> dict[str, dict[str, str]]:
-        """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
-        samples_sex: dict[str, dict[str, str]] = {}
-        for case_sample in case.links:
-            if case_sample.sample.is_tumour:
-                continue
-            sample_id: str = case_sample.sample.internal_id
-            samples_sex[sample_id] = {
-                "pedigree": case_sample.sample.sex,
-                "analysis": Sex.UNKNOWN,
-            }
-        return samples_sex
-
     def get_scout_upload_case_tags(self) -> dict:
         """Return Balsamic Scout upload case tags."""
         return BALSAMIC_CASE_TAGS

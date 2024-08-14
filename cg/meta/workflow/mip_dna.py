@@ -13,7 +13,6 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Case, CaseSample
 from cg.utils import Process
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -100,29 +99,15 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
 
-    def get_samples_sex(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
-        """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
-        analysis_sexes: dict = self._get_analysis_sex(qc_metrics_file)
-        samples_sex: dict[str, dict[str, str]] = {}
-        for case_sample in case.links:
-            sample_id: str = case_sample.sample.internal_id
-            samples_sex[sample_id] = {
-                "pedigree": case_sample.sample.sex,
-                "analysis": analysis_sexes[sample_id],
-            }
-        return samples_sex
-
-    def _get_analysis_sex(self, qc_metrics_file: Path) -> dict:
+    def get_analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: MIPMetricsDeliverables = self._get_parsed_qc_metrics_data(qc_metrics_file)
+        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
             for sample_id_metric in qc_metrics.sample_id_metrics
         }
 
-    @staticmethod
-    def _get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
