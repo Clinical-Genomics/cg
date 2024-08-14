@@ -1,8 +1,6 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
-    CaseError,
-    CaseSampleError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
     InvalidGenePanelsError,
@@ -36,8 +34,8 @@ def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> l
 
 def validate_customer_can_skip_reception_control(
     order: Order, store: Store, **kwargs
-) -> list[OrderError]:
-    errors: list[OrderError] = []
+) -> list[CustomerCannotSkipReceptionControlError]:
+    errors: list[CustomerCannotSkipReceptionControlError] = []
 
     if not order.skip_reception_control:
         return errors
@@ -48,16 +46,20 @@ def validate_customer_can_skip_reception_control(
     return errors
 
 
-def validate_customer_exists(order: Order, store: Store, **kwargs) -> list[OrderError]:
-    errors: list[OrderError] = []
+def validate_customer_exists(
+    order: Order, store: Store, **kwargs
+) -> list[CustomerDoesNotExistError]:
+    errors: list[CustomerDoesNotExistError] = []
     if not store.customer_exists(order.customer_internal_id):
         error = CustomerDoesNotExistError()
         errors.append(error)
     return errors
 
 
-def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> list[CaseSampleError]:
-    errors: list[CaseSampleError] = []
+def validate_application_exists(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[ApplicationNotValidError]:
+    errors: list[ApplicationNotValidError] = []
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if not store.get_application_by_tag(sample.application):
@@ -68,8 +70,8 @@ def validate_application_exists(order: TomteOrder, store: Store, **kwargs) -> li
 
 def validate_application_not_archived(
     order: TomteOrder, store: Store, **kwargs
-) -> list[CaseSampleError]:
-    errors: list[CaseSampleError] = []
+) -> list[ApplicationArchivedError]:
+    errors: list[ApplicationArchivedError] = []
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if store.is_application_archived(sample.application):
@@ -78,8 +80,8 @@ def validate_application_not_archived(
     return errors
 
 
-def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[CaseError]:
-    errors: list[CaseError] = []
+def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[RepeatedGenePanelsError]:
+    errors: list[RepeatedGenePanelsError] = []
     for case_index, case in order.enumerated_cases:
         if contains_duplicates(case.panels):
             error = RepeatedGenePanelsError(case_index=case_index)
@@ -93,9 +95,7 @@ def validate_gene_panels_exist(
     errors: list[InvalidGenePanelsError] = []
     for case_index, case in order.enumerated_cases:
         if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
-            case_error: InvalidGenePanelsError = InvalidGenePanelsError(
-                case_index=case_index, panels=invalid_panels
-            )
+            case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
             errors.append(case_error)
     return errors
 

@@ -12,7 +12,7 @@ class TomteModelValidator:
     @classmethod
     def validate(cls, raw_order: dict) -> tuple[TomteOrder | None, ValidationErrors]:
         try:
-            order = TomteOrder.model_validate(raw_order)
+            order: TomteOrder = TomteOrder.model_validate(raw_order)
             return order, ValidationErrors()
         except ValidationError as error:
             return None, convert_errors(pydantic_errors=error)

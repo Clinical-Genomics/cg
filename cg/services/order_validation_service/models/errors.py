@@ -161,7 +161,7 @@ class SubjectIdSameAsSampleNameError(CaseSampleError):
 
 
 class InvalidConcentrationIfSkipRCError(CaseSampleError):
-    def __init__(self, case_index: int, sample_index: int, allowed_interval: tuple[int, int]):
+    def __init__(self, case_index: int, sample_index: int, allowed_interval: tuple[float, float]):
         field: str = "concentration_ng_ul"
         message: str = (
             f"Concentration must be between {allowed_interval[0]} ng/μL and {allowed_interval[1]} ng/μL if reception control should be skipped"
