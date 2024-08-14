@@ -17,6 +17,7 @@ class OrderType(StrEnum):
     RNAFUSION: str = Workflow.RNAFUSION
     SARS_COV_2: str = "sars-cov-2"
     TOMTE: str = Workflow.TOMTE
+    MICROBIAL_FASTQ: str = "microbial-fastq"
 
 
 class ExcelSampleAliases(StrEnum):
