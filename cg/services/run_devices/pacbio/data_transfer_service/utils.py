@@ -51,6 +51,7 @@ def get_sample_sequencing_metrics_dtos(
 ) -> list[PacBioSampleSequencingMetricsDTO]:
     hifi_mean_read_quality: str = f"Q{metrics.read.hifi_median_read_quality}"
     sample_sequencing_metrics_dto = PacBioSampleSequencingMetricsDTO(
+        sample_internal_id=metrics.dataset_metrics.sample_internal_id,
         hifi_reads=metrics.read.hifi_reads,
         hifi_yield=metrics.read.hifi_yield,
         hifi_mean_read_length=metrics.read.hifi_mean_read_length_kb,
