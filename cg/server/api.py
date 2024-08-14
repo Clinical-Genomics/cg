@@ -333,7 +333,7 @@ def get_order(order_id: int):
 
 
 @BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
-def set_order_delivered(order_id: int):
+def set_order_open(order_id: int):
     try:
         request_data = OrderOpenPatch.model_validate(request.json)
         is_open: bool = request_data.open
