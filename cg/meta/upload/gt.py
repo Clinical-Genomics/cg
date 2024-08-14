@@ -12,6 +12,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 from cg.store.models import Analysis, Case, Sample
 
@@ -123,7 +124,7 @@ class UploadGenotypesAPI(object):
     ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = analysis_api.get_qcmetrics_file(hk_version)
-        analysis_sexes: dict = analysis_api.get_analysis_sex(qc_metrics_file)
+        analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
@@ -132,6 +133,22 @@ class UploadGenotypesAPI(object):
                 "analysis": analysis_sexes[sample_id],
             }
         return samples_sex
+
+    def get_analysis_sex_mip_dna(self, qc_metrics_file: Path) -> dict:
+        """Return analysis sex for each sample of an analysis."""
+        qc_metrics = self.get_parsed_qc_metrics_data_mip_dna(qc_metrics_file)
+        return {
+            sample_id_metric.sample_id: sample_id_metric.predicted_sex
+            for sample_id_metric in qc_metrics.sample_id_metrics
+        }
+
+    def get_parsed_qc_metrics_data_mip_dna(qc_metrics: Path) -> MIPMetricsDeliverables:
+        """Parse and return a QC metrics file."""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return MIPMetricsDeliverables(**qcmetrics_raw)
+
 
     def get_samples_sex_raredisease(
         self, case: Case, hk_version: Version, analysis_api: RarediseaseAnalysisAPI
@@ -158,9 +175,10 @@ class UploadGenotypesAPI(object):
             )
         )
 
-    def get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> list[MetricsBase]:
+    def get_parsed_qc_metrics_data_raredisease(self, qc_metrics: Path) -> list[MetricsBase]:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
+

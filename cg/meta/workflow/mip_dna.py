@@ -1,16 +1,13 @@
 import logging
-from pathlib import Path
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType, FileFormat
+from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
-from cg.io.controller import ReadFile
 from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Case, CaseSample
 from cg.utils import Process
 
@@ -99,20 +96,6 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
 
-    def get_analysis_sex(self, qc_metrics_file: Path) -> dict:
-        """Return analysis sex for each sample of an analysis."""
-        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
-        return {
-            sample_id_metric.sample_id: sample_id_metric.predicted_sex
-            for sample_id_metric in qc_metrics.sample_id_metrics
-        }
-
-    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
-        """Parse and return a QC metrics file."""
-        qcmetrics_raw: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=qc_metrics
-        )
-        return MIPMetricsDeliverables(**qcmetrics_raw)
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return MIP DNA Scout upload case tags."""

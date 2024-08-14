@@ -5,7 +5,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.upload.genotype import upload_genotypes as upload_genotypes_cmd
+from cg.cli.upload.genotype import upload_genotypes
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -27,7 +27,7 @@ def test_upload_genotype(
     assert case_obj
 
     # WHEN uploading the genotypes
-    result = cli_runner.invoke(upload_genotypes_cmd, [case_id], obj=upload_context)
+    result = cli_runner.invoke(upload_genotypes, [case_id], obj=upload_context)
 
     # THEN check that the command exits with success
     assert result.exit_code == 0
