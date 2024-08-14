@@ -29,18 +29,11 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
-from cg.server.dto.orders.order_delivery_update_request import (
-    OrderDeliveredUpdateRequest,
-)
-from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
+from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
+from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import (
@@ -339,24 +332,24 @@ def get_order(order_id: int):
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
-@BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
+@BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
 def set_order_delivered(order_id: int):
     try:
-        request_data = OrderDeliveredPatch.model_validate(request.json)
-        delivered: bool = request_data.delivered
-        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        request_data = OrderOpenPatch.model_validate(request.json)
+        is_open: bool = request_data.open
+        response_data: Order = order_service.set_open(order_id=order_id, is_open=is_open)
         return jsonify(response_data.model_dump()), HTTPStatus.OK
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
 
-@BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
-def update_order_delivered(order_id: int):
-    """Update the delivery status of an order based on the number of delivered analyses."""
+@BLUEPRINT.route("/orders/<order_id>/update-open-status", methods=["POST"])
+def update_order_open_status(order_id: int):
+    """Update the openness status of an order based on the number of delivered analyses."""
     try:
-        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        request_data = OrderOpenUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
-        order_service.update_delivered(order_id=order_id, delivered_analyses=delivered_analyses)
+        order_service.update_is_open(order_id=order_id, delivered_analyses=delivered_analyses)
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 

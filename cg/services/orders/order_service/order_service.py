@@ -45,8 +45,8 @@ class OrderService:
         order: Order = self.store.update_order_status(order_id=order_id, is_open=is_open)
         return create_order_response(order)
 
-    def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
-        """Update the delivery status of an order based on the number of delivered analyses."""
+    def update_is_open(self, order_id: int, delivered_analyses: int) -> None:
+        """Update the openness status of an order based on the number of delivered analyses."""
         order: Order = self.store.get_order_by_id(order_id)
         case_count: int = len(order.cases)
         if order_is_closed(case_count=case_count, delivered_analyses=delivered_analyses):
