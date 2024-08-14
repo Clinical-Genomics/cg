@@ -30,6 +30,7 @@ from cg.services.illumina.post_processing.utils import (
 from cg.services.illumina.post_processing.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.files import get_directories_in_path
@@ -195,6 +196,8 @@ class IlluminaPostProcessingService:
         run_directory_data = IlluminaRunDirectoryData(demux_run_dir)
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
         run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+        sequencing_run: IlluminaSequencingRun | None = None
+        has_backup: bool = False
 
         LOG.debug("Set path for Housekeeper sample sheet in run directory")
         try:
@@ -208,12 +211,15 @@ class IlluminaPostProcessingService:
         if self.dry_run:
             LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
-        sequencing_run: IlluminaSequencingRun | None = (
-            self.status_db.get_illumina_sequencing_run_by_device_internal_id(run_directory_data.id)
-        )
-        has_backup: bool = False
-        if sequencing_run:
+        try:
+            sequencing_run: IlluminaSequencingRun = (
+                self.status_db.get_illumina_sequencing_run_by_device_internal_id(
+                    run_directory_data.id
+                )
+            )
             has_backup: bool = sequencing_run.has_backup
+        except EntryNotFoundError as error:
+            LOG.info(f"Run {sequencing_run_name} not found in StatusDB: {str(error)}")
         self.delete_sequencing_run_data(flow_cell_id=run_directory_data.id)
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
@@ -228,6 +234,7 @@ class IlluminaPostProcessingService:
             self.status_db.update_illumina_sequencing_run_has_backup(
                 sequencing_run=sequencing_run, has_backup=has_backup
             )
+
         create_delivery_file_in_flow_cell_directory(demux_run_dir)
 
     def get_all_demultiplexed_runs(self) -> list[Path]:
@@ -253,6 +260,6 @@ class IlluminaPostProcessingService:
         """Delete sequencing run entries from Housekeeper and StatusDB."""
         try:
             self.status_db.delete_illumina_flow_cell(flow_cell_id)
-        except ValueError:
+        except EntryNotFoundError:
             LOG.warning(f"Flow cell {flow_cell_id} not found in StatusDB.")
         delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
