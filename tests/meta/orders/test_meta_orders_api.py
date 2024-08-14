@@ -48,18 +48,15 @@ def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order_data: OrderI
         )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket: patch, ticket_id: str, user_mail: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str, user_mail: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
-        id=ticket_id,
-        email=user_mail,
-        priority=1,
-        source=2,
-        status=2,
+        id=int(ticket_id),
+        description="This is a test description.",
         subject="Support needed..",
-        created_at=dt.datetime.now(),
+        status=2,
+        priority=1,
         attachments=[],
-        tags=[],
     )
 
 
@@ -332,10 +329,15 @@ def test_submit_unique_sample_case_name(
     user_name: str,
     user_mail: str,
     monkeypatch: pytest.MonkeyPatch,
+    ticket_id: str,
 ):
     with patch(
         "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch:
+    ) as mail_patch, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+    ) as mock_create_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+
         # GIVEN we have an order with a case that is not existing in the database
         order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
 
