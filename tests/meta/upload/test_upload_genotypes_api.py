@@ -97,15 +97,13 @@ def test_get_bcf_file_raredisease(
     upload_genotypes_api: UploadGenotypesAPI,
     case_id: str,
     timestamp: datetime,
-    raredisease_context: CGConfig,
 ):
     """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
     # GIVEN a UploadGenotypeAPI populated with some data
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
-    analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
 
     # WHEN fetching the gbcf file with the api
-    gbcf = analysis_api.get_bcf_file(hk_version_obj=hk_version)
+    gbcf = upload_genotypes_api.get_bcf_file(hk_version_obj=hk_version)
 
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)

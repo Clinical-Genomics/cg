@@ -99,7 +99,7 @@ class UploadGenotypesAPI(UploadAPI):
         if analysis_api in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             self.get_samples_sex_balsamic(case, hk_version, analysis_api)
         elif analysis_api == Workflow.MIP_DNA:
-            self.get_samples_sex_mip_dna( case, hk_version, analysis_api)
+            self.get_samples_sex_mip_dna(case, hk_version, analysis_api)
         elif analysis_api == Workflow.RAREDISEASE:
             self.get_samples_sex_raredisease(case, hk_version, analysis_api)
 
