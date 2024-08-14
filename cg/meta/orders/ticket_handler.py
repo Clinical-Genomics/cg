@@ -8,6 +8,7 @@ from sendmail_container import FormDataRequest
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.clients.freshdesk.utils import create_file_attachment
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -99,10 +100,7 @@ class TicketHandler:
 
     @staticmethod
     def create_new_ticket_header(message: str, order: OrderIn, project: str) -> str:
-        return (
-            f"data:text/html;charset=utf-8, New order with {len(order.samples)} {project} samples:"
-            + message
-        )
+        return f"New order with {len(order.samples)} {project} samples:" + message
 
     @staticmethod
     def add_existing_ticket_header(message: str, order: OrderIn, project: str) -> str:
@@ -199,8 +197,10 @@ class TicketHandler:
             project=project,
         )
         sender_prefix, email_server_alias = user_mail.split("@")
-        temp_dir: TemporaryDirectory = self.client.create_connecting_ticket_attachment(
-            content=self.replace_empty_string_with_none(obj=order.dict())
+        directory = TemporaryDirectory()
+        file_path = Path(directory.name, "order.json")
+        temp_dir: TemporaryDirectory = create_file_attachment(
+            content=self.replace_empty_string_with_none(obj=order.dict()), file_path=file_path
         )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
