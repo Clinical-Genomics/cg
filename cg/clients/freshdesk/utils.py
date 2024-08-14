@@ -2,6 +2,7 @@ import logging
 from functools import wraps
 from pathlib import Path
 from typing import List, Tuple
+from tempfile import TemporaryDirectory
 
 from pydantic import ValidationError
 from requests import ConnectionError, HTTPError
@@ -43,13 +44,16 @@ def prepare_attachments(attachments: List[Path]) -> List[Tuple[str, Tuple[str, b
     ]
 
 
-def create_file_attachment(content: dict, file_path: Path) -> None:
+def create_temp_attachment_file(content: dict, file_name: Path) -> TemporaryDirectory:
     """Create a file-based attachment."""
-    if content and file_path:
+    if content and file_name:
+        directory = TemporaryDirectory()
         WriteFile.write_file_from_content(
             content=content,
             file_format=FileFormat.JSON,
-            file_path=file_path,
+            file_path=Path(directory.name, "order.json"),
         )
+        return directory
     else:
         LOG.error("Content or file path is None. Cannot create file attachment.")
+        raise ValueError("Both content and file path must be provided and cannot be None")

@@ -8,7 +8,7 @@ from sendmail_container import FormDataRequest
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-from cg.clients.freshdesk.utils import create_file_attachment
+from cg.clients.freshdesk.utils import create_temp_attachment_file
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -49,7 +49,7 @@ class TicketHandler:
         )
 
         with TemporaryDirectory() as temp_dir:
-            attachment: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
+            attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
             freshdesk_ticket = TicketCreate(
                 email=user_mail,
@@ -59,7 +59,7 @@ class TicketHandler:
                 attachments=[],
             )
             ticket_response: TicketResponse = self.client.create_ticket(
-                ticket=freshdesk_ticket, attachments=[attachment]
+                ticket=freshdesk_ticket, attachments=[attachments]
             )
             LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
 
@@ -195,11 +195,9 @@ class TicketHandler:
             project=project,
         )
         sender_prefix, email_server_alias = user_mail.split("@")
-        with TemporaryDirectory() as directory:
-            temp_dir: TemporaryDirectory = create_file_attachment(
-                content=self.replace_empty_string_with_none(obj=order.dict()),
-                file_path=Path(directory.name, "order.json"),
-            )
+        temp_dir: TemporaryDirectory = create_temp_attachment_file(
+            content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
+        )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
