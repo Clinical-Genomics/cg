@@ -27,7 +27,6 @@ from tests.apps.orderform.conftest import (
     tomte_order_to_submit,
 )
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.osticket import MockOsTicket
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 
@@ -131,17 +130,18 @@ def tomte_status_data(tomte_order_to_submit: dict):
     return TomteSubmitter.order_to_status(order=order)
 
 
-@pytest.fixture(scope="function")
-def orders_api(
-    base_store, osticket: MockOsTicket, lims_api: MockLimsAPI, freshdesk_client: FreshdeskClient
-):
-    return OrdersAPI(
-        lims=lims_api, status=base_store, osticket=osticket, freshdesk_client=freshdesk_client
+@pytest.fixture
+def freshdesk_client():
+    return FreshdeskClient(
+        base_url="http://example.com", api_key="dummy_api_key", order_email_id=12345, env="test"
     )
 
 
+@pytest.fixture(scope="function")
+def orders_api(base_store: Store, lims_api: MockLimsAPI, ticket_handler: TicketHandler):
+    return OrdersAPI(lims=lims_api, status=base_store, ticket_handler=ticket_handler)
+
+
 @pytest.fixture
-def ticket_handler(
-    store: Store, osticket: MockOsTicket, freshdesk_client: FreshdeskClient
-) -> TicketHandler:
-    return TicketHandler(status_db=store, osticket_api=osticket, freshdesk_client=freshdesk_client)
+def ticket_handler(store: Store, freshdesk_client: FreshdeskClient):
+    return TicketHandler(status_db=store, client=freshdesk_client)
