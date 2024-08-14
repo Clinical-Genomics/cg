@@ -50,7 +50,6 @@ class TicketHandler:
         with TemporaryDirectory() as temp_dir:
             attachments: List[Path] = self.create_attachments(order=order, temp_dir=temp_dir)
 
-            # Create ticket in Freshdesk
             freshdesk_ticket = TicketCreate(
                 email=user_mail,
                 description=message,
