@@ -10,7 +10,6 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.apps.housekeeper.hk import HousekeeperAPI as hk
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -195,10 +194,6 @@ class AnalysisAPI(MetaAPI):
             )
 
         return application_types.pop()
-
-    def are_case_samples_rna(self, case_id: str) -> bool:
-        analysis_type: str = self.get_case_application_type(case_id)
-        return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
 
     def get_case_source_type(self, case_id: str) -> str | None:
         """

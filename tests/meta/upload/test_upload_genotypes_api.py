@@ -20,7 +20,7 @@ def test_get_analysis_sex_mip(
     # GIVEN an AnalysisAPI and some qcmetrics data
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = MipDNAAnalysisAPI._get_analysis_sex(
+    sex: dict = MipDNAAnalysisAPI.get_analysis_sex(
         qc_metrics_file=case_qc_metrics_deliverables,
         sample_id=mip_analysis_api.sample_id_in_single_case,
     )

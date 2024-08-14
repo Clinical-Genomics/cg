@@ -3,12 +3,15 @@ from pathlib import Path
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import PrepCategory, Workflow
+from cg.constants.constants import FileFormat, PrepCategory, Workflow
+from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
+from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.models.deliverables.metric_deliverables import MetricsBase
 
 from cg.store.models import Analysis, Case, Sample
 
@@ -140,6 +143,24 @@ class UploadGenotypesAPI(object):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": analysis_api.get_analysis_sex(qc_metrics_file, sample_id=sample_id),
+                "analysis": self.get_analysis_sex_raredisease(qc_metrics_file, sample_id=sample_id),
             }
         return samples_sex
+
+    def get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: Sample) -> str:
+        """Return analysis sex for each sample of an analysis."""
+        qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
+        return str(
+            next(
+                metric.value
+                for metric in qc_metrics
+                if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id
+            )
+        )
+
+    def get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> list[MetricsBase]:
+        """Parse and return a QC metrics file."""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
