@@ -2520,6 +2520,7 @@ def raredisease_parameters_default(
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
         analysis_type=AnalysisTypes.WES,
+        save_mapped_as_cram=True,
     )
 
 
