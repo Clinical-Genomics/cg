@@ -1,17 +1,14 @@
 import logging
 from http import HTTPStatus
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.utils import handle_client_errors
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile, WriteStream
+from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
@@ -31,17 +28,12 @@ class FreshdeskClient:
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket."""
         ticket_data = ticket.model_dump(exclude_none=True)
-        endpoint_url = self.base_url + EndPoints.TICKETS
+        files = prepare_attachments(attachments) if attachments else None
 
-        if attachments:
-            files = [
-                ("attachments[]", (attachment.name, open(attachment, "rb")))
-                for attachment in attachments
-            ]
-            response: Response = self.session.post(url=endpoint_url, data=ticket_data, files=files)
-        else:
-            response: Response = self.session.post(url=endpoint_url, json=ticket_data)
-
+        LOG.info(ticket_data)
+        response: Response = self.session.post(
+            url=f"{self.base_url}{EndPoints.TICKETS}", data=ticket_data, files=files
+        )
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
 
@@ -49,8 +41,7 @@ class FreshdeskClient:
     def _get_session(self) -> Session:
         session = Session()
         session.auth = (self.api_key, "X")
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
-        session.mount("https://", HTTPAdapter(max_retries=retries))
+        self._configure_retries(session)
         return session
 
     @staticmethod
@@ -69,23 +60,3 @@ class FreshdeskClient:
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
-
-    @staticmethod
-    def create_new_ticket_attachment(content: dict, file_name: str) -> dict:
-        return {
-            file_name: TEXT_FILE_ATTACH_PARAMS.format(
-                content=WriteStream.write_stream_from_content(
-                    content=content, file_format=FileFormat.JSON
-                )
-            )
-        }
-
-    @staticmethod
-    def create_connecting_ticket_attachment(content: dict) -> TemporaryDirectory:
-        directory = TemporaryDirectory()
-        WriteFile.write_file_from_content(
-            content=content,
-            file_format=FileFormat.JSON,
-            file_path=Path(directory.name, "order.json"),
-        )
-        return directory
