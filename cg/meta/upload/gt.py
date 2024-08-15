@@ -51,7 +51,7 @@ class UploadGenotypesAPI(object):
 
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
-        hk_version = HousekeeperAPI.last_version(self=HousekeeperAPI, bundle=case_id)
+        hk_version = self.hk.last_version(bundle=case_id)
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
@@ -83,7 +83,7 @@ class UploadGenotypesAPI(object):
         )
 
     def get_genotype_files(self, version_id: int) -> list:
-        return HousekeeperAPI.files(self=HousekeeperAPI, version=version_id, tags={"genotype"}).all()
+        return self.hk.files(version=version_id, tags={"genotype"}).all()
 
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
@@ -93,6 +93,7 @@ class UploadGenotypesAPI(object):
         hk_version_obj: Version,
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
+        LOG.debug("Get genotype files from Housekeeper")
         genotype_files: list = self.get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
             if self.is_variant_file(genotype_file=genotype_file):
@@ -116,7 +117,7 @@ class UploadGenotypesAPI(object):
     def get_samples_sex_mip_dna(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
-        analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file=qc_metrics_file)
+        analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file=qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
