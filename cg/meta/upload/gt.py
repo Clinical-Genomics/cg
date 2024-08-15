@@ -51,7 +51,7 @@ class UploadGenotypesAPI(object):
 
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
-        hk_version = HousekeeperAPI.last_version(bundle=case_id)
+        hk_version = HousekeeperAPI.last_version(self=HousekeeperAPI, bundle=case_id)
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
@@ -83,7 +83,7 @@ class UploadGenotypesAPI(object):
         )
 
     def get_genotype_files(self, version_id: int) -> list:
-        return HousekeeperAPI.files(self, version=version_id, tags={"genotype"}).all()
+        return HousekeeperAPI.files(self=HousekeeperAPI, version=version_id, tags={"genotype"}).all()
 
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
