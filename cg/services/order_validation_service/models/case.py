@@ -25,7 +25,7 @@ class Case(BaseModel):
 
     @property
     def enumerated_new_samples(self):
-        samples = []
+        samples: list[tuple[int, Sample]] = []
         for sample_index, sample in self.enumerated_samples:
             if sample.is_new:
                 samples.append((sample_index, sample))
