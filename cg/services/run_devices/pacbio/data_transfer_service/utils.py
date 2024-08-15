@@ -41,7 +41,7 @@ def get_sequencing_run_dto(metrics: PacBioMetrics) -> PacBioSequencingRunDTO:
         control_mode_read_concordance=metrics.control.percent_mode_concordance_reads,
         failed_reads=metrics.read.failed_reads,
         failed_yield=metrics.read.failed_yield,
-        failed_mean_read_length=metrics.read.failed_mean_read_length_kb,
+        failed_mean_read_length=metrics.read.failed_mean_read_length,
         movie_name=metrics.dataset_metrics.movie_name,
     )
 
@@ -60,6 +60,6 @@ def get_sample_sequencing_metrics_dtos(
         percent_reads_passing_q30=metrics.read.percent_q30,
         failed_reads=metrics.read.failed_reads,
         failed_yield=metrics.read.failed_yield,
-        failed_mean_read_length=metrics.read.failed_mean_read_length_kb,
+        failed_mean_read_length=metrics.read.failed_mean_read_length,
     )
     return [sample_sequencing_metrics_dto]

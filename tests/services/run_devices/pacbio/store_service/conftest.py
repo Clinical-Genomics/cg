@@ -55,7 +55,7 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
         "control_mode_read_concordance": 99.5,
         "failed_reads": 1000,
         "failed_yield": 500000000,
-        "failed_mean_read_length": 3000.2,
+        "failed_mean_read_length": 3000,
         "movie_name": "movie123",
     }
     return PacBioSequencingRunDTO(**sample_data)

@@ -29,11 +29,7 @@ class ReadMetrics(BaseModel):
     percent_q30: float = Field(..., alias=CCSAttributeIDs.PERCENT_Q30)
     failed_reads: int = Field(..., alias=CCSAttributeIDs.FAILED_READS)
     failed_yield: int = Field(..., alias=CCSAttributeIDs.FAILED_YIELD)
-    failed_mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.FAILED_MEAN_READ_LENGTH)
-
-    _validate_failed_mean_read_length_kb = field_validator(
-        "failed_mean_read_length_kb", mode="before"
-    )(divide_by_thousand_with_one_decimal)
+    failed_mean_read_length: int = Field(..., alias=CCSAttributeIDs.FAILED_MEAN_READ_LENGTH)
 
 
 class ControlMetrics(BaseModel):

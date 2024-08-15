@@ -36,7 +36,7 @@ class PacBioSequencingRunDTO(BaseModel):
     control_mode_read_concordance: float
     failed_reads: int
     failed_yield: int
-    failed_mean_read_length: float
+    failed_mean_read_length: int
 
 
 class PacBioSMRTCellDTO(BaseModel):
