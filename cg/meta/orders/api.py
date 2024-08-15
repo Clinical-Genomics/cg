@@ -27,6 +27,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
+from cg.services.orders.submitters.generic_order_submitter import GenericOrderSubmitter
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -36,19 +37,19 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
     """Factory Method"""
 
     submitters = {
-        OrderType.BALSAMIC: BalsamicSubmitter,
-        OrderType.BALSAMIC_QC: BalsamicQCSubmitter,
-        OrderType.BALSAMIC_UMI: BalsamicUmiSubmitter,
+        OrderType.BALSAMIC: GenericOrderSubmitter,
+        OrderType.BALSAMIC_QC: GenericOrderSubmitter,
+        OrderType.BALSAMIC_UMI: GenericOrderSubmitter,
         OrderType.FASTQ: FastqSubmitter,
         OrderType.FLUFFY: FluffySubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
         OrderType.MICROSALT: MicrosaltSubmitter,
-        OrderType.MIP_DNA: MipDnaSubmitter,
-        OrderType.MIP_RNA: MipRnaSubmitter,
+        OrderType.MIP_DNA: GenericOrderSubmitter,
+        OrderType.MIP_RNA: GenericOrderSubmitter,
         OrderType.RML: RmlSubmitter,
         OrderType.RNAFUSION: RnafusionSubmitter,
         OrderType.SARS_COV_2: SarsCov2Submitter,
-        OrderType.TOMTE: TomteSubmitter,
+        OrderType.TOMTE: GenericOrderSubmitter,
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)
