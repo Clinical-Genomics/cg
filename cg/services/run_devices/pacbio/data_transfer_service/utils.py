@@ -36,7 +36,7 @@ def get_sequencing_run_dto(metrics: PacBioMetrics) -> PacBioSequencingRunDTO:
         polymerase_mean_longest_subread=metrics.polymerase.mean_longest_subread_length,
         polymerase_longest_subread_n50=metrics.polymerase.longest_subread_length_n50,
         control_reads=metrics.control.reads,
-        control_mean_read_length=metrics.control.mean_read_length_kb,
+        control_mean_read_length=metrics.control.mean_read_length,
         control_mean_read_concordance=metrics.control.percent_mean_concordance_reads,
         control_mode_read_concordance=metrics.control.percent_mode_concordance_reads,
         failed_reads=metrics.read.failed_reads,

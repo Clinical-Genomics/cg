@@ -12,7 +12,7 @@ from cg.constants.pacbio import (
     SmrtLinkDatabasesIDs,
 )
 from cg.services.run_devices.abstract_models import RunMetrics
-from cg.utils.calculations import divide_by_thousand_with_one_decimal, fraction_to_percent
+from cg.utils.calculations import fraction_to_percent
 
 BaseMetrics = TypeVar("BaseMetrics", bound=BaseModel)
 
@@ -36,7 +36,7 @@ class ControlMetrics(BaseModel):
     """Model for the control metrics."""
 
     reads: int = Field(..., alias=ControlAttributeIDs.NUMBER_OF_READS)
-    mean_read_length_kb: float = Field(..., alias=ControlAttributeIDs.MEAN_READ_LENGTH)
+    mean_read_length: int = Field(..., alias=ControlAttributeIDs.MEAN_READ_LENGTH)
     percent_mean_concordance_reads: float = Field(
         ..., alias=ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE
     )
@@ -44,9 +44,6 @@ class ControlMetrics(BaseModel):
         ..., alias=ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE
     )
 
-    _validate_mean_read_length_kb = field_validator("mean_read_length_kb", mode="before")(
-        divide_by_thousand_with_one_decimal
-    )
     _validate_percent_mean_concordance_reads = field_validator(
         "percent_mean_concordance_reads", mode="before"
     )(fraction_to_percent)

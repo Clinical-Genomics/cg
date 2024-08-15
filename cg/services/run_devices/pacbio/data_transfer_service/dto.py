@@ -31,7 +31,7 @@ class PacBioSequencingRunDTO(BaseModel):
     polymerase_mean_longest_subread: int
     polymerase_longest_subread_n50: int
     control_reads: int
-    control_mean_read_length: float
+    control_mean_read_length: int
     control_mean_read_concordance: float
     control_mode_read_concordance: float
     failed_reads: int

@@ -50,7 +50,7 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
         "polymerase_mean_longest_subread": 12000,
         "polymerase_longest_subread_n50": 11000,
         "control_reads": 10000,
-        "control_mean_read_length": 5000.1,
+        "control_mean_read_length": 5000,
         "control_mean_read_concordance": 99.0,
         "control_mode_read_concordance": 99.5,
         "failed_reads": 1000,
