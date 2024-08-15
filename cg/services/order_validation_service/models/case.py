@@ -13,8 +13,20 @@ class Case(BaseModel):
     priority: PriorityTerms = PriorityTerms.STANDARD
     samples: list[Sample]
 
+    model_config = ConfigDict(str_min_length=1)
+
     @property
     def enumerated_samples(self):
         return enumerate(self.samples)
 
-    model_config = ConfigDict(str_min_length=1)
+    @property
+    def is_new(self) -> bool:
+        return not self.internal_id
+
+    @property
+    def enumerated_new_samples(self):
+        samples: list[tuple[int, Sample]] = []
+        for sample_index, sample in self.enumerated_samples:
+            if sample.is_new:
+                samples.append((sample_index, sample))
+        return samples

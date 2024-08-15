@@ -15,3 +15,7 @@ class Sample(BaseModel):
     well_position: str | None = None
 
     model_config = ConfigDict(str_min_length=1)
+
+    @property
+    def is_new(self) -> bool:
+        return not self.internal_id

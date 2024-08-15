@@ -148,7 +148,7 @@ def validate_subject_ids_in_case(
     case: TomteCase, case_index: int
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
-    for sample_index, sample in case.enumerated_samples:
+    for sample_index, sample in case.enumerated_new_samples:
         if sample.subject_id == case.name:
             error = SubjectIdSameAsCaseNameError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
@@ -159,7 +159,7 @@ def validate_concentration_in_case(
     case: TomteCase, case_index: int, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors: list[InvalidConcentrationIfSkipRCError] = []
-    for sample_index, sample in case.enumerated_samples:
+    for sample_index, sample in case.enumerated_new_samples:
         if has_sample_invalid_concentration(sample=sample, store=store):
             error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
                 case_index=case_index, sample=sample, sample_index=sample_index, store=store

@@ -60,8 +60,8 @@ def validate_application_exists(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[ApplicationNotValidError]:
     errors: list[ApplicationNotValidError] = []
-    for case_index, case in order.enumerated_cases:
-        for sample_index, sample in case.enumerated_samples:
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
             if not store.get_application_by_tag(sample.application):
                 error = ApplicationNotValidError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
@@ -72,8 +72,8 @@ def validate_application_not_archived(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[ApplicationArchivedError]:
     errors: list[ApplicationArchivedError] = []
-    for case_index, case in order.enumerated_cases:
-        for sample_index, sample in case.enumerated_samples:
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
@@ -82,7 +82,7 @@ def validate_application_not_archived(
 
 def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[RepeatedGenePanelsError]:
     errors: list[RepeatedGenePanelsError] = []
-    for case_index, case in order.enumerated_cases:
+    for case_index, case in order.enumerated_new_cases:
         if contains_duplicates(case.panels):
             error = RepeatedGenePanelsError(case_index=case_index)
             errors.append(error)
@@ -93,7 +93,7 @@ def validate_gene_panels_exist(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[InvalidGenePanelsError]:
     errors: list[InvalidGenePanelsError] = []
-    for case_index, case in order.enumerated_cases:
+    for case_index, case in order.enumerated_new_cases:
         if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
             case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
             errors.append(case_error)
@@ -102,8 +102,8 @@ def validate_gene_panels_exist(
 
 def validate_volume_interval(order: TomteOrder) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
-    for case_index, case in order.enumerated_cases:
-        for sample_index, sample in case.enumerated_samples:
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
             if is_volume_invalid(sample):
                 error = InvalidVolumeError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
