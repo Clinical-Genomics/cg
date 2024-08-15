@@ -27,20 +27,21 @@ def test_get_analysis_sex_mip(
     assert sex == genotype_analysis_sex
 
 
-# def test_get_analysis_sex_raredisease(
-#     case_qc_metrics_deliverables: Path,
-#     genotype_analysis_sex: dict,
-# ):
-#     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
-#     # GIVEN an analysis API
+def test_get_analysis_sex_raredisease(
+    case_qc_metrics_deliverables: Path,
+    genotype_analysis_sex: dict,
+):
+    """Test to get the predicted sex from a MIP run using the upload genotypes API"""
+    # GIVEN an analysis API
 
-#     # WHEN fetching the predicted sex by the analysis
-#     sex: dict = UploadGenotypesAPI.get_analysis_sex_raredisease(
-#         qc_metrics_file=case_qc_metrics_deliverables
-#     )
+    # WHEN fetching the predicted sex by the analysis
+    sex: dict = UploadGenotypesAPI.get_analysis_sex_raredisease(
+        self=UploadGenotypesAPI,
+        qc_metrics_file=case_qc_metrics_deliverables
+    )
 
-#     # THEN assert that the the predicted sex per sample_id is returned
-#     assert sex == genotype_analysis_sex
+    # THEN assert that the the predicted sex per sample_id is returned
+    assert sex == genotype_analysis_sex
 
 
 def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
@@ -56,25 +57,25 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
-# def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Path):
-#     """Test to get the predicted sex from a RAREDISEASE run using the upload Genotypes API"""
-#     # GIVEN an AnalysisAPI and some qcmetrics data
+def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Path):
+    """Test to get the predicted sex from a RAREDISEASE run using the upload Genotypes API"""
+    # GIVEN an AnalysisAPI and some qcmetrics data
 
-#     # WHEN fetching the predicted sex
-#     metrics_object: list[MetricsBase] = UploadGenotypesAPI.get_parsed_qc_metrics_data_raredisease(
-#         case_qc_metrics_deliverables
-#     )
+    # WHEN fetching the predicted sex
+    metrics_object: list[MetricsBase] = UploadGenotypesAPI.get_parsed_qc_metrics_data_raredisease(
+        case_qc_metrics_deliverables
+    )
 
-#     def is_list_of_metricsbase(obj):
-#         if isinstance(obj, list):
-#             return all(isinstance(item, MetricsBase) for item in obj)
-#         return False
+    def is_list_of_metricsbase(obj):
+        if isinstance(obj, list):
+            return all(isinstance(item, MetricsBase) for item in obj)
+        return False
 
-#     # THEN assert that it was successfully created
-#     assert is_list_of_metricsbase(metrics_object)
+    # THEN assert that it was successfully created
+    assert is_list_of_metricsbase(metrics_object)
 
 
-def test_get_bcf_file_mip(
+def test_get_bcf_file(
     upload_genotypes_api: UploadGenotypesAPI,
     case_id: str,
     timestamp: datetime,
@@ -87,19 +88,3 @@ def test_get_bcf_file_mip(
     gbcf = upload_genotypes_api.get_bcf_file(hk_version_obj=hk_version)
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
-
-
-# def test_get_bcf_file_raredisease(
-#     upload_genotypes_api: UploadGenotypesAPI,
-#     case_id: str,
-#     timestamp: datetime,
-# ):
-#     """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
-#     # GIVEN a UploadGenotypeAPI populated with some data
-#     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
-
-#     # WHEN fetching the gbcf file with the api
-#     gbcf = upload_genotypes_api.get_bcf_file(hk_version_obj=hk_version)
-
-#     # THEN assert that the file has the correct tag
-#     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
