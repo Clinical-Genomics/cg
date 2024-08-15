@@ -30,7 +30,7 @@ class PacBioRunFileManager(RunFileManager):
         """Get the files to store for the PostProcessingHKService."""
         run_path: Path = run_data.full_path
         files_to_store: list[Path] = self.get_files_to_parse(run_data)
-        files_to_store.append(self._get_hifi_read_file(run_path))
+        files_to_store.extend(self._get_hifi_read_file(run_path))
         return files_to_store
 
     @staticmethod
@@ -60,11 +60,11 @@ class PacBioRunFileManager(RunFileManager):
         return report_files
 
     @staticmethod
-    def _get_hifi_read_file(run_path: Path) -> Path:
+    def _get_hifi_read_file(run_path: Path) -> list[Path]:
         """Return the path to the HiFi read file."""
         hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS)
-        bam_file: Path = get_files_matching_pattern(
+        bam_files: list[Path] = get_files_matching_pattern(
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}"
-        )[0]
-        validate_files_or_directories_exist([bam_file])
-        return bam_file
+        )
+        validate_files_or_directories_exist(bam_files)
+        return bam_files
