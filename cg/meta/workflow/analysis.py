@@ -736,16 +736,6 @@ class AnalysisAPI(MetaAPI):
             )
         return analysis_types.pop() if analysis_types else None
 
-    def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
-        """Return a QC metrics file path."""
-        hk_qcmetrics: Path = self.hk.files(
-            version=hk_version_obj.id, tags=HkAnalysisMetricsTag.QC_METRICS
-        ).first()
-        if hk_qcmetrics is None:
-            raise FileNotFoundError("QC metrics file not found for the given hk version.")
-        LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")
-        return Path(hk_qcmetrics.full_path)
-
     @staticmethod
     def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
         """Translates a genome reference assembly to its corresponding alternate name."""
