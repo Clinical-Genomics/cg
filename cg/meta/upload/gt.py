@@ -60,10 +60,10 @@ class UploadGenotypesAPI(object):
             gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
                 case=analysis.case, hk_version=hk_version
             )
-        elif analysis.workflow == Workflow.RAREDISEASE:
-            gt_data["samples_sex"] = self.get_samples_sex_raredisease(
-                case=analysis.case, hk_version=hk_version
-            )
+        # elif analysis.workflow == Workflow.RAREDISEASE:
+        #     gt_data["samples_sex"] = self.get_samples_sex_raredisease(
+        #         case=analysis.case, hk_version=hk_version
+        #     )
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return gt_data

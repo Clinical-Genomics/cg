@@ -7,6 +7,7 @@ from click.testing import CliRunner
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.genotype import upload_genotypes
 from cg.models.cg_config import CGConfig
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 
