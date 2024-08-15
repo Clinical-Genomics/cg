@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, List
+from typing import Any
 
 from sendmail_container import FormDataRequest
 
@@ -56,8 +56,15 @@ class TicketHandler:
                 description=message,
                 name=user_name,
                 subject=order.name,
+                type="Order",
+                tags=[order.samples[0].data_analysis],
+                custom_fields={
+                    "cf_environment": "Stage",
+                },
                 attachments=[],
             )
+            LOG.info(f"Request payload: {freshdesk_ticket.model_dump()}")
+
             ticket_response: TicketResponse = self.client.create_ticket(
                 ticket=freshdesk_ticket, attachments=[attachments]
             )
