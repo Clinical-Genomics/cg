@@ -21,7 +21,7 @@ class Case(BaseModel):
 
     @property
     def is_new(self) -> bool:
-        return bool(self.internal_id)
+        return not self.internal_id
 
     @property
     def enumerated_new_samples(self):

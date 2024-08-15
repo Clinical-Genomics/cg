@@ -18,4 +18,4 @@ class Sample(BaseModel):
 
     @property
     def is_new(self) -> bool:
-        return bool(self.internal_id)
+        return not self.internal_id
