@@ -1,4 +1,5 @@
 from cg.exc import OrderError
+from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 from cg.services.orders.submitters.order_submitter import ValidateOrderService
@@ -17,6 +18,8 @@ class ValidateGenericOrderService(ValidateOrderService):
             samples=order.samples, customer_id=order.customer
         )
         self._validate_case_names_are_unique(samples=order.samples, customer_id=order.customer)
+        if order.order_type == OrderType.RNAFUSION:
+            self._validate_only_one_sample_per_case(samples=order.samples)
 
     def _validate_subject_sex(self, samples: [Of1508Sample], customer_id: str):
         """Validate that sex is consistent with existing samples, skips samples of unknown sex
@@ -91,3 +94,9 @@ class ValidateGenericOrderService(ValidateOrderService):
     @staticmethod
     def _is_rerun_of_existing_case(sample: Of1508Sample) -> bool:
         return sample.case_internal_id is not None
+
+    @staticmethod
+    def _validate_only_one_sample_per_case(samples: list[Of1508Sample]) -> None:
+        """Validates that each case contains only one sample."""
+        if len({sample.family_name for sample in samples}) != len(samples):
+            raise OrderError("Each case in an RNAFUSION order must have exactly one sample.")

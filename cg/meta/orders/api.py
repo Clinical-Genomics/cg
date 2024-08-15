@@ -11,16 +11,14 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
-from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.submitters.fastq_order_submitter import FastqOrderSubmitter
 from cg.services.orders.submitters.generic_order_submitter import GenericOrderSubmitter
 from cg.services.orders.submitters.metagenome_order_submitter import MetagenomeOrderSubmitter
+from cg.services.orders.submitters.microbial_order_submitter import MicrobialOrderSubmitter
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
-from cg.services.orders.submitters.rna_fusion_order_submitter import RNAFusionOrderSubmitter
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -36,12 +34,12 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Ord
         OrderType.FASTQ: FastqOrderSubmitter,
         OrderType.FLUFFY: PoolOrderSubmitter,
         OrderType.METAGENOME: MetagenomeOrderSubmitter,
-        OrderType.MICROSALT: MicrosaltSubmitter,
+        OrderType.MICROSALT: MicrobialOrderSubmitter,
         OrderType.MIP_DNA: GenericOrderSubmitter,
         OrderType.MIP_RNA: GenericOrderSubmitter,
         OrderType.RML: PoolOrderSubmitter,
-        OrderType.RNAFUSION: RNAFusionOrderSubmitter,
-        OrderType.SARS_COV_2: SarsCov2Submitter,
+        OrderType.RNAFUSION: GenericOrderSubmitter,
+        OrderType.SARS_COV_2: MicrobialOrderSubmitter,
         OrderType.TOMTE: GenericOrderSubmitter,
     }
     if project in submitters:
