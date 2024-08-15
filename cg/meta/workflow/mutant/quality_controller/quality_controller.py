@@ -23,7 +23,9 @@ from cg.meta.workflow.mutant.quality_controller.result_logger_utils import (
     log_sample_result,
 )
 from cg.meta.workflow.mutant.quality_controller.utils import (
-    has_valid_total_reads,
+    external_negative_control_sample_has_valid_total_reads,
+    internal_negative_control_sample_has_valid_total_reads,
+    sample_has_valid_total_reads,
 )
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -79,15 +81,17 @@ class MutantQualityController:
         samples_quality_results: list[SampleQualityResults] = []
         for sample in quality_metrics.pool.samples:
             sample_results: SampleResults = quality_metrics.results[sample.internal_id]
-            sample_quality_results: SampleQualityResults = self._get_sample_quality_results(
-                sample=sample, sample_results=sample_results
+            sample_quality_results: SampleQualityResults = (
+                self._get_sample_quality_result_for_sample(
+                    sample=sample, sample_results=sample_results
+                )
             )
             samples_quality_results.append(sample_quality_results)
 
         internal_negative_control_sample: Sample = quality_metrics.pool.internal_negative_control
         internal_negative_control_quality_metrics: SampleQualityResults = (
-            self._get_sample_quality_results(
-                sample=internal_negative_control_sample, internal_negative_control=True
+            self._get_sample_quality_result_for_internal_negative_control_sample(
+                sample=internal_negative_control_sample
             )
         )
 
@@ -96,10 +100,9 @@ class MutantQualityController:
             external_negative_control_sample.internal_id
         ]
         external_negative_control_quality_metrics: SampleQualityResults = (
-            self._get_sample_quality_results(
+            self._get_sample_quality_result_for_external_negative_control_sample(
                 sample=external_negative_control_sample,
                 sample_results=external_negative_control_sample_results,
-                external_negative_control=True,
             )
         )
 
@@ -110,43 +113,56 @@ class MutantQualityController:
         )
 
     @staticmethod
-    def _get_sample_quality_results(
-        sample: Sample,
-        sample_results: SampleResults | None = None,
-        external_negative_control: bool = False,
-        internal_negative_control: bool = False,
+    def _get_sample_quality_result_for_sample(
+        sample: Sample, sample_results: SampleResults
     ) -> SampleQualityResults:
-        sample_has_valid_total_reads: bool = has_valid_total_reads(
-            sample=sample,
-            external_negative_control=external_negative_control,
-            internal_negative_control=internal_negative_control,
+        sample_passes_reads_threshold: bool = sample_has_valid_total_reads(sample=sample)
+        sample_passes_qc: bool = sample_passes_reads_threshold and sample_results.qc_pass
+        sample_quality_result = SampleQualityResults(
+            sample_id=sample.internal_id,
+            passes_qc=sample_passes_qc,
+            passes_reads_threshold=sample_passes_reads_threshold,
+            passes_mutant_qc=sample_results.qc_pass,
         )
-
-        if internal_negative_control:
-            sample_quality = SampleQualityResults(
-                sample_id=sample.internal_id,
-                passes_qc=sample_has_valid_total_reads,
-                passes_reads_threshold=sample_has_valid_total_reads,
-            )
-        else:
-            if external_negative_control:
-                sample_passes_qc: bool = sample_has_valid_total_reads and not sample_results.qc_pass
-            else:
-                sample_passes_qc: bool = sample_has_valid_total_reads and sample_results.qc_pass
-
-            sample_quality = SampleQualityResults(
-                sample_id=sample.internal_id,
-                passes_qc=sample_passes_qc,
-                passes_reads_threshold=sample_has_valid_total_reads,
-                passes_mutant_qc=sample_results.qc_pass,
-            )
 
         log_sample_result(
-            result=sample_quality,
-            external_negative_control=external_negative_control,
-            internal_negative_control=internal_negative_control,
+            result=sample_quality_result,
         )
-        return sample_quality
+        return sample_quality_result
+
+    @staticmethod
+    def _get_sample_quality_result_for_internal_negative_control_sample(
+        sample: Sample,
+    ) -> SampleQualityResults:
+        sample_has_valid_total_reads: bool = internal_negative_control_sample_has_valid_total_reads(
+            sample=sample
+        )
+        sample_quality_result = SampleQualityResults(
+            sample_id=sample.internal_id,
+            passes_qc=sample_has_valid_total_reads,
+            passes_reads_threshold=sample_has_valid_total_reads,
+        )
+
+        log_sample_result(result=sample_quality_result, is_external_negative_control=True)
+        return sample_quality_result
+
+    @staticmethod
+    def _get_sample_quality_result_for_external_negative_control_sample(
+        sample: Sample, sample_results: SampleResults
+    ) -> SampleQualityResults:
+        sample_has_valid_total_reads: bool = external_negative_control_sample_has_valid_total_reads(
+            sample=sample
+        )
+        sample_passes_qc: bool = sample_has_valid_total_reads and not sample_results.qc_pass
+        sample_quality_result = SampleQualityResults(
+            sample_id=sample.internal_id,
+            passes_qc=sample_passes_qc,
+            passes_reads_threshold=sample_has_valid_total_reads,
+            passes_mutant_qc=sample_results.qc_pass,
+        )
+
+        log_sample_result(result=sample_quality_result, is_external_negative_control=True)
+        return sample_quality_result
 
     def _get_case_quality_result(
         self, samples_quality_results: SamplesQualityResults
@@ -162,16 +178,19 @@ class MutantQualityController:
             samples_quality_results=samples_quality_results
         )
 
+        case_passes_qc: bool = (
+            samples_pass_qc
+            and internal_negative_control_pass_qc
+            and external_negative_control_pass_qc
+        )
+
         result = CaseQualityResult(
-            passes_qc=(
-                samples_pass_qc
-                and internal_negative_control_pass_qc
-                and external_negative_control_pass_qc
-            ),
+            passes_qc=case_passes_qc,
             internal_negative_control_passes_qc=internal_negative_control_pass_qc,
             external_negative_control_passes_qc=external_negative_control_pass_qc,
             samples_pass_qc=samples_pass_qc,
         )
+
         log_case_result(result)
         return result
 

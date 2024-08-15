@@ -124,11 +124,12 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 
 @mutant.command("run-qc")
+@DRY_RUN
 @click.pass_context
-def run_qc(context: click.Context, case_id: str) -> None:
+def run_qc(context: click.Context, case_id: str, dry_run: bool) -> None:
     """
     Run QC on case and generate QC_report file.
     """
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    analysis_api.run_qc(case_id=case_id)
+    analysis_api.run_qc(case_id=case_id, dry_run=dry_run)

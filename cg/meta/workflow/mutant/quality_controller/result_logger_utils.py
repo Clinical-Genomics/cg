@@ -26,13 +26,13 @@ def log_results(
 
 def log_sample_result(
     result: SampleQualityResults,
-    external_negative_control: bool,
-    internal_negative_control: bool,
+    is_external_negative_control: bool = False,
+    is_internal_negative_control: bool = False,
 ) -> None:
     control_message = ""
-    if external_negative_control:
+    if is_external_negative_control:
         control_message = "External negative control sample "
-    if internal_negative_control:
+    if is_internal_negative_control:
         control_message = "Internal negative control sample "
     if result.passes_qc:
         message = f"{control_message}{result.sample_id} passed QC."

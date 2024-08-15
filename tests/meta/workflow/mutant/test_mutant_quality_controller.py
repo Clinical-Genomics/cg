@@ -57,7 +57,7 @@ def test_get_quality_metrics(
     )
 
 
-def test__get_sample_quality_results(
+def test__get_sample_quality_result_for_sample(
     mutant_quality_controller: MutantQualityController,
     sample_qc_pass: Sample,
     mutant_sample_results_sample_qc_pass: SampleResults,
@@ -66,9 +66,43 @@ def test__get_sample_quality_results(
 
     # WHEN peforming quality control on the sample
     sample_quality_results_sample_qc_pass: SampleQualityResults = (
-        mutant_quality_controller._get_sample_quality_results(
+        mutant_quality_controller._get_sample_quality_result_for_sample(
             sample=sample_qc_pass,
             sample_results=mutant_sample_results_sample_qc_pass,
+        )
+    )
+    # THEN the sample passes qc
+    assert sample_quality_results_sample_qc_pass.passes_qc is True
+
+
+def test__get_sample_quality_result_for_internal_negative_control_sample(
+    mutant_quality_controller: MutantQualityController,
+    internal_negative_control_qc_pass: Sample,
+):
+    # GIVEN an internal negative control sample that passes qc and its corresponding SampleResults
+
+    # WHEN peforming quality control on the sample
+    sample_quality_results_sample_qc_pass: SampleQualityResults = (
+        mutant_quality_controller._get_sample_quality_result_for_internal_negative_control_sample(
+            sample=internal_negative_control_qc_pass,
+        )
+    )
+    # THEN the sample passes qc
+    assert sample_quality_results_sample_qc_pass.passes_qc is True
+
+
+def test__get_sample_quality_result_for_external_negative_control_sample(
+    mutant_quality_controller: MutantQualityController,
+    external_negative_control_qc_pass: Sample,
+    mutant_sample_results_external_negative_control_qc_pass: SampleResults,
+):
+    # GIVEN an external negative control sample that passes qc and its corresponding SampleResults
+
+    # WHEN peforming quality control on the sample
+    sample_quality_results_sample_qc_pass: SampleQualityResults = (
+        mutant_quality_controller._get_sample_quality_result_for_external_negative_control_sample(
+            sample=external_negative_control_qc_pass,
+            sample_results=mutant_sample_results_external_negative_control_qc_pass,
         )
     )
     # THEN the sample passes qc
@@ -92,7 +126,11 @@ def test__get_samples_quality_results(
     assert samples_quality_results.internal_negative_control.passes_qc is True
     assert samples_quality_results.external_negative_control.passes_qc is True
     assert len(samples_quality_results.samples) == 1
-    assert all(samples_quality_results.samples) is True
+    samples_pass_qc = [
+        sample_quality_results.passes_qc
+        for sample_quality_results in samples_quality_results.samples
+    ]
+    assert all(samples_pass_qc) is True
 
 
 def test__get_case_quality_result(

@@ -64,7 +64,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_case_qc_report_path(self, case_id: str) -> Path:
         case_path: Path = self.get_case_path(case_id=case_id)
-        return case_path.joinpath(MutantQC.QUALITY_REPORT_FILE_NAME)
+        return Path(case_path, MutantQC.QUALITY_REPORT_FILE_NAME)
 
     def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
@@ -277,30 +277,23 @@ class MutantAnalysisAPI(AnalysisAPI):
         LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
 
         for case in cases_ready_for_qc:
+            self.run_qc_on_case(case=case, dry_run=dry_run)
+
+    def run_qc_on_case(self, case: Case, dry_run: bool) -> None:
+        try:
+            qc_result: QualityResult = self.get_qc_result(case=case)
+        except Exception as exception:
+            LOG.error(f"Could not run QC for case {case.internal_id}")
             if not dry_run:
                 self.trailblazer_api.set_analysis_status(
-                    case_id=case.internal_id, status=AnalysisStatus.QC
+                    case_id=case.internal_id, status=AnalysisStatus.ERROR
                 )
+            raise CgError(f"Could not run QC for case {case.internal_id}.") from exception
 
-            try:
-                qc_result: QualityResult = self.get_qc_result(case=case)
-            except Exception:
-                LOG.error(f"Could not run QC for case {case.internal_id}")
-                if not dry_run:
-                    self.trailblazer_api.set_analysis_status(
-                        case_id=case.internal_id, status=AnalysisStatus.ERROR
-                    )
-                raise CgError(f"Could not run QC for case {case.internal_id}.")
-
+        if not dry_run:
             self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
-
-            if not dry_run:
-                if not qc_result.passes_qc:
-                    self.fail_analysis(case)
-                else:
-                    self.trailblazer_api.set_analysis_status(
-                        case_id=case.internal_id, status=AnalysisStatus.COMPLETED
-                    )
+            if not qc_result.passes_qc:
+                self.fail_analysis(case)
 
     def get_qc_result(self, case: Case) -> QualityResult:
         case_results_file_path: Path = self.get_case_results_file_path(case=case)
@@ -315,8 +308,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:
         report_file_path: Path = self.get_case_qc_report_path(case_id=case.internal_id)
 
-        if not qc_result.passes_qc:
-            comment = qc_result.summary + f" QC report: {report_file_path}"
+        comment = qc_result.summary + (
+            f" QC report: {report_file_path}" if not qc_result.passes_qc else ""
+        )
         self.trailblazer_api.add_comment(case_id=case.internal_id, comment=comment)
 
     def fail_analysis(self, case: Case) -> None:
@@ -326,9 +320,9 @@ class MutantAnalysisAPI(AnalysisAPI):
         )
         self.set_statusdb_action(case_id=case.internal_id, action=CaseActions.HOLD)
 
-    def run_qc(self, case_id: str) -> None:
+    def run_qc(self, case_id: str, dry_run: bool) -> None:
         LOG.info(f"Running QC on case {case_id}.")
 
         case: Case = self.status_db.get_case_by_internal_id(case_id)
 
-        self.get_qc_result(case=case)
+        self.run_qc_on_case(case=case, dry_run=dry_run)

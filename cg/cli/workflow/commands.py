@@ -120,24 +120,24 @@ def store(context: CGConfig, case_id: str, comment: str | None, dry_run: bool, f
         raise
 
 
-@click.command("store-available")
-@DRY_RUN
-@click.pass_context
-def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished analyses in Housekeeper."""
+# @click.command("store-available")
+# @DRY_RUN
+# @click.pass_context
+# def store_available(context: click.Context, dry_run: bool) -> None:
+#     """Store bundles for all finished analyses in Housekeeper."""
 
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+#     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_store():
-        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
-        try:
-            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
-        except Exception as exception_object:
-            LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
+#     exit_code: int = EXIT_SUCCESS
+#     for case_obj in analysis_api.get_cases_to_store():
+#         LOG.info(f"Storing deliverables for {case_obj.internal_id}")
+#         try:
+#             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
+#         except Exception as exception_object:
+#             LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
+#             exit_code = EXIT_FAIL
+#     if exit_code:
+#         raise click.Abort
 
 
 @click.command("rsync-past-run-dirs")

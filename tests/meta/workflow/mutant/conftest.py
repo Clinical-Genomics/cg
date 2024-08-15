@@ -207,13 +207,13 @@ def sample_qc_pass(mutant_store: Store) -> Sample:
 
 
 @pytest.fixture
-def external_negative_control_qc_pass(mutant_store: Store) -> Sample:
-    return mutant_store.get_sample_by_internal_id("external_negative_control_qc_pass")
+def internal_negative_control_qc_pass(mutant_store: Store) -> Sample:
+    return mutant_store.get_sample_by_internal_id("internal_negative_control_qc_pass")
 
 
 @pytest.fixture
-def internal_negative_control_qc_pass(mutant_store: Store) -> Sample:
-    return mutant_store.get_sample_by_internal_id("internal_negative_control_qc_pass")
+def external_negative_control_qc_pass(mutant_store: Store) -> Sample:
+    return mutant_store.get_sample_by_internal_id("external_negative_control_qc_pass")
 
 
 @pytest.fixture
@@ -274,6 +274,17 @@ def mutant_sample_results_sample_qc_pass(
     sample_qc_pass: Sample, mutant_samples_results_case_qc_pass: dict[str, SampleResults]
 ) -> SampleResults:
     sample_results = mutant_samples_results_case_qc_pass[sample_qc_pass.internal_id]
+    return sample_results
+
+
+@pytest.fixture
+def mutant_sample_results_external_negative_control_qc_pass(
+    external_negative_control_qc_pass: Sample,
+    mutant_samples_results_case_qc_pass: dict[str, SampleResults],
+) -> SampleResults:
+    sample_results = mutant_samples_results_case_qc_pass[
+        external_negative_control_qc_pass.internal_id
+    ]
     return sample_results
 
 
