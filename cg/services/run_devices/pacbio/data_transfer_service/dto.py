@@ -26,10 +26,10 @@ class PacBioSequencingRunDTO(BaseModel):
     p0_percent: float
     p1_percent: float
     p2_percent: float
-    polymerase_mean_read_length: float
-    polymerase_read_length_n50: float
-    polymerase_mean_longest_subread: float
-    polymerase_longest_subread_n50: float
+    polymerase_mean_read_length: int
+    polymerase_read_length_n50: int
+    polymerase_mean_longest_subread: int
+    polymerase_longest_subread_n50: int
     control_reads: int
     control_mean_read_length: float
     control_mean_read_concordance: float
