@@ -26,3 +26,7 @@ class Store(
     def commit_to_store(self):
         """Commit pending changes to the store."""
         self.session.commit()
+
+    def rollback(self):
+        """Rollback any pending change to the store."""
+        self.session.rollback()
