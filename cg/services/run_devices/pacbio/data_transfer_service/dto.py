@@ -48,13 +48,13 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     sample_internal_id: str
     hifi_reads: int
     hifi_yield: int
-    hifi_mean_read_length: float
+    hifi_mean_read_length: int
     hifi_median_read_length: int
     hifi_median_read_quality: str
     percent_reads_passing_q30: float
     failed_reads: int
     failed_yield: int
-    failed_mean_read_length: float
+    failed_mean_read_length: int
 
 
 class PacBioDTOs(PostProcessingDTOs):

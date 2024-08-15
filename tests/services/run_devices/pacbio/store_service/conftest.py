@@ -67,13 +67,13 @@ def pac_bio_sample_sequencing_metrics_dto() -> list[PacBioSampleSequencingMetric
         "sample_internal_id": "sample_123",
         "hifi_reads": 450000,
         "hifi_yield": 2750000000,
-        "hifi_mean_read_length": 6100.7,
+        "hifi_mean_read_length": 6100,
         "hifi_median_read_length": 6000,
         "hifi_median_read_quality": "Q30",
         "percent_reads_passing_q30": 98.6,
         "failed_reads": 1500,
         "failed_yield": 500000000,
-        "failed_mean_read_length": 3200.3,
+        "failed_mean_read_length": 3200,
     }
     return [PacBioSampleSequencingMetricsDTO(**sample_metrics_data)]
 
