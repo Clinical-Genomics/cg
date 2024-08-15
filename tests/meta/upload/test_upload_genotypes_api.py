@@ -13,13 +13,12 @@ from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 def test_get_analysis_sex_mip(
     case_qc_metrics_deliverables: Path,
     genotype_analysis_sex: dict,
-    cg_context: CGConfig,
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(
+    sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(self=UploadGenotypesAPI,
         qc_metrics_file=case_qc_metrics_deliverables,
     )
 
