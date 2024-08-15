@@ -31,16 +31,19 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
     return errors
 
 
-def _is_sample_on_plate(sample: TomteSample) -> bool:
+def is_sample_on_plate(sample: TomteSample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
 def get_indices_for_repeated_case_names(order: TomteOrder) -> list[int]:
-    case_names: list[str] = [case.name for case in order.cases]
-    count = Counter(case_names)
-    return [
-        case_index for case_index, case_name in enumerate(case_names) if count.get(case_name) > 1
-    ]
+    counter = Counter([case.name for case in order.cases])
+    indices: list[int] = []
+
+    for index, case in order.enumerated_new_cases:
+        if counter.get(case.name) > 1:
+            indices.append(index)
+
+    return indices
 
 
 def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameError]:
@@ -49,13 +52,14 @@ def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameErr
 
 
 def get_indices_for_repeated_sample_names(case: TomteCase) -> list[int]:
-    sample_names: list[str] = [sample.name for sample in case.samples]
-    count = Counter(sample_names)
-    return [
-        sample_index
-        for sample_index, sample_name in enumerate(sample_names)
-        if count.get(sample_name) > 1
-    ]
+    counter = Counter([sample.name for sample in case.samples])
+    indices: list[int] = []
+
+    for index, sample in case.enumerated_new_samples:
+        if counter.get(sample.name) > 1:
+            indices.append(index)
+
+    return indices
 
 
 def get_repeated_sample_name_errors(
