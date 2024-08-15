@@ -18,7 +18,8 @@ def test_get_analysis_sex_mip(
     # GIVEN an AnalysisAPI and some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(self=UploadGenotypesAPI,
+    sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(
+        self=UploadGenotypesAPI,
         qc_metrics_file=case_qc_metrics_deliverables,
     )
 
