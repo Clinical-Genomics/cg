@@ -5,6 +5,7 @@ from pathlib import Path
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
+from typing import Dict, Union
 
 from cg.clients.freshdesk.constants import EndPoints
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
@@ -26,8 +27,8 @@ class FreshdeskClient:
 
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
-        """Create a ticket."""
-        ticket_data = ticket.model_dump(exclude_none=True)
+        """Create a ticket with multipart form data."""
+        ticket_data = self._convert_ticket_to_multipart_data(ticket)  # Fix here
         files = prepare_attachments(attachments) if attachments else None
 
         LOG.info(ticket_data)
@@ -36,6 +37,22 @@ class FreshdeskClient:
         )
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
+
+    def _convert_ticket_to_multipart_data(self, ticket: TicketCreate) -> Dict[str, Union[str, int]]:
+        """Convert the TicketCreate model into a flat dictionary for multipart form data."""
+        data = []
+
+        for field, value in ticket.model_dump(exclude_none=True).items():
+            if isinstance(value, list) and field == "tags":
+                for i, tag in enumerate(value):
+                    data.append(("tags[]", tag))
+            elif isinstance(value, dict) and field == "custom_fields":
+                for key, val in value.items():
+                    data.append((f"custom_fields[{key}]", val))
+            else:
+                data.append((field, value))
+
+        return data
 
     @handle_client_errors
     def _get_session(self) -> Session:
