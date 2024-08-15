@@ -11,23 +11,16 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
-from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
-from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.fastq_submitter import FastqSubmitter
-from cg.meta.orders.fluffy_submitter import FluffySubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
-from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
-from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
-from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.rnafusion_submitter import RnafusionSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.submitters.generic_order_submitter import GenericOrderSubmitter
+from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,12 +34,12 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
         OrderType.BALSAMIC_QC: GenericOrderSubmitter,
         OrderType.BALSAMIC_UMI: GenericOrderSubmitter,
         OrderType.FASTQ: FastqSubmitter,
-        OrderType.FLUFFY: FluffySubmitter,
+        OrderType.FLUFFY: PoolOrderSubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
         OrderType.MICROSALT: MicrosaltSubmitter,
         OrderType.MIP_DNA: GenericOrderSubmitter,
         OrderType.MIP_RNA: GenericOrderSubmitter,
-        OrderType.RML: RmlSubmitter,
+        OrderType.RML: PoolOrderSubmitter,
         OrderType.RNAFUSION: RnafusionSubmitter,
         OrderType.SARS_COV_2: SarsCov2Submitter,
         OrderType.TOMTE: GenericOrderSubmitter,

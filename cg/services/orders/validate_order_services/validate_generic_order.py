@@ -27,7 +27,6 @@ class ValidateGenericOrderService(ValidateOrderService):
         Returns:
             Nothing
         """
-
         sample: Of1508Sample
         for sample in samples:
             subject_id: str = sample.subject_id
@@ -88,3 +87,7 @@ class ValidateGenericOrderService(ValidateOrderService):
                 customer=customer, case_name=sample.family_name
             ):
                 raise OrderError(f"Case name {sample.family_name} already in use")
+
+    @staticmethod
+    def _is_rerun_of_existing_case(sample: Of1508Sample) -> bool:
+        return sample.case_internal_id is not None
