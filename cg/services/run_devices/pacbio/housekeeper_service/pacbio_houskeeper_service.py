@@ -4,7 +4,14 @@ import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.pacbio import PacBioBundleTypes, file_pattern_to_bundle_type, file_pattern_to_tag
+from cg.constants import FileExtensions
+from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.pacbio import (
+    PacBioBundleTypes,
+    PacBioDirsAndFiles,
+    PacBioHousekeeperTags,
+    file_pattern_to_bundle_type,
+)
 from cg.services.run_devices.abstract_classes import PostProcessingHKService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
@@ -62,6 +69,14 @@ class PacBioHousekeeperService(PostProcessingHKService):
 
     @staticmethod
     def _get_tags_for_file(file_path: Path) -> list[str]:
+        file_pattern_to_tag: dict[str, list[str]] = {
+            PacBioDirsAndFiles.CONTROL_REPORT: [PacBioHousekeeperTags.CONTROL_REPORT],
+            f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": [PacBioHousekeeperTags.CCS_REPORT],
+            PacBioDirsAndFiles.LOADING_REPORT: [PacBioHousekeeperTags.LOADING_REPORT],
+            PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
+            PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
+            f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
+        }
         return get_item_by_pattern_in_source(source=file_path.name, pattern_map=file_pattern_to_tag)
 
     def _create_bundle_info(self, file_path: Path, parsed_metrics: PacBioMetrics) -> PacBioFileData:

@@ -17,9 +17,7 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
-    PacBioRunFileManager,
-)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 from cg.store.store import Store
 
 
