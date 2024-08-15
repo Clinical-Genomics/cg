@@ -16,8 +16,6 @@ branch_labels = None
 depends_on = None
 
 
-
-
 def upgrade():
     op.alter_column(
         table_name="order", column_name="is_delivered", type_=sa.Boolean, new_column_name="is_open"
@@ -26,8 +24,6 @@ def upgrade():
     session = orm.Session(bind=bind)
     for order in session.query("order").all():
         order.is_open = not order.is_open
-
-
 
 
 def downgrade():
