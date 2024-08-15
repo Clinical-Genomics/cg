@@ -183,4 +183,8 @@ class ContainerNameMissingError(CaseSampleError):
 
 class InvalidVolumeError(CaseSampleError):
     field: str = "volume"
-    message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
+   
+
+class CaseNameNotAvailableError(CaseError):
+    field: str = "name"
+    message: str = "Case name already in use"
