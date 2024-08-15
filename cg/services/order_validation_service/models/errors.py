@@ -188,4 +188,4 @@ class InvalidVolumeError(CaseSampleError):
 
 class CaseNameNotAvailableError(CaseError):
     field: str = "name"
-    message: str = "Case name already in use"
+    message: str = "Case name already used in a previous order"
