@@ -2,10 +2,6 @@
 
 import pytest
 
-from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
-
 
 @pytest.fixture
 def pac_bio_smrt_cell_name() -> str:
@@ -31,22 +27,10 @@ def pac_bio_1_a01_cell_full_name() -> str:
 
 
 @pytest.fixture
-def ccs_report_1_a01_name(pac_bio_1_a01_cell_full_name: str) -> str:
-    """Return the name of a ccs report file."""
-    return f"{pac_bio_1_a01_cell_full_name}.{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}"
+def smrt_cell_internal_id() -> str:
+    return "EA094834"
 
 
 @pytest.fixture
-def expected_smrt_cell_bundle_name(
-    pac_bio_metrics_parser: PacBioMetricsParser, expected_pac_bio_run_data
-) -> str:
-    parsed_metrics: PacBioMetrics = pac_bio_metrics_parser.parse_metrics(expected_pac_bio_run_data)
-    return parsed_metrics.dataset_metrics.cell_id
-
-
-@pytest.fixture
-def expected_pac_bio_sample_name(
-    pac_bio_metrics_parser: PacBioMetricsParser, expected_pac_bio_run_data
-):
-    parsed_metrics: PacBioMetrics = pac_bio_metrics_parser.parse_metrics(expected_pac_bio_run_data)
-    return parsed_metrics.dataset_metrics.sample_internal_id
+def pac_bio_sample_internal_id() -> str:
+    return "1247014000119"

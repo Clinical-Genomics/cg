@@ -11,6 +11,7 @@ from cg.constants.pacbio import (
 )
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     ControlMetrics,
+    PacBioMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
     ReadMetrics,
@@ -69,15 +70,34 @@ def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
 
 
 @pytest.fixture
-def pac_bio_smrtlink_databases_metrics() -> SmrtlinkDatasetsMetrics:
+def pac_bio_smrtlink_databases_metrics(
+    smrt_cell_internal_id: str, pac_bio_sample_internal_id: str, pac_bio_1_a01_cell_full_name: str
+) -> SmrtlinkDatasetsMetrics:
     data: dict[str, any] = {
-        SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME: "1247014000119",
-        SmrtLinkDatabasesIDs.CELL_ID: "EA094834",
+        SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME: pac_bio_sample_internal_id,
+        SmrtLinkDatabasesIDs.CELL_ID: smrt_cell_internal_id,
         SmrtLinkDatabasesIDs.CELL_INDEX: 0,
-        SmrtLinkDatabasesIDs.MOVIE_NAME: "m84202_240522_135641_s1",
+        SmrtLinkDatabasesIDs.MOVIE_NAME: pac_bio_1_a01_cell_full_name,
         SmrtLinkDatabasesIDs.PATH: "/srv/cg_data/pacbio/r84202_20240522_133539/1_A01/pb_formats/m84202_240522_135641_s1.hifi_reads.consensusreadset.xml",
         SmrtLinkDatabasesIDs.RUN_COMPLETED_AT: "2024-05-24T02:21:20.970Z",
         SmrtLinkDatabasesIDs.WELL_NAME: "A01",
-        SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME: "1247014000119",
+        SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME: pac_bio_sample_internal_id,
     }
     return SmrtlinkDatasetsMetrics.model_validate(data, from_attributes=True)
+
+
+@pytest.fixture
+def pac_bio_metrics(
+    pac_bio_read_metrics: ReadMetrics,
+    pac_bio_control_metrics: ControlMetrics,
+    pac_bio_productivity_metrics: ProductivityMetrics,
+    pac_bio_polymerase_metrics: PolymeraseMetrics,
+    pac_bio_smrtlink_databases_metrics: SmrtlinkDatasetsMetrics,
+) -> PacBioMetrics:
+    return PacBioMetrics(
+        read=pac_bio_read_metrics,
+        control=pac_bio_control_metrics,
+        productivity=pac_bio_productivity_metrics,
+        polymerase=pac_bio_polymerase_metrics,
+        dataset_metrics=pac_bio_smrtlink_databases_metrics,
+    )
