@@ -77,7 +77,7 @@ def set_order_delivered(order_id: int):
     try:
         request_data = OrderDeliveredPatch.model_validate(request.json)
         delivered: bool = request_data.delivered
-        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        response_data: Order = order_service.set_open(order_id=order_id, delivered=delivered)
         return jsonify(response_data.model_dump()), HTTPStatus.OK
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND

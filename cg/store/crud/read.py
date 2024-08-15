@@ -1360,7 +1360,7 @@ class ReadHandler(BaseHandler):
             filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
             workflow=orders_request.workflow,
             search=orders_request.search,
-            delivered=orders_request.delivered,
+            delivered=not orders_request.delivered,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
