@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 from pydantic import BaseModel, Field
 
 from cg.clients.freshdesk.constants import Priority, Source, Status
@@ -19,6 +19,7 @@ class TicketCreate(BaseModel):
     subject: str
     tags: list[str] = []
     type: str | None = None
+    custom_fields: Dict[str, Union[str, int, float, None]] = Field(default_factory=dict)
 
 
 class TicketResponse(BaseModel):
