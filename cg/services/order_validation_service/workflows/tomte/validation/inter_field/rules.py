@@ -50,8 +50,8 @@ def create_well_position_to_sample_map(
     well_position, provided the sample is on a plate.
     """
     well_position_to_sample_map = {}
-    for case_index, case in order.enumerated_cases:
-        for sample_index, sample in case.enumerated_samples:
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
             if _is_sample_on_plate(sample):
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
                 value: tuple[int, int] = (case_index, sample_index)
@@ -67,7 +67,7 @@ def validate_case_names_not_repeated(order: TomteOrder) -> list[RepeatedCaseName
 
 def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSampleNameError]:
     errors: list[RepeatedSampleNameError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[RepeatedSampleNameError] = get_repeated_sample_name_errors(
             case=case, case_index=index
         )
@@ -77,7 +77,7 @@ def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSample
 
 def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
             case=case, case_index=index
         )
@@ -87,7 +87,7 @@ def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
 
 def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
             case=case, case_index=index
         )
@@ -97,7 +97,7 @@ def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherN
 
 def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
             case=case, case_index=index
         )
@@ -107,7 +107,7 @@ def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError
 
 def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
             case=case, case_index=index
         )
@@ -117,7 +117,7 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
 
 def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
-    for case_index, case in order.enumerated_cases:
+    for case_index, case in order.enumerated_new_cases:
         case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
         errors.extend(case_errors)
     return errors
@@ -127,7 +127,7 @@ def validate_subject_ids_different_from_case_names(
     order: TomteOrder,
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
             case=case, case_index=index
         )
@@ -141,7 +141,7 @@ def validate_concentration_interval_if_skip_rc(
     if not order.skip_reception_control:
         return []
     errors: list[InvalidConcentrationIfSkipRCError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidConcentrationIfSkipRCError] = validate_concentration_in_case(
             case=case, case_index=index, store=store
         )

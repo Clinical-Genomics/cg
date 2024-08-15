@@ -21,14 +21,14 @@ class FamilyTree:
         self.case: TomteCase = case
         self.case_index: int = case_index
         self._add_nodes()
-        self.add_edges()
+        self._add_edges()
 
     def _add_nodes(self) -> None:
-        for sample_index, sample in self.case.enumerated_samples:
+        for sample_index, sample in self.case.enumerated_new_samples:
             node = Node(sample=sample, sample_index=sample_index, case_index=self.case_index)
             self.graph[sample.name] = node
 
-    def add_edges(self) -> None:
+    def _add_edges(self) -> None:
         for node in self.graph.values():
             sample: TomteSample = node.sample
             if sample.mother:

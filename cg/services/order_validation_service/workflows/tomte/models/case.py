@@ -21,7 +21,7 @@ class TomteCase(Case):
                 return sample
 
     def get_samples_with_father(self) -> list[tuple[TomteSample, int]]:
-        return [(sample, index) for index, sample in self.enumerated_samples if sample.father]
+        return [(sample, index) for index, sample in self.enumerated_new_samples if sample.father]
 
     def get_samples_with_mother(self) -> list[tuple[TomteSample, int]]:
-        return [(sample, index) for index, sample in self.enumerated_samples if sample.mother]
+        return [(sample, index) for index, sample in self.enumerated_new_samples if sample.mother]
