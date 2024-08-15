@@ -1980,7 +1980,7 @@ def context_config(
             "logwatch_email": "some@email.com",
             "upload_cid": "cid",
             "upload_password": "pass",
-            "submitter": "s.submitter",
+            "submitters": "s.submitters",
         },
         "hermes": {"binary_path": "hermes"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},

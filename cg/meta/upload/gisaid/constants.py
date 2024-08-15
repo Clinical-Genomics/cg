@@ -14,7 +14,7 @@ AUTHORS = [
 ]
 
 HEADERS = [
-    "submitter",
+    "submitters",
     "fn",
     "covv_virus_name",
     "covv_type",

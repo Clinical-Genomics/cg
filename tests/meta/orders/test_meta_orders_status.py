@@ -601,7 +601,7 @@ def test_store_metagenome_samples_bad_apptag(
 
 
 @pytest.mark.parametrize(
-    "submitter", [BalsamicSubmitter, BalsamicQCSubmitter, BalsamicUmiSubmitter]
+    "submitters", [BalsamicSubmitter, BalsamicQCSubmitter, BalsamicUmiSubmitter]
 )
 def test_store_cancer_samples(
     orders_api, base_store: Store, balsamic_status_data, submitter, ticket_id: str
