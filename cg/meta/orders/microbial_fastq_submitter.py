@@ -5,13 +5,14 @@ from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.store.models import Sample, Customer, Case
+from cg.models.orders.sample_base import StatusEnum
+from cg.store.exc import EntryNotFoundError
+from cg.store.models import Sample, Customer, Case, CaseSample
+from cg.utils.error_handler import handle_errors
 
 
 class MicrobialFastqSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        """Part of Submitter interface, base implementation"""
-
+    @handle_errors(to_except=(EntryNotFoundError,), to_raise=OrderError)
     def submit_order(self, order: OrderIn) -> dict:
         project_data, lims_map = process_lims(
             lims_api=self.lims, lims_order=order, new_samples=order.samples
@@ -58,6 +59,7 @@ class MicrobialFastqSubmitter(Submitter):
         items: list[dict],
     ) -> list[Sample]:
         customer: Customer = self._get_customer(customer_id)
+        new_samples: list[Sample] = []
         for sample in items:
             case_name: str = sample["name"]
             case: Case = self._create_case_for_sample(sample, customer, case_name)
@@ -65,11 +67,18 @@ class MicrobialFastqSubmitter(Submitter):
             db_sample = self._add_application_to_sample(
                 sample=db_sample, application_tag=sample["application"]
             )
+            case_sample: CaseSample = self.status.relate_sample(
+                case=case, sample=db_sample, status=StatusEnum.unknown
+            )
+            self.status.add_multiple_items_to_store([case, db_sample, case_sample])
+            new_samples.append(db_sample)
+        self.status.commit_to_store()
+        return new_samples
 
     def _get_customer(self, customer_id: str) -> Customer:
         if customer := self.status.get_customer_by_internal_id(customer_id):
             return customer
-        raise OrderError(f"could not find customer: {customer_id}")
+        raise EntryNotFoundError(f"could not find customer: {customer_id}")
 
     def _create_case_for_sample(self, sample: dict, customer: Customer, case_name: str) -> Case:
         if case := self.status.get_case_by_name_and_customer(
@@ -105,4 +114,4 @@ class MicrobialFastqSubmitter(Submitter):
         ):
             sample.application_version = application_version
             return sample
-        raise OrderError(f"Invalid application: {application_tag}")
+        raise EntryNotFoundError(f"Invalid application: {application_tag}")

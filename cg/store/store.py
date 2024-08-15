@@ -7,6 +7,7 @@ from cg.store.crud.delete import DeleteDataHandler
 from cg.store.crud.read import ReadHandler
 from cg.store.crud.update import UpdateHandler
 from cg.store.database import get_session
+from cg.store.models import Base as ModelBase
 
 LOG = logging.getLogger(__name__)
 
@@ -26,3 +27,7 @@ class Store(
     def commit_to_store(self):
         """Commit pending changes to the store."""
         self.session.commit()
+
+    def add_multiple_items_to_store(self, items: list[ModelBase]):
+        """Add multiple items to the store."""
+        self.session.add_all(items)
