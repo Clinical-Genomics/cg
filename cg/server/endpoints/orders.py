@@ -72,7 +72,7 @@ def get_order(order_id: int):
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
-@ORDERS_BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
+@ORDERS_BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
 def set_order_delivered(order_id: int):
     try:
         request_data = OrderDeliveredPatch.model_validate(request.json)
