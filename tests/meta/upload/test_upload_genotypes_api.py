@@ -36,8 +36,7 @@ def test_get_analysis_sex_raredisease(
 
     # WHEN fetching the predicted sex by the analysis
     sex: dict = UploadGenotypesAPI.get_analysis_sex_raredisease(
-        self=UploadGenotypesAPI,
-        qc_metrics_file=case_qc_metrics_deliverables
+        self=UploadGenotypesAPI, qc_metrics_file=case_qc_metrics_deliverables
     )
 
     # THEN assert that the the predicted sex per sample_id is returned
