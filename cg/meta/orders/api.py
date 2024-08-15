@@ -143,14 +143,12 @@ class OrderSubmitterFactory:
 
         lims_service, validate_service_class, store_service_class, submitter_class = service_classes
 
-        # Instantiate the necessary services
         lims_service: OrderLimsService = lims_service(self.lims_api)
         validate_service: ValidateOrderService = validate_service_class(self.status_db)
         store_service: StoreOrderService = store_service_class(
             store=self.status_db, lims=lims_service
         )
 
-        # Instantiate and return the corresponding OrderSubmitter
         return submitter_class(
             validate_order_service=validate_service,
             store_order_service=store_service,
