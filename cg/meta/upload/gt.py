@@ -56,7 +56,7 @@ class UploadGenotypesAPI(object):
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             gt_data["samples_sex"] = self.get_samples_sex_balsamic(
-                case=analysis.case, hk_version=hk_version,
+                case=analysis.case
             )
         elif analysis.workflow == Workflow.MIP_DNA:
             gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
@@ -120,7 +120,7 @@ class UploadGenotypesAPI(object):
     ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
-        analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file)
+        analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file=qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
