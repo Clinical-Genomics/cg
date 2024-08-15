@@ -1,12 +1,14 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    CaseNameNotAvailableError,
     InvalidGenePanelsError,
     RepeatedGenePanelsError,
 )
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
     validate_application_not_archived,
+    validate_case_names_available,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
 )
@@ -78,3 +80,23 @@ def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store)
 
     # THEN the error should concern repeated gene panels
     assert isinstance(errors[0], RepeatedGenePanelsError)
+
+
+def test_case_name_not_available(
+    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+):
+    store = store_with_multiple_cases_and_samples
+
+    # GIVEN an order with a new case that has the same name as an existing case
+    case = store.get_cases()[0]
+    valid_order.cases[0].name = case.name
+    valid_order.customer_internal_id = case.customer.internal_id
+
+    # WHEN validating that the case name is available
+    errors = validate_case_names_available(order=valid_order, store=store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the case name
+    assert isinstance(errors[0], CaseNameNotAvailableError)
