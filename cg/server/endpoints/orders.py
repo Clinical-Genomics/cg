@@ -29,8 +29,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
-from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch, OrderOpenPatch
+from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request

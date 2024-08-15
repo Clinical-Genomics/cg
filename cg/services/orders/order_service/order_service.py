@@ -5,7 +5,7 @@ from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
-    order_is_delivered, order_is_closed,
+    order_is_closed,
 )
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
 from cg.services.orders.order_summary_service.order_summary_service import (
