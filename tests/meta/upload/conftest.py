@@ -53,17 +53,21 @@ def upload_genotypes_api_mip(
 
 @pytest.fixture
 def upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle_raredisease, helpers: StoreHelpers
+    real_housekeeper_api,
+    genotype_api,
+    upload_genotypes_hk_bundle_raredisease,
+    helpers: StoreHelpers,
 ) -> UploadGenotypesAPI:
     """Create a upload genotypes api."""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle_raredisease, include=True)
+    helpers.ensure_hk_bundle(
+        real_housekeeper_api, upload_genotypes_hk_bundle_raredisease, include=True
+    )
     _api = UploadGenotypesAPI(
         hk_api=real_housekeeper_api,
         gt_api=genotype_api,
     )
 
     return _api
-
 
 
 @pytest.fixture(scope="function")

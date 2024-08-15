@@ -27,7 +27,6 @@ def test_get_analysis_sex_mip(
 def test_get_analysis_sex_raredisease(
     case_qc_metrics_deliverables_raredisease: Path,
     genotype_analysis_sex: dict,
-
 ):
     """Test to get the predicted sex from a RAREDISEASE run using the upload genotypes API"""
     # GIVEN an analysis API

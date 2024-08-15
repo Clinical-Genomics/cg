@@ -61,6 +61,7 @@ def upload_genotypes_hk_bundle_mip(
     }
     return data
 
+
 @pytest.fixture
 def upload_genotypes_hk_bundle_raredisease(
     case_id: str, timestamp, case_qc_metrics_deliverables_raredisease: Path, bcf_file: Path
@@ -80,7 +81,6 @@ def upload_genotypes_hk_bundle_raredisease(
         ],
     }
     return data
-
 
 
 @pytest.fixture
