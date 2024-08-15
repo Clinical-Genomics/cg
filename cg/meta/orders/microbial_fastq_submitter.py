@@ -86,8 +86,8 @@ class MicrobialFastqSubmitter(Submitter):
         ):
             return case
         case: Case = self.status.add_case(
-            data_analysis=Workflow(sample["data_analysis"]),
-            data_delivery=DataDelivery(sample["data_delivery"]),
+            data_analysis=Workflow.FASTQ,
+            data_delivery=DataDelivery.FASTQ,
             name=case_name,
             panels=None,
             priority=sample["priority"],
