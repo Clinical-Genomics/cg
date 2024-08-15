@@ -55,9 +55,7 @@ class UploadGenotypesAPI(object):
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            gt_data["samples_sex"] = self.get_samples_sex_balsamic(
-                case=analysis.case
-            )
+            gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=analysis.case)
         elif analysis.workflow == Workflow.MIP_DNA:
             gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
                 case=analysis.case, hk_version=hk_version
@@ -115,9 +113,7 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-    def get_samples_sex_mip_dna(
-        self, case: Case, hk_version: Version
-    ) -> dict[str, dict[str, str]]:
+    def get_samples_sex_mip_dna(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
         analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file=qc_metrics_file)
@@ -144,7 +140,6 @@ class UploadGenotypesAPI(object):
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
-
 
     def get_samples_sex_raredisease(
         self, case: Case, hk_version: Version

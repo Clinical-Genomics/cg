@@ -96,7 +96,6 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
 
-
     def get_scout_upload_case_tags(self) -> dict:
         """Return MIP DNA Scout upload case tags."""
         return MIP_CASE_TAGS

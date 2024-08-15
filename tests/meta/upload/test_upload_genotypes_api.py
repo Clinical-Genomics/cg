@@ -48,7 +48,9 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     # GIVEN an AnalysisAPI and qcmetrics data
 
     # WHEN fetching the predicted sex
-    metrics_object = UploadGenotypesAPI.get_parsed_qc_metrics_data_mip_dna(case_qc_metrics_deliverables)
+    metrics_object = UploadGenotypesAPI.get_parsed_qc_metrics_data_mip_dna(
+        case_qc_metrics_deliverables
+    )
 
     # THEN assert that it was successfully created
     assert isinstance(metrics_object, MIPMetricsDeliverables)
