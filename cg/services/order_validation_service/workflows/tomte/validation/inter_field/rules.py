@@ -15,7 +15,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
-    _is_sample_on_plate,
+    is_sample_on_plate,
     get_father_case_errors,
     get_father_sex_errors,
     get_mother_case_errors,
@@ -52,7 +52,7 @@ def create_well_position_to_sample_map(
     well_position_to_sample_map = {}
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if _is_sample_on_plate(sample):
+            if is_sample_on_plate(sample):
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
                 value: tuple[int, int] = (case_index, sample_index)
                 if not well_position_to_sample_map.get(key):
