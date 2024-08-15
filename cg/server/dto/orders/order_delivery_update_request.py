@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
 
 
-class OrderDeliveredUpdateRequest(BaseModel):
+class OrderOpenUpdateRequest(BaseModel):
     delivered_analyses_count: int = Field(..., alias="deliveredAnalysesCount")
