@@ -17,6 +17,7 @@ from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.fastq_submitter import FastqSubmitter
 from cg.meta.orders.fluffy_submitter import FluffySubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
+from cg.meta.orders.microbial_fastq_submitter import MicrobialFastqSubmitter
 from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
@@ -49,6 +50,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
         OrderType.RNAFUSION: RnafusionSubmitter,
         OrderType.SARS_COV_2: SarsCov2Submitter,
         OrderType.TOMTE: TomteSubmitter,
+        OrderType.MICROBIAL_FASTQ: MicrobialFastqSubmitter,
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)
