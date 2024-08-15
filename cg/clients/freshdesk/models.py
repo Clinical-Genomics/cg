@@ -1,6 +1,6 @@
 from datetime import datetime
-
-from pydantic import BaseModel
+from typing import List, Union, Optional
+from pydantic import BaseModel, Field
 
 from cg.clients.freshdesk.constants import Priority, Source, Status
 
@@ -8,9 +8,10 @@ from cg.clients.freshdesk.constants import Priority, Source, Status
 class TicketCreate(BaseModel):
     """Freshdesk ticket."""
 
-    attachments: list[dict[str, str]] = []
+    attachments: List[Union[str, bytes]] = Field(default_factory=list)
     email: str
     email_config_id: int | None = None
+    description: str
     name: str
     priority: int = Priority.LOW
     source: int = Source.EMAIL
@@ -21,16 +22,9 @@ class TicketCreate(BaseModel):
 
 
 class TicketResponse(BaseModel):
-    """Freshdesk ticket response."""
-
-    attachments: list[dict[str, str]] = []
-    created_at: datetime | None = None
-    email: str
     id: int
-    name: str | None = None
-    priority: int
-    source: int
-    status: int
+    description: str
     subject: str
-    tags: list[str] = []
-    type: str | None = None
+    to_emails: Optional[List[str]] = None
+    status: int
+    priority: int

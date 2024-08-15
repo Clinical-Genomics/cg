@@ -28,7 +28,6 @@ from cg.exc import (
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
-from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
@@ -40,13 +39,7 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.dto.sequencing_metrics.sequencing_metrics_request import SequencingMetricsRequest
 from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import (
-    db,
-    delivery_message_service,
-    lims,
-    order_service,
-    osticket,
-)
+from cg.server.ext import db, delivery_message_service, order_service, orders_api
 from cg.server.utils import parse_metrics_into_request
 from cg.store.models import (
     Analysis,
@@ -67,7 +60,7 @@ BLUEPRINT.before_request(before_request)
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(lims=lims, status=db, osticket=osticket)
+
     error_message: str
     try:
         request_json = request.get_json()
@@ -83,7 +76,7 @@ def submit_order(order_type):
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
-        result: dict = api.submit(
+        result: dict = orders_api.submit(
             project=project,
             order_in=order_in,
             user_name=g.current_user.name,

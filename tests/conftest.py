@@ -81,6 +81,7 @@ from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
@@ -644,6 +645,18 @@ def osticket(ticket_id: str) -> MockOsTicket:
     api = MockOsTicket()
     api.set_ticket_nr(ticket_id)
     return api
+
+
+@pytest.fixture
+def freshdesk_client() -> FreshdeskClient:
+    """Return a FreshdeskClient instance with mock parameters."""
+    client = FreshdeskClient(
+        base_url="https://mock.freshdesk.com",
+        api_key="mock_api_key",
+        order_email_id=2024,
+        env="dev",
+    )
+    return client
 
 
 # Files fixtures
