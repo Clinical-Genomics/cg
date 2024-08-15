@@ -804,9 +804,15 @@ def mip_deliverables_file(mip_dna_store_files: Path) -> Path:
 
 
 @pytest.fixture
-def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+def case_qc_metrics_deliverables_mip(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
+
+@pytest.fixture
+def case_qc_metrics_deliverables_raredisease(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data."""
+    return Path(apps_dir, "raredisease", "case_metrics_deliverables.yaml")
+
 
 
 @pytest.fixture

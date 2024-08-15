@@ -32,7 +32,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 

@@ -28,27 +28,6 @@ class MockCoverage(ChanjoAPI):
 
 
 @pytest.fixture
-def upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
-) -> dict:
-    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
-    data = {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {
-                "path": str(case_qc_metrics_deliverables),
-                "archive": False,
-                "tags": HkMipAnalysisTag.QC_METRICS,
-            },
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
-        ],
-    }
-    return data
-
-
-@pytest.fixture
 def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
@@ -59,17 +38,32 @@ def analysis_obj(
 
 
 @pytest.fixture
-def upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers: StoreHelpers
+def upload_genotypes_api_mip(
+    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle_mip, helpers: StoreHelpers
 ) -> UploadGenotypesAPI:
     """Create a upload genotypes api."""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle_mip, include=True)
     _api = UploadGenotypesAPI(
         hk_api=real_housekeeper_api,
         gt_api=genotype_api,
     )
 
     return _api
+
+
+@pytest.fixture
+def upload_genotypes_api(
+    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle_raredisease, helpers: StoreHelpers
+) -> UploadGenotypesAPI:
+    """Create a upload genotypes api."""
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle_raredisease, include=True)
+    _api = UploadGenotypesAPI(
+        hk_api=real_housekeeper_api,
+        gt_api=genotype_api,
+    )
+
+    return _api
+
 
 
 @pytest.fixture(scope="function")

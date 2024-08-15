@@ -8,10 +8,6 @@ from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
