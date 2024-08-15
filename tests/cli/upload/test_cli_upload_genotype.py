@@ -24,8 +24,8 @@ def test_upload_genotype_mip(
     # GIVEN a context with a case that is ready for upload sequence genotypes
     upload_context.status_db_ = analysis_store_trio
     upload_context.housekeeper_api_ = upload_genotypes_hk_api_mip
-    case_obj = upload_context.status_db.get_case_by_internal_id(internal_id=case_id)
-    assert case_obj
+    case = upload_context.status_db.get_case_by_internal_id(internal_id=case_id)
+    assert case
 
     # WHEN uploading the genotypes
     result = cli_runner.invoke(upload_genotypes, [case_id], obj=upload_context)
@@ -50,8 +50,8 @@ def test_upload_genotype_raredisease(
     # GIVEN a context with a case that is ready for upload sequence genotypes
     upload_context.status_db_ = analysis_store_trio
     upload_context.housekeeper_api_ = upload_genotypes_hk_api_raredisease
-    case_obj = upload_context.status_db.get_case_by_internal_id(internal_id=case_id)
-    assert case_obj
+    case = upload_context.status_db.get_case_by_internal_id(internal_id=case_id)
+    assert case
 
     # WHEN uploading the genotypes
     result = cli_runner.invoke(upload_genotypes, [case_id], obj=upload_context)

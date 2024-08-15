@@ -17,7 +17,6 @@ def test_get_analysis_sex_mip(
 
     # WHEN fetching the predicted sex by the analysis
     sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(
-        self=UploadGenotypesAPI,
         qc_metrics_file=case_qc_metrics_deliverables_mip,
     )
 
@@ -48,7 +47,7 @@ def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables_mip: Path):
 
     # WHEN fetching the predicted sex
     metrics_object = UploadGenotypesAPI.get_parsed_qc_metrics_data_mip_dna(
-        self=UploadGenotypesAPI, qc_metrics_file=case_qc_metrics_deliverables_mip
+        qc_metrics_file=case_qc_metrics_deliverables_mip
     )
 
     # THEN assert that it was successfully created
