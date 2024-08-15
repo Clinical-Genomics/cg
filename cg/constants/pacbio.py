@@ -1,7 +1,6 @@
 """Constants related to PacBio sequencing."""
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
 
 
 class PacBioDirsAndFiles:
@@ -72,15 +71,6 @@ class PacBioBundleTypes:
     SAMPLE: str = "sample"
     SMRT_CELL: str = "smrt_cell"
 
-
-file_pattern_to_tag: dict[str, list[str]] = {
-    PacBioDirsAndFiles.CONTROL_REPORT: [PacBioHousekeeperTags.CONTROL_REPORT],
-    f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": [PacBioHousekeeperTags.CCS_REPORT],
-    PacBioDirsAndFiles.LOADING_REPORT: [PacBioHousekeeperTags.LOADING_REPORT],
-    PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
-    PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
-    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
-}
 
 file_pattern_to_bundle_type: dict[str, str] = {
     PacBioDirsAndFiles.CONTROL_REPORT: PacBioBundleTypes.SMRT_CELL,
