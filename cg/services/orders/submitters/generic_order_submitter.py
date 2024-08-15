@@ -2,13 +2,13 @@
 
 from cg.models.orders.order import OrderIn
 from cg.services.orders.store_order_services.store_generic_order import StoreGenericOrderService
-from cg.services.orders.submitters.submitter import Submitter
+from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.validate_order_services.validate_generic_order import (
     ValidateGenericOrderService,
 )
 
 
-class GenericOrderSubmitter(Submitter):
+class GenericOrderSubmitter(OrderSubmitter):
     """
     Class for submitting generic orders.
     This class is used to submit orders for the following workflows:

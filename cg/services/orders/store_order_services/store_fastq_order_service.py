@@ -1,21 +1,29 @@
-import datetime as dt
+import logging
+from datetime import datetime
 
-from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import CustomerId, PrepCategory, Workflow
-from cg.constants.priority import Priority
+from cg.constants import Workflow, DataDelivery, GenePanelMasterList, Priority
+from cg.constants.constants import CustomerId, PrepCategory
 from cg.exc import OrderError
-from cg.meta.orders.lims import process_lims
-from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
+from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.store.models import Case, CaseSample, Sample, Customer, ApplicationVersion
+from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
-class FastqSubmitter(Submitter):
-    def submit_order(self, order: OrderIn) -> dict:
+class StoreFastqOrderService(StoreOrderService):
+
+    def __init__(self, status_db: Store, lims_service: OrderLimsService):
+        self.status_db = status_db
+        self.lims = lims_service
+
+    def store_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
 
-        project_data, lims_map = process_lims(
+        project_data, lims_map = self.lims(
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
@@ -57,7 +65,7 @@ class FastqSubmitter(Submitter):
 
     def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
-        case: Case = self.status.add_case(
+        case: Case = self.status_db.add_case(
             data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
@@ -65,31 +73,31 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer = self.status.get_customer_by_internal_id(
+        case.customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
         )
-        relationship: CaseSample = self.status.relate_sample(
+        relationship: CaseSample = self.status_db.relate_sample(
             case=case, sample=sample_obj, status=StatusEnum.unknown
         )
-        self.status.session.add_all([case, relationship])
+        self.status_db.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        customer: Customer = self.status.get_customer_by_internal_id(
+        customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case: Case = self.status.get_case_by_name_and_customer(
+        case: Case = self.status_db.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
         submitted_case: dict = items[0]
-        with self.status.session.no_autoflush:
+        with self.status_db.session.no_autoflush:
             for sample in items:
-                new_sample = self.status.add_sample(
+                new_sample = self.status_db.add_sample(
                     name=sample["name"],
                     sex=sample["sex"] or "unknown",
                     comment=sample["comment"],
@@ -105,14 +113,14 @@ class FastqSubmitter(Submitter):
                 new_sample.customer: Customer = customer
                 application_tag: str = sample["application"]
                 application_version: ApplicationVersion = (
-                    self.status.get_current_application_version_by_tag(tag=application_tag)
+                    self.status_db.get_current_application_version_by_tag(tag=application_tag)
                 )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version: ApplicationVersion = application_version
                 new_samples.append(new_sample)
                 if not case:
-                    case = self.status.add_case(
+                    case = self.status_db.add_case(
                         data_analysis=Workflow(submitted_case["data_analysis"]),
                         data_delivery=DataDelivery(submitted_case["data_delivery"]),
                         name=ticket_id,
@@ -126,11 +134,28 @@ class FastqSubmitter(Submitter):
                 ):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer
-                new_relationship = self.status.relate_sample(
+                new_relationship = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
                 )
-                self.status.session.add_all([case, new_relationship])
+                self.status_db.session.add_all([case, new_relationship])
 
-        self.status.session.add_all(new_samples)
-        self.status.session.commit()
+        self.status_db.session.add_all(new_samples)
+        self.status_db.session.commit()
         return new_samples
+
+    @staticmethod
+    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
+        """Fill in LIMS sample ids."""
+        for sample in samples:
+            LOG.debug(f"{sample['name']}: link sample to LIMS")
+            if not sample.get(id_key):
+                internal_id = lims_map[sample["name"]]
+                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
+                sample[id_key] = internal_id
+
+    def _add_missing_reads(self, samples: list[Sample]):
+        """Add expected reads/reads missing."""
+        for sample_obj in samples:
+            LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
+            target_reads = sample_obj.application_version.application.target_reads / 1000000
+            self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)

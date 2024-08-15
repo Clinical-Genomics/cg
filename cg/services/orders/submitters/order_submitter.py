@@ -28,7 +28,7 @@ class StoreOrderService(ABC):
         pass
 
 
-class Submitter(ABC):
+class OrderSubmitter(ABC):
     @abstractmethod
     def __init__(
         self,

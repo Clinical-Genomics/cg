@@ -1,7 +1,7 @@
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.services.orders.submitters.submitter import ValidateOrderService
+from cg.services.orders.submitters.order_submitter import ValidateOrderService
 from cg.store.models import Sample, Customer
 from cg.store.store import Store
 

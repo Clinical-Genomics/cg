@@ -1,10 +1,10 @@
 from cg.models.orders.order import OrderIn
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
-from cg.services.orders.submitters.submitter import Submitter
+from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.validate_order_services.validate_pool_order import ValidatePoolOrderService
 
 
-class PoolOrderSubmitter(Submitter):
+class PoolOrderSubmitter(OrderSubmitter):
     """
     Class for submitting pool orders.
     This class is used to submit orders for the following workflows:

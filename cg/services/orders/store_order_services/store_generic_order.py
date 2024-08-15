@@ -7,7 +7,7 @@ from cg.constants.pedigree import Pedigree
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.submitter import StoreOrderService
+from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import Case, Customer, Sample, CaseSample, ApplicationVersion
 from cg.store.store import Store
 

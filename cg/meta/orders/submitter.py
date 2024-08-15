@@ -7,6 +7,7 @@ from cg.models.orders.order import OrderIn
 from cg.store.models import Base, Sample
 from cg.store.store import Store
 
+
 LOG = logging.getLogger(__name__)
 
 
