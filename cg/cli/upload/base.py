@@ -38,6 +38,7 @@ from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
