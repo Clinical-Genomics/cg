@@ -52,7 +52,7 @@ def upload_genotypes_api_mip(
 
 
 @pytest.fixture
-def upload_genotypes_api(
+def upload_genotypes_api_raredisease(
     real_housekeeper_api,
     genotype_api,
     upload_genotypes_hk_bundle_raredisease,

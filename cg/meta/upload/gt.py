@@ -125,6 +125,7 @@ class UploadGenotypesAPI(object):
 
     def get_analysis_sex_mip_dna(self, qc_metrics_file: Path) -> dict:
         """Return analysis sex for each sample of an analysis."""
+        LOG.info("qc_metrics stuff")
         qc_metrics = self.get_parsed_qc_metrics_data_mip_dna(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
@@ -175,7 +176,7 @@ class UploadGenotypesAPI(object):
         hk_qcmetrics: Path = self.hk.files(
             version=hk_version_obj.id, tags=HkAnalysisMetricsTag.QC_METRICS
         ).first()
-        if hk_qcmetrics is None:
+        if not hk_qcmetrics:
             raise FileNotFoundError("QC metrics file not found for the given hk version.")
         LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)

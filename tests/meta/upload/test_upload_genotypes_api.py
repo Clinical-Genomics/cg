@@ -71,16 +71,31 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables_rar
     assert is_list_of_metricsbase(metrics_object)
 
 
-def test_get_bcf_file(
-    upload_genotypes_api: UploadGenotypesAPI,
+def test_get_bcf_file_mip(
+    upload_genotypes_ap_mip: UploadGenotypesAPI,
     case_id: str,
     timestamp: datetime,
 ):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
-    hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
+    hk_version = upload_genotypes_api_mip.hk.version(case_id, timestamp)
 
     # WHEN fetching the gbcf file with the api
-    gbcf = upload_genotypes_api.get_bcf_file(hk_version_obj=hk_version)
+    gbcf = upload_genotypes_ap_mip.get_bcf_file(hk_version_obj=hk_version)
+    # THEN assert that the file has the correct tag
+    assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
+
+
+def test_get_bcf_file_raredisease(
+    upload_genotypes_api_raredisease: UploadGenotypesAPI,
+    case_id: str,
+    timestamp: datetime,
+):
+    """Test to get the predicted sex from a MIP run using the upload genotypes API"""
+    # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
+    hk_version = upload_genotypes_api_raredisease.hk.version(case_id, timestamp)
+
+    # WHEN fetching the gbcf file with the api
+    gbcf = upload_genotypes_api_raredisease.get_bcf_file(hk_version_obj=hk_version)
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)

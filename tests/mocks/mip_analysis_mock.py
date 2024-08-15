@@ -15,7 +15,6 @@ def create_mip_metrics_deliverables():
     )
     return MIPMetricsDeliverables(**metrics_deliverables)
 
-
 class MockMipAnalysis(MipAnalysisAPI):
     """Mock MIP analysis object."""
 

@@ -12,11 +12,15 @@ from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.analysis import NextflowAnalysis
+from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Case
 from tests.mocks.mip_analysis_mock import create_mip_metrics_deliverables
+from tests.mocks.raredisease_analysis_mock import create_raredisease_metrics_deliverables
 
 LOG = logging.getLogger(__name__)
 
@@ -47,6 +51,33 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
     def get_data_analysis_type(self, case: Case) -> str | None:
         """Return data analysis type carried out."""
         return AnalysisType.WHOLE_GENOME_SEQUENCING
+
+class MockRarediseaseAnalysisAPI(RarediseaseAnalysisAPI):
+    """Mock RarediseaseAnalysisAPI for CLI tests."""
+
+    def __init__(self, config: CGConfig):
+        super().__init__(config)
+
+    @property
+    def root(self):
+        return "/root/path"
+
+    @staticmethod
+    def get_latest_metadata(family_id: str = None, **kwargs) -> NextflowAnalysis:
+        metrics: RarediseaseMetricsDeliverables = create_raredisease_metrics_deliverables()
+        return NextflowAnalysis(
+            case=family_id or "yellowhog",
+            genome_build=GenomeVersion.HG19.value,
+            sample_id_metrics=metrics.sample_id_metrics,
+            raredisease_version="v4.0.20",
+            rank_model_version="1.18",
+            sample_ids=["2018-20203", "2018-20204"],
+        )
+
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
+        return AnalysisType.WHOLE_GENOME_SEQUENCING
+
 
 
 class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
@@ -79,6 +110,37 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         return f"path/to/{scout_key}"
 
 
+class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
+    """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
+
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+    def add_delivery_report_to_hk(
+        self, case_id: str, delivery_report_file: Path, version: Version
+    ) -> None:
+        """Mocked add_delivery_report_to_hk method."""
+        LOG.info(
+            f"add_delivery_report_to_hk called with the following args:  case={case_id}, delivery_report_file="
+            f"{delivery_report_file}, version={version}"
+        )
+
+    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> None:
+        """Return mocked delivery report path stored in Housekeeper."""
+        LOG.info(
+            f"get_delivery_report_from_hk called with the following args: case={case_id}, version={version}"
+        )
+        return None
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_key: ScoutUploadKey) -> str:
+        """Return mocked uploaded to Scout file."""
+        LOG.info(
+            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_key={scout_key}"
+        )
+        return f"path/to/{scout_key}"
+
+
+
 class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     """Mock ReportAPI for CLI tests."""
 
@@ -101,6 +163,31 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
             f"analysis_date={analysis_date}, force={force}"
         )
         return directory
+
+
+class MockRarediseaseReportAPI(MockHousekeeperMipDNAReportAPI):
+    """Mock ReportAPI for CLI tests."""
+
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> None:
+        """Mocked create_delivery_report method."""
+        LOG.info(
+            f"create_delivery_report called with the following args: case={case_id}, analysis_date={analysis_date}, "
+            f"force={force}",
+        )
+
+    def create_delivery_report_file(
+        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
+    ) -> Path:
+        """Return mocked delivery report file path."""
+        LOG.info(
+            f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
+            f"analysis_date={analysis_date}, force={force}"
+        )
+        return directory
+
 
 
 class MockChanjo(ChanjoAPI):

@@ -25,6 +25,7 @@ from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -32,7 +33,6 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 )
 from cg.store.models import Analysis
 from cg.store.store import Store
-from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
@@ -338,8 +338,24 @@ class MockLims:
 
 
 @pytest.fixture
-def upload_context(cg_context: CGConfig) -> CGConfig:
+def upload_context_mip(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
+    cg_context.meta_apis["analysis_api"] = analysis_api
+    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
+    cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=cg_context.housekeeper_api,
+        scout_api=cg_context.scout_api,
+        madeline_api=cg_context.madeline_api,
+        analysis_api=analysis_api,
+        lims_api=cg_context.lims_api,
+        status_db=cg_context.status_db,
+    )
+
+    return cg_context
+
+@pytest.fixture
+def upload_context_raredisease(cg_context: CGConfig) -> CGConfig:
+    analysis_api = RarediseaseAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
     cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
