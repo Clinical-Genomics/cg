@@ -19,5 +19,4 @@ class RNAFusionOrderSubmitter(OrderSubmitter):
     def submit_order(self, order_in: OrderIn) -> dict:
         """Submit a RNA fusion order."""
         self.order_validation_service.validate_order(order_in)
-        result: dict = self.order_store_service.store_order(order_in)
-        return result
+        return self.order_store_service.store_order(order_in)

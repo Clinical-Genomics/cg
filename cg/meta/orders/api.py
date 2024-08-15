@@ -11,14 +11,14 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
-from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.submitters.fastq_order_submitter import FastqOrderSubmitter
 from cg.services.orders.submitters.generic_order_submitter import GenericOrderSubmitter
+from cg.services.orders.submitters.metagenome_order_submitter import MetagenomeOrderSubmitter
+from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
 from cg.services.orders.submitters.rna_fusion_order_submitter import RNAFusionOrderSubmitter
 from cg.store.store import Store
@@ -26,7 +26,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Submitter:
+def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> OrderSubmitter:
     """Factory Method"""
 
     submitters = {
@@ -35,7 +35,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
         OrderType.BALSAMIC_UMI: GenericOrderSubmitter,
         OrderType.FASTQ: FastqOrderSubmitter,
         OrderType.FLUFFY: PoolOrderSubmitter,
-        OrderType.METAGENOME: MetagenomeSubmitter,
+        OrderType.METAGENOME: MetagenomeOrderSubmitter,
         OrderType.MICROSALT: MicrosaltSubmitter,
         OrderType.MIP_DNA: GenericOrderSubmitter,
         OrderType.MIP_RNA: GenericOrderSubmitter,
@@ -62,8 +62,9 @@ class OrdersAPI:
 
         Main entry point for the class towards interfaces that implements it.
         """
-        submit_handler: Submitter = _get_submit_handler(project, lims=self.lims, status=self.status)
-        submit_handler.validate_order(order=order_in)
+        submit_handler: OrderSubmitter = _get_submit_handler(
+            project, lims=self.lims, status=self.status
+        )
 
         # detect manual ticket assignment
         ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
@@ -80,4 +81,4 @@ class OrdersAPI:
                 ticket_number=ticket_number,
             )
         order_in.ticket = ticket_number
-        return submit_handler.submit_order(order=order_in)
+        return submit_handler.submit_order(order_in=order_in)
