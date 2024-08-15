@@ -45,8 +45,8 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
     )
 
 
-def filter_orders_by_is_open(orders: Query, open: bool | None, **kwargs) -> Query:
-    return orders.filter(Order.is_open == open) if open is not None else orders
+def filter_orders_by_is_open(orders: Query, is_open: bool | None, **kwargs) -> Query:
+    return orders.filter(Order.is_open == is_open) if is_open is not None else orders
 
 
 def apply_sorting(
