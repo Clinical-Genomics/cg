@@ -22,7 +22,7 @@ class ReadMetrics(BaseModel):
 
     hifi_reads: int = Field(..., alias=CCSAttributeIDs.HIFI_READS)
     hifi_yield: int = Field(..., alias=CCSAttributeIDs.HIFI_YIELD)
-    hifi_mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.HIFI_MEAN_READ_LENGTH)
+    hifi_mean_read_length: int = Field(..., alias=CCSAttributeIDs.HIFI_MEAN_READ_LENGTH)
     hifi_median_read_length: int = Field(..., alias=CCSAttributeIDs.HIFI_MEDIAN_READ_LENGTH)
     hifi_mean_length_n50: int = Field(..., alias=CCSAttributeIDs.HIFI_READ_LENGTH_N50)
     hifi_median_read_quality: int = Field(..., alias=CCSAttributeIDs.HIFI_MEDIAN_READ_QUALITY)
@@ -31,9 +31,6 @@ class ReadMetrics(BaseModel):
     failed_yield: int = Field(..., alias=CCSAttributeIDs.FAILED_YIELD)
     failed_mean_read_length_kb: float = Field(..., alias=CCSAttributeIDs.FAILED_MEAN_READ_LENGTH)
 
-    _validate_hifi_mean_read_length_kb = field_validator("hifi_mean_read_length_kb", mode="before")(
-        divide_by_thousand_with_one_decimal
-    )
     _validate_failed_mean_read_length_kb = field_validator(
         "failed_mean_read_length_kb", mode="before"
     )(divide_by_thousand_with_one_decimal)

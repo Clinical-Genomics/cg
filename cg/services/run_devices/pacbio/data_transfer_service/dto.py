@@ -17,7 +17,7 @@ class PacBioSequencingRunDTO(BaseModel):
     completed_at: datetime
     hifi_reads: int
     hifi_yield: int
-    hifi_mean_read_length: float
+    hifi_mean_read_length: int
     hifi_median_read_length: int
     hifi_mean_length_n50: int
     hifi_median_read_quality: str

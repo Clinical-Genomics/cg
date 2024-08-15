@@ -36,7 +36,7 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
         "movie_time_hours": 10,
         "hifi_reads": 500000,
         "hifi_yield": 3000000000,
-        "hifi_mean_read_length": 6000.5,
+        "hifi_mean_read_length": 6000,
         "hifi_median_read_length": 6000,
         "hifi_mean_length_n50": 5000,
         "hifi_median_read_quality": "Q20",
