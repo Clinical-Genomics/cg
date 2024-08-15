@@ -28,7 +28,7 @@ class FreshdeskClient:
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket with multipart form data."""
-        ticket_data = self._convert_ticket_to_multipart_data(ticket)  # Fix here
+        ticket_data = self._convert_ticket_to_multipart_data(ticket)
         files = prepare_attachments(attachments) if attachments else None
 
         LOG.info(ticket_data)
