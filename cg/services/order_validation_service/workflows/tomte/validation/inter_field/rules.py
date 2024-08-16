@@ -119,7 +119,7 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
 
 def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
         errors.extend(case_errors)
     return errors
