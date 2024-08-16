@@ -47,8 +47,10 @@ class UploadGenotypesAPI(object):
         LOG.info(f"workflow: {case.data_analysis}")
         case_id = case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
-        hk_version = self.hk.last_version(bundle=case_id)
+        hk_version: Version = self.hk.last_version(bundle=case_id)
+
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
+
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if case.data_analysis in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=case)
@@ -90,7 +92,7 @@ class UploadGenotypesAPI(object):
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         LOG.debug("Get genotype files from Housekeeper")
-        genotype_files: list = self.get_genotype_files(version_id=hk_version_obj.id)
+        genotype_files: list = self.get_genotype_files(version_id=hk_version_obj)
         for genotype_file in genotype_files:
             if self.is_variant_file(genotype_file=genotype_file):
                 LOG.debug(f"Found BCF file {genotype_file.full_path}")
@@ -113,7 +115,7 @@ class UploadGenotypesAPI(object):
     def get_samples_sex_mip_dna(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
-        analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file)
+        analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
@@ -169,9 +171,9 @@ class UploadGenotypesAPI(object):
 
     def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
         """Return a QC metrics file path."""
-        hk_qcmetrics: Path = self.hk.get_latest_file(
-            version=hk_version_obj.id, tags={HkAnalysisMetricsTag.QC_METRICS}
-        ).first()
+        hk_qcmetrics: File = self.hk.get_latest_file(
+            version=hk_version_obj, tags=HkAnalysisMetricsTag.QC_METRICS
+        )
         if not hk_qcmetrics:
             raise FileNotFoundError("QC metrics file not found for the given Housekeeper version.")
         LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")

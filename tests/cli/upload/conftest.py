@@ -17,7 +17,7 @@ from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     GensAnalysisTag,
-    HkMipAnalysisTag,
+    HkAnalysisMetricsTag,
 )
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
@@ -55,7 +55,7 @@ def upload_genotypes_hk_bundle_mip(
             {
                 "path": str(case_qc_metrics_deliverables_mip),
                 "archive": False,
-                "tags": HkMipAnalysisTag.QC_METRICS,
+                "tags": HkAnalysisMetricsTag.QC_METRICS,
             },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
         ],
@@ -76,7 +76,7 @@ def upload_genotypes_hk_bundle_raredisease(
             {
                 "path": str(case_qc_metrics_deliverables_raredisease),
                 "archive": False,
-                "tags": HkMipAnalysisTag.QC_METRICS,
+                "tags": HkAnalysisMetricsTag.QC_METRICS,
             },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
         ],
