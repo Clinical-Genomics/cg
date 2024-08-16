@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 class UploadGenotypesAPI(object):
-    """Genotype upload API"""
+    """Genotype upload API."""
 
     def __init__(
         self,
