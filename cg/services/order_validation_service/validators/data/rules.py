@@ -4,11 +4,12 @@ from cg.services.order_validation_service.models.errors import (
     CaseNameNotAvailableError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
-    ExistingCaseDoesNotExistError,
+    CaseDoesNotExistError,
     InvalidGenePanelsError,
     InvalidVolumeError,
     OrderError,
     RepeatedGenePanelsError,
+    SampleDoesNotExistError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
@@ -18,7 +19,7 @@ from cg.services.order_validation_service.validators.data.utils import (
     is_volume_invalid,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -127,11 +128,24 @@ def validate_case_names_available(
 
 def validate_case_internal_ids_exist(
     order: TomteOrder, store: Store, **kwargs
-) -> list[ExistingCaseDoesNotExistError]:
-    errors: list[ExistingCaseDoesNotExistError] = []
+) -> list[CaseDoesNotExistError]:
+    errors: list[CaseDoesNotExistError] = []
     for case_index, case in order.enumerated_existing_cases:
         case: Case | None = store.get_case_by_internal_id(case.internal_id)
         if not case:
-            error = ExistingCaseDoesNotExistError(case_index=case_index)
+            error = CaseDoesNotExistError(case_index=case_index)
             errors.append(error)
+    return errors
+
+
+def validate_samples_exist(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[SampleDoesNotExistError]:
+    errors: list[SampleDoesNotExistError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_existing_samples:
+            sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
+            if not sample:
+                error = SampleDoesNotExistError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
     return errors

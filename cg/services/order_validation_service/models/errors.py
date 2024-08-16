@@ -191,11 +191,16 @@ class CaseNameNotAvailableError(CaseError):
     message: str = "Case name already used in a previous order"
 
 
-class ExistingCaseDoesNotExistError(CaseError):
+class CaseDoesNotExistError(CaseError):
     field: str = "internal_id"
-    message: str = "The existing case is not found"
+    message: str = "The case does not exist"
 
 
 class StatusMissingError(CaseSampleError):
     field: str = "status"
-    message: str = "Carrier status is required"
+    message: str = "Carrier status is required" 
+
+
+class SampleDoesNotExistError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "The sample does not exist"
