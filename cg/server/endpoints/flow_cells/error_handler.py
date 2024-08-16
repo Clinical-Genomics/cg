@@ -2,9 +2,7 @@ from http import HTTPStatus
 import logging
 from functools import wraps
 from flask import jsonify
-from pydantic import ValidationError
 
-from cg.exc import MissingSequencingMetricsError
 from cg.store.exc import EntryNotFoundError
 
 LOG = logging.getLogger(__name__)
@@ -17,9 +15,6 @@ def handle_endpoint_errors(func):
         try:
             return func(*args, **kwargs)
         except EntryNotFoundError as error:
-            LOG.error(error)
-            return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
-        except MissingSequencingMetricsError as error:
             LOG.error(error)
             return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
         except Exception as error:
