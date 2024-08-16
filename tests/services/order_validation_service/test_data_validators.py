@@ -2,12 +2,14 @@ from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
     CaseNameNotAvailableError,
+    ExistingCaseDoesNotExistError,
     InvalidGenePanelsError,
     RepeatedGenePanelsError,
 )
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
     validate_application_not_archived,
+    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
@@ -100,3 +102,22 @@ def test_case_name_not_available(
 
     # THEN the error should concern the case name
     assert isinstance(errors[0], CaseNameNotAvailableError)
+
+
+def test_case_internal_ids_does_not_exist(
+    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+):
+
+    # GIVEN an order with a case marked as existing but which does not exist in the database
+    valid_order.cases[0].internal_id = "Non-existent case"
+
+    # WHEN validating that the internal ids match existing cases
+    errors = validate_case_internal_ids_exist(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the non-existent case
+    assert isinstance(errors[0], ExistingCaseDoesNotExistError)

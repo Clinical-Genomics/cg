@@ -189,3 +189,8 @@ class InvalidVolumeError(CaseSampleError):
 class CaseNameNotAvailableError(CaseError):
     field: str = "name"
     message: str = "Case name already used in a previous order"
+
+
+class ExistingCaseDoesNotExistError(CaseError):
+    field: str = "internal_id"
+    message: str = "The existing case is not found"

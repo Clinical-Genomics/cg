@@ -4,6 +4,7 @@ from cg.services.order_validation_service.models.errors import (
     CaseNameNotAvailableError,
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
+    ExistingCaseDoesNotExistError,
     InvalidGenePanelsError,
     InvalidVolumeError,
     OrderError,
@@ -17,6 +18,7 @@ from cg.services.order_validation_service.validators.data.utils import (
     is_volume_invalid,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.store.models import Case
 from cg.store.store import Store
 
 
@@ -111,11 +113,25 @@ def validate_volume_interval(order: TomteOrder) -> list[InvalidVolumeError]:
     return errors
 
 
-def validate_case_names_available(order: TomteOrder, store: Store, **kwargs) -> list[OrderError]:
+def validate_case_names_available(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[CaseNameNotAvailableError]:
     errors: list[CaseNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer_internal_id)
     for case_index, case in order.enumerated_new_cases:
         if store.get_case_by_name_and_customer(case_name=case.name, customer=customer):
             error = CaseNameNotAvailableError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_case_internal_ids_exist(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[ExistingCaseDoesNotExistError]:
+    errors: list[ExistingCaseDoesNotExistError] = []
+    for case_index, case in order.enumerated_existing_cases:
+        case: Case | None = store.get_case_by_internal_id(case.internal_id)
+        if not case:
+            error = ExistingCaseDoesNotExistError(case_index=case_index)
             errors.append(error)
     return errors
