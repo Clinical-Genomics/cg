@@ -140,5 +140,5 @@ def test_sample_internal_ids_does_not_exist(
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should concern the non-existent case
+    # THEN the error should concern the non-existent sample
     assert isinstance(errors[0], SampleDoesNotExistError)
