@@ -1,11 +1,11 @@
 import logging
 from http import HTTPStatus
 from pathlib import Path
+from typing import List, Tuple, Union
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
-from typing import Dict, Union
 
 from cg.clients.freshdesk.constants import EndPoints
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
@@ -38,21 +38,23 @@ class FreshdeskClient:
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
 
-    def _convert_ticket_to_multipart_data(self, ticket: TicketCreate) -> Dict[str, Union[str, int]]:
+    def _convert_ticket_to_multipart_data(
+        self, ticket: TicketCreate
+    ) -> List[Tuple[str, Union[str, int]]]:
         """Convert the TicketCreate model into a flat dictionary for multipart form data."""
-        data = []
+        multipart_data = []
 
         for field, value in ticket.model_dump(exclude_none=True).items():
             if isinstance(value, list) and field == "tags":
-                for i, tag in enumerate(value):
-                    data.append(("tags[]", tag))
+                multipart_data.extend([("tags[]", tag) for tag in value])
             elif isinstance(value, dict) and field == "custom_fields":
-                for key, val in value.items():
-                    data.append((f"custom_fields[{key}]", val))
+                multipart_data.extend(
+                    [(f"custom_fields[{key}]", val) for key, val in value.items()]
+                )
             else:
-                data.append((field, value))
+                multipart_data.append((field, value))
 
-        return data
+        return multipart_data
 
     @handle_client_errors
     def _get_session(self) -> Session:
