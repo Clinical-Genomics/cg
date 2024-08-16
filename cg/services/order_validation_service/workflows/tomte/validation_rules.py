@@ -1,6 +1,7 @@
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
     validate_application_not_archived,
+    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
@@ -36,9 +37,10 @@ TOMTE_ORDER_RULES: list[callable] = [
 ]
 
 TOMTE_CASE_RULES: list[callable] = [
+    validate_case_internal_ids_exist,
+    validate_case_names_available,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
-    validate_case_names_available,
 ]
 
 TOMTE_CASE_SAMPLE_RULES: list[callable] = [
