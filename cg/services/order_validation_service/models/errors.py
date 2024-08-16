@@ -204,3 +204,8 @@ class StatusMissingError(CaseSampleError):
 class SampleDoesNotExistError(CaseSampleError):
     field: str = "internal_id"
     message: str = "The sample does not exist"
+
+
+class SexMissingError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Sex is required"

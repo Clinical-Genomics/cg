@@ -8,6 +8,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_exist,
+    validate_sex_required_for_new_samples,
     validate_user_belongs_to_customer,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
@@ -60,6 +61,7 @@ TOMTE_CASE_SAMPLE_RULES: list[callable] = [
     validate_pedigree,
     validate_samples_exist,
     validate_sample_names_not_repeated,
+    validate_sex_required_for_new_samples,
     validate_status_required_if_new,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
