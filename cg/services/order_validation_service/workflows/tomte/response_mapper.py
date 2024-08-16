@@ -8,7 +8,7 @@ from cg.services.order_validation_service.models.errors import (
 
 def create_validated_order_response(raw_order: dict, errors: ValidationErrors) -> dict:
     wrap_fields(raw_order)
-    map_errors_to_order(raw_order, errors)
+    map_errors_to_order(order=raw_order, errors=errors)
     return raw_order
 
 
