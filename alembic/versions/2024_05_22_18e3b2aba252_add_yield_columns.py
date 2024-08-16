@@ -18,7 +18,6 @@ depends_on = None
 
 
 def upgrade():
-
     # rename table IlluminaSampleRunMetrics to IlluminaSampleSequencingMetrics
     op.rename_table(
         old_table_name="illumina_sample_run_metrics",
