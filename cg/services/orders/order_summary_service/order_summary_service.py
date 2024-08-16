@@ -1,10 +1,7 @@
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
-from cg.services.orders.order_summary_service.utils import (
-    _get_analysis_map,
-    get_cases_failed_sequencing_qc_count,
-)
+from cg.services.orders.order_summary_service.utils import _get_analysis_map
 from cg.store.models import Order
 from cg.store.store import Store
 
@@ -47,9 +44,10 @@ class OrderSummaryService:
         in_sequencing: int = self.store.get_case_in_sequencing_count(
             order_id=order_id, cases_to_exclude=counted_cases
         )
-        failed_sequencing_qc: int = get_cases_failed_sequencing_qc_count(
-            order=order, cases_to_exclude=counted_cases
+        failed_sequencing_qc: int = self.store.get_case_failed_sequencing_count(
+            order_id=order_id, cases_to_exclude=counted_cases
         )
+
         return OrderSummary(
             order_id=order_id,
             total=len(order.cases),

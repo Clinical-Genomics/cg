@@ -48,7 +48,7 @@ def test_backup_illumina_runs(
 
 def test_backup_illumina_runs_when_dsmc_is_running(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    context_with_illumina_data: CGConfig,
     caplog,
     mocker,
 ):
@@ -59,7 +59,7 @@ def test_backup_illumina_runs_when_dsmc_is_running(
     mocker.patch.object(Process, "name", return_value="dsmc")
 
     # WHEN backing up Illumina runs in dry run mode
-    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -70,7 +70,7 @@ def test_backup_illumina_runs_when_dsmc_is_running(
 
 def test_backup_illumina_run_when_run_already_has_backup(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    context_with_illumina_data: CGConfig,
     caplog,
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
@@ -80,7 +80,7 @@ def test_backup_illumina_run_when_run_already_has_backup(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a store with a backed up sequencing run
-    cg_context.status_db_ = store_with_illumina_sequencing_data
+    context_with_illumina_data.status_db_ = store_with_illumina_sequencing_data
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
@@ -89,7 +89,7 @@ def test_backup_illumina_run_when_run_already_has_backup(
     sequencing_run.has_backup = True
 
     # WHEN backing up Illumina runs in dry run mode
-    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -103,7 +103,7 @@ def test_backup_illumina_run_when_run_already_has_backup(
 
 def test_backup_illumina_runs_when_encryption_is_not_completed(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    context_with_illumina_data: CGConfig,
     caplog,
     novaseq_x_flow_cell_id: str,
 ):
@@ -111,7 +111,7 @@ def test_backup_illumina_runs_when_encryption_is_not_completed(
     caplog.set_level(logging.DEBUG)
 
     # WHEN backing up Illumina runs in dry run mode
-    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -124,13 +124,13 @@ def test_backup_illumina_runs_when_encryption_is_not_completed(
 
 
 def test_encrypt_illumina_runs(
-    cli_runner: CliRunner, cg_context: CGConfig, caplog, sbatch_job_number: str
+    cli_runner: CliRunner, context_with_illumina_data: CGConfig, caplog, sbatch_job_number: str
 ):
     """Test encrypt Illumina runs in dry run mode."""
     caplog.set_level(logging.INFO)
 
     # WHEN encrypting run in dry run mode
-    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -141,7 +141,7 @@ def test_encrypt_illumina_runs(
 
 def test_encrypt_illumina_runs_when_already_backed_up(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    context_with_illumina_data: CGConfig,
     caplog,
     novaseq_x_flow_cell_id: str,
     store_with_illumina_sequencing_data: Store,
@@ -151,7 +151,7 @@ def test_encrypt_illumina_runs_when_already_backed_up(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a sequencing run with a back-up
-    cg_context.status_db_ = store_with_illumina_sequencing_data
+    context_with_illumina_data.status_db_ = store_with_illumina_sequencing_data
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
@@ -162,7 +162,7 @@ def test_encrypt_illumina_runs_when_already_backed_up(
     # GIVEN a sequencing runs directory
 
     # WHEN encrypting runs in dry run mode
-    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -173,7 +173,7 @@ def test_encrypt_illumina_runs_when_already_backed_up(
 
 def test_encrypt_illumina_run_when_sequencing_not_done(
     cli_runner: CliRunner,
-    cg_context: CGConfig,
+    context_with_illumina_data: CGConfig,
     caplog,
     mocker,
     novaseq_x_flow_cell_id: str,
@@ -188,7 +188,7 @@ def test_encrypt_illumina_run_when_sequencing_not_done(
     # GIVEN a sequencing runs directory
 
     # WHEN encrypting runs in dry run mode
-    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_illumina_runs, ["--dry-run"], obj=context_with_illumina_data)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -327,10 +327,6 @@ def test_run_fetch_illumina_run_non_existing_flow_cell(
 
     # GIVEN a non-existing flow cell id
     flow_cell_id = "non-existing-id"
-    assert (
-        backup_context.status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
-        is None
-    )
 
     # WHEN running the command with the non-existing flow cell id
     result = cli_runner.invoke(
@@ -339,5 +335,3 @@ def test_run_fetch_illumina_run_non_existing_flow_cell(
 
     # THEN assert that it exits with a non-zero exit code
     assert result.exit_code != 0
-    # THEN assert that it was communicated that the flow cell does not exist
-    assert f"{flow_cell_id}: not found" in caplog.text

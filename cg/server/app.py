@@ -8,6 +8,12 @@ from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, api, ext, invoices
 from cg.server.app_config import app_config
+from cg.server.endpoints.flow_cells import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.orders import ORDERS_BLUEPRINT
+from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
+from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.pools import POOLS_BLUEPRINT
+from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
@@ -20,6 +26,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
     Order,
@@ -28,7 +35,6 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
-    IlluminaSampleSequencingMetrics,
 )
 
 
@@ -86,9 +92,21 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(api.BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
+    app.register_blueprint(APPLICATIONS_BLUEPRINT)
+    app.register_blueprint(CASES_BLUEPRINT)
+    app.register_blueprint(ORDERS_BLUEPRINT)
+    app.register_blueprint(SAMPLES_BLUEPRINT)
+    app.register_blueprint(POOLS_BLUEPRINT)
+    app.register_blueprint(FLOW_CELLS_BLUEPRINT)
     _register_admin_views()
 
-    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
+    ext.csrf.exempt(api.BLUEPRINT)
+    ext.csrf.exempt(SAMPLES_BLUEPRINT)
+    ext.csrf.exempt(CASES_BLUEPRINT)
+    ext.csrf.exempt(APPLICATIONS_BLUEPRINT)
+    ext.csrf.exempt(ORDERS_BLUEPRINT)
+    ext.csrf.exempt(POOLS_BLUEPRINT)
+    ext.csrf.exempt(FLOW_CELLS_BLUEPRINT)
 
     @app.route("/")
     def index():
