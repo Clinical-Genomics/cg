@@ -182,7 +182,7 @@ class GisaidAPI:
             bundle_name=case_id, file=gisaid_fasta_file, tags=[GisaidTag.FASTA, case_id]
         )
 
-    def create_and_include_gisaid_samples_to_hk(
+    def create_and_include_gisaid_samples_csv_to_hk(
         self, gisaid_samples: list[GisaidSample], case_id: str
     ) -> None:
         """Create and include CSV file for GISAID samples to Housekeeper."""
@@ -247,7 +247,9 @@ class GisaidAPI:
         gisaid_samples: list[GisaidSample] = self.get_gisaid_samples(
             case_id=case_id, samples=samples
         )
-        self.create_and_include_gisaid_samples_to_hk(gisaid_samples=gisaid_samples, case_id=case_id)
+        self.create_and_include_gisaid_samples_csv_to_hk(
+            gisaid_samples=gisaid_samples, case_id=case_id
+        )
         self.create_and_include_gisaid_fasta_to_hk(gisaid_samples=gisaid_samples, case_id=case_id)
         self.create_and_include_gisaid_log_file_to_hk(case_id)
 
@@ -352,16 +354,21 @@ class GisaidAPI:
     def update_complementary_file_with_gisaid_accessions(self, case_id: str) -> None:
         """Update complementary file with GISAID accession numbers."""
         complementary_report: File | None = self.get_complementary_file_from_hk(case_id=case_id)
-        accession: dict = self.get_gisaid_accession_numbers(case_id=case_id)
+        accession: dict[str, str] = self.get_gisaid_accession_numbers(case_id=case_id)
         sars_cov_complementary_reports: list[GisaidComplementaryReport] = (
             self.parse_and_get_sars_cov_complementary_reports(Path(complementary_report.full_path))
         )
         self.add_gisaid_accession_to_complementary_reports(
             gisaid_accession=accession, reports=sars_cov_complementary_reports
         )
-        reports: list[dict] = [report.model_dump() for report in sars_cov_complementary_reports]
+        reports: list[dict] = [
+            report.model_dump(by_alias=True) for report in sars_cov_complementary_reports
+        ]
+        field_names: list[str] = sorted(
+            sars_cov_complementary_reports[0].model_dump(by_alias=True).keys()
+        )
         write_csv_from_dict(
-            content=reports, fieldnames=HEADERS, file_path=Path(complementary_report.full_path)
+            content=reports, fieldnames=field_names, file_path=Path(complementary_report.full_path)
         )
 
     def upload_to_gisaid(self, case_id: str) -> None:

@@ -45,26 +45,26 @@ class GisaidSample(BaseModel):
     model_config = ConfigDict(coerce_numbers_to_str=True)
     case_id: str
     cg_lims_id: str
-    submitter: str
-    region: str
-    region_code: str
-    fn: str
+    covv_authors: str | None = " ,".join(AUTHORS)
     covv_collection_date: str
-    covv_subm_sample_id: str
-    covv_virus_name: str | None = None
-    covv_orig_lab: str | None = None
-    covv_type: str | None = "betacoronavirus"
-    covv_passage: str | None = "Original"
-    covv_location: str | None = None
-    covv_host: str | None = "Human"
     covv_gender: str | None = "unknown"
+    covv_host: str | None = "Human"
+    covv_location: str | None = None
+    covv_orig_lab: str | None = None
+    covv_orig_lab_addr: str | None = None
+    covv_passage: str | None = "Original"
     covv_patient_age: str | None = "unknown"
     covv_patient_status: str | None = "unknown"
     covv_seq_technology: str | None = "Illumina NovaSeq"
-    covv_orig_lab_addr: str | None = None
     covv_subm_lab: str | None = "Karolinska University Hospital"
     covv_subm_lab_addr: str | None = "171 76 Stockholm, Sweden"
-    covv_authors: str | None = " ,".join(AUTHORS)
+    covv_subm_sample_id: str
+    covv_type: str | None = "betacoronavirus"
+    covv_virus_name: str | None = None
+    fn: str
+    region: str
+    region_code: str
+    submitter: str
 
     @model_validator(mode="before")
     @classmethod
