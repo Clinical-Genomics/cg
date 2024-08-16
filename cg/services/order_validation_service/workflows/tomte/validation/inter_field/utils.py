@@ -100,7 +100,8 @@ def get_father_case_errors(case: TomteCase, case_index: int) -> list[FatherNotIn
         father: TomteSample | None = case.get_sample(child.father)
         if not father:
             error: FatherNotInCaseError = create_father_case_error(
-                case_index=case_index, sample_index=child_index
+                case_index=case_index,
+                sample_index=child_index,
             )
             errors.append(error)
     return errors

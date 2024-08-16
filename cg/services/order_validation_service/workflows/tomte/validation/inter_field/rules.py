@@ -88,9 +88,10 @@ def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
 
 def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
-            case=case, case_index=index
+            case=case,
+            case_index=index,
         )
         errors.extend(case_errors)
     return errors
