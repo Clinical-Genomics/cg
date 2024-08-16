@@ -113,7 +113,8 @@ def get_mother_sex_errors(case: TomteCase, case_index: int) -> list[InvalidMothe
     for child, child_index in children:
         if is_mother_sex_invalid(child=child, case=case):
             error: InvalidMotherSexError = create_mother_sex_error(
-                case_index=case_index, sample_index=child_index
+                case_index=case_index,
+                sample_index=child_index,
             )
             errors.append(error)
     return errors
