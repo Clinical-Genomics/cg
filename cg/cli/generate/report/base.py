@@ -22,7 +22,7 @@ from cg.cli.generate.report.utils import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError
-from cg.meta.report.report_api import ReportAPI
+from cg.meta.delivery_report.report_api import ReportAPI
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)

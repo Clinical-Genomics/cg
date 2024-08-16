@@ -13,7 +13,7 @@ from cg.constants.constants import AnalysisType
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType
-from cg.models.report.validators import (
+from cg.models.delivery_report.validators import (
     get_analysis_type_as_string,
     get_boolean_as_string,
     get_date_as_string,

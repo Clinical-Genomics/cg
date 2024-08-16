@@ -1,9 +1,9 @@
 import copy
 
 from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
-from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
-from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
+from cg.models.delivery_report.metadata import BalsamicTargetedSampleMetadataModel
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

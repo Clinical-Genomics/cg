@@ -7,10 +7,10 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.io.controller import ReadFile
-from cg.meta.report.balsamic import BalsamicReportAPI
-from cg.meta.report.mip_dna import MipDNAReportAPI
-from cg.meta.report.rnafusion import RnafusionReportAPI
-from cg.meta.report.tomte import TomteReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
+from cg.meta.delivery_report.tomte import TomteReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store

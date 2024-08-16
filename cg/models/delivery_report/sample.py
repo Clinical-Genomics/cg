@@ -2,7 +2,7 @@ from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
 from cg.constants import NA_FIELD
-from cg.models.report.metadata import (
+from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
     MipDNASampleMetadataModel,
@@ -11,7 +11,7 @@ from cg.models.report.metadata import (
     TaxprofilerSampleMetadataModel,
     TomteSampleMetadataModel,
 )
-from cg.models.report.validators import (
+from cg.models.delivery_report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,

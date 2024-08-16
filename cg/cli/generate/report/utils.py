@@ -10,15 +10,15 @@ from cg.constants import (
     REPORT_SUPPORTED_WORKFLOW,
     Workflow,
 )
-from cg.meta.report.balsamic import BalsamicReportAPI
-from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
-from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
-from cg.meta.report.mip_dna import MipDNAReportAPI
-from cg.meta.report.raredisease import RarediseaseReportAPI
-from cg.meta.report.report_api import ReportAPI
-from cg.meta.report.rnafusion import RnafusionReportAPI
-from cg.meta.report.taxprofiler import TaxprofilerReportAPI
-from cg.meta.report.tomte import TomteReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.balsamic_qc import BalsamicQCReportAPI
+from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.raredisease import RarediseaseReportAPI
+from cg.meta.delivery_report.report_api import ReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
+from cg.meta.delivery_report.taxprofiler import TaxprofilerReportAPI
+from cg.meta.delivery_report.tomte import TomteReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI

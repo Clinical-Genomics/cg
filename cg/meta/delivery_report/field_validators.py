@@ -2,7 +2,7 @@
 
 from cg.constants import NA_FIELD
 from cg.constants.constants import SCALE_TO_MILLION_READ_PAIRS
-from cg.models.report.report import ReportModel
+from cg.models.delivery_report.report import ReportModel
 
 
 def get_mapped_reads_fraction(mapped_reads: float, total_reads: float) -> float | None:

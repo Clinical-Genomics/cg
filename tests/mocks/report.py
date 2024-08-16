@@ -9,7 +9,7 @@ from housekeeper.store.models import Version
 from cg.apps.coverage import ChanjoAPI
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.scout import ScoutUploadKey
-from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig

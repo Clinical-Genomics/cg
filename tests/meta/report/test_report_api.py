@@ -9,16 +9,16 @@ from _pytest.logging import LogCaptureFixture
 
 from cg.constants import REPORT_SEX, Workflow
 from cg.exc import DeliveryReportError
-from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.report import (
+from cg.models.delivery_report.report import (
     CaseModel,
     CustomerModel,
     DataAnalysisModel,
     ReportModel,
 )
-from cg.models.report.sample import (
+from cg.models.delivery_report.sample import (
     ApplicationModel,
     MethodsModel,
     SampleModel,

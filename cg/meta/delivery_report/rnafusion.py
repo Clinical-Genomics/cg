@@ -14,17 +14,17 @@ from cg.constants import (
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
 )
 from cg.constants.scout import ScoutUploadKey
-from cg.meta.report.field_validators import (
+from cg.meta.delivery_report.field_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
 )
-from cg.meta.report.report_api import ReportAPI
+from cg.meta.delivery_report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
-from cg.models.report.sample import SampleModel
+from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Case, Sample
 

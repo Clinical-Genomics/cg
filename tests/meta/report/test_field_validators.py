@@ -1,7 +1,7 @@
 """Tests report data validation"""
 
 from cg.constants.report import NA_FIELD
-from cg.meta.report.field_validators import (
+from cg.meta.delivery_report.field_validators import (
     get_empty_report_data,
     get_million_read_pairs,
     get_missing_report_data,

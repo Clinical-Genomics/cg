@@ -19,8 +19,8 @@ from cg.constants import (
 )
 from cg.constants.constants import AnalysisType
 from cg.constants.scout import ScoutUploadKey
-from cg.meta.report.field_validators import get_million_read_pairs
-from cg.meta.report.report_api import ReportAPI
+from cg.meta.delivery_report.field_validators import get_million_read_pairs
+from cg.meta.delivery_report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import (
@@ -29,12 +29,12 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import (
+from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
-from cg.models.report.sample import SampleModel
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
 LOG = logging.getLogger(__name__)

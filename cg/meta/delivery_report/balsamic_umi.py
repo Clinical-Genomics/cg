@@ -1,6 +1,6 @@
 import logging
 
-from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicReportAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.models.cg_config import CGConfig
 

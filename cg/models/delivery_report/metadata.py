@@ -2,7 +2,7 @@ from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
 
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
-from cg.models.report.validators import (
+from cg.models.delivery_report.validators import (
     get_float_as_percentage,
     get_initial_qc_as_string,
     get_number_as_string,

@@ -16,22 +16,22 @@ from cg.constants.scout import ScoutUploadKey
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import (
+from cg.meta.delivery_report.field_validators import (
     get_empty_report_data,
     get_missing_report_data,
 )
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import SampleMetadataModel
-from cg.models.report.report import (
+from cg.models.delivery_report.metadata import SampleMetadataModel
+from cg.models.delivery_report.report import (
     CaseModel,
     CustomerModel,
     DataAnalysisModel,
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import (
+from cg.models.delivery_report.sample import (
     ApplicationModel,
     MethodsModel,
     SampleModel,
@@ -127,7 +127,7 @@ class ReportAPI(MetaAPI):
     def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template."""
         env = Environment(
-            loader=PackageLoader("cg", "meta/report/templates"),
+            loader=PackageLoader("cg", "meta/delivery_report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
         env.globals["get_content_from_file"] = ReadFile.get_content_from_file

@@ -1,8 +1,8 @@
 """Test Tomte delivery report API."""
 
-from cg.meta.report.tomte import TomteReportAPI
+from cg.meta.delivery_report.tomte import TomteReportAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.report.metadata import TomteSampleMetadataModel
+from cg.models.delivery_report.metadata import TomteSampleMetadataModel
 from cg.store.models import Case, Sample
 
 

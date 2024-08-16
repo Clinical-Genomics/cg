@@ -4,9 +4,9 @@ import pytest
 from pytest_mock import MockFixture
 
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
-from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.report.metadata import RnafusionSampleMetadataModel
+from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.store.models import Case, Sample
 from tests.mocks.limsmock import MockLimsAPI
 

@@ -9,7 +9,7 @@ from cg.constants.subject import Sex
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
-    files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
+    files("cg"), "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]

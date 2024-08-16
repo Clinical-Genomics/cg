@@ -11,14 +11,14 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_TOMTE_FIELDS,
 )
-from cg.meta.report.field_validators import get_million_read_pairs
-from cg.meta.report.report_api import ReportAPI
+from cg.meta.delivery_report.field_validators import get_million_read_pairs
+from cg.meta.delivery_report.report_api import ReportAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import TomteSampleMetadataModel
-from cg.models.report.report import CaseModel, ReportRequiredFields
-from cg.models.report.sample import SampleModel
+from cg.models.delivery_report.metadata import TomteSampleMetadataModel
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields
+from cg.models.delivery_report.sample import SampleModel
 from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
 

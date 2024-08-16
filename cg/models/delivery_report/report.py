@@ -4,8 +4,8 @@ from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
 
 from cg.constants import NA_FIELD, REPORT_SUPPORTED_WORKFLOW
-from cg.models.report.sample import ApplicationModel, SampleModel
-from cg.models.report.validators import (
+from cg.models.delivery_report.sample import ApplicationModel, SampleModel
+from cg.models.delivery_report.validators import (
     get_analysis_type_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,

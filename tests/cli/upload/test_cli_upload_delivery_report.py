@@ -5,7 +5,7 @@ from click.testing import CliRunner, Result
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
 
 

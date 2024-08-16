@@ -12,7 +12,7 @@ from cg.cli.generate.report.utils import (
     get_report_case,
 )
 from cg.constants import Workflow
-from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
+from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
 
