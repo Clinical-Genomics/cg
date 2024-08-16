@@ -25,6 +25,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_mothers_in_same_case_as_children,
     validate_pedigree,
     validate_sample_names_not_repeated,
+    validate_status_required_if_new,
     validate_subject_ids_different_from_case_names,
     validate_wells_contain_at_most_one_sample,
 )
@@ -57,6 +58,7 @@ TOMTE_CASE_SAMPLE_RULES: list[callable] = [
     validate_mothers_in_same_case_as_children,
     validate_pedigree,
     validate_sample_names_not_repeated,
+    validate_status_required_if_new,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_wells_contain_at_most_one_sample,

@@ -8,6 +8,7 @@ from cg.services.order_validation_service.models.errors import (
     PedigreeError,
     RepeatedCaseNameError,
     RepeatedSampleNameError,
+    StatusMissingError,
     SubjectIdSameAsCaseNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
@@ -15,7 +16,6 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
-    is_sample_on_plate,
     get_father_case_errors,
     get_father_sex_errors,
     get_mother_case_errors,
@@ -23,6 +23,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_occupied_well_errors,
     get_repeated_case_name_errors,
     get_repeated_sample_name_errors,
+    is_sample_on_plate,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
 )
@@ -146,4 +147,14 @@ def validate_concentration_interval_if_skip_rc(
             case=case, case_index=index, store=store
         )
         errors.extend(case_errors)
+    return errors
+
+
+def validate_status_required_if_new(order: TomteOrder) -> list[StatusMissingError]:
+    errors: list[StatusMissingError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if not sample.status:
+                error = StatusMissingError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
     return errors

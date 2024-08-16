@@ -194,3 +194,8 @@ class CaseNameNotAvailableError(CaseError):
 class ExistingCaseDoesNotExistError(CaseError):
     field: str = "internal_id"
     message: str = "The existing case is not found"
+
+
+class StatusMissingError(CaseSampleError):
+    field: str = "status"
+    message: str = "Status is required"

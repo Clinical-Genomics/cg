@@ -9,6 +9,7 @@ from cg.services.order_validation_service.models.errors import (
     RepeatedCaseNameError,
     RepeatedSampleNameError,
     SampleIsOwnFatherError,
+    StatusMissingError,
     SubjectIdSameAsSampleNameError,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
@@ -27,6 +28,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_fathers_in_same_case_as_children,
     validate_pedigree,
     validate_sample_names_not_repeated,
+    validate_status_required_if_new,
     validate_wells_contain_at_most_one_sample,
 )
 from cg.store.models import Application
@@ -236,3 +238,18 @@ def test_concentration_not_within_interval_if_skip_rc(
 
     # THEN the error should concern the application interval
     assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
+
+
+def test_missing_status_on_new_sample(valid_order: TomteOrder):
+
+    # GIVEN an order with a new sample with 'status' not set
+    valid_order.cases[0].samples[0].status = None
+
+    # WHEN validating that all new samples have a provided status
+    errors = validate_status_required_if_new(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing status
+    assert isinstance(errors[0], StatusMissingError)
