@@ -203,19 +203,21 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases for which the analysis is complete on Traiblazer and a QC report has been generated."""
+        completed_not_stored_cases: list[Case] = self.get_cases_with_completed_not_stored_analysis()
         return [
             case
-            for case in self.get_cases_with_completed_not_stored_analysis()
+            for case in completed_not_stored_cases
             if self.get_case_qc_report_path(case_id=case.internal_id).exists()
         ]
 
     def get_cases_with_completed_not_stored_analysis(self) -> list[Case]:
         """Return cases with a completed analysis that are not yet stored."""
-        return [
+        completed_not_stored_cases: list[Case] = [
             case
             for case in self.status_db.get_running_cases_in_workflow(self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
         ]
+        return completed_not_stored_cases
 
     def get_metadata_for_nanopore_sample(self, sample: Sample) -> list[dict]:
         return [
@@ -314,7 +316,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.trailblazer_api.add_comment(case_id=case.internal_id, comment=comment)
 
     def fail_analysis(self, case: Case) -> None:
-        """Fail analysis on TB and set case status to hold in StatusDB."""
+        """Fail analysis on Trailblazer and set case status to hold in StatusDB."""
         self.trailblazer_api.set_analysis_status(
             case_id=case.internal_id, status=AnalysisStatus.FAILED
         )

@@ -3,7 +3,7 @@ from pydantic import BaseModel, BeforeValidator, Field, ValidationError, ConfigD
 from cg.store.models import Sample
 
 
-# Validators
+# Validator
 def str_to_bool(value: str) -> bool:
     if value == "TRUE":
         return True
@@ -20,7 +20,7 @@ class SampleResults(BaseModel):
     ticket: int = Field(alias="Ticket")
     pct_n_bases: float = Field(alias="%N_bases")
     pct_10x_coverage: float = Field(alias="%10X_coverage")
-    qc_pass: Annotated[bool, BeforeValidator(str_to_bool)] = Field(alias="QC_pass")
+    passes_qc: Annotated[bool, BeforeValidator(str_to_bool)] = Field(alias="QC_pass")
     lineage: str = Field(alias="Lineage")
     pangolin_data_version: str = Field(alias="Pangolin_data_version")
     voc: str = Field(alias="VOC")
@@ -35,7 +35,7 @@ class MutantPoolSamples(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class QualityMetrics(BaseModel):
+class SampleCollectionAndResults(BaseModel):
     results: dict[str, SampleResults]
     pool: MutantPoolSamples
 

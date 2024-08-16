@@ -9,7 +9,7 @@ from cg.meta.workflow.mutant.quality_controller.models import SampleResults
 from cg.store.models import Case, Sample
 
 
-def test__get_samples_results(
+def test_get_samples_results(
     mutant_case_qc_pass: Case,
     mutant_results_list_qc_pass: list[SampleResults],
     sample_qc_pass: Sample,
@@ -26,7 +26,7 @@ def test__get_samples_results(
     assert isinstance(samples_results[sample_qc_pass.internal_id], SampleResults)
 
 
-def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
+def test_get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
     # GIVEN a case
 
     # WHEN creating a sample_name_to_id_mapping dict
@@ -43,7 +43,7 @@ def test__get_sample_name_to_id_mapping(mutant_case_qc_pass: Case):
     )
 
 
-def test__get_validated_results_list(mutant_results_file_path_case_qc_pass: Path):
+def test_get_validated_results_list(mutant_results_file_path_case_qc_pass: Path):
     # GIVEN a valid raw_results: list[dict[str, Any]] objects
 
     # WHEN parsing the file
@@ -63,4 +63,4 @@ def test_parse_samples_results(
     )
 
     # THEN no error is thrown and sample_qc_pass passes QC
-    assert samples_results["sample_qc_pass"].qc_pass is True
+    assert samples_results["sample_qc_pass"].passes_qc is True

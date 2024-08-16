@@ -7,7 +7,7 @@ from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import (
     parse_samples_results,
 )
 from cg.meta.workflow.mutant.quality_controller.models import (
-    QualityMetrics,
+    SampleCollectionAndResults,
     SampleResults,
     SamplesQualityResults,
 )
@@ -249,12 +249,12 @@ def mutant_results_list_qc_pass(mutant_results_file_path_case_qc_pass: Path):
 
 
 @pytest.fixture
-def mutant_quality_metrics_qc_pass(
+def mutant_sample_collection_and_results_case_qc_pass(
     mutant_quality_controller: MutantQualityController,
     mutant_results_file_path_case_qc_pass: Path,
     mutant_case_qc_pass: Case,
-) -> QualityMetrics:
-    return mutant_quality_controller._get_quality_metrics(
+) -> SampleCollectionAndResults:
+    return mutant_quality_controller._get_sample_collection_and_results(
         case_results_file_path=mutant_results_file_path_case_qc_pass,
         case=mutant_case_qc_pass,
     )
@@ -291,10 +291,10 @@ def mutant_sample_results_external_negative_control_qc_pass(
 @pytest.fixture
 def samples_quality_results_case_qc_pass(
     mutant_quality_controller: MutantQualityController,
-    mutant_quality_metrics_qc_pass: QualityMetrics,
+    mutant_sample_collection_and_results_case_qc_pass: SampleCollectionAndResults,
 ) -> SamplesQualityResults:
     return mutant_quality_controller._get_samples_quality_results(
-        quality_metrics=mutant_quality_metrics_qc_pass
+        sample_collection_and_results=mutant_sample_collection_and_results_case_qc_pass
     )
 
 
