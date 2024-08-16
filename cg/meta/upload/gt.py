@@ -156,13 +156,9 @@ class UploadGenotypesAPI(object):
     def get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
-        return str(
-            next(
-                metric.value
-                for metric in qc_metrics
-                if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id
-            )
-        )
+for metric in qc_metrics:
+        if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
+            return str(metric.value)
 
     def get_parsed_qc_metrics_data_raredisease(self, qc_metrics: Path) -> list[MetricsBase]:
         """Parse and return a QC metrics file."""
