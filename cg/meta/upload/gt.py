@@ -44,12 +44,13 @@ class UploadGenotypesAPI(object):
             ]
         }
         """
-
+        LOG.info(f"workflow: {analysis.workflow}")
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(bundle=case_id)
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
+        LOG.info(f"workflow: {analysis.workflow}")
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=analysis.case)
         elif analysis.workflow == Workflow.MIP_DNA:

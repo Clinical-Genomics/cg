@@ -72,7 +72,7 @@ def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables_rar
 
 
 def test_get_bcf_file_mip(
-    upload_genotypes_ap_mip: UploadGenotypesAPI,
+    upload_genotypes_api_mip: UploadGenotypesAPI,
     case_id: str,
     timestamp: datetime,
 ):
@@ -81,7 +81,7 @@ def test_get_bcf_file_mip(
     hk_version = upload_genotypes_api_mip.hk.version(case_id, timestamp)
 
     # WHEN fetching the gbcf file with the api
-    gbcf = upload_genotypes_ap_mip.get_bcf_file(hk_version_obj=hk_version)
+    gbcf = upload_genotypes_api_mip.get_bcf_file(hk_version_obj=hk_version)
     # THEN assert that the file has the correct tag
     assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
 

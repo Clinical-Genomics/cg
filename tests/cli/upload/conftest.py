@@ -36,6 +36,7 @@ from cg.store.store import Store
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
+from tests.mocks.report import MockRarediseaseReportAPI
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
@@ -354,17 +355,17 @@ def upload_context_mip(cg_context: CGConfig) -> CGConfig:
     return cg_context
 
 @pytest.fixture
-def upload_context_raredisease(cg_context: CGConfig) -> CGConfig:
-    analysis_api = RarediseaseAnalysisAPI(config=cg_context)
-    cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
-    cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
-        hk_api=cg_context.housekeeper_api,
-        scout_api=cg_context.scout_api,
-        madeline_api=cg_context.madeline_api,
+def upload_context_raredisease(raredisease_context: CGConfig) -> CGConfig:
+    analysis_api = RarediseaseAnalysisAPI(config=raredisease_context)
+    raredisease_context.meta_apis["analysis_api"] = analysis_api
+    raredisease_context.meta_apis["report_api"] = MockRarediseaseReportAPI(raredisease_context, analysis_api)
+    raredisease_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=raredisease_context.housekeeper_api,
+        scout_api=raredisease_context.scout_api,
+        madeline_api=raredisease_context.madeline_api,
         analysis_api=analysis_api,
-        lims_api=cg_context.lims_api,
-        status_db=cg_context.status_db,
+        lims_api=raredisease_context.lims_api,
+        status_db=raredisease_context.status_db,
     )
 
-    return cg_context
+    return raredisease_context

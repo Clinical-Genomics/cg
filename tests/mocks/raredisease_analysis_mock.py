@@ -2,6 +2,9 @@ from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.analysis import NextflowAnalysis
+
 from cg.models.deliverables.metric_deliverables import MetricsBase
 
 
@@ -15,7 +18,7 @@ def create_raredisease_metrics_deliverables():
 
 
 
-class MockRarediseaseAnalysis(AnalysisAPI):
+class MockNextflowAnalysis(AnalysisAPI):
     """Mock MIP analysis object."""
 
     @staticmethod
@@ -23,8 +26,7 @@ class MockRarediseaseAnalysis(AnalysisAPI):
         """Mock get_latest_metadata."""
         # Returns: dict: parsed data
         # Define output dict
-        metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
+        metrics: MetricsBase = create_raredisease_metrics_deliverables()
         return NextflowAnalysis(
-            case=family_id or "yellowhog",
             sample_metrics=metrics.sample_id_metrics,
         )

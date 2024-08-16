@@ -10,9 +10,10 @@ from cg.apps.coverage import ChanjoAPI
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.scout import ScoutUploadKey
 from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.report.raredisease import RarediseaseReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.analysis import NextflowAnalysis
 from cg.models.deliverables.metric_deliverables import MetricsBase
@@ -52,8 +53,9 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
         """Return data analysis type carried out."""
         return AnalysisType.WHOLE_GENOME_SEQUENCING
 
-class MockRarediseaseAnalysisAPI(RarediseaseAnalysisAPI):
-    """Mock RarediseaseAnalysisAPI for CLI tests."""
+
+class MockNextflowAnalysisAPI(NfAnalysisAPI):
+    """Mock NextflowAnalysisAPI for CLI tests."""
 
     def __init__(self, config: CGConfig):
         super().__init__(config)
@@ -64,14 +66,9 @@ class MockRarediseaseAnalysisAPI(RarediseaseAnalysisAPI):
 
     @staticmethod
     def get_latest_metadata(family_id: str = None, **kwargs) -> NextflowAnalysis:
-        metrics: RarediseaseMetricsDeliverables = create_raredisease_metrics_deliverables()
+        metrics: MetricsBase = create_raredisease_metrics_deliverables()
         return NextflowAnalysis(
-            case=family_id or "yellowhog",
-            genome_build=GenomeVersion.HG19.value,
-            sample_id_metrics=metrics.sample_id_metrics,
-            raredisease_version="v4.0.20",
-            rank_model_version="1.18",
-            sample_ids=["2018-20203", "2018-20204"],
+            sample_metrics=metrics.sample_id_metrics,
         )
 
     def get_data_analysis_type(self, case: Case) -> str | None:
@@ -79,7 +76,6 @@ class MockRarediseaseAnalysisAPI(RarediseaseAnalysisAPI):
         return AnalysisType.WHOLE_GENOME_SEQUENCING
 
 
-
 class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
     """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
 
@@ -110,7 +106,7 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         return f"path/to/{scout_key}"
 
 
-class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
+class MockHousekeeperRarediseaseReportAPI(RarediseaseReportAPI):
     """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
@@ -138,7 +134,6 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
             f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_key={scout_key}"
         )
         return f"path/to/{scout_key}"
-
 
 
 class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
@@ -165,7 +160,7 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
         return directory
 
 
-class MockRarediseaseReportAPI(MockHousekeeperMipDNAReportAPI):
+class MockRarediseaseReportAPI(MockHousekeeperRarediseaseReportAPI):
     """Mock ReportAPI for CLI tests."""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
@@ -187,7 +182,6 @@ class MockRarediseaseReportAPI(MockHousekeeperMipDNAReportAPI):
             f"analysis_date={analysis_date}, force={force}"
         )
         return directory
-
 
 
 class MockChanjo(ChanjoAPI):
