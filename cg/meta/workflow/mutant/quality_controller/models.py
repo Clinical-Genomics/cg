@@ -13,7 +13,7 @@ def str_to_bool(value: str) -> bool:
 
 
 # Models
-class SampleResults(BaseModel):
+class ParsedSampleResults(BaseModel):
     sample_name: str = Field(alias="Sample")
     selection: str = Field(alias="Selection")
     region_code: str = Field(alias="Region Code")
@@ -35,9 +35,9 @@ class MutantPoolSamples(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class SampleCollectionAndResults(BaseModel):
-    results: dict[str, SampleResults]
+class SamplePoolAndResults(BaseModel):
     pool: MutantPoolSamples
+    results: dict[str, ParsedSampleResults]
 
 
 class SampleQualityResults(BaseModel):
@@ -70,10 +70,10 @@ class CaseQualityResult(BaseModel):
     passes_qc: bool
     internal_negative_control_passes_qc: bool
     external_negative_control_passes_qc: bool
-    samples_pass_qc: bool
+    fraction_samples_passes_qc: bool
 
 
-class QualityResult(BaseModel):
+class MutantQualityResult(BaseModel):
     case_quality_result: CaseQualityResult
     samples_quality_results: SamplesQualityResults
     summary: str
@@ -83,7 +83,7 @@ class QualityResult(BaseModel):
         return self.case_quality_result.passes_qc
 
 
-class Report(BaseModel):
+class MutantReport(BaseModel):
     summary: str
     case: dict[str, Any]
     samples: dict[str, Any]

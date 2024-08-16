@@ -17,6 +17,7 @@ from cg.constants.lims import (
     LimsArtifactTypes,
     LimsProcess,
 )
+from cg.constants.priority import Priority
 from cg.exc import LimsDataError
 
 from .order import OrderHandler

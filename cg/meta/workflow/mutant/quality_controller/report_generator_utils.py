@@ -2,7 +2,7 @@ from pathlib import Path
 from cg.io.json import write_json
 from cg.meta.workflow.mutant.quality_controller.models import (
     CaseQualityResult,
-    Report,
+    MutantReport,
     SamplesQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.result_logger_utils import (
@@ -19,7 +19,7 @@ def write_report(
         case_quality_result=case_quality_result,
         samples_quality_results=samples_quality_results,
     )
-    report = Report(
+    report = MutantReport(
         summary=summary,
         case=case_quality_result.model_dump(),
         samples=samples_quality_results.model_dump(),

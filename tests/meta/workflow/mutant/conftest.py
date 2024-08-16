@@ -7,8 +7,8 @@ from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import (
     parse_samples_results,
 )
 from cg.meta.workflow.mutant.quality_controller.models import (
-    SampleCollectionAndResults,
-    SampleResults,
+    SamplePoolAndResults,
+    ParsedSampleResults,
     SamplesQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
@@ -249,12 +249,12 @@ def mutant_results_list_qc_pass(mutant_results_file_path_case_qc_pass: Path):
 
 
 @pytest.fixture
-def mutant_sample_collection_and_results_case_qc_pass(
+def mutant_sample_pool_and_results_case_qc_pass(
     mutant_quality_controller: MutantQualityController,
     mutant_results_file_path_case_qc_pass: Path,
     mutant_case_qc_pass: Case,
-) -> SampleCollectionAndResults:
-    return mutant_quality_controller._get_sample_collection_and_results(
+) -> SamplePoolAndResults:
+    return mutant_quality_controller._get_sample_pool_and_results(
         case_results_file_path=mutant_results_file_path_case_qc_pass,
         case=mutant_case_qc_pass,
     )
@@ -263,7 +263,7 @@ def mutant_sample_collection_and_results_case_qc_pass(
 @pytest.fixture
 def mutant_samples_results_case_qc_pass(
     mutant_case_qc_pass: Case, mutant_results_file_path_case_qc_pass: Path
-) -> dict[str, SampleResults]:
+) -> dict[str, ParsedSampleResults]:
     return parse_samples_results(
         case=mutant_case_qc_pass, results_file_path=mutant_results_file_path_case_qc_pass
     )
@@ -271,8 +271,8 @@ def mutant_samples_results_case_qc_pass(
 
 @pytest.fixture
 def mutant_sample_results_sample_qc_pass(
-    sample_qc_pass: Sample, mutant_samples_results_case_qc_pass: dict[str, SampleResults]
-) -> SampleResults:
+    sample_qc_pass: Sample, mutant_samples_results_case_qc_pass: dict[str, ParsedSampleResults]
+) -> ParsedSampleResults:
     sample_results = mutant_samples_results_case_qc_pass[sample_qc_pass.internal_id]
     return sample_results
 
@@ -280,8 +280,8 @@ def mutant_sample_results_sample_qc_pass(
 @pytest.fixture
 def mutant_sample_results_external_negative_control_qc_pass(
     external_negative_control_qc_pass: Sample,
-    mutant_samples_results_case_qc_pass: dict[str, SampleResults],
-) -> SampleResults:
+    mutant_samples_results_case_qc_pass: dict[str, ParsedSampleResults],
+) -> ParsedSampleResults:
     sample_results = mutant_samples_results_case_qc_pass[
         external_negative_control_qc_pass.internal_id
     ]
@@ -291,10 +291,10 @@ def mutant_sample_results_external_negative_control_qc_pass(
 @pytest.fixture
 def samples_quality_results_case_qc_pass(
     mutant_quality_controller: MutantQualityController,
-    mutant_sample_collection_and_results_case_qc_pass: SampleCollectionAndResults,
+    mutant_sample_pool_and_results_case_qc_pass: SamplePoolAndResults,
 ) -> SamplesQualityResults:
     return mutant_quality_controller._get_samples_quality_results(
-        sample_collection_and_results=mutant_sample_collection_and_results_case_qc_pass
+        sample_pool_and_results=mutant_sample_pool_and_results_case_qc_pass
     )
 
 

@@ -4,7 +4,7 @@
         "passes_qc": false,
         "internal_negative_control_passes_qc": false,
         "external_negative_control_passes_qc": false,
-        "samples_pass_qc": true
+        "fraction_samples_passes_qc": true
     },
     "samples": {
         "internal_negative_control": {

@@ -6,11 +6,11 @@ from cg.exc import CgError
 from cg.meta.workflow.mutant.quality_controller.metrics_parser_utils import parse_samples_results
 from cg.meta.workflow.mutant.quality_controller.models import (
     MutantPoolSamples,
-    SampleCollectionAndResults,
+    SamplePoolAndResults,
     SampleQualityResults,
     CaseQualityResult,
-    QualityResult,
-    SampleResults,
+    MutantQualityResult,
+    ParsedSampleResults,
     SamplesQualityResults,
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator_utils import (
@@ -38,17 +38,15 @@ class MutantQualityController:
 
     def get_quality_control_result(
         self, case: Case, case_results_file_path: Path, case_qc_report_path: Path
-    ) -> QualityResult:
+    ) -> MutantQualityResult:
         """Perform QC check on a case and generate the QC_report."""
-        sample_collection_and_results: (
-            SampleCollectionAndResults
-        ) = self._get_sample_collection_and_results(
+        sample_pool_and_results: SamplePoolAndResults = self._get_sample_pool_and_results(
             case_results_file_path=case_results_file_path,
             case=case,
         )
 
         samples_quality_results: SamplesQualityResults = self._get_samples_quality_results(
-            sample_collection_and_results=sample_collection_and_results
+            sample_pool_and_results=sample_pool_and_results
         )
         case_quality_result: CaseQualityResult = self._get_case_quality_result(
             samples_quality_results
@@ -71,18 +69,18 @@ class MutantQualityController:
             samples_quality_results=samples_quality_results,
         )
 
-        return QualityResult(
+        return MutantQualityResult(
             case_quality_result=case_quality_result,
             samples_quality_results=samples_quality_results,
             summary=summary,
         )
 
     def _get_samples_quality_results(
-        self, sample_collection_and_results: SampleCollectionAndResults
+        self, sample_pool_and_results: SamplePoolAndResults
     ) -> SamplesQualityResults:
         samples_quality_results: list[SampleQualityResults] = []
-        for sample in sample_collection_and_results.pool.samples:
-            sample_results: SampleResults = sample_collection_and_results.results[
+        for sample in sample_pool_and_results.pool.samples:
+            sample_results: ParsedSampleResults = sample_pool_and_results.results[
                 sample.internal_id
             ]
             sample_quality_results: (
@@ -94,7 +92,7 @@ class MutantQualityController:
 
         internal_negative_control_sample: (
             Sample
-        ) = sample_collection_and_results.pool.internal_negative_control
+        ) = sample_pool_and_results.pool.internal_negative_control
         internal_negative_control_quality_metrics: (
             SampleQualityResults
         ) = self._get_sample_quality_result_for_internal_negative_control_sample(
@@ -103,10 +101,10 @@ class MutantQualityController:
 
         external_negative_control_sample: (
             Sample
-        ) = sample_collection_and_results.pool.external_negative_control
+        ) = sample_pool_and_results.pool.external_negative_control
         external_negative_control_sample_results: (
-            SampleResults
-        ) = sample_collection_and_results.results[external_negative_control_sample.internal_id]
+            ParsedSampleResults
+        ) = sample_pool_and_results.results[external_negative_control_sample.internal_id]
         external_negative_control_quality_metrics: (
             SampleQualityResults
         ) = self._get_sample_quality_result_for_external_negative_control_sample(
@@ -122,7 +120,7 @@ class MutantQualityController:
 
     @staticmethod
     def _get_sample_quality_result_for_sample(
-        sample: Sample, sample_results: SampleResults
+        sample: Sample, sample_results: ParsedSampleResults
     ) -> SampleQualityResults:
         does_sample_pass_reads_threshold: bool = has_sample_valid_total_reads(sample=sample)
         does_sample_pass_qc: bool = does_sample_pass_reads_threshold and sample_results.passes_qc
@@ -156,7 +154,7 @@ class MutantQualityController:
 
     @staticmethod
     def _get_sample_quality_result_for_external_negative_control_sample(
-        sample: Sample, sample_results: SampleResults
+        sample: Sample, sample_results: ParsedSampleResults
     ) -> SampleQualityResults:
         does_sample_pass_reads_threshold: (
             bool
@@ -196,7 +194,7 @@ class MutantQualityController:
             passes_qc=case_passes_qc,
             internal_negative_control_passes_qc=internal_negative_control_pass_qc,
             external_negative_control_passes_qc=external_negative_control_pass_qc,
-            samples_pass_qc=samples_pass_qc,
+            fraction_samples_passes_qc=samples_pass_qc,
         )
 
         log_case_result(result)
@@ -253,9 +251,9 @@ class MutantQualityController:
             internal_negative_control=internal_negative_control,
         )
 
-    def _get_sample_collection_and_results(
+    def _get_sample_pool_and_results(
         self, case_results_file_path: Path, case: Case
-    ) -> SampleCollectionAndResults:
+    ) -> SamplePoolAndResults:
         try:
             samples: MutantPoolSamples = self._get_mutant_pool_samples(case=case)
         except Exception as exception_object:
@@ -264,7 +262,7 @@ class MutantQualityController:
             ) from exception_object
 
         try:
-            samples_results: dict[str, SampleResults] = parse_samples_results(
+            samples_results: dict[str, ParsedSampleResults] = parse_samples_results(
                 case=case, results_file_path=case_results_file_path
             )
         except Exception as exception_object:
@@ -272,4 +270,4 @@ class MutantQualityController:
                 f"Not possible to retrieve results for case {case}."
             ) from exception_object
 
-        return SampleCollectionAndResults(pool=samples, results=samples_results)
+        return SamplePoolAndResults(pool=samples, results=samples_results)

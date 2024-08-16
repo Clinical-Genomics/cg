@@ -9,7 +9,7 @@ from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
-from cg.meta.workflow.mutant.quality_controller.models import QualityResult
+from cg.meta.workflow.mutant.quality_controller.models import MutantQualityResult
 from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
@@ -283,7 +283,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def run_qc_on_case(self, case: Case, dry_run: bool) -> None:
         try:
-            qc_result: QualityResult = self.get_qc_result(case=case)
+            qc_result: MutantQualityResult = self.get_qc_result(case=case)
         except Exception as exception:
             LOG.error(f"Could not run QC for case {case.internal_id}")
             if not dry_run:
@@ -297,17 +297,17 @@ class MutantAnalysisAPI(AnalysisAPI):
             if not qc_result.passes_qc:
                 self.fail_analysis(case)
 
-    def get_qc_result(self, case: Case) -> QualityResult:
+    def get_qc_result(self, case: Case) -> MutantQualityResult:
         case_results_file_path: Path = self.get_case_results_file_path(case=case)
         case_qc_report_path: Path = self.get_case_qc_report_path(case_id=case.internal_id)
-        qc_result: QualityResult = self.quality_checker.get_quality_control_result(
+        qc_result: MutantQualityResult = self.quality_checker.get_quality_control_result(
             case=case,
             case_results_file_path=case_results_file_path,
             case_qc_report_path=case_qc_report_path,
         )
         return qc_result
 
-    def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:
+    def report_qc_on_trailblazer(self, case: Case, qc_result: MutantQualityResult) -> None:
         report_file_path: Path = self.get_case_qc_report_path(case_id=case.internal_id)
 
         comment = qc_result.summary + (
