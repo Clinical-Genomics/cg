@@ -431,7 +431,6 @@ class UploadScoutAPI:
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),

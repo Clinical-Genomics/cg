@@ -35,9 +35,21 @@ class RarediseaseUploadAPI(UploadAPI):
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
+        # Delivery report generation
+        if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
+            ctx.invoke(generate_delivery_report, case_id=case.internal_id)
+
         # Clinical delivery upload
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
+        # Scout specific upload
+        if DataDelivery.SCOUT in case.data_delivery:
+            ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
+        else:
+            LOG.warning(
+                f"There is nothing to upload to Scout for case {case.internal_id} and "
+                f"the specified data delivery ({case.data_delivery})"
+            )
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
