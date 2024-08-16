@@ -196,6 +196,11 @@ class CaseDoesNotExistError(CaseError):
     message: str = "The case does not exist"
 
 
+class StatusMissingError(CaseSampleError):
+    field: str = "status"
+    message: str = "Carrier status is required"
+
+
 class SampleDoesNotExistError(CaseSampleError):
     field: str = "internal_id"
     message: str = "The sample does not exist"
