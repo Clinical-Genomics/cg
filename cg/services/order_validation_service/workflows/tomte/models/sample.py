@@ -10,9 +10,9 @@ class TomteSample(Sample):
     age_at_sampling: float | None = None
     control: ControlEnum | None = None
     elution_buffer: str | None = None
-    father: str = Field(pattern=NAME_PATTERN)
+    father: str | None = Field(None, pattern=NAME_PATTERN)
     formalin_fixation_time: int | None = None
-    mother: str = Field(pattern=NAME_PATTERN)
+    mother: str | None = Field(None, pattern=NAME_PATTERN)
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
