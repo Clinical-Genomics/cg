@@ -170,7 +170,7 @@ for metric in qc_metrics:
     def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
         """Return a QC metrics file path."""
         hk_qcmetrics: Path = self.hk.files(
-            version=hk_version_obj.id, tags=HkAnalysisMetricsTag.QC_METRICS
+            version=hk_version_obj.id, tags={HkAnalysisMetricsTag.QC_METRICS}
         ).first()
         if not hk_qcmetrics:
             raise FileNotFoundError("QC metrics file not found for the given hk version.")
