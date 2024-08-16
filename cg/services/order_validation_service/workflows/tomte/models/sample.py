@@ -19,7 +19,7 @@ class TomteSample(Sample):
     reference_genome: GenomeVersion
     sex: SexEnum | None = None
     source: str
-    status: StatusEnum
+    status: StatusEnum | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None
