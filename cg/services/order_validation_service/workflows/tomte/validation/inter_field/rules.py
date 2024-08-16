@@ -78,7 +78,7 @@ def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSample
 
 def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
             case=case, case_index=index
         )
