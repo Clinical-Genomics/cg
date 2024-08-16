@@ -268,6 +268,18 @@ class MicrobialSample(OrderInSample):
         return OptionalFloatValidator.str_to_float(v=v)
 
 
+class MicrobialFastqSample(OrderInSample):
+    _suitable_project = OrderType.MICROBIAL_FASTQ
+
+    elution_buffer: str
+    container: ContainerEnum
+    # "Required if Plate"
+    container_name: str | None
+    well_position: str | None
+    # "These fields are not required"
+    control: str | None
+
+
 class MicrosaltSample(MicrobialSample):
     _suitable_project = OrderType.MICROSALT
     # 1603 Orderform Microbial WGS

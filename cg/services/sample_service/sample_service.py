@@ -12,7 +12,6 @@ from cg.store.store import Store
 
 
 class SampleService:
-
     def __init__(self, store: Store):
         self.store = store
 
