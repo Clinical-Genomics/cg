@@ -108,7 +108,7 @@ def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError
 
 def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
             case=case, case_index=index
         )
