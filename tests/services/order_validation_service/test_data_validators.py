@@ -1,11 +1,12 @@
 from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
-    CaseNameNotAvailableError,
     CaseDoesNotExistError,
+    CaseNameNotAvailableError,
     InvalidGenePanelsError,
     RepeatedGenePanelsError,
     SampleDoesNotExistError,
+    SexMissingError,
 )
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
@@ -15,6 +16,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_exist,
+    validate_sex_required_for_new_samples,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Application
@@ -142,3 +144,18 @@ def test_sample_internal_ids_does_not_exist(
 
     # THEN the error should concern the non-existent sample
     assert isinstance(errors[0], SampleDoesNotExistError)
+
+
+def test_sex_missing_for_new_sample(valid_order: TomteOrder):
+
+    # GIVEN an order with a new sample without 'sex' set
+    valid_order.cases[0].samples[0].sex = None
+
+    # WHEN validating that all new samples have a provided sex
+    errors = validate_sex_required_for_new_samples(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing sex
+    assert isinstance(errors[0], SexMissingError)
