@@ -24,7 +24,7 @@ class FamilyTree:
         self._add_edges()
 
     def _add_nodes(self) -> None:
-        for sample_index, sample in self.case.enumerated_new_samples:
+        for sample_index, sample in self.case.enumerated_samples:
             node = Node(sample=sample, sample_index=sample_index, case_index=self.case_index)
             self.graph[sample.name] = node
 
