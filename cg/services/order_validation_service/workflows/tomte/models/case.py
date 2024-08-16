@@ -10,10 +10,10 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 
 class TomteCase(Case):
     cohorts: list[str] | None = None
-    data_delivery: TomteDeliveryType
-    panels: list[GenePanelMasterList]
+    data_delivery: TomteDeliveryType | None = None
+    panels: list[GenePanelMasterList] | None = None
     synopsis: str | None = None
-    samples: list[TomteSample]
+    samples: list[TomteSample] | None = None
 
     def get_sample(self, sample_name: str) -> TomteSample | None:
         for sample in self.samples:

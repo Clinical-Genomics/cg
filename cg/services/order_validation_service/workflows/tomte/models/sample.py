@@ -16,10 +16,10 @@ class TomteSample(Sample):
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
-    reference_genome: GenomeVersion
+    reference_genome: GenomeVersion | None = None
     sex: SexEnum | None = None
-    source: str
+    source: str | None = None
     status: StatusEnum | None = None
-    subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
+    subject_id: str = Field(None, pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None

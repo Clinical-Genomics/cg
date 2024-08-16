@@ -7,11 +7,11 @@ from cg.services.order_validation_service.models.sample import Sample
 
 
 class Case(BaseModel):
-    data_delivery: DataDelivery
+    data_delivery: DataDelivery | None = None
     internal_id: str | None = None
-    name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
-    priority: PriorityTerms = PriorityTerms.STANDARD
-    samples: list[Sample]
+    name: str | None = Field(default=None, pattern=NAME_PATTERN, min_length=2, max_length=128)
+    priority: PriorityTerms | None = None
+    samples: list[Sample] | None = None
 
     model_config = ConfigDict(str_min_length=1)
 
