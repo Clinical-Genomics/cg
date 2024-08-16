@@ -20,27 +20,36 @@ def map_errors_to_order(order: dict, errors: ValidationErrors) -> None:
 
 def map_order_errors(order: dict, errors: list[OrderError]) -> None:
     for error in errors:
-        order[error.field]["errors"].append(error.message)
+        add_error_to_order(order=order, error=error)
 
 
 def map_case_errors(order: dict, errors: list[CaseError]) -> None:
     for error in errors:
-        order["cases"][error.case_index][error.field]["errors"].append(error.message)
+        case: dict = get_case(order=order, index=error.case_index)
+        add_error_to_case(case=case, error=error)
 
 
 def map_case_sample_errors(order: dict, errors: list[CaseSampleError]) -> None:
     for error in errors:
-        case: dict = get_case(order, error.case_index)
-        sample: dict = get_sample(case, error.sample_index)
-        add_error_to_sample_field(sample, error)
+        case: dict = get_case(order=order, index=error.case_index)
+        sample: dict = get_sample(case=case, index=error.sample_index)
+        add_error_to_sample_field(sample=sample, error=error)
 
 
-def get_case(order: dict, case_index: int) -> dict:
-    return order["cases"][case_index]
+def add_error_to_order(order: dict, error: OrderError) -> None:
+    order[error.field]["errors"].append(error.message)
 
 
-def get_sample(case: dict, sample_index: int) -> dict:
-    return case["samples"][sample_index]
+def add_error_to_case(case: dict, error: CaseError) -> None:
+    case[error.field]["errors"].append(error.message)
+
+
+def get_case(order: dict, index: int) -> dict:
+    return order["cases"][index]
+
+
+def get_sample(case: dict, index: int) -> dict:
+    return case["samples"][index]
 
 
 def add_error_to_sample_field(sample: dict, error: CaseSampleError) -> None:
