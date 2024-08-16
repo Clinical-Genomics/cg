@@ -2,9 +2,10 @@ from cg.services.order_validation_service.models.errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
     CaseNameNotAvailableError,
-    ExistingCaseDoesNotExistError,
+    CaseDoesNotExistError,
     InvalidGenePanelsError,
     RepeatedGenePanelsError,
+    SampleDoesNotExistError,
 )
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
@@ -13,6 +14,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_case_names_available,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
+    validate_samples_exist,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Application
@@ -105,7 +107,8 @@ def test_case_name_not_available(
 
 
 def test_case_internal_ids_does_not_exist(
-    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+    valid_order: TomteOrder,
+    store_with_multiple_cases_and_samples: Store,
 ):
 
     # GIVEN an order with a case marked as existing but which does not exist in the database
@@ -120,4 +123,22 @@ def test_case_internal_ids_does_not_exist(
     assert errors
 
     # THEN the error should concern the non-existent case
-    assert isinstance(errors[0], ExistingCaseDoesNotExistError)
+    assert isinstance(errors[0], CaseDoesNotExistError)
+
+
+def test_sample_internal_ids_does_not_exist(
+    valid_order: TomteOrder,
+    store_with_multiple_cases_and_samples: Store,
+):
+
+    # GIVEN an order with a sample marked as existing but which does not exist in the database
+    valid_order.cases[0].samples[0].internal_id = "Non-existent sample"
+
+    # WHEN validating that the samples exists
+    errors = validate_samples_exist(order=valid_order, store=store_with_multiple_cases_and_samples)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the non-existent sample
+    assert isinstance(errors[0], SampleDoesNotExistError)
