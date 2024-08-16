@@ -173,6 +173,6 @@ for metric in qc_metrics:
             version=hk_version_obj.id, tags={HkAnalysisMetricsTag.QC_METRICS}
         ).first()
         if not hk_qcmetrics:
-            raise FileNotFoundError("QC metrics file not found for the given hk version.")
+            raise FileNotFoundError("QC metrics file not found for the given Housekeeper version.")
         LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
