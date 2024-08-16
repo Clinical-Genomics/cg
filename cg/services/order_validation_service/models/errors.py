@@ -198,7 +198,7 @@ class CaseDoesNotExistError(CaseError):
 
 class StatusMissingError(CaseSampleError):
     field: str = "status"
-    message: str = "Carrier status is required" 
+    message: str = "Carrier status is required"
 
 
 class SampleDoesNotExistError(CaseSampleError):
