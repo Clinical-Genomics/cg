@@ -47,7 +47,7 @@ def test_case_field_error(
     tomte_model_validator: TomteModelValidator,
 ):
     # GIVEN an order with a case field error
-    valid_order.cases[0].data_delivery = None
+    valid_order.cases[0].data_delivery = ""
     order = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
@@ -83,8 +83,8 @@ def test_order_case_and_case_sample_field_error(
     valid_order: TomteOrder, tomte_model_validator: TomteModelValidator
 ):
     # GIVEN an order with an order, case and case sample error
-    valid_order.name = None
-    valid_order.cases[0].data_delivery = None
+    valid_order.name = ""
+    valid_order.cases[0].data_delivery = ""
     valid_order.cases[0].samples[0].well_position = 1.8
     order = valid_order.model_dump(by_alias=True)
 
