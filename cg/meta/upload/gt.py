@@ -30,7 +30,7 @@ class UploadGenotypesAPI(object):
         self.hk = hk_api
         self.gt = gt_api
 
-    def get_gt_data(self, analysis: Analysis) -> dict[dict[str, dict[str, str]]]:
+    def get_gt_data(self, case: Case) -> dict[dict[str, dict[str, str]]]:
         """Fetch data about an analysis to load genotypes.
 
         Returns: dict on form
@@ -44,25 +44,24 @@ class UploadGenotypesAPI(object):
             ]
         }
         """
-        LOG.info(f"workflow: {analysis.workflow}")
-        case_id = analysis.case.internal_id
+        LOG.info(f"workflow: {case.data_analysis}")
+        case_id = case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(bundle=case_id)
         hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
         gt_data: dict = {"bcf": hk_bcf.full_path}
-        LOG.info(f"workflow: {analysis.workflow}")
-        if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=analysis.case)
-        elif analysis.workflow == Workflow.MIP_DNA:
+        if case.data_analysis in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
+            gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=case)
+        elif case.data_analysis == Workflow.MIP_DNA:
             gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
-                case=analysis.case, hk_version=hk_version
+                case=case, hk_version=hk_version
             )
-        elif analysis.workflow == Workflow.RAREDISEASE:
+        elif case.data_analysis == Workflow.RAREDISEASE:
             gt_data["samples_sex"] = self.get_samples_sex_raredisease(
-                case=analysis.case, hk_version=hk_version
+                case=case, hk_version=hk_version
             )
         else:
-            raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
+            raise ValueError(f"Workflow {case.data_analysis} does not support Genotype upload")
         return gt_data
 
     def upload(self, gt_data: dict, replace: bool = False):

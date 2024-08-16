@@ -39,9 +39,7 @@ def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
         raise click.Abort
     case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
-    LOG.info(f"workflow: {case.analyses[0]}")
-    LOG.info(f"workflow: {case}")
-    results: dict = upload_genotypes_api.get_gt_data(case.analyses[0])
+    results: dict = upload_genotypes_api.get_gt_data(case)
 
     if not results:
         LOG.warning("Could not find any results to upload")

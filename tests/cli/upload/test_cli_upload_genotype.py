@@ -52,6 +52,7 @@ def test_upload_genotype_raredisease(
     upload_context_raredisease.status_db_ = analysis_store_trio
     upload_context_raredisease.housekeeper_api_ = upload_genotypes_hk_api_raredisease
     case = upload_context_raredisease.status_db.get_case_by_internal_id(internal_id=raredisease_case_id)
+    LOG.info("been there")
     assert case
 
     # WHEN uploading the genotypes
