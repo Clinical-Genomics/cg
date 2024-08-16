@@ -504,7 +504,20 @@ class LimsAPI(Lims, OrderHandler):
             raise LimsDataError(
                 f"No artifacts were found for process {process_type}, type {artifact_type} and sample {sample_internal_id}."
             )
-        return artifacts[0]
+
+        latest_artifact: Artifact = self._get_latest_artifact_from_list(artifact_list=artifacts)
+        return latest_artifact
+
+    def _get_latest_artifact_from_list(self, artifact_list: list[Artifact]) -> Artifact:
+        """Returning the latest artifact in a list of artifacts."""
+        artifacts = []
+        for artifact in artifact_list:
+            date = artifact.parent_process.date_run or datetime.today().strftime("%Y-%m-%d")
+            artifacts.append((date, artifact.id, artifact))
+
+        artifacts.sort()
+        date, id, latest_artifact = artifacts[-1]
+        return latest_artifact
 
     def get_internal_negative_control_id_from_sample_in_pool(
         self, sample_internal_id: str, pooling_step: LimsProcess
