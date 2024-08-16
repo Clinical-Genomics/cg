@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from cg.constants import Workflow
@@ -68,7 +70,7 @@ def test_to_lims_rml(rml_order_to_submit):
     first_sample = samples[0]
     assert first_sample.udfs.pool == "pool-1"
     assert first_sample.udfs.volume == "30"
-    assert first_sample.udfs.concentration == 5.0
+    assert math.isclose(a=first_sample.udfs.concentration, b=5.0, rel_tol=1e-09, abs_tol=1e-09)
     assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
     assert first_sample.udfs.index_number == "1"
 
