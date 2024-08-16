@@ -18,7 +18,7 @@ class TomteSample(Sample):
     post_formalin_fixation_time: int | None = None
     reference_genome: GenomeVersion
     sex: SexEnum | None = None
-    source: str
+    source: str | None = None
     status: StatusEnum | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None

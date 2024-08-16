@@ -209,3 +209,8 @@ class SampleDoesNotExistError(CaseSampleError):
 class SexMissingError(CaseSampleError):
     field: str = "sex"
     message: str = "Sex is required"
+
+
+class SourceMissingError(CaseSampleError):
+    field: str = "source"
+    message: str = "Source is required"
