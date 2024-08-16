@@ -9,7 +9,7 @@ def get_mapped_reads_fraction(mapped_reads: float, total_reads: float) -> float 
     return mapped_reads / total_reads if mapped_reads and total_reads else None
 
 
-def get_million_read_pairs(reads: int) -> float | None:
+def get_million_read_pairs(reads: int | float) -> float | None:
     """Return number of sequencing reads as millions of read pairs."""
     return (
         round(reads / SCALE_TO_MILLION_READ_PAIRS, 1) if reads or isinstance(reads, int) else None

@@ -23,11 +23,7 @@ from cg.meta.delivery_report.field_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
-from cg.models.balsamic.metrics import (
-    BalsamicQCMetrics,
-    BalsamicTargetedQCMetrics,
-    BalsamicWGSQCMetrics,
-)
+from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
 from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
@@ -50,9 +46,9 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel:
         """Return sample metadata to include in the report."""
-        sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
-            sample.internal_id
-        ]
+        sample_metrics: BalsamicTargetedQCMetrics | BalsamicWGSQCMetrics = (
+            analysis_metadata.sample_metrics[sample.internal_id]
+        )
         million_read_pairs: float = get_million_read_pairs(sample.reads)
         passed_initial_qc: bool | None = self.lims_api.has_sample_passed_initial_qc(
             sample.internal_id

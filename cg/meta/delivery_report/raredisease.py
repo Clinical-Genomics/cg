@@ -86,8 +86,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS
-                if PrepCategory.WHOLE_GENOME_SEQUENCING.value
-                in sample.application.prep_category.lower()
+                if PrepCategory.WHOLE_GENOME_SEQUENCING in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_RAREDISEASE_FIELDS
             )
             required_sample_metadata_fields.update({sample.id: required_fields})
