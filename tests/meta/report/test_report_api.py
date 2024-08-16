@@ -36,7 +36,7 @@ def test_create_delivery_report(report_api_mip_dna: MipDNADeliveryReportAPI, cas
     # GIVEN a pre-built case
 
     # WHEN extracting and rendering the report data
-    delivery_report: str = report_api_mip_dna.create_delivery_report(
+    delivery_report: str = report_api_mip_dna.get_delivery_report_html(
         case_id=case_mip_dna.internal_id,
         analysis_date=case_mip_dna.analyses[0].started_at,
         force=False,
@@ -54,7 +54,7 @@ def test_create_delivery_report_file(
     # GIVEN a pre-built case
 
     # WHEN creating the report file
-    created_report_file: Path = report_api_mip_dna.create_delivery_report_file(
+    created_report_file: Path = report_api_mip_dna.write_delivery_report_file(
         case_id=case_mip_dna.internal_id,
         directory=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,

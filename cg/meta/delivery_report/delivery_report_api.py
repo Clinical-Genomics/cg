@@ -56,7 +56,7 @@ class DeliveryReportAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api: AnalysisAPI = analysis_api
 
-    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> str:
+    def get_delivery_report_html(self, case_id: str, analysis_date: datetime, force: bool) -> str:
         """Generates the HTML content of a delivery report."""
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
@@ -67,12 +67,12 @@ class DeliveryReportAPI(MetaAPI):
         rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
-    def create_delivery_report_file(
+    def write_delivery_report_file(
         self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
         """Generates a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
-        delivery_report: str = self.create_delivery_report(
+        delivery_report: str = self.get_delivery_report_html(
             case_id=case_id, analysis_date=analysis_date, force=force
         )
         report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)

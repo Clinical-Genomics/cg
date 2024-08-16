@@ -49,7 +49,7 @@ def generate_delivery_report(
 
     # Dry run: prints the HTML report to console
     if dry_run:
-        delivery_report_html: str = report_api.create_delivery_report(
+        delivery_report_html: str = report_api.get_delivery_report_html(
             case_id=case_id, analysis_date=analysis_date, force=force
         )
         click.echo(delivery_report_html)
@@ -65,7 +65,7 @@ def generate_delivery_report(
         )
         return
 
-    created_delivery_report: Path = report_api.create_delivery_report_file(
+    created_delivery_report: Path = report_api.write_delivery_report_file(
         case_id=case_id,
         directory=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_date,
