@@ -22,7 +22,7 @@ from cg.cli.generate.report.utils import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError
-from cg.meta.delivery_report.delivery_report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ def generate_delivery_report(
     """Creates a delivery report for the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
-    report_api: ReportAPI = get_report_api(context, case)
+    report_api: DeliveryReportAPI = get_report_api(context, case)
     analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
 
     # Dry run: prints the HTML report to console
@@ -97,7 +97,7 @@ def generate_available_delivery_reports(
 
     exit_code = EXIT_SUCCESS
 
-    report_api: ReportAPI = get_report_api_workflow(context=context, workflow=workflow)
+    report_api: DeliveryReportAPI = get_report_api_workflow(context=context, workflow=workflow)
     context.obj.meta_apis["report_api"] = report_api if workflow else None
 
     cases_without_delivery_report = report_api.get_cases_without_delivery_report(workflow)

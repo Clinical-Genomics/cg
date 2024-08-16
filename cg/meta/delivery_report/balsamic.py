@@ -20,7 +20,7 @@ from cg.constants import (
 from cg.constants.constants import AnalysisType
 from cg.constants.scout import ScoutUploadKey
 from cg.meta.delivery_report.field_validators import get_million_read_pairs
-from cg.meta.delivery_report.delivery_report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import (
@@ -40,7 +40,7 @@ from cg.store.models import Bed, BedVersion, Case, Sample
 LOG = logging.getLogger(__name__)
 
 
-class BalsamicReportAPI(ReportAPI):
+class BalsamicDeliveryReportAPI(DeliveryReportAPI):
     """API to create Balsamic delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicAnalysisAPI):

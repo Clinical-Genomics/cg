@@ -16,7 +16,7 @@ from cg.constants.report import (
 )
 from cg.constants.scout import ScoutUploadKey
 from cg.meta.delivery_report.field_validators import get_million_read_pairs
-from cg.meta.delivery_report.delivery_report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -27,7 +27,7 @@ from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Case, Sample
 
 
-class RarediseaseReportAPI(ReportAPI):
+class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
     """API to create Raredisease delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: RarediseaseAnalysisAPI):

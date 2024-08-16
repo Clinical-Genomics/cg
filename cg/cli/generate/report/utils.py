@@ -10,15 +10,15 @@ from cg.constants import (
     REPORT_SUPPORTED_WORKFLOW,
     Workflow,
 )
-from cg.meta.delivery_report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
-from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
-from cg.meta.delivery_report.raredisease import RarediseaseReportAPI
-from cg.meta.delivery_report.delivery_report_api import ReportAPI
-from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
-from cg.meta.delivery_report.taxprofiler import TaxprofilerReportAPI
-from cg.meta.delivery_report.tomte import TomteReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
+from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
+from cg.meta.delivery_report.taxprofiler import TaxprofilerDeliveryReportAPI
+from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
@@ -35,10 +35,12 @@ LOG = logging.getLogger(__name__)
 def get_report_case(context: click.Context, case_id: str) -> Case:
     """Extracts a case object for delivery report generation."""
     # Default report API (MIP DNA report API)
-    report_api: ReportAPI = (
+    report_api: DeliveryReportAPI = (
         context.obj.meta_apis.get("report_api")
         if context.obj.meta_apis.get("report_api")
-        else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
+        else MipDNADeliveryReportAPI(
+            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+        )
     )
     case: Case = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
     # Missing or not valid internal case ID
@@ -76,19 +78,19 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     return case
 
 
-def get_report_api(context: click.Context, case: Case) -> ReportAPI:
+def get_report_api(context: click.Context, case: Case) -> DeliveryReportAPI:
     """Returns a report API to be used for the delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
     return get_report_api_workflow(context, case.data_analysis)
 
 
-def get_report_api_workflow(context: click.Context, workflow: Workflow) -> ReportAPI:
+def get_report_api_workflow(context: click.Context, workflow: Workflow) -> DeliveryReportAPI:
     """Return the report API given a specific workflow."""
     # Default report API workflow: MIP-DNA
     workflow: Workflow = workflow if workflow else Workflow.MIP_DNA
-    dispatch_report_api: dict[Workflow, ReportAPI] = {
-        Workflow.BALSAMIC: BalsamicReportAPI(
+    dispatch_report_api: dict[Workflow, DeliveryReportAPI] = {
+        Workflow.BALSAMIC: BalsamicDeliveryReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
         ),
         Workflow.BALSAMIC_QC: BalsamicQCReportAPI(
@@ -97,19 +99,19 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
         Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         ),
-        Workflow.MIP_DNA: MipDNAReportAPI(
+        Workflow.MIP_DNA: MipDNADeliveryReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
-        Workflow.RAREDISEASE: RarediseaseReportAPI(
+        Workflow.RAREDISEASE: RarediseaseDeliveryReportAPI(
             config=context.obj, analysis_api=RarediseaseAnalysisAPI(config=context.obj)
         ),
-        Workflow.RNAFUSION: RnafusionReportAPI(
+        Workflow.RNAFUSION: RnafusionDeliveryReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
-        Workflow.TAXPROFILER: TaxprofilerReportAPI(
+        Workflow.TAXPROFILER: TaxprofilerDeliveryReportAPI(
             config=context.obj, analysis_api=TaxprofilerAnalysisAPI(config=context.obj)
         ),
-        Workflow.TOMTE: TomteReportAPI(
+        Workflow.TOMTE: TomteDeliveryReportAPI(
             config=context.obj, analysis_api=TomteAnalysisAPI(config=context.obj)
         ),
     }
@@ -117,7 +119,7 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
 
 
 def get_report_analysis_started(
-    case: Case, report_api: ReportAPI, analysis_started_at: str | None
+    case: Case, report_api: DeliveryReportAPI, analysis_started_at: str | None
 ) -> datetime:
     """Resolves and returns a valid analysis date."""
     if not analysis_started_at:

@@ -1,13 +1,13 @@
 """Test Tomte delivery report API."""
 
-from cg.meta.delivery_report.tomte import TomteReportAPI
+from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery_report.metadata import TomteSampleMetadataModel
 from cg.store.models import Case, Sample
 
 
 def test_get_sample_metadata(
-    report_api_tomte: TomteReportAPI,
+    report_api_tomte: TomteDeliveryReportAPI,
     sample_id: str,
     tomte_case_id: str,
     tomte_validated_metrics: dict[str, str],

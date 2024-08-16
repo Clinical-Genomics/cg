@@ -1,13 +1,13 @@
 import logging
 
-from cg.meta.delivery_report.balsamic import BalsamicReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
-class BalsamicUmiReportAPI(BalsamicReportAPI):
+class BalsamicUmiReportAPI(BalsamicDeliveryReportAPI):
     """API to create Balsamic UMI delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicUmiAnalysisAPI):

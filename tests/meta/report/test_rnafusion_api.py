@@ -4,7 +4,7 @@ import pytest
 from pytest_mock import MockFixture
 
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
-from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.store.models import Case, Sample
@@ -12,7 +12,7 @@ from tests.mocks.limsmock import MockLimsAPI
 
 
 def test_get_sample_metadata(
-    report_api_rnafusion: RnafusionReportAPI,
+    report_api_rnafusion: RnafusionDeliveryReportAPI,
     sample_id: str,
     rnafusion_case_id: str,
     rnafusion_validated_metrics: dict[str, str],
@@ -54,7 +54,7 @@ def test_ensure_rin_thresholds(
     sample_id: str,
     input_rin: int | float,
     expected_rin: str,
-    report_api_rnafusion: RnafusionReportAPI,
+    report_api_rnafusion: RnafusionDeliveryReportAPI,
     rnafusion_mock_analysis_finish: None,
     mocker: MockFixture,
 ):

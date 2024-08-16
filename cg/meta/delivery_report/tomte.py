@@ -12,7 +12,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TOMTE_FIELDS,
 )
 from cg.meta.delivery_report.field_validators import get_million_read_pairs
-from cg.meta.delivery_report.delivery_report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -23,7 +23,7 @@ from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
 
 
-class TomteReportAPI(ReportAPI):
+class TomteDeliveryReportAPI(DeliveryReportAPI):
     """API to create Tomte delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: TomteAnalysisAPI):

@@ -7,10 +7,10 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.io.controller import ReadFile
-from cg.meta.delivery_report.balsamic import BalsamicReportAPI
-from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
-from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
-from cg.meta.delivery_report.tomte import TomteReportAPI
+from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
+from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
+from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -27,7 +27,7 @@ from tests.mocks.report import (
 @pytest.fixture(scope="function")
 def report_api_mip_dna(
     cg_context: CGConfig, lims_samples: list[dict], report_store: Store
-) -> MipDNAReportAPI:
+) -> MipDNADeliveryReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipDNAAnalysisAPI(config=cg_context)
     cg_context.status_db_ = report_store
@@ -40,51 +40,51 @@ def report_api_mip_dna(
 @pytest.fixture(scope="function")
 def report_api_balsamic(
     cg_context: CGConfig, lims_samples: list[dict], report_store: Store
-) -> BalsamicReportAPI:
+) -> BalsamicDeliveryReportAPI:
     """BALSAMIC ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
     cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.scout_api_ = MockScoutApi(cg_context)
-    return BalsamicReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
+    return BalsamicDeliveryReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
 @pytest.fixture(scope="function")
 def report_api_rnafusion(
     rnafusion_context: CGConfig, lims_samples: list[dict]
-) -> RnafusionReportAPI:
+) -> RnafusionDeliveryReportAPI:
     """Rnafusion report API fixture."""
     rnafusion_context.lims_api_ = MockLimsAPI(config=rnafusion_context, samples=lims_samples)
     rnafusion_context.scout_api_ = MockScoutApi(rnafusion_context)
-    return RnafusionReportAPI(
+    return RnafusionDeliveryReportAPI(
         config=rnafusion_context, analysis_api=rnafusion_context.meta_apis["analysis_api"]
     )
 
 
 @pytest.fixture(scope="function")
-def report_api_tomte(tomte_context: CGConfig, lims_samples: list[dict]) -> TomteReportAPI:
+def report_api_tomte(tomte_context: CGConfig, lims_samples: list[dict]) -> TomteDeliveryReportAPI:
     """Tomte report API fixture."""
     tomte_context.lims_api_ = MockLimsAPI(config=tomte_context, samples=lims_samples)
     tomte_context.scout_api_ = MockScoutApi(tomte_context)
-    return TomteReportAPI(
+    return TomteDeliveryReportAPI(
         config=tomte_context, analysis_api=tomte_context.meta_apis["analysis_api"]
     )
 
 
 @pytest.fixture(scope="function")
-def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Case:
+def case_mip_dna(case_id: str, report_api_mip_dna: MipDNADeliveryReportAPI) -> Case:
     """MIP DNA case instance."""
     return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function")
-def case_balsamic(case_id: str, report_api_balsamic: BalsamicReportAPI) -> Case:
+def case_balsamic(case_id: str, report_api_balsamic: BalsamicDeliveryReportAPI) -> Case:
     """BALSAMIC case instance."""
     return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function")
-def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
+def case_samples_data(case_id: str, report_api_mip_dna: MipDNADeliveryReportAPI):
     """MIP DNA family sample object."""
     return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_internal_id=case_id)
 

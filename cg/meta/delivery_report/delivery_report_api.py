@@ -49,7 +49,7 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class ReportAPI(MetaAPI):
+class DeliveryReportAPI(MetaAPI):
     """Common Delivery Report API."""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
@@ -415,7 +415,9 @@ class ReportAPI(MetaAPI):
             if sample.application.external:
                 required_fields.remove("received_at")
                 break
-        return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
+        return DeliveryReportAPI.get_sample_required_fields(
+            case=case, required_fields=required_fields
+        )
 
     def get_hk_scout_file_tags(self, scout_key: ScoutUploadKey) -> list | None:
         """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
