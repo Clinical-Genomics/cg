@@ -15,7 +15,7 @@ from cg.meta.delivery_report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.delivery_report.mip_dna import MipDNAReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseReportAPI
-from cg.meta.delivery_report.report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import ReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionReportAPI
 from cg.meta.delivery_report.taxprofiler import TaxprofilerReportAPI
 from cg.meta.delivery_report.tomte import TomteReportAPI

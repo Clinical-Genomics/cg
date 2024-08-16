@@ -18,7 +18,7 @@ from cg.meta.delivery_report.field_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
 )
-from cg.meta.delivery_report.report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig

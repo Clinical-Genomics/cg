@@ -11,7 +11,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TAXPROFILER_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
-from cg.meta.delivery_report.report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import ReportAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
