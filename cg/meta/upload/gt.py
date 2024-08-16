@@ -149,7 +149,7 @@ class UploadGenotypesAPI(object):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": self.get_analysis_sex_raredisease(qc_metrics_file, sample_id),
+                "analysis": self.get_analysis_sex_raredisease(qc_metrics_file=qc_metrics_file, sample_id=sample_id),
             }
         return samples_sex
 
