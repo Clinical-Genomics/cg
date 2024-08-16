@@ -30,7 +30,7 @@ from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkAnalysisMetricsTag
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
@@ -157,6 +157,12 @@ def email_address() -> str:
 def case_id() -> str:
     """Return a case id."""
     return "yellowhog"
+
+@pytest.fixture(scope="session")
+def mip_case_id() -> str:
+    """Return a case id."""
+    return "yellowhog"
+
 
 
 @pytest.fixture(scope="session")
@@ -4096,3 +4102,44 @@ def analysis_summary(
         delivered=delivered_status_summary,
         failed=failed_status_summary,
     )
+
+@pytest.fixture
+def upload_genotypes_hk_bundle_mip(
+    mip_case_id: str, timestamp, case_qc_metrics_deliverables_mip: Path, bcf_file: Path
+) -> dict:
+    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
+    data = {
+        "name": mip_case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(case_qc_metrics_deliverables_mip),
+                "archive": False,
+                "tags": HkAnalysisMetricsTag.QC_METRICS,
+            },
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
+        ],
+    }
+    return data
+
+@pytest.fixture
+def upload_genotypes_hk_bundle_raredisease(
+    raredisease_case_id: str, timestamp, case_qc_metrics_deliverables_raredisease: Path, bcf_file: Path
+) -> dict:
+    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
+    data = {
+        "name": raredisease_case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(case_qc_metrics_deliverables_raredisease),
+                "archive": False,
+                "tags": HkAnalysisMetricsTag.QC_METRICS,
+            },
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
+        ],
+    }
+    return data
+
