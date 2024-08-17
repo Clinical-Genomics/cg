@@ -1,5 +1,5 @@
 import datetime as dt
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 
@@ -132,7 +132,7 @@ def test_submit_illegal_sample_customer(
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
-
+    orders_api.ticket_handler = Mock()
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
     new_customer = sample_store.add_customer(
@@ -178,6 +178,7 @@ def test_submit_scout_legal_sample_customer(
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
+    orders_api.ticket_handler = Mock()
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
     collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
@@ -233,7 +234,7 @@ def test_submit_duplicate_sample_case_name(
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
+    orders_api.ticket_handler = Mock()
     for sample in order_data.samples:
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
