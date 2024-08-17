@@ -12,7 +12,9 @@ class ValidatePoolOrderService(ValidateOrderService):
         self.status_db = status_db
 
     def validate_order(self, order: OrderIn) -> None:
-        self._validate_case_names_are_available()
+        self._validate_case_names_are_available(
+            customer_id=order.customer, samples=order.samples, ticket=order.ticket
+        )
 
     def _validate_case_names_are_available(
         self, customer_id: str, samples: list[RmlSample], ticket: str
