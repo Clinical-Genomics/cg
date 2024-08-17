@@ -10,6 +10,9 @@ from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
+from cg.services.orders.validate_order_services.validate_generic_order import (
+    ValidateGenericOrderService,
+)
 from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -348,12 +351,12 @@ def test_validate_sex_inconsistent_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateGenericOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_sex
     # THEN an OrderError should be raised on non-matching sex
     with pytest.raises(OrderError):
-        submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+        validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
 
 def test_validate_sex_consistent_sex(
@@ -378,10 +381,10 @@ def test_validate_sex_consistent_sex(
         store.session.commit()
         assert sample_obj.sex == sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateGenericOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
@@ -409,10 +412,10 @@ def test_validate_sex_unknown_existing_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateGenericOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
@@ -442,10 +445,10 @@ def test_validate_sex_unknown_new_sex(
     for sample in order_data.samples:
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateGenericOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
