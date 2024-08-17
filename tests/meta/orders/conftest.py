@@ -5,7 +5,10 @@ import pytest
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
+from cg.services.orders.submitters.order_submitter_registry import (
+    OrderSubmitterRegistry,
+    setup_order_submitter_registry,
+)
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
@@ -112,8 +115,18 @@ def tomte_status_data(tomte_order_to_submit: dict):
 
 
 @pytest.fixture(scope="function")
-def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
-    return OrdersAPI(lims=lims_api, status=base_store, osticket=osticket)
+def orders_api(
+    base_store,
+    osticket: MockOsTicket,
+    lims_api: MockLimsAPI,
+    order_submitter_registry: OrderSubmitterRegistry,
+) -> OrdersAPI:
+    return OrdersAPI(
+        lims=lims_api,
+        status=base_store,
+        osticket=osticket,
+        submitter_registry=order_submitter_registry,
+    )
 
 
 @pytest.fixture
@@ -122,5 +135,5 @@ def ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
 
 
 @pytest.fixture
-def order_submitter_registry() -> OrderSubmitterRegistry:
-    pass
+def order_submitter_registry(base_store: Store, lims_api: MockLimsAPI) -> OrderSubmitterRegistry:
+    return setup_order_submitter_registry(lims=lims_api, status_db=base_store)

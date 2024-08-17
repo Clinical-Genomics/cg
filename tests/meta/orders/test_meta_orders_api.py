@@ -8,20 +8,20 @@ from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
-SUBMITTERS = [
-    "fastq_submitter",
-    "metagenome_submitter",
-    "microbial_submitter",
-    "case_submitter",
-    "pool_submitter",
-]
+
+def monkeypatch_process_lims(monkeypatch, order_data) -> None:
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    monkeypatch.setattr(
+        "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
+        lambda *args, **kwargs: (lims_project_data, lims_map),
+    )
 
 
 def test_too_long_order_name():
@@ -83,16 +83,6 @@ def test_submit(
         elif isinstance(record, Case):
             for link_obj in record.links:
                 assert link_obj.sample.original_ticket == ticket_id
-
-
-def monkeypatch_process_lims(monkeypatch, order_data):
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
 
 
 @pytest.mark.parametrize(
