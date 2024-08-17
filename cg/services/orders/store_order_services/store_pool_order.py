@@ -187,13 +187,3 @@ class StorePoolOrderService(StoreOrderService):
     @staticmethod
     def create_case_name(ticket: str, pool_name: str) -> str:
         return f"{ticket}-{pool_name}"
-
-    @staticmethod
-    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
-        """Fill in LIMS sample ids."""
-        for sample in samples:
-            LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample.get(id_key):
-                internal_id = lims_map[sample["name"]]
-                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample[id_key] = internal_id

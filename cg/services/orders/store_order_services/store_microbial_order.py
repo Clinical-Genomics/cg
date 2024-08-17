@@ -173,10 +173,3 @@ class StoreMicrobialOrderService(StoreOrderService):
                 internal_id = lims_map[sample["name"]]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
-
-    def _add_missing_reads(self, samples: list[Sample]):
-        """Add expected reads/reads missing."""
-        for sample_obj in samples:
-            LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
-            target_reads = sample_obj.application_version.application.target_reads / 1000000
-            self.lims.lims_api.update_sample(sample_obj.internal_id, target_reads=target_reads)
