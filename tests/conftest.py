@@ -118,6 +118,7 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
 ]
 
 
