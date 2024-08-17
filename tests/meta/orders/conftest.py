@@ -3,29 +3,10 @@ from pathlib import Path
 import pytest
 
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.api import FastqSubmitter
-from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
-from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
-from cg.meta.orders.microbial_submitter import MicrobialSubmitter
-from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
-from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
-from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
+from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
 from cg.store.store import Store
-from tests.apps.orderform.conftest import (
-    balsamic_order_to_submit,
-    fastq_order_to_submit,
-    metagenome_order_to_submit,
-    microbial_order_to_submit,
-    mip_order_to_submit,
-    mip_rna_order_to_submit,
-    rml_order_to_submit,
-    rnafusion_order_to_submit,
-    sarscov2_order_to_submit,
-    tomte_order_to_submit,
-)
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
 
@@ -138,3 +119,8 @@ def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
 @pytest.fixture
 def ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
     return TicketHandler(status_db=store, osticket_api=osticket)
+
+
+@pytest.fixture
+def order_submitter_registry() -> OrderSubmitterRegistry:
+    pass
