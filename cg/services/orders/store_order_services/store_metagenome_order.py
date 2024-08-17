@@ -21,9 +21,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
 
     def store_order(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""
-        project_data, lims_map = self.lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
+        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["families"][0]["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
