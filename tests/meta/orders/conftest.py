@@ -4,7 +4,6 @@ import pytest
 
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,

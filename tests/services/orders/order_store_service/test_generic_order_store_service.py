@@ -1,6 +1,7 @@
 """Module to test the StoreGenericOrderService class."""
 
 import datetime as dt
+import math
 from copy import deepcopy
 
 
@@ -38,7 +39,7 @@ def test_cases_to_status(
     assert len(family["samples"]) == 3
 
     first_sample = family["samples"][0]
-    assert first_sample["age_at_sampling"] == 17.18192
+    assert math.isclose(first_sample["age_at_sampling"], 17.18192, rel_tol=1e-09, abs_tol=1e-09)
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
@@ -117,8 +118,7 @@ def test_store_mip(
     assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
     assert new_link.sample.subject_id == "subject1"
-
-    assert new_link.sample.age_at_sampling == 17.18192
+    assert math.isclose(new_link.sample.age_at_sampling, 17.18192, rel_tol=1e-09, abs_tol=1e-09)
 
 
 def test_store_mip_rna(
