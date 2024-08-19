@@ -11,6 +11,7 @@ from cg.services.order_validation_service.validators.data.rules import (
     validate_sex_required_for_new_samples,
     validate_source_required,
     validate_user_belongs_to_customer,
+    validate_volume_interval,
 )
 from cg.services.order_validation_service.validators.inter_field.rules import (
     validate_application_compatibility,
@@ -67,5 +68,6 @@ TOMTE_CASE_SAMPLE_RULES: list[callable] = [
     validate_status_required_if_new,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
+    validate_volume_interval,
     validate_wells_contain_at_most_one_sample,
 ]

@@ -9,7 +9,46 @@ def test_valid_order(valid_order: TomteOrder, tomte_validation_service: TomteVal
     # GIVEN a valid order
 
     # WHEN validating the order
-    errors = tomte_validation_service.validate(valid_order.model_dump_json())
+    errors = tomte_validation_service._get_errors(valid_order.model_dump())
 
     # THEN no errors should be raised
     assert not errors
+
+
+def test_order_error_conversion(valid_order: TomteOrder, tomte_validation_service: TomteValidationService):
+
+    # GIVEN an order with a missing field on order level
+    valid_order.name = ""
+    order: dict = valid_order.model_dump()
+
+    # WHEN validating the order
+    response: dict = tomte_validation_service.validate(order)
+
+    # THEN there should be an error for the missing name
+    assert response["name"]["errors"]
+
+
+def test_valid_order_conversion(valid_order: TomteOrder, tomte_validation_service: TomteValidationService):
+
+    # GIVEN a valid order
+    order: dict = valid_order.model_dump()
+
+    # WHEN validating the order
+    response = tomte_validation_service.validate(order)
+
+    # THEN a response should be given
+    assert response
+
+def test_sample_error_conversion(valid_order: TomteOrder, tomte_validation_service: TomteValidationService):
+
+    # GIVEN an order with a sample with an invalid field
+    valid_order.cases[0].samples[0].volume = 1
+    invalid_order: dict = valid_order.model_dump_json()
+
+    # WHEN validating the order
+    response = tomte_validation_service.validate(invalid_order)
+
+    errors = tomte_validation_service._get_errors(invalid_order)
+
+    # THEN an error should be returned regarding the invalid volume
+    assert response["cases"][0]["samples"][0]["volume"]["errors"]
