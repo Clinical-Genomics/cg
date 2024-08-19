@@ -5,6 +5,9 @@ from cg.services.order_validation_service.models.errors import (
 )
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.utils import apply_case_validation, apply_order_validation
+from cg.services.order_validation_service.workflows.microsalt.validation.field.model_validator import (
+    MicroSaltModelValidator,
+)
 from cg.services.order_validation_service.workflows.microsalt.validation_rules import (
     ORDER_RULES,
     SAMPLE_RULES,
