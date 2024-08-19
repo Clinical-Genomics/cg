@@ -13,6 +13,13 @@ LOG = logging.getLogger(__name__)
 
 
 class StoreMicrobialOrderService(StoreOrderService):
+    """
+    Storing service for microbial orders.
+    These include:
+    - Mutant samples
+    - Microsalt samples
+    - Sars-Cov-2 samples
+    """
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status = status_db

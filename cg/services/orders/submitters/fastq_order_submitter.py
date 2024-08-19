@@ -7,6 +7,7 @@ from cg.services.orders.validate_order_services.validate_fastq_order import (
 
 
 class FastqOrderSubmitter(OrderSubmitter):
+    """Submitter for fastq orders."""
 
     def __init__(
         self,

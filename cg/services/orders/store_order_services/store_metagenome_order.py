@@ -14,6 +14,7 @@ LOG = logging.getLogger(__name__)
 
 
 class StoreMetagenomeOrderService(StoreOrderService):
+    """Storing service for metagenome orders."""
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status_db = status_db

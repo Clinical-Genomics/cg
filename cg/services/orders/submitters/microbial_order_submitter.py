@@ -11,6 +11,7 @@ class MicrobialOrderSubmitter(OrderSubmitter):
     This class is used to submit orders for the following workflows:
     - Sars-Cov-2
     - Microsalt
+    - Mutant
     """
 
     def __init__(

@@ -15,6 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class StoreFastqOrderService(StoreOrderService):
+    """Storing service for FASTQ orders."""
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status_db = status_db

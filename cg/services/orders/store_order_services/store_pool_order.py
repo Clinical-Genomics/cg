@@ -15,6 +15,12 @@ LOG = logging.getLogger(__name__)
 
 
 class StorePoolOrderService(StoreOrderService):
+    """
+    Storing service for pool orders.
+    These include:
+    - Fluffy / NIPT samples
+    - RML samples
+    """
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status_db = status_db
