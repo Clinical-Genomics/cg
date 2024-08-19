@@ -17,7 +17,6 @@ LOG = logging.getLogger(__name__)
 
 
 class SequencingQCService:
-
     def __init__(self, store: Store):
         self.store = store
 

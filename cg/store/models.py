@@ -1103,9 +1103,9 @@ class PacBioSequencingRun(InstrumentRun):
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
+    movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
-    movie_name: Mapped[Str32]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1166,7 +1166,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
 class PacBioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
-    __tablename__ = "pacbio_sample_sequencing_metrics"
+    __tablename__ = "pacbio_sample_run_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
     hifi_reads: Mapped[BigInt]
