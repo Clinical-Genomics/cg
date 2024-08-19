@@ -6,7 +6,6 @@ from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 
 
-
 def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
     """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
     wrap_fields(raw_order)

@@ -1,5 +1,11 @@
 from cg.constants.pedigree import Pedigree
-from cg.services.order_validation_service.errors.case_sample_errors import DescendantAsFatherError, DescendantAsMotherError, PedigreeError, SampleIsOwnFatherError, SampleIsOwnMotherError
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    DescendantAsFatherError,
+    DescendantAsMotherError,
+    PedigreeError,
+    SampleIsOwnFatherError,
+    SampleIsOwnMotherError,
+)
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
