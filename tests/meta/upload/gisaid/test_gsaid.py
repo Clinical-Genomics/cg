@@ -36,7 +36,7 @@ def test_get_sars_cov_complementary_reports(
 ):
     # GIVEN a list of reports
 
-    # WHEN getting Sars-cov reports from reports
+    # WHEN getting, Sars-cov reports from reports
     content: list[GisaidComplementaryReport] = gisaid_api.get_sars_cov_complementary_reports(
         gisaid_complementary_reports
     )

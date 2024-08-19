@@ -326,7 +326,7 @@ class GisaidAPI:
     def get_gisaid_accession_numbers(self, case_id: str) -> dict[str, str]:
         """Parse and return GISAID accession numbers and sample ids from log file."""
         log_file = Path(
-            self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
+            self.housekeeper_api.get_files(bundle=case_id, tags=[GisaidTag.LOG, case_id])
             .first()
             .full_path
         )
