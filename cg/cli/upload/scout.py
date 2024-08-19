@@ -1,4 +1,4 @@
-"""Code for uploading to scout via CLI"""
+"""Code for uploading to Scout via CLI."""
 
 import logging
 from pathlib import Path
@@ -157,16 +157,27 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("Case loaded successfully to Scout")
 
 
+@click.command(name="validate-case-samples-are-rna")
+@click.argument("case_id")
+@click.pass_obj
+def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    are_all_samples_rna: bool = scout_upload_api.mip_analysis_api.are_case_samples_rna(case_id)
+    if not are_all_samples_rna:
+        LOG.error(f"{case_id} has non-RNA samples - aborting.")
+        raise click.Abort
+
+
 @click.command(name="rna-to-scout")
 @DRY_RUN
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
 @click.argument("case_id")
 @click.pass_context
 def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
-    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
-
+    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
+    context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(

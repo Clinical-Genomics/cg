@@ -66,3 +66,4 @@ class RarediseaseParameters(WorkflowParameters):
 
     target_bed: str
     analysis_type: str
+    save_mapped_as_cram: bool

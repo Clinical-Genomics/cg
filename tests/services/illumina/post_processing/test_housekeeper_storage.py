@@ -47,7 +47,6 @@ def test_add_fastq_files_to_housekeeper(
         attribute="get_demultiplexed_runs_dir",
         return_value=tmp_demultiplexed_novaseq_6000_post_1_5_kits_path,
     ):
-
         # WHEN adding the sample fastq files to Housekeeper
         add_sample_fastq_files_to_housekeeper(
             run_directory_data=novaseq_6000_post_1_5_kits_flow_cell,
