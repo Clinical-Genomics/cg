@@ -45,7 +45,7 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             bundle_name=case_id, tags=sample_tags_with_sample_id
         )
         return [
-            SampleFile(case_id=case_id, sample_id=sample_id, file=sample_file.full_path)
+            SampleFile(case_id=case_id, sample_id=sample_id, file_path=sample_file.full_path)
             for sample_file in sample_files
         ]
 
@@ -71,5 +71,6 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_id_tags
         )
         return [
-            CaseFile(case_id=case.internal_id, file=case_file.full_path) for case_file in case_files
+            CaseFile(case_id=case.internal_id, file_path=case_file.full_path)
+            for case_file in case_files
         ]

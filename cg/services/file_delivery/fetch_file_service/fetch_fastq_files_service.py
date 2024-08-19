@@ -41,6 +41,6 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
             bundle_name=sample_id, tags=fastq_tags
         )
         return [
-            SampleFile(case_id=case_id, sample_id=sample_id, file=fastq_file.full_path)
+            SampleFile(case_id=case_id, sample_id=sample_id, file_path=fastq_file.full_path)
             for fastq_file in fastq_files
         ]
