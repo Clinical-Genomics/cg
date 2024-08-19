@@ -2,14 +2,14 @@ from cg.apps.lims import LimsAPI
 from cg.models.orders.constants import OrderType
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.services.orders.store_order_services.store_generic_order import StoreGenericOrderService
+from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
 from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.services.orders.submitters.fastq_order_submitter import FastqOrderSubmitter
-from cg.services.orders.submitters.generic_order_submitter import GenericOrderSubmitter
+from cg.services.orders.submitters.case_order_submitter import CaseOrderSubmitter
 from cg.services.orders.submitters.metagenome_order_submitter import MetagenomeOrderSubmitter
 from cg.services.orders.submitters.microbial_order_submitter import MicrobialOrderSubmitter
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
@@ -17,8 +17,8 @@ from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitte
 from cg.services.orders.validate_order_services.validate_fastq_order import (
     ValidateFastqOrderService,
 )
-from cg.services.orders.validate_order_services.validate_generic_order import (
-    ValidateGenericOrderService,
+from cg.services.orders.validate_order_services.validate_case_order import (
+    ValidateCaseOrderService,
 )
 from cg.services.orders.validate_order_services.validate_metagenome_order import (
     ValidateMetagenomeOrderService,
@@ -52,21 +52,21 @@ class OrderSubmitterRegistry:
 order_service_mapping = {
     OrderType.BALSAMIC: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.BALSAMIC_QC: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.BALSAMIC_UMI: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.FASTQ: (
         OrderLimsService,
@@ -94,15 +94,15 @@ order_service_mapping = {
     ),
     OrderType.MIP_DNA: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.MIP_RNA: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.RML: (
         OrderLimsService,
@@ -112,9 +112,9 @@ order_service_mapping = {
     ),
     OrderType.RNAFUSION: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
     OrderType.SARS_COV_2: (
         OrderLimsService,
@@ -124,9 +124,9 @@ order_service_mapping = {
     ),
     OrderType.TOMTE: (
         OrderLimsService,
-        ValidateGenericOrderService,
-        StoreGenericOrderService,
-        GenericOrderSubmitter,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
     ),
 }
 

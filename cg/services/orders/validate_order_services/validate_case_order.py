@@ -7,7 +7,7 @@ from cg.store.models import Sample, Customer
 from cg.store.store import Store
 
 
-class ValidateGenericOrderService(ValidateOrderService):
+class ValidateCaseOrderService(ValidateOrderService):
 
     def __init__(self, status_db: Store):
         self.status_db = status_db

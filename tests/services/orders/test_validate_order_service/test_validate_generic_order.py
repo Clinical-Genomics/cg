@@ -3,8 +3,8 @@ import pytest
 from cg.exc import OrderError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
-from cg.services.orders.validate_order_services.validate_generic_order import (
-    ValidateGenericOrderService,
+from cg.services.orders.validate_order_services.validate_case_order import (
+    ValidateCaseOrderService,
 )
 from cg.store.store import Store
 
@@ -17,7 +17,7 @@ def test__validate_one_sample_per_case_multiple_samples(
     ### GIVEN an RNAFUSION order where the first and last sample share the same case
     order_data = OrderIn.parse_obj(obj=rnafusion_order_to_submit, project=OrderType.RNAFUSION)
     order_data.samples[-1].family_name = order_data.samples[0].family_name
-    validator = ValidateGenericOrderService(base_store)
+    validator = ValidateCaseOrderService(base_store)
 
     ### WHEN validating that each case has only one sample
     ### THEN an OrderError should be raised
@@ -35,7 +35,7 @@ def test__validate_one_sample_per_case_unique_samples(
     order_data: OrderIn = OrderIn.parse_obj(
         obj=rnafusion_order_to_submit, project=OrderType.RNAFUSION
     )
-    validator = ValidateGenericOrderService(base_store)
+    validator = ValidateCaseOrderService(base_store)
 
     ### WHEN validating that each case has only one sample
     validator._validate_only_one_sample_per_case(order_data.samples)

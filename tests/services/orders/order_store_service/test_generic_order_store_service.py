@@ -8,13 +8,13 @@ from copy import deepcopy
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.store_order_services.store_generic_order import StoreGenericOrderService
+from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
 def test_cases_to_status(
-    mip_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    mip_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ):
     # GIVEN a scout order with a trio case
     project: OrderType = OrderType.MIP_DNA
@@ -55,7 +55,7 @@ def test_cases_to_status(
 
 
 def test_cases_to_status_synopsis(
-    mip_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    mip_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ):
     # GIVEN a scout order with a trio case where synopsis is None
     modified_order: dict = deepcopy(mip_order_to_submit)
@@ -75,7 +75,7 @@ def test_store_mip(
     base_store: Store,
     mip_status_data: dict,
     ticket_id: str,
-    store_generic_order_service: StoreGenericOrderService,
+    store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert not base_store._get_query(table=Sample).first()
@@ -125,7 +125,7 @@ def test_store_mip_rna(
     base_store: Store,
     mip_rna_status_data,
     ticket_id: str,
-    store_generic_order_service: StoreGenericOrderService,
+    store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a basic store with no samples or nothing in it + rna order
     rna_application_tag = "RNAPOAR025"
@@ -158,7 +158,7 @@ def test_store_cancer_samples(
     base_store: Store,
     balsamic_status_data: dict,
     ticket_id: str,
-    store_generic_order_service: StoreGenericOrderService,
+    store_generic_order_service: StoreCaseOrderService,
 ):
 
     # GIVEN a basic store with no samples and a cancer order
@@ -200,7 +200,7 @@ def test_store_existing_single_sample_from_trio(
     base_store: Store,
     mip_status_data: dict,
     ticket_id: str,
-    store_generic_order_service: StoreGenericOrderService,
+    store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a stored trio case
 
@@ -260,7 +260,7 @@ def test_store_existing_case(
     base_store: Store,
     mip_status_data: dict,
     ticket_id: str,
-    store_generic_order_service: StoreGenericOrderService,
+    store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert not base_store._get_query(table=Sample).first()

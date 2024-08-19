@@ -14,7 +14,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class StoreGenericOrderService(StoreOrderService):
+class StoreCaseOrderService(StoreOrderService):
     """
     Service for storing generic orders in StatusDB and Lims.
     This class is used to store orders for the following workflows:

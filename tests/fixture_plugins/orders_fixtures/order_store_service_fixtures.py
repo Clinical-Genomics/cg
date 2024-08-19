@@ -2,7 +2,7 @@ import pytest
 
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.services.orders.store_order_services.store_generic_order import StoreGenericOrderService
+from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
@@ -13,10 +13,8 @@ from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
-def store_generic_order_service(
-    base_store: Store, lims_api: MockLimsAPI
-) -> StoreGenericOrderService:
-    return StoreGenericOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
+def store_generic_order_service(base_store: Store, lims_api: MockLimsAPI) -> StoreCaseOrderService:
+    return StoreCaseOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
 
 
 @pytest.fixture

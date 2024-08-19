@@ -14,7 +14,7 @@ from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.services.orders.store_order_services.store_generic_order import StoreGenericOrderService
+from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
@@ -407,7 +407,7 @@ def all_orders_to_submit(
 
 @pytest.fixture
 def balsamic_status_data(
-    balsamic_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    balsamic_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ) -> dict:
     """Parse balsamic order example."""
     project: OrderType = OrderType.BALSAMIC
@@ -448,7 +448,7 @@ def microbial_status_data(
 
 @pytest.fixture
 def mip_rna_status_data(
-    mip_rna_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    mip_rna_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ) -> dict:
     """Parse rna order example."""
     project: OrderType = OrderType.MIP_RNA
@@ -458,7 +458,7 @@ def mip_rna_status_data(
 
 @pytest.fixture
 def mip_status_data(
-    mip_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    mip_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ) -> dict:
     """Parse scout order example."""
     project: OrderType = OrderType.MIP_DNA
@@ -478,7 +478,7 @@ def rml_status_data(
 
 @pytest.fixture
 def tomte_status_data(
-    tomte_order_to_submit: dict, store_generic_order_service: StoreGenericOrderService
+    tomte_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
 ) -> dict:
     """Parse TOMTE order example."""
     project: OrderType = OrderType.TOMTE
