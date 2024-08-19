@@ -1,110 +1,42 @@
-import datetime as dt
 import logging
+from datetime import datetime
 
-from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Workflow
+from cg.constants import Workflow, Priority
+from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.pedigree import Pedigree
-from cg.exc import OrderError
-from cg.meta.orders.lims import process_lims
-from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
+from cg.models.orders.samples import Of1508Sample
+from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.store.models import Case, Customer, Sample, CaseSample, ApplicationVersion
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-class CaseSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        self._validate_samples_available_to_customer(
-            samples=order.samples, customer_id=order.customer
-        )
-        self._validate_case_names_are_unique(samples=order.samples, customer_id=order.customer)
-        self._validate_subject_sex(samples=order.samples, customer_id=order.customer)
+class StoreCaseOrderService(StoreOrderService):
+    """
+    Service for storing generic orders in StatusDB and Lims.
+    This class is used to store orders for the following workflows:
+    - Balsamic
+    - Balsamic QC
+    - Balsamic UMI
+    - MIP DNA
+    - MIP RNA
+    - Tomte
+    """
 
-    def _validate_subject_sex(self, samples: [Of1508Sample], customer_id: str):
-        """Validate that sex is consistent with existing samples, skips samples of unknown sex
+    def __init__(
+        self,
+        status_db: Store,
+        lims_service: OrderLimsService,
+    ):
+        self.status_db = status_db
+        self.lims = lims_service
 
-        Args:
-            samples     (list[dict]):   Samples to validate
-            customer_id (str):          Customer that the samples belong to
-        Returns:
-            Nothing
-        """
-
-        sample: Of1508Sample
-        for sample in samples:
-            subject_id: str = sample.subject_id
-            if not subject_id:
-                continue
-            new_gender: str = sample.sex
-            if new_gender == "unknown":
-                continue
-
-            existing_samples: list[Sample] = self.status.get_samples_by_customer_and_subject_id(
-                customer_internal_id=customer_id, subject_id=subject_id
-            )
-            existing_sample: Sample
-            for existing_sample in existing_samples:
-                previous_gender = existing_sample.sex
-                if previous_gender == "unknown":
-                    continue
-
-                if previous_gender != new_gender:
-                    raise OrderError(
-                        f"Sample gender inconsistency for subject_id: {subject_id}: previous gender {previous_gender}, new gender {new_gender}"
-                    )
-
-    def _validate_samples_available_to_customer(
-        self, samples: list[OrderInSample], customer_id: str
-    ) -> None:
-        """Validate that the customer have access to all samples"""
-        sample: Of1508Sample
-        for sample in samples:
-            if not sample.internal_id:
-                continue
-
-            existing_sample: Sample = self.status.get_sample_by_internal_id(
-                internal_id=sample.internal_id
-            )
-
-            data_customer: Customer = self.status.get_customer_by_internal_id(
-                customer_internal_id=customer_id
-            )
-
-            if existing_sample.customer not in data_customer.collaborators:
-                raise OrderError(f"Sample not available: {sample.name}")
-
-    def _validate_case_names_are_unique(
-        self, samples: list[OrderInSample], customer_id: str
-    ) -> None:
-        """Validate that the names of all cases are unused for all samples"""
-
-        customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
-
-        sample: Of1508Sample
-        for sample in samples:
-            if self._is_rerun_of_existing_case(sample=sample):
-                continue
-            if self.status.get_case_by_name_and_customer(
-                customer=customer, case_name=sample.family_name
-            ):
-                raise OrderError(f"Case name {sample.family_name} already in use")
-
-    def submit_order(self, order: OrderIn) -> dict:
+    def store_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self._process_case_samples(order=order)
-        for case_obj in result["records"]:
-            LOG.info(f"{case_obj.name}: submit family samples")
-            status_samples = [
-                link_obj.sample
-                for link_obj in case_obj.links
-                if link_obj.sample.original_ticket == order.ticket
-            ]
-            self._add_missing_reads(status_samples)
-        return result
+        return self._process_case_samples(order=order)
 
     def _process_case_samples(self, order: OrderIn) -> dict:
         """Process samples to be analyzed."""
@@ -113,8 +45,8 @@ class CaseSubmitter(Submitter):
         # submit new samples to lims
         new_samples = [sample for sample in order.samples if sample.internal_id is None]
         if new_samples:
-            project_data, lims_map = process_lims(
-                lims_api=self.lims, lims_order=order, new_samples=new_samples
+            project_data, lims_map = self.lims.process_lims(
+                lims_order=order, new_samples=new_samples
             )
 
         status_data = self.order_to_status(order=order)
@@ -125,7 +57,7 @@ class CaseSubmitter(Submitter):
         new_cases: list[Case] = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
-            ordered=project_data["date"] if project_data else dt.datetime.now(),
+            ordered=project_data["date"] if project_data else datetime.now(),
             ticket_id=order.ticket,
             items=status_data["families"],
         )
@@ -150,25 +82,20 @@ class CaseSubmitter(Submitter):
         single_value = values.pop()
         return single_value
 
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
+    def order_to_status(self, order: OrderIn) -> dict:
         """Converts order input to status interface input for MIP-DNA, MIP-RNA and Balsamic."""
         status_data = {"customer": order.customer, "order": order.name, "families": []}
-        cases = CaseSubmitter._group_cases(order.samples)
+        cases = self._group_cases(order.samples)
 
         for case_name, case_samples in cases.items():
-            case_internal_id: str = CaseSubmitter._get_single_value(
+            case_internal_id: str = self._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
             cohorts: set[str] = {
                 cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
-            data_analysis = CaseSubmitter._get_single_value(
-                case_name, case_samples, "data_analysis"
-            )
-            data_delivery = CaseSubmitter._get_single_value(
-                case_name, case_samples, "data_delivery"
-            )
+            data_analysis = self._get_single_value(case_name, case_samples, "data_analysis")
+            data_delivery = self._get_single_value(case_name, case_samples, "data_delivery")
 
             panels: set[str] = set()
             if data_analysis in [Workflow.MIP_DNA, Workflow.TOMTE]:
@@ -176,10 +103,10 @@ class CaseSubmitter(Submitter):
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
 
-            priority = CaseSubmitter._get_single_value(
+            priority = self._get_single_value(
                 case_name, case_samples, "priority", Priority.standard.name
             )
-            synopsis: str = CaseSubmitter._get_single_value(case_name, case_samples, "synopsis")
+            synopsis: str = self._get_single_value(case_name, case_samples, "synopsis")
 
             case = {
                 "cohorts": list(cohorts),
@@ -219,16 +146,16 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Case]:
         """Store cases, samples and their relationship in the Status database."""
-        customer: Customer = self.status.get_customer_by_internal_id(
+        customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         new_cases: list[Case] = []
 
         for case in items:
-            status_db_case: Case = self.status.get_case_by_internal_id(
+            status_db_case: Case = self.status_db.get_case_by_internal_id(
                 internal_id=case["internal_id"]
             )
             if not status_db_case:
@@ -245,7 +172,7 @@ class CaseSubmitter(Submitter):
 
             case_samples: dict[str, Sample] = {}
             for sample in case["samples"]:
-                existing_sample: Sample = self.status.get_sample_by_internal_id(
+                existing_sample: Sample = self.status_db.get_sample_by_internal_id(
                     internal_id=sample["internal_id"]
                 )
                 if not existing_sample:
@@ -264,8 +191,8 @@ class CaseSubmitter(Submitter):
             for sample in case["samples"]:
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
-                with self.status.session.no_autoflush:
-                    case_sample: CaseSample = self.status.get_case_sample_link(
+                with self.status_db.session.no_autoflush:
+                    case_sample: CaseSample = self.status_db.get_case_sample_link(
                         case_internal_id=status_db_case.internal_id,
                         sample_internal_id=sample["internal_id"],
                     )
@@ -284,8 +211,8 @@ class CaseSubmitter(Submitter):
                     mother_obj=sample_mother,
                     sample=sample,
                 )
-            self.status.session.add_all(new_cases)
-            self.status.session.commit()
+            self.status_db.session.add_all(new_cases)
+            self.status_db.session.commit()
         return new_cases
 
     @staticmethod
@@ -310,18 +237,18 @@ class CaseSubmitter(Submitter):
         link_obj.father = father_obj or link_obj.father
 
     def _create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
-        link_obj = self.status.relate_sample(
+        link_obj = self.status_db.relate_sample(
             case=case_obj,
             sample=family_samples[sample["name"]],
             status=sample["status"],
             mother=mother_obj,
             father=father_obj,
         )
-        self.status.session.add(link_obj)
+        self.status_db.session.add(link_obj)
         return link_obj
 
     def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
-        sample_obj = self.status.add_sample(
+        sample_obj = self.status_db.add_sample(
             name=sample["name"],
             comment=sample["comment"],
             control=sample["control"],
@@ -340,16 +267,16 @@ class CaseSubmitter(Submitter):
             subject_id=sample["subject_id"],
         )
         sample_obj.customer = customer_obj
-        with self.status.session.no_autoflush:
+        with self.status_db.session.no_autoflush:
             application_tag = sample["application"]
             sample_obj.application_version: ApplicationVersion = (
-                self.status.get_current_application_version_by_tag(tag=application_tag)
+                self.status_db.get_current_application_version_by_tag(tag=application_tag)
             )
-        self.status.session.add(sample_obj)
+        self.status_db.session.add(sample_obj)
         return sample_obj
 
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
-        case_obj = self.status.add_case(
+        case_obj = self.status_db.add_case(
             cohorts=case["cohorts"],
             data_analysis=Workflow(case["data_analysis"]),
             data_delivery=DataDelivery(case["data_delivery"]),

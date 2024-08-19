@@ -1,23 +1,53 @@
-import datetime as dt
+import logging
+from datetime import datetime
 
-from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
-from cg.constants.subject import Sex
-from cg.meta.orders.lims import process_lims
-from cg.meta.orders.submitter import Submitter
+from cg.constants import Workflow, DataDelivery, Sex
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Organism,
-    Sample,
-)
+from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.store.models import Sample, Customer, Case, ApplicationVersion, Organism, CaseSample
+from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
-class MicrobialSubmitter(Submitter):
+class StoreMicrobialOrderService(StoreOrderService):
+    """
+    Storing service for microbial orders.
+    These include:
+    - Mutant samples
+    - Microsalt samples
+    - Sars-Cov-2 samples
+    """
+
+    def __init__(self, status_db: Store, lims_service: OrderLimsService):
+        self.status = status_db
+        self.lims = lims_service
+
+    def store_order(self, order: OrderIn) -> dict:
+        self._fill_in_sample_verified_organism(order.samples)
+        # submit samples to LIMS
+        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        # prepare order for status database
+        status_data = self.order_to_status(order)
+        self._fill_in_sample_ids(
+            samples=status_data["samples"], lims_map=lims_map, id_key="internal_id"
+        )
+
+        # submit samples to Status
+        samples = self.store_items_in_status(
+            customer_id=status_data["customer"],
+            order=status_data["order"],
+            ordered=project_data["date"] if project_data else dt.datetime.now(),
+            ticket_id=order.ticket,
+            items=status_data["samples"],
+            comment=status_data["comment"],
+            data_analysis=Workflow(status_data["data_analysis"]),
+            data_delivery=DataDelivery(status_data["data_delivery"]),
+        )
+        return {"project": project_data, "records": samples}
+
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""
@@ -44,31 +74,6 @@ class MicrobialSubmitter(Submitter):
         }
         return status_data
 
-    def submit_order(self, order: OrderIn) -> dict:
-        self._fill_in_sample_verified_organism(order.samples)
-        # submit samples to LIMS
-        project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
-        # prepare order for status database
-        status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(
-            samples=status_data["samples"], lims_map=lims_map, id_key="internal_id"
-        )
-
-        # submit samples to Status
-        samples = self.store_items_in_status(
-            customer_id=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket_id=order.ticket,
-            items=status_data["samples"],
-            comment=status_data["comment"],
-            data_analysis=Workflow(status_data["data_analysis"]),
-            data_delivery=DataDelivery(status_data["data_delivery"]),
-        )
-        return {"project": project_data, "records": samples}
-
     def store_items_in_status(
         self,
         comment: str,
@@ -76,7 +81,7 @@ class MicrobialSubmitter(Submitter):
         data_analysis: Workflow,
         data_delivery: DataDelivery,
         order: str,
-        ordered: dt.datetime,
+        ordered: datetime,
         items: list[dict],
         ticket_id: str,
     ) -> [Sample]:

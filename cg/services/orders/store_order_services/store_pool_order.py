@@ -1,28 +1,34 @@
-import datetime as dt
+import logging
+from datetime import datetime
 
-from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
+from cg.constants import Workflow, DataDelivery
 from cg.exc import OrderError
-from cg.meta.orders.lims import process_lims
-from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Pool, Sample
+from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.store.models import ApplicationVersion, Customer, Pool, Sample, CaseSample, Case
+from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
-class PoolSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        super().validate_order(order=order)
-        self._validate_case_names_are_available(
-            customer_id=order.customer, samples=order.samples, ticket=order.ticket
-        )
+class StorePoolOrderService(StoreOrderService):
+    """
+    Storing service for pool orders.
+    These include:
+    - Fluffy / NIPT samples
+    - RML samples
+    """
 
-    def submit_order(self, order: OrderIn) -> dict:
+    def __init__(self, status_db: Store, lims_service: OrderLimsService):
+        self.status_db = status_db
+        self.lims = lims_service
+
+    def store_order(self, order: OrderIn) -> dict:
         status_data = self.order_to_status(order)
-        project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
+        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
         self._fill_in_sample_ids(samples=samples, lims_map=lims_map, id_key="internal_id")
         new_records = self.store_items_in_status(
@@ -104,28 +110,28 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Pool]:
         """Store pools in the status database."""
-        customer: Customer = self.status.get_customer_by_internal_id(
+        customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         new_pools: list[Pool] = []
         new_samples: list[Sample] = []
         for pool in items:
-            with self.status.session.no_autoflush:
+            with self.status_db.session.no_autoflush:
                 application_version: ApplicationVersion = (
-                    self.status.get_current_application_version_by_tag(tag=pool["application"])
+                    self.status_db.get_current_application_version_by_tag(tag=pool["application"])
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
-            case: Case = self.status.get_case_by_name_and_customer(
+            case: Case = self.status_db.get_case_by_name_and_customer(
                 customer=customer, case_name=case_name
             )
             if not case:
                 data_analysis: Workflow = Workflow(pool["data_analysis"])
                 data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
-                case = self.status.add_case(
+                case = self.status_db.add_case(
                     data_analysis=data_analysis,
                     data_delivery=data_delivery,
                     name=case_name,
@@ -134,9 +140,9 @@ class PoolSubmitter(Submitter):
                     ticket=ticket_id,
                 )
                 case.customer = customer
-                self.status.session.add(case)
+                self.status_db.session.add(case)
 
-            new_pool: Pool = self.status.add_pool(
+            new_pool: Pool = self.status_db.add_pool(
                 application_version=application_version,
                 customer=customer,
                 name=pool["name"],
@@ -146,7 +152,7 @@ class PoolSubmitter(Submitter):
             )
             sex: SexEnum = SexEnum.unknown
             for sample in pool["samples"]:
-                new_sample = self.status.add_sample(
+                new_sample = self.status_db.add_sample(
                     name=sample["name"],
                     sex=sex,
                     comment=sample["comment"],
@@ -161,25 +167,25 @@ class PoolSubmitter(Submitter):
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)
-                link: CaseSample = self.status.relate_sample(
+                link: CaseSample = self.status_db.relate_sample(
                     case=case, sample=new_sample, status="unknown"
                 )
-                self.status.session.add(link)
+                self.status_db.session.add(link)
             new_pools.append(new_pool)
-        self.status.session.add_all(new_pools)
-        self.status.session.commit()
+        self.status_db.session.add_all(new_pools)
+        self.status_db.session.commit()
         return new_pools
 
     def _validate_case_names_are_available(
         self, customer_id: str, samples: list[RmlSample], ticket: str
     ):
         """Validate names of all samples are not already in use."""
-        customer: Customer = self.status.get_customer_by_internal_id(
+        customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         for sample in samples:
             case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
-            if self.status.get_case_by_name_and_customer(customer=customer, case_name=case_name):
+            if self.status_db.get_case_by_name_and_customer(customer=customer, case_name=case_name):
                 raise OrderError(
                     f"Case name {case_name} already in use for customer {customer.name}"
                 )

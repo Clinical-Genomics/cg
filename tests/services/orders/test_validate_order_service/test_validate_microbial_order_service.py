@@ -1,11 +1,14 @@
 import pytest
 
 from cg.exc import OrderError
-from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
+
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
+from cg.services.orders.validate_order_services.validate_microbial_order import (
+    ValidateMicrobialOrderService,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -15,7 +18,7 @@ def test_validate_normal_order(sarscov2_order_to_submit: dict, base_store: Store
     order = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     # WHEN validating the order
-    SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
+    ValidateMicrobialOrderService(base_store).validate_order(order=order)
     # THEN it should be regarded as valid
 
 
@@ -32,7 +35,7 @@ def test_validate_submitted_order(
     # WHEN validating the order
     # THEN it should be regarded as invalid
     with pytest.raises(OrderError):
-        SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
+        ValidateMicrobialOrderService(base_store).validate_order(order=order)
 
 
 def test_validate_submitted_control_order(
@@ -48,4 +51,4 @@ def test_validate_submitted_control_order(
 
     # WHEN validating the order
     # THEN it should be regarded as valid
-    SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
+    ValidateMicrobialOrderService(base_store).validate_order(order=order)
