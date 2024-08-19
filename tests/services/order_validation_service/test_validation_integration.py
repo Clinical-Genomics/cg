@@ -12,7 +12,9 @@ def test_valid_order(valid_order: TomteOrder, tomte_validation_service: TomteVal
     errors = tomte_validation_service._get_errors(valid_order.model_dump())
 
     # THEN no errors should be raised
-    assert not errors
+    assert not errors.order_errors
+    assert not errors.case_errors
+    assert not errors.case_sample_errors
 
 
 def test_order_error_conversion(
@@ -54,8 +56,6 @@ def test_sample_error_conversion(
 
     # WHEN validating the order
     response = tomte_validation_service.validate(invalid_order)
-
-    errors = tomte_validation_service._get_errors(invalid_order)
 
     # THEN an error should be returned regarding the invalid volume
     assert response["cases"][0]["samples"][0]["volume"]["errors"]

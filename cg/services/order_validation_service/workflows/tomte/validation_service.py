@@ -4,7 +4,9 @@ from cg.services.order_validation_service.models.errors import (
     OrderError,
     ValidationErrors,
 )
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
+from cg.services.order_validation_service.order_validation_service import (
+    OrderValidationService,
+)
 from cg.services.order_validation_service.utils import (
     apply_case_sample_validation,
     apply_case_validation,
@@ -37,7 +39,7 @@ class TomteValidationService(OrderValidationService):
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
         order, field_errors = self.model_validator.validate(raw_order)
 
-        if field_errors:
+        if not order:
             return field_errors
 
         order_errors: list[OrderError] = apply_order_validation(

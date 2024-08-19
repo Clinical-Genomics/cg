@@ -64,14 +64,14 @@ def validate_application_compatibility(
     return errors
 
 
-def validate_buffer_skip_rc_condition(order: TomteOrder) -> list[InvalidBufferError]:
+def validate_buffer_skip_rc_condition(order: TomteOrder, **kwargs) -> list[InvalidBufferError]:
     errors: list[InvalidBufferError] = []
     if order.skip_reception_control:
         errors.extend(validate_buffers_are_allowed(order))
     return errors
 
 
-def validate_buffers_are_allowed(order: TomteOrder) -> list[InvalidBufferError]:
+def validate_buffers_are_allowed(order: TomteOrder, **kwargs) -> list[InvalidBufferError]:
     errors = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -82,7 +82,7 @@ def validate_buffers_are_allowed(order: TomteOrder) -> list[InvalidBufferError]:
 
 
 def validate_concentration_required_if_skip_rc(
-    order: TomteOrder,
+    order: TomteOrder, **kwargs
 ) -> list[ConcentrationRequiredIfSkipRCError]:
     if not order.skip_reception_control:
         return []
@@ -98,7 +98,7 @@ def validate_concentration_required_if_skip_rc(
 
 
 def validate_subject_ids_different_from_sample_names(
-    order: TomteOrder,
+    order: TomteOrder, **kwargs
 ) -> list[SubjectIdSameAsSampleNameError]:
     errors: list[SubjectIdSameAsSampleNameError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -111,7 +111,7 @@ def validate_subject_ids_different_from_sample_names(
     return errors
 
 
-def validate_well_positions_required(order: TomteOrder) -> list[WellPositionMissingError]:
+def validate_well_positions_required(order: TomteOrder, **kwargs) -> list[WellPositionMissingError]:
     errors: list[WellPositionMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -121,7 +121,9 @@ def validate_well_positions_required(order: TomteOrder) -> list[WellPositionMiss
     return errors
 
 
-def validate_container_name_required(order: TomteOrder) -> list[ContainerNameMissingError]:
+def validate_container_name_required(
+    order: TomteOrder, **kwargs
+) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
