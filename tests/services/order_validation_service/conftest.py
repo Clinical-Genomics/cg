@@ -26,7 +26,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.field.tomte
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
-from cg.store.models import Application
+from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
 
@@ -165,8 +165,8 @@ def order_with_repeated_case_names(case: TomteCase) -> TomteOrder:
 
 @pytest.fixture
 def order_with_invalid_father_sex(case: TomteCase):
-    child = case.samples[0]
-    father = case.samples[1]
+    child: TomteSample = case.samples[0]
+    father: TomteSample = case.samples[1]
     child.father = father.name
     father.sex = SexEnum.female
     return create_tomte_order([case])
@@ -174,8 +174,8 @@ def order_with_invalid_father_sex(case: TomteCase):
 
 @pytest.fixture
 def order_with_father_in_wrong_case(case: TomteCase):
-    child = case.samples[0]
-    father = case.samples[1]
+    child: TomteSample = case.samples[0]
+    father: TomteSample = case.samples[1]
     child.father = father.name
     case.samples = [child]
     return create_tomte_order([case])
@@ -231,7 +231,7 @@ def sample_with_invalid_concentration():
 
 @pytest.fixture
 def sample_with_missing_well_position():
-    sample = create_tomte_sample(1)
+    sample: TomteSample = create_tomte_sample(1)
     sample.well_position = None
     return sample
 
@@ -251,8 +251,8 @@ def application_with_concentration_interval(base_store: Store) -> Application:
 
 @pytest.fixture
 def order_with_invalid_concentration(sample_with_invalid_concentration) -> TomteOrder:
-    case = create_case([sample_with_invalid_concentration])
-    order = create_tomte_order([case])
+    case: TomteCase = create_case([sample_with_invalid_concentration])
+    order: TomteOrder = create_tomte_order([case])
     order.skip_reception_control = True
     return order
 
@@ -271,9 +271,9 @@ def tomte_model_validator() -> TomteModelValidator:
 
 @pytest.fixture
 def valid_microsalt_order() -> MicroSaltOrder:
-    sample_1 = create_microsalt_sample(1)
-    sample_2 = create_microsalt_sample(2)
-    sample_3 = create_microsalt_sample(3)
+    sample_1: MicroSaltSample = create_microsalt_sample(1)
+    sample_2: MicroSaltSample = create_microsalt_sample(2)
+    sample_3: MicroSaltSample = create_microsalt_sample(3)
     return create_microsalt_order([sample_1, sample_2, sample_3])
 
 
@@ -283,8 +283,8 @@ def tomte_validation_service(
     tomte_model_validator: TomteModelValidator,
     application_with_concentration_interval: Application,
 ) -> TomteValidationService:
-    customer = base_store.get_customer_by_internal_id("cust000")
-    user = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
+    customer: Customer = base_store.get_customer_by_internal_id("cust000")
+    user: User = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
