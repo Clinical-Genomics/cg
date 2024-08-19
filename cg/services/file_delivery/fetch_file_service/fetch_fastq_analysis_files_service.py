@@ -12,7 +12,7 @@ from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
 from cg.store.store import Store
 
 
-class FetchFatsqAndAnalysisDeliveryFilesService(FetchDeliveryFilesService):
+class FetchFastqAndAnalysisDeliveryFilesService(FetchDeliveryFilesService):
     def __init__(self, status_db: Store, hk_api: HousekeeperAPI):
         self.status_db = status_db
         self.hk_api = hk_api
