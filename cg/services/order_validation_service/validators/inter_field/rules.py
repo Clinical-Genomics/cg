@@ -72,7 +72,7 @@ def validate_buffer_skip_rc_condition(order: TomteOrder, **kwargs) -> list[Inval
 
 
 def validate_buffers_are_allowed(order: TomteOrder, **kwargs) -> list[InvalidBufferError]:
-    errors = []
+    errors: list[InvalidBufferError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:

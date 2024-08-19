@@ -1,5 +1,8 @@
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
 from cg.services.order_validation_service.models.sample import Sample
 from cg.store.store import Store
 
@@ -16,8 +19,8 @@ def contains_duplicates(input_list: list) -> bool:
 
 
 def is_volume_invalid(sample: Sample) -> bool:
-    in_container = is_in_container(sample.container)
-    allowed_volume = is_volume_within_allowed_interval(sample.volume)
+    in_container: bool = is_in_container(sample.container)
+    allowed_volume: bool = is_volume_within_allowed_interval(sample.volume)
     return in_container and not allowed_volume
 
 
