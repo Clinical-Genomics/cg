@@ -1,10 +1,13 @@
 from cg.services.order_validation_service.models.errors import (
-    CaseError,
     OrderError,
+    SampleError,
     ValidationErrors,
 )
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.order_validation_service.utils import apply_case_validation, apply_order_validation
+from cg.services.order_validation_service.utils import (
+    apply_order_validation,
+    apply_sample_validation,
+)
 from cg.services.order_validation_service.workflows.microsalt.validation.field.model_validator import (
     MicroSaltModelValidator,
 )
@@ -31,7 +34,7 @@ class MicroSaltValidationService(OrderValidationService):
             order=order,
             store=self.store,
         )
-        sample_errors: list[CaseError] = apply_case_validation(
+        sample_errors: list[SampleError] = apply_sample_validation(
             rules=SAMPLE_RULES,
             order=order,
             store=self.store,
