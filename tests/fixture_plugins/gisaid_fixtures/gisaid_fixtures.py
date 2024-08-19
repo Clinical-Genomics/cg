@@ -6,6 +6,14 @@ from cg.models.gisaid.reports import GisaidComplementaryReport
 
 
 @pytest.fixture
+def gisaid_log_raw() -> list[dict[str, str]]:
+    """Return a raw GISAID log."""
+    return [
+        {"code": "epi_isl_id", "msg": "hCoV-19/Sweden/01_SE100_00CS100000/2024; EPI_ISL_00000000"},
+    ]
+
+
+@pytest.fixture
 def gisaid_complementary_report_raw() -> dict[str, str]:
     """Return a raw GISAID complementary report."""
     return {
