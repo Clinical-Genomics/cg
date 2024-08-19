@@ -10,7 +10,6 @@ from cg.server import admin, ext, invoices
 from cg.server.app_config import app_config
 from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
-from cg.server.endpoints.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
