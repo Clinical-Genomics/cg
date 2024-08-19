@@ -170,13 +170,3 @@ class StoreMicrobialOrderService(StoreOrderService):
                 organism and organism.reference_genome == reference_genome and organism.verified
             )
             sample.verified_organism = is_verified
-
-    @staticmethod
-    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
-        """Fill in LIMS sample ids."""
-        for sample in samples:
-            LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample.get(id_key):
-                internal_id = lims_map[sample["name"]]
-                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample[id_key] = internal_id

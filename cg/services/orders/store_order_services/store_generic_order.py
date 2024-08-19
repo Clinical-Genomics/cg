@@ -291,13 +291,3 @@ class StoreGenericOrderService(StoreOrderService):
     @staticmethod
     def _is_rerun_of_existing_case(sample: Of1508Sample) -> bool:
         return sample.case_internal_id is not None
-
-    @staticmethod
-    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
-        """Fill in LIMS sample ids."""
-        for sample in samples:
-            LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample.get(id_key):
-                internal_id = lims_map[sample["name"]]
-                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample[id_key] = internal_id
