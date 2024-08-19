@@ -12,6 +12,9 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
+from cg.services.order_validation_service.workflows.tomte.response_mapper import (
+    create_order_validation_response,
+)
 from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
     TomteModelValidator,
 )
@@ -29,10 +32,14 @@ class TomteValidationService(OrderValidationService):
         self.store = store
         self.model_validator = model_validator
 
-    def validate(self, raw_order: dict) -> ValidationErrors:
+    def validate(self, raw_order: dict) -> dict:
+        errors: ValidationErrors = self._get_errors(raw_order)
+        return create_order_validation_response(raw_order=raw_order, errors=errors)
+
+    def _get_errors(self, raw_order: dict) -> ValidationErrors:
         order, field_errors = self.model_validator.validate(raw_order)
 
-        if field_errors:
+        if not order:
             return field_errors
 
         order_errors: list[OrderError] = apply_order_validation(

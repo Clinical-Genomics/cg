@@ -28,7 +28,7 @@ from cg.store.store import Store
 def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> list[OrderError]:
     has_access: bool = store.is_user_associated_with_customer(
         user_id=order.user_id,
-        customer_internal_id=order.customer_internal_id,
+        customer_internal_id=order.customer,
     )
 
     errors: list[OrderError] = []
@@ -46,7 +46,7 @@ def validate_customer_can_skip_reception_control(
     if not order.skip_reception_control:
         return errors
 
-    if not store.is_customer_trusted(order.customer_internal_id):
+    if not store.is_customer_trusted(order.customer):
         error = CustomerCannotSkipReceptionControlError()
         errors.append(error)
     return errors
@@ -56,7 +56,7 @@ def validate_customer_exists(
     order: Order, store: Store, **kwargs
 ) -> list[CustomerDoesNotExistError]:
     errors: list[CustomerDoesNotExistError] = []
-    if not store.customer_exists(order.customer_internal_id):
+    if not store.customer_exists(order.customer):
         error = CustomerDoesNotExistError()
         errors.append(error)
     return errors
@@ -106,7 +106,7 @@ def validate_gene_panels_exist(
     return errors
 
 
-def validate_volume_interval(order: TomteOrder) -> list[InvalidVolumeError]:
+def validate_volume_interval(order: TomteOrder, **kwargs) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -120,7 +120,7 @@ def validate_case_names_available(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[CaseNameNotAvailableError]:
     errors: list[CaseNameNotAvailableError] = []
-    customer = store.get_customer_by_internal_id(order.customer_internal_id)
+    customer = store.get_customer_by_internal_id(order.customer)
     for case_index, case in order.enumerated_new_cases:
         if store.get_case_by_name_and_customer(case_name=case.name, customer=customer):
             error = CaseNameNotAvailableError(case_index=case_index)
@@ -153,7 +153,7 @@ def validate_samples_exist(
     return errors
 
 
-def validate_sex_required_for_new_samples(order: TomteOrder) -> list[SexMissingError]:
+def validate_sex_required_for_new_samples(order: TomteOrder, **kwargs) -> list[SexMissingError]:
     errors: list[SexMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -163,7 +163,7 @@ def validate_sex_required_for_new_samples(order: TomteOrder) -> list[SexMissingE
     return errors
 
 
-def validate_source_required(order: TomteOrder) -> list[SourceMissingError]:
+def validate_source_required(order: TomteOrder, **kwargs) -> list[SourceMissingError]:
     errors: list[SourceMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:

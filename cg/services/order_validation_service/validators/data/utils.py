@@ -19,9 +19,9 @@ def contains_duplicates(input_list: list) -> bool:
 
 
 def is_volume_invalid(sample: Sample) -> bool:
-    return is_in_container(sample.container) and not is_volume_within_allowed_interval(
-        sample.volume
-    )
+    in_container: bool = is_in_container(sample.container)
+    allowed_volume: bool = is_volume_within_allowed_interval(sample.volume)
+    return in_container and not allowed_volume
 
 
 def is_in_container(container: ContainerEnum) -> bool:

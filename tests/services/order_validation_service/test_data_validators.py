@@ -98,7 +98,7 @@ def test_case_name_not_available(
     # GIVEN an order with a new case that has the same name as an existing case
     case = store.get_cases()[0]
     valid_order.cases[0].name = case.name
-    valid_order.customer_internal_id = case.customer.internal_id
+    valid_order.customer = case.customer.internal_id
 
     # WHEN validating that the case name is available
     errors = validate_case_names_available(order=valid_order, store=store)

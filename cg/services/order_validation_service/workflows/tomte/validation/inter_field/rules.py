@@ -30,7 +30,9 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
 from cg.store.store import Store
 
 
-def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[OccupiedWellError]:
+def validate_wells_contain_at_most_one_sample(
+    order: TomteOrder, **kwargs
+) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
     well_position_to_sample_map: dict[tuple[str, str], list[tuple[int, int]]] = (
         create_well_position_to_sample_map(order)
@@ -43,7 +45,7 @@ def validate_wells_contain_at_most_one_sample(order: TomteOrder) -> list[Occupie
 
 
 def create_well_position_to_sample_map(
-    order: TomteOrder,
+    order: TomteOrder, **kwargs
 ) -> dict[tuple[str, str], list[tuple[int, int]]]:
     """
     Constructs a dict with keys being a (container_name, well_position) pair. For each such pair, the value will be
@@ -62,11 +64,13 @@ def create_well_position_to_sample_map(
     return well_position_to_sample_map
 
 
-def validate_case_names_not_repeated(order: TomteOrder) -> list[RepeatedCaseNameError]:
+def validate_case_names_not_repeated(order: TomteOrder, **kwargs) -> list[RepeatedCaseNameError]:
     return get_repeated_case_name_errors(order)
 
 
-def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSampleNameError]:
+def validate_sample_names_not_repeated(
+    order: TomteOrder, **kwargs
+) -> list[RepeatedSampleNameError]:
     errors: list[RepeatedSampleNameError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[RepeatedSampleNameError] = get_repeated_sample_name_errors(
@@ -76,7 +80,7 @@ def validate_sample_names_not_repeated(order: TomteOrder) -> list[RepeatedSample
     return errors
 
 
-def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
+def validate_fathers_are_male(order: TomteOrder, **kwargs) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
@@ -86,7 +90,9 @@ def validate_fathers_are_male(order: TomteOrder) -> list[InvalidFatherSexError]:
     return errors
 
 
-def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherNotInCaseError]:
+def validate_fathers_in_same_case_as_children(
+    order: TomteOrder, **kwargs
+) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
@@ -97,7 +103,7 @@ def validate_fathers_in_same_case_as_children(order: TomteOrder) -> list[FatherN
     return errors
 
 
-def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError]:
+def validate_mothers_are_female(order: TomteOrder, **kwargs) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
@@ -108,7 +114,9 @@ def validate_mothers_are_female(order: TomteOrder) -> list[InvalidMotherSexError
     return errors
 
 
-def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherNotInCaseError]:
+def validate_mothers_in_same_case_as_children(
+    order: TomteOrder, **kwargs
+) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
@@ -118,7 +126,7 @@ def validate_mothers_in_same_case_as_children(order: TomteOrder) -> list[MotherN
     return errors
 
 
-def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
+def validate_pedigree(order: TomteOrder, **kwargs) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
     for case_index, case in order.enumerated_cases:
         case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
@@ -127,7 +135,7 @@ def validate_pedigree(order: TomteOrder) -> list[PedigreeError]:
 
 
 def validate_subject_ids_different_from_case_names(
-    order: TomteOrder,
+    order: TomteOrder, **kwargs
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
     for index, case in order.enumerated_new_cases:
@@ -139,7 +147,7 @@ def validate_subject_ids_different_from_case_names(
 
 
 def validate_concentration_interval_if_skip_rc(
-    order: TomteOrder, store: Store
+    order: TomteOrder, store: Store, **kwargs
 ) -> list[InvalidConcentrationIfSkipRCError]:
     if not order.skip_reception_control:
         return []
@@ -152,7 +160,7 @@ def validate_concentration_interval_if_skip_rc(
     return errors
 
 
-def validate_status_required_if_new(order: TomteOrder) -> list[StatusMissingError]:
+def validate_status_required_if_new(order: TomteOrder, **kwargs) -> list[StatusMissingError]:
     errors: list[StatusMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:

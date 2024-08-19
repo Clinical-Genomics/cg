@@ -55,7 +55,7 @@ def create_order(cases: list[TomteCase]) -> TomteOrder:
         ticket_number="#12345",
         workflow=Workflow.TOMTE,
         user_id=1,
-        customer="customer",
+        customer="cust000",
         cases=cases,
     )
 
@@ -239,7 +239,13 @@ def tomte_model_validator() -> TomteModelValidator:
 def tomte_validation_service(
     base_store: Store,
     tomte_model_validator: TomteModelValidator,
+    application_with_concentration_interval: Application,
 ) -> TomteValidationService:
+    customer = base_store.get_customer_by_internal_id("cust000")
+    user = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
+    base_store.session.add(user)
+    base_store.session.add(application_with_concentration_interval)
+    base_store.session.commit()
     return TomteValidationService(
         store=base_store,
         model_validator=tomte_model_validator,

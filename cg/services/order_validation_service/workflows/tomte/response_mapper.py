@@ -1,4 +1,5 @@
 from typing import Any
+
 from cg.services.order_validation_service.models.errors import (
     CaseError,
     CaseSampleError,
@@ -7,7 +8,7 @@ from cg.services.order_validation_service.models.errors import (
 )
 
 
-def create_validated_order_response(raw_order: dict, errors: ValidationErrors) -> dict:
+def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
     """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
     wrap_fields(raw_order)
     map_errors_to_order(order=raw_order, errors=errors)
