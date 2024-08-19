@@ -1,9 +1,7 @@
-"""DTO for the sequencing metrics."""
-
 from pydantic import BaseModel
 
 
-class SequencingMetricsRequest(BaseModel):
+class SequencingMetrics(BaseModel):
     flow_cell_name: str
     flow_cell_lane_number: int
     sample_internal_id: str
