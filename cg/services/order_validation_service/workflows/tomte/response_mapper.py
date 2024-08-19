@@ -20,28 +20,26 @@ def map_errors_to_order(order: dict, errors: ValidationErrors) -> None:
 
 def map_order_errors(order: dict, errors: list[OrderError]) -> None:
     for error in errors:
-        add_error_to_order(order=order, error=error)
+        add_error(entity=order, field=error.field, message=error.message)
 
 
 def map_case_errors(order: dict, errors: list[CaseError]) -> None:
     for error in errors:
         case: dict = get_case(order=order, index=error.case_index)
-        add_error_to_case(case=case, error=error)
+        add_error(entity=case, field=error.field, message=error.message)
 
 
 def map_case_sample_errors(order: dict, errors: list[CaseSampleError]) -> None:
     for error in errors:
         case: dict = get_case(order=order, index=error.case_index)
         sample: dict = get_sample(case=case, index=error.sample_index)
-        add_error_to_sample_field(sample=sample, error=error)
+        add_error(entity=sample, field=error.field, message=error.message)
 
 
-def add_error_to_order(order: dict, error: OrderError) -> None:
-    order[error.field]["errors"].append(error.message)
-
-
-def add_error_to_case(case: dict, error: CaseError) -> None:
-    case[error.field]["errors"].append(error.message)
+def add_error(entity: dict, field: str, message: str) -> None:
+    if not entity.get(field):
+        entity[field] = {"value": None, "errors": []}
+    entity[field]["errors"].append(message)
 
 
 def get_case(order: dict, index: int) -> dict:
@@ -50,10 +48,6 @@ def get_case(order: dict, index: int) -> dict:
 
 def get_sample(case: dict, index: int) -> dict:
     return case["samples"][index]
-
-
-def add_error_to_sample_field(sample: dict, error: CaseSampleError) -> None:
-    sample[error.field]["errors"].append(error.message)
 
 
 def wrap_fields(raw_order: dict) -> None:
