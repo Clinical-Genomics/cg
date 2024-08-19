@@ -17,12 +17,11 @@ from cg.store.store import Store
 
 class MicroSaltValidationService(OrderValidationService):
 
-    def __init__(self, store: Store, model_validator: MicroSaltModelValidator):
+    def __init__(self, store: Store):
         self.store = store
-        self.model_validator = model_validator
 
     def validate(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = self.model_validator.validate(raw_order)
+        order, field_errors = MicroSaltModelValidator.validate(raw_order)
 
         if field_errors:
             return field_errors
