@@ -1,10 +1,8 @@
 from pydantic_core import ValidationError
 
 from cg.services.order_validation_service.models.errors import ValidationErrors
+from cg.services.order_validation_service.validators.field.utils import convert_errors
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.validation.field.utils import (
-    convert_errors,
-)
 
 
 class TomteModelValidator:
