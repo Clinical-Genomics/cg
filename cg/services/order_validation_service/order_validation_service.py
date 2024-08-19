@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class OrderValidationService(ABC):
     @abstractmethod
-    def validate(self, order_json: str) -> dict:
+    def validate(self, raw_order: dict) -> dict:
         pass
