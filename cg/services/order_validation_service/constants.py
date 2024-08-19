@@ -12,6 +12,7 @@ class TissueBlockEnum(Enum):
 ALLOWED_SKIP_RC_BUFFERS = ["Nuclease-free water", "Tris-HCl"]
 
 WORKFLOW_PREP_CATEGORIES: dict[Workflow, list[PrepCategory]] = {
+    Workflow.MICROSALT: [PrepCategory.COVID, PrepCategory.MICROBIAL],
     Workflow.TOMTE: [PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING],
 }
 
