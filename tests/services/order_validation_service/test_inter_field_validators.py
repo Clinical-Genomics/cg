@@ -1,13 +1,15 @@
 import pytest
 
-from cg.services.order_validation_service.models.errors import (
+from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotCompatibleError,
     ContainerNameMissingError,
     InvalidVolumeError,
-    OrderNameRequiredError,
     SubjectIdSameAsCaseNameError,
-    TicketNumberRequiredError,
     WellPositionMissingError,
+)
+from cg.services.order_validation_service.errors.order_errors import (
+    OrderNameRequiredError,
+    TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.data.rules import (

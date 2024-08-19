@@ -1,14 +1,5 @@
-from cg.services.order_validation_service.models.errors import (
-    ApplicationArchivedError,
-    ApplicationNotValidError,
-    CaseDoesNotExistError,
-    CaseNameNotAvailableError,
-    InvalidGenePanelsError,
-    RepeatedGenePanelsError,
-    SampleDoesNotExistError,
-    SexMissingError,
-    SourceMissingError,
-)
+from cg.services.order_validation_service.errors.case_errors import CaseDoesNotExistError, CaseNameNotAvailableError, InvalidGenePanelsError, RepeatedGenePanelsError
+from cg.services.order_validation_service.errors.case_sample_errors import ApplicationArchivedError, ApplicationNotValidError, SampleDoesNotExistError, SexMissingError, SourceMissingError
 from cg.services.order_validation_service.validators.data.rules import (
     validate_application_exists,
     validate_application_not_archived,

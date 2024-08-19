@@ -3,15 +3,17 @@ from cg.services.order_validation_service.constants import (
     ALLOWED_SKIP_RC_BUFFERS,
     WORKFLOW_PREP_CATEGORIES,
 )
-from cg.services.order_validation_service.models.errors import (
+from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotCompatibleError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     InvalidBufferError,
-    OrderNameRequiredError,
     SubjectIdSameAsSampleNameError,
-    TicketNumberRequiredError,
     WellPositionMissingError,
+)
+from cg.services.order_validation_service.errors.order_errors import (
+    OrderNameRequiredError,
+    TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.validators.inter_field.utils import (

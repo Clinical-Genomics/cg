@@ -1,12 +1,10 @@
 from pydantic_core import ErrorDetails, ValidationError
 
-from cg.services.order_validation_service.models.errors import (
-    CaseError,
-    CaseSampleError,
-    OrderError,
-    SampleError,
-    ValidationErrors,
-)
+from cg.services.order_validation_service.errors.case_errors import CaseError
+from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
+from cg.services.order_validation_service.errors.order_errors import OrderError
+from cg.services.order_validation_service.errors.sample_errors import SampleError
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 
 
 def convert_errors(pydantic_errors: ValidationError) -> ValidationErrors:

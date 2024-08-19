@@ -3,14 +3,14 @@ from collections import Counter
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.models.errors import (
+from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_sample_errors import (
     FatherNotInCaseError,
     InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     InvalidMotherSexError,
     MotherNotInCaseError,
     OccupiedWellError,
-    RepeatedCaseNameError,
     RepeatedSampleNameError,
     SubjectIdSameAsCaseNameError,
 )

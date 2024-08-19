@@ -4,55 +4,12 @@ from cg.services.order_validation_service.constants import (
     MAXIMUM_VOLUME,
     MINIMUM_VOLUME,
 )
-
-
-class OrderError(BaseModel):
-    field: str
-    message: str
-
-
-class CaseError(OrderError):
-    case_index: int
-
-
-class SampleError(OrderError):
-    sample_index: int
+from cg.services.order_validation_service.errors.case_errors import CaseError
+from cg.services.order_validation_service.errors.sample_errors import SampleError
 
 
 class CaseSampleError(CaseError, SampleError):
     pass
-
-
-class ValidationErrors(BaseModel):
-    order_errors: list[OrderError] = []
-    case_errors: list[CaseError] = []
-    sample_errors: list[SampleError] = []
-    case_sample_errors: list[CaseSampleError] = []
-
-
-class UserNotAssociatedWithCustomerError(OrderError):
-    field: str = "customer"
-    message: str = "User does not belong to customer"
-
-
-class TicketNumberRequiredError(OrderError):
-    field: str = "ticket_number"
-    message: str = "Ticket number is required"
-
-
-class CustomerCannotSkipReceptionControlError(OrderError):
-    field: str = "skip_reception_control"
-    message: str = "Customer cannot skip reception control"
-
-
-class CustomerDoesNotExistError(OrderError):
-    field: str = "customer"
-    message: str = "Customer does not exist"
-
-
-class OrderNameRequiredError(OrderError):
-    field: str = "name"
-    message: str = "Order name is required"
 
 
 class OccupiedWellError(CaseSampleError):
@@ -73,11 +30,6 @@ class ApplicationNotValidError(CaseSampleError):
 class ApplicationNotCompatibleError(CaseSampleError):
     field: str = "application"
     message: str = "Application is not allowed for the chosen workflow"
-
-
-class RepeatedCaseNameError(CaseError):
-    field: str = "name"
-    message: str = "Case name already used"
 
 
 class RepeatedSampleNameError(CaseSampleError):
@@ -129,20 +81,24 @@ class MotherNotInCaseError(CaseSampleError):
     message: str = "Mother must be in the same case"
 
 
-class InvalidGenePanelsError(CaseError):
-    def __init__(self, case_index: int, panels: list[str]):
-        message = "Invalid panels: " + ",".join(panels)
-        super(CaseError, self).__init__(field="panels", case_index=case_index, message=message)
+class StatusMissingError(CaseSampleError):
+    field: str = "status"
+    message: str = "Carrier status is required"
 
 
-class InvalidBufferError(CaseSampleError):
-    field: str = "elution_buffer"
-    message: str = "The chosen buffer is not allowed when skipping reception control"
+class SampleDoesNotExistError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "The sample does not exist"
 
 
-class RepeatedGenePanelsError(CaseError):
-    field: str = "panels"
-    message: str = "Gene panels must be unique"
+class SexMissingError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Sex is required"
+
+
+class SourceMissingError(CaseSampleError):
+    field: str = "source"
+    message: str = "Source is required"
 
 
 class SubjectIdSameAsCaseNameError(CaseSampleError):
@@ -186,31 +142,6 @@ class InvalidVolumeError(CaseSampleError):
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
 
 
-class CaseNameNotAvailableError(CaseError):
-    field: str = "name"
-    message: str = "Case name already used in a previous order"
-
-
-class CaseDoesNotExistError(CaseError):
-    field: str = "internal_id"
-    message: str = "The case does not exist"
-
-
-class StatusMissingError(CaseSampleError):
-    field: str = "status"
-    message: str = "Carrier status is required"
-
-
-class SampleDoesNotExistError(CaseSampleError):
-    field: str = "internal_id"
-    message: str = "The sample does not exist"
-
-
-class SexMissingError(CaseSampleError):
-    field: str = "sex"
-    message: str = "Sex is required"
-
-
-class SourceMissingError(CaseSampleError):
-    field: str = "source"
-    message: str = "Source is required"
+class InvalidBufferError(CaseSampleError):
+    field: str = "elution_buffer"
+    message: str = "The chosen buffer is not allowed when skipping reception control"
