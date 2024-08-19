@@ -1,8 +1,6 @@
-from cg.services.order_validation_service.models.errors import (
-    OrderError,
-    SampleError,
-    ValidationErrors,
-)
+from cg.services.order_validation_service.errors.order_errors import OrderError
+from cg.services.order_validation_service.errors.sample_errors import SampleError
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.utils import (
     apply_order_validation,

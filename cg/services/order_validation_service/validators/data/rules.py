@@ -1,17 +1,21 @@
-from cg.services.order_validation_service.models.errors import (
-    ApplicationArchivedError,
-    ApplicationNotValidError,
+from cg.services.order_validation_service.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
-    CustomerCannotSkipReceptionControlError,
-    CustomerDoesNotExistError,
     InvalidGenePanelsError,
-    InvalidVolumeError,
-    OrderError,
     RepeatedGenePanelsError,
+)
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    ApplicationArchivedError,
+    ApplicationNotValidError,
+    InvalidVolumeError,
     SampleDoesNotExistError,
     SexMissingError,
     SourceMissingError,
+)
+from cg.services.order_validation_service.errors.order_errors import (
+    CustomerCannotSkipReceptionControlError,
+    CustomerDoesNotExistError,
+    OrderError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order

@@ -1,11 +1,10 @@
 from typing import Callable
 
-from cg.services.order_validation_service.models.errors import (
-    CaseError,
-    CaseSampleError,
-    OrderError,
-    SampleError,
-)
+
+from cg.services.order_validation_service.errors.case_errors import CaseError
+from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
+from cg.services.order_validation_service.errors.order_errors import OrderError
+from cg.services.order_validation_service.errors.sample_errors import SampleError
 from cg.services.order_validation_service.models.order import Order
 from cg.store.store import Store
 

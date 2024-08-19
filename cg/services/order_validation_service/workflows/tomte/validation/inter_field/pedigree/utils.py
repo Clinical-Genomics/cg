@@ -1,5 +1,5 @@
 from cg.constants.pedigree import Pedigree
-from cg.services.order_validation_service.models.errors import (
+from cg.services.order_validation_service.errors.case_sample_errors import (
     DescendantAsFatherError,
     DescendantAsMotherError,
     PedigreeError,

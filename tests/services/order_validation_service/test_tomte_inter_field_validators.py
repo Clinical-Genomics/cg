@@ -1,4 +1,5 @@
-from cg.services.order_validation_service.models.errors import (
+from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_sample_errors import (
     ConcentrationRequiredIfSkipRCError,
     DescendantAsFatherError,
     FatherNotInCaseError,
@@ -6,7 +7,6 @@ from cg.services.order_validation_service.models.errors import (
     InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     OccupiedWellError,
-    RepeatedCaseNameError,
     RepeatedSampleNameError,
     SampleIsOwnFatherError,
     StatusMissingError,
