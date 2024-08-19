@@ -100,7 +100,6 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(POOLS_BLUEPRINT)
     app.register_blueprint(FLOW_CELLS_BLUEPRINT)
     app.register_blueprint(ANALYSES_BLUEPRINT)
-    app.register_blueprint(USERS_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(SAMPLES_BLUEPRINT)

@@ -4,7 +4,7 @@ from cg.server.ext import db
 from cg.server.endpoints.utils import before_request
 from cg.store.models import Analysis
 
-ANALYSES_BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+ANALYSES_BLUEPRINT = Blueprint("analyses", __name__, url_prefix="/api/v1")
 ANALYSES_BLUEPRINT.before_request(before_request)
 
 

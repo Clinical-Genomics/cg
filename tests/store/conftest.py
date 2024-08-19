@@ -11,8 +11,8 @@ from cg.constants import Workflow
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
-from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
+from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.models import (
     Analysis,
     Application,
@@ -514,7 +514,7 @@ def rml_pool_store(
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
-        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
+        name=StorePoolOrderService.create_case_name(ticket=ticket_id, pool_name="Test"),
     )
     store.session.add(new_case)
 
