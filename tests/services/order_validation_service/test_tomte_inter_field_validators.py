@@ -1,3 +1,4 @@
+from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ConcentrationRequiredIfSkipRCError,
     DescendantAsFatherError,
