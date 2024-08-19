@@ -246,7 +246,4 @@ def tomte_validation_service(
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
-    return TomteValidationService(
-        store=base_store,
-        model_validator=tomte_model_validator,
-    )
+    return TomteValidationService(base_store)
