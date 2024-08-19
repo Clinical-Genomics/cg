@@ -17,6 +17,20 @@ def test_valid_order(valid_order: TomteOrder, tomte_validation_service: TomteVal
     assert not errors.case_sample_errors
 
 
+def test_valid_order_conversion(
+    valid_order: TomteOrder, tomte_validation_service: TomteValidationService
+):
+
+    # GIVEN a valid order
+    order: dict = valid_order.model_dump()
+
+    # WHEN validating the order
+    response = tomte_validation_service.validate(order)
+
+    # THEN a response should be given
+    assert response
+
+
 def test_order_error_conversion(
     valid_order: TomteOrder, tomte_validation_service: TomteValidationService
 ):
@@ -32,18 +46,17 @@ def test_order_error_conversion(
     assert response["name"]["errors"]
 
 
-def test_valid_order_conversion(
-    valid_order: TomteOrder, tomte_validation_service: TomteValidationService
-):
+def test_case_error_conversion(valid_order, tomte_validation_service: TomteValidationService):
 
-    # GIVEN a valid order
-    order: dict = valid_order.model_dump()
+    # GIVEN an order with a faulty case priority
+    valid_order.cases[0].priority = "Non-existent priority"
+    order = valid_order.model_dump()
 
     # WHEN validating the order
-    response = tomte_validation_service.validate(order)
+    response: dict = tomte_validation_service.validate(order)
 
-    # THEN a response should be given
-    assert response
+    # THEN there should be an error for the faulty priority
+    assert response["cases"][0]["priority"]["errors"]
 
 
 def test_sample_error_conversion(
