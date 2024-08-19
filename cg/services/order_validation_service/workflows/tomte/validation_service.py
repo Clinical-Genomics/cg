@@ -28,16 +28,15 @@ from cg.store.store import Store
 
 class TomteValidationService(OrderValidationService):
 
-    def __init__(self, store: Store, model_validator: TomteModelValidator):
+    def __init__(self, store: Store):
         self.store = store
-        self.model_validator = model_validator
 
     def validate(self, raw_order: dict) -> dict:
         errors: ValidationErrors = self._get_errors(raw_order)
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = self.model_validator.validate(raw_order)
+        order, field_errors = TomteModelValidator.validate(raw_order)
 
         if not order:
             return field_errors
