@@ -1,3 +1,4 @@
+from typing import Any
 from cg.services.order_validation_service.models.errors import (
     CaseError,
     CaseSampleError,
@@ -7,15 +8,7 @@ from cg.services.order_validation_service.models.errors import (
 
 
 def create_validated_order_response(raw_order: dict, errors: ValidationErrors) -> dict:
-    """Maps the errors to the order and wraps the fields.
-
-    Args:
-        raw_order (dict): the raw order data provided in the request
-        errors (ValidationErrors): the errors that occurred during validation
-
-    Returns:
-        dict: each field has the structure field: {value: raw value, errors: [errors]}"
-    """
+    """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
     wrap_fields(raw_order)
     map_errors_to_order(order=raw_order, errors=errors)
     return raw_order
@@ -47,7 +40,7 @@ def map_case_sample_errors(order: dict, errors: list[CaseSampleError]) -> None:
 
 def add_error(entity: dict, field: str, message: str) -> None:
     if not entity.get(field):
-        entity[field] = {"value": None, "errors": []}
+        set_field(entity=entity, field=field, value=None)
     entity[field]["errors"].append(message)
 
 
@@ -67,22 +60,27 @@ def wrap_fields(raw_order: dict) -> None:
 def wrap_order_fields(raw_order: dict) -> None:
     for field, value in raw_order.items():
         if field not in {"cases", "samples"}:
-            raw_order[field] = {"value": value, "errors": []}
+            set_field(entity=raw_order, field=field, value=value)
 
 
 def wrap_case_and_sample_fields(raw_order: dict) -> None:
     for case in raw_order["cases"]:
         wrap_case_fields(case)
-        wrap_sample_fields(case["samples"])
+        wrap_sample_fields(case)
 
 
 def wrap_case_fields(case: dict) -> None:
     for field, value in case.items():
         if field != "samples":
-            case[field] = {"value": value, "errors": []}
+            set_field(entity=case, field=field, value=value)
 
 
-def wrap_sample_fields(samples: list[dict]) -> None:
+def wrap_sample_fields(case: dict) -> None:
+    samples: list[dict] = case.get("samples", [])
     for sample in samples:
         for field, value in sample.items():
-            sample[field] = {"value": value, "errors": []}
+            set_field(entity=sample, field=field, value=value)
+
+
+def set_field(entity: dict, field: str, value: Any) -> None:
+    entity[field] = {"value": value, "errors": []}
