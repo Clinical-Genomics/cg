@@ -23,6 +23,26 @@ from cg.store.models import Application
 from cg.store.store import Store
 
 
+def get_well_sample_map(
+    order: TomteOrder, **kwargs
+) -> dict[tuple[str, str], list[tuple[int, int]]]:
+    """
+    Constructs a dict with keys being a (container_name, well_position) pair. For each such pair, the value will be
+    a list of (case index, sample index) pairs corresponding to all samples with matching container_name and
+    well_position, provided the sample is on a plate.
+    """
+    well_position_to_sample_map = {}
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_sample_on_plate(sample):
+                key: tuple[str, str] = (sample.container_name, sample.well_position)
+                value: tuple[int, int] = (case_index, sample_index)
+                if not well_position_to_sample_map.get(key):
+                    well_position_to_sample_map[key] = []
+                well_position_to_sample_map[key].append(value)
+    return well_position_to_sample_map
+
+
 def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
     for sample_index, case_index in colliding_samples:

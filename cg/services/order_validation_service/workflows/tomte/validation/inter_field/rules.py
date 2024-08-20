@@ -16,6 +16,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
+    get_well_sample_map,
     get_father_case_errors,
     get_father_sex_errors,
     get_mother_case_errors,
@@ -34,34 +35,14 @@ def validate_wells_contain_at_most_one_sample(
     order: TomteOrder, **kwargs
 ) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
-    well_position_to_sample_map: dict[tuple[str, str], list[tuple[int, int]]] = (
-        create_well_position_to_sample_map(order)
+    well_position_to_sample_map: dict[tuple[str, str], list[tuple[int, int]]] = get_well_sample_map(
+        order
     )
     for indices in well_position_to_sample_map.values():
         if len(indices) > 1:
             well_errors = get_occupied_well_errors(indices[1:])
             errors.extend(well_errors)
     return errors
-
-
-def create_well_position_to_sample_map(
-    order: TomteOrder, **kwargs
-) -> dict[tuple[str, str], list[tuple[int, int]]]:
-    """
-    Constructs a dict with keys being a (container_name, well_position) pair. For each such pair, the value will be
-    a list of (case index, sample index) pairs corresponding to all samples with matching container_name and
-    well_position, provided the sample is on a plate.
-    """
-    well_position_to_sample_map = {}
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if is_sample_on_plate(sample):
-                key: tuple[str, str] = (sample.container_name, sample.well_position)
-                value: tuple[int, int] = (case_index, sample_index)
-                if not well_position_to_sample_map.get(key):
-                    well_position_to_sample_map[key] = []
-                well_position_to_sample_map[key].append(value)
-    return well_position_to_sample_map
 
 
 def validate_case_names_not_repeated(order: TomteOrder, **kwargs) -> list[RepeatedCaseNameError]:
