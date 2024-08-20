@@ -28,18 +28,10 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
 
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
-        case: Case = self._get_case(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self.get_analysis_case_delivery_files(case)
-        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(
-            case=case
-        )
+        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
         return DeliveryFiles(case_files=analysis_case_files, sample_files=analysis_sample_files)
-
-    def _get_case(self, case_id: str):
-        """Get the case."""
-        if case := self.status_db.get_case_by_internal_id(internal_id=case_id):
-            return case
-        raise EntryNotFoundError(f"Case {case_id} not found.")
 
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
