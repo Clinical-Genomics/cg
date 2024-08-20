@@ -1,17 +1,6 @@
 from abc import abstractmethod, ABC
 
 
-class FetchDeliveryFileTagsService(ABC):
-    """
-    Abstract class that encapsulates the logic required for fetching tags for files to deliver.
-    """
-
-    @abstractmethod
-    def fetch_tags(self, case_id: str) -> None:
-        """Fetch the tags for the files to deliver."""
-        pass
-
-
 class FilterDeliveryFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for filtering files to deliver.

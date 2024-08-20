@@ -1,5 +1,8 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
+from cg.services.file_delivery.fetch_delivery_files_tags.fetch_fastq_delivery_file_tags_service import (
+    FetchFastqDeliveryFileTagsService,
+)
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
@@ -14,9 +17,15 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
     Fetch the fastq files for a case from Housekeeper.
     """
 
-    def __init__(self, status_db: Store, hk_api: HousekeeperAPI):
+    def __init__(
+        self,
+        status_db: Store,
+        hk_api: HousekeeperAPI,
+        tags_fetcher: FetchFastqDeliveryFileTagsService,
+    ):
         self.status_db = status_db
         self.hk_api = hk_api
+        self.tags_fetcher = tags_fetcher
 
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of FASTQ files to be delivered for a case and its samples."""
@@ -36,7 +45,7 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
 
     def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile]:
         """Get the FASTQ files for a sample."""
-        fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
+        fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.FASTQ).sample_tags
         fastq_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=sample_id, tags=fastq_tags
         )
