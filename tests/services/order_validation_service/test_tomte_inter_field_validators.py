@@ -1,4 +1,6 @@
-from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_errors import (
+    RepeatedCaseNameError,
+)
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ConcentrationRequiredIfSkipRCError,
     DescendantAsFatherError,
@@ -7,8 +9,8 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     OccupiedWellError,
-    RepeatedSampleNameError,
     SampleIsOwnFatherError,
+    SampleNameRepeatedError,
     StatusMissingError,
     SubjectIdSameAsSampleNameError,
 )
@@ -70,7 +72,7 @@ def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: Tom
     assert errors
 
     # THEN the errors are about the sample names
-    assert isinstance(errors[0], RepeatedSampleNameError)
+    assert isinstance(errors[0], SampleNameRepeatedError)
 
 
 def test_repeated_case_names_not_allowed(order_with_repeated_case_names: TomteOrder):

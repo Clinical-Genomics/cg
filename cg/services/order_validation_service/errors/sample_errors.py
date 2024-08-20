@@ -28,3 +28,8 @@ class OccupiedWellError(SampleError):
 class WellPositionMissingError(SampleError):
     field: str = "well_position"
     message: str = "Well position is required for well plates"
+
+
+class SampleNameRepeatedError(SampleError):
+    field: str = "name"
+    message: str = "Sample name repeated"
