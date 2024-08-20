@@ -12,6 +12,8 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 from cg.services.order_validation_service.workflows.microsalt.models.sample import (
     MicrosaltSample,
 )
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 def create_microsalt_sample(id: int) -> MicrosaltSample:
@@ -53,3 +55,15 @@ def sample_with_non_compatible_application() -> MicrosaltSample:
     sample: MicrosaltSample = create_microsalt_sample(1)
     sample.application = "WGSPCFC030"
     return sample
+
+
+@pytest.fixture
+def archived_application(base_store: Store) -> Application:
+    return base_store.add_application(
+        tag="archived_application",
+        prep_category="mic",
+        description="This is an archived_application",
+        percent_kth=100,
+        percent_reads_guaranteed=90,
+        is_archived=True,
+    )
