@@ -13,3 +13,8 @@ class ApplicationNotValidError(SampleError):
 class ApplicationNotCompatibleError(SampleError):
     field: str = "application"
     message: str = "Chosen application is not compatible with workflow"
+
+
+class OccupiedWellError(SampleError):
+    field: str = "well_position"
+    message: str = "Well is already occupied"

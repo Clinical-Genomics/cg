@@ -1,10 +1,16 @@
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
-from cg.services.order_validation_service.errors.sample_errors import ApplicationNotCompatibleError
+from cg.services.order_validation_service.errors.sample_errors import (
+    ApplicationNotCompatibleError,
+    OccupiedWellError,
+)
 from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_application_not_compatible,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.utils import (
+    PlateSamplesValidator,
+)
 from cg.store.store import Store
 
 
@@ -26,3 +32,11 @@ def validate_application_compatibility(
             error = ApplicationNotCompatibleError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def validate_wells_contain_at_most_one_sample(
+    order: MicrosaltOrder,
+    **kwargs,
+) -> list[OccupiedWellError]:
+    plate_samples = PlateSamplesValidator(order)
+    return plate_samples.get_occupied_well_errors()
