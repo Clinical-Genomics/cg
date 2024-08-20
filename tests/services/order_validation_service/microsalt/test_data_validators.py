@@ -2,7 +2,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationNotValidError,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicroSaltOrder,
+    MicrosaltOrder,
 )
 from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
     validate_application_exists,
@@ -10,7 +10,7 @@ from cg.services.order_validation_service.workflows.microsalt.validation.data.ru
 from cg.store.store import Store
 
 
-def test_applications_exist_sample_order(valid_microsalt_order: MicroSaltOrder, base_store: Store):
+def test_applications_exist_sample_order(valid_microsalt_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a sample with an application which is not found in the database
     valid_microsalt_order.samples[0].application = "Non-existent app tag"
