@@ -1,13 +1,31 @@
 from abc import abstractmethod, ABC
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+
+class FetchDeliveryFileTagsService(ABC):
+    """
+    Abstract class that encapsulates the logic required for fetching tags for files to deliver.
+    """
+
+    @abstractmethod
+    def fetch_tags(self, case_id: str) -> None:
+        """Fetch the tags for the files to deliver."""
+        pass
+
+
+class FilterDeliveryFilesService(ABC):
+    """
+    Abstract class that encapsulates the logic required for filtering files to deliver.
+    """
+
+    @abstractmethod
+    def filter_files(self, case_id: str) -> None:
+        """Filter the files to deliver."""
+        pass
 
 
 class FormatDeliveryFilesService(ABC):
     """
-    Abstract class that encaps
+    Abstract class that encapsulates the logic required for formatting files to deliver.
     """
 
     @abstractmethod
@@ -24,6 +42,17 @@ class MoveDeliveryFilesService(ABC):
     @abstractmethod
     def move_files(self, case_id: str) -> None:
         """Move the files to the customer folder."""
+        pass
+
+
+class GenerateDeliveryReportFilesService(ABC):
+    """
+    Abstract class that encapulates the logic required for generating a report of the files to deliver.
+    """
+
+    @abstractmethod
+    def generate_report(self, case_id: str) -> None:
+        """Generate a report of the files to deliver and adds it to housekeeper."""
         pass
 
 
