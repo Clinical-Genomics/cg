@@ -23,3 +23,8 @@ class ApplicationNotCompatibleError(SampleError):
 class OccupiedWellError(SampleError):
     field: str = "well_position"
     message: str = "Well is already occupied"
+
+
+class WellPositionMissingError(SampleError):
+    field: str = "well_position"
+    message: str = "Well position is required for well plates"
