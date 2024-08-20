@@ -5,9 +5,6 @@ from cg.services.order_validation_service.workflows.microsalt.constants import (
 from cg.services.order_validation_service.workflows.microsalt.models.sample import (
     MicrosaltSample,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.sample import (
-    MicrosaltSample,
-)
 
 
 class MicrosaltOrder(Order):
@@ -23,5 +20,13 @@ class MicrosaltOrder(Order):
         samples: list[tuple[int, MicrosaltSample]] = []
         for sample_index, sample in self.enumerated_samples:
             if sample.is_new:
+                samples.append((sample_index, sample))
+        return samples
+
+    @property
+    def enumerated_existing_samples(self) -> list[tuple[int, MicrosaltSample]]:
+        samples: list[tuple[int, MicrosaltSample]] = []
+        for sample_index, sample in self.enumerated_samples:
+            if not sample.is_new:
                 samples.append((sample_index, sample))
         return samples

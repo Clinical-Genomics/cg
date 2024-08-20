@@ -2,6 +2,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    SampleDoesNotExistError,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
@@ -12,6 +13,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.sample impo
 from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
     validate_application_exists,
     validate_applications_not_archived,
+    validate_samples_exist,
 )
 from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.rules import (
     validate_application_compatibility,
@@ -71,3 +73,28 @@ def test_application_is_not_archived(
 
     # THEN the error should concern the archived application
     assert isinstance(errors[0], ApplicationArchivedError)
+
+
+def test_sample_does_not_exist(valid_order: MicrosaltOrder, base_store: Store):
+
+    # GIVEN an order with a non-existent old sample
+    valid_order.samples[0].internal_id = "this internal id does not exist in the database"
+
+    # WHEN validating that all old samples do exist
+    errors = validate_samples_exist(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the non-existent sample
+    assert isinstance(errors[0], SampleDoesNotExistError)
+
+
+def test_samples_do_exist(valid_order: MicrosaltOrder, base_store: Store):
+    # GIVEN a valid order
+
+    # WHEN validating that all old samples do exist
+    errors = validate_samples_exist(order=valid_order, store=base_store)
+
+    # THEN no error should be returned
+    assert not errors
