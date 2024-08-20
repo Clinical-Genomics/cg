@@ -1,6 +1,7 @@
 import logging
 from http import HTTPStatus
 from pathlib import Path
+from typing import List, Tuple, Union
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
@@ -17,22 +18,19 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str, order_email_id: int, env: str):
+    def __init__(self, base_url: str, api_key: str, order_email_id: int):
         self.base_url = base_url
         self.api_key = api_key
-        self.order_email_id = order_email_id
-        self.env = env
         self.session = self._get_session()
 
     @handle_client_errors
-    def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
-        """Create a ticket."""
-        ticket_data = ticket.model_dump(exclude_none=True)
+    def create_ticket(self, ticket: TicketCreate, attachments: List[Path] = None) -> TicketResponse:
+        """Create a ticket with multipart form data."""
+        multipart_data = ticket.to_multipart_data()
         files = prepare_attachments(attachments) if attachments else None
 
-        LOG.info(ticket_data)
-        response: Response = self.session.post(
-            url=f"{self.base_url}{EndPoints.TICKETS}", data=ticket_data, files=files
+        response = self.session.post(
+            url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
         )
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())

@@ -25,7 +25,16 @@ def handle_client_errors(func):
         try:
             return func(*args, **kwargs)
         except (MissingSchema, HTTPError, ConnectionError) as error:
-            LOG.error(f"Request to Freshdesk failed: {error}")
+            if isinstance(error, HTTPError) and error.response is not None:
+                try:
+                    error_detail = error.response.json()
+                except ValueError:
+                    error_detail = error.response.text
+
+                LOG.error(f"Request to Freshdesk failed: {error} - Details: {error_detail}")
+            else:
+                LOG.error(f"Request to Freshdesk failed: {error}")
+
             raise FreshdeskAPIException(error) from error
         except ValidationError as error:
             LOG.error(f"Invalid response from Freshdesk: {error}")

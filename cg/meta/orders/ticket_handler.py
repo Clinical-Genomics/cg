@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, List
+from typing import Any
 
 from sendmail_container import FormDataRequest
 
@@ -22,9 +22,10 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, status_db: Store, client: FreshdeskClient):
+    def __init__(self, status_db: Store, client: FreshdeskClient, env: str):
         self.client: FreshdeskClient = client
         self.status_db: Store = status_db
+        self.env = env
 
     @staticmethod
     def parse_ticket_number(name: str) -> str | None:
@@ -56,8 +57,15 @@ class TicketHandler:
                 description=message,
                 name=user_name,
                 subject=order.name,
+                type="Order",
+                tags=[order.samples[0].data_analysis],
+                custom_fields={
+                    "cf_environment": self.env,
+                },
                 attachments=[],
             )
+            LOG.info(f"Request payload: {freshdesk_ticket.model_dump()}")
+
             ticket_response: TicketResponse = self.client.create_ticket(
                 ticket=freshdesk_ticket, attachments=[attachments]
             )
