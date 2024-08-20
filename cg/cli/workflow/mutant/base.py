@@ -125,6 +125,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 @mutant.command("run-qc")
 @DRY_RUN
+@ARGUMENT_CASE_ID
 @click.pass_context
 def run_qc(context: click.Context, case_id: str, dry_run: bool) -> None:
     """
