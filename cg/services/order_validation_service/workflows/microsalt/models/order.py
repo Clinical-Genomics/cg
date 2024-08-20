@@ -1,6 +1,9 @@
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.workflows.microsalt.constants import (
-    MicrosaltDeliveryType,
+    MicroSaltDeliveryType,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.sample import (
+    MicroSaltSample,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.sample import (
     MicrosaltSample,

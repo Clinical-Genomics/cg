@@ -3,6 +3,15 @@ import pytest
 from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
+from cg.services.order_validation_service.workflows.microsalt.constants import (
+    MicroSaltDeliveryType,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.order import (
+    MicroSaltOrder,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.sample import (
+    MicroSaltSample,
+)
 from cg.services.order_validation_service.workflows.tomte.constants import (
     TomteDeliveryType,
 )
@@ -17,11 +26,11 @@ from cg.services.order_validation_service.workflows.tomte.validation.field.tomte
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
-from cg.store.models import Application
+from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
 
-def create_sample(id: int) -> TomteSample:
+def create_tomte_sample(id: int) -> TomteSample:
     return TomteSample(
         name=f"name{id}",
         application="RNAPOAR100",
@@ -38,16 +47,28 @@ def create_sample(id: int) -> TomteSample:
     )
 
 
+def create_microsalt_sample(id: int) -> MicroSaltSample:
+    return MicroSaltSample(
+        name=f"name{id}",
+        application="MWRNXTR003",
+        container=ContainerEnum.plate,
+        container_name="ContainerName",
+        require_qc_ok=True,
+        reference_genome="NC_00001",
+        well_position=f"A:{id}",
+        volume=MINIMUM_VOLUME,
+    )
+
+
 def create_case(samples: list[TomteSample]) -> TomteCase:
     return TomteCase(
         name="name",
-        data_delivery=TomteDeliveryType.FASTQ,
         panels=[],
         samples=samples,
     )
 
 
-def create_order(cases: list[TomteCase]) -> TomteOrder:
+def create_tomte_order(cases: list[TomteCase]) -> TomteOrder:
     return TomteOrder(
         connect_to_ticket=True,
         delivery_type=TomteDeliveryType.FASTQ,
@@ -60,16 +81,29 @@ def create_order(cases: list[TomteCase]) -> TomteOrder:
     )
 
 
+def create_microsalt_order(samples: list[MicroSaltSample]) -> MicroSaltOrder:
+    return MicroSaltOrder(
+        connect_to_ticket=True,
+        delivery_type=MicroSaltDeliveryType.FASTQ_QC,
+        name="order_name",
+        ticket_number="#12345",
+        workflow=Workflow.MICROSALT,
+        user_id=1,
+        customer="cust000",
+        samples=samples,
+    )
+
+
 @pytest.fixture
 def case_with_samples_in_same_well() -> TomteCase:
-    sample_1: TomteSample = create_sample(1)
-    sample_2: TomteSample = create_sample(1)
+    sample_1: TomteSample = create_tomte_sample(1)
+    sample_2: TomteSample = create_tomte_sample(1)
     return create_case([sample_1, sample_2])
 
 
 @pytest.fixture
 def sample_with_non_compatible_application() -> TomteSample:
-    sample: TomteSample = create_sample(1)
+    sample: TomteSample = create_tomte_sample(1)
     sample.application = "WGSPCFC030"
     return sample
 
@@ -88,24 +122,24 @@ def archived_application(base_store: Store) -> Application:
 
 @pytest.fixture
 def valid_order() -> TomteOrder:
-    child: TomteSample = create_sample(1)
-    father: TomteSample = create_sample(2)
-    mother: TomteSample = create_sample(3)
-    grandfather: TomteSample = create_sample(4)
-    grandmother: TomteSample = create_sample(5)
+    child: TomteSample = create_tomte_sample(1)
+    father: TomteSample = create_tomte_sample(2)
+    mother: TomteSample = create_tomte_sample(3)
+    grandfather: TomteSample = create_tomte_sample(4)
+    grandmother: TomteSample = create_tomte_sample(5)
     case = create_case([child, father, mother, grandfather, grandmother])
-    return create_order([case])
+    return create_tomte_order([case])
 
 
 @pytest.fixture
 def order_with_samples_in_same_well(case_with_samples_in_same_well: TomteCase) -> TomteOrder:
-    return create_order([case_with_samples_in_same_well])
+    return create_tomte_order([case_with_samples_in_same_well])
 
 
 @pytest.fixture
 def case_with_samples_with_repeated_names() -> TomteCase:
-    sample_1: TomteSample = create_sample(1)
-    sample_2: TomteSample = create_sample(1)
+    sample_1: TomteSample = create_tomte_sample(1)
+    sample_2: TomteSample = create_tomte_sample(1)
     sample_1.name = sample_2.name
     return create_case([sample_1, sample_2])
 
@@ -114,46 +148,46 @@ def case_with_samples_with_repeated_names() -> TomteCase:
 def order_with_repeated_sample_names(
     case_with_samples_with_repeated_names: TomteCase,
 ) -> TomteOrder:
-    return create_order([case_with_samples_with_repeated_names])
+    return create_tomte_order([case_with_samples_with_repeated_names])
 
 
 @pytest.fixture
 def case() -> TomteCase:
-    sample_1: TomteSample = create_sample(1)
-    sample_2: TomteSample = create_sample(2)
+    sample_1: TomteSample = create_tomte_sample(1)
+    sample_2: TomteSample = create_tomte_sample(2)
     return create_case([sample_1, sample_2])
 
 
 @pytest.fixture
 def order_with_repeated_case_names(case: TomteCase) -> TomteOrder:
-    return create_order([case, case])
+    return create_tomte_order([case, case])
 
 
 @pytest.fixture
 def order_with_invalid_father_sex(case: TomteCase):
-    child = case.samples[0]
-    father = case.samples[1]
+    child: TomteSample = case.samples[0]
+    father: TomteSample = case.samples[1]
     child.father = father.name
     father.sex = SexEnum.female
-    return create_order([case])
+    return create_tomte_order([case])
 
 
 @pytest.fixture
 def order_with_father_in_wrong_case(case: TomteCase):
-    child = case.samples[0]
-    father = case.samples[1]
+    child: TomteSample = case.samples[0]
+    father: TomteSample = case.samples[1]
     child.father = father.name
     case.samples = [child]
-    return create_order([case])
+    return create_tomte_order([case])
 
 
 @pytest.fixture
 def order_with_sample_cycle():
-    child: TomteSample = create_sample(1)
-    father: TomteSample = create_sample(2)
-    mother: TomteSample = create_sample(3)
-    grandfather: TomteSample = create_sample(4)
-    grandmother: TomteSample = create_sample(5)
+    child: TomteSample = create_tomte_sample(1)
+    father: TomteSample = create_tomte_sample(2)
+    mother: TomteSample = create_tomte_sample(3)
+    grandfather: TomteSample = create_tomte_sample(4)
+    grandmother: TomteSample = create_tomte_sample(5)
 
     child.mother = mother.name
     child.father = father.name
@@ -162,18 +196,18 @@ def order_with_sample_cycle():
     father.father = child.name  # Cycle introduced here
 
     case = create_case([child, father, mother, grandfather, grandmother])
-    return create_order([case])
+    return create_tomte_order([case])
 
 
 @pytest.fixture
 def order_with_siblings_as_parents():
-    child: TomteSample = create_sample(1)
+    child: TomteSample = create_tomte_sample(1)
 
-    father: TomteSample = create_sample(3)
-    mother: TomteSample = create_sample(4)
+    father: TomteSample = create_tomte_sample(3)
+    mother: TomteSample = create_tomte_sample(4)
 
-    grandfather: TomteSample = create_sample(5)
-    grandmother: TomteSample = create_sample(6)
+    grandfather: TomteSample = create_tomte_sample(5)
+    grandmother: TomteSample = create_tomte_sample(6)
 
     child.father = father.name
     child.mother = mother.name
@@ -185,19 +219,19 @@ def order_with_siblings_as_parents():
     mother.father = grandfather.name
 
     case = create_case([child, father, mother, grandfather, grandmother])
-    return create_order([case])
+    return create_tomte_order([case])
 
 
 @pytest.fixture
 def sample_with_invalid_concentration():
-    sample: TomteSample = create_sample(1)
+    sample: TomteSample = create_tomte_sample(1)
     sample.concentration_ng_ul = 1
     return sample
 
 
 @pytest.fixture
 def sample_with_missing_well_position():
-    sample = create_sample(1)
+    sample: TomteSample = create_tomte_sample(1)
     sample.well_position = None
     return sample
 
@@ -217,15 +251,15 @@ def application_with_concentration_interval(base_store: Store) -> Application:
 
 @pytest.fixture
 def order_with_invalid_concentration(sample_with_invalid_concentration) -> TomteOrder:
-    case = create_case([sample_with_invalid_concentration])
-    order = create_order([case])
+    case: TomteCase = create_case([sample_with_invalid_concentration])
+    order: TomteOrder = create_tomte_order([case])
     order.skip_reception_control = True
     return order
 
 
 @pytest.fixture
 def sample_with_missing_container_name() -> TomteSample:
-    sample: TomteSample = create_sample(1)
+    sample: TomteSample = create_tomte_sample(1)
     sample.container_name = None
     return sample
 
@@ -236,13 +270,21 @@ def tomte_model_validator() -> TomteModelValidator:
 
 
 @pytest.fixture
+def valid_microsalt_order() -> MicroSaltOrder:
+    sample_1: MicroSaltSample = create_microsalt_sample(1)
+    sample_2: MicroSaltSample = create_microsalt_sample(2)
+    sample_3: MicroSaltSample = create_microsalt_sample(3)
+    return create_microsalt_order([sample_1, sample_2, sample_3])
+
+
+@pytest.fixture
 def tomte_validation_service(
     base_store: Store,
     tomte_model_validator: TomteModelValidator,
     application_with_concentration_interval: Application,
 ) -> TomteValidationService:
-    customer = base_store.get_customer_by_internal_id("cust000")
-    user = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
+    customer: Customer = base_store.get_customer_by_internal_id("cust000")
+    user: User = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
