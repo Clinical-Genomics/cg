@@ -4,13 +4,17 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
 
 
-class PlateSamples:
+class PlateSamplesValidator:
 
     def __init__(self, order: MicrosaltOrder):
         self.wells: dict = {}
         self._initialize_map(order)
 
     def _initialize_map(self, order: MicrosaltOrder):
+        """
+        Construct a dict with keys being a (container_name, well_position) pair.
+        The value will be a list of sample indices for samples located in the well.
+        """
         for sample_index, sample in order.enumerated_new_samples:
             if is_sample_on_plate(sample):
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
