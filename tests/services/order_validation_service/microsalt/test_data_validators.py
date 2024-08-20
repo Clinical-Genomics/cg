@@ -55,16 +55,16 @@ def test_application_is_incompatible(
 
 
 def test_application_is_not_archived(
-    valid_microsalt_order: MicrosaltOrder, archived_application: Application, base_store: Store
+    valid_order: MicrosaltOrder, archived_application: Application, base_store: Store
 ):
 
     # GIVEN an order with a new sample with an archived application
-    valid_microsalt_order.enumerated_new_samples[0][1].application = archived_application.tag
+    valid_order.enumerated_new_samples[0][1].application = archived_application.tag
     base_store.session.add(archived_application)
     base_store.commit_to_store()
 
     # WHEN validating that the applications are not archived
-    errors = validate_applications_not_archived(order=valid_microsalt_order, store=base_store)
+    errors = validate_applications_not_archived(order=valid_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
