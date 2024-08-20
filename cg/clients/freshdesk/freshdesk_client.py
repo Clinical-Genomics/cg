@@ -28,12 +28,7 @@ class FreshdeskClient:
         self, multipart_data: List[Tuple[str, Union[str, int]]], attachments: List[Path] = None
     ) -> TicketResponse:
         """Create a ticket with multipart form data."""
-        files = []
-        if attachments:
-            files = [
-                ("attachments[]", (attachment.name, attachment.open("rb")))
-                for attachment in attachments
-            ]
+        files = prepare_attachments(attachments) if attachments else None
 
         response = self.session.post(
             url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
