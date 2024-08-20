@@ -68,8 +68,8 @@ def archived_application(base_store: Store) -> Application:
         is_archived=True,
     )
 
-  
-@pytest.fixture  
+
+@pytest.fixture
 def order_with_samples_in_same_well() -> MicrosaltOrder:
     sample_1: MicrosaltSample = create_microsalt_sample(1)
     sample_2: MicrosaltSample = create_microsalt_sample(1)
