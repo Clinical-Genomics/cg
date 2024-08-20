@@ -24,6 +24,6 @@ ORDER_RULES: list[callable] = [
 SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
-    validate_wells_contain_at_most_one_sample,
     validate_well_positions_required,
+    validate_wells_contain_at_most_one_sample,
 ]
