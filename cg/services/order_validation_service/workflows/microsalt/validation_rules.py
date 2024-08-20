@@ -11,6 +11,8 @@ from cg.services.order_validation_service.workflows.microsalt.validation.data.ru
 )
 from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.rules import (
     validate_application_compatibility,
+    validate_well_positions_required,
+    validate_wells_contain_at_most_one_sample,
 )
 
 ORDER_RULES: list[callable] = [
@@ -22,4 +24,6 @@ ORDER_RULES: list[callable] = [
 SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
+    validate_well_positions_required,
+    validate_wells_contain_at_most_one_sample,
 ]

@@ -40,3 +40,11 @@ def validate_wells_contain_at_most_one_sample(
 ) -> list[OccupiedWellError]:
     plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_occupied_well_errors()
+
+
+def validate_well_positions_required(
+    order: MicrosaltOrder,
+    **kwargs,
+) -> list[OccupiedWellError]:
+    plate_samples = PlateSamplesValidator(order)
+    return plate_samples.get_well_position_missing_errors()
