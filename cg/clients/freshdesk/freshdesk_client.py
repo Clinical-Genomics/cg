@@ -24,10 +24,9 @@ class FreshdeskClient:
         self.session = self._get_session()
 
     @handle_client_errors
-    def create_ticket(
-        self, multipart_data: List[Tuple[str, Union[str, int]]], attachments: List[Path] = None
-    ) -> TicketResponse:
+    def create_ticket(self, ticket: TicketCreate, attachments: List[Path] = None) -> TicketResponse:
         """Create a ticket with multipart form data."""
+        multipart_data = ticket.to_multipart_data()
         files = prepare_attachments(attachments) if attachments else None
 
         response = self.session.post(

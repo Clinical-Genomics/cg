@@ -64,11 +64,10 @@ class TicketHandler:
                 },
                 attachments=[],
             )
-            multipart_data = freshdesk_ticket.to_multipart_data()
-            LOG.info(f"Request payload: {multipart_data}")
+            LOG.info(f"Request payload: {freshdesk_ticket.model_dump()}")
 
             ticket_response: TicketResponse = self.client.create_ticket(
-                multipart_data=multipart_data, attachments=[attachments]
+                ticket=freshdesk_ticket, attachments=[attachments]
             )
             LOG.info(f"{ticket_response.id}: opened new ticket in Freshdesk")
 
