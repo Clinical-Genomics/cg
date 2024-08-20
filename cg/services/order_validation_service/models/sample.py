@@ -19,3 +19,7 @@ class Sample(BaseModel):
     @property
     def is_new(self) -> bool:
         return not self.internal_id
+
+    @property
+    def is_on_plate(self) -> bool:
+        return self.container == ContainerEnum.plate
