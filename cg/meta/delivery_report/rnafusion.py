@@ -21,9 +21,8 @@ from cg.meta.delivery_report.field_validators import (
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
-from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
-from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Case, Sample
@@ -32,8 +31,8 @@ from cg.store.models import Case, Sample
 class RnafusionDeliveryReportAPI(DeliveryReportAPI):
     """API to create Rnafusion delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, analysis_api: RnafusionAnalysisAPI):
+        super().__init__(analysis_api=analysis_api)
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
@@ -89,9 +88,9 @@ class RnafusionDeliveryReportAPI(DeliveryReportAPI):
         is_input_amount_accredited: bool = self.is_input_amount_accredited(samples)
         return is_apptag_accredited and is_input_amount_accredited
 
-    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+    def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles(
+        return ScoutVariantsFiles(
             vcf_fusion=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.VCF_FUSION
             )

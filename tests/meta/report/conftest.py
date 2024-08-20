@@ -1,12 +1,9 @@
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pytest
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat
 from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
-from cg.io.controller import ReadFile
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
@@ -17,11 +14,7 @@ from cg.store.store import Store
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.report import (
-    MockChanjo,
-    MockHousekeeperMipDNAReportAPI,
-    MockMipDNAAnalysisAPI,
-)
+from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI, MockMipDNAAnalysisAPI
 
 
 @pytest.fixture(scope="function")
@@ -93,20 +86,6 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNADeliveryReportAPI)
 def mip_dna_analysis_api(cg_context: CGConfig) -> MockMipDNAAnalysisAPI:
     """MIP DNA analysis mock data."""
     return MockMipDNAAnalysisAPI(config=cg_context)
-
-
-@pytest.fixture(scope="session")
-def lims_family(fixtures_dir: Path) -> dict:
-    """Returns a lims-like case of samples."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def lims_samples(lims_family: dict) -> list[dict]:
-    """Returns the samples of a lims case."""
-    return lims_family["samples"]
 
 
 @pytest.fixture(scope="function", autouse=True)

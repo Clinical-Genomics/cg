@@ -19,11 +19,10 @@ from cg.constants.scout import ScoutUploadKey
 from cg.meta.delivery_report.field_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.delivery_report.metadata import MipDNASampleMetadataModel
-from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -33,8 +32,8 @@ LOG = logging.getLogger(__name__)
 class MipDNADeliveryReportAPI(DeliveryReportAPI):
     """API to create Rare disease DNA delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, analysis_api: MipDNAAnalysisAPI):
+        super().__init__(analysis_api=analysis_api)
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
@@ -86,9 +85,9 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
                 return False
         return True
 
-    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+    def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles(
+        return ScoutVariantsFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
             ),

@@ -35,7 +35,7 @@ from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisTypes
-from cg.io.controller import WriteFile
+from cg.io.controller import WriteFile, ReadFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.rsync import RsyncAPI
@@ -93,8 +93,8 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
-    "tests.fixture_plugins.delivery_report_fixtures.delivery_report_api_fixtures",
-    "tests.fixture_plugins.delivery_report_fixtures.delivery_report_context_fixtures",
+    "tests.fixture_plugins.delivery_report_fixtures.api_fixtures",
+    "tests.fixture_plugins.delivery_report_fixtures.context_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
@@ -2769,10 +2769,16 @@ def raredisease_deliverables_response_data(
     )
 
 
-@pytest.fixture(scope="function")
-def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+@pytest.fixture
+def raredisease_multiqc_json_metrics_path(raredisease_analysis_dir: Path) -> Path:
+    """Return Multiqc JSON file path for Raredisease."""
+    return Path(raredisease_analysis_dir, "multiqc_data.json")
+
+
+@pytest.fixture
+def raredisease_multiqc_json_metrics(raredisease_multiqc_json_metrics_path: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=raredisease_multiqc_json_metrics_path)
 
 
 # Rnafusion fixtures
@@ -4092,3 +4098,32 @@ def analysis_summary(
         delivered=delivered_status_summary,
         failed=failed_status_summary,
     )
+
+
+@pytest.fixture
+def lims_family(fixtures_dir: Path) -> dict:
+    """Returns a lims-like case of samples."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
+
+
+@pytest.fixture
+def lims_samples(lims_family: dict) -> list[dict]:
+    """Returns the samples of a lims case."""
+    return lims_family["samples"]
+
+
+@pytest.fixture
+def library_prep_method() -> str:
+    return "Manual TruSeq DNA PCR-free library preparation (9.33.15)"
+
+
+@pytest.fixture
+def libary_sequencing_method() -> str:
+    return "NovaSeq X sequencing method (9.33.15)"
+
+
+@pytest.fixture
+def capture_kit() -> str:
+    return "panel.bed"

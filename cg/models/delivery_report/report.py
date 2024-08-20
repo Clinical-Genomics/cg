@@ -34,7 +34,7 @@ class CustomerModel(BaseModel):
     scout_access: bool | None = None
 
 
-class ScoutReportFiles(BaseModel):
+class ScoutVariantsFiles(BaseModel):
     """
     Model that describes the files uploaded to Scout and delivered to the customer
 
@@ -85,7 +85,7 @@ class DataAnalysisModel(BaseModel):
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     pons: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
-    scout_files: ScoutReportFiles
+    scout_files: ScoutVariantsFiles
     workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD

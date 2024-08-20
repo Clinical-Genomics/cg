@@ -5,13 +5,9 @@ from datetime import datetime
 
 import click
 
-from cg.constants import (
-    REPORT_SUPPORTED_DATA_DELIVERY,
-    REPORT_SUPPORTED_WORKFLOW,
-    Workflow,
-)
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, REPORT_SUPPORTED_WORKFLOW, Workflow
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
-from cg.meta.delivery_report.balsamic_qc import BalsamicQCReportAPI
+from cg.meta.delivery_report.balsamic_qc import BalsamicQCDeliveryReportAPI
 from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
@@ -38,9 +34,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     report_api: DeliveryReportAPI = (
         context.obj.meta_apis.get("report_api")
         if context.obj.meta_apis.get("report_api")
-        else MipDNADeliveryReportAPI(
-            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
-        )
+        else MipDNADeliveryReportAPI(analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
     case: Case = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
     # Missing or not valid internal case ID
@@ -82,7 +76,7 @@ def get_report_api(context: click.Context, case: Case) -> DeliveryReportAPI:
     """Returns a report API to be used for the delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
-    return get_report_api_workflow(context, case.data_analysis)
+    return get_report_api_workflow(context=context, workflow=case.data_analysis)
 
 
 def get_report_api_workflow(context: click.Context, workflow: Workflow) -> DeliveryReportAPI:
@@ -91,29 +85,27 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
     workflow: Workflow = workflow if workflow else Workflow.MIP_DNA
     dispatch_report_api: dict[Workflow, DeliveryReportAPI] = {
         Workflow.BALSAMIC: BalsamicDeliveryReportAPI(
-            config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
+            analysis_api=BalsamicAnalysisAPI(config=context.obj)
         ),
-        Workflow.BALSAMIC_QC: BalsamicQCReportAPI(
-            config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
+        Workflow.BALSAMIC_QC: BalsamicQCDeliveryReportAPI(
+            analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
         ),
         Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
-            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
+            analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         ),
         Workflow.MIP_DNA: MipDNADeliveryReportAPI(
-            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+            analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
         Workflow.RAREDISEASE: RarediseaseDeliveryReportAPI(
-            config=context.obj, analysis_api=RarediseaseAnalysisAPI(config=context.obj)
+            analysis_api=RarediseaseAnalysisAPI(config=context.obj)
         ),
         Workflow.RNAFUSION: RnafusionDeliveryReportAPI(
-            config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
+            analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
         Workflow.TAXPROFILER: TaxprofilerDeliveryReportAPI(
-            config=context.obj, analysis_api=TaxprofilerAnalysisAPI(config=context.obj)
+            analysis_api=TaxprofilerAnalysisAPI(config=context.obj)
         ),
-        Workflow.TOMTE: TomteDeliveryReportAPI(
-            config=context.obj, analysis_api=TomteAnalysisAPI(config=context.obj)
-        ),
+        Workflow.TOMTE: TomteDeliveryReportAPI(analysis_api=TomteAnalysisAPI(config=context.obj)),
     }
     return dispatch_report_api.get(workflow)
 

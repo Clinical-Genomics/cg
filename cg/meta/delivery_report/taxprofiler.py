@@ -14,7 +14,6 @@ from cg.constants import (
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
-from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.metadata import TaxprofilerSampleMetadataModel
 from cg.models.delivery_report.report import CaseModel, ReportRequiredFields
 from cg.models.delivery_report.sample import SampleModel
@@ -24,8 +23,8 @@ from cg.store.models import Case, Sample
 class TaxprofilerDeliveryReportAPI(DeliveryReportAPI):
     """API to create Taxprofiler delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: TaxprofilerAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, analysis_api: TaxprofilerAnalysisAPI):
+        super().__init__(analysis_api=analysis_api)
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis

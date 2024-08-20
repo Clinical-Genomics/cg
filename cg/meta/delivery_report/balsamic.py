@@ -24,12 +24,11 @@ from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
-from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -39,8 +38,8 @@ LOG = logging.getLogger(__name__)
 class BalsamicDeliveryReportAPI(DeliveryReportAPI):
     """API to create Balsamic delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: BalsamicAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, analysis_api: BalsamicAnalysisAPI):
+        super().__init__(analysis_api=analysis_api)
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
@@ -132,9 +131,9 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             return True
         return False
 
-    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+    def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles(
+        return ScoutVariantsFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
             ),

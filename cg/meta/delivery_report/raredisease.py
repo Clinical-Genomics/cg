@@ -19,10 +19,9 @@ from cg.meta.delivery_report.field_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
-from cg.models.cg_config import CGConfig
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.delivery_report.metadata import RarediseaseSampleMetadataModel
-from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -30,8 +29,8 @@ from cg.store.models import Case, Sample
 class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
     """API to create Raredisease delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: RarediseaseAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, analysis_api: RarediseaseAnalysisAPI):
+        super().__init__(analysis_api=analysis_api)
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
@@ -62,9 +61,9 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         """
         return all(sample.application.accredited for sample in samples)
 
-    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+    def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
-        return ScoutReportFiles(
+        return ScoutVariantsFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
             ),

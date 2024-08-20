@@ -9,27 +9,25 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
 from cg.constants.scout import ScoutUploadKey
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
-from cg.meta.meta import MetaAPI
-from cg.meta.delivery_report.field_validators import (
-    get_empty_report_data,
-    get_missing_report_data,
-)
+from cg.meta.delivery.delivery import DeliveryAPI
+from cg.meta.delivery_report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
-from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
     CaseModel,
     CustomerModel,
     DataAnalysisModel,
     ReportModel,
-    ScoutReportFiles,
+    ScoutVariantsFiles,
 )
 from cg.models.delivery_report.sample import (
     ApplicationModel,
@@ -45,16 +43,20 @@ from cg.store.models import (
     CaseSample,
     Sample,
 )
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-class DeliveryReportAPI(MetaAPI):
-    """Common Delivery Report API."""
+class DeliveryReportAPI:
+    """Common delivery report API."""
 
-    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
-        super().__init__(config=config)
+    def __init__(self, analysis_api: AnalysisAPI):
         self.analysis_api: AnalysisAPI = analysis_api
+        self.housekeeper_api: HousekeeperAPI = self.analysis_api.housekeeper_api
+        self.status_db: Store = self.analysis_api.status_db
+        self.delivery_api: DeliveryAPI = self.analysis_api.delivery_api
+        self.lims_api: LimsAPI = self.analysis_api.lims_api
 
     def get_delivery_report_html(self, case_id: str, analysis_date: datetime, force: bool) -> str:
         """Generates the HTML content of a delivery report."""
@@ -352,16 +354,16 @@ class DeliveryReportAPI(MetaAPI):
             genome_build=self.analysis_api.get_genome_build(case.internal_id),
             panels=case.panels,
             pons=self.analysis_api.get_pons(case.internal_id),
-            scout_files=self.get_scout_uploaded_files(case.internal_id),
+            scout_files=self.get_scout_variants_files(case.internal_id),
             type=self.analysis_api.get_data_analysis_type(case.internal_id),
             variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
         )
 
-    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
+    def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles()
+        return ScoutVariantsFiles()
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
