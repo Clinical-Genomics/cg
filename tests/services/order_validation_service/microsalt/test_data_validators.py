@@ -23,3 +23,7 @@ def test_applications_exist_sample_order(valid_microsalt_order: MicrosaltOrder, 
 
     # THEN the error should concern the invalid application
     assert isinstance(errors[0], ApplicationNotValidError)
+
+
+def test_application_is_compatible():
+    pass
