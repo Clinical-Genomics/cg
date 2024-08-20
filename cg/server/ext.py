@@ -91,11 +91,11 @@ freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url,
     api_key=app_config.freshdesk_api_key,
     order_email_id=app_config.freshdesk_order_email_id,
-    env=app_config.freshdesk_environment,
 )
 ticket_handler = TicketHandler(
     client=freshdesk_client,
     status_db=db,
+    env=app_config.freshdesk_environment,
 )
 orders_api = OrdersAPI(
     lims=lims,
