@@ -3,7 +3,6 @@ from cg.apps.tb.models import TrailblazerAnalysis
 
 
 class AnalysisService:
-
     def __init__(self, analysis_client: TrailblazerAPI):
         self.analysis_client = analysis_client
 

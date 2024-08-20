@@ -3,7 +3,6 @@ from enum import StrEnum, auto
 from cg.constants import FileExtensions
 from cg.constants.housekeeper_tags import AlignmentFileTag
 
-
 HGNC_ID = "hgnc_id"
 
 

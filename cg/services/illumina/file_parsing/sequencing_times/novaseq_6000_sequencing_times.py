@@ -7,7 +7,6 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina.file_parsing.sequencing_times.sequencing_time_service import (
     SequencingTimesService,
 )
-
 from cg.utils.files import get_source_modified_time_stamp
 from cg.utils.time import format_time_from_ctime
 

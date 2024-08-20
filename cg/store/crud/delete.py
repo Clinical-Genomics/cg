@@ -13,13 +13,6 @@ class DeleteDataHandler(BaseHandler):
         super().__init__(session=session)
         self.session = session
 
-    def delete_relationships_sample(self, sample: Sample) -> None:
-        """Delete relationships between all cases and the provided sample."""
-        if sample and sample.links:
-            for case_sample in sample.links:
-                self.session.delete(case_sample)
-            self.session.commit()
-
     def delete_cases_without_samples(self, case_internal_ids: list[str]) -> None:
         """Delete any cases specified in case_ids without samples."""
         for case_internal_id in case_internal_ids:
@@ -30,9 +23,13 @@ class DeleteDataHandler(BaseHandler):
 
     def delete_illumina_flow_cell(self, internal_id: str):
         """Delete an Illumina flow cell."""
-        flow_cell = self.get_illumina_flow_cell_by_internal_id(internal_id=internal_id)
-        if flow_cell:
+
+        if flow_cell := self.get_illumina_flow_cell_by_internal_id(internal_id=internal_id):
             self.session.delete(flow_cell)
             self.session.commit()
-        else:
-            raise ValueError(f"Illumina flow cell with internal id {internal_id} not found.")
+
+    def decouple_sample_from_cases(self, sample_id: int) -> None:
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
+        for case_sample in sample.links:
+            self.session.delete(case_sample)
+        self.session.commit()

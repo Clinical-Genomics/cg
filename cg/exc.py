@@ -60,6 +60,12 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.
@@ -276,6 +282,10 @@ class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
 
 
+class MissingSequencingMetricsError(CgError):
+    """Exception raised when sequencing metrics are missing."""
+
+
 class ArchiveJobFailedError(CgError):
     """Exception raised when an archival or retrieval job has failed."""
 
@@ -306,10 +316,6 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
-
-
-class PacBioMetricsParsingError(CgError):
-    """Exception raised when PacBio metric files are not in place."""
 
 
 class Chanjo2APIClientError(CgError):

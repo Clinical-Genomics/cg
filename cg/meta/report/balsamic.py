@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel, ScoutReportFiles, ReportRequiredFields
+from cg.models.report.report import CaseModel, ReportRequiredFields, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
