@@ -9,7 +9,7 @@ from cg.services.order_validation_service.validators.inter_field.utils import (
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.utils import (
-    PlateSamples,
+    PlateSamplesValidator,
 )
 from cg.store.store import Store
 
@@ -38,7 +38,7 @@ def validate_wells_contain_at_most_one_sample(
     order: MicrosaltOrder,
     **kwargs,
 ) -> list[OccupiedWellError]:
-    plate_samples = PlateSamples(order)
+    plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_occupied_well_errors()
 
 
@@ -46,5 +46,5 @@ def validate_well_positions_required(
     order: MicrosaltOrder,
     **kwargs,
 ) -> list[OccupiedWellError]:
-    plate_samples = PlateSamples(order)
+    plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_well_position_missing_errors()
