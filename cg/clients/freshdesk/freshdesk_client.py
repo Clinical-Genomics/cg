@@ -18,11 +18,10 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str, order_email_id: int, env: str):
+    def __init__(self, base_url: str, api_key: str, order_email_id: int):
         self.base_url = base_url
         self.api_key = api_key
         self.order_email_id = order_email_id
-        self.env = env
         self.session = self._get_session()
 
     @handle_client_errors
