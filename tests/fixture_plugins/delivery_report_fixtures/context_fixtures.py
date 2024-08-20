@@ -27,6 +27,7 @@ def raredisease_delivery_report_store_context(
     sample_id: str,
     wgs_application_tag: str,
     total_sequenced_reads_pass: int,
+    ticket_id: str,
     base_store: Store,
     helpers: StoreHelpers,
 ) -> Store:
@@ -43,8 +44,10 @@ def raredisease_delivery_report_store_context(
         store=base_store,
         internal_id=sample_id,
         last_sequenced_at=datetime.now(),
+        received_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
+        original_ticket=ticket_id,
     )
 
     helpers.add_relationship(base_store, case=case, sample=sample)

@@ -20,5 +20,5 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     delivery_report_html: str = delivery_report_api.get_delivery_report_html(
-        case_id=case_id, analysis_date=case.analyses[0].started_at, force=True
+        case_id=case_id, analysis_date=case.analyses[0].started_at, force=False
     )
