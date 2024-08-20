@@ -24,7 +24,7 @@ class AppConfig(BaseSettings):
     freshdesk_url: str = "https://company.freshdesk.com"
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
-    freshdesk_environment: str = "development"
+    freshdesk_environment: str = "Stage"
 
 
 app_config = AppConfig()
