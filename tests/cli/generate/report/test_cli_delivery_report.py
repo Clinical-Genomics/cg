@@ -1,4 +1,4 @@
-"""Tests the cli for generating delivery reports."""
+"""Tests the cli for generating file_delivery reports."""
 
 import logging
 from datetime import datetime
@@ -14,7 +14,7 @@ from cg.models.cg_config import CGConfig
 def test_delivery_report_invalid_case(
     mip_dna_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Tests the delivery report command for an invalid case."""
+    """Tests the file_delivery report command for an invalid case."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a MIP DNA context object
@@ -26,14 +26,14 @@ def test_delivery_report_invalid_case(
 
     # THEN the command should fail due to an invalid case ID
     assert "Invalid case ID. Retrieving available cases." in caplog.text
-    assert "There are no valid cases to perform delivery report actions" in result.output
+    assert "There are no valid cases to perform file_delivery report actions" in result.output
     assert result.exit_code == EXIT_FAIL
 
 
 def test_delivery_report_dry_run(
     mip_dna_context: CGConfig, cli_runner: CliRunner, case_id: str, caplog: LogCaptureFixture
 ):
-    """Tests the delivery report command with a dry run option."""
+    """Tests the file_delivery report command with a dry run option."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a MIP DNA context object
@@ -54,7 +54,7 @@ def test_delivery_report_dry_run(
 def test_delivery_report(
     mip_dna_context: CGConfig, cli_runner: CliRunner, case_id: str, caplog: LogCaptureFixture
 ):
-    """Tests the delivery report command expecting a rendered html file."""
+    """Tests the file_delivery report command expecting a rendered html file."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a MIP DNA context object

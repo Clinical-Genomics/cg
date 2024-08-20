@@ -52,7 +52,7 @@ def delivery_store_balsamic(
     # Error case without samples
     helpers.add_case(store=status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # Balsamic case with FASTQ and analysis as data delivery
+    # Balsamic case with FASTQ and analysis as data file_delivery
     case: Case = helpers.add_case(
         store=status_db,
         internal_id=case_id,
@@ -104,7 +104,7 @@ def delivery_store_microsalt(
     # Error case without samples
     helpers.add_case(store=status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # MicroSALT case with FASTQ-QC as data delivery
+    # MicroSALT case with FASTQ-QC as data file_delivery
     case: Case = helpers.add_case(
         store=status_db,
         internal_id=case_id,

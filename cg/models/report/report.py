@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 class CustomerModel(BaseModel):
     """
-    Customer model associated to the delivery report generated
+    Customer model associated to the file_delivery report generated
 
     Attributes:
         name: customer name; source: statusDB/family/customer/name
@@ -64,7 +64,7 @@ class DataAnalysisModel(BaseModel):
     Attributes:
         comment: prod bioinfo comment regarding the data analysis; source: StatusDB/analysis/comment
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
-        data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
+        data_delivery: data file_delivery requested by the customer; source: StatusDB/family/data_delivery
         delivered_files: list of analysis case files to be delivered
         genome_build: build version of the genome reference; source: workflow
         panels: list of case specific panels; source: StatusDB/family/panels
@@ -101,7 +101,9 @@ class DataAnalysisModel(BaseModel):
             )
             raise ValueError
         if self.workflow not in REPORT_SUPPORTED_WORKFLOW:
-            LOG.error(f"The workflow {self.workflow} does not support delivery report generation")
+            LOG.error(
+                f"The workflow {self.workflow} does not support file_delivery report generation"
+            )
             raise ValueError
         return self
 
@@ -131,7 +133,7 @@ class ReportModel(BaseModel):
 
     Attributes:
         customer: customer attributes
-        version: delivery report version; source: StatusDB/analysis/family/analyses(/index)
+        version: file_delivery report version; source: StatusDB/analysis/family/analyses(/index)
         date: report generation date; source: CG runtime
         case: case attributes
         accredited: whether the report is accredited or not; source: all(StatusDB/application/accredited)
@@ -145,7 +147,7 @@ class ReportModel(BaseModel):
 
 
 class ReportRequiredFields(BaseModel):
-    """Model that defines the mandatory fields of the different sections of the delivery report."""
+    """Model that defines the mandatory fields of the different sections of the file_delivery report."""
 
     applications: dict[str, list[str]]
     case: list[str]

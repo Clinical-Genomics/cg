@@ -33,7 +33,7 @@ def test_analysis_included(
 
 
 def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
-    """Tests that analyses that are completed but lacks delivery report are returned."""
+    """Tests that analyses that are completed but lacks file_delivery report are returned."""
 
     # GIVEN an analysis that is not uploaded
     analysis = helpers.add_analysis(

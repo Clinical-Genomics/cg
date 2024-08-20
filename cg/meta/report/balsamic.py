@@ -41,7 +41,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicReportAPI(ReportAPI):
-    """API to create Balsamic delivery reports."""
+    """API to create Balsamic file_delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -124,7 +124,7 @@ class BalsamicReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
-        """Return whether the Balsamic delivery report is accredited."""
+        """Return whether the Balsamic file_delivery report is accredited."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
@@ -148,7 +148,7 @@ class BalsamicReportAPI(ReportAPI):
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return a dictionary with the delivery report required fields for Balsamic."""
+        """Return a dictionary with the file_delivery report required fields for Balsamic."""
         analysis_type: str = case.data_analysis.type
         required_data_analysis_fields: list[str] = (
             REQUIRED_DATA_ANALYSIS_FIELDS

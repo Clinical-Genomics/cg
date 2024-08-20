@@ -13,7 +13,7 @@ from cg.store.store import Store
 class FetchDeliveryFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for managing the files to deliver.
-    1. Get a workflow and data delivery option
+    1. Get a workflow and data file_delivery option
     2. Fetch the files based on tags from Housekeeper
     3. Return the files to deliver
     """

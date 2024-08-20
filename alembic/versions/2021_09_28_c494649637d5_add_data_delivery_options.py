@@ -1,4 +1,4 @@
-"""Add data delivery options
+"""Add data file_delivery options
 
 Revision ID: c494649637d5
 Revises: c081458ff180

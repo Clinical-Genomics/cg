@@ -40,7 +40,7 @@ class ScoutUploadKey(StrEnum):
 
 
 RAREDISEASE_CASE_TAGS = dict(
-    delivery_report={"delivery-report"},
+    delivery_report={"file_delivery-report"},
     multiqc_report={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
@@ -63,7 +63,7 @@ BALSAMIC_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     cnv_report={"cnv-report"},
     multiqc_report={"multiqc-html"},
-    delivery_report={"delivery-report"},
+    delivery_report={"file_delivery-report"},
 )
 
 BALSAMIC_UMI_CASE_TAGS = dict(
@@ -71,7 +71,7 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     snv_vcf={"vcf-umi-snv-clinical"},
     cnv_report={"cnv-report"},
     multiqc_report={"multiqc-html"},
-    delivery_report={"delivery-report"},
+    delivery_report={"file_delivery-report"},
 )
 
 RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
@@ -82,7 +82,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     RNAfusion_report_research={"fusionreport", "research"},
     RNAfusion_inspector={"fusioninspector-html", "clinical"},
     RNAfusion_inspector_research={"fusioninspector-html", "research"},
-    delivery_report={"delivery-report"},
+    delivery_report={"file_delivery-report"},
     vcf_fusion={"vcf-fusion"},
 )
 

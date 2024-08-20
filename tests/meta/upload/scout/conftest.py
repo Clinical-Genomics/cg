@@ -320,7 +320,7 @@ def mip_dna_analysis_hk_bundle_data(
             {
                 "path": Path(mip_dna_analysis_dir, "report.pdf").as_posix(),
                 "archive": False,
-                "tags": ["delivery-report"],
+                "tags": ["file_delivery-report"],
             },
             {
                 "path": Path(mip_dna_analysis_dir, "adm1.mt.bam").as_posix(),
@@ -446,7 +446,7 @@ def balsamic_analysis_hk_bundle_data(
             {
                 "path": Path(balsamic_wgs_analysis_dir, "coverage_qc_report.pdf").as_posix(),
                 "archive": False,
-                "tags": ["delivery-report"],
+                "tags": ["file_delivery-report"],
             },
         ],
     }

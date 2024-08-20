@@ -137,7 +137,7 @@ class Of1508Sample(OrderInSample):
 
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
-    # "Required if data analysis in Scout or vcf delivery"
+    # "Required if data analysis in Scout or vcf file_delivery"
     panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 

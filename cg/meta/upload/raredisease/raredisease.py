@@ -35,7 +35,7 @@ class RarediseaseUploadAPI(UploadAPI):
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
-        # Clinical delivery upload
+        # Clinical file_delivery upload
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
         LOG.info(

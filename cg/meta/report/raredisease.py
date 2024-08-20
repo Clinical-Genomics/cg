@@ -28,7 +28,7 @@ from cg.store.models import Case, Sample
 
 
 class RarediseaseReportAPI(ReportAPI):
-    """API to create Raredisease delivery reports."""
+    """API to create Raredisease file_delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: RarediseaseAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -57,7 +57,7 @@ class RarediseaseReportAPI(ReportAPI):
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel = None
     ) -> bool:
         """
-        Return whether the Raredisease delivery report is accredited.
+        Return whether the Raredisease file_delivery report is accredited.
         This method evaluates the accreditation status of each sample's application.
         """
         return all(sample.application.accredited for sample in samples)
@@ -94,7 +94,7 @@ class RarediseaseReportAPI(ReportAPI):
         return required_sample_metadata_fields
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the delivery report required fields for Raredisease."""
+        """Return dictionary with the file_delivery report required fields for Raredisease."""
         report_required_fields = ReportRequiredFields(
             applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS

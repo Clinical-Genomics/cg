@@ -1,4 +1,4 @@
-"""Module to create delivery reports."""
+"""Module to create file_delivery reports."""
 
 import logging
 from datetime import datetime
@@ -57,7 +57,7 @@ class ReportAPI(MetaAPI):
         self.analysis_api: AnalysisAPI = analysis_api
 
     def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> str:
-        """Generates the HTML content of a delivery report."""
+        """Generates the HTML content of a file_delivery report."""
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
@@ -70,7 +70,7 @@ class ReportAPI(MetaAPI):
     def create_delivery_report_file(
         self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
-        """Generates a file containing the delivery report content."""
+        """Generates a file containing the file_delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force=force
@@ -83,8 +83,8 @@ class ReportAPI(MetaAPI):
     def add_delivery_report_to_hk(
         self, case_id: str, delivery_report_file: Path, version: Version
     ) -> File | None:
-        """Add a delivery report file to a case bundle and return its file object."""
-        LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
+        """Add a file_delivery report file to a case bundle and return its file object."""
+        LOG.info(f"Adding a new file_delivery report to housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
             path=delivery_report_file,
             version_obj=version,
@@ -100,12 +100,12 @@ class ReportAPI(MetaAPI):
         return file
 
     def get_delivery_report_from_hk(self, case_id: str, version: Version) -> str | None:
-        """Return path of a delivery report stored in HK."""
+        """Return path of a file_delivery report stored in HK."""
         delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
         if not delivery_report:
-            LOG.warning(f"No delivery report found in housekeeper for {case_id}")
+            LOG.warning(f"No file_delivery report found in housekeeper for {case_id}")
             return None
         return delivery_report.full_path
 
@@ -136,7 +136,7 @@ class ReportAPI(MetaAPI):
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
-        """Returns a list of cases that has been stored and need a delivery report."""
+        """Returns a list of cases that has been stored and need a file_delivery report."""
         stored_cases: list[Case] = []
         analyses: Query = self.status_db.analyses_to_delivery_report(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
@@ -152,19 +152,19 @@ class ReportAPI(MetaAPI):
                 stored_cases.append(case)
             else:
                 LOG.warning(
-                    f"Case {case.internal_id} must be stored before creating a delivery report"
+                    f"Case {case.internal_id} must be stored before creating a file_delivery report"
                 )
         return stored_cases
 
     def get_cases_without_uploaded_delivery_report(self, workflow: Workflow) -> list[Case]:
-        """Returns a list of cases that need a delivery report to be uploaded."""
+        """Returns a list of cases that need a file_delivery report to be uploaded."""
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
         return [analysis.case for analysis in analyses]
 
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
-        """Updates the date when a delivery report was created."""
+        """Updates the date when a file_delivery report was created."""
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
         )
@@ -172,7 +172,7 @@ class ReportAPI(MetaAPI):
         self.status_db.session.commit()
 
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
-        """Fetches all the data needed to generate a delivery report."""
+        """Fetches all the data needed to generate a file_delivery report."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
@@ -385,11 +385,11 @@ class ReportAPI(MetaAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Return whether the delivery report is accredited."""
+        """Return whether the file_delivery report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the delivery report required fields."""
+        """Return dictionary with the file_delivery report required fields."""
         raise NotImplementedError
 
     @staticmethod

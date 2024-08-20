@@ -151,15 +151,15 @@ def test_data_analysis_invalid(mip_rna_orderform_sample: dict):
 
 
 def test_data_delivery_convert_to_lower(mip_rna_orderform_sample: dict):
-    """Tests that a sample with a data delivery which is not all lower case is converted correctly."""
+    """Tests that a sample with a data file_delivery which is not all lower case is converted correctly."""
 
-    # GIVEN a parsed order form in Excel format with data delivery set in all caps
+    # GIVEN a parsed order form in Excel format with data file_delivery set in all caps
     mip_rna_orderform_sample[ExcelSampleAliases.DATA_DELIVERY] = "ANALYSIS"
 
     # WHEN converting to an ExcelSample object
     excel_sample: ExcelSample = ExcelSample.model_validate(mip_rna_orderform_sample)
 
-    # THEN the data delivery should be in lower case
+    # THEN the data file_delivery should be in lower case
     assert excel_sample.data_delivery == "analysis"
 
 

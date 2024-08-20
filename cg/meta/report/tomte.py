@@ -1,4 +1,4 @@
-"""Tomte delivery report API."""
+"""Tomte file_delivery report API."""
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -24,7 +24,7 @@ from cg.store.models import Case, Sample
 
 
 class TomteReportAPI(ReportAPI):
-    """API to create Tomte delivery reports."""
+    """API to create Tomte file_delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: TomteAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -32,7 +32,7 @@ class TomteReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
     ) -> TomteSampleMetadataModel:
-        """Return Tomte sample metadata to include in the delivery report."""
+        """Return Tomte sample metadata to include in the file_delivery report."""
         sample_metrics: TomteQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
         return TomteSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
@@ -58,11 +58,11 @@ class TomteReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Return whether the Tomte delivery report is accredited."""
+        """Return whether the Tomte file_delivery report is accredited."""
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return the delivery report required fields for Tomte."""
+        """Return the file_delivery report required fields for Tomte."""
         report_required_fields = ReportRequiredFields(
             applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS

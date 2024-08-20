@@ -52,6 +52,6 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
 
 @pytest.fixture
 def delivery_report_click_context(mip_dna_context) -> click.Context:
-    """Click delivery report context fixture"""
+    """Click file_delivery report context fixture"""
 
     return click.Context(generate_delivery_report, obj=mip_dna_context)

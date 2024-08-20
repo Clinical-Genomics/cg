@@ -22,7 +22,7 @@ AM_METHODS = {
     "1317": "HiSeq X Sequencing method at Clinical Genomics",
     "1383": "MIP analysis for Whole genome and Exome",
     "1717": "NxSeq® AmpFREE Low DNA Library Kit (Lucigen)",
-    "1060": "Raw data delivery",
+    "1060": "Raw data file_delivery",
     "1036": "HiSeq 2500 Rapid Run sequencing",
     "1314": "Automated SureSelect XT Target Enrichment for Illumina sequencing",
     "1518": "200 ng input Manual SureSelect XT Target Enrichment",
@@ -128,7 +128,7 @@ class LimsAPI(Lims, OrderHandler):
         return date
 
     def get_delivery_date(self, lims_id: str) -> date:
-        """Get delivery date for a sample."""
+        """Get file_delivery date for a sample."""
         sample = Sample(self, id=lims_id)
         try:
             date = sample.udf.get("Delivered at")

@@ -1,4 +1,4 @@
-"""Tests for running the delivery command"""
+"""Tests for running the file_delivery command"""
 
 import logging
 from pathlib import Path
@@ -28,7 +28,9 @@ def test_run_deliver_without_specifying_case_or_ticket(
     caplog.set_level(logging.INFO)
     # GIVEN a cli runner and a base context
     # WHEN running the deliver command with help text
-    result = cli_runner.invoke(deliver_analysis, ["--delivery-type", "mip-dna"], obj=base_context)
+    result = cli_runner.invoke(
+        deliver_analysis, ["--file_delivery-type", "mip-dna"], obj=base_context
+    )
 
     # THEN assert the command exits without problems
     assert result.exit_code == 0
@@ -48,7 +50,9 @@ def test_run_deliver_non_existing_case(
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
-        deliver_analysis, ["--case-id", case_id, "--delivery-type", "mip-dna"], obj=base_context
+        deliver_analysis,
+        ["--case-id", case_id, "--file_delivery-type", "mip-dna"],
+        obj=base_context,
     )
 
     # THEN assert the command exits without problems
@@ -64,21 +68,21 @@ def test_delivery_with_dry_run(
     delivery_inbox: Path,
     caplog,
 ):
-    """Test to run the delivery command with dry run enabled"""
+    """Test to run the file_delivery command with dry run enabled"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a cli runner
     # GIVEN a context with a case that have files in housekeeper to deliver
-    # GIVEN that the delivery path does not exist
+    # GIVEN that the file_delivery path does not exist
     assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command in dry run mode
     cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "mip-dna", "--dry-run"],
+        ["--case-id", case_id, "--file_delivery-type", "mip-dna", "--dry-run"],
         obj=populated_mip_context,
     )
 
-    # THEN assert that the path to the delivery folder was not created
+    # THEN assert that the path to the file_delivery folder was not created
     assert delivery_inbox.exists() is False
 
     # THEN assert that it is communicated that at least one file would be linked
@@ -88,20 +92,20 @@ def test_delivery_with_dry_run(
 def test_delivery_path_created(
     cli_runner: CliRunner, populated_mip_context: CGConfig, case_id: str, delivery_inbox: Path
 ):
-    """Test that the delivery path is created when running the deliver analysis command"""
+    """Test that the file_delivery path is created when running the deliver analysis command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
     # GIVEN a cli runner
-    # GIVEN that the delivery file does not exist
+    # GIVEN that the file_delivery file does not exist
     assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "mip-dna"],
+        ["--case-id", case_id, "--file_delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
-    # THEN assert that the path to the delivery folder was created
+    # THEN assert that the path to the file_delivery folder was created
     assert delivery_inbox.exists() is True
 
 
@@ -114,17 +118,17 @@ def test_delivery_ticket_id(
     """Test that to run the deliver command with ticket nr"""
     # GIVEN a context with a case that have files in housekeeper to deliver
     # GIVEN a cli runner
-    # GIVEN that the delivery file does not exist
+    # GIVEN that the file_delivery file does not exist
     assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--file_delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
-    # THEN assert that the path to the delivery folder was created
+    # THEN assert that the path to the file_delivery folder was created
     assert delivery_inbox.exists() is True
 
 
@@ -140,14 +144,14 @@ def test_run_deliver_multiple_delivery_flags(
     caplog.set_level(logging.WARNING)
     # GIVEN a context with a case that has files and a sample with a file, in housekeeper to deliver
     # GIVEN a cli runner
-    # WHEN running the deliver command with multiple delivery flags
+    # WHEN running the deliver command with multiple file_delivery flags
 
     assert deliver_vcf_path.exists() is False
     assert deliver_fastq_path.exists() is False
 
     result = cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "fastq", "--delivery-type", "mip-dna"],
+        ["--case-id", case_id, "--file_delivery-type", "fastq", "--file_delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -162,7 +166,7 @@ def test_run_deliver_multiple_delivery_flags(
 def test_case_file_is_delivered(
     populated_mip_context: CGConfig, case_id: str, deliver_vcf_path: Path, cli_runner: CliRunner
 ):
-    """Test that the a case file is delivered when running the delivery command"""
+    """Test that the a case file is delivered when running the file_delivery command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
     # GIVEN a cli runner
     # GIVEN that a case vcf does not exist
@@ -171,7 +175,7 @@ def test_case_file_is_delivered(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "mip-dna"],
+        ["--case-id", case_id, "--file_delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -190,7 +194,7 @@ def test_delivering_analysis_with_missing_bundle_errors(
     # WHEN running the deliver analysis command
     result = cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--file_delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
@@ -207,17 +211,17 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
     """Test that it is possible to deliver analysis with a missing bundle using the --ignore-missing-bundles flag."""
     # GIVEN a context without files in housekeeper to deliver.
     # GIVEN a cli runner
-    # GIVEN that the delivery file does not exist
+    # GIVEN that the file_delivery file does not exist
     assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket_id, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--ignore-missing-bundles", "--file_delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
-    # THEN assert that the path to the delivery folder was created
+    # THEN assert that the path to the file_delivery folder was created
     assert delivery_inbox.exists() is True
 
 
@@ -235,7 +239,7 @@ def test_deliver_ticket_with_missing_bundle(
             ticket_id,
             "--dry-run",
             "--ignore-missing-bundles",
-            "--delivery-type",
+            "--file_delivery-type",
             "mip-dna",
         ],
         obj=context_with_missing_bundle,

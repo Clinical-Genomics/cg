@@ -1,4 +1,4 @@
-"""Add order delivery
+"""Add order file_delivery
 
 Revision ID: 0395f682958e
 Revises: 2a0ec08b0922

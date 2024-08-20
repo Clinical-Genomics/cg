@@ -17,7 +17,7 @@ def get_million_read_pairs(reads: int) -> float | None:
 
 
 def get_missing_fields(empty_fields: list, required_fields: list) -> list:
-    """Return missing fields that are required to generate successfully the delivery report."""
+    """Return missing fields that are required to generate successfully the file_delivery report."""
     missing_fields = list()
     for field in empty_fields:
         if field in required_fields:

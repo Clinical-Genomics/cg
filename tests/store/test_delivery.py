@@ -8,19 +8,19 @@ from cg.store.models import Case, Sample
 
 
 def test_get_delivery_arguments(case: Case):
-    """Testing the parsing of delivery arguments from the case data_delivery."""
+    """Testing the parsing of file_delivery arguments from the case data_delivery."""
     # GIVEN a DataDelivery
     case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
-    # WHEN parsing the delivery types
+    # WHEN parsing the file_delivery types
     delivery_types: set[str] = case.get_delivery_arguments()
 
-    # THEN the correct delivery types should be returned
+    # THEN the correct file_delivery types should be returned
     assert delivery_types == {Workflow.MIP_DNA, Workflow.FASTQ}
 
 
 def test_list_samples_to_deliver(base_store, helpers):
-    """Test to fetch samples ready for delivery"""
+    """Test to fetch samples ready for file_delivery"""
     store = base_store
     # GIVEN a populated store without samples
     assert len(store._get_query(table=Sample).all()) == 0
@@ -36,9 +36,9 @@ def test_list_samples_to_deliver(base_store, helpers):
 
 
 def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
-    """Test to fetch samples ready for delivery and avoid the ones that are not"""
+    """Test to fetch samples ready for file_delivery and avoid the ones that are not"""
     store = base_store
-    # GIVEN a populated store with two samples where one is scheduled for delivery
+    # GIVEN a populated store with two samples where one is scheduled for file_delivery
     helpers.add_sample(store, last_sequenced_at=dt.datetime.now())
     helpers.add_sample(
         store, name="delivered", last_sequenced_at=dt.datetime.now(), delivered_at=dt.datetime.now()

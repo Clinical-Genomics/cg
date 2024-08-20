@@ -28,7 +28,7 @@ def get_report_string(value: Any) -> str:
 
 
 def get_boolean_as_string(value: bool | None) -> str:
-    """Return delivery report adapted string representation of a boolean."""
+    """Return file_delivery report adapted string representation of a boolean."""
     if isinstance(value, bool):
         return YES_FIELD if value else NO_FIELD
     return NA_FIELD
@@ -67,7 +67,7 @@ def get_list_as_string(value: list[str] | None) -> str:
 
 
 def get_delivered_files_as_file_names(delivery_files: list[DeliveryFile] | None) -> list[str] | str:
-    """Return a list of validated file names given a list of delivery files."""
+    """Return a list of validated file names given a list of file_delivery files."""
     return [file.destination_path.name for file in delivery_files] if delivery_files else NA_FIELD
 
 
@@ -84,13 +84,13 @@ def get_sex_as_string(sex: Sex | None) -> str:
 def get_prep_category_as_string(prep_category: PrepCategory | None) -> str:
     """Return a report validated prep category as string."""
     if prep_category == OrderType.RML:
-        LOG.error("The delivery report generation does not support RML samples")
+        LOG.error("The file_delivery report generation does not support RML samples")
         raise ValueError
     return get_report_string(prep_category)
 
 
 def get_analysis_type_as_string(analysis_type: str | None, info: ValidationInfo) -> str:
-    """Return the analysis type as an accepted string value for the delivery report."""
+    """Return the analysis type as an accepted string value for the file_delivery report."""
     if analysis_type and Workflow.BALSAMIC in info.data.get("workflow"):
         analysis_type: str = BALSAMIC_ANALYSIS_TYPE.get(analysis_type)
     return get_report_string(analysis_type)

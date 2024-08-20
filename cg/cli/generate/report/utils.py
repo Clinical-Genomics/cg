@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_report_case(context: click.Context, case_id: str) -> Case:
-    """Extracts a case object for delivery report generation."""
+    """Extracts a case object for file_delivery report generation."""
     # Default report API (MIP DNA report API)
     report_api: ReportAPI = (
         context.obj.meta_apis.get("report_api")
@@ -55,7 +55,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         if not cases_without_delivery_report:
             click.echo(
                 click.style(
-                    "There are no valid cases to perform delivery report actions", fg="green"
+                    "There are no valid cases to perform file_delivery report actions", fg="green"
                 )
             )
         else:
@@ -65,19 +65,19 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         raise click.Abort
     if case.data_analysis not in REPORT_SUPPORTED_WORKFLOW:
         LOG.error(
-            f"The {case.data_analysis} workflow does not support delivery reports (case: {case.internal_id})"
+            f"The {case.data_analysis} workflow does not support file_delivery reports (case: {case.internal_id})"
         )
         raise click.Abort
     if case.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
         LOG.error(
-            f"The {case.data_delivery} data delivery does not support delivery reports (case: {case.internal_id})"
+            f"The {case.data_delivery} data file_delivery does not support file_delivery reports (case: {case.internal_id})"
         )
         raise click.Abort
     return case
 
 
 def get_report_api(context: click.Context, case: Case) -> ReportAPI:
-    """Returns a report API to be used for the delivery report generation."""
+    """Returns a report API to be used for the file_delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
     return get_report_api_workflow(context, case.data_analysis)

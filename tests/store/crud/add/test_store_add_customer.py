@@ -4,7 +4,7 @@ from cg.store.models import Customer
 from cg.store.store import Store
 
 
-@pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
+@pytest.mark.parametrize("contact_type", ["file_delivery", "primary", "invoice"])
 def test_contact_storing(store: Store, contact_type, helpers):
     # GIVEN an empty database
     assert store._get_query(table=Customer).first() is None
@@ -34,7 +34,7 @@ def test_contact_storing(store: Store, contact_type, helpers):
     )
 
 
-@pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
+@pytest.mark.parametrize("contact_type", ["file_delivery", "primary", "invoice"])
 def test_contact_structure(store: Store, contact_type):
     # GIVEN the Customer model
 

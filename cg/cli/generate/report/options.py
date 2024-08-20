@@ -13,7 +13,7 @@ ARGUMENT_CASE_ID = click.argument(
 OPTION_WORKFLOW = click.option(
     "--workflow",
     type=click.Choice(REPORT_SUPPORTED_WORKFLOW),
-    help="Limit delivery report generation to a specific workflow",
+    help="Limit file_delivery report generation to a specific workflow",
 )
 
 OPTION_STARTED_AT = click.option(

@@ -213,7 +213,7 @@ def test_slurm_rsync_single_case(
         sample_files_present=True,
     )
 
-    # THEN check that an integer was returned as sbatch number and the delivery should be complete
+    # THEN check that an integer was returned as sbatch number and the file_delivery should be complete
     assert isinstance(sbatch_number, int)
     assert is_complete_delivery
 

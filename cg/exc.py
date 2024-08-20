@@ -88,7 +88,7 @@ class DecompressionNeededError(CgError):
 
 class DeliveryReportError(CgError):
     """
-    Exception related to delivery report creation.
+    Exception related to file_delivery report creation.
     """
 
 
@@ -230,7 +230,7 @@ class TrailblazerAnalysisNotFound(CgError):
 
 class ValidationError(CgError):
     """
-    Exception related to delivery report validation.
+    Exception related to file_delivery report validation.
     """
 
 
@@ -303,11 +303,11 @@ class OrderMismatchError(CgError):
 
 
 class OrderNotDeliverableError(CgError):
-    """Exception raised when no analysis is ready for delivery for an order."""
+    """Exception raised when no analysis is ready for file_delivery for an order."""
 
 
 class DeliveryMessageNotSupportedError(CgError):
-    """Exception raised when trying to fetch delivery messages for unsupported workflows."""
+    """Exception raised when trying to fetch file_delivery messages for unsupported workflows."""
 
 
 class OverrideCyclesError(CgError):

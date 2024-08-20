@@ -284,14 +284,14 @@ def test_get_undetermined_fastqs(tmp_demultiplexed_novaseq_6000_post_1_5_kits_pa
 
 
 def test_create_delivery_file_in_flow_cell_directory(tmp_path: Path):
-    # GIVEN a temporary directory without a delivery file
+    # GIVEN a temporary directory without a file_delivery file
     flow_cell_directory: Path = tmp_path
     assert not (flow_cell_directory / DemultiplexingDirsAndFiles.DELIVERY).exists()
 
-    # WHEN creating a delivery file inside the temporary directory
+    # WHEN creating a file_delivery file inside the temporary directory
     create_delivery_file_in_flow_cell_directory(flow_cell_directory)
 
-    # THEN a delivery file should exist in the temporary directory
+    # THEN a file_delivery file should exist in the temporary directory
     assert (flow_cell_directory / DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 

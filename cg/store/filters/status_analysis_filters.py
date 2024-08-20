@@ -35,19 +35,19 @@ def filter_not_uploaded_analyses(analyses: Query, **kwargs) -> Query:
 
 
 def filter_analyses_with_delivery_report(analyses: Query, **kwargs) -> Query:
-    """Return analyses that have a delivery report generated."""
+    """Return analyses that have a file_delivery report generated."""
     return analyses.filter(Analysis.delivery_report_created_at.isnot(None))
 
 
 def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
-    """Return analyses that do not have a delivery report generated."""
+    """Return analyses that do not have a file_delivery report generated."""
     return analyses.filter(Analysis.delivery_report_created_at.is_(None))
 
 
 def filter_report_analyses_by_workflow(
     analyses: Query, workflow: Workflow = None, **kwargs
 ) -> Query:
-    """Return the delivery report related analyses associated to the provided or supported workflows."""
+    """Return the file_delivery report related analyses associated to the provided or supported workflows."""
     return (
         analyses.filter(Analysis.workflow == workflow)
         if workflow

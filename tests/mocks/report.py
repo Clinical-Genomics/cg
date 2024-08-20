@@ -65,7 +65,7 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         )
 
     def get_delivery_report_from_hk(self, case_id: str, version: Version) -> None:
-        """Return mocked delivery report path stored in Housekeeper."""
+        """Return mocked file_delivery report path stored in Housekeeper."""
         LOG.info(
             f"get_delivery_report_from_hk called with the following args: case={case_id}, version={version}"
         )
@@ -95,7 +95,7 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     def create_delivery_report_file(
         self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
-        """Return mocked delivery report file path."""
+        """Return mocked file_delivery report file path."""
         LOG.info(
             f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
             f"analysis_date={analysis_date}, force={force}"

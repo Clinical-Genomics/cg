@@ -24,7 +24,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.command("clinical-delivery")
+@click.command("clinical-file_delivery")
 @click.pass_context
 @click.argument("case_id", required=True)
 @DRY_RUN
@@ -32,7 +32,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
     and subsequently uses rsync to upload it to caesar."""
 
-    click.echo(click.style("----------------- Clinical-delivery -----------------"))
+    click.echo(click.style("----------------- Clinical-file_delivery -----------------"))
 
     case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
     delivery_types: set[str] = case.get_delivery_arguments()
@@ -44,7 +44,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         delivery_arguments=delivery_types
     )
     if not delivery_types:
-        LOG.info(f"No delivery of files requested for case {case_id}")
+        LOG.info(f"No file_delivery of files requested for case {case_id}")
         return
 
     LOG.debug(f"Delivery types are: {delivery_types}")
@@ -98,7 +98,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 @DRY_RUN
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all not previously uploaded cases with analysis type fastq to
-    clinical-delivery."""
+    clinical-file_delivery."""
     exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
@@ -116,7 +116,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
                 LOG.debug(
-                    f"Upload to clinical-delivery for {analysis_obj.case.internal_id} has already started, skipping"
+                    f"Upload to clinical-file_delivery for {analysis_obj.case.internal_id} has already started, skipping"
                 )
             continue
         case: Case = analysis_obj.case

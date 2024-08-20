@@ -59,14 +59,14 @@ def test_run_deliver_delivered_ticket(
 
     # GIVEN a cli runner
 
-    # GIVEN uploading data to the delivery server is not needed
+    # GIVEN uploading data to the file_delivery server is not needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--file_delivery-type", "fastq"],
         obj=cg_context,
     )
 
@@ -86,14 +86,22 @@ def test_deliver_ticket_with_force_all_flag(
 
     # GIVEN a cli runner
 
-    # GIVEN uploading data to the delivery server is not needed
+    # GIVEN uploading data to the file_delivery server is not needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket with --force-all flag
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
+        [
+            "ticket",
+            "--dry-run",
+            "--ticket",
+            ticket_id,
+            "--file_delivery-type",
+            "fastq",
+            "--force-all",
+        ],
         obj=cg_context,
     )
 
@@ -108,14 +116,14 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
 
     # GIVEN a cli runner
 
-    # GIVEN uploading data to the delivery server is needed
+    # GIVEN uploading data to the file_delivery server is needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = True
 
     # WHEN running cg deliver ticket
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--file_delivery-type", "fastq"],
         obj=cg_context,
     )
 

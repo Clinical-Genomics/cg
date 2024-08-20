@@ -11,7 +11,7 @@ from cg.store.models import Case, Order
 def test_get_delivery_message_single_case(client: FlaskClient, server_case: Case, order: Order):
     # GIVEN a case
 
-    # WHEN a request is made to get a delivery message for the case
+    # WHEN a request is made to get a file_delivery message for the case
     response = client.get(f"/api/v1/cases/{server_case.internal_id}/delivery_message")
 
     # THEN the response should be successful
@@ -26,7 +26,7 @@ def test_get_delivery_message_matching_order(
 ):
     # GIVEN a case
 
-    # WHEN a request is made to get a delivery message for the case
+    # WHEN a request is made to get a file_delivery message for the case
     response = client.get(
         f"/api/v1/cases/delivery_message?case_ids={server_case.internal_id},{server_case_in_same_order.internal_id}"
     )
@@ -46,10 +46,10 @@ def test_get_delivery_message_order(
     trailblazer_analysis_for_server_case_in_same_order: TrailblazerAnalysis,
     order: Order,
 ):
-    """Tests that a delivery message is generated for an order with cases ready for delivery."""
+    """Tests that a file_delivery message is generated for an order with cases ready for file_delivery."""
     # GIVEN an order
 
-    # WHEN a request is made to get a delivery message for the order
+    # WHEN a request is made to get a file_delivery message for the order
 
     # WHEN cases are ready to be delivered
     with mock.patch.object(
@@ -77,10 +77,10 @@ def test_get_delivery_message_order_missing_cases(
     trailblazer_analysis_for_server_case_in_same_order: TrailblazerAnalysis,
     order: Order,
 ):
-    """Tests that an error is returned for orders without any cases ready for delivery."""
+    """Tests that an error is returned for orders without any cases ready for file_delivery."""
     # GIVEN an order
 
-    # WHEN a request is made to get a delivery message for the order
+    # WHEN a request is made to get a file_delivery message for the order
 
     # WHEN no cases are ready to be delivered
     with mock.patch.object(TrailblazerAPI, "query_trailblazer", return_value={"analyses": []}):

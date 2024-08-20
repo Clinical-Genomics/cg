@@ -1,4 +1,4 @@
-"""Taxprofiler delivery report API."""
+"""Taxprofiler file_delivery report API."""
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -22,7 +22,7 @@ from cg.store.models import Case, Sample
 
 
 class TaxprofilerReportAPI(ReportAPI):
-    """API to create Taxprofiler delivery reports."""
+    """API to create Taxprofiler file_delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: TaxprofilerAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -30,7 +30,7 @@ class TaxprofilerReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
     ) -> TaxprofilerSampleMetadataModel:
-        """Return Taxprofiler sample metadata to include in the delivery report."""
+        """Return Taxprofiler sample metadata to include in the file_delivery report."""
         return TaxprofilerSampleMetadataModel(
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id)
         )
@@ -38,11 +38,11 @@ class TaxprofilerReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Return whether the Taxprofiler delivery report is accredited."""
+        """Return whether the Taxprofiler file_delivery report is accredited."""
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return the delivery report required fields for Taxprofiler."""
+        """Return the file_delivery report required fields for Taxprofiler."""
 
         report_required_fields = ReportRequiredFields(
             applications=self.get_application_required_fields(

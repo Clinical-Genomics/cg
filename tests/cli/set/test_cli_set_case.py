@@ -169,7 +169,7 @@ def test_set_case_bad_data_delivery(
     data_delivery: str = "dummy_delivery"
     case_id: str = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(
-        set_case, [case_id, "--data-delivery", data_delivery], obj=base_context
+        set_case, [case_id, "--data-file_delivery", data_delivery], obj=base_context
     )
 
     # THEN it should complain in invalid data_delivery instead of setting a value
@@ -190,7 +190,7 @@ def test_set_case_data_delivery(
     # WHEN setting a data_delivery of a case
     result = cli_runner.invoke(
         set_case,
-        [case_to_alter.internal_id, "--data-delivery", str(data_delivery)],
+        [case_to_alter.internal_id, "--data-file_delivery", str(data_delivery)],
         obj=base_context,
     )
 

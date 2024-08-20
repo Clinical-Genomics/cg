@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 DELIVERY_TYPE = click.option(
     "-d",
-    "--delivery-type",
+    "--file_delivery-type",
     multiple=True,
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
@@ -30,7 +30,7 @@ DELIVERY_TYPE = click.option(
 FORCE_ALL = click.option(
     "--force-all",
     help=(
-        "Force delivery of all sample files "
+        "Force file_delivery of all sample files "
         "- disregarding of amount of reads or previous deliveries"
     ),
     is_flag=True,
@@ -122,12 +122,12 @@ def deliver_analysis(
 @click.pass_obj
 def rsync(context: CGConfig, ticket: str, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
-    rsynced with this function to the customers inbox on the delivery server
+    rsynced with this function to the customers inbox on the file_delivery server
     """
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: RsyncAPI = RsyncAPI(config=context)
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
-    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
+    LOG.info(f"Rsync to the file_delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )
@@ -169,7 +169,7 @@ def deliver_ticket(
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
-    from customer inbox hasta to the customer inbox on the delivery server
+    from customer inbox hasta to the customer inbox on the file_delivery server
     """
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)

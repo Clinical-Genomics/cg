@@ -49,13 +49,13 @@ HK_MULTIQC_HTML_TAG = ["multiqc-html"]
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
-HK_DELIVERY_REPORT_TAG = "delivery-report"
+HK_DELIVERY_REPORT_TAG = "file_delivery-report"
 
 
 class HermesFileTag(StrEnum):
     """Tags for hermes."""
 
-    CLINICAL_DELIVERY: str = "clinical-delivery"
+    CLINICAL_DELIVERY: str = "clinical-file_delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
 
 
@@ -101,7 +101,7 @@ class BalsamicProtectedTags:
         ["balsamic-config"],
         ["balsamic-dag"],
         ["balsamic-report"],
-        ["delivery-report"],
+        ["file_delivery-report"],
         ["multiqc-html"],
         ["multiqc-json"],
         ["qc-metrics"],
@@ -168,7 +168,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["vcf-research-sv-bin-index"],  # legacy
         ["exe-ver"],
         ["vcf2cytosure"],
-        ["delivery-report"],
+        ["file_delivery-report"],
         ["madeline"],
         ["multiqc-html"],
         ["storage"],
@@ -186,18 +186,18 @@ WORKFLOW_PROTECTED_TAGS = {
         ["salmon-quant"],
     ],
     Workflow.MUTANT: [
-        ["fohm-delivery", "instrument-properties"],
-        ["fohm-delivery", "pangolin-typing-fohm", "csv"],
-        ["vcf", "vcf-report", "fohm-delivery"],
+        ["fohm-file_delivery", "instrument-properties"],
+        ["fohm-file_delivery", "pangolin-typing-fohm", "csv"],
+        ["vcf", "vcf-report", "fohm-file_delivery"],
         ["mutant-log"],
         ["metrics"],
         ["config"],
         ["mutant-config"],
         ["software-versions"],
-        ["fohm-delivery", "komplettering", "visualization"],
-        ["fohm-delivery", "pangolin-typing", "csv", "visualization"],
-        ["ks-delivery", "ks-results", "typing-report", "visualization", "csv"],
-        ["ks-delivery", "ks-aux-results", "typing-report", "visualization", "csv"],
+        ["fohm-file_delivery", "komplettering", "visualization"],
+        ["fohm-file_delivery", "pangolin-typing", "csv", "visualization"],
+        ["ks-file_delivery", "ks-results", "typing-report", "visualization", "csv"],
+        ["ks-file_delivery", "ks-aux-results", "typing-report", "visualization", "csv"],
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],

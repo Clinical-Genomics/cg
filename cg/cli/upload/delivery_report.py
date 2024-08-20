@@ -14,17 +14,17 @@ from cg.store.models import Case
 LOG = logging.getLogger(__name__)
 
 
-@click.command("delivery-report-to-scout")
+@click.command("file_delivery-report-to-scout")
 @ARGUMENT_CASE_ID
 @click.option(
-    "-r", "--re-upload", is_flag=True, default=False, help="Re-upload existing delivery report"
+    "-r", "--re-upload", is_flag=True, default=False, help="Re-upload existing file_delivery report"
 )
 @DRY_RUN
 @click.pass_context
 def upload_delivery_report_to_scout(
     context: click.Context, case_id: str, re_upload: bool, dry_run: bool
 ) -> None:
-    """Fetches a delivery report from Housekeeper and uploads it to Scout."""
+    """Fetches a file_delivery report from Housekeeper and uploads it to Scout."""
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)

@@ -142,7 +142,7 @@ def upload_gens_context(
 
 @pytest.fixture
 def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
-    """Returns a dictionary including the delivery report html file"""
+    """Returns a dictionary including the file_delivery report html file"""
 
     return {
         "name": case_id,

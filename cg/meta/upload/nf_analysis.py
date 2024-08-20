@@ -41,7 +41,7 @@ class NfAnalysisUploadAPI(UploadAPI):
         ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery
+        # Clinical file_delivery
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
         # Scout specific upload

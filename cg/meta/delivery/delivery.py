@@ -1,4 +1,4 @@
-"""Delivery API for handling file delivery to customer's inbox."""
+"""Delivery API for handling file file_delivery to customer's inbox."""
 
 import logging
 from pathlib import Path
@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 class DeliveryAPI:
     """
-    This class provides methods to handle the delivery process of files from the Housekeeper
+    This class provides methods to handle the file_delivery process of files from the Housekeeper
     bundle to the customer's inbox.
     """
 
@@ -76,7 +76,7 @@ class DeliveryAPI:
         external_id: str,
         analysis_sample_files: bool = False,
     ) -> list[DeliveryFile]:
-        """Return a populated delivery file object given a list of Housekeeper files."""
+        """Return a populated file_delivery file object given a list of Housekeeper files."""
         delivery_files: list[DeliveryFile] = []
         destination_path = Path(
             self.delivery_path, case.customer.internal_id, INBOX_NAME, case.latest_ticket

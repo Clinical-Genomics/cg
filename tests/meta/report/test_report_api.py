@@ -1,4 +1,4 @@
-"""Test delivery report API methods."""
+"""Test file_delivery report API methods."""
 
 import logging
 from datetime import datetime, timedelta
@@ -31,7 +31,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
-    """Tests the creation of the rendered delivery report."""
+    """Tests the creation of the rendered file_delivery report."""
 
     # GIVEN a pre-built case
 
@@ -42,14 +42,14 @@ def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
         force=False,
     )
 
-    # THEN check if the delivery report has been created
+    # THEN check if the file_delivery report has been created
     assert len(delivery_report) > 0
 
 
 def test_create_delivery_report_file(
     report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, tmp_path: Path
 ):
-    """Tests file generation containing the delivery report data."""
+    """Tests file generation containing the file_delivery report data."""
 
     # GIVEN a pre-built case
 
@@ -67,7 +67,7 @@ def test_create_delivery_report_file(
 
 
 def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
-    """Tests delivery report rendering."""
+    """Tests file_delivery report rendering."""
 
     # GIVEN a generated report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
@@ -90,7 +90,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
     assert case_mip_dna.links
     assert case_mip_dna.analyses
 
-    # WHEN collecting the delivery data
+    # WHEN collecting the file_delivery data
     report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
@@ -108,7 +108,7 @@ def test_validate_report_empty_fields(
     """Tests the validations of allowed empty report fields."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a delivery report
+    # GIVEN a file_delivery report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
@@ -133,7 +133,7 @@ def test_validate_report_missing_fields(
 ):
     """Tests the validations of empty required report fields."""
 
-    # GIVEN a delivery report
+    # GIVEN a file_delivery report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
@@ -159,7 +159,7 @@ def test_get_validated_report_data_external_sample(
 ):
     """Tests report data retrieval."""
 
-    # GIVEN a delivery report with external sample data
+    # GIVEN a file_delivery report with external sample data
     report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
@@ -402,7 +402,7 @@ def test_get_case_analysis_data_workflow_match_error(
 def test_get_case_analysis_data_workflow_not_supported(
     report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
-    """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
+    """Test validation error if the analysis workflow is not supported by the file_delivery report workflow."""
 
     # GIVEN a pre-built case with Fluffy as data analysis
     case_mip_dna.data_analysis = Workflow.MICROSALT
@@ -415,7 +415,7 @@ def test_get_case_analysis_data_workflow_not_supported(
     with pytest.raises(ValueError):
         report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
     assert (
-        f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
+        f"The workflow {case_mip_dna.data_analysis} does not support file_delivery report generation"
         in caplog.text
     )
 
