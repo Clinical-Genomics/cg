@@ -377,22 +377,27 @@ class GisaidAPI:
             content=reports, fieldnames=field_names, file_path=Path(complementary_report.full_path)
         )
 
-    def upload_to_gisaid(self, case_id: str) -> None:
-        """Uploading results to GISAID and saving the accession numbers in complementary file."""
+    def is_gisaid_samples_uploaded(
+        self, sars_cov_complementary_reports: list[GisaidComplementaryReport]
+    ) -> bool:
         gisaid_accession_count: int = 0
         sample_number_count: int = 0
+        for report in sars_cov_complementary_reports:
+            if report.gisaid_accession:
+                gisaid_accession_count += 1
+            if report.sample_number:
+                sample_number_count += 1
+        return gisaid_accession_count == sample_number_count
+
+    def upload_to_gisaid(self, case_id: str) -> None:
+        """Uploading results to GISAID and saving the accession numbers in complementary file."""
         complementary_report_content_raw: list[dict] = self.get_complementary_report_content_raw(
             case_id
         )
         sars_cov_complementary_reports: list[GisaidComplementaryReport] = (
             self.parse_and_get_sars_cov_complementary_reports(complementary_report_content_raw)
         )
-        for report in sars_cov_complementary_reports:
-            if report.gisaid_accession:
-                gisaid_accession_count += 1
-            if report.sample_number:
-                sample_number_count += 1
-        if gisaid_accession_count == sample_number_count:
+        if self.is_gisaid_samples_uploaded(sars_cov_complementary_reports):
             LOG.info("All samples already uploaded")
             return
 
