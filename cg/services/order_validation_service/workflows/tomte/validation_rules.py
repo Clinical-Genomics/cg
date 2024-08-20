@@ -44,6 +44,7 @@ TOMTE_ORDER_RULES: list[callable] = [
 TOMTE_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
+    validate_case_names_not_repeated,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
 ]
@@ -53,7 +54,6 @@ TOMTE_CASE_SAMPLE_RULES: list[callable] = [
     validate_application_exists,
     validate_application_not_archived,
     validate_buffer_skip_rc_condition,
-    validate_case_names_not_repeated,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_fathers_are_male,
