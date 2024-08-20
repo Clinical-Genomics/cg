@@ -4,7 +4,7 @@ from cg.models.orders.sample_base import ControlEnum, PriorityEnum
 from cg.services.order_validation_service.models.sample import Sample
 
 
-class MicroSaltSample(Sample):
+class MicrosaltSample(Sample):
     control: ControlEnum | None = None
     elution_buffer: str | None = None
     extraction_method: str | None = None

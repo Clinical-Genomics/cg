@@ -4,12 +4,12 @@ from cg.services.order_validation_service.errors.sample_errors import Applicatio
 from cg.services.order_validation_service.validators.inter_field.utils import (
     _is_application_not_compatible,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import MicroSaltOrder
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.store.store import Store
 
 
 def validate_application_compatibility(
-    order: MicroSaltOrder,
+    order: MicrosaltOrder,
     store: Store,
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
