@@ -20,13 +20,13 @@ from cg.store.models import Application
 from cg.store.store import Store
 
 
-def test_applications_exist_sample_order(valid_microsalt_order: MicrosaltOrder, base_store: Store):
+def test_applications_exist_sample_order(valid_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a sample with an application which is not found in the database
-    valid_microsalt_order.samples[0].application = "Non-existent app tag"
+    valid_order.samples[0].application = "Non-existent app tag"
 
     # WHEN validating that the specified applications exist
-    errors = validate_application_exists(order=valid_microsalt_order, store=base_store)
+    errors = validate_application_exists(order=valid_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
@@ -36,16 +36,16 @@ def test_applications_exist_sample_order(valid_microsalt_order: MicrosaltOrder, 
 
 
 def test_application_is_incompatible(
-    valid_microsalt_order: MicrosaltOrder,
+    valid_order: MicrosaltOrder,
     sample_with_non_compatible_application: MicrosaltSample,
     base_store: Store,
 ):
 
     # GIVEN an order that has a sample with an application which is incompatible with microsalt
-    valid_microsalt_order.samples.append(sample_with_non_compatible_application)
+    valid_order.samples.append(sample_with_non_compatible_application)
 
     # WHEN validating the order
-    errors = validate_application_compatibility(order=valid_microsalt_order, store=base_store)
+    errors = validate_application_compatibility(order=valid_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
