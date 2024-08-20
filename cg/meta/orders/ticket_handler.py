@@ -22,9 +22,10 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, status_db: Store, client: FreshdeskClient):
+    def __init__(self, status_db: Store, client: FreshdeskClient, env: str):
         self.client: FreshdeskClient = client
         self.status_db: Store = status_db
+        self.env = env
 
     @staticmethod
     def parse_ticket_number(name: str) -> str | None:
@@ -59,7 +60,7 @@ class TicketHandler:
                 type="Order",
                 tags=[order.samples[0].data_analysis],
                 custom_fields={
-                    "cf_environment": "Stage",
+                    "cf_environment": self.env,
                 },
                 attachments=[],
             )
