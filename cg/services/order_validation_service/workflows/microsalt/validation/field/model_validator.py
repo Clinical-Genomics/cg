@@ -9,7 +9,7 @@ class MicroSaltModelValidator:
     @classmethod
     def validate(cls, raw_order: dict) -> tuple[MicrosaltOrder | None, ValidationErrors]:
         try:
-            order: MicrosaltOrder = MicrosaltOrder.model_validate(raw_order)
+            order = MicrosaltOrder.model_validate(raw_order)
             return order, ValidationErrors()
         except ValidationError as error:
             return None, convert_errors(pydantic_errors=error)
