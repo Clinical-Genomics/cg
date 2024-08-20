@@ -35,7 +35,8 @@ def validate_application_compatibility(
 
 
 def validate_wells_contain_at_most_one_sample(
-    order: MicrosaltOrder, **kwargs,
+    order: MicrosaltOrder,
+    **kwargs,
 ) -> list[OccupiedWellError]:
     plate_samples = PlateSamples(order)
     return plate_samples.get_occupied_well_errors()
