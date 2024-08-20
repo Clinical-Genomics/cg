@@ -46,3 +46,10 @@ def valid_microsalt_order() -> MicrosaltOrder:
     sample_2: MicrosaltSample = create_microsalt_sample(2)
     sample_3: MicrosaltSample = create_microsalt_sample(3)
     return create_microsalt_order([sample_1, sample_2, sample_3])
+
+
+@pytest.fixture
+def sample_with_non_compatible_application() -> MicrosaltSample:
+    sample: MicrosaltSample = create_microsalt_sample(1)
+    sample.application = "WGSPCFC030"
+    return sample
