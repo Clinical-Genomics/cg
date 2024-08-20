@@ -80,3 +80,33 @@ def test_add_gisaid_accession_to_reports(
 
     # THEN a GISAID accession has been added
     assert isinstance(gisaid_complementary_reports[0].gisaid_accession, str)
+
+
+def test_parse_and_get_sars_cov_complementary_reports(
+    gisaid_complementary_report_raw: dict[str, str], gisaid_api: GisaidAPI
+):
+    """Test getting Sars-cov complementary reports."""
+    # GIVEN a GISAID API
+
+    # GIVEN a report with a Sars-cov entry
+    raw_reports: list[dict[str, str]] = [
+        gisaid_complementary_report_raw,
+        {
+            "urvalskriterium": "criteria",
+            "provnummer": "44CS000000",
+        },
+    ]
+
+    # WHEN getting, Sars-cov reports
+    sars_cov_reports: list[GisaidComplementaryReport] = (
+        gisaid_api.parse_and_get_sars_cov_complementary_reports(
+            complementary_report_content_raw=raw_reports
+        )
+    )
+
+    # THEN a sars-cov reports should be returned
+    assert isinstance(sars_cov_reports[0], GisaidComplementaryReport)
+
+    # THEN only the report for Sars-cov2 reports remains
+    assert len(sars_cov_reports) == 1
+    assert sars_cov_reports[0].sample_number == "44CS000000"
