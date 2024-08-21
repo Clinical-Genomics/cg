@@ -446,7 +446,7 @@ def balsamic_analysis_hk_bundle_data(
             {
                 "path": Path(balsamic_wgs_analysis_dir, "coverage_qc_report.pdf").as_posix(),
                 "archive": False,
-                "tags": ["file_delivery-report"],
+                "tags": ["delivery-report"],
             },
         ],
     }

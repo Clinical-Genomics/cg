@@ -1,4 +1,4 @@
-"""Tests utils for generating file_delivery reports"""
+"""Tests utils for generating delivery reports"""
 
 from datetime import datetime
 
@@ -17,9 +17,9 @@ from tests.mocks.report import MockMipDNAReportAPI
 
 
 def test_get_report_case(delivery_report_click_context, case_id):
-    """Tests case object extraction for file_delivery report given a valid case_id"""
+    """Tests case object extraction for delivery report given a valid case_id"""
 
-    # GIVEN a file_delivery report click context
+    # GIVEN a delivery report click context
 
     # WHEN resolving a report case ID
     case_obj = get_report_case(delivery_report_click_context, case_id)
@@ -31,7 +31,7 @@ def test_get_report_case(delivery_report_click_context, case_id):
 def test_get_report_case(delivery_report_click_context, caplog):
     """Tests error raise when an incorrect case ID is provided"""
 
-    # GIVEN a file_delivery report click context
+    # GIVEN a delivery report click context
 
     # WHEN resolving an incorrect case ID, an exception should be raised
     with pytest.raises(click.exceptions.Abort):

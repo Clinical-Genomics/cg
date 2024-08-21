@@ -35,7 +35,7 @@ def test_add_case_required(
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
-            "--data-file_delivery",
+            "--data-delivery",
             CLI_OPTION_DELIVERY,
             "--ticket",
             ticket_id,

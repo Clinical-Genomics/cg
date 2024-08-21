@@ -14,5 +14,5 @@ def test_generate_no_options(base_context, cli_runner):
 
     # THEN the output should list all the supported workflows
     assert result.exit_code == EXIT_SUCCESS
-    assert "file_delivery-report" in result.output
-    assert "available-file_delivery-reports" in result.output
+    assert "delivery-report" in result.output
+    assert "available-delivery-reports" in result.output

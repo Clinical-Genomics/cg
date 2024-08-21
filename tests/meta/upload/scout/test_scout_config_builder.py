@@ -192,7 +192,7 @@ def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuil
 
 
 def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfigBuilder):
-    """Test include Balsamic file_delivery report."""
+    """Test include Balsamic delivery report."""
     # GIVEN a Housekeeper version bundle with balsamic analysis files
     # GIVEN a case load object
 

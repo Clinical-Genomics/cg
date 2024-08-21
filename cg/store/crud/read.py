@@ -1235,7 +1235,7 @@ class ReadHandler(BaseHandler):
         )
 
     def analyses_to_upload_delivery_reports(self, workflow: Workflow = None) -> Query:
-        """Return analyses that need a file_delivery report to be uploaded."""
+        """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.WITH_SCOUT_DELIVERY],

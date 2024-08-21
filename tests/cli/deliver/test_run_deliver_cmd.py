@@ -1,4 +1,4 @@
-"""Tests for running the file_delivery command"""
+"""Tests for running the delivery command"""
 
 import logging
 from pathlib import Path
@@ -28,9 +28,7 @@ def test_run_deliver_without_specifying_case_or_ticket(
     caplog.set_level(logging.INFO)
     # GIVEN a cli runner and a base context
     # WHEN running the deliver command with help text
-    result = cli_runner.invoke(
-        deliver_analysis, ["--file_delivery-type", "mip-dna"], obj=base_context
-    )
+    result = cli_runner.invoke(deliver_analysis, ["--delivery-type", "mip-dna"], obj=base_context)
 
     # THEN assert the command exits without problems
     assert result.exit_code == 0
@@ -51,7 +49,7 @@ def test_run_deliver_non_existing_case(
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--file_delivery-type", "mip-dna"],
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
         obj=base_context,
     )
 
@@ -68,17 +66,17 @@ def test_delivery_with_dry_run(
     delivery_inbox: Path,
     caplog,
 ):
-    """Test to run the file_delivery command with dry run enabled"""
+    """Test to run the delivery command with dry run enabled"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a cli runner
     # GIVEN a context with a case that have files in housekeeper to deliver
-    # GIVEN that the file_delivery path does not exist
+    # GIVEN that the delivery path does not exist
     assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command in dry run mode
     cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--file_delivery-type", "mip-dna", "--dry-run"],
+        ["--case-id", case_id, "--delivery-type", "mip-dna", "--dry-run"],
         obj=populated_mip_context,
     )
 

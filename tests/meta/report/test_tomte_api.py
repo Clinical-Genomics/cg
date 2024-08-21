@@ -1,4 +1,4 @@
-"""Test Tomte file_delivery report API."""
+"""Test Tomte delivery report API."""
 
 from cg.meta.report.tomte import TomteReportAPI
 from cg.models.analysis import NextflowAnalysis

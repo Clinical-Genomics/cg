@@ -64,8 +64,8 @@ def test_get_prepared_date_no_sample(lims_api, mocker):
 
 
 def test_get_delivery_date(lims_api, mocker):
-    """Test to get the file_delivery date for an existing sample"""
-    # GIVEN a lims api and a mocked sample that returns a file_delivery date
+    """Test to get the delivery date for an existing sample"""
+    # GIVEN a lims api and a mocked sample that returns a delivery date
     mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
     mock_instance = mocked_sample.return_value
     date = dt.datetime.today()
@@ -79,7 +79,7 @@ def test_get_delivery_date(lims_api, mocker):
 
 
 def test_get_delivery_date_no_sample(lims_api, mocker):
-    """Test to get the file_delivery date when sample not exists"""
+    """Test to get the delivery date when sample not exists"""
     # GIVEN a lims api and a mocked sample that raises exception when fething date
     mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
     mock_instance = mocked_sample.return_value

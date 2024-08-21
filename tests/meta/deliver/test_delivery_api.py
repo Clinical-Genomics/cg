@@ -159,10 +159,10 @@ def test_get_sample_files_from_version(
 
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
-    # GIVEN a case only file_delivery type
+    # GIVEN a case only delivery type
     delivery_type: set[str] = {Workflow.MIP_DNA}
 
-    # WHEN getting the file_delivery scope
+    # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN a case_delivery should be True while sample_delivery False
@@ -171,11 +171,11 @@ def test_get_delivery_scope_case_only():
 
 
 def test_get_delivery_scope_sample_only():
-    """Testing the file_delivery scope of a sample only file_delivery."""
-    # GIVEN a sample only file_delivery type
+    """Testing the delivery scope of a sample only delivery."""
+    # GIVEN a sample only delivery type
     delivery_type = {Workflow.FASTQ}
 
-    # WHEN getting the file_delivery scope
+    # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN a sample_delivery should be True while case_delivery False
@@ -184,11 +184,11 @@ def test_get_delivery_scope_sample_only():
 
 
 def test_get_delivery_scope_case_and_sample():
-    """Testing the file_delivery scope of a case and sample file_delivery."""
-    # GIVEN a case and sample file_delivery type
+    """Testing the delivery scope of a case and sample delivery."""
+    # GIVEN a case and sample delivery type
     delivery_type = {Workflow.MUTANT}
 
-    # WHEN getting the file_delivery scope
+    # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN both case_delivery and sample_delivery should be True

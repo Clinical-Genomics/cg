@@ -1,4 +1,4 @@
-"""Test module for the Rnafusion file_delivery report API."""
+"""Test module for the Rnafusion delivery report API."""
 
 import pytest
 from pytest_mock import MockFixture

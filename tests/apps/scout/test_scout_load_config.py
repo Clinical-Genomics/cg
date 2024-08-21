@@ -27,7 +27,7 @@ def test_validate_scout_individual_attributes(scout_individual: dict, key: str, 
 def test_instantiate_empty_mip_config(delivery_report_html: Path):
     """Tests whether a MipLoadConfig can be instantiated only with mandatory arguments."""
 
-    # GIVEN a file_delivery report file
+    # GIVEN a delivery report file
 
     # WHEN instantiating an empty MIP load config
     config: MipLoadConfig = scout_load_config.MipLoadConfig(
