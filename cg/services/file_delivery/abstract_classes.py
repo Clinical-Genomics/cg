@@ -23,17 +23,6 @@ class MoveDeliveryFilesService(ABC):
         pass
 
 
-class GenerateDeliveryReportFilesService(ABC):
-    """
-    Abstract class that encapulates the logic required for generating a report of the files to deliver.
-    """
-
-    @abstractmethod
-    def generate_report(self, case_id: str) -> None:
-        """Generate a report of the files to deliver and adds it to housekeeper."""
-        pass
-
-
 class DeliverFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for delivering files to the customer.
