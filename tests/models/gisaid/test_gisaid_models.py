@@ -1,4 +1,4 @@
-from cg.meta.upload.gisaid.models import GisaidAccession
+from cg.meta.upload.gisaid.models import GisaidAccession, GisaidSample
 from cg.models.gisaid.reports import GisaidComplementaryReport
 
 
@@ -26,3 +26,15 @@ def test_instantiate_gisaid_complementary_report(gisaid_complementary_report_raw
 
     # THEN assert that it was successfully created
     assert isinstance(report, GisaidComplementaryReport)
+
+
+def test_instantiate_gisaid_sample(gisaid_samples_raw: dict[str, str]):
+    """Tests GISAID saples dict against a pydantic GisaidSample."""
+
+    # GIVEN a HISAID sample dict
+
+    # WHEN instantiating a GisaidSample object
+    gisaid_sample = GisaidSample.model_validate(gisaid_samples_raw)
+
+    # THEN assert that it was successfully created
+    assert isinstance(gisaid_sample, GisaidSample)

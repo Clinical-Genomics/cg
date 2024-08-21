@@ -80,3 +80,26 @@ def gisaid_api(
 ) -> GisaidAPI:
     """GISAID API fixture."""
     return GisaidAPI(cg_context)
+
+
+@pytest.fixture
+def gisaid_samples_raw() -> dict[str, str]:
+    """Return a raw GISAID sample."""
+    return {
+        "case_id": "a_case_id",
+        "cg_lims_id": "a_cg_lims_id",
+        "covv_authors": "a_covv_authors",
+        "covv_collection_date": "2000-01-01",
+        "covv_gender": "unknown",
+        "covv_host": "Human",
+        "covv_passage": "Original",
+        "covv_patient_age": "unknown",
+        "covv_patient_status": "unknown",
+        "covv_subm_lab": "Karolinska University Hospital",
+        "covv_subm_lab_addr": "171 76 Stockholm, Sweden",
+        "covv_type": "betacoronavirus",
+        "fn": "a_fn",
+        "region": "a_region",
+        "region_code": "a_region_code",
+        "submitter": "a_submitter",
+    }
