@@ -40,16 +40,20 @@ def expected_analysis_delivery_files(
 ) -> DeliveryFiles:
     """Return the expected analysis delivery files."""
     hk_bundle_names: list[str] = [sample_id, another_sample_id]
-    sample_files: list[SampleFile] = [
-        SampleFile(
-            case_id=case_id,
-            sample_id=sample,
-            file_path=delivery_housekeeper_api.get_files_from_latest_version(
-                bundle_name=case_id, tags=[AlignmentFileTag.CRAM]
-            )[0].full_path,
+    sample_files: list[SampleFile] = []
+    for sample in hk_bundle_names:
+        sample_files.extend(
+            [
+                SampleFile(
+                    case_id=case_id,
+                    sample_id=sample,
+                    file_path=file.full_path,
+                )
+                for file in delivery_housekeeper_api.get_files_from_latest_version(
+                    bundle_name=case_id, tags=[AlignmentFileTag.CRAM, sample]
+                )
+            ]
         )
-        for sample in hk_bundle_names
-    ]
     case_files: list[CaseFile] = [
         CaseFile(
             case_id=case_id,

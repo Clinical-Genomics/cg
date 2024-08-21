@@ -10,6 +10,7 @@ from housekeeper.store.models import File
 
 from cg.services.file_delivery.fetch_file_service.models import SampleFile, CaseFile, DeliveryFiles
 from cg.store.models import Case
+
 from cg.store.store import Store
 
 
@@ -38,6 +39,7 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
+
         sample_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case_id, tags=sample_tags_with_sample_id
         )
