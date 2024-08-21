@@ -1,5 +1,9 @@
 from abc import abstractmethod, ABC
 
+from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
+    FetchDeliveryFilesService,
+)
+
 
 class FormatDeliveryFilesService(ABC):
     """
