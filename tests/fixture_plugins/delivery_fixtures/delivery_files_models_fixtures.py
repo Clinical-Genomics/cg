@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     AlignmentFileTag,
@@ -85,6 +88,34 @@ def expected_analysis_delivery_files(
 
 
 @pytest.fixture
-def moved_fastq_delivery_files(expected_fastq_delivery_files: DeliveryFiles) -> DeliveryFiles:
+def expected_moved_fastq_delivery_files(
+    expected_fastq_delivery_files: DeliveryFiles, tmp_path
+) -> DeliveryFiles:
     """Return the moved fastq delivery files."""
+    inbox_path: Path = Path(
+        tmp_path,
+        expected_fastq_delivery_files.delivery_data.customer_internal_id,
+        INBOX_NAME,
+        expected_fastq_delivery_files.delivery_data.ticket_id,
+    )
+    for sample_file in expected_fastq_delivery_files.sample_files:
+        sample_file.file_path = Path(inbox_path, sample_file.file_path.name)
     return expected_fastq_delivery_files
+
+
+@pytest.fixture
+def expected_moved_analysis_delivery_files(
+    expected_analysis_delivery_files: DeliveryFiles, tmp_path
+) -> DeliveryFiles:
+    """Return the moved analysis delivery files."""
+    inbox_path: Path = Path(
+        tmp_path,
+        expected_analysis_delivery_files.delivery_data.customer_internal_id,
+        INBOX_NAME,
+        expected_analysis_delivery_files.delivery_data.ticket_id,
+    )
+    for sample_file in expected_analysis_delivery_files.sample_files:
+        sample_file.file_path = Path(inbox_path, sample_file.file_path.name)
+    for case_file in expected_analysis_delivery_files.case_files:
+        case_file.file_path = Path(inbox_path, case_file.file_path.name)
+    return expected_analysis_delivery_files
