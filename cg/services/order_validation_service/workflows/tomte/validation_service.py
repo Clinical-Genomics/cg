@@ -10,9 +10,7 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
     TomteModelValidator,
 )

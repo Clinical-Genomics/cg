@@ -16,9 +16,7 @@ from cg.services.order_validation_service.workflows.mip_dna.validation_rules imp
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.store.store import Store
 
 

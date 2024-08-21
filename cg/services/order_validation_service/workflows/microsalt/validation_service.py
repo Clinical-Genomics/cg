@@ -13,9 +13,7 @@ from cg.services.order_validation_service.workflows.microsalt.validation_rules i
     ORDER_RULES,
     SAMPLE_RULES,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.store.store import Store
 
 
