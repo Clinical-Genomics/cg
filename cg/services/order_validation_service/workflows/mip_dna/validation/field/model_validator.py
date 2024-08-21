@@ -5,7 +5,7 @@ from cg.services.order_validation_service.validators.field.utils import convert_
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 
 
-class TomteModelValidator:
+class MipDnaModelValidator:
 
     @classmethod
     def validate(cls, raw_order: dict) -> tuple[MipDnaOrder | None, ValidationErrors]:

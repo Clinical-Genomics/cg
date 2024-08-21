@@ -10,15 +10,13 @@ from cg.services.order_validation_service.utils import (
 )
 from cg.services.order_validation_service.workflows.microsalt.validation_rules import ORDER_RULES
 from cg.services.order_validation_service.workflows.mip_dna.validation.field.model_validator import (
-    TomteModelValidator,
+    MipDnaModelValidator,
 )
 from cg.services.order_validation_service.workflows.mip_dna.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.workflows.tomte.response_mapper import create_order_validation_response
 from cg.store.store import Store
 
 
@@ -32,19 +30,25 @@ class MipDnaValidationService(OrderValidationService):
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = TomteModelValidator.validate(raw_order)
+        order, field_errors = MipDnaModelValidator.validate(raw_order)
 
         if not order:
             return field_errors
 
         order_errors: list[OrderError] = apply_order_validation(
-            rules=ORDER_RULES, order=order, store=self.store
+            rules=ORDER_RULES,
+            order=order,
+            store=self.store,
         )
         case_errors: list[CaseError] = apply_case_validation(
-            rules=CASE_RULES, order=order, store=self.store
+            rules=CASE_RULES,
+            order=order,
+            store=self.store,
         )
         case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(
-            rules=CASE_SAMPLE_RULES, order=order, store=self.store
+            rules=CASE_SAMPLE_RULES,
+            order=order,
+            store=self.store,
         )
 
         return ValidationErrors(
