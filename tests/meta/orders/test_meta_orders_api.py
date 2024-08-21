@@ -84,7 +84,7 @@ def test_submit(
     user_mail: str,
     user_name: str,
 ):
-    with patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None), patch(
+    with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
@@ -199,48 +199,45 @@ def test_submit_scout_legal_sample_customer(
     user_mail: str,
     user_name: str,
 ):
-    with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch:
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        monkeypatch_process_lims(monkeypatch, order_data)
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    monkeypatch_process_lims(monkeypatch, order_data)
 
-        # GIVEN we have an order with a customer that is in the same customer group as the customer
-        # that the samples originate from
-        collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
-        sample_store.session.add(collaboration)
-        sample_customer = sample_store.add_customer(
-            "customer1",
-            "customer 1",
-            scout_access=True,
-            invoice_address="dummy street 1",
-            invoice_reference="dummy nr",
-        )
-        order_customer = sample_store.add_customer(
-            "customer2",
-            "customer 2",
-            scout_access=True,
-            invoice_address="dummy street 2",
-            invoice_reference="dummy nr",
-        )
-        sample_customer.collaborations.append(collaboration)
-        order_customer.collaborations.append(collaboration)
-        sample_store.session.add(sample_customer)
-        sample_store.session.add(order_customer)
-        existing_sample: Sample = sample_store._get_query(table=Sample).first()
-        existing_sample.customer = sample_customer
-        sample_store.session.commit()
-        order_data.customer = order_customer.internal_id
+    # GIVEN we have an order with a customer that is in the same customer group as the customer
+    # that the samples originate from
+    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
+    sample_store.session.add(collaboration)
+    sample_customer = sample_store.add_customer(
+        "customer1",
+        "customer 1",
+        scout_access=True,
+        invoice_address="dummy street 1",
+        invoice_reference="dummy nr",
+    )
+    order_customer = sample_store.add_customer(
+        "customer2",
+        "customer 2",
+        scout_access=True,
+        invoice_address="dummy street 2",
+        invoice_reference="dummy nr",
+    )
+    sample_customer.collaborations.append(collaboration)
+    order_customer.collaborations.append(collaboration)
+    sample_store.session.add(sample_customer)
+    sample_store.session.add(order_customer)
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
+    existing_sample.customer = sample_customer
+    sample_store.session.commit()
+    order_data.customer = order_customer.internal_id
 
-        for sample in order_data.samples:
-            sample.internal_id = existing_sample.internal_id
-            break
+    for sample in order_data.samples:
+        sample.internal_id = existing_sample.internal_id
+        break
 
-        # WHEN calling submit
-        # THEN an OrderError should not be raised on illegal customer
-        orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
-        )
+    # WHEN calling submit
+    # THEN an OrderError should not be raised on illegal customer
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
 
 
 @pytest.mark.parametrize(
@@ -300,26 +297,23 @@ def test_submit_fluffy_duplicate_sample_case_name(
     user_mail: str,
     user_name: str,
 ):
-    with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch:
-        # GIVEN we have an order with a case that is already in the database
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        monkeypatch_process_lims(monkeypatch, order_data)
+    # GIVEN we have an order with a case that is already in the database
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    monkeypatch_process_lims(monkeypatch, order_data)
 
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # WHEN calling submit
+    # THEN an OrderError should be raised on duplicate case name
+    with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
-
-        # WHEN calling submit
-        # THEN an OrderError should be raised on duplicate case name
-        with pytest.raises(OrderError):
-            orders_api.submit(
-                project=order_type,
-                order_in=order_data,
-                user_name=user_name,
-                user_mail=user_mail,
-            )
 
 
 def test_submit_unique_sample_case_name(
@@ -331,8 +325,6 @@ def test_submit_unique_sample_case_name(
     ticket_id: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
@@ -512,8 +504,6 @@ def test_submit_unique_sample_name(
     user_name: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
@@ -599,8 +589,6 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     user_name: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
