@@ -6,7 +6,14 @@ from cg.constants.housekeeper_tags import (
     AlignmentFileTag,
     SequencingFileTag,
 )
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles, SampleFile, CaseFile
+from cg.services.file_delivery.fetch_file_service.models import (
+    DeliveryFiles,
+    SampleFile,
+    CaseFile,
+    DeliveryMetaData,
+)
+from cg.store.models import Case
+from cg.store.store import Store
 
 
 @pytest.fixture
@@ -15,6 +22,7 @@ def expected_fastq_delivery_files(
     case_id: str,
     sample_id: str,
     another_sample_id: str,
+    delivery_store_microsalt: Store,
 ) -> DeliveryFiles:
     """Return the expected fastq delivery files."""
     hk_bundle_names: list[str] = [sample_id, another_sample_id]
@@ -28,7 +36,11 @@ def expected_fastq_delivery_files(
         )
         for sample in hk_bundle_names
     ]
-    return DeliveryFiles(case_files=None, sample_files=sample_files)
+    case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
+    delivery_data = DeliveryMetaData(
+        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+    )
+    return DeliveryFiles(delivery_data=delivery_data, case_files=None, sample_files=sample_files)
 
 
 @pytest.fixture
@@ -37,6 +49,7 @@ def expected_analysis_delivery_files(
     case_id: str,
     sample_id: str,
     another_sample_id: str,
+    delivery_store_balsamic: Store,
 ) -> DeliveryFiles:
     """Return the expected analysis delivery files."""
     hk_bundle_names: list[str] = [sample_id, another_sample_id]
@@ -62,4 +75,16 @@ def expected_analysis_delivery_files(
             )[0].full_path,
         )
     ]
-    return DeliveryFiles(case_files=case_files, sample_files=sample_files)
+    case: Case = delivery_store_balsamic.get_case_by_internal_id(case_id)
+    delivery_data = DeliveryMetaData(
+        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+    )
+    return DeliveryFiles(
+        delivery_data=delivery_data, case_files=case_files, sample_files=sample_files
+    )
+
+
+@pytest.fixture
+def moved_fastq_delivery_files(expected_fastq_delivery_files: DeliveryFiles) -> DeliveryFiles:
+    """Return the moved fastq delivery files."""
+    return expected_fastq_delivery_files
