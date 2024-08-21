@@ -194,7 +194,6 @@ class TicketHandler:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
 
-        # Create the message content
         message: str = self.add_existing_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
             order=order,
