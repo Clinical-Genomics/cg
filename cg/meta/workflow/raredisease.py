@@ -16,10 +16,10 @@ from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import (
-    RAREDISEASE_METRIC_CONDITIONS,
     RAREDISEASE_COVERAGE_FILE_TAGS,
-    RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
+    RAREDISEASE_COVERAGE_THRESHOLD,
+    RAREDISEASE_METRIC_CONDITIONS,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -109,6 +109,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
             analysis_type=analysis_type,
             target_bed=Path(self.references, target_bed).as_posix(),
+            save_mapped_as_cram=True,
         )
 
     @staticmethod
