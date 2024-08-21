@@ -34,14 +34,14 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     validate_wells_contain_at_most_one_sample,
 )
 
-TOMTE_ORDER_RULES: list[callable] = [
+ORDER_RULES: list[callable] = [
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
     validate_ticket_number_required_if_connected,
     validate_user_belongs_to_customer,
 ]
 
-TOMTE_CASE_RULES: list[callable] = [
+CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -49,7 +49,7 @@ TOMTE_CASE_RULES: list[callable] = [
     validate_gene_panels_unique,
 ]
 
-TOMTE_CASE_SAMPLE_RULES: list[callable] = [
+CASE_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
