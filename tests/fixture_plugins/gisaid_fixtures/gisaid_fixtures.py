@@ -6,11 +6,6 @@ from cg.models.gisaid.reports import GisaidComplementaryReport
 
 
 @pytest.fixture
-def sars_cov_sample_number() -> str:
-    return "44CS000000"
-
-
-@pytest.fixture
 def gisaid_log_raw(sars_cov_sample_number: str) -> list[dict[str, str]]:
     """Return a raw GISAID log."""
     return [
