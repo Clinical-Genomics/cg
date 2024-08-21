@@ -57,7 +57,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_case_results_file_path(self, case: Case) -> Path:
         case_output_path: Path = self.get_case_output_path(case.internal_id)
-        return Path(case_output_path, f"/sars-cov-2_{case.latest_ticket}_results.csv")
+        return Path(case_output_path, f"sars-cov-2_{case.latest_ticket}_results.csv")
 
     def get_case_fastq_dir(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "fastq")

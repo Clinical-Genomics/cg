@@ -24,7 +24,6 @@ def parse_samples_results(case: Case, results_file_path: Path) -> dict[str, Pars
 
 def _get_validated_results_list(results_file_path: Path) -> list[ParsedSampleResults]:
     """Parses the results file and returns a list of validated SampleResults."""
-
     raw_results: list[dict[Any, Any]] = read_csv(file_path=results_file_path, read_to_dict=True)
     adapter = TypeAdapter(list[ParsedSampleResults])
     return adapter.validate_python(raw_results)

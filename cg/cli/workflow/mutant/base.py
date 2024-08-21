@@ -113,7 +113,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     cases_ready_for_qc: list[Case] = analysis_api.get_cases_with_completed_not_stored_analysis()
     LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
     for case in cases_ready_for_qc:
-        LOG.info(f"Storing deliverables for {case.internal_id}")
+        LOG.info(f"Performing QC on case {case.internal_id}.")
         try:
             analysis_api.run_qc_on_case(case=case, dry_run=dry_run)
         except Exception:
