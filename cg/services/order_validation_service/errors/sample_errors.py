@@ -54,6 +54,11 @@ class OrganismDoesNotExistError(SampleError):
     message: str = "Organism does not exist"
 
 
+class ElutionBufferMissingError(SampleError):
+    field: str = "elution_buffer"
+    message: str = "Buffer is required"
+
+
 class ExtractionMethodMissingError(SampleError):
     field: str = "extraction_method"
     message: str = "Extraction method is required"

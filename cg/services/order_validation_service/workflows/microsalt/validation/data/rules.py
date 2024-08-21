@@ -1,6 +1,7 @@
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    ElutionBufferMissingError,
     ExtractionMethodMissingError,
     InvalidVolumeError,
     OrganismDoesNotExistError,
@@ -64,6 +65,15 @@ def validate_organism_exists(
     for sample_index, sample in order.enumerated_new_samples:
         if not store.get_organism_by_internal_id(sample.organism):
             error = OrganismDoesNotExistError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_buffer_required(order: MicrosaltOrder, **kwargs) -> list[ElutionBufferMissingError]:
+    errors: list[ElutionBufferMissingError] = []
+    for sample_index, sample in order.enumerated_new_samples:
+        if not sample.elution_buffer:
+            error = ElutionBufferMissingError(sample_index=sample_index)
             errors.append(error)
     return errors
 
