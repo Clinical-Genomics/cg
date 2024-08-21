@@ -120,6 +120,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             exit_code = EXIT_FAIL
 
     cases_to_store: list[Case] = analysis_api.get_cases_to_store()
+    LOG.info(f"Found {len(cases_to_store)} cases to store!")
     for case in cases_to_store:
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
