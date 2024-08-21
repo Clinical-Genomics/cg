@@ -16,17 +16,6 @@ class FormatDeliveryFilesService(ABC):
         pass
 
 
-class MoveDeliveryFilesService(ABC):
-    """
-    Abstract class that encapsulates the logic required for moving files to the customer folder. including formatting and renaming.
-    """
-
-    @abstractmethod
-    def move_files(self, case_id: str) -> None:
-        """Move the files to the customer folder."""
-        pass
-
-
 class DeliverFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for delivering files to the customer.

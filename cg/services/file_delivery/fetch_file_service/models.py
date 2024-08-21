@@ -3,6 +3,11 @@ from pathlib import Path
 from pydantic import BaseModel
 
 
+class DeliveryMetaData(BaseModel):
+    customer_internal_id: str
+    ticket_id: str
+
+
 class CaseFile(BaseModel):
     case_id: str
     file_path: Path
@@ -15,5 +20,6 @@ class SampleFile(BaseModel):
 
 
 class DeliveryFiles(BaseModel):
+    delivery_data: DeliveryMetaData
     case_files: list[CaseFile] | None
     sample_files: list[SampleFile]
