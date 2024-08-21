@@ -132,9 +132,7 @@ def tomte_status_data(tomte_order_to_submit: dict):
 
 @pytest.fixture
 def freshdesk_client():
-    return FreshdeskClient(
-        base_url="https://example.com", api_key="dummy_api_key", order_email_id=12345
-    )
+    return FreshdeskClient(base_url="https://example.com", api_key="dummy_api_key")
 
 
 @pytest.fixture(scope="function")
@@ -144,4 +142,4 @@ def orders_api(base_store: Store, lims_api: MockLimsAPI, ticket_handler: TicketH
 
 @pytest.fixture
 def ticket_handler(store: Store, freshdesk_client: FreshdeskClient):
-    return TicketHandler(status_db=store, client=freshdesk_client, env="test")
+    return TicketHandler(status_db=store, client=freshdesk_client, system_email_id=1, env="test")

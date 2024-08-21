@@ -4,11 +4,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
-from sendmail_container import FormDataRequest
-
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-from cg.clients.freshdesk.utils import create_temp_attachment_file
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -22,16 +19,17 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, status_db: Store, client: FreshdeskClient, env: str):
+    def __init__(self, status_db: Store, client: FreshdeskClient, system_email_id: int, env: str):
         self.client: FreshdeskClient = client
         self.status_db: Store = status_db
+        self.system_email_id: int = system_email_id
         self.env = env
 
     @staticmethod
     def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", name)
+        ticket_match = re.fullmatch(r"#([0-9]{6,10})", name)
         if ticket_match:
             ticket_id = ticket_match.group(1)
             LOG.info(f"{ticket_id}: detected ticket in order name")
@@ -39,9 +37,7 @@ class TicketHandler:
         LOG.info(f"Could not detected ticket number in name {name}")
         return None
 
-    def create_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str
-    ) -> int | None:
+    def create_ticket(self, order: OrderIn, user_name: str, project: str) -> int | None:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
@@ -53,8 +49,8 @@ class TicketHandler:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
             freshdesk_ticket = TicketCreate(
-                email=user_mail,
                 description=message,
+                email_config_id=self.system_email_id,
                 name=user_name,
                 subject=order.name,
                 type="Order",
@@ -193,27 +189,26 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
+        self, order: OrderIn, user_name: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
-        LOG.info(f"Connecting order to ticket {ticket_number}")
+        LOG.info("Connecting order to ticket %s", ticket_number)
+
         message: str = self.add_existing_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
             order=order,
             project=project,
         )
-        sender_prefix, email_server_alias = user_mail.split("@")
-        temp_dir: TemporaryDirectory = create_temp_attachment_file(
-            content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
-        )
-        email_form = FormDataRequest(
-            sender_prefix=sender_prefix,
-            email_server_alias=email_server_alias,
-            request_uri=self.client.base_url,
-            recipients=user_mail,
-            mail_title=f"[#{ticket_number}]",
-            mail_body=message,
-            attachments=[Path(f"{temp_dir.name}/order.json")],
-        )
-        email_form.submit()
-        temp_dir.cleanup()
+
+        with TemporaryDirectory() as temp_dir:
+            attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
+
+            reply_payload = {"body": message, "attachments": []}
+
+            LOG.info("Reply payload: %s", reply_payload)
+
+            self.client.reply_to_ticket(
+                ticket_id=ticket_number, reply=reply_payload, attachments=[attachments]
+            )
+
+            LOG.info("Connected order to ticket %s in Freshdesk", ticket_number)

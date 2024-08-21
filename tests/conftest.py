@@ -650,9 +650,7 @@ def osticket(ticket_id: str) -> MockOsTicket:
 @pytest.fixture
 def freshdesk_client() -> FreshdeskClient:
     """Return a FreshdeskClient instance with mock parameters."""
-    client = FreshdeskClient(
-        base_url="https://mock.freshdesk.com", api_key="mock_api_key", order_email_id=2024
-    )
+    client = FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
     return client
 
 
