@@ -377,7 +377,7 @@ class GisaidAPI:
             content=reports, fieldnames=field_names, file_path=Path(complementary_report.full_path)
         )
 
-    def is_gisaid_samples_uploaded(
+    def are_gisaid_samples_uploaded(
         self, sars_cov_complementary_reports: list[GisaidComplementaryReport]
     ) -> bool:
         gisaid_accession_count: int = 0
@@ -397,7 +397,7 @@ class GisaidAPI:
         sars_cov_complementary_reports: list[GisaidComplementaryReport] = (
             self.parse_and_get_sars_cov_complementary_reports(complementary_report_content_raw)
         )
-        if self.is_gisaid_samples_uploaded(sars_cov_complementary_reports):
+        if self.are_gisaid_samples_uploaded(sars_cov_complementary_reports):
             LOG.info("All samples already uploaded")
             return
 

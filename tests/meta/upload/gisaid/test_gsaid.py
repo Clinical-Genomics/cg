@@ -32,7 +32,9 @@ def test_validate_gisaid_complementary_reports(
 
 
 def test_get_sars_cov_complementary_reports(
-    gisaid_complementary_reports: list[GisaidComplementaryReport], gisaid_api: GisaidAPI
+    gisaid_complementary_reports: list[GisaidComplementaryReport],
+    gisaid_api: GisaidAPI,
+    sars_cov_sample_number: str,
 ):
     # GIVEN a list of reports
 
@@ -46,7 +48,7 @@ def test_get_sars_cov_complementary_reports(
 
     # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
-    assert content[0].sample_number == "44CS000000"
+    assert content[0].sample_number == sars_cov_sample_number
 
 
 def test_get_complementary_report_sample_number(
@@ -83,7 +85,10 @@ def test_add_gisaid_accession_to_reports(
 
 
 def test_parse_and_get_sars_cov_complementary_reports(
-    gisaid_complementary_report_raw: dict[str, str], gisaid_api: GisaidAPI
+    gisaid_complementary_report_raw: dict[str, str],
+    gisaid_api: GisaidAPI,
+    sars_cov_sample_number: str,
+    gisaid_sars_cov_complementary_report_raw: dict[str, str],
 ):
     """Test getting Sars-cov complementary reports."""
     # GIVEN a GISAID API
@@ -91,10 +96,7 @@ def test_parse_and_get_sars_cov_complementary_reports(
     # GIVEN a report with a Sars-cov entry
     raw_reports: list[dict[str, str]] = [
         gisaid_complementary_report_raw,
-        {
-            "urvalskriterium": "criteria",
-            "provnummer": "44CS000000",
-        },
+        gisaid_sars_cov_complementary_report_raw,
     ]
 
     # WHEN getting, Sars-cov reports
@@ -109,4 +111,4 @@ def test_parse_and_get_sars_cov_complementary_reports(
 
     # THEN only the report for Sars-cov2 reports remains
     assert len(sars_cov_reports) == 1
-    assert sars_cov_reports[0].sample_number == "44CS000000"
+    assert sars_cov_reports[0].sample_number == sars_cov_sample_number
