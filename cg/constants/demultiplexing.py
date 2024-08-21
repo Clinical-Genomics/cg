@@ -11,7 +11,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     """Demultiplexing related directories and files."""
 
     COPY_COMPLETE: str = "CopyComplete.txt"
-    DELIVERY: str = "file_delivery.txt"
+    DELIVERY: str = "delivery.txt"
     DEMUX_STARTED: str = "demuxstarted.txt"
     DEMUX_COMPLETE: str = "demuxcomplete.txt"
     RTACOMPLETE: str = "RTAComplete.txt"

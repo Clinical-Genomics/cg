@@ -1,9 +1,9 @@
 import pytest
 
-from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
+from cg.services.delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
+from cg.services.delivery.fetch_file_service.models import DeliveryFiles
 
 
 @pytest.mark.parametrize(

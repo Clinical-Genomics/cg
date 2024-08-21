@@ -171,7 +171,7 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data file_delivery type"""
+        """Determine the order_data delivery type"""
 
         data_delivery: str = self.parse_data_delivery()
 
@@ -229,5 +229,5 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
-        """Transforms the data-file_delivery parsed in the excel file, to the ones used in cg"""
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
         return data_delivery.lower().replace(" + ", "-").replace(" ", "_")

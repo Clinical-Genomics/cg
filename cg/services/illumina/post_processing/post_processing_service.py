@@ -180,13 +180,13 @@ class IlluminaPostProcessingService:
         self,
         sequencing_run_name: str,
     ) -> None:
-        """Store data for an Illumina demultiplexed run and mark it as ready for file_delivery.
+        """Store data for an Illumina demultiplexed run and mark it as ready for delivery.
         This function:
             - Stores the run data in the status database
             - Stores sequencing metrics in the status database
             - Updates sample read counts in the status database
             - Stores the run data in the Housekeeper database
-            - Creates a file_delivery file in the sequencing run directory
+            - Creates a delivery file in the sequencing run directory
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """

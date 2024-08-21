@@ -1,4 +1,4 @@
-"""Constants for file_delivery."""
+"""Constants for delivery."""
 
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import (
@@ -20,7 +20,7 @@ SKIP_MISSING: list[Workflow] = [
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"file_delivery-report"},
+    {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
     {"cnv-report"},
@@ -47,7 +47,7 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 BALSAMIC_QC_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"file_delivery-report"},
+    {"delivery-report"},
     {"multiqc-html"},
 ]
 
@@ -83,7 +83,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"file_delivery-report"},
+    {"delivery-report"},
     {"multiqc-html"},
     {"vcf-clinical-sv-bin"},
     {"vcf-clinical-sv-bin-index"},
@@ -142,12 +142,12 @@ MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
-    {"ks-file_delivery"},
+    {"ks-delivery"},
 ]
 
 MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
-    {"vcf", "vcf-report", "fohm-file_delivery"},
+    {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
 

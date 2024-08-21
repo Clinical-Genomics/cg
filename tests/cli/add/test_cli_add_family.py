@@ -78,7 +78,7 @@ def test_add_case_bad_workflow(
             panel_id,
             "--analysis",
             non_existing_analysis,
-            "--data-file_delivery",
+            "--data-delivery",
             CLI_OPTION_DELIVERY,
             "--ticket",
             ticket_id,
@@ -99,7 +99,7 @@ def test_add_case_bad_data_delivery(
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
-    # WHEN adding a case without data file_delivery
+    # WHEN adding a case without data delivery
     disk_store: Store = base_context.status_db
 
     customer: Customer = helpers.ensure_customer(store=disk_store)
@@ -117,7 +117,7 @@ def test_add_case_bad_data_delivery(
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
-            "--data-file_delivery",
+            "--data-delivery",
             non_existing_data_delivery,
             customer_id,
             name,
@@ -147,7 +147,7 @@ def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ti
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
-            "--data-file_delivery",
+            "--data-delivery",
             CLI_OPTION_DELIVERY,
             "--ticket",
             ticket_id,
@@ -182,7 +182,7 @@ def test_add_case_bad_panel(
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
-            "--data-file_delivery",
+            "--data-delivery",
             CLI_OPTION_DELIVERY,
             "--ticket",
             ticket_id,
@@ -222,7 +222,7 @@ def test_add_case_priority(
             priority,
             "--analysis",
             CLI_OPTION_ANALYSIS,
-            "--data-file_delivery",
+            "--data-delivery",
             CLI_OPTION_DELIVERY,
             "--ticket",
             ticket_id,

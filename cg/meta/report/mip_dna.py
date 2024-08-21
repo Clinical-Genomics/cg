@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 
 
 class MipDNAReportAPI(ReportAPI):
-    """API to create Rare disease DNA file_delivery reports."""
+    """API to create Rare disease DNA delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -78,7 +78,7 @@ class MipDNAReportAPI(ReportAPI):
         self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """
-        Return whether the MIP-DNA file_delivery report is accredited by evaluating each of the sample
+        Return whether the MIP-DNA delivery report is accredited by evaluating each of the sample
         process accreditations.
         """
         for sample in samples:
@@ -104,7 +104,7 @@ class MipDNAReportAPI(ReportAPI):
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the file_delivery report required fields for MIP DNA."""
+        """Return dictionary with the delivery report required fields for MIP DNA."""
         report_required_fields = ReportRequiredFields(
             applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS

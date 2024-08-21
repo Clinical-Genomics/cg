@@ -155,7 +155,7 @@ class FOHMUploadAPI:
         )
 
     def set_cases_to_aggregate(self, cases: list) -> None:
-        LOG.info(f"Preparing aggregated file_delivery for {cases}")
+        LOG.info(f"Preparing aggregated delivery for {cases}")
         self._cases_to_aggregate = cases
 
     def create_daily_delivery_folders(self) -> None:
@@ -191,7 +191,7 @@ class FOHMUploadAPI:
     def link_sample_raw_data_files(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
-        """Hardlink samples raw data files to FOHM file_delivery folder."""
+        """Hardlink samples raw data files to FOHM delivery folder."""
         for report in reports:
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=report.internal_id

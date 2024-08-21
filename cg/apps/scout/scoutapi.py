@@ -186,21 +186,21 @@ class ScoutAPI:
         return self.get_cases(status="solved", days_ago=days_ago)
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
-        """Load a file_delivery report into a case in the database.
+        """Load a delivery report into a case in the database.
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
         'update' has to be 'True'."""
 
-        upload_command: list[str] = ["load", "file_delivery-report", case_id, report_path]
+        upload_command: list[str] = ["load", "delivery-report", case_id, report_path]
 
         if update:
             upload_command.append("--update")
 
         try:
-            LOG.info(f"Uploading file_delivery report {report_path} to case {case_id}")
+            LOG.info(f"Uploading delivery report {report_path} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError:
-            LOG.warning("Something went wrong when uploading file_delivery report")
+            LOG.warning("Something went wrong when uploading delivery report")
 
     def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
         """Load report into a case in the database."""

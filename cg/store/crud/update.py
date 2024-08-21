@@ -30,7 +30,7 @@ class UpdateHandler(BaseHandler):
         self.session.commit()
 
     def update_order_delivery(self, order_id: int, delivered: bool) -> Order:
-        """Update the file_delivery status of an order."""
+        """Update the delivery status of an order."""
         order: Order = self.get_order_by_id(order_id)
         order.is_delivered = delivered
         self.session.commit()

@@ -185,7 +185,7 @@ class DataDelivery(StrEnum):
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
     FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
     NIPT_VIEWER: str = "nipt-viewer"
-    NO_DELIVERY: str = "no-file_delivery"
+    NO_DELIVERY: str = "no-delivery"
     SCOUT: str = "scout"
     STATINA: str = "statina"
 

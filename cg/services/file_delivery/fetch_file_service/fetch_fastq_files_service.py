@@ -1,13 +1,13 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
+from cg.services.delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
     FetchSampleAndCaseDeliveryFileTagsService,
 )
-from cg.services.file_delivery.fetch_file_service.error_handling import handle_missing_bundle_errors
-from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
+from cg.services.delivery.fetch_file_service.error_handling import handle_missing_bundle_errors
+from cg.services.delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.file_delivery.fetch_file_service.models import SampleFile, DeliveryFiles
+from cg.services.delivery.fetch_file_service.models import SampleFile, DeliveryFiles
 from cg.store.models import Case
 from cg.store.store import Store
 from housekeeper.store.models import File

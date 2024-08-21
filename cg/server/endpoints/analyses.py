@@ -11,7 +11,7 @@ ANALYSES_BLUEPRINT.before_request(before_request)
 @ANALYSES_BLUEPRINT.route("/analyses")
 def get_analyses():
     """Return analyses."""
-    if request.args.get("status") == "file_delivery":
+    if request.args.get("status") == "delivery":
         analyses: list[Analysis] = db.get_analyses_to_deliver_for_pipeline()
     elif request.args.get("status") == "upload":
         analyses: list[Analysis] = db.get_analyses_to_upload()

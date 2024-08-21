@@ -86,7 +86,7 @@ def set_order_delivered(order_id: int):
 
 @ORDERS_BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
 def update_order_delivered(order_id: int):
-    """Update the file_delivery status of an order based on the number of delivered analyses."""
+    """Update the delivery status of an order based on the number of delivered analyses."""
     try:
         request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
@@ -97,7 +97,7 @@ def update_order_delivered(order_id: int):
 
 @ORDERS_BLUEPRINT.route("/orders/<order_id>/delivery_message")
 def get_delivery_message_for_order(order_id: int):
-    """Return the file_delivery message for an order."""
+    """Return the delivery message for an order."""
     try:
         response: DeliveryMessageResponse = delivery_message_service.get_order_message(order_id)
         response_dict: dict = response.model_dump()

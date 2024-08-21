@@ -22,7 +22,7 @@ OPTION_CASES = click.option(
     multiple=True,
     type=str,
     required=True,
-    help="CG internal id of cases to aggregate for daily file_delivery",
+    help="CG internal id of cases to aggregate for daily delivery",
 )
 
 
@@ -32,7 +32,7 @@ def fohm(context: CGConfig):
     pass
 
 
-@fohm.command("aggregate-file_delivery")
+@fohm.command("aggregate-delivery")
 @OPTION_CASES
 @DRY_RUN
 @ARGUMENT_DATE
@@ -40,7 +40,7 @@ def fohm(context: CGConfig):
 def aggregate_delivery(
     context: CGConfig, cases: list, dry_run: bool = False, datestr: str | None = None
 ):
-    """Re-aggregates file_delivery files for FOHM and saves them to default working directory."""
+    """Re-aggregates delivery files for FOHM and saves them to default working directory."""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     try:
         fohm_api.aggregate_delivery(cases)
@@ -86,7 +86,7 @@ def preprocess_all(
         except Exception as error:
             LOG.error(
                 f"Upload of case {case_id} to GISAID unsuccessful {error}, case {case_id} "
-                f"will be removed from file_delivery batch"
+                f"will be removed from delivery batch"
             )
     try:
         fohm_api.aggregate_delivery(upload_cases)

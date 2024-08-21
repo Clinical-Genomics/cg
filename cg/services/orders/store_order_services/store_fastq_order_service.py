@@ -22,7 +22,7 @@ class StoreFastqOrderService(StoreOrderService):
         self.lims = lims_service
 
     def store_order(self, order: OrderIn) -> dict:
-        """Submit a batch of samples for FASTQ file_delivery."""
+        """Submit a batch of samples for FASTQ delivery."""
 
         project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
         status_data = self.order_to_status(order)
@@ -82,7 +82,7 @@ class StoreFastqOrderService(StoreOrderService):
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Sample]:
-        """Store fastq samples in the status database including family connection and file_delivery"""
+        """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )

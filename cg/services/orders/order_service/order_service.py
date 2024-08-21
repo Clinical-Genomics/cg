@@ -46,7 +46,7 @@ class OrderService:
         return create_order_response(order)
 
     def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
-        """Update the file_delivery status of an order based on the number of delivered analyses."""
+        """Update the delivery status of an order based on the number of delivered analyses."""
         order: Order = self.store.get_order_by_id(order_id)
         case_count: int = len(order.cases)
         if order_is_delivered(case_count=case_count, delivered_analyses=delivered_analyses):

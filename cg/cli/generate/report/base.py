@@ -1,4 +1,4 @@
-"""Commands to generate file_delivery reports."""
+"""Commands to generate delivery reports."""
 
 import logging
 import sys
@@ -28,7 +28,7 @@ from cg.store.models import Case
 LOG = logging.getLogger(__name__)
 
 
-@click.command("file_delivery-report")
+@click.command("delivery-report")
 @ARGUMENT_CASE_ID
 @FORCE
 @DRY_RUN
@@ -41,7 +41,7 @@ def generate_delivery_report(
     dry_run: bool,
     analysis_started_at: str = None,
 ) -> None:
-    """Creates a file_delivery report for the provided case."""
+    """Creates a delivery report for the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
@@ -76,14 +76,14 @@ def generate_delivery_report(
     )
     click.echo(
         click.style(
-            f"Uploaded file_delivery report to housekeeper: {created_delivery_report.as_posix()}",
+            f"Uploaded delivery report to housekeeper: {created_delivery_report.as_posix()}",
             fg="green",
         )
     )
     report_api.update_delivery_report_date(case=case, analysis_date=analysis_date)
 
 
-@click.command("available-file_delivery-reports")
+@click.command("available-delivery-reports")
 @OPTION_WORKFLOW
 @FORCE
 @DRY_RUN
@@ -91,7 +91,7 @@ def generate_delivery_report(
 def generate_available_delivery_reports(
     context: click.Context, workflow: Workflow, force: bool, dry_run: bool
 ) -> None:
-    """Generates file_delivery reports for all cases that need one and stores them in Housekeeper."""
+    """Generates delivery reports for all cases that need one and stores them in Housekeeper."""
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
@@ -104,14 +104,14 @@ def generate_available_delivery_reports(
     if not cases_without_delivery_report:
         click.echo(
             click.style(
-                f"There are no cases available to generate file_delivery reports ({datetime.now()})",
+                f"There are no cases available to generate delivery reports ({datetime.now()})",
                 fg="green",
             )
         )
     else:
         for case in cases_without_delivery_report:
             case_id: str = case.internal_id
-            LOG.info(f"Generating file_delivery report for case: {case_id}")
+            LOG.info(f"Generating delivery report for case: {case_id}")
             try:
                 context.invoke(
                     generate_delivery_report,
@@ -121,17 +121,15 @@ def generate_available_delivery_reports(
                 )
             except FileNotFoundError as error:
                 LOG.error(
-                    f"The file_delivery report generation is missing a file for case: {case_id}, {error}"
+                    f"The delivery report generation is missing a file for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
             except CgError as error:
-                LOG.error(
-                    f"The file_delivery report generation failed for case: {case_id}, {error}"
-                )
+                LOG.error(f"The delivery report generation failed for case: {case_id}, {error}")
                 exit_code = EXIT_FAIL
             except Exception as error:
                 LOG.error(
-                    f"Unspecified error when generating the file_delivery report for case: {case_id}, {error}"
+                    f"Unspecified error when generating the delivery report for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
 

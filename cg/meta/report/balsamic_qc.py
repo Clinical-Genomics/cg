@@ -1,4 +1,4 @@
-"""Balsamic QC file_delivery report API."""
+"""Balsamic QC delivery report API."""
 
 import logging
 
@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicQCReportAPI(BalsamicReportAPI):
-    """API to create Balsamic QC file_delivery reports."""
+    """API to create Balsamic QC delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicQCAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)

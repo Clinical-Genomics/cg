@@ -1,4 +1,4 @@
-"""RNAfusion file_delivery report API."""
+"""RNAfusion delivery report API."""
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -30,7 +30,7 @@ from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
-    """API to create Rnafusion file_delivery reports."""
+    """API to create Rnafusion delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -84,7 +84,7 @@ class RnafusionReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Return whether the Rnafusion file_delivery report is accredited or not."""
+        """Return whether the Rnafusion delivery report is accredited or not."""
         is_apptag_accredited: bool = self.is_apptag_accredited(samples)
         is_input_amount_accredited: bool = self.is_input_amount_accredited(samples)
         return is_apptag_accredited and is_input_amount_accredited
@@ -98,7 +98,7 @@ class RnafusionReportAPI(ReportAPI):
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the file_delivery report required fields for Rnafusion."""
+        """Return dictionary with the delivery report required fields for Rnafusion."""
         report_required_fields = ReportRequiredFields(
             applications=self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS

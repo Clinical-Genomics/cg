@@ -26,10 +26,10 @@ LOG = logging.getLogger(__name__)
 )
 @click.option(
     "-dd",
-    "--data-file_delivery",
+    "--data-delivery",
     "data_delivery",
     type=EnumChoice(DataDelivery),
-    help="Update case data file_delivery",
+    help="Update case data delivery",
 )
 @click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(

@@ -6,7 +6,7 @@ from cg.constants.housekeeper_tags import (
     AlignmentFileTag,
     SequencingFileTag,
 )
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles, SampleFile, CaseFile
+from cg.services.delivery.fetch_file_service.models import DeliveryFiles, SampleFile, CaseFile
 
 
 @pytest.fixture

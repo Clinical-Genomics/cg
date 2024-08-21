@@ -38,8 +38,8 @@ class DeliverFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for delivering files to the customer.
 
-    1. Get the files to deliver from Housekeeper based on workflow and data file_delivery
-    2. Create a file_delivery folder structure in the customer folder on Hasta and move the files there
+    1. Get the files to deliver from Housekeeper based on workflow and data delivery
+    2. Create a delivery folder structure in the customer folder on Hasta and move the files there
     3. Reformatting of output / renaming of files
     4. Start a Rsync job to upload the files to Caesar
     5. Track the status of the Rsync job in Trailblazer

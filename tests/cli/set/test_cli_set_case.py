@@ -190,7 +190,7 @@ def test_set_case_data_delivery(
     # WHEN setting a data_delivery of a case
     result = cli_runner.invoke(
         set_case,
-        [case_to_alter.internal_id, "--data-file_delivery", str(data_delivery)],
+        [case_to_alter.internal_id, "--data-delivery", str(data_delivery)],
         obj=base_context,
     )
 

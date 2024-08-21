@@ -159,7 +159,7 @@ def filter_cases_with_loqusdb_supported_sequencing_method(
 
 
 def filter_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
-    """Filter cases containing Scout as a data file_delivery option."""
+    """Filter cases containing Scout as a data delivery option."""
     return cases.filter(Case.data_delivery.contains(DataDelivery.SCOUT))
 
 
@@ -186,7 +186,7 @@ def filter_older_cases_by_creation_date(cases: Query, creation_date: datetime, *
 
 
 def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
-    """Filter cases with a valid data file_delivery for file_delivery report generation."""
+    """Filter cases with a valid data delivery for delivery report generation."""
     return cases.filter(Case.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 

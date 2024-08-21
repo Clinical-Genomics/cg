@@ -8,7 +8,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicUmiReportAPI(BalsamicReportAPI):
-    """API to create Balsamic UMI file_delivery reports."""
+    """API to create Balsamic UMI delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicUmiAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)

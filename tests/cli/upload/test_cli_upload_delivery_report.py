@@ -31,10 +31,10 @@ def test_delivery_report_to_scout(
 ):
     """Tests the upload to Scout of a MIP DNA delivery report."""
 
-    # GIVEN a Housekeeper context with a file_delivery report file that is ready for upload
+    # GIVEN a Housekeeper context with a delivery report file that is ready for upload
     upload_context.housekeeper_api_ = upload_report_hk_api
 
-    # WHEN uploading the file_delivery report
+    # WHEN uploading the delivery report
     result: Result = cli_runner.invoke(
         upload_delivery_report_to_scout, [case_id], obj=upload_context
     )

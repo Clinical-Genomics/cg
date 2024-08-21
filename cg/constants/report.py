@@ -7,7 +7,7 @@ from cg.constants import DataDelivery
 from cg.constants.constants import CancerAnalysisType, FileExtensions, Workflow
 from cg.constants.subject import Sex
 
-DELIVERY_REPORT_FILE_NAME: str = f"file_delivery-report{FileExtensions.HTML}"
+DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
     files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
 )

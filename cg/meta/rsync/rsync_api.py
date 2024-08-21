@@ -1,4 +1,4 @@
-"""Module for building the rsync command to send files to customer inbox on the file_delivery server."""
+"""Module for building the rsync command to send files to customer inbox on the delivery server."""
 
 import datetime as dt
 import glob
@@ -192,7 +192,7 @@ class RsyncAPI(MetaAPI):
         sample_files_present: bool = False,
         case_files_present: bool = False,
     ) -> tuple[bool, int]:
-        """Runs rsync of a single case to the file_delivery server, parameters depend on file_delivery type."""
+        """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
         case_id: str = case.internal_id
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
@@ -223,7 +223,7 @@ class RsyncAPI(MetaAPI):
         )
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
-        """Runs rsync of a whole ticket folder to the file_delivery server."""
+        """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
         cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)

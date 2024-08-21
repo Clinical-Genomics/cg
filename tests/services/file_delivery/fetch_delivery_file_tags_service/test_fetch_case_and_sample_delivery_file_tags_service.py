@@ -1,12 +1,12 @@
-"""Module to test fetching of file tags for file_delivery."""
+"""Module to test fetching of file tags for delivery."""
 
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.services.file_delivery.fetch_delivery_files_tags.exc import FetchDeliveryFileTagsError
-from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
+from cg.services.delivery.fetch_delivery_files_tags.exc import FetchDeliveryFileTagsError
+from cg.services.delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
     FetchSampleAndCaseDeliveryFileTagsService,
 )
-from cg.services.file_delivery.fetch_delivery_files_tags.models import DeliveryFileTags
+from cg.services.delivery.fetch_delivery_files_tags.models import DeliveryFileTags
 import pytest
 
 

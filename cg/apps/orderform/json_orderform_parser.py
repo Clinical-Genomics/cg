@@ -30,7 +30,7 @@ class JsonOrderformParser(OrderformParser):
 
     @staticmethod
     def project_type_to_order_type(project_type: str) -> str:
-        """In the case where data file_delivery was not defined we map from project type"""
+        """In the case where data delivery was not defined we map from project type"""
         project_to_order = {
             OrderType.METAGENOME: DataDelivery.FASTQ,
             OrderType.FASTQ: DataDelivery.FASTQ,
@@ -39,11 +39,11 @@ class JsonOrderformParser(OrderformParser):
             OrderType.FLUFFY: DataDelivery.STATINA,
         }
         if project_type not in project_to_order:
-            raise OrderFormError(f"Could not find data file_delivery for: {project_type}")
+            raise OrderFormError(f"Could not find data delivery for: {project_type}")
         return project_to_order[project_type]
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data file_delivery type."""
+        """Determine the order_data delivery type."""
 
         data_deliveries = {sample.data_delivery for sample in self.samples}
 
@@ -61,7 +61,7 @@ class JsonOrderformParser(OrderformParser):
         try:
             return str(DataDelivery(data_delivery))
         except ValueError:
-            raise OrderFormError(f"Unsupported order_data file_delivery: {data_delivery}")
+            raise OrderFormError(f"Unsupported order_data delivery: {data_delivery}")
 
     def parse_orderform(self, order_data: dict) -> None:
         """Parse order form in JSON format."""

@@ -41,12 +41,12 @@ class DeliverAPI:
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
-        """Initialize a file_delivery api
+        """Initialize a delivery api
 
-        A file_delivery is made in the context of a ticket id that can be associated to one or many cases.
+        A delivery is made in the context of a ticket id that can be associated to one or many cases.
         Each case can have one or multiple samples linked to them.
 
-        Each file_delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
+        Each delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
         to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
         <ticket>/<case_id>/<sample_id>.
         """
@@ -307,7 +307,7 @@ class DeliverAPI:
         At least one tag should match between file and tags.
         Only include files with sample tag.
 
-        For fastq file_delivery we know that we want to deliver all files of bundle.
+        For fastq delivery we know that we want to deliver all files of bundle.
         """
         file_tags = {tag.name for tag in file_obj.tags}
         tags: set[str]
@@ -351,7 +351,7 @@ class DeliverAPI:
 
     @staticmethod
     def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
-        """Returns the scope of the file_delivery, ie whether sample and/or case files were delivered."""
+        """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery: bool = False
         sample_delivery: bool = False
         for delivery in delivery_arguments:

@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
+from cg.services.delivery.fetch_file_service.models import DeliveryFiles
 
 
 class FilterDeliveryFilesService(ABC):
