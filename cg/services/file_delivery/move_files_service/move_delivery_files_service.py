@@ -1,8 +1,4 @@
-from abc import abstractmethod, ABC
 from pathlib import Path
-
-# Exchan
-
 from cg.constants.delivery import INBOX_NAME
 from cg.services.file_delivery.fetch_file_service.models import (
     DeliveryFiles,
@@ -96,7 +92,9 @@ class MoveDeliveryFilesService:
         delivery_files: DeliveryFiles,
         inbox_path: Path,
     ) -> DeliveryFiles:
-        """Replace the file paths with the inbox paths."""
+        """
+        Replace to original file paths in the delivery files with the customer inbox file paths.
+        """
         if delivery_files.case_files:
             delivery_files.case_files = self._replace_file_path_with_inbox_path(
                 file_models=delivery_files.case_files, inbox_path=inbox_path
