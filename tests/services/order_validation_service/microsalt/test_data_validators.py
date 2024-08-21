@@ -1,7 +1,9 @@
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    InvalidVolumeError,
     SampleDoesNotExistError,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
@@ -14,6 +16,7 @@ from cg.services.order_validation_service.workflows.microsalt.validation.data.ru
     validate_application_exists,
     validate_applications_not_archived,
     validate_samples_exist,
+    validate_volume_interval,
 )
 from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.rules import (
     validate_application_compatibility,
@@ -98,3 +101,18 @@ def test_samples_do_exist(valid_order: MicrosaltOrder, base_store: Store):
 
     # THEN no error should be returned
     assert not errors
+
+
+def test_invalid_volume(valid_order: MicrosaltOrder, base_store: Store):
+
+    # GIVEN an order with a sample with an invalid volume
+    valid_order.samples[0].volume = MAXIMUM_VOLUME + 10
+
+    # WHEN validating the volume interval
+    errors = validate_volume_interval(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid volume
+    assert isinstance(errors[0], InvalidVolumeError)
