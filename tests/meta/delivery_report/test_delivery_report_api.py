@@ -19,6 +19,10 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
+    # WHEN generating the delivery report HTML
     delivery_report_html: str = delivery_report_api.get_delivery_report_html(
         case_id=case_id, analysis_date=case.analyses[0].started_at, force=False
     )
+
+    # THEN it should generate a valid HTML string
+    assert "<!DOCTYPE html>" in delivery_report_html
