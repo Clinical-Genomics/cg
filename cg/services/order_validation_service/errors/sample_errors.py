@@ -52,3 +52,8 @@ class InvalidVolumeError(SampleError):
 class OrganismDoesNotExistError(SampleError):
     field: str = "organism"
     message: str = "Organism does not exist"
+
+
+class ElutionBufferMissingError(SampleError):
+    field: str = "elution_buffer"
+    message: str = "Buffer is required"

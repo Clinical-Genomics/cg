@@ -3,6 +3,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    ElutionBufferMissingError,
     InvalidVolumeError,
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
@@ -16,6 +17,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.sample impo
 from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
     validate_application_exists,
     validate_applications_not_archived,
+    validate_buffer_required,
     validate_organism_exists,
     validate_samples_exist,
     validate_volume_interval,
@@ -144,3 +146,18 @@ def test_valid_organisms(valid_order: MicrosaltOrder, base_store: Store):
 
     # THEN no error should be returned
     assert not errors
+
+
+def test_buffer_required(valid_order: MicrosaltOrder):
+
+    # GIVEN an order containing a sample with missing buffer
+    valid_order.samples[0].elution_buffer = None
+
+    # WHEN validating that buffers are set for new samples
+    errors = validate_buffer_required(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing buffer
+    assert isinstance(errors[0], ElutionBufferMissingError)
