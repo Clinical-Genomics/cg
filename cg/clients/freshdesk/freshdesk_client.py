@@ -1,9 +1,9 @@
 import logging
 from http import HTTPStatus
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List
 
-from requests import Response, Session
+from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
@@ -18,7 +18,7 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str, order_email_id: int):
+    def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url
         self.api_key = api_key
         self.session = self._get_session()
@@ -58,3 +58,22 @@ class FreshdeskClient:
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
+
+    @handle_client_errors
+    def reply_to_ticket(self, ticket_id: str, reply: dict, attachments: List[Path] = None) -> None:
+        """Send a reply to an existing ticket in Freshdesk."""
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+
+        files = prepare_attachments(attachments) if attachments else None
+
+        response = self.session.post(url=url, data={"body": reply["body"]}, files=files)
+        if response.status_code == HTTPStatus.OK:
+            LOG.info("Successfully replied to ticket %s", ticket_id)
+        else:
+            LOG.error(
+                "Failed to reply to ticket %s. Status code: %s, Response: %s",
+                ticket_id,
+                response.status_code,
+                response.text,
+            )
+            response.raise_for_status()
