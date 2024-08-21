@@ -9,13 +9,9 @@ from cg.services.order_validation_service.utils import (
 from cg.services.order_validation_service.workflows.microsalt.validation.field.model_validator import (
     MicroSaltModelValidator,
 )
-from cg.services.order_validation_service.workflows.microsalt.validation_rules import (
-    ORDER_RULES,
-    SAMPLE_RULES,
-)
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.workflows.microsalt.validation_rules import SAMPLE_RULES
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
 from cg.store.store import Store
 
 

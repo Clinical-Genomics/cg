@@ -10,16 +10,14 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
 from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
     TomteModelValidator,
 )
 from cg.services.order_validation_service.workflows.tomte.validation_rules import (
-    TOMTE_CASE_RULES,
-    TOMTE_CASE_SAMPLE_RULES,
-    TOMTE_ORDER_RULES,
+    CASE_RULES,
+    CASE_SAMPLE_RULES,
 )
 from cg.store.store import Store
 
@@ -40,13 +38,19 @@ class TomteValidationService(OrderValidationService):
             return field_errors
 
         order_errors: list[OrderError] = apply_order_validation(
-            rules=TOMTE_ORDER_RULES, order=order, store=self.store
+            rules=ORDER_RULES,
+            order=order,
+            store=self.store,
         )
         case_errors: list[CaseError] = apply_case_validation(
-            rules=TOMTE_CASE_RULES, order=order, store=self.store
+            rules=CASE_RULES,
+            order=order,
+            store=self.store,
         )
         case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(
-            rules=TOMTE_CASE_SAMPLE_RULES, order=order, store=self.store
+            rules=CASE_SAMPLE_RULES,
+            order=order,
+            store=self.store,
         )
 
         return ValidationErrors(

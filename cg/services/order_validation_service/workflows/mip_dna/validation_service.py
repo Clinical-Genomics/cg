@@ -8,7 +8,6 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.microsalt.validation_rules import ORDER_RULES
 from cg.services.order_validation_service.workflows.mip_dna.validation.field.model_validator import (
     MipDnaModelValidator,
 )
@@ -16,9 +15,8 @@ from cg.services.order_validation_service.workflows.mip_dna.validation_rules imp
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
-from cg.services.order_validation_service.workflows.tomte.response_mapper import (
-    create_order_validation_response,
-)
+from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
 from cg.store.store import Store
 
 
