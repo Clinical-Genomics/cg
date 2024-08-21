@@ -19,12 +19,12 @@ from cg.services.order_validation_service.errors.order_errors import (
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.validators.data.utils import (
     contains_duplicates,
     get_invalid_panels,
     is_volume_invalid,
 )
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -43,7 +43,9 @@ def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> l
 
 
 def validate_customer_can_skip_reception_control(
-    order: Order, store: Store, **kwargs
+    order: Order,
+    store: Store,
+    **kwargs,
 ) -> list[CustomerCannotSkipReceptionControlError]:
     errors: list[CustomerCannotSkipReceptionControlError] = []
 
@@ -57,7 +59,9 @@ def validate_customer_can_skip_reception_control(
 
 
 def validate_customer_exists(
-    order: Order, store: Store, **kwargs
+    order: Order,
+    store: Store,
+    **kwargs,
 ) -> list[CustomerDoesNotExistError]:
     errors: list[CustomerDoesNotExistError] = []
     if not store.customer_exists(order.customer):
@@ -67,7 +71,9 @@ def validate_customer_exists(
 
 
 def validate_application_exists(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[ApplicationNotValidError]:
     errors: list[ApplicationNotValidError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -79,7 +85,9 @@ def validate_application_exists(
 
 
 def validate_application_not_archived(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[ApplicationArchivedError]:
     errors: list[ApplicationArchivedError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -90,7 +98,7 @@ def validate_application_not_archived(
     return errors
 
 
-def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[RepeatedGenePanelsError]:
+def validate_gene_panels_unique(order: OrderWithCases, **kwargs) -> list[RepeatedGenePanelsError]:
     errors: list[RepeatedGenePanelsError] = []
     for case_index, case in order.enumerated_new_cases:
         if contains_duplicates(case.panels):
@@ -100,7 +108,9 @@ def validate_gene_panels_unique(order: TomteOrder, **kwargs) -> list[RepeatedGen
 
 
 def validate_gene_panels_exist(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[InvalidGenePanelsError]:
     errors: list[InvalidGenePanelsError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -110,7 +120,7 @@ def validate_gene_panels_exist(
     return errors
 
 
-def validate_volume_interval(order: TomteOrder, **kwargs) -> list[InvalidVolumeError]:
+def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -121,7 +131,9 @@ def validate_volume_interval(order: TomteOrder, **kwargs) -> list[InvalidVolumeE
 
 
 def validate_case_names_available(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[CaseNameNotAvailableError]:
     errors: list[CaseNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
@@ -133,7 +145,9 @@ def validate_case_names_available(
 
 
 def validate_case_internal_ids_exist(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[CaseDoesNotExistError]:
     errors: list[CaseDoesNotExistError] = []
     for case_index, case in order.enumerated_existing_cases:
@@ -145,7 +159,9 @@ def validate_case_internal_ids_exist(
 
 
 def validate_samples_exist(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[SampleDoesNotExistError]:
     errors: list[SampleDoesNotExistError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -157,7 +173,7 @@ def validate_samples_exist(
     return errors
 
 
-def validate_sex_required_for_new_samples(order: TomteOrder, **kwargs) -> list[SexMissingError]:
+def validate_sex_required_for_new_samples(order: OrderWithCases, **kwargs) -> list[SexMissingError]:
     errors: list[SexMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -167,7 +183,7 @@ def validate_sex_required_for_new_samples(order: TomteOrder, **kwargs) -> list[S
     return errors
 
 
-def validate_source_required(order: TomteOrder, **kwargs) -> list[SourceMissingError]:
+def validate_source_required(order: OrderWithCases, **kwargs) -> list[SourceMissingError]:
     errors: list[SourceMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
