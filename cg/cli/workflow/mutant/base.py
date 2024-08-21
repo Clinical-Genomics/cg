@@ -16,6 +16,7 @@ from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -109,19 +110,25 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
 
-    try:
-        analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
-    except Exception as exception_object:
-        LOG.error(f"Error performing QC on completed analyses:{exception_object}")
-        exit_code = EXIT_FAIL
-
-    for case_obj in analysis_api.get_cases_to_store():
-        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
+    cases_ready_for_qc: list[Case] = analysis_api.get_cases_with_completed_not_stored_analysis()
+    LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
+    for case in cases_ready_for_qc:
+        LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
-            store(context=context, case_id=case_obj.internal_id, dry_run=dry_run)
+            analysis_api.run_qc_on_case(case=case, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error(f"Error storing {case_obj.internal_id}:{exception_object}")
+            LOG.error(f"Error performing QC on completed analyses: {exception_object}")
             exit_code = EXIT_FAIL
+
+    cases_to_store: list[Case] = analysis_api.get_cases_to_store()
+    for case in cases_to_store:
+        LOG.info(f"Storing deliverables for {case.internal_id}")
+        try:
+            store(context=context, case_id=case.internal_id, dry_run=dry_run)
+        except Exception as exception_object:
+            LOG.error(f"Error storing {case.internal_id}: {exception_object}")
+            exit_code = EXIT_FAIL
+
     if exit_code:
         raise click.Abort
 

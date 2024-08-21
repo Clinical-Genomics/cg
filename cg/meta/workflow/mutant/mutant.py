@@ -273,15 +273,8 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)
 
-    def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
-        """Run qc check, report qc summaries on Trailblazer and fail analyses that fail QC."""
-        cases_ready_for_qc: list[Case] = self.get_cases_with_completed_not_stored_analysis()
-        LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
-
-        for case in cases_ready_for_qc:
-            self.run_qc_on_case(case=case, dry_run=dry_run)
-
     def run_qc_on_case(self, case: Case, dry_run: bool) -> None:
+        """Run qc check on case, report qc summary on Trailblazer and set analysis status to fail if it fails QC."""
         try:
             qc_result: MutantQualityResult = self.get_qc_result(case=case)
         except Exception as exception:
