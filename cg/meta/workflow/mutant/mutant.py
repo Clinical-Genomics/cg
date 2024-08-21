@@ -283,7 +283,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 self.trailblazer_api.set_analysis_status(
                     case_id=case.internal_id, status=AnalysisStatus.ERROR
                 )
-            raise CgError(f"Could not run QC for case {case.internal_id}.") from exception
+            raise CgError(f"Could not run QC for case {case.internal_id}: {exception}")
 
         if not dry_run:
             self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
