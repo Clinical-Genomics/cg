@@ -1,9 +1,15 @@
+from collections import Counter
+
 from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
+from cg.services.order_validation_service.workflows.microsalt.models.order import (
+    MicrosaltOrder,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.sample import (
+    MicrosaltSample,
+)
 
 
 class PlateSamplesValidator:
@@ -49,3 +55,12 @@ def get_occupied_well_errors(sample_indices: list[int]) -> list[OccupiedWellErro
 
 def get_missing_well_errors(sample_indices: list[int]) -> list[WellPositionMissingError]:
     return [WellPositionMissingError(sample_index) for sample_index in sample_indices]
+
+
+def get_indices_for_repeated_sample_names(order: MicrosaltOrder) -> list[int]:
+    counter = Counter([sample.name for sample in order.samples])
+    indices: list[int] = []
+    for index, sample in order.enumerated_new_samples:
+        if counter.get(sample.name) > 1:
+            indices.append(index)
+    return indices

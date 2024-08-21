@@ -3,7 +3,9 @@ from collections import Counter
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_errors import (
+    RepeatedCaseNameError,
+)
 from cg.services.order_validation_service.errors.case_sample_errors import (
     FatherNotInCaseError,
     InvalidConcentrationIfSkipRCError,
@@ -11,7 +13,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     InvalidMotherSexError,
     MotherNotInCaseError,
     OccupiedWellError,
-    RepeatedSampleNameError,
+    SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
@@ -84,10 +86,10 @@ def get_indices_for_repeated_sample_names(case: TomteCase) -> list[int]:
 
 def get_repeated_sample_name_errors(
     case: TomteCase, case_index: int
-) -> list[RepeatedSampleNameError]:
+) -> list[SampleNameRepeatedError]:
     sample_indices: list[int] = get_indices_for_repeated_sample_names(case)
     return [
-        RepeatedSampleNameError(sample_index=sample_index, case_index=case_index)
+        SampleNameRepeatedError(sample_index=sample_index, case_index=case_index)
         for sample_index in sample_indices
     ]
 

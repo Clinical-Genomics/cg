@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-
 from cg.services.order_validation_service.constants import (
     MAXIMUM_VOLUME,
     MINIMUM_VOLUME,
@@ -32,7 +30,7 @@ class ApplicationNotCompatibleError(CaseSampleError):
     message: str = "Application is not allowed for the chosen workflow"
 
 
-class RepeatedSampleNameError(CaseSampleError):
+class SampleNameRepeatedError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already used"
 

@@ -1,4 +1,6 @@
-from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_errors import (
+    RepeatedCaseNameError,
+)
 from cg.services.order_validation_service.errors.case_sample_errors import (
     FatherNotInCaseError,
     InvalidConcentrationIfSkipRCError,
@@ -7,7 +9,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     MotherNotInCaseError,
     OccupiedWellError,
     PedigreeError,
-    RepeatedSampleNameError,
+    SampleNameRepeatedError,
     StatusMissingError,
     SubjectIdSameAsCaseNameError,
 )
@@ -16,7 +18,6 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import (
-    get_well_sample_map,
     get_father_case_errors,
     get_father_sex_errors,
     get_mother_case_errors,
@@ -24,7 +25,7 @@ from cg.services.order_validation_service.workflows.tomte.validation.inter_field
     get_occupied_well_errors,
     get_repeated_case_name_errors,
     get_repeated_sample_name_errors,
-    is_sample_on_plate,
+    get_well_sample_map,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
 )
@@ -51,10 +52,10 @@ def validate_case_names_not_repeated(order: TomteOrder, **kwargs) -> list[Repeat
 
 def validate_sample_names_not_repeated(
     order: TomteOrder, **kwargs
-) -> list[RepeatedSampleNameError]:
-    errors: list[RepeatedSampleNameError] = []
+) -> list[SampleNameRepeatedError]:
+    errors: list[SampleNameRepeatedError] = []
     for index, case in order.enumerated_new_cases:
-        case_errors: list[RepeatedSampleNameError] = get_repeated_sample_name_errors(
+        case_errors: list[SampleNameRepeatedError] = get_repeated_sample_name_errors(
             case=case, case_index=index
         )
         errors.extend(case_errors)
