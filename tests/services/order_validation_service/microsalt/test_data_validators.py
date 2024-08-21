@@ -178,4 +178,3 @@ def test_extraction_method_missing(valid_order: MicrosaltOrder):
 
     # THEN the error should concern the missing extraction method
     assert isinstance(errors[0], ExtractionMethodMissingError)
-

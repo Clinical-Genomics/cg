@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Workflow
 from cg.exc import (
     OrderError,
     OrderExistsError,
@@ -41,6 +41,8 @@ from cg.server.ext import (
     order_service,
     osticket,
     order_submitter_registry,
+    microsalt_validation_service,
+    tomte_validation_service,
 )
 from cg.store.models import (
     Application,
@@ -260,3 +262,15 @@ def get_options():
         panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
     )
+
+
+@ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
+def validate_order(workflow: str):
+    raw_order = request.get_json()
+
+    if workflow == Workflow.TOMTE:
+        response = tomte_validation_service.validate(raw_order)
+        return jsonify(response), HTTPStatus.OK
+    if workflow == Workflow.MICROSALT:
+        response = microsalt_validation_service.validate(raw_order)
+        return jsonify(response), HTTPStatus.OK

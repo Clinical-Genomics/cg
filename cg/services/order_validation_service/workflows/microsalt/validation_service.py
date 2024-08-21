@@ -13,6 +13,9 @@ from cg.services.order_validation_service.workflows.microsalt.validation_rules i
     ORDER_RULES,
     SAMPLE_RULES,
 )
+from cg.services.order_validation_service.workflows.tomte.response_mapper import (
+    create_order_validation_response,
+)
 from cg.store.store import Store
 
 
@@ -21,7 +24,11 @@ class MicroSaltValidationService(OrderValidationService):
     def __init__(self, store: Store):
         self.store = store
 
-    def validate(self, raw_order: dict) -> ValidationErrors:
+    def validate(self, raw_order: dict) -> dict:
+        errors: ValidationErrors = self._get_errors(raw_order)
+        return create_order_validation_response(raw_order=raw_order, errors=errors)
+
+    def _get_errors(self, raw_order: dict) -> ValidationErrors:
         order, field_errors = MicroSaltModelValidator.validate(raw_order)
 
         if field_errors:

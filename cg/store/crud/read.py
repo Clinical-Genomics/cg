@@ -1544,6 +1544,7 @@ class ReadHandler(BaseHandler):
 
     def does_gene_panel_exist(self, abbreviation: str) -> bool:
         return bool(self.get_panel_by_abbreviation(abbreviation))
+
     def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],

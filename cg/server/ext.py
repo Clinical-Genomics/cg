@@ -1,6 +1,12 @@
 from decimal import Decimal
 from json import JSONEncoder
 
+from cg.services.order_validation_service.workflows.microsalt.validation_service import (
+    MicroSaltValidationService,
+)
+from cg.services.order_validation_service.workflows.tomte.validation_service import (
+    TomteValidationService,
+)
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
@@ -95,3 +101,6 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
     lims=lims,
     status_db=db,
 )
+
+tomte_validation_service = TomteValidationService(store=db)
+microsalt_validation_service = MicroSaltValidationService(store=db)
