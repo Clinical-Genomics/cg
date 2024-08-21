@@ -8,7 +8,6 @@ class TicketCreate(BaseModel):
     """Freshdesk ticket."""
 
     attachments: List[Union[str, bytes]] = Field(default_factory=list)
-    email: str
     email_config_id: int | None = None
     description: str
     name: str
