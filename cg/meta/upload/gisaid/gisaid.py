@@ -109,8 +109,8 @@ class GisaidAPI:
         """Return the path to GISAID FASTA file."""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}{FileExtensions.FASTA}")
 
-    def get_gisaid_csv_path(self, case_id: str) -> Path:
-        """Return the path to GISAID CSV file."""
+    def get_gisaid_sample_csv_path(self, case_id: str) -> Path:
+        """Return the path to GISAID sample CSV file."""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}{FileExtensions.CSV}")
 
     def get_gisaid_samples(self, case_id: str, samples: list[Sample]) -> list[GisaidSample]:
@@ -191,15 +191,15 @@ class GisaidAPI:
         )
         if gisaid_samples_csv:
             LOG.info(f"GISAID samples CSV for case {case_id} exists, and will be replaced")
-            gisaid_csv_file = Path(gisaid_samples_csv.full_path)
+            gisaid_samples_csv_file = Path(gisaid_samples_csv.full_path)
         else:
-            gisaid_csv_file: Path = self.get_gisaid_csv_path(case_id=case_id)
+            gisaid_samples_csv_file: Path = self.get_gisaid_sample_csv_path(case_id=case_id)
         samples: list[dict] = [sample.model_dump() for sample in gisaid_samples]
-        write_csv_from_dict(content=samples, fieldnames=HEADERS, file_path=gisaid_csv_file)
+        write_csv_from_dict(content=samples, fieldnames=HEADERS, file_path=gisaid_samples_csv_file)
         if gisaid_samples_csv:
             return
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=gisaid_csv_file, tags=[GisaidTag.CSV, case_id]
+            bundle_name=case_id, file=gisaid_samples_csv_file, tags=[GisaidTag.CSV, case_id]
         )
 
     def create_and_include_gisaid_log_file_to_hk(self, case_id: str) -> None:
@@ -275,7 +275,7 @@ class GisaidAPI:
         temp_log_file = tempfile.NamedTemporaryFile(
             dir=self.gisaid_log_dir, mode="w+", delete=False
         )
-        gisaid_csv_file: str = self.housekeeper_api.get_file_from_latest_version(
+        gisaid_samples_csv_file: str = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags={GisaidTag.CSV, case_id}
         ).full_path
 
@@ -296,7 +296,7 @@ class GisaidAPI:
             "CoV",
             "upload",
             "--csv",
-            gisaid_csv_file,
+            gisaid_samples_csv_file,
             "--fasta",
             gisaid_fasta_file,
         ]
