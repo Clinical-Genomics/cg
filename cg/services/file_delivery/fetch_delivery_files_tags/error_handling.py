@@ -1,7 +1,7 @@
 from functools import wraps
 
 from cg.exc import CgError
-from cg.services.delivery.fetch_delivery_files_tags.exc import FetchDeliveryFileTagsError
+from cg.services.file_delivery.fetch_delivery_files_tags.exc import FetchDeliveryFileTagsError
 
 
 def handle_tag_errors(func):

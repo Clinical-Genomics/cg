@@ -1,13 +1,13 @@
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
+from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
     FetchSampleAndCaseDeliveryFileTagsService,
 )
-from cg.services.delivery.fetch_file_service.fetch_analysis_files_service import (
+from cg.services.file_delivery.fetch_file_service.fetch_analysis_files_service import (
     FetchAnalysisDeliveryFilesService,
 )
-from cg.services.delivery.fetch_file_service.fetch_fastq_files_service import (
+from cg.services.file_delivery.fetch_file_service.fetch_fastq_files_service import (
     FetchFastqDeliveryFilesService,
 )
 from cg.store.store import Store
