@@ -282,7 +282,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             LOG.error(error_message)
             if not dry_run:
                 self.trailblazer_api.add_comment(
-                    case_id=case.internal_id, comment="Could not perform QC on case"
+                    case_id=case.internal_id, comment="ERROR: Could not perform QC on case"
                 )
                 self.trailblazer_api.set_analysis_status(
                     case_id=case.internal_id, status=AnalysisStatus.ERROR
