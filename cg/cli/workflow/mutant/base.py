@@ -109,7 +109,11 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
 
-    analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
+    try:
+        analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
+    except Exception as exception_object:
+        LOG.error(f"Error performing QC on completed analyses:{exception_object}")
+        exit_code = EXIT_FAIL
 
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case_obj.internal_id}")
