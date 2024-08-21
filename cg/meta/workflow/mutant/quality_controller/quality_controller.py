@@ -239,7 +239,7 @@ class MutantQualityController:
             samples.append(sample)
 
         if not external_negative_control:
-            raise CgError(f"No external negative control sample found for case {case}.")
+            raise CgError(f"No external negative control sample found for case {case.internal_id}.")
 
         internal_negative_control: Sample = self._get_internal_negative_control_sample_for_case(
             case=case
@@ -258,7 +258,7 @@ class MutantQualityController:
             samples: MutantPoolSamples = self._get_mutant_pool_samples(case=case)
         except Exception as exception_object:
             raise CgError(
-                f"Not possible to retrieve samples for case {case}: {exception_object}."
+                f"Not possible to retrieve samples for case {case.internal_id}: {exception_object}"
             ) from exception_object
 
         try:
@@ -267,7 +267,7 @@ class MutantQualityController:
             )
         except Exception as exception_object:
             raise CgError(
-                f"Not possible to retrieve results for case {case.internal_id}: {exception_object}."
+                f"Not possible to retrieve results for case {case.internal_id}: {exception_object}"
             )
 
         return SamplePoolAndResults(pool=samples, results=samples_results)
