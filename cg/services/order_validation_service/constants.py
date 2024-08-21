@@ -17,3 +17,12 @@ WORKFLOW_PREP_CATEGORIES: dict[Workflow, list[PrepCategory]] = {
 }
 
 MINIMUM_VOLUME, MAXIMUM_VOLUME = 20, 130
+
+
+class ExtractionMethod(Enum):
+    EZ1 = "EZ1"
+    MAELSTROM = "Maelstrom"
+    MAGNAPURE_96 = "MagNaPure 96 (contact Clinical Genomics before submission)"
+    QIAGEN_MAGATTRACT = "Qiagen MagAttract"
+    QIASYMPHONE = "QIAsymphony"
+    OTHER = 'Other (specify in "Comments")'
