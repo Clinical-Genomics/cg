@@ -1,6 +1,7 @@
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
+    ExtractionMethodMissingError,
     InvalidVolumeError,
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
@@ -63,5 +64,16 @@ def validate_organism_exists(
     for sample_index, sample in order.enumerated_new_samples:
         if not store.get_organism_by_internal_id(sample.organism):
             error = OrganismDoesNotExistError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_extraction_method_required(
+    order: MicrosaltOrder, **kwargs
+) -> list[ExtractionMethodMissingError]:
+    errors: list[ExtractionMethodMissingError] = []
+    for sample_index, sample in order.enumerated_new_samples:
+        if not sample.extraction_method:
+            error = ExtractionMethodMissingError(sample_index=sample_index)
             errors.append(error)
     return errors

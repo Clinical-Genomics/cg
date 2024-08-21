@@ -52,3 +52,8 @@ class InvalidVolumeError(SampleError):
 class OrganismDoesNotExistError(SampleError):
     field: str = "organism"
     message: str = "Organism does not exist"
+
+
+class ExtractionMethodMissingError(SampleError):
+    field: str = "extraction_method"
+    message: str = "Extraction method is required"
