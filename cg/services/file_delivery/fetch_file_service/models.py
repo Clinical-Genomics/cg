@@ -15,5 +15,5 @@ class SampleFile(BaseModel):
 
 
 class DeliveryFiles(BaseModel):
-    case_files: list[CaseFile]
+    case_files: list[CaseFile] | None
     sample_files: list[SampleFile]

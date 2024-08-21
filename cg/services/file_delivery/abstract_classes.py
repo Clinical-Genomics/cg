@@ -1,17 +1,6 @@
 from abc import abstractmethod, ABC
 
 
-class FilterDeliveryFilesService(ABC):
-    """
-    Abstract class that encapsulates the logic required for filtering files to deliver.
-    """
-
-    @abstractmethod
-    def filter_files(self, case_id: str) -> None:
-        """Filter the files to deliver."""
-        pass
-
-
 class FormatDeliveryFilesService(ABC):
     """
     Abstract class that encapsulates the logic required for formatting files to deliver.

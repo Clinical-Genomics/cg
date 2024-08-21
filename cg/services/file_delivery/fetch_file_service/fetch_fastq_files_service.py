@@ -3,6 +3,7 @@ from cg.constants import Workflow
 from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
     FetchSampleAndCaseDeliveryFileTagsService,
 )
+from cg.services.file_delivery.fetch_file_service.error_handling import handle_missing_bundle_errors
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
@@ -33,11 +34,14 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
         sample_ids: list[str] = case.sample_ids
         fastq_files: list[SampleFile] = []
         for sample_id in sample_ids:
-            fastq_files.extend(
-                self._get_fastq_files_for_sample(sample_id=sample_id, case_id=case_id)
-            )
+            if sample_fastq_files := self._get_fastq_files_for_sample(
+                case_id=case_id, sample_id=sample_id
+            ):
+                fastq_files.extend(sample_fastq_files)
+
         return DeliveryFiles(case_files=None, sample_files=fastq_files)
 
+    @handle_missing_bundle_errors
     def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile]:
         """Get the FASTQ files for a sample."""
         fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.FASTQ).sample_tags
