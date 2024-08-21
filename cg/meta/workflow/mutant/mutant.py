@@ -278,12 +278,13 @@ class MutantAnalysisAPI(AnalysisAPI):
         try:
             qc_result: MutantQualityResult = self.get_qc_result(case=case)
         except Exception as exception:
-            LOG.error(f"Could not run QC for case {case.internal_id}: {exception}")
+            error_message: str = f"Could not run QC for case {case.internal_id}: {exception}"
+            LOG.error(error_message)
             if not dry_run:
                 self.trailblazer_api.set_analysis_status(
                     case_id=case.internal_id, status=AnalysisStatus.ERROR
                 )
-            raise CgError(f"Could not run QC for case {case.internal_id}: {exception}")
+            raise CgError(error_message)
 
         if not dry_run:
             self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
