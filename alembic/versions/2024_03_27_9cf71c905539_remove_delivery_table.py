@@ -18,12 +18,12 @@ depends_on = None
 
 
 def upgrade():
-    op.drop_table(table_name="file_delivery")
+    op.drop_table(table_name="delivery")
 
 
 def downgrade():
     op.create_table(
-        "file_delivery",
+        "delivery",
         sa.Column("id", sa.Integer, nullable=False, primary_key=True),
         sa.Column("delivered_at", sa.DateTime, nullable=True),
         sa.Column("removed_at", sa.DateTime, nullable=True),

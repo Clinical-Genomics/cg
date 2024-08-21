@@ -1,4 +1,4 @@
-"""Modifies available file_delivery options
+"""Modifies available delivery options
 
 Revision ID: 2968d39ac35f
 Revises: 9c9ca9407227

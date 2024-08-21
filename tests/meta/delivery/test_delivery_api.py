@@ -1,4 +1,4 @@
-"""Test file_delivery API methods."""
+"""Test delivery API methods."""
 
 import logging
 from pathlib import Path
@@ -19,7 +19,7 @@ from cg.store.store import Store
 def test_is_sample_deliverable(delivery_context_microsalt: CGConfig, sample_id: str):
     """Test that a sample is deliverable."""
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
@@ -38,7 +38,7 @@ def test_is_sample_deliverable_false(
 ):
     """Test that a sample is not deliverable."""
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
@@ -56,7 +56,7 @@ def test_is_sample_deliverable_force(
     delivery_context_microsalt: CGConfig, sample_id_not_enough_reads: str
 ):
     """Test that a non-deliverable sample is deliverable with a force flag."""
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
@@ -71,9 +71,9 @@ def test_is_sample_deliverable_force(
 
 
 def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfig, case_id: str):
-    """Test Housekeeper case files conversion to file_delivery files."""
+    """Test Housekeeper case files conversion to delivery files."""
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
     housekeeper_api: HousekeeperAPI = delivery_context_balsamic.housekeeper_api
     status_db: Store = delivery_context_balsamic.status_db
@@ -82,12 +82,12 @@ def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfi
     case: Case = status_db.get_case_by_internal_id(case_id)
     hk_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[case_id]).all()
 
-    # WHEN converting Housekeeper case files to file_delivery files
+    # WHEN converting Housekeeper case files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_files, case=case, internal_id=case.internal_id, external_id=case.name
     )
 
-    # THEN the file_delivery files should be correctly formatted
+    # THEN the delivery files should be correctly formatted
     hk_file: File = hk_files[0]
     delivery_file: DeliveryFile = delivery_files[0]
     destination_dir = Path(
@@ -106,9 +106,9 @@ def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfi
 def test_convert_sample_files_to_delivery_files(
     delivery_context_balsamic: CGConfig, case_id: str, sample_id: str
 ):
-    """Test Housekeeper sample files conversion to file_delivery files."""
+    """Test Housekeeper sample files conversion to delivery files."""
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
     housekeeper_api: HousekeeperAPI = delivery_context_balsamic.housekeeper_api
     status_db: Store = delivery_context_balsamic.status_db
@@ -118,7 +118,7 @@ def test_convert_sample_files_to_delivery_files(
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
     hk_sample_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[sample_id]).all()
 
-    # WHEN converting Housekeeper sample files to file_delivery files
+    # WHEN converting Housekeeper sample files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_sample_files,
         case=case,
@@ -127,7 +127,7 @@ def test_convert_sample_files_to_delivery_files(
         analysis_sample_files=True,
     )
 
-    # THEN the file_delivery sample files should be correctly formatted
+    # THEN the delivery sample files should be correctly formatted
     hk_file: File = hk_sample_files[0]
     delivery_file: DeliveryFile = delivery_files[0]
     destination_dir = Path(
@@ -148,11 +148,11 @@ def test_convert_sample_files_to_delivery_files_with_case_id(
     delivery_context_balsamic: CGConfig, case_id: str, sample_id: str
 ):
     """
-    Test Housekeeper sample files conversion to file_delivery files when sample files have case ID in
+    Test Housekeeper sample files conversion to delivery files when sample files have case ID in
     their name.
     """
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
     housekeeper_api: HousekeeperAPI = delivery_context_balsamic.housekeeper_api
     status_db: Store = delivery_context_balsamic.status_db
@@ -165,7 +165,7 @@ def test_convert_sample_files_to_delivery_files_with_case_id(
     hk_case_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[case_id]).all()
     hk_files: list[File] = hk_sample_files + hk_case_files
 
-    # WHEN converting Housekeeper sample files to file_delivery files
+    # WHEN converting Housekeeper sample files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_files,
         case=case,
@@ -176,7 +176,7 @@ def test_convert_sample_files_to_delivery_files_with_case_id(
 
     print(delivery_files)
 
-    # THEN the file_delivery sample files should be correctly formatted and not contain case or sample
+    # THEN the delivery sample files should be correctly formatted and not contain case or sample
     # internal IDs
     for delivery_file in delivery_files:
         assert sample.name in delivery_file.destination_path.as_posix()
@@ -191,9 +191,9 @@ def test_get_fastq_delivery_files_by_sample(
     delivery_fastq_file: Path,
     delivery_spring_file: Path,
 ):
-    """Test get FASTQ file_delivery files for a sample."""
+    """Test get FASTQ delivery files for a sample."""
 
-    # GIVEN a file_delivery context
+    # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
@@ -201,7 +201,7 @@ def test_get_fastq_delivery_files_by_sample(
     case: Case = status_db.get_case_by_internal_id(case_id)
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
 
-    # WHEN retrieving FASTQ file_delivery files by sample
+    # WHEN retrieving FASTQ delivery files by sample
     delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files_by_sample(
         case=case, sample=sample
     )
@@ -219,7 +219,7 @@ def test_get_fastq_delivery_files_by_sample_not_deliverable(
     sample_id_not_enough_reads: str,
     caplog: LogCaptureFixture,
 ):
-    """Test get FASTQ file_delivery files for a sample that is not deliverable."""
+    """Test get FASTQ delivery files for a sample that is not deliverable."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a file_delivery context

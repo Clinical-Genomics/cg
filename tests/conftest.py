@@ -351,7 +351,7 @@ def base_config_dict() -> dict:
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
         "tower_binary_path": "path/to/tower",
-        "delivery_path": "path/to/file_delivery",
+        "delivery_path": "path/to/delivery",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
             "pacbio": {
@@ -1925,7 +1925,7 @@ def context_config(
                 "number_tasks": 1,
             },
         },
-        "data-file_delivery": {
+        "data-delivery": {
             "account": "development",
             "base_path": "/another/path",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",

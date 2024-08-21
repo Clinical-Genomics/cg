@@ -1,4 +1,4 @@
-"""Tests file_delivery report models validators."""
+"""Tests delivery report models validators."""
 
 from datetime import datetime
 from pathlib import Path
@@ -42,7 +42,7 @@ def test_get_report_string():
 
 
 def test_get_boolean_as_string():
-    """Test boolean formatting for the file_delivery report."""
+    """Test boolean formatting for the delivery report."""
 
     # GIVEN a not formatted inputs
     none_field: Any = None
@@ -149,12 +149,12 @@ def test_get_list_as_string():
 def test_get_list_paths_as_strings(filled_file: Path):
     """Test file path name extraction from a list."""
 
-    # GIVEN a list of file_delivery files
+    # GIVEN a list of delivery files
     path_list: list[DeliveryFile] = [
         DeliveryFile(source_path=filled_file, destination_path=filled_file)
     ]
 
-    # WHEN validating the provided list of file_delivery paths
+    # WHEN validating the provided list of delivery paths
     path_name_list: list[str] = get_delivered_files_as_file_names(path_list)
 
     # THEN the returned list should contain the file names
@@ -200,11 +200,11 @@ def test_get_prep_category_as_string(caplog: LogCaptureFixture):
     # THEN check if an exception was raised
     with pytest.raises(ValueError):
         get_prep_category_as_string(prep_category)
-    assert "The file_delivery report generation does not support RML samples" in caplog.text
+    assert "The delivery report generation does not support RML samples" in caplog.text
 
 
 def test_get_analysis_type_as_string():
-    """Test analysis type formatting for the file_delivery report generation."""
+    """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: AnalysisType = AnalysisType.WHOLE_GENOME_SEQUENCING
@@ -221,7 +221,7 @@ def test_get_analysis_type_as_string():
 
 
 def test_get_analysis_type_as_string_balsamic():
-    """Test analysis type formatting for the file_delivery report generation."""
+    """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: str = "tumor_normal_wgs"

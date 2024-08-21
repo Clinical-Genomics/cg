@@ -129,12 +129,12 @@ def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
 def test_filter_analyses_with_delivery_report(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
-    """Test filtering of analysis with a file_delivery report generated."""
+    """Test filtering of analysis with a delivery report generated."""
 
-    # GIVEN an analysis with a file_delivery report
+    # GIVEN an analysis with a delivery report
     analysis: Analysis = helpers.add_analysis(store=base_store, delivery_reported_at=timestamp_now)
 
-    # WHEN calling the file_delivery report analysis filtering function
+    # WHEN calling the delivery report analysis filtering function
     analyses: Query = filter_analyses_with_delivery_report(
         analyses=base_store._get_query(table=Analysis)
     )
@@ -142,19 +142,19 @@ def test_filter_analyses_with_delivery_report(
     # ASSERT that analyses is a query
     assert isinstance(analyses, Query)
 
-    # THEN the analysis containing the file_delivery report should be extracted
+    # THEN the analysis containing the delivery report should be extracted
     assert analysis in analyses
 
 
 def test_filter_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
-    """Test filtering of analysis without a file_delivery report generated."""
+    """Test filtering of analysis without a delivery report generated."""
 
-    # GIVEN an analysis with a file_delivery report
+    # GIVEN an analysis with a delivery report
     analysis_without_delivery_report: Analysis = helpers.add_analysis(
         store=base_store, delivery_reported_at=None
     )
 
-    # WHEN calling the file_delivery report analysis filtering function
+    # WHEN calling the delivery report analysis filtering function
     analyses: Query = filter_analyses_without_delivery_report(
         analyses=base_store._get_query(table=Analysis)
     )
@@ -162,12 +162,12 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     # ASSERT that analyses is a query
     assert isinstance(analyses, Query)
 
-    # THEN the analysis without a file_delivery report should be extracted
+    # THEN the analysis without a delivery report should be extracted
     assert analysis_without_delivery_report in analyses
 
 
 def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test filtering file_delivery report related analysis by workflow."""
+    """Test filtering delivery report related analysis by workflow."""
 
     # GIVEN a set of mock analysis
     balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
@@ -175,7 +175,7 @@ def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHel
         store=base_store, case=case, workflow=Workflow.FLUFFY
     )
 
-    # WHEN filtering file_delivery report related analyses
+    # WHEN filtering delivery report related analyses
     analyses: Query = filter_report_analyses_by_workflow(
         analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
     )
@@ -183,7 +183,7 @@ def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHel
     # ASSERT that analyses is a query
     assert isinstance(analyses, Query)
 
-    # THEN only the file_delivery report supported analysis should be retrieved
+    # THEN only the delivery report supported analysis should be retrieved
     assert balsamic_analysis in analyses
     assert fluffy_analysis not in analyses
 

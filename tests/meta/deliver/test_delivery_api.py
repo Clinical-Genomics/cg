@@ -1,4 +1,4 @@
-"""Tests for file_delivery API"""
+"""Tests for delivery API"""
 
 from pathlib import Path
 
@@ -22,7 +22,7 @@ from tests.store_helpers import StoreHelpers
 def test_get_delivery_path(
     base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
 ):
-    """Test to create the file_delivery path."""
+    """Test to create the delivery path."""
     # GIVEN a deliver api
     deliver_api = DeliverAPI(
         store=base_store,
@@ -59,7 +59,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     samples: list[Sample] = [link.sample for link in link_objs]
     sample_ids: set[str] = {sample.internal_id for sample in samples}
 
-    # WHEN fetching all case files from the file_delivery api
+    # WHEN fetching all case files from the delivery api
     bundle_latest_files = deliver_api.get_case_files_from_version(
         version=version, sample_ids=sample_ids
     )
@@ -81,7 +81,7 @@ def test_get_case_files_from_version(
     # GIVEN a store with a case
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
     assert case_obj.internal_id == case_id
-    # GIVEN a file_delivery api
+    # GIVEN a delivery api
     deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
@@ -158,7 +158,7 @@ def test_get_sample_files_from_version(
 
 
 def test_get_delivery_scope_case_only():
-    """Testing the file_delivery scope of a case only file_delivery."""
+    """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only file_delivery type
     delivery_type: set[str] = {Workflow.MIP_DNA}
 

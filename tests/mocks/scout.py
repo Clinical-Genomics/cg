@@ -123,14 +123,14 @@ class MockScoutAPI(ScoutAPI):
         return self._cases
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False):
-        """Load a file_delivery report into a case in the database
+        """Load a delivery report into a case in the database
 
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
         'update' has to be 'True'
 
         Args:
-            report_path (string):       Path to file_delivery report
+            report_path (string):       Path to delivery report
             case_id     (string):       Case identifier
             update      (bool):         If an existing report should be replaced
 

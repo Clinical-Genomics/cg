@@ -1,4 +1,4 @@
-"""add data-file_delivery statina
+"""add data-delivery statina
 
 Revision ID: 76e8252a6efb
 Revises: c76d655c8edf

@@ -379,7 +379,7 @@ class CGConfig(BaseModel):
     chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
-    data_delivery: DataDeliveryConfig = Field(None, alias="data-file_delivery")
+    data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
     delivery_api_: DeliveryAPI | None = None
     demultiplex: DemultiplexConfig = None
@@ -700,7 +700,7 @@ class CGConfig(BaseModel):
     def delivery_api(self) -> DeliveryAPI:
         api = self.__dict__.get("delivery_api_")
         if api is None:
-            LOG.debug("Instantiating file_delivery api")
+            LOG.debug("Instantiating delivery api")
             api = DeliveryAPI(
                 delivery_path=Path(self.delivery_path),
                 fastq_concatenation_service=self.fastq_concatenation_service,

@@ -22,7 +22,7 @@ def deliver_api(
 ) -> DeliverAPI:
     """Fixture for deliver_api
 
-    The fixture will return a file_delivery api where the store is populated with a case with three individuals.
+    The fixture will return a delivery api where the store is populated with a case with three individuals.
     The housekeeper database is empty
     """
     _deliver_api = DeliverAPI(
@@ -43,7 +43,7 @@ def delivery_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     helpers=StoreHelpers,
 ) -> HousekeeperAPI:
-    """Fixture that returns a housekeeper database with file_delivery data"""
+    """Fixture that returns a housekeeper database with delivery data"""
 
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
     return real_housekeeper_api
@@ -53,7 +53,7 @@ def delivery_hk_api(
 def populated_deliver_api(
     analysis_store: Store, delivery_hk_api: HousekeeperAPI, project_dir: Path
 ) -> DeliverAPI:
-    """Return a file_delivery api where housekeeper is populated with some files"""
+    """Return a delivery api where housekeeper is populated with some files"""
     _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,

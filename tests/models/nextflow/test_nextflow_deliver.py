@@ -31,7 +31,7 @@ def test_file_deliverables(any_string: str, filled_file: Path):
 
 
 def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
-    """Tests file file_delivery when an optional field is missing."""
+    """Tests file delivery when an optional field is missing."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
@@ -51,7 +51,7 @@ def test_file_deliverables_missing_mandatory(
     any_string: str,
     filled_file: Path,
 ):
-    """Tests file file_delivery when a mandatory field is missing."""
+    """Tests file delivery when a mandatory field is missing."""
     # WHEN instantiating a deliverables object with a missing field
 
     # THEN assert that an error is raised
@@ -67,7 +67,7 @@ def test_file_deliverables_missing_mandatory(
 
 
 def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: Path):
-    """Tests file file_delivery when a non existing attribute is given."""
+    """Tests file delivery when a non existing attribute is given."""
     # WHEN instantiating a deliverables object with additional attributes not present in the model
     file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
@@ -89,7 +89,7 @@ def test_file_deliverables_non_existing_file(
     any_string: str,
     non_existing_file_path: Path,
 ):
-    """Tests file file_delivery when a mandatory file does not exist."""
+    """Tests file delivery when a mandatory file does not exist."""
     # WHEN instantiating a deliverables object
 
     # THEN assert that an error is raised

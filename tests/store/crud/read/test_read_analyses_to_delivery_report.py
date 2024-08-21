@@ -9,9 +9,9 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
-    """Test that analyses that are completed, but lacks a file_delivery report returned."""
+    """Test that analyses that are completed, but lacks a delivery report returned."""
 
-    # GIVEN an analysis that is delivered but has no file_delivery report
+    # GIVEN an analysis that is delivered but has no delivery report
     workflow = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
@@ -39,13 +39,13 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
 def test_outdated_analysis(
     analysis_store: Store, helpers: StoreHelpers, timestamp_now, timestamp_yesterday
 ):
-    """Tests that analyses that are older then when Hasta became production (2017-09-26) are not included in the cases to generate a file_delivery report for"""
+    """Tests that analyses that are older then when Hasta became production (2017-09-26) are not included in the cases to generate a delivery report for"""
 
     # GIVEN an analysis that is older than Hasta
     timestamp_old_analysis = get_date("2017-09-26")
     workflow = Workflow.BALSAMIC
 
-    # GIVEN a file_delivery report created at date which is older than the upload date to trigger file_delivery report generation
+    # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
 
     # GIVEN a store to add analysis to
     analysis = helpers.add_analysis(
@@ -75,9 +75,9 @@ def test_outdated_analysis(
 def test_analyses_to_upload_delivery_reports(
     analysis_store: Store, helpers: StoreHelpers, timestamp_now
 ):
-    """Tests extraction of analyses ready for file_delivery report upload"""
+    """Tests extraction of analyses ready for delivery report upload"""
 
-    # GIVEN an analysis that has a file_delivery report generated
+    # GIVEN an analysis that has a delivery report generated
     workflow = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,

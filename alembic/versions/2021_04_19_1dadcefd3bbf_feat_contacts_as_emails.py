@@ -106,7 +106,7 @@ def downgrade():
     count = 0
     # replace email addresses on customers with connection between customer and user using users email
     for customer in session.query(Customer):
-        # file_delivery contact
+        # delivery contact
         if customer.delivery_contact_email:
             # get user with that email
             user = session.query(User).filter(User.email == customer.delivery_contact_email).first()

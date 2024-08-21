@@ -1,4 +1,4 @@
-"""add fastq_qc-analysis option to data file_delivery
+"""add fastq_qc-analysis option to data delivery
 
 Revision ID: c76d655c8edf
 Revises: f2edbd530656

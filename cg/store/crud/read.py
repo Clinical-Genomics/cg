@@ -1219,7 +1219,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def analyses_to_delivery_report(self, workflow: Workflow | None = None) -> Query:
-        """Return analyses that need a file_delivery report to be regenerated."""
+        """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.REPORT_SUPPORTED],

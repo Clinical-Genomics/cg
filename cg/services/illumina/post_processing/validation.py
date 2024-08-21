@@ -37,7 +37,7 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
     if is_flow_cell_ready_for_delivery(flow_cell_output_directory) and not force:
         raise FlowCellError(
             f"Flow cell output directory {flow_cell_output_directory}"
-            " has already been processed and is ready for file_delivery."
+            " has already been processed and is ready for delivery."
         )
 
 

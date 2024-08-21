@@ -18,7 +18,7 @@ def test_get_latest_nipt_analysis_to_upload(
     workflow: str = Workflow.FLUFFY,
 ):
     """Test get the latest NIPT analysis to upload."""
-    # GIVEN an analysis that is not file_delivery reported but there exists a newer analysis
+    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to nipt
     analyses: list[Analysis] = (
@@ -40,7 +40,7 @@ def test_get_latest_microsalt_analysis_to_upload(
     workflow: str = Workflow.MICROSALT,
 ):
     """Test get the latest microsalt analysis to upload."""
-    # GIVEN an analysis that is not file_delivery reported but there exists a newer analysis
+    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to microsalt
     analyses: list[Analysis] = (
