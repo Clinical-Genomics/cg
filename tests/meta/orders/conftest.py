@@ -132,9 +132,7 @@ def tomte_status_data(tomte_order_to_submit: dict):
 
 @pytest.fixture
 def freshdesk_client():
-    return FreshdeskClient(
-        base_url="https://example.com", api_key="dummy_api_key"
-    )
+    return FreshdeskClient(base_url="https://example.com", api_key="dummy_api_key")
 
 
 @pytest.fixture(scope="function")
