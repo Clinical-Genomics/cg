@@ -47,3 +47,8 @@ class SampleDoesNotExistError(SampleError):
 class InvalidVolumeError(SampleError):
     field: str = "volume"
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
+
+
+class OrganismDoesNotExistError(SampleError):
+    field: str = "organism"
+    message: str = "Organism does not exist"

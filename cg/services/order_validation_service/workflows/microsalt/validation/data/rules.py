@@ -2,6 +2,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotValidError,
     InvalidVolumeError,
+    OrganismDoesNotExistError,
     SampleDoesNotExistError,
 )
 from cg.services.order_validation_service.validators.data.utils import is_volume_invalid
@@ -51,5 +52,16 @@ def validate_volume_interval(order: MicrosaltOrder, **kwargs) -> list[InvalidVol
     for sample_index, sample in order.enumerated_new_samples:
         if is_volume_invalid(sample):
             error = InvalidVolumeError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_organism_exists(
+    order: MicrosaltOrder, store: Store, **kwargs
+) -> list[OrganismDoesNotExistError]:
+    errors: list[OrganismDoesNotExistError] = []
+    for sample_index, sample in order.enumerated_new_samples:
+        if not store.get_organism_by_internal_id(sample.organism):
+            error = OrganismDoesNotExistError(sample_index=sample_index)
             errors.append(error)
     return errors

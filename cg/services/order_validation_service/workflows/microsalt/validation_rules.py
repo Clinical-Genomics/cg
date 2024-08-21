@@ -9,6 +9,7 @@ from cg.services.order_validation_service.validators.inter_field.rules import (
 from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
     validate_application_exists,
     validate_applications_not_archived,
+    validate_organism_exists,
     validate_samples_exist,
     validate_volume_interval,
 )
@@ -29,6 +30,7 @@ SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
+    validate_organism_exists,
     validate_sample_names_unique,
     validate_samples_exist,
     validate_volume_interval,
