@@ -93,7 +93,15 @@ def test_deliver_ticket_with_force_all_flag(
     # WHEN running cg deliver ticket with --force-all flag
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
+        [
+            "ticket",
+            "--dry-run",
+            "--ticket",
+            ticket_id,
+            "--delivery-type",
+            "fastq",
+            "--force-all",
+        ],
         obj=cg_context,
     )
 

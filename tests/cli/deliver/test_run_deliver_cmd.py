@@ -48,7 +48,9 @@ def test_run_deliver_non_existing_case(
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
-        deliver_analysis, ["--case-id", case_id, "--delivery-type", "mip-dna"], obj=base_context
+        deliver_analysis,
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
+        obj=base_context,
     )
 
     # THEN assert the command exits without problems
