@@ -133,3 +133,14 @@ def test_invalid_organism(valid_order: MicrosaltOrder, base_store: Store):
 
     # THEN the error should concern the invalid organism
     assert isinstance(errors[0], OrganismDoesNotExistError)
+
+
+def test_valid_organisms(valid_order: MicrosaltOrder, base_store: Store):
+
+    # GIVEN a valid order
+
+    # WHEN validating that all organisms exist
+    errors = validate_organism_exists(order=valid_order, store=base_store)
+
+    # THEN no error should be returned
+    assert not errors
