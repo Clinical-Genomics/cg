@@ -47,7 +47,7 @@ def test_get_sars_cov_complementary_reports(
     assert isinstance(content[0], GisaidComplementaryReport)
 
     # THEN only the report for Sars-cov2 reports remains
-    assert len(content) == 1
+    assert len(content) == 2
     assert content[0].sample_number == sars_cov_sample_number
 
 
@@ -112,3 +112,38 @@ def test_parse_and_get_sars_cov_complementary_reports(
     # THEN only the report for Sars-cov2 reports remains
     assert len(sars_cov_reports) == 1
     assert sars_cov_reports[0].sample_number == sars_cov_sample_number
+
+
+def test_are_gisaid_samples_uploaded_when_uploaded(
+    gisaid_sars_cov_complementary_report_complete_raw: dict[str, str], gisaid_api: GisaidAPI
+):
+    """Test are GISAID samples uploaded when the report has GISAID accession."""
+    # GIVEN a GISAID API
+
+    # GIVEN an already uploaded report
+    sars_cov_complementary_report_complete = GisaidComplementaryReport.model_validate(
+        gisaid_sars_cov_complementary_report_complete_raw
+    )
+
+    # WHEN verifying if GISAID samples are uploaded
+    is_uploaded: bool = gisaid_api.are_gisaid_samples_uploaded(
+        [sars_cov_complementary_report_complete]
+    )
+
+    # THEN return true
+    assert is_uploaded
+
+
+def test_are_gisaid_samples_uploaded_when_not_uploaded(
+    gisaid_complementary_reports: list[GisaidComplementaryReport], gisaid_api: GisaidAPI
+):
+    """Test are GISAID samples uploaded when areport lacks GISAID accession."""
+    # GIVEN a GISAID API
+
+    # GIVEN a list of reports
+
+    # WHEN verifying if GISAID samples are uploaded
+    is_uploaded: bool = gisaid_api.are_gisaid_samples_uploaded(gisaid_complementary_reports)
+
+    # THEN return false
+    assert not is_uploaded

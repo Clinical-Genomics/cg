@@ -35,6 +35,18 @@ def gisaid_sars_cov_complementary_report_raw(sars_cov_sample_number: str) -> dic
 
 
 @pytest.fixture
+def gisaid_sars_cov_complementary_report_complete_raw(
+    sars_cov_sample_number: str,
+) -> dict[str, str]:
+    """Return a raw GISAID complementary report."""
+    return {
+        "GISAID_accession": "an_accession",
+        "urvalskriterium": "criteria",
+        "provnummer": f"{sars_cov_sample_number}",
+    }
+
+
+@pytest.fixture
 def gisaid_complementary_report(
     gisaid_complementary_report_raw: list[dict],
 ) -> GisaidComplementaryReport:
@@ -46,15 +58,20 @@ def gisaid_complementary_report(
 def gisaid_complementary_reports(
     gisaid_complementary_report: GisaidComplementaryReport,
     gisaid_sars_cov_complementary_report_raw: dict[str, str],
+    gisaid_sars_cov_complementary_report_complete_raw: dict[str, str],
 ) -> list[GisaidComplementaryReport]:
     """Return GISAID complementary reports."""
-    report_1 = GisaidComplementaryReport.model_validate(
-        {"provnummer": "1CS", "urvalskriterium": "criteria", "GISAID_accession": "an_accession"}
+    sars_cov_complementary_report_complete = GisaidComplementaryReport.model_validate(
+        gisaid_sars_cov_complementary_report_complete_raw
     )
     sars_cov_complementary_report = GisaidComplementaryReport.model_validate(
         gisaid_sars_cov_complementary_report_raw
     )
-    return [gisaid_complementary_report, sars_cov_complementary_report, report_1]
+    return [
+        gisaid_complementary_report,
+        sars_cov_complementary_report,
+        sars_cov_complementary_report_complete,
+    ]
 
 
 @pytest.fixture
