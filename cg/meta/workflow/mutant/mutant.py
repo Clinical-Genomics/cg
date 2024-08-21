@@ -292,7 +292,9 @@ class MutantAnalysisAPI(AnalysisAPI):
         if not dry_run:
             self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
             if not qc_result.passes_qc:
-                self.fail_analysis(case)
+                self.trailblazer_api.set_analysis_status(
+                    case_id=case.internal_id, status=AnalysisStatus.FAILED
+                )
 
     def get_qc_result(self, case: Case) -> MutantQualityResult:
         case_results_file_path: Path = self.get_case_results_file_path(case=case)
@@ -311,13 +313,6 @@ class MutantAnalysisAPI(AnalysisAPI):
             f" QC report: {report_file_path}" if not qc_result.passes_qc else ""
         )
         self.trailblazer_api.add_comment(case_id=case.internal_id, comment=comment)
-
-    def fail_analysis(self, case: Case) -> None:
-        """Fail analysis on Trailblazer and set case status to hold in StatusDB."""
-        self.trailblazer_api.set_analysis_status(
-            case_id=case.internal_id, status=AnalysisStatus.FAILED
-        )
-        self.set_statusdb_action(case_id=case.internal_id, action=CaseActions.HOLD)
 
     def run_qc(self, case_id: str, dry_run: bool) -> None:
         LOG.info(f"Running QC on case {case_id}.")
