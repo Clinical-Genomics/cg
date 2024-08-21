@@ -11,13 +11,13 @@ from cg.services.order_validation_service.utils import (
     apply_order_validation,
 )
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
 from cg.services.order_validation_service.workflows.tomte.validation.field.tomte_model_validator import (
     TomteModelValidator,
 )
 from cg.services.order_validation_service.workflows.tomte.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
-    ORDER_RULES,
 )
 from cg.store.store import Store
 
