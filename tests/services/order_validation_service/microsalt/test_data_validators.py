@@ -4,6 +4,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
     InvalidVolumeError,
+    OrganismDoesNotExistError,
     SampleDoesNotExistError,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
@@ -15,6 +16,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.sample impo
 from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
     validate_application_exists,
     validate_applications_not_archived,
+    validate_organism_exists,
     validate_samples_exist,
     validate_volume_interval,
 )
@@ -116,3 +118,29 @@ def test_invalid_volume(valid_order: MicrosaltOrder, base_store: Store):
 
     # THEN the error should concern the invalid volume
     assert isinstance(errors[0], InvalidVolumeError)
+
+
+def test_invalid_organism(valid_order: MicrosaltOrder, base_store: Store):
+
+    # GIVEN an order with a sample specifying a non-existent organism
+    valid_order.samples[0].organism = "Non-existent organism"
+
+    # WHEN validating that all organisms exist
+    errors = validate_organism_exists(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid organism
+    assert isinstance(errors[0], OrganismDoesNotExistError)
+
+
+def test_valid_organisms(valid_order: MicrosaltOrder, base_store: Store):
+
+    # GIVEN a valid order
+
+    # WHEN validating that all organisms exist
+    errors = validate_organism_exists(order=valid_order, store=base_store)
+
+    # THEN no error should be returned
+    assert not errors

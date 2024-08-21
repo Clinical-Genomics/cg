@@ -22,6 +22,7 @@ def create_microsalt_sample(id: int) -> MicrosaltSample:
         application="MWRNXTR003",
         container=ContainerEnum.plate,
         container_name="ContainerName",
+        organism="C. jejuni",
         require_qc_ok=True,
         reference_genome="NC_00001",
         well_position=f"A:{id}",
