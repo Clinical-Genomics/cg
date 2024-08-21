@@ -1,3 +1,7 @@
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
 from cg.services.order_validation_service.errors.order_errors import OrderError
 
 
@@ -38,3 +42,8 @@ class SampleNameRepeatedError(SampleError):
 class SampleDoesNotExistError(SampleError):
     field: str = "internal_id"
     message: str = "The sample does not exist"
+
+
+class InvalidVolumeError(SampleError):
+    field: str = "volume"
+    message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
