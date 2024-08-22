@@ -11,6 +11,7 @@ from cg.constants import Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.models.analysis import AnalysisModel
+from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
     ReportModel,
     CustomerModel,
@@ -541,3 +542,31 @@ def test_get_sample_timestamp_data(request: FixtureRequest, workflow: Workflow):
     assert sample_timestamp_data.received_at
     assert sample_timestamp_data.prepared_at
     assert sample_timestamp_data.reads_updated_at
+
+
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+def test_get_sample_metadata(request: FixtureRequest, workflow: Workflow):
+    """Test sample metadata extraction."""
+
+    # GIVEN a delivery report API
+    delivery_report_api: DeliveryReportAPI = request.getfixturevalue(
+        f"{workflow}_delivery_report_api"
+    )
+
+    # GIVEN a case object
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    # GIVEN a sample object
+    sample: Sample = case.samples[0]
+
+    # GIVEN workflow specific analysis metadata
+    analysis_metadata: AnalysisModel = delivery_report_api.analysis_api.get_latest_metadata(case_id)
+
+    # WHEN retrieving the sample metadata
+    sample_metadata: SampleMetadataModel = delivery_report_api.get_sample_metadata(
+        case=case, sample=sample, analysis_metadata=analysis_metadata
+    )
+
+    # THEN check that the sample metadata has been correctly retrieved
+    assert sample_metadata
