@@ -1,7 +1,23 @@
+from collections import Counter
 from cg.constants.constants import PrepCategory
+from cg.constants.sample_sources import SourceType
+from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
+from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    FatherNotInCaseError,
+    InvalidConcentrationIfSkipRCError,
+    InvalidFatherSexError,
+    InvalidMotherSexError,
+    MotherNotInCaseError,
+    OccupiedWellError,
+    SampleNameRepeatedError,
+    SubjectIdSameAsCaseNameError,
+)
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application
 from cg.store.store import Store
@@ -49,35 +65,8 @@ def is_volume_within_allowed_interval(volume: int) -> bool:
     return MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME
 
 
-from collections import Counter
-
-from cg.constants.sample_sources import SourceType
-from cg.constants.subject import Sex
-from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.errors.case_errors import (
-    RepeatedCaseNameError,
-)
-from cg.services.order_validation_service.errors.case_sample_errors import (
-    FatherNotInCaseError,
-    InvalidConcentrationIfSkipRCError,
-    InvalidFatherSexError,
-    InvalidMotherSexError,
-    MotherNotInCaseError,
-    OccupiedWellError,
-    SampleNameRepeatedError,
-    SubjectIdSameAsCaseNameError,
-)
-from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import (
-    TomteSample,
-)
-from cg.store.models import Application
-from cg.store.store import Store
-
-
 def get_well_sample_map(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> dict[tuple[str, str], list[tuple[int, int]]]:
     """
     Constructs a dict with keys being a (container_name, well_position) pair. For each such pair, the value will be
@@ -108,7 +97,7 @@ def is_sample_on_plate(sample: TomteSample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
-def get_indices_for_repeated_case_names(order: TomteOrder) -> list[int]:
+def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
     counter = Counter([case.name for case in order.cases])
     indices: list[int] = []
 
@@ -119,7 +108,7 @@ def get_indices_for_repeated_case_names(order: TomteOrder) -> list[int]:
     return indices
 
 
-def get_repeated_case_name_errors(order: TomteOrder) -> list[RepeatedCaseNameError]:
+def get_repeated_case_name_errors(order: OrderWithCases) -> list[RepeatedCaseNameError]:
     case_indices: list[int] = get_indices_for_repeated_case_names(order)
     return [RepeatedCaseNameError(case_index=case_index) for case_index in case_indices]
 
@@ -241,7 +230,10 @@ def validate_concentration_in_case(
     for sample_index, sample in case.enumerated_new_samples:
         if has_sample_invalid_concentration(sample=sample, store=store):
             error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
-                case_index=case_index, sample=sample, sample_index=sample_index, store=store
+                case_index=case_index,
+                sample=sample,
+                sample_index=sample_index,
+                store=store,
             )
             errors.append(error)
     return errors
@@ -253,10 +245,13 @@ def create_invalid_concentration_error(
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna: bool = is_sample_cfdna(sample)
     allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application, is_cfdna=is_cfdna
+        application=application,
+        is_cfdna=is_cfdna,
     )
     return InvalidConcentrationIfSkipRCError(
-        case_index=case_index, sample_index=sample_index, allowed_interval=allowed_interval
+        case_index=case_index,
+        sample_index=sample_index,
+        allowed_interval=allowed_interval,
     )
 
 
