@@ -401,6 +401,6 @@ class GisaidAPI:
             LOG.info("All samples already uploaded")
             return
 
-        self.create_and_include_gisaid_files_in_hk(case_id=case_id)
-        self.upload_results_to_gisaid(case_id=case_id)
-        self.update_complementary_file_with_gisaid_accessions(case_id=case_id)
+        self.create_and_include_gisaid_files_in_hk(case_id)
+        self.upload_results_to_gisaid(case_id)
+        self.update_complementary_file_with_gisaid_accessions(case_id)
