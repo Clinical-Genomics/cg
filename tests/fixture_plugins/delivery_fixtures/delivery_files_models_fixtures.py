@@ -40,7 +40,7 @@ def expected_fastq_delivery_files(
         for sample in hk_bundle_names
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
-    delivery_data = DeliveryMetaData(
+    delivery_meta_data = DeliveryMetaData(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
     return DeliveryFiles(delivery_data=delivery_data, case_files=None, sample_files=sample_files)
@@ -79,7 +79,7 @@ def expected_analysis_delivery_files(
         )
     ]
     case: Case = delivery_store_balsamic.get_case_by_internal_id(case_id)
-    delivery_data = DeliveryMetaData(
+    delivery_meta_data = DeliveryMetaData(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
     return DeliveryFiles(
@@ -93,7 +93,7 @@ def expected_moved_fastq_delivery_files(
 ) -> DeliveryFiles:
     """Return the moved FASTQ delivery files."""
     delivery_files = DeliveryFiles(**expected_fastq_delivery_files.model_dump())
-    inbox_path: Path = Path(
+    inbox_dir_path = Path(
         tmp_path,
         delivery_files.delivery_data.customer_internal_id,
         INBOX_NAME,
@@ -111,11 +111,11 @@ def expected_moved_fastq_delivery_files(
 
 @pytest.fixture
 def expected_moved_analysis_delivery_files(
-    expected_analysis_delivery_files: DeliveryFiles, tmp_path
+    expected_analysis_delivery_files: DeliveryFiles, tmp_path: Path
 ) -> DeliveryFiles:
     """Return the moved analysis delivery files."""
     delivery_files = DeliveryFiles(**expected_analysis_delivery_files.model_dump())
-    inbox_path: Path = Path(
+    inbox_dir_path = Path(
         tmp_path,
         delivery_files.delivery_data.customer_internal_id,
         INBOX_NAME,
