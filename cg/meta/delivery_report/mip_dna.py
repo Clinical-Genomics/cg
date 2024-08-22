@@ -16,7 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
 from cg.constants.scout import ScoutUploadKey
-from cg.meta.delivery_report.field_validators import get_million_read_pairs
+from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis

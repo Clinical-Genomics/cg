@@ -14,7 +14,7 @@ from cg.constants import (
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
 )
 from cg.constants.scout import ScoutUploadKey
-from cg.meta.delivery_report.field_validators import (
+from cg.meta.delivery_report.data_validators import (
     get_mapped_reads_fraction,
     get_million_read_pairs,
 )

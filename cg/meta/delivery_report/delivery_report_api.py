@@ -18,7 +18,7 @@ from cg.constants.scout import ScoutUploadKey
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.delivery.delivery import DeliveryAPI
-from cg.meta.delivery_report.field_validators import get_empty_report_data, get_missing_report_data
+from cg.meta.delivery_report.data_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.delivery_report.metadata import SampleMetadataModel
