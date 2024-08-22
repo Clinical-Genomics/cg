@@ -14,9 +14,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SubjectIdSameAsCaseNameError,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.rules.case_sample.rules import (
-    get_pedigree_errors,
-)
+from cg.services.order_validation_service.workflows.tomte.rules.case_sample.pedigree.validate_pedigree import get_pedigree_errors
 from cg.services.order_validation_service.workflows.tomte.rules.case_sample.utils import (
     get_father_case_errors,
     get_father_sex_errors,

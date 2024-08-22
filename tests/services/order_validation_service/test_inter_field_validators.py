@@ -12,21 +12,21 @@ from cg.services.order_validation_service.errors.order_errors import (
     TicketNumberRequiredError,
 )
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.validators.data.rules import (
-    validate_volume_interval,
-)
-from cg.services.order_validation_service.validators.inter_field.rules import (
+from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_compatibility,
     validate_container_name_required,
+    validate_volume_interval,
+    validate_well_positions_required,
+)
+from cg.services.order_validation_service.rules.order.rules import (
     validate_name_required_for_new_order,
     validate_ticket_number_required_if_connected,
-    validate_well_positions_required,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+from cg.services.order_validation_service.workflows.tomte.rules.case_sample.rules import (
     validate_subject_ids_different_from_case_names,
 )
 from cg.store.store import Store

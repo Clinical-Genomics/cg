@@ -9,10 +9,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field.pedigree.models import (
-    FamilyTree,
-    Node,
-)
+from cg.services.order_validation_service.workflows.tomte.rules.case_sample.pedigree.models import FamilyTree, Node
 
 
 def validate_tree(pedigree: FamilyTree) -> list[PedigreeError]:
