@@ -33,13 +33,13 @@ class FetchFastqAndAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             self.hk_api,
             tags_fetcher=FetchSampleAndCaseDeliveryFileTagsService(),
         )
-        fastq_files = fetch_fastq_service.get_files_to_deliver(case_id)
-        analysis_files = fetch_analysis_service.get_files_to_deliver(case_id)
+        fastq_files: DeliveryFiles = fetch_fastq_service.get_files_to_deliver(case_id)
+        analysis_files: DeliveryFiles = fetch_analysis_service.get_files_to_deliver(case_id)
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
         return DeliveryFiles(
             delivery_data=delivery_data,
-            case_files=analysis_case_files,
-            sample_files=analysis_sample_files,
+            case_files=analysis_files.case_files,
+            sample_files=analysis_files.sample_files + fastq_files.sample_files,
         )

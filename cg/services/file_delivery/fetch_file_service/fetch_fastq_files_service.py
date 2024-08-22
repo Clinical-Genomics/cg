@@ -59,7 +59,13 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
         fastq_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=sample_id, tags=fastq_tags
         )
+        sample_name: str = self.status_db.get_sample_by_internal_id(sample_id).name
         return [
-            SampleFile(case_id=case_id, sample_id=sample_id, file_path=fastq_file.full_path)
+            SampleFile(
+                case_id=case_id,
+                sample_id=sample_id,
+                sample_name=sample_name,
+                file_path=fastq_file.full_path,
+            )
             for fastq_file in fastq_files
         ]

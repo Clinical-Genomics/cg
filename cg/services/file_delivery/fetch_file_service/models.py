@@ -10,12 +10,14 @@ class DeliveryMetaData(BaseModel):
 
 class CaseFile(BaseModel):
     case_id: str
+    case_name: str
     file_path: Path
 
 
 class SampleFile(BaseModel):
     case_id: str
     sample_id: str
+    sample_name: str
     file_path: Path
 
 

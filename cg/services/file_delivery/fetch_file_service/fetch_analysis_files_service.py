@@ -51,12 +51,17 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
-
         sample_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case_id, tags=sample_tags_with_sample_id
         )
+        sample_name: str = self.status_db.get_sample_by_internal_id(sample_id).name
         return [
-            SampleFile(case_id=case_id, sample_id=sample_id, file_path=sample_file.full_path)
+            SampleFile(
+                case_id=case_id,
+                sample_id=sample_id,
+                sample_name=sample_name,
+                file_path=sample_file.full_path,
+            )
             for sample_file in sample_files
         ]
 
@@ -82,6 +87,10 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_id_tags
         )
         return [
-            CaseFile(case_id=case.internal_id, file_path=case_file.full_path)
+            CaseFile(
+                case_id=case.internal_id,
+                case_name=case.name,
+                file_path=case_file.full_path,
+            )
             for case_file in case_files
         ]
