@@ -14,7 +14,10 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
 )
-from cg.services.order_validation_service.rules.case_sample.utils import is_application_not_compatible, is_volume_invalid
+from cg.services.order_validation_service.rules.case_sample.utils import (
+    is_application_not_compatible,
+    is_volume_invalid,
+)
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
 )
