@@ -3,6 +3,9 @@ from abc import abstractmethod, ABC
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
+from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
+    MoveDeliveryFilesService,
+)
 
 
 class FormatDeliveryFilesService(ABC):
@@ -13,17 +16,6 @@ class FormatDeliveryFilesService(ABC):
     @abstractmethod
     def format_files(self, case_id: str) -> None:
         """Format the files to deliver."""
-        pass
-
-
-class MoveDeliveryFilesService(ABC):
-    """
-    Abstract class that encapsulates the logic required for moving files to the customer folder. including formatting and renaming.
-    """
-
-    @abstractmethod
-    def move_files(self, case_id: str) -> None:
-        """Move the files to the customer folder."""
         pass
 
 

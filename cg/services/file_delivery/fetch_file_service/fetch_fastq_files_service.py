@@ -7,7 +7,11 @@ from cg.services.file_delivery.fetch_file_service.error_handling import handle_m
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.file_delivery.fetch_file_service.models import SampleFile, DeliveryFiles
+from cg.services.file_delivery.fetch_file_service.models import (
+    SampleFile,
+    DeliveryFiles,
+    DeliveryMetaData,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 from housekeeper.store.models import File
@@ -39,7 +43,14 @@ class FetchFastqDeliveryFilesService(FetchDeliveryFilesService):
             ):
                 fastq_files.extend(sample_fastq_files)
 
-        return DeliveryFiles(case_files=None, sample_files=fastq_files)
+        delivery_data = DeliveryMetaData(
+            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        )
+        return DeliveryFiles(
+            delivery_data=delivery_data,
+            case_files=None,
+            sample_files=fastq_files,
+        )
 
     @handle_missing_bundle_errors
     def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile]:

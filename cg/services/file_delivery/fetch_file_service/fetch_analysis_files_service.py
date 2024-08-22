@@ -8,7 +8,12 @@ from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service i
 )
 from housekeeper.store.models import File
 
-from cg.services.file_delivery.fetch_file_service.models import SampleFile, CaseFile, DeliveryFiles
+from cg.services.file_delivery.fetch_file_service.models import (
+    SampleFile,
+    CaseFile,
+    DeliveryFiles,
+    DeliveryMetaData,
+)
 from cg.store.models import Case
 
 from cg.store.store import Store
@@ -31,7 +36,14 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self.get_analysis_case_delivery_files(case)
         analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
-        return DeliveryFiles(case_files=analysis_case_files, sample_files=analysis_sample_files)
+        delivery_data = DeliveryMetaData(
+            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        )
+        return DeliveryFiles(
+            delivery_data=delivery_data,
+            case_files=analysis_case_files,
+            sample_files=analysis_sample_files,
+        )
 
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
