@@ -135,7 +135,7 @@ def expected_moved_analysis_delivery_files(
 
 
 def swap_file_paths_with_inbox_paths(
-    file_models: list[CaseFile | SampleFile], inbox_path: Path
+    file_models: list[CaseFile | SampleFile], inbox_dir_path: Path
 ) -> list[CaseFile | SampleFile]:
     """Swap the file paths with the inbox paths."""
     new_file_models: list[SampleFile | CaseFile] = []
