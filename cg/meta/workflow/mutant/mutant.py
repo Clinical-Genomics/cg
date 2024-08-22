@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 from cg.constants import SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat, MutantQC
+from cg.constants.constants import FileFormat, MutantQC
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError
 from cg.io.controller import WriteFile
@@ -203,21 +203,23 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases for which the analysis is complete on Traiblazer and a QC report has been generated."""
-        completed_not_stored_cases: list[Case] = self.get_cases_with_completed_not_stored_analysis()
-        return [
-            case
-            for case in completed_not_stored_cases
-            if self.get_case_qc_report_path(case_id=case.internal_id).exists()
-        ]
-
-    def get_cases_with_completed_not_stored_analysis(self) -> list[Case]:
-        """Return cases with a completed analysis that are not yet stored."""
-        completed_not_stored_cases: list[Case] = [
+        cases_to_store: list[Case] = [
             case
             for case in self.status_db.get_running_cases_in_workflow(self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
+            and self.get_case_qc_report_path(case_id=case.internal_id).exists()
         ]
-        return completed_not_stored_cases
+        return cases_to_store
+
+    def get_cases_to_perform_qc_on(self) -> list[Case]:
+        """Return cases with a completed analysis that are not yet stored."""
+        cases_to_perform_qc_on: list[Case] = [
+            case
+            for case in self.status_db.get_running_cases_in_workflow(self.workflow)
+            if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
+            and not self.get_case_qc_report_path(case_id=case.internal_id).exists()
+        ]
+        return cases_to_perform_qc_on
 
     def get_metadata_for_nanopore_sample(self, sample: Sample) -> list[dict]:
         return [

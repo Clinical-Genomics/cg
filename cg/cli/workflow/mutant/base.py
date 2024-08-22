@@ -110,7 +110,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
 
-    cases_ready_for_qc: list[Case] = analysis_api.get_cases_with_completed_not_stored_analysis()
+    cases_ready_for_qc: list[Case] = analysis_api.get_cases_to_perform_qc_on()
     LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
     for case in cases_ready_for_qc:
         LOG.info(f"Performing QC on case {case.internal_id}.")
@@ -124,7 +124,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     for case in cases_to_store:
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
-            store(context=context.obj, case_id=case.internal_id, dry_run=dry_run)
+            context.invoke(store, case_id=case.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Error storingc {case.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
