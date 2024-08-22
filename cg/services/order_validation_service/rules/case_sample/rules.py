@@ -10,30 +10,51 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotValidError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
+    FatherNotInCaseError,
     InvalidBufferError,
+    InvalidConcentrationIfSkipRCError,
+    InvalidFatherSexError,
+    InvalidMotherSexError,
     InvalidVolumeError,
+    MotherNotInCaseError,
+    OccupiedWellError,
+    PedigreeError,
     SampleDoesNotExistError,
+    SampleNameRepeatedError,
     SexMissingError,
     SourceMissingError,
+    StatusMissingError,
+    SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
+    get_pedigree_errors,
+)
 from cg.services.order_validation_service.rules.case_sample.utils import (
+    get_father_case_errors,
+    get_father_sex_errors,
     get_invalid_panels,
+    get_mother_case_errors,
+    get_mother_sex_errors,
+    get_occupied_well_errors,
+    get_repeated_sample_name_errors,
+    get_well_sample_map,
     is_application_not_compatible,
     is_concentration_missing,
     is_container_name_missing,
     is_volume_invalid,
     is_well_position_missing,
+    validate_concentration_in_case,
+    validate_subject_ids_in_case,
 )
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Sample
 from cg.store.store import Store
 
 
 def validate_application_compatibility(
-    order: TomteOrder,
+    order: OrderWithCases,
     store: Store,
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
@@ -55,14 +76,14 @@ def validate_application_compatibility(
     return errors
 
 
-def validate_buffer_skip_rc_condition(order: TomteOrder, **kwargs) -> list[InvalidBufferError]:
+def validate_buffer_skip_rc_condition(order: OrderWithCases, **kwargs) -> list[InvalidBufferError]:
     errors: list[InvalidBufferError] = []
     if order.skip_reception_control:
         errors.extend(validate_buffers_are_allowed(order))
     return errors
 
 
-def validate_buffers_are_allowed(order: TomteOrder, **kwargs) -> list[InvalidBufferError]:
+def validate_buffers_are_allowed(order: OrderWithCases, **kwargs) -> list[InvalidBufferError]:
     errors: list[InvalidBufferError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -73,7 +94,7 @@ def validate_buffers_are_allowed(order: TomteOrder, **kwargs) -> list[InvalidBuf
 
 
 def validate_concentration_required_if_skip_rc(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[ConcentrationRequiredIfSkipRCError]:
     if not order.skip_reception_control:
         return []
@@ -90,7 +111,7 @@ def validate_concentration_required_if_skip_rc(
 
 
 def validate_subject_ids_different_from_sample_names(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[SubjectIdSameAsSampleNameError]:
     errors: list[SubjectIdSameAsSampleNameError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -104,7 +125,9 @@ def validate_subject_ids_different_from_sample_names(
     return errors
 
 
-def validate_well_positions_required(order: TomteOrder, **kwargs) -> list[WellPositionMissingError]:
+def validate_well_positions_required(
+    order: OrderWithCases, **kwargs
+) -> list[WellPositionMissingError]:
     errors: list[WellPositionMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -115,7 +138,7 @@ def validate_well_positions_required(order: TomteOrder, **kwargs) -> list[WellPo
 
 
 def validate_container_name_required(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -215,41 +238,8 @@ def validate_source_required(order: OrderWithCases, **kwargs) -> list[SourceMiss
     return errors
 
 
-from cg.services.order_validation_service.errors.case_errors import (
-    RepeatedCaseNameError,
-)
-from cg.services.order_validation_service.errors.case_sample_errors import (
-    FatherNotInCaseError,
-    InvalidConcentrationIfSkipRCError,
-    InvalidFatherSexError,
-    InvalidMotherSexError,
-    MotherNotInCaseError,
-    OccupiedWellError,
-    PedigreeError,
-    SampleNameRepeatedError,
-    StatusMissingError,
-    SubjectIdSameAsCaseNameError,
-)
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
-    get_pedigree_errors,
-)
-from cg.services.order_validation_service.rules.case_sample.utils import (
-    get_father_case_errors,
-    get_father_sex_errors,
-    get_mother_case_errors,
-    get_mother_sex_errors,
-    get_occupied_well_errors,
-    get_repeated_sample_name_errors,
-    get_well_sample_map,
-    validate_concentration_in_case,
-    validate_subject_ids_in_case,
-)
-from cg.store.store import Store
-
-
 def validate_wells_contain_at_most_one_sample(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
     well_position_to_sample_map: dict[tuple[str, str], list[tuple[int, int]]] = get_well_sample_map(
@@ -263,7 +253,7 @@ def validate_wells_contain_at_most_one_sample(
 
 
 def validate_sample_names_not_repeated(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[SampleNameRepeatedError]:
     errors: list[SampleNameRepeatedError] = []
     for index, case in order.enumerated_new_cases:
@@ -274,7 +264,7 @@ def validate_sample_names_not_repeated(
     return errors
 
 
-def validate_fathers_are_male(order: TomteOrder, **kwargs) -> list[InvalidFatherSexError]:
+def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
@@ -285,7 +275,7 @@ def validate_fathers_are_male(order: TomteOrder, **kwargs) -> list[InvalidFather
 
 
 def validate_fathers_in_same_case_as_children(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
     for index, case in order.enumerated_cases:
@@ -297,7 +287,7 @@ def validate_fathers_in_same_case_as_children(
     return errors
 
 
-def validate_mothers_are_female(order: TomteOrder, **kwargs) -> list[InvalidMotherSexError]:
+def validate_mothers_are_female(order: OrderWithCases, **kwargs) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
@@ -309,18 +299,19 @@ def validate_mothers_are_female(order: TomteOrder, **kwargs) -> list[InvalidMoth
 
 
 def validate_mothers_in_same_case_as_children(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
     for index, case in order.enumerated_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
-            case=case, case_index=index
+            case=case,
+            case_index=index,
         )
         errors.extend(case_errors)
     return errors
 
 
-def validate_pedigree(order: TomteOrder, **kwargs) -> list[PedigreeError]:
+def validate_pedigree(order: OrderWithCases, **kwargs) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
     for case_index, case in order.enumerated_cases:
         case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
@@ -329,32 +320,35 @@ def validate_pedigree(order: TomteOrder, **kwargs) -> list[PedigreeError]:
 
 
 def validate_subject_ids_different_from_case_names(
-    order: TomteOrder, **kwargs
+    order: OrderWithCases, **kwargs
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
-            case=case, case_index=index
+            case=case,
+            case_index=index,
         )
         errors.extend(case_errors)
     return errors
 
 
 def validate_concentration_interval_if_skip_rc(
-    order: TomteOrder, store: Store, **kwargs
+    order: OrderWithCases, store: Store, **kwargs
 ) -> list[InvalidConcentrationIfSkipRCError]:
     if not order.skip_reception_control:
         return []
     errors: list[InvalidConcentrationIfSkipRCError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidConcentrationIfSkipRCError] = validate_concentration_in_case(
-            case=case, case_index=index, store=store
+            case=case,
+            case_index=index,
+            store=store,
         )
         errors.extend(case_errors)
     return errors
 
 
-def validate_status_required_if_new(order: TomteOrder, **kwargs) -> list[StatusMissingError]:
+def validate_status_required_if_new(order: OrderWithCases, **kwargs) -> list[StatusMissingError]:
     errors: list[StatusMissingError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
