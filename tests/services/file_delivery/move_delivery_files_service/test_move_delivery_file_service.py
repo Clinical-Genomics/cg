@@ -34,3 +34,8 @@ def test_move_files(
 
     # THEN assert that the delivery files are moved
     assert moved_delivery_files == expected_moved_delivery_files
+    if case_files := moved_delivery_files.case_files:
+        for case_file in case_files:
+            assert case_file.file_path.exists
+    for sample_file in moved_delivery_files.sample_files:
+        assert sample_file.file_path.exists()
