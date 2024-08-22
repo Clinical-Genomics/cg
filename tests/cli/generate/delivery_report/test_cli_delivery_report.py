@@ -6,7 +6,7 @@ from datetime import datetime
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner, Result
 
-from cg.cli.generate.report.base import generate_delivery_report
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 

@@ -6,7 +6,7 @@ import logging
 import click
 
 from cg.apps.gens import GensAPI
-from cg.cli.generate.report.base import generate_delivery_report
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens

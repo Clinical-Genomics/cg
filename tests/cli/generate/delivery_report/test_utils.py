@@ -5,7 +5,7 @@ from datetime import datetime
 import click.exceptions
 import pytest
 
-from cg.cli.generate.report.utils import (
+from cg.cli.generate.delivery_report.utils import (
     get_report_analysis_started,
     get_report_api,
     get_report_api_workflow,

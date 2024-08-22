@@ -8,12 +8,12 @@ from pathlib import Path
 import click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.report.options import (
+from cg.cli.generate.delivery_report.options import (
     ARGUMENT_CASE_ID,
     OPTION_STARTED_AT,
     OPTION_WORKFLOW,
 )
-from cg.cli.generate.report.utils import (
+from cg.cli.generate.delivery_report.utils import (
     get_report_analysis_started,
     get_report_api,
     get_report_api_workflow,

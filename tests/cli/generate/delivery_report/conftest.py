@@ -3,7 +3,7 @@ from datetime import datetime
 import click
 import pytest
 
-from cg.cli.generate.report.base import generate_delivery_report
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAAnalysisAPI, MockMipDNAReportAPI

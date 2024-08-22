@@ -5,8 +5,8 @@ import logging
 import click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.report.options import ARGUMENT_CASE_ID
-from cg.cli.generate.report.utils import get_report_api, get_report_case
+from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID
+from cg.cli.generate.delivery_report.utils import get_report_api, get_report_case
 from cg.constants.cli_options import DRY_RUN
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.store.models import Case
