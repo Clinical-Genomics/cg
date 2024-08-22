@@ -1,27 +1,24 @@
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
 from cg.services.order_validation_service.errors.sample_errors import (
-    ApplicationNotCompatibleError,
-    OccupiedWellError,
-    SampleNameRepeatedError,
-)
-from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
+    ApplicationNotCompatibleError,
     ApplicationNotValidError,
     ElutionBufferMissingError,
     ExtractionMethodMissingError,
     InvalidVolumeError,
+    OccupiedWellError,
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
+    SampleNameRepeatedError,
 )
-from cg.services.order_validation_service.rules.case_sample.utils import (
+from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
     is_volume_invalid,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
 )
-
 from cg.services.order_validation_service.workflows.microsalt.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
