@@ -3,9 +3,11 @@ from abc import abstractmethod, ABC
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
+
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
+
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )

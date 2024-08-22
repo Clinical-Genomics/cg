@@ -33,6 +33,7 @@ class FetchFastqAndAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             self.hk_api,
             tags_fetcher=FetchSampleAndCaseDeliveryFileTagsService(),
         )
+
         fastq_files: DeliveryFiles = fetch_fastq_service.get_files_to_deliver(case_id)
         analysis_files: DeliveryFiles = fetch_analysis_service.get_files_to_deliver(case_id)
         delivery_data = DeliveryMetaData(
