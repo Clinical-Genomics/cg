@@ -124,9 +124,9 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     for case in cases_to_store:
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
-            store(context=context, case_id=case.internal_id, dry_run=dry_run)
+            context.invoke(store, case_id=case.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error(f"Error storing {case.internal_id}: {exception_object}")
+            LOG.error(f"Error storingc {case.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
 
     if exit_code:
