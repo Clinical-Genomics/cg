@@ -43,7 +43,9 @@ def expected_fastq_delivery_files(
     delivery_meta_data = DeliveryMetaData(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
-    return DeliveryFiles(delivery_data=delivery_data, case_files=None, sample_files=sample_files)
+    return DeliveryFiles(
+        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
+    )
 
 
 @pytest.fixture
@@ -83,13 +85,13 @@ def expected_analysis_delivery_files(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
     return DeliveryFiles(
-        delivery_data=delivery_data, case_files=case_files, sample_files=sample_files
+        delivery_data=delivery_meta_data, case_files=case_files, sample_files=sample_files
     )
 
 
 @pytest.fixture
 def expected_moved_fastq_delivery_files(
-    expected_fastq_delivery_files: DeliveryFiles, tmp_path
+    expected_fastq_delivery_files: DeliveryFiles, tmp_path: Path
 ) -> DeliveryFiles:
     """Return the moved FASTQ delivery files."""
     delivery_files = DeliveryFiles(**expected_fastq_delivery_files.model_dump())
@@ -100,7 +102,7 @@ def expected_moved_fastq_delivery_files(
         delivery_files.delivery_data.ticket_id,
     )
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
-        delivery_files.sample_files, inbox_path
+        file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
     return DeliveryFiles(
         delivery_data=expected_fastq_delivery_files.delivery_data,
@@ -122,10 +124,10 @@ def expected_moved_analysis_delivery_files(
         delivery_files.delivery_data.ticket_id,
     )
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
-        delivery_files.case_files, inbox_path
+        file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
     )
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
-        delivery_files.sample_files, inbox_path
+        file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
     return DeliveryFiles(
         delivery_data=delivery_files.delivery_data,
@@ -141,6 +143,6 @@ def swap_file_paths_with_inbox_paths(
     new_file_models: list[SampleFile | CaseFile] = []
     for file_model in file_models:
         new_file_model: SampleFile = file_model
-        new_file_model.file_path = Path(inbox_path, file_model.file_path.name)
+        new_file_model.file_path = Path(inbox_dir_path, file_model.file_path.name)
         new_file_models.append(new_file_model)
     return new_file_models

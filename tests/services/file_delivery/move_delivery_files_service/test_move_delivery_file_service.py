@@ -26,9 +26,10 @@ def test_move_files(
         expected_moved_delivery_files
     )
     delivery_files: DeliveryFiles = request.getfixturevalue(delivery_files)
+
     # WHEN moving the delivery files
-    file_mover = MoveDeliveryFilesService()
-    moved_delivery_files: DeliveryFiles = file_mover.move_files(
+    move_files_service = MoveDeliveryFilesService()
+    moved_delivery_files: DeliveryFiles = move_files_service.move_files(
         delivery_files=delivery_files, delivery_base_path=tmp_path
     )
 

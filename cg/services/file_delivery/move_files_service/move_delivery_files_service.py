@@ -16,29 +16,29 @@ class MoveDeliveryFilesService:
 
     def move_files(self, delivery_files: DeliveryFiles, delivery_base_path: Path) -> DeliveryFiles:
         """Move the files to the customer folder."""
-        inbox_path: Path = self._create_ticket_inbox_path(
+        inbox_dir_path: Path = self._create_ticket_inbox_dir_path(
             delivery_base_path, delivery_files.delivery_data
         )
-        self._create_ticket_inbox_folder(inbox_path)
+        self._create_ticket_inbox_folder(inbox_dir_path)
         self._create_hard_links_for_delivery_files(
-            delivery_files=delivery_files, inbox_path=inbox_path
+            delivery_files=delivery_files, inbox_dir_path=inbox_dir_path
         )
-        return self._replace_file_paths_with_inbox_paths(
-            delivery_files=delivery_files, inbox_path=inbox_path
+        return self._replace_file_paths_with_inbox_dir_paths(
+            delivery_files=delivery_files, inbox_dir_path=inbox_dir_path
         )
 
     @staticmethod
     def _create_ticket_inbox_folder(
-        inbox_path: Path,
+        inbox_dir_path: Path,
     ) -> Path:
         """Create a ticket inbox folder in the customer folder."""
-        if not inbox_path.exists():
-            inbox_path.mkdir(parents=True)
-            return inbox_path
-        raise FileExistsError(f"Ticket inbox folder {inbox_path} already exists for ticket.")
+        if not inbox_dir_path.exists():
+            inbox_dir_path.mkdir(parents=True)
+            return inbox_dir_path
+        raise FileExistsError(f"Ticket inbox folder {inbox_dir_path} already exists for ticket.")
 
     @staticmethod
-    def _create_ticket_inbox_path(
+    def _create_ticket_inbox_dir_path(
         delivery_base_path: Path, delivery_data: DeliveryMetaData
     ) -> Path:
         """Create the path to the ticket inbox folder."""
@@ -50,56 +50,56 @@ class MoveDeliveryFilesService:
         )
 
     @staticmethod
-    def _create_inbox_file_path(file_path: Path, inbox_path: Path) -> Path:
+    def _create_inbox_file_path(file_path: Path, inbox_dir_path: Path) -> Path:
         """Create the path to the inbox file."""
-        return Path(inbox_path, file_path.name)
+        return Path(inbox_dir_path, file_path.name)
 
     def _create_hard_link_file_paths(
-        self, file_models: list[SampleFile | CaseFile], inbox_path: Path
+        self, file_models: list[SampleFile | CaseFile], inbox_dir_path: Path
     ) -> None:
         """Create hard links to the sample files in the customer folder."""
         for file_model in file_models:
             inbox_file_path: Path = self._create_inbox_file_path(
-                file_path=file_model.file_path, inbox_path=inbox_path
+                file_path=file_model.file_path, inbox_dir_path=inbox_dir_path
             )
             link_or_overwrite_file(src=file_model.file_path, dst=inbox_file_path)
 
     def _create_hard_links_for_delivery_files(
-        self, delivery_files: DeliveryFiles, inbox_path: Path
+        self, delivery_files: DeliveryFiles, inbox_dir_path: Path
     ) -> None:
         """Create hard links to the files in the customer folder."""
         if delivery_files.case_files:
             self._create_hard_link_file_paths(
-                file_models=delivery_files.case_files, inbox_path=inbox_path
+                file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
             )
         self._create_hard_link_file_paths(
-            file_models=delivery_files.sample_files, inbox_path=inbox_path
+            file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
         )
 
-    def _replace_file_path_with_inbox_path(
-        self, file_models: list[SampleFile | CaseFile], inbox_path: Path
+    def _replace_file_path_with_inbox_dir_path(
+        self, file_models: list[SampleFile | CaseFile], inbox_dir_path: Path
     ) -> list[SampleFile | CaseFile]:
         """Replace the file path with the inbox path."""
         for file_model in file_models:
             inbox_file_path: Path = self._create_inbox_file_path(
-                file_path=file_model.file_path, inbox_path=inbox_path
+                file_path=file_model.file_path, inbox_dir_path=inbox_dir_path
             )
             file_model.file_path = inbox_file_path
         return file_models
 
-    def _replace_file_paths_with_inbox_paths(
+    def _replace_file_paths_with_inbox_dir_paths(
         self,
         delivery_files: DeliveryFiles,
-        inbox_path: Path,
+        inbox_dir_path: Path,
     ) -> DeliveryFiles:
         """
         Replace to original file paths in the delivery files with the customer inbox file paths.
         """
         if delivery_files.case_files:
-            delivery_files.case_files = self._replace_file_path_with_inbox_path(
-                file_models=delivery_files.case_files, inbox_path=inbox_path
+            delivery_files.case_files = self._replace_file_path_with_inbox_dir_path(
+                file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
             )
-        delivery_files.sample_files = self._replace_file_path_with_inbox_path(
-            file_models=delivery_files.sample_files, inbox_path=inbox_path
+        delivery_files.sample_files = self._replace_file_path_with_inbox_dir_path(
+            file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
         )
         return delivery_files
