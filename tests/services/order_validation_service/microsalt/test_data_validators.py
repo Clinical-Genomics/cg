@@ -15,7 +15,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 from cg.services.order_validation_service.workflows.microsalt.models.sample import (
     MicrosaltSample,
 )
-from cg.services.order_validation_service.workflows.microsalt.validation.data.rules import (
+from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules import (
     validate_application_exists,
     validate_applications_not_archived,
     validate_buffer_required,
@@ -23,8 +23,6 @@ from cg.services.order_validation_service.workflows.microsalt.validation.data.ru
     validate_organism_exists,
     validate_samples_exist,
     validate_volume_interval,
-)
-from cg.services.order_validation_service.workflows.microsalt.validation.inter_field.rules import (
     validate_application_compatibility,
 )
 from cg.store.models import Application

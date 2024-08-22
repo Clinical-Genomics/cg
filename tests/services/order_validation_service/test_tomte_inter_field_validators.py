@@ -14,7 +14,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     StatusMissingError,
     SubjectIdSameAsSampleNameError,
 )
-from cg.services.order_validation_service.validators.inter_field.rules import (
+from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_buffers_are_allowed,
     validate_concentration_required_if_skip_rc,
     validate_subject_ids_different_from_sample_names,
@@ -23,7 +23,7 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field.rules import (
+from cg.services.order_validation_service.workflows.tomte.rules.case_sample.rules import (
     validate_case_names_not_repeated,
     validate_concentration_interval_if_skip_rc,
     validate_fathers_are_male,

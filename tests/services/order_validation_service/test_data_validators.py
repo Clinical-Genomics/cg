@@ -11,13 +11,15 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SexMissingError,
     SourceMissingError,
 )
-from cg.services.order_validation_service.validators.data.rules import (
-    validate_application_exists,
-    validate_application_not_archived,
+from cg.services.order_validation_service.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
-    validate_gene_panels_exist,
     validate_gene_panels_unique,
+)
+from cg.services.order_validation_service.rules.case_sample.rules import (
+    validate_application_exists,
+    validate_application_not_archived,
+    validate_gene_panels_exist,
     validate_samples_exist,
     validate_sex_required_for_new_samples,
     validate_source_required,
@@ -122,7 +124,8 @@ def test_case_internal_ids_does_not_exist(
 
     # WHEN validating that the internal ids match existing cases
     errors = validate_case_internal_ids_exist(
-        order=valid_order, store=store_with_multiple_cases_and_samples
+        order=valid_order,
+        store=store_with_multiple_cases_and_samples,
     )
 
     # THEN an error should be returned
