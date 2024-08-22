@@ -14,15 +14,15 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
 )
-from cg.services.order_validation_service.rules.case_sample.utils import (
-    is_application_not_compatible,
-    is_volume_invalid,
-)
+from cg.services.order_validation_service.rules.case_sample.utils import is_application_not_compatible, is_volume_invalid
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
 )
 
-from cg.services.order_validation_service.workflows.tomte.validation.inter_field.utils import get_indices_for_repeated_sample_names
+from cg.services.order_validation_service.workflows.microsalt.rules.sample.utils import (
+    PlateSamplesValidator,
+    get_indices_for_repeated_sample_names,
+)
 from cg.store.models import Sample
 from cg.store.store import Store
 
