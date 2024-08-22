@@ -91,7 +91,7 @@ def expected_analysis_delivery_files(
 def expected_moved_fastq_delivery_files(
     expected_fastq_delivery_files: DeliveryFiles, tmp_path
 ) -> DeliveryFiles:
-    """Return the moved fastq delivery files."""
+    """Return the moved FASTQ delivery files."""
     delivery_files = DeliveryFiles(**expected_fastq_delivery_files.model_dump())
     inbox_path: Path = Path(
         tmp_path,
