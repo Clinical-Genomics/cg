@@ -16,14 +16,16 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
     ],
 )
 def test_move_files(
-    expected_moved_delivery_files: DeliveryFiles, delivery_files: DeliveryFiles, tmp_path, request
+    expected_moved_delivery_files: DeliveryFiles,
+    delivery_files: DeliveryFiles,
+    tmp_path,
+    request,
 ):
     # GIVEN a delivery files to move
     expected_moved_delivery_files: DeliveryFiles = request.getfixturevalue(
         expected_moved_delivery_files
     )
     delivery_files: DeliveryFiles = request.getfixturevalue(delivery_files)
-
     # WHEN moving the delivery files
     file_mover = MoveDeliveryFilesService()
     moved_delivery_files: DeliveryFiles = file_mover.move_files(
