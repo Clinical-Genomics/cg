@@ -15,10 +15,12 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
 )
+from cg.services.order_validation_service.models.aliases import (
+    CaseContainingRelatives,
+    SampleWithRelatives,
+)
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
-from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -32,15 +34,15 @@ def is_application_not_compatible(
     return application and (application.prep_category not in allowed_prep_categories)
 
 
-def is_concentration_missing(sample: TomteSample) -> bool:
+def is_concentration_missing(sample: SampleWithRelatives) -> bool:
     return not sample.concentration_ng_ul
 
 
-def is_well_position_missing(sample: TomteSample) -> bool:
+def is_well_position_missing(sample: SampleWithRelatives) -> bool:
     return sample.container == ContainerEnum.plate and not sample.well_position
 
 
-def is_container_name_missing(sample: TomteSample) -> bool:
+def is_container_name_missing(sample: SampleWithRelatives) -> bool:
     return sample.container == ContainerEnum.plate and not sample.container_name
 
 
@@ -93,7 +95,7 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
     return errors
 
 
-def is_sample_on_plate(sample: TomteSample) -> bool:
+def is_sample_on_plate(sample: SampleWithRelatives) -> bool:
     return sample.container == ContainerEnum.plate
 
 
@@ -113,7 +115,7 @@ def get_repeated_case_name_errors(order: OrderWithCases) -> list[RepeatedCaseNam
     return [RepeatedCaseNameError(case_index=case_index) for case_index in case_indices]
 
 
-def get_indices_for_repeated_sample_names(case: TomteCase) -> list[int]:
+def get_indices_for_repeated_sample_names(case: CaseContainingRelatives) -> list[int]:
     counter = Counter([sample.name for sample in case.samples])
     indices: list[int] = []
 
@@ -125,7 +127,7 @@ def get_indices_for_repeated_sample_names(case: TomteCase) -> list[int]:
 
 
 def get_repeated_sample_name_errors(
-    case: TomteCase, case_index: int
+    case: CaseContainingRelatives, case_index: int
 ) -> list[SampleNameRepeatedError]:
     sample_indices: list[int] = get_indices_for_repeated_sample_names(case)
     return [
@@ -134,9 +136,9 @@ def get_repeated_sample_name_errors(
     ]
 
 
-def get_father_sex_errors(case: TomteCase, case_index: int) -> list[InvalidFatherSexError]:
+def get_father_sex_errors(case: CaseContainingRelatives, case_index: int) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
-    children: list[tuple[TomteSample, int]] = case.get_samples_with_father()
+    children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
         if is_father_sex_invalid(child=child, case=case):
             error: InvalidFatherSexError = create_father_sex_error(
@@ -146,8 +148,8 @@ def get_father_sex_errors(case: TomteCase, case_index: int) -> list[InvalidFathe
     return errors
 
 
-def is_father_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
-    father: TomteSample | None = case.get_sample(child.father)
+def is_father_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
+    father: SampleWithRelatives | None = case.get_sample(child.father)
     return father and father.sex != Sex.MALE
 
 
@@ -155,11 +157,11 @@ def create_father_sex_error(case_index: int, sample_index: int) -> InvalidFather
     return InvalidFatherSexError(case_index=case_index, sample_index=sample_index)
 
 
-def get_father_case_errors(case: TomteCase, case_index: int) -> list[FatherNotInCaseError]:
+def get_father_case_errors(case: CaseContainingRelatives, case_index: int) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    children: list[tuple[TomteSample, int]] = case.get_samples_with_father()
+    children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
-        father: TomteSample | None = case.get_sample(child.father)
+        father: SampleWithRelatives | None = case.get_sample(child.father)
         if not father:
             error: FatherNotInCaseError = create_father_case_error(
                 case_index=case_index,
@@ -169,9 +171,9 @@ def get_father_case_errors(case: TomteCase, case_index: int) -> list[FatherNotIn
     return errors
 
 
-def get_mother_sex_errors(case: TomteCase, case_index: int) -> list[InvalidMotherSexError]:
+def get_mother_sex_errors(case: CaseContainingRelatives, case_index: int) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
-    children: list[tuple[TomteSample, int]] = case.get_samples_with_mother()
+    children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
         if is_mother_sex_invalid(child=child, case=case):
             error: InvalidMotherSexError = create_mother_sex_error(
@@ -182,11 +184,11 @@ def get_mother_sex_errors(case: TomteCase, case_index: int) -> list[InvalidMothe
     return errors
 
 
-def get_mother_case_errors(case: TomteCase, case_index: int) -> list[MotherNotInCaseError]:
+def get_mother_case_errors(case: CaseContainingRelatives, case_index: int) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
-    children: list[tuple[TomteSample, int]] = case.get_samples_with_mother()
+    children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
-        mother: TomteSample | None = case.get_sample(child.mother)
+        mother: SampleWithRelatives | None = case.get_sample(child.mother)
         if not mother:
             error: MotherNotInCaseError = create_mother_case_error(
                 case_index=case_index, sample_index=child_index
@@ -203,8 +205,8 @@ def create_mother_case_error(case_index: int, sample_index: int) -> MotherNotInC
     return MotherNotInCaseError(case_index=case_index, sample_index=sample_index)
 
 
-def is_mother_sex_invalid(child: TomteSample, case: TomteCase) -> bool:
-    mother: TomteSample | None = case.get_sample(child.mother)
+def is_mother_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
+    mother: SampleWithRelatives | None = case.get_sample(child.mother)
     return mother and mother.sex != Sex.FEMALE
 
 
@@ -213,7 +215,7 @@ def create_mother_sex_error(case_index: int, sample_index: int) -> InvalidMother
 
 
 def validate_subject_ids_in_case(
-    case: TomteCase, case_index: int
+    case: CaseContainingRelatives, case_index: int
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
     for sample_index, sample in case.enumerated_new_samples:
@@ -224,7 +226,7 @@ def validate_subject_ids_in_case(
 
 
 def validate_concentration_in_case(
-    case: TomteCase, case_index: int, store: Store
+    case: CaseContainingRelatives, case_index: int, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors: list[InvalidConcentrationIfSkipRCError] = []
     for sample_index, sample in case.enumerated_new_samples:
@@ -240,7 +242,7 @@ def validate_concentration_in_case(
 
 
 def create_invalid_concentration_error(
-    case_index: int, sample: TomteSample, sample_index: int, store: Store
+    case_index: int, sample: SampleWithRelatives, sample_index: int, store: Store
 ) -> InvalidConcentrationIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna: bool = is_sample_cfdna(sample)
@@ -255,7 +257,7 @@ def create_invalid_concentration_error(
     )
 
 
-def has_sample_invalid_concentration(sample: TomteSample, store: Store) -> bool:
+def has_sample_invalid_concentration(sample: SampleWithRelatives, store: Store) -> bool:
     application: Application | None = store.get_application_by_tag(sample.application)
     if not application:
         return False
@@ -269,7 +271,7 @@ def has_sample_invalid_concentration(sample: TomteSample, store: Store) -> bool:
     )
 
 
-def is_sample_cfdna(sample: TomteSample) -> bool:
+def is_sample_cfdna(sample: SampleWithRelatives) -> bool:
     source = sample.source
     return source == SourceType.CELL_FREE_DNA
 
