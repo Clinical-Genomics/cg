@@ -136,7 +136,9 @@ def get_repeated_sample_name_errors(
     ]
 
 
-def get_father_sex_errors(case: CaseContainingRelatives, case_index: int) -> list[InvalidFatherSexError]:
+def get_father_sex_errors(
+    case: CaseContainingRelatives, case_index: int
+) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
@@ -157,7 +159,10 @@ def create_father_sex_error(case_index: int, sample_index: int) -> InvalidFather
     return InvalidFatherSexError(case_index=case_index, sample_index=sample_index)
 
 
-def get_father_case_errors(case: CaseContainingRelatives, case_index: int) -> list[FatherNotInCaseError]:
+def get_father_case_errors(
+    case: CaseContainingRelatives,
+    case_index: int,
+) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
@@ -171,7 +176,10 @@ def get_father_case_errors(case: CaseContainingRelatives, case_index: int) -> li
     return errors
 
 
-def get_mother_sex_errors(case: CaseContainingRelatives, case_index: int) -> list[InvalidMotherSexError]:
+def get_mother_sex_errors(
+    case: CaseContainingRelatives,
+    case_index: int,
+) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
@@ -184,7 +192,10 @@ def get_mother_sex_errors(case: CaseContainingRelatives, case_index: int) -> lis
     return errors
 
 
-def get_mother_case_errors(case: CaseContainingRelatives, case_index: int) -> list[MotherNotInCaseError]:
+def get_mother_case_errors(
+    case: CaseContainingRelatives,
+    case_index: int,
+) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
