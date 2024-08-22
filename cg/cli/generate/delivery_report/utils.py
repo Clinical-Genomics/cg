@@ -34,7 +34,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     report_api: DeliveryReportAPI = (
         context.obj.meta_apis.get("report_api")
         if context.obj.meta_apis.get("report_api")
-        else MipDNADeliveryReportAPI(analysis_api=MipDNAAnalysisAPI(config=context.obj))
+        else RarediseaseDeliveryReportAPI(analysis_api=RarediseaseAnalysisAPI(config=context.obj))
     )
     case: Case = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
     # Missing or not valid internal case ID

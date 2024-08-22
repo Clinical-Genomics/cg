@@ -3,10 +3,12 @@
 from datetime import datetime
 from pathlib import Path
 
+import click
 import pytest
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import Workflow, DataDelivery
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
@@ -99,3 +101,11 @@ def raredisease_delivery_report_context(
         RarediseaseDeliveryReportAPI, "get_scout_variants_files", return_value=scout_variants_files
     )  # RD specific
     return cg_context
+
+
+@pytest.fixture
+def raredisease_delivery_report_click_context(
+    raredisease_delivery_report_context: CGConfig,
+) -> click.Context:
+    """Click delivery report context fixture."""
+    return click.Context(generate_delivery_report, obj=raredisease_delivery_report_context)
