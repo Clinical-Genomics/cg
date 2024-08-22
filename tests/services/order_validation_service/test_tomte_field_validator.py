@@ -65,9 +65,7 @@ def test_case_sample_field_error(valid_order: TomteOrder):
     assert errors.case_sample_errors[0].field == "well_position"
 
 
-def test_order_case_and_case_sample_field_error(
-    valid_order: TomteOrder, tomte_model_validator: ModelValidator
-):
+def test_order_case_and_case_sample_field_error(valid_order: TomteOrder):
     # GIVEN an order with an order, case and case sample error
     valid_order.name = None
     valid_order.cases[0].priority = None

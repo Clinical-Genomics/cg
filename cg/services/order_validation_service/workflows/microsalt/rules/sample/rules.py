@@ -1,6 +1,6 @@
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
-from cg.services.order_validation_service.errors.case_sample_errors import (
+from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationNotCompatibleError,
     OccupiedWellError,
     SampleNameRepeatedError,
