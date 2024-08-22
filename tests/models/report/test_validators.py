@@ -235,3 +235,44 @@ def test_get_analysis_type_as_string_balsamic():
 
     # THEN check if the input value was formatted correctly
     assert validated_analysis_type == "Tumör/normal (helgenomsekvensering)"
+
+
+def test_get_case_analysis_data_workflow_match_error(
+    report_api_mip_dna: MipDNADeliveryReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
+):
+    """Test validation error if a customer requested workflow does not match the data analysis."""
+
+    # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
+    mip_analysis: Analysis = case_mip_dna.analyses[0]
+    mip_analysis.workflow = Workflow.BALSAMIC
+
+    # WHEN retrieving analysis information
+
+    # THEN a validation error should be raised
+    with pytest.raises(ValueError):
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
+    assert (
+        f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
+        f"({mip_analysis.workflow})" in caplog.text
+    )
+
+
+def test_get_case_analysis_data_workflow_not_supported(
+    report_api_mip_dna: MipDNADeliveryReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
+):
+    """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
+
+    # GIVEN a pre-built case with Fluffy as data analysis
+    case_mip_dna.data_analysis = Workflow.MICROSALT
+    mip_analysis: Analysis = case_mip_dna.analyses[0]
+    mip_analysis.workflow = Workflow.MICROSALT
+
+    # WHEN retrieving data analysis information
+
+    # THEN a validation error should be raised
+    with pytest.raises(ValueError):
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
+    assert (
+        f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
+        in caplog.text
+    )
