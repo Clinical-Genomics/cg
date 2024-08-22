@@ -10,7 +10,6 @@ from cg.services.order_validation_service.rules.case.utils import contains_dupli
 from cg.services.order_validation_service.rules.case_sample.utils import (
     get_repeated_case_name_errors,
 )
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
 
 
@@ -51,5 +50,8 @@ def validate_case_internal_ids_exist(
     return errors
 
 
-def validate_case_names_not_repeated(order: TomteOrder, **kwargs) -> list[RepeatedCaseNameError]:
+def validate_case_names_not_repeated(
+    order: OrderWithCases,
+    **kwargs,
+) -> list[RepeatedCaseNameError]:
     return get_repeated_case_name_errors(order)
