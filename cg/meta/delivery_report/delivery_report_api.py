@@ -63,7 +63,7 @@ class DeliveryReportAPI:
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
-        report_data: ReportModel = self.validate_report_fields(
+        report_data: ReportModel = self.validate_report_data(
             case_id=case_id, report_data=report_data, force=force
         )
         rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
@@ -191,7 +191,9 @@ class DeliveryReportAPI:
             ),
         )
 
-    def validate_report_fields(self, case_id: str, report_data: ReportModel, force) -> ReportModel:
+    def validate_report_data(
+        self, case_id: str, report_data: ReportModel, force: bool
+    ) -> ReportModel:
         """Verifies that the required report fields are not empty."""
         required_fields: dict = self.get_required_fields(case=report_data.case)
         empty_report_fields: dict = get_empty_report_data(report_data=report_data)
@@ -302,7 +304,7 @@ class DeliveryReportAPI:
         return application_limitation.limitations if application_limitation else None
 
     def get_sample_application(
-        self, sample: Sample, lims_sample: dict[str:Any]
+        self, sample: Sample, lims_sample: dict[str, Any]
     ) -> ApplicationModel:
         """Return the analysis application attributes for a sample."""
         application: Application = self.status_db.get_application_by_tag(

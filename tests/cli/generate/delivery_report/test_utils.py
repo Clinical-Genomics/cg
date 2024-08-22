@@ -40,10 +40,10 @@ def test_get_report_case_invalid_case_id(
 
     # GIVEN a delivery report click context
 
-    # WHEN resolving a report case ID
+    # WHEN resolving an invalid report case ID
 
+    # THEN an exception should be raised
     with pytest.raises(click.exceptions.Abort):
-        # THEN an exception should be raised
         get_report_case(
             context=raredisease_delivery_report_click_context, case_id=case_id_does_not_exist
         )
