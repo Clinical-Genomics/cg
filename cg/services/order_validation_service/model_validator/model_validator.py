@@ -7,7 +7,7 @@ from cg.services.order_validation_service.models.order import Order
 class ModelValidator:
 
     @staticmethod
-    def validate(order: dict, model: Order) -> tuple[Order | None, ValidationErrors]:
+    def validate(order: dict, model: type[Order]) -> tuple[Order | None, ValidationErrors]:
         try:
             order = model.model_validate(order)
             return order, ValidationErrors()
