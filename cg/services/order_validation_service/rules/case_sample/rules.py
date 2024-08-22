@@ -3,7 +3,9 @@ from cg.services.order_validation_service.constants import (
     ALLOWED_SKIP_RC_BUFFERS,
     WORKFLOW_PREP_CATEGORIES,
 )
-from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
+from cg.services.order_validation_service.errors.case_errors import (
+    InvalidGenePanelsError,
+)
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -21,11 +23,13 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.utils import (
     get_invalid_panels,
-    is_application_not_compatible,
     is_concentration_missing,
     is_container_name_missing,
-    is_volume_invalid,
     is_well_position_missing,
+)
+from cg.services.order_validation_service.rules.utils import (
+    is_application_not_compatible,
+    is_volume_invalid,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Sample
