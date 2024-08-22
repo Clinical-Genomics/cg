@@ -65,10 +65,7 @@ def validate_customer_can_skip_reception_control(
 ) -> list[CustomerCannotSkipReceptionControlError]:
     errors: list[CustomerCannotSkipReceptionControlError] = []
 
-    if not order.skip_reception_control:
-        return errors
-
-    if not store.is_customer_trusted(order.customer):
+    if order.skip_reception_control and not store.is_customer_trusted(order.customer):
         error = CustomerCannotSkipReceptionControlError()
         errors.append(error)
     return errors

@@ -9,7 +9,7 @@ class ModelValidator:
     @staticmethod
     def validate(order: dict, model: type[Order]) -> tuple[Order | None, ValidationErrors]:
         try:
-            order = model.model_validate(order)
+            order: Order = model.model_validate(order)
             return order, ValidationErrors()
         except ValidationError as error:
             return None, convert_errors(pydantic_errors=error)
