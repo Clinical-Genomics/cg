@@ -90,7 +90,7 @@ class DeliveryReportAPI:
         self, case_id: str, delivery_report_file: Path, version: Version
     ) -> File | None:
         """Add a delivery report file to a case bundle and return its file object."""
-        LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
+        LOG.info(f"Adding a new delivery report to Housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
             path=delivery_report_file.as_posix(),
             version_obj=version,
