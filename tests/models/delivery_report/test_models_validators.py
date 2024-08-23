@@ -22,7 +22,7 @@ from cg.constants import (
 from cg.constants.constants import AnalysisType, Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
-from cg.models.analysis import NextflowAnalysis, AnalysisModel
+from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.models.delivery_report.validators import (
