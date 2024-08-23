@@ -14,7 +14,7 @@ from cg.cli.generate.delivery_report.options import (
     OPTION_WORKFLOW,
 )
 from cg.cli.generate.delivery_report.utils import (
-    get_report_analysis_started,
+    get_report_analysis_started_at,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -45,7 +45,7 @@ def generate_delivery_report(
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: DeliveryReportAPI = get_report_api(context, case)
-    analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
+    analysis_date: datetime = get_report_analysis_started_at(case, report_api, analysis_started_at)
 
     # Dry run: prints the HTML report to console
     if dry_run:

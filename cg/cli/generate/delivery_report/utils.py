@@ -110,7 +110,7 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
     return dispatch_report_api.get(workflow)
 
 
-def get_report_analysis_started(
+def get_report_analysis_started_at(
     case: Case, report_api: DeliveryReportAPI, analysis_started_at: str | None
 ) -> datetime:
     """Resolves and returns a valid analysis date."""

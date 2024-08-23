@@ -9,7 +9,7 @@ from cg.cli.generate.delivery_report.utils import (
     get_report_case,
     get_report_api,
     get_report_api_workflow,
-    get_report_analysis_started,
+    get_report_analysis_started_at,
 )
 from cg.constants import Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
@@ -84,7 +84,7 @@ def test_get_report_api_workflow(raredisease_delivery_report_click_context: clic
     assert isinstance(report_api, RarediseaseDeliveryReportAPI)
 
 
-def test_get_report_analysis_started(
+def test_get_report_analysis_started_at(
     raredisease_delivery_report_click_context: click.Context, raredisease_case_id: str
 ):
     """Tests retrieval of analysis started at field"""
@@ -98,7 +98,7 @@ def test_get_report_analysis_started(
     )
 
     # WHEN resolving the analysis started at field
-    started_at = get_report_analysis_started(
+    started_at = get_report_analysis_started_at(
         case=case, report_api=report_api, analysis_started_at=None
     )
 
