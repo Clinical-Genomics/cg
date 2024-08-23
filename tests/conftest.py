@@ -4115,17 +4115,17 @@ def analysis_summary(
 
 
 @pytest.fixture
-def lims_family(fixtures_dir: Path) -> dict:
-    """Returns a lims-like case of samples."""
+def lims_case(fixtures_dir: Path) -> dict:
+    """Returns a LIMS case dict of samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
     )
 
 
 @pytest.fixture
-def lims_samples(lims_family: dict) -> list[dict]:
-    """Returns the samples of a lims case."""
-    return lims_family["samples"]
+def lims_samples(lims_case: dict) -> list[dict]:
+    """Returns the samples of a LIMS case."""
+    return lims_case["samples"]
 
 
 @pytest.fixture

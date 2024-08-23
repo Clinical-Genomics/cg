@@ -23,7 +23,7 @@ def test_generate_delivery_report(
     # GIVEN a case ID
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
-    # WHEN calling delivery_report with a dry option
+    # WHEN calling delivery report generation
     result: Result = cli_runner.invoke(
         generate_delivery_report, [case_id], obj=delivery_report_context
     )
@@ -46,7 +46,7 @@ def test_generate_delivery_report_dry_rum(
     # GIVEN a case ID
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
-    # WHEN calling delivery_report with a dry option to print the HTML content to the terminal
+    # WHEN calling delivery report generation with a dry option to print the HTML content to the terminal
     result: Result = cli_runner.invoke(
         generate_delivery_report, [case_id, "--dry-run"], obj=delivery_report_context
     )
