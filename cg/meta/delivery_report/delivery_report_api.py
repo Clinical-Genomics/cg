@@ -419,12 +419,13 @@ class DeliveryReportAPI:
     @staticmethod
     def get_timestamp_required_fields(case: CaseModel, required_fields: list) -> dict:
         """Return sample timestamps required fields."""
+        required_fields_copy: list = required_fields.copy()
         for sample in case.samples:
             if sample.application.external:
-                required_fields.remove("received_at")
+                required_fields_copy.remove("received_at")
                 break
         return DeliveryReportAPI.get_sample_required_fields(
-            case=case, required_fields=required_fields
+            case=case, required_fields=required_fields_copy
         )
 
     def get_hk_scout_file_tags(self, scout_key: ScoutUploadKey) -> list | None:

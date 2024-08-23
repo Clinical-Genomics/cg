@@ -1378,6 +1378,12 @@ def wgs_application_tag() -> str:
 
 
 @pytest.fixture
+def wts_application_tag() -> str:
+    """Return a WTS application tag."""
+    return "RNAPOAR100"
+
+
+@pytest.fixture
 def microbial_application_tag() -> str:
     """Return the WGS microbial application tag."""
     return "MWRNXTR003"
@@ -2772,7 +2778,7 @@ def raredisease_deliverables_response_data(
 @pytest.fixture
 def raredisease_multiqc_json_metrics_path(raredisease_analysis_dir: Path) -> Path:
     """Return Multiqc JSON file path for Raredisease."""
-    return Path(raredisease_analysis_dir, "multiqc_data.json")
+    return Path(raredisease_analysis_dir, multiqc_json_file)
 
 
 @pytest.fixture
@@ -2849,10 +2855,16 @@ def rnafusion_malformed_hermes_deliverables(rnafusion_hermes_deliverables: dict)
     return malformed_deliverable
 
 
-@pytest.fixture(scope="function")
-def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+@pytest.fixture
+def rnafusion_multiqc_json_metrics_path(rnafusion_analysis_dir: Path) -> Path:
+    """Return Multiqc JSON file path for Raredisease."""
+    return Path(rnafusion_analysis_dir, multiqc_json_file)
+
+
+@pytest.fixture
+def rnafusion_multiqc_json_metrics(rnafusion_multiqc_json_metrics_path: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(rnafusion_analysis_dir, multiqc_json_file))
+    return read_json(file_path=rnafusion_multiqc_json_metrics_path)
 
 
 @pytest.fixture(scope="function")

@@ -9,7 +9,7 @@ from cg.constants import Workflow, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_generate_delivery_report(
     request: FixtureRequest,
     workflow: Workflow,
@@ -35,7 +35,7 @@ def test_generate_delivery_report(
     assert result.exit_code == EXIT_SUCCESS
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_generate_delivery_report_dry_rum(
     request: FixtureRequest,
     workflow: Workflow,

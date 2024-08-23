@@ -3,6 +3,7 @@
 import pytest
 
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.report import ScoutVariantsFiles
 
@@ -13,6 +14,15 @@ def raredisease_delivery_report_api(
 ) -> RarediseaseDeliveryReportAPI:
     return RarediseaseDeliveryReportAPI(
         analysis_api=raredisease_delivery_report_context.meta_apis["analysis_api"]
+    )
+
+
+@pytest.fixture
+def rnafusion_delivery_report_api(
+    rnafusion_delivery_report_context: CGConfig,
+) -> RnafusionDeliveryReportAPI:
+    return RnafusionDeliveryReportAPI(
+        analysis_api=rnafusion_delivery_report_context.meta_apis["analysis_api"]
     )
 
 

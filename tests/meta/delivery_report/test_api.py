@@ -27,7 +27,7 @@ from cg.models.delivery_report.sample import (
 from cg.store.models import Case, Analysis, Sample
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     """Test rendering of the delivery report for different workflows."""
 
@@ -50,7 +50,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     assert "<!DOCTYPE html>" in delivery_report_html
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_path: Path):
     """Test writing of the delivery report for different workflows."""
 
@@ -74,7 +74,7 @@ def write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_
     assert delivery_report_file.is_file()
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_render_delivery_report(request: FixtureRequest, workflow: Workflow):
     """Test delivery report HTML rendering."""
 
@@ -100,7 +100,7 @@ def test_render_delivery_report(request: FixtureRequest, workflow: Workflow):
     assert "<!DOCTYPE html>" in rendered_report
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_report_data(request: FixtureRequest, workflow: Workflow):
     """Test extraction of the data necessary to render the delivery report."""
 
@@ -123,7 +123,7 @@ def test_get_report_data(request: FixtureRequest, workflow: Workflow):
     assert isinstance(report_data, ReportModel)
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_validate_report_data(request: FixtureRequest, workflow: Workflow):
     """Test retrieval and validation of the delivery report data."""
 
@@ -151,7 +151,7 @@ def test_validate_report_data(request: FixtureRequest, workflow: Workflow):
     assert isinstance(report_data_validated, ReportModel)
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_validate_report_data_empty_optional_fields(
     request: FixtureRequest, workflow: Workflow, caplog: LogCaptureFixture
 ):
@@ -191,7 +191,7 @@ def test_validate_report_data_empty_optional_fields(
     assert "library_prep" in caplog.text
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_validate_report_data_empty_required_fields(
     request: FixtureRequest, workflow: Workflow, caplog: LogCaptureFixture
 ):
@@ -229,7 +229,7 @@ def test_validate_report_data_empty_required_fields(
     assert "duplicates" in caplog.text
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_validate_report_data_empty_required_fields_force(
     request: FixtureRequest, workflow: Workflow, caplog: LogCaptureFixture
 ):
@@ -264,7 +264,7 @@ def test_validate_report_data_empty_required_fields_force(
     assert isinstance(report_data_validated, ReportModel)
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_validate_report_data_external_sample(request: FixtureRequest, workflow: Workflow):
     """Tests report data validation for a case with an external sample."""
 
@@ -295,7 +295,7 @@ def test_validate_report_data_external_sample(request: FixtureRequest, workflow:
     assert report_data
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_customer_data(request: FixtureRequest, workflow: Workflow):
     """Checks that the retrieved customer data is the expected one."""
 
@@ -318,7 +318,7 @@ def test_get_customer_data(request: FixtureRequest, workflow: Workflow):
     assert customer_data.invoice_address
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_report_version(request: FixtureRequest, workflow: Workflow):
     """Test report version extraction from an analysis object."""
 
@@ -341,7 +341,7 @@ def test_get_report_version(request: FixtureRequest, workflow: Workflow):
     assert delivery_report_version == 1
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_case_data(request: FixtureRequest, workflow: Workflow):
     """Test report version extraction from an analysis object."""
 
@@ -370,7 +370,7 @@ def test_get_case_data(request: FixtureRequest, workflow: Workflow):
     assert case_data.applications
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_samples_data(request: FixtureRequest, workflow: Workflow):
     """Test retrieval of sample data."""
 
@@ -406,7 +406,7 @@ def test_get_samples_data(request: FixtureRequest, workflow: Workflow):
     assert samples_data.timestamps
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_sample_application(request: FixtureRequest, workflow: Workflow):
     """Test sample application data extraction."""
 
@@ -442,7 +442,7 @@ def test_get_sample_application(request: FixtureRequest, workflow: Workflow):
     assert application_data.accredited
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_unique_applications(request: FixtureRequest, workflow: Workflow):
     """Test unique applications filtering."""
 
@@ -472,7 +472,7 @@ def test_get_unique_applications(request: FixtureRequest, workflow: Workflow):
     assert len(unique_applications) == 1
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_sample_methods_data(request: FixtureRequest, workflow: Workflow, sample_id: str):
     """Test sample methods retrieval from LIMS."""
 
@@ -492,7 +492,7 @@ def test_get_sample_methods_data(request: FixtureRequest, workflow: Workflow, sa
     assert sample_methods.sequencing
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_case_analysis_data(request: FixtureRequest, workflow: Workflow):
     """Test data analysis retrieval."""
 
@@ -517,7 +517,7 @@ def test_get_case_analysis_data(request: FixtureRequest, workflow: Workflow):
     assert case_analysis_data.scout_files
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_sample_timestamp_data(request: FixtureRequest, workflow: Workflow):
     """Test that the sample timestamp information is correctly retrieved from StatusDB."""
 
@@ -544,7 +544,7 @@ def test_get_sample_timestamp_data(request: FixtureRequest, workflow: Workflow):
     assert sample_timestamp_data.reads_updated_at
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE])
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_sample_metadata(request: FixtureRequest, workflow: Workflow):
     """Test sample metadata extraction."""
 
