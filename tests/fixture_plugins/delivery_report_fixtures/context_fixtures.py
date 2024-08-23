@@ -67,40 +67,51 @@ def raredisease_delivery_report_store_context(
 
 
 @pytest.fixture
-def raredisease_delivery_report_context(
+def delivery_report_context(
     cg_context: CGConfig,
-    raredisease_delivery_report_store_context: Store,
-    raredisease_multiqc_json_metrics_path: Path,
     lims_samples: list[dict],
     library_prep_method: str,
     libary_sequencing_method: str,
     capture_kit: str,
+    mocker: MockFixture,
+) -> CGConfig:
+    """Delivery report generation context."""
+    mocker.patch.object(LimsAPI, "sample", return_value=lims_samples[0])
+    mocker.patch.object(LimsAPI, "get_prep_method", return_value=library_prep_method)
+    mocker.patch.object(LimsAPI, "get_sequencing_method", return_value=libary_sequencing_method)
+    mocker.patch.object(LimsAPI, "capture_kit", return_value=capture_kit)
+    return cg_context
+
+
+@pytest.fixture
+def raredisease_delivery_report_context(
+    delivery_report_context: CGConfig,
+    raredisease_delivery_report_store_context: Store,
+    raredisease_multiqc_json_metrics_path: Path,
     coverage_metrics: CoverageMetrics,
     scout_variants_files: ScoutVariantsFiles,
     mocker: MockFixture,
 ) -> CGConfig:
     """Raredisease context for the delivery report generation."""
 
-    # CG context
-    cg_context.status_db_ = raredisease_delivery_report_store_context
-    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    # Raredisease delivery report context
+    delivery_report_context.status_db_ = raredisease_delivery_report_store_context
+    delivery_report_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(
+        config=delivery_report_context
+    )
 
-    # Mocked methods
+    # Raredisease delivery report mocked methods
     mocker.patch.object(
         NfAnalysisAPI, "get_multiqc_json_path", return_value=raredisease_multiqc_json_metrics_path
-    )  # RD specific
-    mocker.patch.object(LimsAPI, "sample", return_value=lims_samples[0])
-    mocker.patch.object(LimsAPI, "get_prep_method", return_value=library_prep_method)
-    mocker.patch.object(LimsAPI, "get_sequencing_method", return_value=libary_sequencing_method)
-    mocker.patch.object(LimsAPI, "capture_kit", return_value=capture_kit)
-    mocker.patch.object(AnalysisAPI, "get_gene_ids_from_scout", return_value=[])  # RD specific
+    )
+    mocker.patch.object(AnalysisAPI, "get_gene_ids_from_scout", return_value=[])
     mocker.patch.object(
         RarediseaseAnalysisAPI, "get_sample_coverage", return_value=coverage_metrics
-    )  # RD specific
+    )
     mocker.patch.object(
         RarediseaseDeliveryReportAPI, "get_scout_variants_files", return_value=scout_variants_files
-    )  # RD specific
-    return cg_context
+    )
+    return delivery_report_context
 
 
 @pytest.fixture
