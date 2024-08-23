@@ -7,11 +7,24 @@ from typing import Any
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pydantic_core.core_schema import ValidationInfo
+from pytest_mock import MockFixture
 
-from cg.constants import NA_FIELD, YES_FIELD, NO_FIELD, REPORT_SEX, Sex
+from cg.apps.lims import LimsAPI
+from cg.constants import (
+    NA_FIELD,
+    YES_FIELD,
+    NO_FIELD,
+    REPORT_SEX,
+    Sex,
+    RIN_MAX_THRESHOLD,
+    RIN_MIN_THRESHOLD,
+)
 from cg.constants.constants import AnalysisType, Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
+from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
+from cg.models.analysis import NextflowAnalysis, AnalysisModel
 from cg.models.delivery.delivery import DeliveryFile
+from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.models.delivery_report.validators import (
     get_report_string,
     get_boolean_as_string,
@@ -26,7 +39,7 @@ from cg.models.delivery_report.validators import (
     get_analysis_type_as_string,
 )
 from cg.models.orders.constants import OrderType
-from cg.store.models import Case, Analysis
+from cg.store.models import Case, Analysis, Sample
 
 
 def test_get_report_string():
@@ -295,3 +308,50 @@ def test_check_supported_workflow_not_delivery_report_supported(
         f"The workflow {case.data_analysis} does not support delivery report generation"
         in caplog.text
     )
+
+
+@pytest.mark.parametrize(
+    "input_rin, expected_rin",
+    [
+        (RIN_MAX_THRESHOLD, str(float(RIN_MAX_THRESHOLD))),  # Test for a valid integer input
+        (RIN_MAX_THRESHOLD + 1, NA_FIELD),  # Test for an integer above the allowed threshold
+        (RIN_MIN_THRESHOLD - 1, NA_FIELD),  # Test for an integer below the allowed threshold
+        (None, NA_FIELD),  # Test for a None input
+    ],
+)
+def test_ensure_rin_thresholds(
+    rnafusion_case_id: str,
+    sample_id: str,
+    input_rin: int | float,
+    expected_rin: str,
+    rnafusion_delivery_report_api: RnafusionDeliveryReportAPI,
+    rnafusion_mock_analysis_finish: None,
+    mocker: MockFixture,
+):
+    """Test Rnafusion RIN value validation."""
+
+    # GIVEN a Rnafusion case and associated sample
+    case: Case = rnafusion_delivery_report_api.status_db.get_case_by_internal_id(
+        internal_id=rnafusion_case_id
+    )
+    sample: Sample = rnafusion_delivery_report_api.status_db.get_sample_by_internal_id(
+        internal_id=sample_id
+    )
+
+    # GIVEN an analysis metadata object
+    analysis_metadata: NextflowAnalysis = (
+        rnafusion_delivery_report_api.analysis_api.get_latest_metadata(rnafusion_case_id)
+    )
+
+    # GIVEN a specific RIN value
+    mocker.patch.object(LimsAPI, "get_sample_rin", return_value=input_rin)
+
+    # WHEN getting the sample metadata
+    sample_metadata: RnafusionSampleMetadataModel = (
+        rnafusion_delivery_report_api.get_sample_metadata(
+            case=case, sample=sample, analysis_metadata=analysis_metadata
+        )
+    )
+
+    # THEN the sample RIN value should match the expected RIN value
+    assert sample_metadata.rin == expected_rin
