@@ -95,7 +95,7 @@ def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
                 )
             }
         else:
-            missing_data = get_missing_report_fields(
+            missing_data: list | dict = get_missing_report_fields(
                 empty_fields=empty_fields[source], required_fields=required_fields[source]
             )
         if missing_data:
