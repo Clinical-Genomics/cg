@@ -427,7 +427,7 @@ def test_get_sample_application(request: FixtureRequest, workflow: Workflow):
         sample.internal_id
     )
 
-    # WHEN retrieving application data from status DB
+    # WHEN retrieving application data from Statusdb
     application_data: ApplicationModel = delivery_report_api.get_sample_application(
         sample=sample, lims_sample=lims_sample
     )
@@ -505,7 +505,7 @@ def test_get_case_analysis_data(request: FixtureRequest, workflow: Workflow):
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # WHEN retrieving analysis information
+    # WHEN retrieving a case analysis
     case_analysis_data: DataAnalysisModel = delivery_report_api.get_case_analysis_data(
         case, case.analyses[0]
     )

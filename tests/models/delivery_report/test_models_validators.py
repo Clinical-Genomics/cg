@@ -269,7 +269,7 @@ def test_check_supported_workflow_mismatch_between_ordered_and_started(
     analysis: Analysis = case.analyses[0]
     analysis.workflow = Workflow.RNAFUSION
 
-    # WHEN retrieving analysis information
+    # WHEN retrieving case analysis data
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
@@ -299,7 +299,7 @@ def test_check_supported_workflow_not_delivery_report_supported(
     analysis: Analysis = case.analyses[0]
     analysis.workflow = Workflow.FLUFFY
 
-    # WHEN retrieving analysis information
+    # WHEN retrieving case analysis data
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
