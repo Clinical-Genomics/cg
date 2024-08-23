@@ -18,7 +18,9 @@ class Order(BaseModel):
     workflow: Workflow
 
     @model_validator(mode="before")
-    def convert_empty_strings_to_none(cls, data: dict):
-        for key, value in data.items():
-            if value == "":
-                data[key] = None
+    def convert_empty_strings_to_none(cls, data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if value == "":
+                    data[key] = None
+        return data
