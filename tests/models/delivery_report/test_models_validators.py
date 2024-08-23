@@ -6,33 +6,34 @@ from typing import Any
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from pydantic import ValidationInfo
+from pydantic_core.core_schema import ValidationInfo
 
-from cg.constants import NA_FIELD, NO_FIELD, REPORT_SEX, YES_FIELD, Workflow
-from cg.constants.constants import AnalysisType
-from cg.constants.subject import Sex
+from cg.constants import NA_FIELD, YES_FIELD, NO_FIELD, REPORT_SEX, Sex
+from cg.constants.constants import AnalysisType, Workflow
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.models.delivery.delivery import DeliveryFile
-from cg.models.orders.constants import OrderType
 from cg.models.delivery_report.validators import (
-    get_analysis_type_as_string,
-    get_boolean_as_string,
-    get_date_as_string,
-    get_delivered_files_as_file_names,
-    get_float_as_percentage,
-    get_list_as_string,
-    get_number_as_string,
-    get_path_as_string,
-    get_prep_category_as_string,
     get_report_string,
+    get_boolean_as_string,
+    get_number_as_string,
+    get_float_as_percentage,
+    get_date_as_string,
+    get_list_as_string,
+    get_delivered_files_as_file_names,
+    get_path_as_string,
     get_sex_as_string,
+    get_prep_category_as_string,
+    get_analysis_type_as_string,
 )
+from cg.models.orders.constants import OrderType
+from cg.store.models import Case, Analysis
 
 
 def test_get_report_string():
     """Test formatting an empty value."""
 
     # GIVEN a not valid empty field
-    none_field: Any = None
+    none_field = None
 
     # WHEN performing the validation
     output: str = get_report_string(none_field)
@@ -45,16 +46,16 @@ def test_get_boolean_as_string():
     """Test boolean formatting for the delivery report."""
 
     # GIVEN a not formatted inputs
-    none_field: Any = None
-    true_field: bool = True
-    false_field: bool = False
-    not_bool_field: str = "not a boolean"
+    none_field = None
+    true_field = True
+    false_field = False
+    not_a_bool_field = "not a boolean"
 
     # WHEN performing the validation
     validated_none_field: str = get_boolean_as_string(none_field)
     validated_true_field: str = get_boolean_as_string(true_field)
     validated_false_field: str = get_boolean_as_string(false_field)
-    validated_not_bool_field = get_boolean_as_string(not_bool_field)
+    validated_not_bool_field = get_boolean_as_string(not_a_bool_field)
 
     # THEN check if the input values were formatted correctly
     assert validated_none_field == NA_FIELD
@@ -89,7 +90,7 @@ def test_get_number_as_string(input_value: Any, expected_output: str, caplog: Lo
         assert f"Value {input_value} cannot be converted to float" in caplog.text
     else:
         # WHEN getting a string representation of a number
-        validated_float_value = get_number_as_string(input_value)
+        validated_float_value: str = get_number_as_string(input_value)
 
         # THEN the expected output should be correctly formatted
         assert validated_float_value == expected_output
@@ -99,7 +100,7 @@ def test_get_float_as_percentage():
     """Test the validation of a percentage value."""
 
     # GIVEN a not formatted percentage
-    pct_value: float = 0.9876
+    pct_value = 0.9876
 
     # WHEN performing the validation
     validated_pct_value: str = get_float_as_percentage(pct_value)
@@ -112,7 +113,7 @@ def test_get_float_as_percentage_zero_input():
     """Test the validation of a percentage value when input is zero."""
 
     # GIVEN a zero input
-    pct_value: float = 0.0
+    pct_value = 0.0
 
     # WHEN performing the validation
     validated_pct_value: str = get_float_as_percentage(pct_value)
@@ -130,17 +131,17 @@ def test_get_date_as_string(timestamp_now: datetime):
     validated_date_value: str = get_date_as_string(timestamp_now)
 
     # THEN check if the input values were formatted correctly
-    assert validated_date_value == timestamp_now.date().__str__()
+    assert validated_date_value == str(timestamp_now.date())
 
 
 def test_get_list_as_string():
     """Test if a list is transformed into a string of comma separated values."""
 
-    # GIVEN a mock list
-    mock_list: list[str] = ["I am", "a", "list"]
+    # GIVEN a mocked list
+    mocked_list = ["I am", "a", "list"]
 
     # WHEN performing the validation
-    validated_list: str = get_list_as_string(mock_list)
+    validated_list: str = get_list_as_string(mocked_list)
 
     # THEN check if the input values were formatted correctly
     assert validated_list == "I am, a, list"
@@ -158,7 +159,7 @@ def test_get_list_paths_as_strings(filled_file: Path):
     path_name_list: list[str] = get_delivered_files_as_file_names(path_list)
 
     # THEN the returned list should contain the file names
-    assert path_name_list.pop() == "a_file.txt"
+    assert path_name_list[0] == "a_file.txt"
 
 
 def test_get_path_as_string(filled_file: Path):
@@ -207,9 +208,9 @@ def test_get_analysis_type_as_string():
     """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WGS analysis type and a model info dictionary
-    analysis_type: AnalysisType = AnalysisType.WHOLE_GENOME_SEQUENCING
-    model_info: ValidationInfo = ValidationInfo
-    model_info.data: dict[str, Any] = {"workflow": Workflow.MIP_DNA.value}
+    analysis_type = AnalysisType.WHOLE_GENOME_SEQUENCING
+    model_info = ValidationInfo
+    model_info.data = {"workflow": Workflow.MIP_DNA.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
@@ -224,9 +225,9 @@ def test_get_analysis_type_as_string_balsamic():
     """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WGS analysis type and a model info dictionary
-    analysis_type: str = "tumor_normal_wgs"
-    model_info: ValidationInfo = ValidationInfo
-    model_info.data: dict[str, Any] = {"workflow": Workflow.BALSAMIC.value}
+    analysis_type = "tumor_normal_wgs"
+    model_info = ValidationInfo
+    model_info.data = {"workflow": Workflow.BALSAMIC.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
@@ -237,42 +238,60 @@ def test_get_analysis_type_as_string_balsamic():
     assert validated_analysis_type == "Tumör/normal (helgenomsekvensering)"
 
 
-def test_get_case_analysis_data_workflow_match_error(
-    report_api_mip_dna: MipDNADeliveryReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
+def test_check_supported_workflow_mismatch_between_ordered_and_started(
+    raredisease_delivery_report_api: DeliveryReportAPI,
+    raredisease_case_id: str,
+    caplog: LogCaptureFixture,
 ):
     """Test validation error if a customer requested workflow does not match the data analysis."""
 
-    # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
-    mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.workflow = Workflow.BALSAMIC
+    # GIVEN a delivery report API
+
+    # GIVEN a case object that has been ordered with Raredisease workflow
+    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
+        raredisease_case_id
+    )
+
+    # GIVEN an analysis that has been started with the Rnafusion workflow
+    analysis: Analysis = case.analyses[0]
+    analysis.workflow = Workflow.RNAFUSION
 
     # WHEN retrieving analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
+        raredisease_delivery_report_api.get_case_analysis_data(case=case, analysis=analysis)
     assert (
-        f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
-        f"({mip_analysis.workflow})" in caplog.text
+        f"The analysis requested by the customer ({case.data_analysis}) does not match the one executed "
+        f"({analysis.workflow})" in caplog.text
     )
 
 
-def test_get_case_analysis_data_workflow_not_supported(
-    report_api_mip_dna: MipDNADeliveryReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
+def test_check_supported_workflow_not_delivery_report_supported(
+    raredisease_delivery_report_api: DeliveryReportAPI,
+    raredisease_case_id: str,
+    caplog: LogCaptureFixture,
 ):
-    """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
+    """Test validation error if a customer requested workflow does not match the data analysis."""
 
-    # GIVEN a pre-built case with Fluffy as data analysis
-    case_mip_dna.data_analysis = Workflow.MICROSALT
-    mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.workflow = Workflow.MICROSALT
+    # GIVEN a delivery report API
 
-    # WHEN retrieving data analysis information
+    # GIVEN a FLUFFY case object
+    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
+        raredisease_case_id
+    )
+    case.data_analysis = Workflow.FLUFFY
+
+    # GIVEN an analysis that has been started with the FLUFFY workflow
+    analysis: Analysis = case.analyses[0]
+    analysis.workflow = Workflow.FLUFFY
+
+    # WHEN retrieving analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
+        raredisease_delivery_report_api.get_case_analysis_data(case=case, analysis=analysis)
     assert (
-        f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
+        f"The workflow {case.data_analysis} does not support delivery report generation"
         in caplog.text
     )
