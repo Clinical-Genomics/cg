@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
 
 class Sample(BaseModel):
-    application: str
+    application: str = Field(min_length=1)
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
@@ -13,8 +13,6 @@ class Sample(BaseModel):
     require_qc_ok: bool
     volume: int | None = None
     well_position: str | None = None
-
-    model_config = ConfigDict(str_min_length=1)
 
     @property
     def is_new(self) -> bool:

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
@@ -10,8 +10,6 @@ class Case(BaseModel):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
     samples: list[Sample]
-
-    model_config = ConfigDict(str_min_length=1)
 
     @property
     def enumerated_samples(self):
