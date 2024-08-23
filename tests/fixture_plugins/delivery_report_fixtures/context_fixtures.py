@@ -77,7 +77,7 @@ def raredisease_delivery_report_store_context(
         original_ticket=ticket_id,
     )
 
-    helpers.add_relationship(base_store, case=case, sample=sample)
+    helpers.add_relationship(store=base_store, case=case, sample=sample)
 
     helpers.add_analysis(
         store=base_store,
@@ -120,7 +120,7 @@ def rnafusion_delivery_report_store_context(
         original_ticket=ticket_id,
     )
 
-    helpers.add_relationship(base_store, case=case, sample=sample)
+    helpers.add_relationship(store=base_store, case=case, sample=sample)
 
     helpers.add_analysis(
         store=base_store,
