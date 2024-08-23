@@ -57,9 +57,9 @@ Interface to Housekeeper. For storing files from analysis runs and FASTQ files f
 
 Interface to LoqusDB. For loading observation counts from the analysis output.
 
-#### osticket
+#### freshdesk
 
-Internal app for opening tickets in SupportSystems. We use this mainly to link a ticket with the opening of an order for new samples/analyses.
+Freshdesk is a web-based customer support platform. We utilize its API primarily to manage and link support tickets with the initiation of orders for new samples or analyses.
 
 #### scoutapi
 
@@ -183,11 +183,11 @@ cg upload genotypes --re-upload raredragon
 
 ### `meta`
 
-This is the interfaces that bridge various apps. An example would be the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
+This is the interfaces that bridge various apps. An example would be the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, and `status`, in addition to: `ticket handler`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
 
 #### orders
 
-Includes: `lims`, `status`, `osticket`
+Includes: `lims`, `status`, `ticket handler`
 
 The API exposes a single endpoint for submitting a batch of new samples/external samples for analysis. It handles a mix of updates to existing samples with entierly new ones. The API is designed to work well in a REST API context.
 
@@ -199,7 +199,7 @@ The interface supports:
 - analysis of externally sequenced samples (**external**)
 - sequencing and analysis of microbial whole genomes (**microbial**)
 
-It opens a ticket using the `osticket` API for each order which it links with the ticket number. It stores information in both LIMS and `status` for samples and pools linked by LIMS id. It stores only a minimum of information about each sample in LIMS. Most of the critial information is stored in `status` and this is also the primary place to go if we need to update e.g. application tag for a sample.
+It opens a ticket using the `ticket handler` which utilizes the `Freshdesk client` for each order which it links with the ticket number. It stores information in both LIMS and `status` for samples and pools linked by LIMS id. It stores only a minimum of information about each sample in LIMS. Most of the critial information is stored in `status` and this is also the primary place to go if we need to update e.g. application tag for a sample.
 
 #### transfer
 

@@ -75,7 +75,6 @@ from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.osticket import MockOsTicket
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
@@ -637,14 +636,6 @@ def madeline_api(madeline_output: Path) -> MockMadelineAPI:
 def ticket_id() -> str:
     """Return a ticket number for testing."""
     return "123456"
-
-
-@pytest.fixture
-def osticket(ticket_id: str) -> MockOsTicket:
-    """Return a api that mock the os ticket api."""
-    api = MockOsTicket()
-    api.set_ticket_nr(ticket_id)
-    return api
 
 
 @pytest.fixture

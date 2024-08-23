@@ -12,8 +12,6 @@ class AppConfig(BaseSettings):
     lims_host: str = "lims_host"
     lims_username: str = "username"
     lims_password: str = "password"
-    osticket_api_key: str = "api_key"
-    osticket_domain: str = "domain.com"
     support_system_email: str = "support@mail.com"
     email_uri: str = "smtp://localhost"
     google_oauth_client_id: str = "client_id"
