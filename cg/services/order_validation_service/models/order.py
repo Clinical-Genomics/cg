@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
@@ -16,3 +16,9 @@ class Order(BaseModel):
     ticket_number: str | None = Field(None, pattern=TICKET_PATTERN)
     user_id: int
     workflow: Workflow
+
+    @model_validator(mode="before")
+    def convert_empty_strings_to_none(cls, data: dict):
+        for key, value in data.items():
+            if value == "":
+                data[key] = None

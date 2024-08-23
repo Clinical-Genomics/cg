@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
@@ -21,3 +21,9 @@ class Sample(BaseModel):
     @property
     def is_on_plate(self) -> bool:
         return self.container == ContainerEnum.plate
+
+    @model_validator(mode="before")
+    def convert_empty_strings_to_none(cls, data: dict):
+        for key, value in data.items():
+            if value == "":
+                data[key] = None
