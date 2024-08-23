@@ -81,7 +81,7 @@ class DeliveryReportAPI:
         delivery_report: str = self.get_delivery_report_html(
             case_id=case_id, analysis_date=analysis_date, force=force
         )
-        report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
+        report_file_path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
             delivery_report_stream.write(delivery_report)
         return report_file_path
