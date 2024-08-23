@@ -9,8 +9,10 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
+from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
@@ -53,10 +55,12 @@ class DeliveryReportAPI:
 
     def __init__(self, analysis_api: AnalysisAPI):
         self.analysis_api: AnalysisAPI = analysis_api
-        self.housekeeper_api: HousekeeperAPI = self.analysis_api.housekeeper_api
-        self.status_db: Store = self.analysis_api.status_db
+        self.chanjo_api: ChanjoAPI = self.analysis_api.chanjo_api
         self.delivery_api: DeliveryAPI = self.analysis_api.delivery_api
+        self.housekeeper_api: HousekeeperAPI = self.analysis_api.housekeeper_api
         self.lims_api: LimsAPI = self.analysis_api.lims_api
+        self.scout_api: ScoutAPI = self.analysis_api.scout_api
+        self.status_db: Store = self.analysis_api.status_db
 
     def get_delivery_report_html(self, case_id: str, analysis_date: datetime, force: bool) -> str:
         """Generates the HTML content of a delivery report."""
