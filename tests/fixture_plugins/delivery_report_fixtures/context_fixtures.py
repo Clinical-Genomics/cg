@@ -197,11 +197,3 @@ def raredisease_delivery_report_click_context(
 ) -> click.Context:
     """Raredisease click delivery report context fixture."""
     return click.Context(generate_delivery_report, obj=raredisease_delivery_report_context)
-
-
-@pytest.fixture
-def rnafusion_delivery_report_click_context(
-    rnafusion_delivery_report_context: CGConfig,
-) -> click.Context:
-    """Rnafusion click delivery report context fixture."""
-    return click.Context(generate_delivery_report, obj=rnafusion_delivery_report_context)
