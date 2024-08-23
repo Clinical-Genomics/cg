@@ -59,14 +59,12 @@ def raredisease_delivery_report_store_context(
     wgs_application_tag: str,
 ) -> Store:
     """Raredisease delivery report Statusdb fixture."""
-
     case: Case = helpers.add_case(
         store=base_store,
         internal_id=raredisease_case_id,
         name=raredisease_case_id,
         data_analysis=Workflow.RAREDISEASE,
     )
-
     sample: Sample = helpers.add_sample(
         store=base_store,
         internal_id=sample_id,
@@ -76,9 +74,7 @@ def raredisease_delivery_report_store_context(
         application_tag=wgs_application_tag,
         original_ticket=ticket_id,
     )
-
     helpers.add_relationship(store=base_store, case=case, sample=sample)
-
     helpers.add_analysis(
         store=base_store,
         case=case,
@@ -87,7 +83,6 @@ def raredisease_delivery_report_store_context(
         workflow=Workflow.RAREDISEASE,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
     )
-
     return base_store
 
 
@@ -102,14 +97,12 @@ def rnafusion_delivery_report_store_context(
     wts_application_tag: str,
 ) -> Store:
     """Rnafusion delivery report Statusdb fixture."""
-
     case: Case = helpers.add_case(
         store=base_store,
         internal_id=rnafusion_case_id,
         name=rnafusion_case_id,
         data_analysis=Workflow.RNAFUSION,
     )
-
     sample: Sample = helpers.add_sample(
         store=base_store,
         internal_id=sample_id,
@@ -119,9 +112,7 @@ def rnafusion_delivery_report_store_context(
         application_tag=wts_application_tag,
         original_ticket=ticket_id,
     )
-
     helpers.add_relationship(store=base_store, case=case, sample=sample)
-
     helpers.add_analysis(
         store=base_store,
         case=case,
@@ -130,7 +121,6 @@ def rnafusion_delivery_report_store_context(
         workflow=Workflow.RNAFUSION,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
     )
-
     return base_store
 
 
