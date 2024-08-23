@@ -1,5 +1,7 @@
 """Tests delivery report data validation helpers."""
 
+import math
+
 from cg.constants import NA_FIELD
 from cg.meta.delivery_report.data_validators import (
     get_empty_report_data,
@@ -113,7 +115,7 @@ def test_get_million_read_pairs():
     million_read_pairs: float = get_million_read_pairs(sample_reads)
 
     # THEN the expected value should match the calculated one
-    assert million_read_pairs == expected_million_read_pairs
+    assert math.isclose(million_read_pairs, expected_million_read_pairs)
 
 
 def test_get_million_read_pairs_zero_input():
@@ -126,4 +128,4 @@ def test_get_million_read_pairs_zero_input():
     million_read_pairs: float = get_million_read_pairs(sample_reads)
 
     # THEN the obtained value should be zero
-    assert million_read_pairs == 0.0
+    assert math.isclose(million_read_pairs, 0.0)
