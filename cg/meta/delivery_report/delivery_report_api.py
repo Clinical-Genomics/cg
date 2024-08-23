@@ -133,7 +133,7 @@ class DeliveryReportAPI:
     def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template."""
         env = Environment(
-            loader=PackageLoader("cg", "meta/delivery_report/templates"),
+            loader=PackageLoader("cg", Path("meta", "delivery_report", "templates").as_posix()),
             autoescape=select_autoescape(["html", "xml"]),
         )
         env.globals["get_content_from_file"] = ReadFile.get_content_from_file
