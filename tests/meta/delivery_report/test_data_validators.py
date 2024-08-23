@@ -109,7 +109,7 @@ def test_get_million_read_pairs():
 
     # GIVEN a number of sequencing reads and its representation in millions of read pairs
     sample_reads = 1_200_000_000
-    expected_million_read_pairs = 600.0
+    expected_million_read_pairs = sample_reads / 2_000_000
 
     # WHEN obtaining the number of reds in millions of read pairs
     million_read_pairs: float = get_million_read_pairs(sample_reads)

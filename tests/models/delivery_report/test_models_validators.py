@@ -221,7 +221,7 @@ def test_get_analysis_type_as_string():
     """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WGS analysis type and a model info dictionary
-    analysis_type = AnalysisType.WHOLE_GENOME_SEQUENCING
+    analysis_type: str = AnalysisType.WHOLE_GENOME_SEQUENCING
     model_info = ValidationInfo
     model_info.data = {"workflow": Workflow.MIP_DNA.value}
 
