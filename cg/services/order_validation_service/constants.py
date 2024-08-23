@@ -1,9 +1,9 @@
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 
 from cg.constants import PrepCategory, Workflow
 
 
-class TissueBlockEnum(Enum):
+class TissueBlockEnum(StrEnum):
     SMALL: str = auto()
     LARGE: str = auto()
     BLANK: str = ""
