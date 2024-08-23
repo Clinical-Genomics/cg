@@ -109,7 +109,7 @@ def test_get_report_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -132,7 +132,7 @@ def test_validate_report_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -162,7 +162,7 @@ def test_validate_report_data_empty_optional_fields(
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -202,7 +202,7 @@ def test_validate_report_data_empty_required_fields(
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -240,7 +240,7 @@ def test_validate_report_data_empty_required_fields_force(
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -273,7 +273,7 @@ def test_validate_report_data_external_sample(request: FixtureRequest, workflow:
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -304,7 +304,7 @@ def test_get_customer_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -327,7 +327,7 @@ def test_get_report_version(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -350,7 +350,7 @@ def test_get_case_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -379,7 +379,7 @@ def test_get_samples_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -415,11 +415,11 @@ def test_get_sample_application(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a sample object
+    # GIVEN a sample
     sample: Sample = case.samples[0]
 
     # GIVEN a LIMS sample dictionary
@@ -451,7 +451,7 @@ def test_get_unique_applications(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -501,7 +501,7 @@ def test_get_case_analysis_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
@@ -526,11 +526,11 @@ def test_get_sample_timestamp_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a sample object
+    # GIVEN a sample
     sample: Sample = case.samples[0]
 
     # WHEN extracting the timestamp data associated to a specific sample
@@ -553,11 +553,11 @@ def test_get_sample_metadata(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case object
+    # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a sample object
+    # GIVEN a sample
     sample: Sample = case.samples[0]
 
     # GIVEN workflow specific analysis metadata
