@@ -76,7 +76,7 @@ class DeliveryReportAPI:
     def write_delivery_report_file(
         self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
-        """Generates a file containing the delivery report content."""
+        """Write a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.get_delivery_report_html(
             case_id=case_id, analysis_date=analysis_date, force=force
