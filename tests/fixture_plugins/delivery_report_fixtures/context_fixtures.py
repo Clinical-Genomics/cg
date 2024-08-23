@@ -11,6 +11,7 @@ from cg.apps.lims import LimsAPI
 from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import Workflow, DataDelivery
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -21,6 +22,24 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.conftest import raredisease_case_id
 from tests.store_helpers import StoreHelpers
+
+
+@pytest.fixture
+def delivery_report_context(
+    cg_context: CGConfig,
+    lims_samples: list[dict],
+    library_prep_method: str,
+    libary_sequencing_method: str,
+    capture_kit: str,
+    mocker: MockFixture,
+) -> CGConfig:
+    """Delivery report generation context."""
+    mocker.patch.object(DeliveryReportAPI, "get_delivery_report_from_hk", return_value=None)
+    mocker.patch.object(LimsAPI, "sample", return_value=lims_samples[0])
+    mocker.patch.object(LimsAPI, "get_prep_method", return_value=library_prep_method)
+    mocker.patch.object(LimsAPI, "get_sequencing_method", return_value=libary_sequencing_method)
+    mocker.patch.object(LimsAPI, "capture_kit", return_value=capture_kit)
+    return cg_context
 
 
 @pytest.fixture
@@ -64,23 +83,6 @@ def raredisease_delivery_report_store_context(
     )
 
     return base_store
-
-
-@pytest.fixture
-def delivery_report_context(
-    cg_context: CGConfig,
-    lims_samples: list[dict],
-    library_prep_method: str,
-    libary_sequencing_method: str,
-    capture_kit: str,
-    mocker: MockFixture,
-) -> CGConfig:
-    """Delivery report generation context."""
-    mocker.patch.object(LimsAPI, "sample", return_value=lims_samples[0])
-    mocker.patch.object(LimsAPI, "get_prep_method", return_value=library_prep_method)
-    mocker.patch.object(LimsAPI, "get_sequencing_method", return_value=libary_sequencing_method)
-    mocker.patch.object(LimsAPI, "capture_kit", return_value=capture_kit)
-    return cg_context
 
 
 @pytest.fixture
