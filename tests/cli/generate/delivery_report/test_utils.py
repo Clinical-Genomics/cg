@@ -29,7 +29,7 @@ def test_get_report_case(
         context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
     )
 
-    # THEN a valid case object should be returned
+    # THEN a valid case should be returned
     assert case.internal_id == raredisease_case_id
 
 
@@ -54,7 +54,7 @@ def test_get_report_api(
 ):
     """Tests delivery report API extraction."""
 
-    # GIVEN a case object
+    # GIVEN a case
     case: Case = get_report_case(
         context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
     )
@@ -89,7 +89,7 @@ def test_get_report_analysis_started_at(
 ):
     """Tests retrieval of analysis started at field"""
 
-    # GIVEN a case object and a report api
+    # GIVEN a case and a report api
     case: Case = get_report_case(
         context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
     )

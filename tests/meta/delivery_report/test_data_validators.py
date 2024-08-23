@@ -34,7 +34,7 @@ def test_get_empty_report_data(
         case_id=raredisease_case_id, analysis_date=case.analyses[0].started_at
     )
 
-    # GIVEN some empty fields
+    # GIVEN empty fields
     report_data.version = None
     report_data.accredited = None
     report_data.customer.id = NA_FIELD

@@ -171,7 +171,7 @@ def test_validate_report_data_empty_optional_fields(
         case_id, case.analyses[0].started_at
     )
 
-    # GIVEN some empty optional delivery report fields
+    # GIVEN empty optional delivery report fields
     report_data.version = None
     report_data.customer.id = None
     report_data.case.samples[0].methods.library_prep = None
@@ -211,7 +211,7 @@ def test_validate_report_data_empty_required_fields(
         case_id, case.analyses[0].started_at
     )
 
-    # GIVEN some empty required delivery report fields
+    # GIVEN empty required delivery report fields
     report_data.accredited = None
     report_data.case.samples[0].metadata.million_read_pairs = None
     report_data.case.samples[0].metadata.duplicates = None
@@ -249,7 +249,7 @@ def test_validate_report_data_empty_required_fields_force(
         case_id, case.analyses[0].started_at
     )
 
-    # GIVEN some empty required delivery report fields
+    # GIVEN empty required delivery report fields
     report_data.accredited = None
     report_data.case.samples[0].metadata.million_read_pairs = None
     report_data.case.samples[0].metadata.duplicates = None
@@ -286,7 +286,7 @@ def test_validate_report_data_external_sample(request: FixtureRequest, workflow:
     report_data.case.samples[0].timestamps.received_at = None
     report_data.case.samples[0].application.external = True
 
-    # WHEN validating  the delivery report fields
+    # WHEN validating the delivery report fields
     report_data: ReportModel = delivery_report_api.validate_report_data(
         case_id=case_id, report_data=report_data, force=False
     )
@@ -422,7 +422,7 @@ def test_get_sample_application(request: FixtureRequest, workflow: Workflow):
     # GIVEN a sample
     sample: Sample = case.samples[0]
 
-    # GIVEN a LIMS sample dictionary
+    # GIVEN a LIMS sample
     lims_sample: dict[str, Any] = delivery_report_api.analysis_api.lims_api.sample(
         sample.internal_id
     )
