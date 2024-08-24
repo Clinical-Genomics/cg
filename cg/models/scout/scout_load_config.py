@@ -80,7 +80,6 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     mitodel_file: str | None = None
 
 
-
 class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: str | None = None
     tmb: str | None = None

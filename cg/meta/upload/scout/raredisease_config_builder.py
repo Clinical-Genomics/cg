@@ -7,7 +7,12 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import GenomeBuild, RAREDISEASE_CASE_TAGS, RAREDISEASE_SAMPLE_TAGS, UploadTrack
+from cg.constants.scout import (
+    GenomeBuild,
+    RAREDISEASE_CASE_TAGS,
+    RAREDISEASE_SAMPLE_TAGS,
+    UploadTrack,
+)
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -48,8 +53,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Create a RAREDISEASE specific load config for uploading analysis to Scout"""
         LOG.info("Build load config for RAREDISEASE case")
         self.add_common_info_to_load_config()
-        raredisease_analysis_data: RarediseaseAnalysisAPI = self.raredisease_analysis_api.get_latest_metadata(
-            self.analysis_obj.case.internal_id
+        raredisease_analysis_data: RarediseaseAnalysisAPI = (
+            self.raredisease_analysis_api.get_latest_metadata(self.analysis_obj.case.internal_id)
         )
         # self.load_config.human_genome_build = (
         #     "38" if "38" in raredisease_analysis_data.genome_build else "37"
@@ -121,9 +126,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             scout_key,
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
-
-
-
 
         # self.include_multiqc_report()
 
