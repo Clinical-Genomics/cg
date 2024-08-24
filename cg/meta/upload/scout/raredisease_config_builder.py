@@ -39,7 +39,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         super().__init__(
             hk_version_obj=hk_version_obj,
             analysis_obj=analysis_obj,
-            raredisease_analysis_api=raredisease_analysis_api,
             lims_api=lims_api,
         )
         self.case_tags: CaseTags = CaseTags(**RAREDISEASE_CASE_TAGS)

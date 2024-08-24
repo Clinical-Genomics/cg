@@ -56,6 +56,7 @@ class UploadScoutAPI:
         self.scout_api = scout_api
         self.madeline_api = madeline_api
         self.mip_analysis_api = analysis_api
+        self.raredisease_analysis_api = analysis_api
         self.lims = lims_api
         self.status_db = status_db
 
@@ -431,7 +432,7 @@ class UploadScoutAPI:
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                raredisease_analysis_api=analysis,
+                raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
