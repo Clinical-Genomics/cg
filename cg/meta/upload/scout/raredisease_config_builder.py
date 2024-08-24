@@ -37,7 +37,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         madeline_api: MadelineAPI,
     ):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj,
+            analysis_obj=analysis_obj,
+            raredisease_analysis_api=raredisease_analysis_api,
+            lims_api=lims_api,
         )
         self.case_tags: CaseTags = CaseTags(**RAREDISEASE_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RAREDISEASE_SAMPLE_TAGS)
@@ -56,9 +59,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         raredisease_analysis_data: RarediseaseAnalysisAPI = (
             self.raredisease_analysis_api.get_latest_metadata(self.analysis_obj.case.internal_id)
         )
-        # self.load_config.human_genome_build = (
-        #     "38" if "38" in raredisease_analysis_data.genome_build else "37"
-        # )
+        self.load_config.human_genome_build = (
+            "38" if "38" in raredisease_analysis_data.genome_build else "37"
+        )
         # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
         # self.load_config.sv_rank_model_version = raredisease_analysis_data.sv_rank_model_version
