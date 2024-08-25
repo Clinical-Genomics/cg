@@ -8,7 +8,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
-    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     UploadTrack,
@@ -124,18 +123,18 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-        # self.include_multiqc_report()
+        self.include_multiqc_report()
 
-    # def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
-    #     """Include sample level files that are optional for RAREDISEASE samples"""
-    #     LOG.info("Including RAREDISEASE specific sample level files")
-    #     sample_id: str = config_sample.sample_id
-    #     config_sample.vcf2cytosure = self.get_sample_file(
-    #         hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
-    #     )
-    #     config_sample.mt_bam = self.get_sample_file(
-    #         hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
-    #     )
+    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
+        """Include sample level files that are optional for RAREDISEASE samples"""
+        LOG.info("Including RAREDISEASE specific sample level files")
+        sample_id: str = config_sample.sample_id
+        config_sample.vcf2cytosure = self.get_sample_file(
+            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
+        )
+        config_sample.mt_bam = self.get_sample_file(
+            hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
+        )
     #     config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
     #         file_path=self.get_sample_file(
     #             hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
@@ -170,15 +169,15 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     #         hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
     #     )
 
-    # @staticmethod
-    # def extract_generic_filepath(file_path: str | None) -> str | None:
-    #     """Remove a file's suffix and identifying integer or X/Y
-    #     Example:
-    #     `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
-    #     `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
-    #     if file_path is None:
-    #         return file_path
-    #     return re.split("(\d+|X|Y)\.png", file_path)[0]
+    @staticmethod
+    def extract_generic_filepath(file_path: str | None) -> str | None:
+        """Remove a file's suffix and identifying integer or X/Y
+        Example:
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
+        if file_path is None:
+            return file_path
+        return re.split("(\d+|X|Y)\.png", file_path)[0]
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
