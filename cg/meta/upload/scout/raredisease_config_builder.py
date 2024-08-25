@@ -103,7 +103,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             if case_sample.mother
             else RelationshipStatus.HAS_NO_PARENT
         )
-
         return config_sample
 
     def include_case_files(self):
@@ -122,52 +121,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             scout_key,
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
-
-        self.include_multiqc_report()
-
-    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
-        """Include sample level files that are optional for RAREDISEASE samples"""
-        LOG.info("Including RAREDISEASE specific sample level files")
-        sample_id: str = config_sample.sample_id
-        config_sample.vcf2cytosure = self.get_sample_file(
-            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
-        )
-        config_sample.mt_bam = self.get_sample_file(
-            hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
-        )
-    #     config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
-    #         file_path=self.get_sample_file(
-    #             hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
-    #         )
-    #     )
-    #     config_sample.chromograph_images.coverage = self.extract_generic_filepath(
-    #         file_path=self.get_sample_file(
-    #             hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
-    #         )
-    #     )
-    #     config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
-    #         file_path=self.get_sample_file(
-    #             hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
-    #         )
-    #     )
-    #     config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
-    #         file_path=self.get_sample_file(
-    #             hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
-    #         )
-    #     )
-    #     config_sample.reviewer.alignment = self.get_sample_file(
-    #         hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
-    #     )
-    #     config_sample.reviewer.alignment_index = self.get_sample_file(
-    #         hk_tags=self.sample_tags.reviewer_alignment_index, sample_id=sample_id
-    #     )
-    #     config_sample.reviewer.vcf = self.get_sample_file(
-    #         hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
-    #     )
-    #     config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
-    #     config_sample.mitodel_file = self.get_sample_file(
-    #         hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
-    #     )
 
     @staticmethod
     def extract_generic_filepath(file_path: str | None) -> str | None:
