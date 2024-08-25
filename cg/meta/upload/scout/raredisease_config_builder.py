@@ -55,17 +55,12 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Create a RAREDISEASE specific load config for uploading analysis to Scout"""
         LOG.info("Build load config for RAREDISEASE case")
         self.add_common_info_to_load_config()
-        raredisease_analysis_data: RarediseaseAnalysisAPI = (
-            self.raredisease_analysis_api.get_latest_metadata(self.analysis_obj.case.internal_id)
-        )
-        self.load_config.human_genome_build = (
-            "38" if "38" in raredisease_analysis_data.genome_build else "37"
+        self.load_config.human_genome_build = self.raredisease_analysis_api.get_genome_build(
+            self.analysis_obj.case
         )
         # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
         # self.load_config.sv_rank_model_version = raredisease_analysis_data.sv_rank_model_version
-
-        self.load_config.human_genome_build = GenomeBuild.hg38
 
         self.load_config.gene_panels = (
             self.raredisease_analysis_api.get_aggregated_panels(

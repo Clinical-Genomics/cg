@@ -16,3 +16,4 @@ class NextflowAnalysis(AnalysisModel):
     sample_metrics: dict[
         str, RarediseaseQCMetrics | RnafusionQCMetrics | TaxprofilerQCMetrics | TomteQCMetrics
     ]
+    genome_build: str
