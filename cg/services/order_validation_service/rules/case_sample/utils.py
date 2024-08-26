@@ -19,9 +19,14 @@ from cg.services.order_validation_service.models.aliases import (
     CaseContainingRelatives,
     SampleWithRelatives,
 )
+from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.rules.utils import is_in_container, is_sample_on_plate, is_volume_within_allowed_interval
+from cg.services.order_validation_service.rules.utils import (
+    is_in_container,
+    is_sample_on_plate,
+    is_volume_within_allowed_interval,
+)
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -95,7 +100,7 @@ def get_repeated_case_name_errors(order: OrderWithCases) -> list[RepeatedCaseNam
     return [RepeatedCaseNameError(case_index=case_index) for case_index in case_indices]
 
 
-def get_indices_for_repeated_sample_names(case: CaseContainingRelatives) -> list[int]:
+def get_indices_for_repeated_sample_names(case: Case) -> list[int]:
     counter = Counter([sample.name for sample in case.samples])
     indices: list[int] = []
 
@@ -106,9 +111,7 @@ def get_indices_for_repeated_sample_names(case: CaseContainingRelatives) -> list
     return indices
 
 
-def get_repeated_sample_name_errors(
-    case: CaseContainingRelatives, case_index: int
-) -> list[SampleNameRepeatedError]:
+def get_repeated_sample_name_errors(case: Case, case_index: int) -> list[SampleNameRepeatedError]:
     sample_indices: list[int] = get_indices_for_repeated_sample_names(case)
     return [
         SampleNameRepeatedError(sample_index=sample_index, case_index=case_index)
