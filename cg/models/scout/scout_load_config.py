@@ -109,6 +109,7 @@ class ScoutLoadConfig(BaseModel):
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
     multiqc: str | None = None
+    multiqc_report: str | None = None
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )
@@ -157,14 +158,14 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     peddy_sex: str | None = None
     samples: list[ScoutMipIndividual] = []
     smn_tsv: str | None = None
-    variant_catalog: str | None = None
+    str_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
-    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    snv_vcf: Annotated[str, BeforeValidator(field_not_none)] = None
+    snv_research_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
-    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    sv_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    sv_research_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
