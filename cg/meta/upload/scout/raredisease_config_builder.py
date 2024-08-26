@@ -112,6 +112,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Include case level files for mip case"""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
+            LOG.info(f"Scout key: {scout_key}")
             self._include_file(scout_key)
 
     def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:

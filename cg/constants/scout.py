@@ -56,7 +56,22 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_str={"vcf-str"},
 )
 
-MIP_CASE_TAGS: dict[str, set[str]] = RAREDISEASE_CASE_TAGS
+MIP_CASE_TAGS: dict[str, set[str]] = dict(
+    delivery_report={"delivery-report"},
+    multiqc_report={"multiqc-html"},
+    peddy_check={"ped-check", "peddy"},
+    peddy_ped={"ped", "peddy"},
+    peddy_sex={"sex-check", "peddy"},
+    smn_tsv={"smn-calling"},
+    snv_research_vcf={"vcf-snv-research"},
+    snv_vcf={"vcf-snv-clinical"},
+    str_catalog={"expansionhunter", "variant-catalog"},
+    sv_research_vcf={"vcf-sv-research"},
+    sv_vcf={"vcf-sv-clinical"},
+    vcf_mei={"mobile-elements", "clinical", "vcf"},
+    vcf_mei_research={"mobile-elements", "research", "vcf"},
+    vcf_str={"vcf-str"},
+)
 
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
