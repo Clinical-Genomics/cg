@@ -41,7 +41,7 @@ class ScoutUploadKey(StrEnum):
 
 RAREDISEASE_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
-    # multiqc_report={"multiqc-html"},
+    multiqc_report={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     peddy_sex={"sex-check", "peddy"},
