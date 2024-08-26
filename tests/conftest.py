@@ -102,6 +102,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.device_fixtures",
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
     "tests.fixture_plugins.fohm.fohm_fixtures",
     "tests.fixture_plugins.io.csv_fixtures",
@@ -110,6 +111,7 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
@@ -117,6 +119,8 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
@@ -1333,7 +1337,7 @@ def collaboration_id() -> str:
 
 
 @pytest.fixture
-def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
+def mip_dna_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
         name="Klinisk Immunologi",
@@ -1343,11 +1347,21 @@ def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
+def balsamic_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",
         internal_id=CustomerId.CUST110,
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture
+def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a customer with enabled observation upload."""
+    return Customer(
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
 
@@ -2117,6 +2131,16 @@ def cg_context(
     return cg_config
 
 
+@pytest.fixture
+def context_with_illumina_data(
+    context_config: dict, store_with_illumina_sequencing_data, housekeeper_api: MockHousekeeperAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = store_with_illumina_sequencing_data
+    cg_config.housekeeper_api_ = housekeeper_api
+    return cg_config
+
+
 @pytest.fixture(scope="session")
 def case_id_with_single_sample() -> str:
     """Return a case id that should only be associated with one sample."""
@@ -2485,6 +2509,7 @@ def raredisease_parameters_default(
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
         analysis_type=AnalysisTypes.WES,
+        save_mapped_as_cram=True,
     )
 
 
