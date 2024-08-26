@@ -25,11 +25,9 @@ class ConcatenationDeliveryFileFormatter(DeliveryFileFormattingService):
         self,
         case_file_formatter: CaseFileFormatter,
         sample_file_formatter: SampleConcatenationFileFormatter,
-        concatenation_service: FastqConcatenationService,
     ):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter
-        self.concatenation_service = concatenation_service
 
     def format_files(self, delivery_files: DeliveryFiles) -> None:
         """Format the files to be delivered in the generic format."""
