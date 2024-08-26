@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
@@ -34,3 +34,11 @@ class Case(BaseModel):
             if not sample.is_new:
                 samples.append((sample_index, sample))
         return samples
+
+    @model_validator(mode="before")
+    def convert_empty_strings_to_none(cls, data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if value == "":
+                    data[key] = None
+        return data

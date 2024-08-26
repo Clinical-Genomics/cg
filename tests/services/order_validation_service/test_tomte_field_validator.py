@@ -1,4 +1,6 @@
-from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
+from cg.services.order_validation_service.model_validator.model_validator import (
+    ModelValidator,
+)
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 
 
@@ -84,3 +86,14 @@ def test_order_case_and_case_sample_field_error(valid_order: TomteOrder):
     assert errors.order_errors[0].field == "name"
     assert errors.case_errors[0].field == "priority"
     assert errors.case_sample_errors[0].field == "well_position"
+
+
+def test_null_conversion(valid_order: TomteOrder):
+    # GIVEN an order with an order, case and case sample error
+    valid_order.cases[0].samples[0].concentration_ng_ul = ""
+    order = valid_order.model_dump(by_alias=True)
+
+    # WHEN validating the order
+    order, errors = ModelValidator.validate(order=order, model=TomteOrder)
+
+    assert order
