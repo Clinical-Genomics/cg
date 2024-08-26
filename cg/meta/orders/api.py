@@ -74,12 +74,13 @@ class OrdersAPI:
         ticket_number: str | None = self.ticket_handler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
-                order=order_in, user_name=user_name, project=project
+                order=order_in, user_name=user_name, user_mail=user_mail, project=project
             )
         else:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
                 user_name=user_name,
+                user_mail=user_mail,
                 project=project,
                 ticket_number=ticket_number,
             )

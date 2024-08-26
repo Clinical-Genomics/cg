@@ -37,7 +37,9 @@ class TicketHandler:
         LOG.info(f"Could not detected ticket number in name {name}")
         return None
 
-    def create_ticket(self, order: OrderIn, user_name: str, project: str) -> int | None:
+    def create_ticket(
+        self, order: OrderIn, user_name: str, user_mail: str, project: str
+    ) -> int | None:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
@@ -49,6 +51,7 @@ class TicketHandler:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
             freshdesk_ticket = TicketCreate(
+                email=user_mail,
                 description=message,
                 email_config_id=self.system_email_id,
                 name=user_name,
