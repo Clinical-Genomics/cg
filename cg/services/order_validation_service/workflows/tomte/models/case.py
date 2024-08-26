@@ -1,4 +1,3 @@
-from cg.constants import GenePanelMasterList
 from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
@@ -7,7 +6,7 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 
 class TomteCase(Case):
     cohorts: list[str] | None = None
-    panels: list[GenePanelMasterList]
+    panels: list[str]
     synopsis: str | None = None
     samples: list[TomteSample]
 
