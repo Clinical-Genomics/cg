@@ -14,10 +14,7 @@ class CaseFileFormatter:
         self._create_case_name_folder(
             ticket_path=ticket_dir_path, case_name=case_files[0].case_name
         )
-        formatted_files: list[FormattedFile] = self._rename_case_files(case_files=case_files)
-        for formatted_file in formatted_files:
-            os.rename(src=formatted_file.original_path, dst=formatted_file.formatted_path)
-        return self._rename_case_files(case_files=case_files)
+        return self._rename_case_files(case_files)
 
     @staticmethod
     def _rename_case_files(case_files: list[CaseFile]) -> list[FormattedFile]:
@@ -32,6 +29,8 @@ class CaseFileFormatter:
             formatted_files.append(
                 FormattedFile(original_path=case_file.file_path, formatted_path=formatted_file_path)
             )
+        for formatted_file in formatted_files:
+            os.rename(src=formatted_file.original_path, dst=formatted_file.formatted_path)
         return formatted_files
 
     @staticmethod

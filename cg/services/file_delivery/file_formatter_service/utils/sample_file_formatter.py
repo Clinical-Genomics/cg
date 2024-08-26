@@ -1,33 +1,25 @@
 import os
 from pathlib import Path
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.services.file_delivery.fetch_file_service.models import SampleFile
 from cg.services.file_delivery.file_formatter_service.models import FormattedFile
 
 
 class SampleFileFormatter:
-    def __init__(self, concatenation_service: FastqConcatenationService):
-        self.concatenation_service = concatenation_service
 
     def format_files(
         self, sample_files: list[SampleFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         """Format the sample files to deliver."""
-        sample_names: list[str] = self._get_sample_names(sample_files=sample_files)
+        sample_names: set[str] = self._get_sample_names(sample_files=sample_files)
         self._create_sample_folders(ticket_dir_path=ticket_dir_path, sample_names=sample_names)
-        formatted_files: list[FormattedFile] = self._rename_sample_files(sample_files=sample_files)
-        for formatted_file in formatted_files:
-            os.rename(src=formatted_file.original_path, dst=formatted_file.formatted_path)
-        return formatted_files
+        return self._rename_sample_files(sample_files=sample_files)
 
     @staticmethod
-    def _get_sample_names(sample_files: list[SampleFile]) -> list[set[str]]:
-        return [set(sample_file.sample_name for sample_file in sample_files)]
+    def _get_sample_names(sample_files: list[SampleFile]) -> set[str]:
+        return set(sample_file.sample_name for sample_file in sample_files)
 
     @staticmethod
-    def _create_sample_folders(ticket_dir_path: Path, sample_names: list[str]):
+    def _create_sample_folders(ticket_dir_path: Path, sample_names: set[str]):
         for sample_name in sample_names:
             sample_dir_path = Path(ticket_dir_path, sample_name)
             sample_dir_path.mkdir(exist_ok=True)
@@ -47,4 +39,6 @@ class SampleFileFormatter:
                     original_path=sample_file.file_path, formatted_path=formatted_file_path
                 )
             )
+        for formatted_file in formatted_files:
+            os.rename(src=formatted_file.original_path, dst=formatted_file.formatted_path)
         return formatted_files

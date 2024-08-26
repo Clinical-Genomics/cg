@@ -2,6 +2,9 @@ from pathlib import Path
 
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
 from cg.meta.deliver.fastq_path_generator import generate_concatenated_fastq_delivery_path
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.services.file_delivery.fetch_file_service.models import SampleFile
 from cg.services.file_delivery.file_formatter_service.models import FormattedFile
 from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter import (
@@ -10,6 +13,8 @@ from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatte
 
 
 class SampleFileConcatenationFormatter(SampleFileFormatter):
+    def __init__(self, concatenation_service: FastqConcatenationService):
+        self.concatenation_service = concatenation_service
 
     def format_files(
         self, sample_files: list[SampleFile], ticket_dir_path: Path
@@ -18,6 +23,7 @@ class SampleFileConcatenationFormatter(SampleFileFormatter):
             sample_files=sample_files, ticket_dir_path=ticket_dir_path
         )
         forward_paths, reverse_path = self._concatenate_fastq_files(formatted_files=formatted_files)
+
         return self._replace_fastq_paths(
             reverse_paths=reverse_path,
             forward_paths=forward_paths,
@@ -33,21 +39,23 @@ class SampleFileConcatenationFormatter(SampleFileFormatter):
         forward_paths: list[Path] = []
         reverse_paths: list[Path] = []
         for sample_dir_path in unique_sample_dir_paths:
-            sample_name: str = sample_dir_path.name
+            fastq_directory: Path = sample_dir_path
+            sample_name: str = fastq_directory.name
+
             forward_path: Path = generate_concatenated_fastq_delivery_path(
-                fastq_directory=sample_dir_path,
+                fastq_directory=fastq_directory,
                 sample_name=sample_name,
                 direction=ReadDirection.FORWARD,
             )
             forward_paths.append(forward_path)
             reverse_path: Path = generate_concatenated_fastq_delivery_path(
-                fastq_directory=sample_dir_path,
+                fastq_directory=fastq_directory,
                 sample_name=sample_name,
                 direction=ReadDirection.REVERSE,
             )
             reverse_paths.append(reverse_path)
             self.concatenation_service.concatenate(
-                fastq_directory=sample_dir_path,
+                fastq_directory=fastq_directory,
                 forward_output_path=forward_path,
                 reverse_output_path=reverse_path,
                 remove_raw=True,
@@ -58,7 +66,7 @@ class SampleFileConcatenationFormatter(SampleFileFormatter):
     def _get_unique_sample_paths(sample_files: list[FormattedFile]) -> set[Path]:
         sample_paths: list[Path] = []
         for sample_file in sample_files:
-            sample_paths.append(sample_file.formatted_path)
+            sample_paths.append(sample_file.formatted_path.parent)
         return set(sample_paths)
 
     @staticmethod
