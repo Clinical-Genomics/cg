@@ -1,11 +1,15 @@
 from cg.services.order_validation_service.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
+    RepeatedCaseNameError,
     RepeatedGenePanelsError,
 )
 from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case.utils import contains_duplicates
+from cg.services.order_validation_service.rules.case_sample.utils import (
+    get_repeated_case_name_errors,
+)
 from cg.store.store import Store
 
 
@@ -44,3 +48,10 @@ def validate_case_internal_ids_exist(
             error = CaseDoesNotExistError(case_index=case_index)
             errors.append(error)
     return errors
+
+
+def validate_case_names_not_repeated(
+    order: OrderWithCases,
+    **kwargs,
+) -> list[RepeatedCaseNameError]:
+    return get_repeated_case_name_errors(order)

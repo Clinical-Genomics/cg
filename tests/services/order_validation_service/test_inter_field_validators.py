@@ -26,7 +26,7 @@ from cg.services.order_validation_service.workflows.tomte.models.order import To
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
-from cg.services.order_validation_service.workflows.tomte.rules.case_sample.rules import (
+from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_subject_ids_different_from_case_names,
 )
 from cg.store.store import Store
