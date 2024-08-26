@@ -15,7 +15,6 @@ class MipDnaSample(Sample):
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
-    reference_genome: GenomeVersion
     sex: SexEnum | None = None
     source: str | None = None
     status: StatusEnum | None = None
