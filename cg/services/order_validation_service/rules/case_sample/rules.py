@@ -49,7 +49,10 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     validate_concentration_in_case,
     validate_subject_ids_in_case,
 )
-from cg.services.order_validation_service.rules.utils import is_application_not_compatible, is_volume_invalid
+from cg.services.order_validation_service.rules.utils import (
+    is_application_not_compatible,
+    is_volume_invalid,
+)
 from cg.store.models import Sample
 from cg.store.store import Store
 
