@@ -21,6 +21,7 @@ from cg.services.order_validation_service.models.aliases import (
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.rules.utils import is_in_container, is_volume_within_allowed_interval
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -48,14 +49,6 @@ def is_volume_invalid(sample: Sample) -> bool:
     in_container: bool = is_in_container(sample.container)
     allowed_volume: bool = is_volume_within_allowed_interval(sample.volume)
     return in_container and not allowed_volume
-
-
-def is_in_container(container: ContainerEnum) -> bool:
-    return container != ContainerEnum.no_container
-
-
-def is_volume_within_allowed_interval(volume: int) -> bool:
-    return MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME
 
 
 def get_well_sample_map(
