@@ -21,7 +21,7 @@ from cg.services.order_validation_service.models.aliases import (
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.rules.utils import is_in_container, is_volume_within_allowed_interval
+from cg.services.order_validation_service.rules.utils import is_in_container, is_sample_on_plate, is_volume_within_allowed_interval
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -77,10 +77,6 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
         error = OccupiedWellError(case_index=case_index, sample_index=sample_index)
         errors.append(error)
     return errors
-
-
-def is_sample_on_plate(sample: SampleWithRelatives) -> bool:
-    return sample.container == ContainerEnum.plate
 
 
 def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
