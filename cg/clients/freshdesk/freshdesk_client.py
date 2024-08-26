@@ -60,13 +60,18 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     @handle_client_errors
-    def reply_to_ticket(self, ticket_id: str, reply: dict, attachments: List[Path] = None) -> None:
+    def reply_to_ticket(
+        self, ticket_id: str, from_email: str, reply: dict, attachments: List[Path] = None
+    ) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
 
         files = prepare_attachments(attachments) if attachments else None
-
-        response = self.session.post(url=url, data={"body": reply["body"]}, files=files)
+        data = {
+            "body": reply["body"],
+            "from_email": from_email,
+        }
+        response = self.session.post(url=url, data=data, files=files)
         if response.status_code == HTTPStatus.OK:
             LOG.info("Successfully replied to ticket %s", ticket_id)
         else:

@@ -192,7 +192,7 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self, order: OrderIn, user_name: str, project: str, ticket_number: str
+        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
@@ -211,7 +211,10 @@ class TicketHandler:
             LOG.info("Reply payload: %s", reply_payload)
 
             self.client.reply_to_ticket(
-                ticket_id=ticket_number, reply=reply_payload, attachments=[attachments]
+                ticket_id=ticket_number,
+                from_email=user_mail,
+                reply=reply_payload,
+                attachments=[attachments],
             )
 
             LOG.info("Connected order to ticket %s in Freshdesk", ticket_number)
