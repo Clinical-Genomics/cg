@@ -80,7 +80,6 @@ class OrdersAPI:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
                 user_name=user_name,
-                user_mail=user_mail,
                 project=project,
                 ticket_number=ticket_number,
             )
