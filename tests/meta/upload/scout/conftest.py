@@ -10,7 +10,7 @@ from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
@@ -453,6 +453,33 @@ def balsamic_analysis_hk_bundle_data(
 
 
 @pytest.fixture(scope="function")
+def raredisease_analysis_hk_bundle_data(
+    case_id: str,
+    timestamp: datetime,
+    raredisease_analysis_dir: Path,
+    delivery_report_html: Path,
+) -> dict:
+    """Return RAREDISEASE Housekeeper bundle data."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(raredisease_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": [AnalysisTag.MULTIQC_HTML],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+        ],
+    }
+
+
+@pytest.fixture(scope="function")
 def rnafusion_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, delivery_report_html: Path
 ) -> dict:
@@ -525,6 +552,15 @@ def balsamic_analysis_hk_api(
 
 
 @pytest.fixture
+def raredisease_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with some RAREDISEASE analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
 def rnafusion_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -583,6 +619,34 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
         link_object.case.data_analysis = Workflow.BALSAMIC_UMI
 
     return analysis_obj
+
+
+@pytest.fixture
+def raredisease_analysis(
+    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
+) -> Analysis:
+    """Return a RAREDISEASE analysis object."""
+    helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
+    case: Case = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
+    analysis: Analysis = helpers.add_analysis(
+        store=analysis_store_trio,
+        case=case,
+        started_at=timestamp,
+        completed_at=timestamp,
+        workflow=Workflow.RAREDISEASE,
+    )
+    for link in case.links:
+        helpers.add_phenotype_groups_to_sample(
+            store=analysis_store_trio, sample_id=link.sample.internal_id
+        )
+        helpers.add_phenotype_terms_to_sample(
+            store=analysis_store_trio, sample_id=link.sample.internal_id
+        )
+        helpers.add_subject_id_to_sample(
+            store=analysis_store_trio, sample_id=link.sample.internal_id
+        )
+    return analysis
+
 
 
 @pytest.fixture
@@ -727,6 +791,30 @@ def upload_balsamic_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
+
+
+# @pytest.fixture
+# def upload_raredisease_analysis_scout_api(
+#     cg_context: CGConfig,
+#     scout_api: MockScoutAPI,
+#     madeline_api: MockMadelineAPI,
+#     lims_samples: list[dict],
+#     raredisease_analysis_hk_api: MockHousekeeperAPI,
+#     store: Store,
+# ) -> Generator[UploadScoutAPI, None, None]:
+#     """Return RAREDISEASE upload Scout API."""
+#     analysis_mock = MockRarediseaseAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE)
+#     lims_api = MockLimsAPI(samples=lims_samples)
+
+#     yield UploadScoutAPI(
+#         hk_api=raredisease_analysis_hk_api,
+#         scout_api=scout_api,
+#         madeline_api=madeline_api,
+#         analysis_api=analysis_mock,
+#         lims_api=lims_api,
+#         status_db=store,
+#     )
+
 
 
 @pytest.fixture

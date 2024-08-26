@@ -8,6 +8,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
+    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     UploadTrack,
@@ -18,6 +19,7 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
     RarediseaseLoadConfig,
+    ScoutIndividual,
     ScoutLoadConfig,
     ScoutRarediseaseIndividual,
 )
@@ -54,8 +56,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Create a RAREDISEASE specific load config for uploading analysis to Scout"""
         LOG.info("Build load config for RAREDISEASE case")
         self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = self.raredisease_analysis_api.get_genome_build(
-            self.analysis_obj.case
+        self.load_config.human_genome_build = getattr(
+            GenomeBuild,
+            self.raredisease_analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
         )
         # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
@@ -70,22 +73,21 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
 
         self.include_case_files()
+    #     LOG.info("Building samples")
+    #     db_sample: CaseSample
+    #     for db_sample in self.analysis_obj.case.links:
+    #         self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+    #     self.include_pedigree_picture()
 
-        LOG.info("Building samples")
-        db_sample: CaseSample
-        for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        self.include_pedigree_picture()
-
-    def include_pedigree_picture(self) -> None:
-        if self.is_multi_sample_case(self.load_config):
-            if self.is_family_case(self.load_config):
-                svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                self.load_config.madeline = str(svg_path)
-            else:
-                LOG.info("family of unconnected samples - skip pedigree graph")
-        else:
-            LOG.info("family of 1 sample - skip pedigree graph")
+    # def include_pedigree_picture(self) -> None:
+    #     if self.is_multi_sample_case(self.load_config):
+    #         if self.is_family_case(self.load_config):
+    #             svg_path: Path = self.run_madeline(self.analysis_obj.case)
+    #             self.load_config.madeline = str(svg_path)
+    #         else:
+    #             LOG.info("family of unconnected samples - skip pedigree graph")
+    #     else:
+    #         LOG.info("family of 1 sample - skip pedigree graph")
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutRarediseaseIndividual:
         """Build a sample with mip specific information"""
@@ -93,6 +95,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        self.include_sample_files(config_sample)
         config_sample.father = (
             case_sample.father.internal_id
             if case_sample.father
@@ -105,11 +108,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         return config_sample
 
-    def include_case_files(self):
+    def include_case_files(self) -> None:
         """Include case level files for mip case"""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
             self._include_file(scout_key)
+
+    def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
             self._include_file(scout_key)
 
