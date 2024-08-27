@@ -13,11 +13,8 @@ from cg.services.file_delivery.fetch_file_service.fetch_analysis_files_service i
 from cg.services.file_delivery.fetch_file_service.fetch_fastq_files_service import (
     FetchFastqDeliveryFilesService,
 )
-from cg.services.file_delivery.file_formatter_service.concatenation_delivery_file_formatter_service import (
-    ConcatenationDeliveryFileFormatter,
-)
-from cg.services.file_delivery.file_formatter_service.generic_delivery_file_formatter_service import (
-    GenericDeliveryFileFormatter,
+from cg.services.file_delivery.file_formatter_service.delivery_file_formatter import (
+    DeliveryFileFormatter,
 )
 from cg.services.file_delivery.file_formatter_service.utils.case_file_formatter import (
     CaseFileFormatter,
@@ -60,17 +57,8 @@ def analysis_delivery_service(
 
 
 @pytest.fixture
-def generic_delivery_file_formatter() -> GenericDeliveryFileFormatter:
+def generic_delivery_file_formatter() -> DeliveryFileFormatter:
     """Fixture to get an instance of GenericDeliveryFileFormatter."""
-    return GenericDeliveryFileFormatter(
+    return DeliveryFileFormatter(
         sample_file_formatter=SampleFileFormatter(), case_file_formatter=CaseFileFormatter()
-    )
-
-
-@pytest.fixture
-def concatenation_delivery_file_formatter() -> ConcatenationDeliveryFileFormatter:
-    """Fixture to get an instance of ConcatenationDeliveryFileFormatter."""
-    return ConcatenationDeliveryFileFormatter(
-        sample_file_formatter=SampleFileConcatenationFormatter(FastqConcatenationService()),
-        case_file_formatter=CaseFileFormatter(),
     )
