@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse, ReplyCreate
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -63,8 +63,6 @@ class TicketHandler:
                 },
                 attachments=[],
             )
-            LOG.info(f"Request payload: {freshdesk_ticket.model_dump()}")
-
             ticket_response: TicketResponse = self.client.create_ticket(
                 ticket=freshdesk_ticket, attachments=[attachments]
             )
@@ -192,7 +190,7 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
+        self, order: OrderIn, user_name: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
@@ -206,14 +204,10 @@ class TicketHandler:
         with TemporaryDirectory() as temp_dir:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
-            reply_payload = {"body": message, "attachments": []}
-
-            LOG.info("Reply payload: %s", reply_payload)
+            reply = ReplyCreate(ticket_number=ticket_number, body=message)
 
             self.client.reply_to_ticket(
-                ticket_id=ticket_number,
-                from_email=user_mail,
-                reply=reply_payload,
+                reply=reply,
                 attachments=[attachments],
             )
 
