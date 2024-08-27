@@ -2,6 +2,9 @@
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.services.file_delivery.fetch_delivery_files_tags.fetch_delivery_file_tags_service import (
     FetchDeliveryFileTagsService,
 )
@@ -29,6 +32,12 @@ from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_s
 from cg.services.file_delivery.file_formatter_service.generic_delivery_file_formatter_service import (
     GenericDeliveryFileFormatter,
 )
+from cg.services.file_delivery.file_formatter_service.utils.sample_file_concatenation_formatter import (
+    SampleFileConcatenationFormatter,
+)
+from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter import (
+    SampleFileFormatter,
+)
 from cg.store.store import Store
 
 
@@ -52,7 +61,7 @@ def get_fetch_file_service(delivery_type: str) -> FetchDeliveryFilesService:
     return service_map[delivery_type]
 
 
-def get_file_formatter_service(workflow: Workflow) -> DeliveryFileFormattingService:
+def get_deliver_file_formatter_service(workflow: Workflow) -> DeliveryFileFormattingService:
     """Get the file formatter service based on the workflow."""
     service_map = {
         Workflow.BALSAMIC: GenericDeliveryFileFormatter,
@@ -69,3 +78,13 @@ def get_file_formatter_service(workflow: Workflow) -> DeliveryFileFormattingServ
         Workflow.MUTANT: ConcatenationDeliveryFileFormatter,
     }
     return service_map[workflow]
+
+
+def get_sample_file_formatter_service(
+    delivery_file_foramtter: DeliveryFileFormattingService,
+) -> SampleFileFormatter | SampleFileConcatenationFormatter:
+    """Get the sample file formatter service based on the delivery file formatter."""
+    if isinstance(delivery_file_foramtter, GenericDeliveryFileFormatter):
+        return SampleFileFormatter()
+    concatenation_service = FastqConcatenationService()
+    return SampleFileConcatenationFormatter(concatenation_service)
