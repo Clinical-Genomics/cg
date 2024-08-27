@@ -531,7 +531,7 @@ class NfAnalysisAPI(AnalysisAPI):
         command_args: NfCommandArgs,
         use_nextflow: bool,
         dry_run: bool = False,
-    ) -> None:
+    ) -> str | None:
         """Execute run analysis with given options."""
         if use_nextflow:
             self._run_analysis_with_nextflow(
