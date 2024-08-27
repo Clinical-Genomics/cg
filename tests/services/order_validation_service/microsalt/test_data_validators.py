@@ -9,6 +9,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     SampleDoesNotExistError,
 )
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
 )
@@ -16,6 +17,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.sample impo
     MicrosaltSample,
 )
 from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules import (
+    validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
     validate_buffer_required,
@@ -23,7 +25,6 @@ from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules
     validate_organism_exists,
     validate_samples_exist,
     validate_volume_interval,
-    validate_application_compatibility,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -85,7 +86,8 @@ def test_application_is_not_archived(
 def test_sample_does_not_exist(valid_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a non-existent old sample
-    valid_order.samples[0].internal_id = "this internal id does not exist in the database"
+    existing_sample = ExistingSample(internal_id="this internal id does not exist in the database")
+    valid_order.samples.append(existing_sample)
 
     # WHEN validating that all old samples do exist
     errors = validate_samples_exist(order=valid_order, store=base_store)

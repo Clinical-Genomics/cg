@@ -1,3 +1,5 @@
+from cg.constants import GenePanelMasterList
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.order_validation_service.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
@@ -11,6 +13,8 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SexMissingError,
     SourceMissingError,
 )
+from cg.services.order_validation_service.models.existing_case import ExistingCase
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
@@ -120,7 +124,8 @@ def test_case_internal_ids_does_not_exist(
 ):
 
     # GIVEN an order with a case marked as existing but which does not exist in the database
-    valid_order.cases[0].internal_id = "Non-existent case"
+    existing_case = ExistingCase(internal_id="Non-existent case", panels=[GenePanelMasterList.AID])
+    valid_order.cases.append(existing_case)
 
     # WHEN validating that the internal ids match existing cases
     errors = validate_case_internal_ids_exist(
@@ -141,7 +146,8 @@ def test_sample_internal_ids_does_not_exist(
 ):
 
     # GIVEN an order with a sample marked as existing but which does not exist in the database
-    valid_order.cases[0].samples[0].internal_id = "Non-existent sample"
+    existing_sample = ExistingSample(internal_id="Non-existent sample", status=StatusEnum.unknown)
+    valid_order.cases[0].samples.append(existing_sample)
 
     # WHEN validating that the samples exists
     errors = validate_samples_exist(order=valid_order, store=store_with_multiple_cases_and_samples)

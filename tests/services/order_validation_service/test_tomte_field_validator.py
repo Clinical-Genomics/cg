@@ -39,7 +39,7 @@ def test_order_field_error(valid_order: TomteOrder):
 def test_case_field_error(valid_order: TomteOrder):
     # GIVEN an order with a case field error
     valid_order.cases[0].priority = None
-    order = valid_order.model_dump(by_alias=True)
+    order = valid_order.model_dump()
 
     # WHEN validating the order
     order, errors = ModelValidator.validate(order=order, model=TomteOrder)
@@ -55,7 +55,7 @@ def test_case_sample_field_error(valid_order: TomteOrder):
 
     # GIVEN an order with a case sample error
     valid_order.cases[0].samples[0].well_position = 1.8
-    order = valid_order.model_dump(by_alias=True)
+    order = valid_order.model_dump()
 
     # WHEN validating the order
     order, errors = ModelValidator.validate(order=order, model=TomteOrder)

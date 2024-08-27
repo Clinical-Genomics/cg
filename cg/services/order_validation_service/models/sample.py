@@ -8,7 +8,6 @@ class Sample(BaseModel):
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
-    internal_id: str | None = None
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     require_qc_ok: bool
     volume: int | None = None
@@ -16,7 +15,7 @@ class Sample(BaseModel):
 
     @property
     def is_new(self) -> bool:
-        return not self.internal_id
+        return True
 
     @property
     def is_on_plate(self) -> bool:
