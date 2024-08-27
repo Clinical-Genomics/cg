@@ -20,8 +20,14 @@ from cg.services.file_delivery.fetch_file_service.fetch_fastq_analysis_files_ser
 from cg.services.file_delivery.fetch_file_service.fetch_fastq_files_service import (
     FetchFastqDeliveryFilesService,
 )
+from cg.services.file_delivery.file_formatter_service.concatenation_delivery_file_formatter_service import (
+    ConcatenationDeliveryFileFormatter,
+)
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
+)
+from cg.services.file_delivery.file_formatter_service.generic_delivery_file_formatter_service import (
+    GenericDeliveryFileFormatter,
 )
 from cg.store.store import Store
 
@@ -48,5 +54,18 @@ def get_fetch_file_service(delivery_type: str) -> FetchDeliveryFilesService:
 
 def get_file_formatter_service(workflow: Workflow) -> DeliveryFileFormattingService:
     """Get the file formatter service based on the workflow."""
-    service_map = {}
+    service_map = {
+        Workflow.BALSAMIC: GenericDeliveryFileFormatter,
+        Workflow.BALSAMIC_QC: GenericDeliveryFileFormatter,
+        Workflow.BALSAMIC_UMI: GenericDeliveryFileFormatter,
+        Workflow.MIP_DNA: GenericDeliveryFileFormatter,
+        Workflow.MIP_RNA: GenericDeliveryFileFormatter,
+        Workflow.FASTQ: GenericDeliveryFileFormatter,
+        Workflow.RAREDISEASE: GenericDeliveryFileFormatter,
+        Workflow.RNAFUSION: GenericDeliveryFileFormatter,
+        Workflow.TAXPROFILER: GenericDeliveryFileFormatter,
+        Workflow.TOMTE: GenericDeliveryFileFormatter,
+        Workflow.MICROSALT: ConcatenationDeliveryFileFormatter,
+        Workflow.MUTANT: ConcatenationDeliveryFileFormatter,
+    }
     return service_map[workflow]
