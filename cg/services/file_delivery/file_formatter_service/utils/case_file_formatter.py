@@ -8,13 +8,13 @@ from cg.services.file_delivery.file_formatter_service.models import FormattedFil
 class CaseFileFormatter:
 
     def format_files(
-        self, case_files: list[CaseFile], ticket_dir_path: Path
+        self, moved_files: list[CaseFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         """Format the case files to deliver."""
         self._create_case_name_folder(
-            ticket_path=ticket_dir_path, case_name=case_files[0].case_name
+            ticket_path=ticket_dir_path, case_name=moved_files[0].case_name
         )
-        return self._rename_case_files(case_files)
+        return self._rename_case_files(moved_files)
 
     @staticmethod
     def _rename_case_files(case_files: list[CaseFile]) -> list[FormattedFile]:

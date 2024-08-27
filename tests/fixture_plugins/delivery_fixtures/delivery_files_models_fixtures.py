@@ -150,6 +150,40 @@ def expected_moved_analysis_delivery_files(
     )
 
 
+@pytest.fixture
+def expected_moved_analysis_sample_delivery_files(
+    expected_moved_analysis_delivery_files: DeliveryFiles,
+) -> list[SampleFile]:
+    return expected_moved_analysis_delivery_files.sample_files
+
+
+@pytest.fixture
+def expected_moved_analysis_case_delivery_files(
+    expected_moved_analysis_delivery_files: DeliveryFiles,
+) -> list[CaseFile]:
+    return expected_moved_analysis_delivery_files.case_files
+
+
+@pytest.fixture
+def fastq_concatenation_sample_files(tmp_path: Path) -> list[SampleFile]:
+    some_ticket: str = "some_ticket"
+    fastq_paths: list[Path] = [
+        Path(tmp_path, some_ticket, "S1_1_R1_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_2_R1_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_1_R2_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_2_R2_1.fastq.gz"),
+    ]
+    return [
+        SampleFile(
+            sample_id="S1",
+            case_id="Case1",
+            sample_name="Sample1",
+            file_path=fastq_path,
+        )
+        for fastq_path in fastq_paths
+    ]
+
+
 def swap_file_paths_with_inbox_paths(
     file_models: list[CaseFile | SampleFile], inbox_dir_path: Path
 ) -> list[CaseFile | SampleFile]:

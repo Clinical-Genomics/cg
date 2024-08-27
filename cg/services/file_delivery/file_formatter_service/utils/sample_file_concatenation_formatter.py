@@ -17,10 +17,10 @@ class SampleFileConcatenationFormatter(SampleFileFormatter):
         self.concatenation_service = concatenation_service
 
     def format_files(
-        self, sample_files: list[SampleFile], ticket_dir_path: Path
+        self, moved_files: list[SampleFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         formatted_files: list[FormattedFile] = super().format_files(
-            sample_files=sample_files, ticket_dir_path=ticket_dir_path
+            moved_files=moved_files, ticket_dir_path=ticket_dir_path
         )
         forward_paths, reverse_path = self._concatenate_fastq_files(formatted_files=formatted_files)
 

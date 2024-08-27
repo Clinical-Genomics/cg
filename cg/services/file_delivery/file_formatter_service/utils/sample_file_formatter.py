@@ -7,12 +7,12 @@ from cg.services.file_delivery.file_formatter_service.models import FormattedFil
 class SampleFileFormatter:
 
     def format_files(
-        self, sample_files: list[SampleFile], ticket_dir_path: Path
+        self, moved_files: list[SampleFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         """Format the sample files to deliver."""
-        sample_names: set[str] = self._get_sample_names(sample_files=sample_files)
+        sample_names: set[str] = self._get_sample_names(moved_files)
         self._create_sample_folders(ticket_dir_path=ticket_dir_path, sample_names=sample_names)
-        return self._rename_sample_files(sample_files=sample_files)
+        return self._rename_sample_files(moved_files)
 
     @staticmethod
     def _get_sample_names(sample_files: list[SampleFile]) -> set[str]:

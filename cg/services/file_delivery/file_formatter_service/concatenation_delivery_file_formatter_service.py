@@ -48,13 +48,13 @@ class ConcatenationDeliveryFileFormatter(DeliveryFileFormattingService):
         create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = []
         formatter_sample_files = self.sample_file_formatter.format_files(
-            sample_files=delivery_files.sample_files,
+            moved_files=delivery_files.sample_files,
             ticket_dir_path=ticket_dir_path,
         )
         formatted_files.extend(formatter_sample_files)
         if delivery_files.case_files:
             formatter_case_file = self.case_file_formatter.format_files(
-                case_files=delivery_files.case_files,
+                moved_files=delivery_files.case_files,
                 ticket_dir_path=ticket_dir_path,
             )
             formatted_files.extend(formatter_case_file)

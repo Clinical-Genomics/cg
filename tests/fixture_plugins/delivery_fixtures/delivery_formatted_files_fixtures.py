@@ -61,34 +61,18 @@ def expected_formatted_fastq_sample_files(
 
 
 @pytest.fixture
-def fastq_sample_files(tmp_path: Path) -> list[SampleFile]:
-    some_ticket: str = "some_ticket"
-    fastq_paths: list[Path] = [
-        Path(tmp_path, some_ticket, "S1_1_R1.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_2_R1.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_1_R2.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_2_R2.fastq.gz"),
-    ]
-    return [
-        SampleFile(
-            sample_id="S1",
-            case_id="Case1",
-            sample_name="Sample1",
-            file_path=fastq_path,
-        )
-        for fastq_path in fastq_paths
-    ]
-
-
-@pytest.fixture
 def expected_concatenated_fastq_formatted_files(
-    fastq_sample_files: list[SampleFile],
+    fastq_concatenation_sample_files,
 ) -> list[FormattedFile]:
     formatted_files: list[FormattedFile] = []
-    for sample_file in fastq_sample_files:
+    for sample_file in fastq_concatenation_sample_files:
         replaced_sample_file_name: str = sample_file.file_path.name.replace(
             sample_file.sample_id, sample_file.sample_name
         )
+        replaced_sample_file_name = replaced_sample_file_name.replace("1_R1_1", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("2_R1_1", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("1_R2_1", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("2_R2_1", "2")
         formatted_file_path = Path(
             sample_file.file_path.parent, sample_file.sample_name, replaced_sample_file_name
         )
