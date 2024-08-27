@@ -412,7 +412,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def _run_analysis_with_tower(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
-    ) -> None:
+    ) -> str | None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
         if command_args.resume:
@@ -434,6 +434,7 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
+            return tower_id
         LOG.info(self.process.stdout)
 
     def get_command_args(
@@ -501,7 +502,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
             self.check_analysis_ongoing(case_id=case_id)
             LOG.info(f"Running analysis for {case_id}")
-            self.run_analysis(
+            tower_workflow_id: str | None = self.run_analysis(
                 case_id=case_id,
                 command_args=command_args,
                 use_nextflow=use_nextflow,
@@ -519,7 +520,10 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError
 
         if not dry_run:
-            self.add_pending_trailblazer_analysis(case_id=case_id)
+            self.add_pending_trailblazer_analysis(
+                case_id=case_id,
+                tower_workflow_id=tower_workflow_id,
+            )
 
     def run_analysis(
         self,
@@ -536,7 +540,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
         else:
-            self._run_analysis_with_tower(
+            return self._run_analysis_with_tower(
                 case_id=case_id,
                 command_args=command_args,
                 dry_run=dry_run,
