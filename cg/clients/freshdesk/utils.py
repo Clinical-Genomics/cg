@@ -20,27 +20,38 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 def handle_client_errors(func):
+    """Decorator to handle and log errors in Freshdesk client methods."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (MissingSchema, HTTPError, ConnectionError) as error:
-            if isinstance(error, HTTPError) and error.response is not None:
+        except HTTPError as error:
+            error_detail = None
+            if error.response is not None:
                 try:
                     error_detail = error.response.json()
                 except ValueError:
                     error_detail = error.response.text
 
-                LOG.error(f"Request to Freshdesk failed: {error} - Details: {error_detail}")
-            else:
-                LOG.error(f"Request to Freshdesk failed: {error}")
-
+            LOG.error(
+                "Failed request to Freshdesk: %s - Status code: %s, Details: %s",
+                error,
+                error.response.status_code if error.response else "N/A",
+                error_detail,
+            )
+            raise FreshdeskAPIException(error) from error
+        except (MissingSchema, ConnectionError) as error:
+            LOG.error("Request to Freshdesk failed: %s", error)
             raise FreshdeskAPIException(error) from error
         except ValidationError as error:
-            LOG.error(f"Invalid response from Freshdesk: {error}")
+            LOG.error("Invalid response from Freshdesk: %s", error)
             raise FreshdeskModelException(error) from error
+        except ValueError as error:
+            LOG.error("Operation failed: %s", error)
+            raise FreshdeskAPIException(error) from error
         except Exception as error:
-            LOG.error(f"Unexpected error in Freshdesk client: {error}")
+            LOG.error("Unexpected error in Freshdesk client: %s", error)
             raise FreshdeskAPIException(error) from error
 
     return wrapper
