@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import mock
 
 from cg.services.file_delivery.fetch_file_service.models import (
