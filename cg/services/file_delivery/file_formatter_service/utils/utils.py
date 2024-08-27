@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from cg.constants.delivery import INBOX_NAME
@@ -13,4 +14,4 @@ def get_ticket_dir_path(file_path) -> Path:
 
 
 def create_ticket_dir(ticket_dir_path: Path) -> None:
-    ticket_dir_path.mkdir(exist_ok=True)
+    os.makedirs(ticket_dir_path)

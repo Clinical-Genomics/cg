@@ -80,3 +80,8 @@ def expected_concatenated_fastq_formatted_files(
             FormattedFile(original_path=sample_file.file_path, formatted_path=formatted_file_path)
         )
     return formatted_files
+
+
+@pytest.fixture
+def empty_case_files() -> None:
+    return None

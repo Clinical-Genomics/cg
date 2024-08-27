@@ -1,32 +1,74 @@
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
+from unittest.mock import Mock
+
+import mock
+
+from cg.services.file_delivery.fetch_file_service.models import (
+    DeliveryFiles,
+    SampleFile,
+    CaseFile,
+    DeliveryMetaData,
+)
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
-from cg.services.file_delivery.file_formatter_service.generic_delivery_file_formatter_service import (
-    GenericDeliveryFileFormatter,
-)
 import pytest
 
-from cg.services.file_delivery.file_formatter_service.models import FormattedFiles
+from cg.services.file_delivery.file_formatter_service.models import FormattedFiles, FormattedFile
 
 
 @pytest.mark.parametrize(
-    "delivery_files,expected_formatted_files,formatter_service",
+    "formatter_service, formatted_case_files, formatted_sample_files, case_files, sample_files",
     [
-        "moved_fastq_delivery_files",
-        "expected_formatted_fastq_files",
-        GenericDeliveryFileFormatter(),
+        (
+            "generic_delivery_file_formatter",
+            "empty_case_files",
+            "expected_formatted_analysis_sample_files",
+            "empty_case_files",
+            "expected_moved_analysis_sample_delivery_files",
+        ),
+        (
+            "generic_delivery_file_formatter",
+            "expected_formatted_analysis_case_files",
+            "expected_formatted_analysis_sample_files",
+            "expected_moved_analysis_case_delivery_files",
+            "expected_moved_analysis_sample_delivery_files",
+        ),
     ],
 )
 def test_reformat_files(
-    delivery_files: DeliveryFiles,
-    expected_formatted_files: FormattedFiles,
     formatter_service: DeliveryFileFormattingService,
+    formatted_case_files: list[FormattedFile],
+    formatted_sample_files: list[FormattedFile],
+    case_files: list[CaseFile],
+    sample_files: list[SampleFile],
+    request,
 ):
-    # GIVEN a delivery file formatter and moved delivery files
+    # GIVEN a delivery file formatter, mocked delivery files and expected formatted files
+    formatter_service = request.getfixturevalue(formatter_service)
+    formatted_case_files = request.getfixturevalue(formatted_case_files)
+    formatted_sample_files = request.getfixturevalue(formatted_sample_files)
+    case_files = request.getfixturevalue(case_files)
+    sample_files = request.getfixturevalue(sample_files)
 
-    # WHEN reformatting the delivery files
-    formatted_files: FormattedFiles = formatter_service.format_files(delivery_files)
+    delivery_data = DeliveryMetaData(customer_internal_id="cust_id", ticket_id="ticket_id")
+    mock_delivery_files = DeliveryFiles(
+        delivery_data=delivery_data, case_files=case_files, sample_files=sample_files
+    )
+    files = []
+    files.extend(formatted_sample_files)
+    if case_files:
+        files.extend(formatted_case_files)
+
+    expected_formatted_files = FormattedFiles(files=files)
+    with mock.patch(
+        "cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter.SampleFileFormatter.format_files",
+        return_value=formatted_sample_files,
+    ), mock.patch(
+        "cg.services.file_delivery.file_formatter_service.utils.case_file_formatter.CaseFileFormatter.format_files",
+        return_value=formatted_case_files,
+    ):
+        # WHEN reformatting the delivery files
+        formatted_files: FormattedFiles = formatter_service.format_files(mock_delivery_files)
+
     # THEN the delivery files should be reformatted
-
     assert formatted_files == expected_formatted_files
