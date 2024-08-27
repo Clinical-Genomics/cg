@@ -33,19 +33,19 @@ class GenericDeliveryFileFormatter(DeliveryFileFormattingService):
         self.sample_file_formatter = sample_file_formatter
 
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
-        """Format the files to be delivered in the generic format."""
+        """Format the files to be delivered and return the formatted files in the generic format."""
         ticket_dir_path: Path = get_ticket_dir_path(delivery_files.sample_files[0].file_path)
         create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = []
-        formatter_sample_files = self.sample_file_formatter.format_files(
+        formatted_sample_files: list[FormattedFile] = self.sample_file_formatter.format_files(
             moved_files=delivery_files.sample_files,
             ticket_dir_path=get_ticket_dir_path(delivery_files.sample_files[0].file_path),
         )
-        formatted_files.extend(formatter_sample_files)
+        formatted_files.extend(formatted_sample_files)
         if delivery_files.case_files:
-            formatter_case_file = self.case_file_formatter.format_files(
+            formatted_case_file: list[FormattedFile] = self.case_file_formatter.format_files(
                 moved_files=delivery_files.case_files,
                 ticket_dir_path=get_ticket_dir_path(delivery_files.case_files[0].file_path),
             )
-            formatted_files.extend(formatter_case_file)
+            formatted_files.extend(formatted_case_file)
         return FormattedFiles(files=formatted_files)

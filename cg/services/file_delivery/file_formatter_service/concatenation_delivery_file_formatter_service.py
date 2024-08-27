@@ -26,7 +26,7 @@ from cg.services.file_delivery.file_formatter_service.utils.utils import (
 
 class ConcatenationDeliveryFileFormatter(DeliveryFileFormattingService):
     """
-    Reformat the files to be delivered in the microsalt format.
+    Reformat the files to be delivered and concatenate fastq files.
     Expected structure:
     <customer>/inbox/<ticket_id>/<case_name>/<case_files>
     <customer>/inbox/<ticket_id>/<sample_name>/<sample_files>
@@ -43,19 +43,19 @@ class ConcatenationDeliveryFileFormatter(DeliveryFileFormattingService):
         self.sample_file_formatter = sample_file_formatter
 
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
-        """Format the files to be delivered in the concatenated format."""
+        """Format the files to be delivered and reutrn the formatted in the concatenated format."""
         ticket_dir_path: Path = get_ticket_dir_path(delivery_files.sample_files[0].file_path)
         create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = []
-        formatter_sample_files = self.sample_file_formatter.format_files(
+        formatted_sample_files: list[FormattedFile] = self.sample_file_formatter.format_files(
             moved_files=delivery_files.sample_files,
             ticket_dir_path=ticket_dir_path,
         )
-        formatted_files.extend(formatter_sample_files)
+        formatted_files.extend(formatted_sample_files)
         if delivery_files.case_files:
-            formatter_case_file = self.case_file_formatter.format_files(
+            formatted_case_file: list[FormattedFile] = self.case_file_formatter.format_files(
                 moved_files=delivery_files.case_files,
                 ticket_dir_path=ticket_dir_path,
             )
-            formatted_files.extend(formatter_case_file)
+            formatted_files.extend(formatted_case_file)
         return FormattedFiles(files=formatted_files)
