@@ -275,7 +275,11 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id: str, tower_workflow_id: str | None) -> None:
+    def add_pending_trailblazer_analysis(
+        self,
+        case_id: str,
+        tower_workflow_id: str | None = None,
+    ) -> None:
         self.check_analysis_ongoing(case_id)
         application_type: str = self.get_application_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
