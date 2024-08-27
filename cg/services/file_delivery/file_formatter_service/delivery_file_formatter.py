@@ -9,6 +9,9 @@ from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_s
     DeliveryFileFormattingService,
 )
 from cg.services.file_delivery.file_formatter_service.models import FormattedFiles, FormattedFile
+from cg.services.file_delivery.file_formatter_service.utils.sample_file_concatenation_formatter import (
+    SampleFileConcatenationFormatter,
+)
 from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
@@ -18,7 +21,7 @@ from cg.services.file_delivery.file_formatter_service.utils.utils import (
 )
 
 
-class GenericDeliveryFileFormatter(DeliveryFileFormattingService):
+class DeliveryFileFormatter(DeliveryFileFormattingService):
     """
     Format the files to be delivered in the generic format.
     Expected structure:
@@ -27,7 +30,9 @@ class GenericDeliveryFileFormatter(DeliveryFileFormattingService):
     """
 
     def __init__(
-        self, case_file_formatter: CaseFileFormatter, sample_file_formatter: SampleFileFormatter
+        self,
+        case_file_formatter: CaseFileFormatter,
+        sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter,
     ):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter

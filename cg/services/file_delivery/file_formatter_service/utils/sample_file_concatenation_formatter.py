@@ -13,6 +13,11 @@ from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatte
 
 
 class SampleFileConcatenationFormatter(SampleFileFormatter):
+    """
+    Format the sample files to deliver, concatenate fastq files and return the formatted files.
+    Used for workflows: Microsalt and Mutant.
+    """
+
     def __init__(self, concatenation_service: FastqConcatenationService):
         self.concatenation_service = concatenation_service
 

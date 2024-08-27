@@ -5,6 +5,10 @@ from cg.services.file_delivery.file_formatter_service.models import FormattedFil
 
 
 class SampleFileFormatter:
+    """
+    Format the sample files to deliver.
+    Used for all workflows except Microsalt and Mutant.
+    """
 
     def format_files(
         self, moved_files: list[SampleFile], ticket_dir_path: Path
