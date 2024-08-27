@@ -1,17 +1,14 @@
-import logging
 from http import HTTPStatus
 from pathlib import Path
-from typing import List
 
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse, ReplyCreate
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
-LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
@@ -24,7 +21,7 @@ class FreshdeskClient:
         self.session = self._get_session()
 
     @handle_client_errors
-    def create_ticket(self, ticket: TicketCreate, attachments: List[Path] = None) -> TicketResponse:
+    def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket with multipart form data."""
         multipart_data = ticket.to_multipart_data()
         files = prepare_attachments(attachments) if attachments else None
@@ -60,25 +57,12 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     @handle_client_errors
-    def reply_to_ticket(
-        self, ticket_id: str, from_email: str, reply: dict, attachments: List[Path] = None
-    ) -> None:
+    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
-        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+        url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
 
         files = prepare_attachments(attachments) if attachments else None
-        data = {
-            "body": reply["body"],
-            "from_email": from_email,
-        }
-        response = self.session.post(url=url, data=data, files=files)
-        if response.status_code == HTTPStatus.OK:
-            LOG.info("Successfully replied to ticket %s", ticket_id)
-        else:
-            LOG.error(
-                "Failed to reply to ticket %s. Status code: %s, Response: %s",
-                ticket_id,
-                response.status_code,
-                response.text,
-            )
-            response.raise_for_status()
+        multipart_data = reply.to_multipart_data()
+
+        response = self.session.post(url=url, data=multipart_data, files=files)
+        response.raise_for_status()
