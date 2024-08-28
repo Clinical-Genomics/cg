@@ -43,6 +43,7 @@ from cg.server.ext import (
     order_submitter_registry,
     microsalt_validation_service,
     tomte_validation_service,
+    mip_dna_validation_service,
 )
 from cg.store.models import (
     Application,
@@ -267,10 +268,11 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
 def validate_order(workflow: str):
     raw_order = request.get_json()
-
+    response = {}
     if workflow == Workflow.TOMTE:
         response = tomte_validation_service.validate(raw_order)
-        return jsonify(response), HTTPStatus.OK
     if workflow == Workflow.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-        return jsonify(response), HTTPStatus.OK
+    if workflow == Workflow.MIP_DNA:
+        response = mip_dna_validation_service.validate(raw_order)
+    return jsonify(response), HTTPStatus.OK

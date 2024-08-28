@@ -4,6 +4,9 @@ from json import JSONEncoder
 from cg.services.order_validation_service.workflows.microsalt.validation_service import (
     MicroSaltValidationService,
 )
+from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
+    MipDnaValidationService,
+)
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
@@ -104,3 +107,4 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
 
 tomte_validation_service = TomteValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
+mip_dna_validation_service = MipDnaValidationService(store=db)
