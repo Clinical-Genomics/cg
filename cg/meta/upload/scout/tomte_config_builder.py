@@ -41,7 +41,7 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         """Build a Tomte-specific load config for uploading a case to Scout."""
         LOG.info("Build load config for Tomte case")
         self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = getattr(
+        self.load_config.rna_genome_build = getattr(
             GenomeBuild,
             self.analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
         )
