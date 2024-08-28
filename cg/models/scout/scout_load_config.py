@@ -95,7 +95,7 @@ class ScoutLoadConfig(BaseModel):
     gene_panels: list[str] | None = None
     default_gene_panels: list[str] = []
     cohorts: list[str] | None = None
-    human_genome_build: str | None = None
+    human_genome_build: str = None
     rna_genome_build: str | None = None
     rank_model_version: str | None = None
     rank_score_threshold: int = None
