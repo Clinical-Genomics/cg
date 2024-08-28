@@ -5,7 +5,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
 )
-from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules import (
+from cg.services.order_validation_service.rules.sample.rules import (
     validate_sample_names_unique,
     validate_wells_contain_at_most_one_sample,
 )

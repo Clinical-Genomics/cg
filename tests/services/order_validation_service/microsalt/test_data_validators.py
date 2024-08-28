@@ -14,7 +14,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 from cg.services.order_validation_service.workflows.microsalt.models.sample import (
     MicrosaltSample,
 )
-from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules import (
+from cg.services.order_validation_service.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
@@ -66,7 +66,7 @@ def test_application_is_not_archived(
 ):
 
     # GIVEN an order with a new sample with an archived application
-    valid_order.enumerated_new_samples[0][1].application = archived_application.tag
+    valid_order.samples[0].application = archived_application.tag
     base_store.session.add(archived_application)
     base_store.commit_to_store()
 

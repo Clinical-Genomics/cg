@@ -1,4 +1,4 @@
-from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules import (
+from cg.services.order_validation_service.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
