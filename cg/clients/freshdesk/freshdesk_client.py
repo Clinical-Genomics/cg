@@ -1,12 +1,13 @@
 from http import HTTPStatus
 from pathlib import Path
 
+from flask import Flask
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse, ReplyCreate
+from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
@@ -15,11 +16,11 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str):
-        self.base_url = base_url
-        self.api_key = api_key
+    def __init__(self, config: dict):
+        self.base_url = config["freshdesk_base_url"]
+        self.api_key = config["freshdesk_api_key"]
         self.session = self._get_session()
-
+       
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket with multipart form data."""
