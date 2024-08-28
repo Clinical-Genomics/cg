@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
+from pydantic import ConfigDict
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -24,6 +25,7 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
+    CustomerId,
     PrepCategory,
     SequencingQCStatus,
     SexOptions,
@@ -813,6 +815,18 @@ class Sample(Base, PriorityMixin):
     @property
     def has_reads(self) -> bool:
         return bool(self.reads)
+
+    @property
+    def is_negative_control(self) -> bool:
+        return self.control == ControlOptions.NEGATIVE
+
+    @property
+    def is_internal_negative_control(self) -> bool:
+        return self.is_negative_control and self.customer == CustomerId.CG_INTERNAL_CUSTOMER
+
+    @property
+    def is_external_negative_control(self) -> bool:
+        return self.is_negative_control and self.customer != CustomerId.CG_INTERNAL_CUSTOMER
 
     @property
     def flow_cells(self) -> list[Flowcell]:
