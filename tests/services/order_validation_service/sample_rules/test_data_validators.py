@@ -8,12 +8,6 @@ from cg.services.order_validation_service.errors.sample_errors import (
     InvalidVolumeError,
     OrganismDoesNotExistError,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicrosaltOrder,
-)
-from cg.services.order_validation_service.workflows.microsalt.models.sample import (
-    MicrosaltSample,
-)
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -22,6 +16,12 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_extraction_method_required,
     validate_organism_exists,
     validate_volume_interval,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.order import (
+    MicrosaltOrder,
+)
+from cg.services.order_validation_service.workflows.microsalt.models.sample import (
+    MicrosaltSample,
 )
 from cg.store.models import Application
 from cg.store.store import Store

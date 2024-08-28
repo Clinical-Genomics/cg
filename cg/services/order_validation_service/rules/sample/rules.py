@@ -9,7 +9,12 @@ from cg.services.order_validation_service.errors.sample_errors import (
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
+    SampleNameNotAvailableError,
     SampleNameRepeatedError,
+)
+from cg.services.order_validation_service.rules.sample.utils import (
+    PlateSamplesValidator,
+    get_indices_for_repeated_sample_names,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
@@ -17,10 +22,6 @@ from cg.services.order_validation_service.rules.utils import (
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     OrderWithNonHumanSamples,
-)
-from cg.services.order_validation_service.rules.sample.utils import (
-    PlateSamplesValidator,
-    get_indices_for_repeated_sample_names,
 )
 from cg.store.store import Store
 
@@ -131,3 +132,17 @@ def validate_sample_names_unique(
 ) -> list[SampleNameRepeatedError]:
     sample_indices: list[int] = get_indices_for_repeated_sample_names(order)
     return [SampleNameRepeatedError(sample_index=sample_index) for sample_index in sample_indices]
+
+
+def validate_sample_names_available(
+    order: OrderWithNonHumanSamples, store: Store, **kwargs
+) -> list[SampleNameNotAvailableError]:
+    errors: list[SampleNameNotAvailableError] = []
+    customer = store.get_customer_by_internal_id(order.customer)
+    for sample_index, sample in order.enumerated_samples:
+        if store.get_sample_by_customer_and_name(
+            sample_name=sample.name, customer_entry_id=[customer.id]
+        ):
+            error = SampleNameNotAvailableError(sample_index=sample_index)
+            errors.append(error)
+    return errors

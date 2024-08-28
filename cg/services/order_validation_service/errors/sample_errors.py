@@ -57,3 +57,8 @@ class ElutionBufferMissingError(SampleError):
 class ExtractionMethodMissingError(SampleError):
     field: str = "extraction_method"
     message: str = "Extraction method is required"
+
+
+class SampleNameNotAvailableError(SampleError):
+    field: str = "name"
+    message: str = "Sample name already used in previous order"
