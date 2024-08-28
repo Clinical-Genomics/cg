@@ -39,11 +39,6 @@ class SampleNameRepeatedError(SampleError):
     message: str = "Sample name repeated"
 
 
-class SampleDoesNotExistError(SampleError):
-    field: str = "internal_id"
-    message: str = "The sample does not exist"
-
-
 class InvalidVolumeError(SampleError):
     field: str = "volume"
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"

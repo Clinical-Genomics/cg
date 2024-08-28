@@ -21,7 +21,6 @@ from cg.services.order_validation_service.workflows.microsalt.rules.sample.rules
     validate_buffer_required,
     validate_extraction_method_required,
     validate_organism_exists,
-    validate_samples_exist,
     validate_volume_interval,
 )
 from cg.store.models import Application
@@ -79,16 +78,6 @@ def test_application_is_not_archived(
 
     # THEN the error should concern the archived application
     assert isinstance(errors[0], ApplicationArchivedError)
-
-
-def test_samples_do_exist(valid_order: MicrosaltOrder, base_store: Store):
-    # GIVEN a valid order
-
-    # WHEN validating that all old samples do exist
-    errors = validate_samples_exist(order=valid_order, store=base_store)
-
-    # THEN no error should be returned
-    assert not errors
 
 
 def test_invalid_volume(valid_order: MicrosaltOrder, base_store: Store):
