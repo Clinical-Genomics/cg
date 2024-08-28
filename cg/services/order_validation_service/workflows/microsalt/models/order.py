@@ -14,19 +14,3 @@ class MicrosaltOrder(OrderWithNonHumanSamples):
     @property
     def enumerated_samples(self) -> enumerate[MicrosaltSample]:
         return enumerate(self.samples)
-
-    @property
-    def enumerated_new_samples(self) -> list[tuple[int, MicrosaltSample]]:
-        samples: list[tuple[int, MicrosaltSample]] = []
-        for sample_index, sample in self.enumerated_samples:
-            if sample.is_new:
-                samples.append((sample_index, sample))
-        return samples
-
-    @property
-    def enumerated_existing_samples(self) -> list[tuple[int, MicrosaltSample]]:
-        samples: list[tuple[int, MicrosaltSample]] = []
-        for sample_index, sample in self.enumerated_samples:
-            if not sample.is_new:
-                samples.append((sample_index, sample))
-        return samples
