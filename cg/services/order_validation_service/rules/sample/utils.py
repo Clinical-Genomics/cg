@@ -4,27 +4,23 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicrosaltOrder,
-)
-from cg.services.order_validation_service.workflows.microsalt.models.sample import (
-    MicrosaltSample,
-)
+from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
+from cg.services.order_validation_service.models.sample import Sample
 
 
 class PlateSamplesValidator:
 
-    def __init__(self, order: MicrosaltOrder):
+    def __init__(self, order: OrderWithSamples):
         self.wells: dict[tuple[str, str], list[int]] = {}
-        self.plate_samples: list[tuple[int, MicrosaltSample]] = []
+        self.plate_samples: list[tuple[int, Sample]] = []
         self._initialize_wells(order)
 
-    def _initialize_wells(self, order: MicrosaltOrder):
+    def _initialize_wells(self, order: OrderWithSamples):
         """
         Construct a dict with keys being a (container_name, well_position) pair.
         The value will be a list of sample indices for samples located in the well.
         """
-        for sample_index, sample in order.enumerated_new_samples:
+        for sample_index, sample in order.enumerated_samples:
             if sample.is_on_plate:
                 self.plate_samples.append((sample_index, sample))
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
@@ -34,7 +30,7 @@ class PlateSamplesValidator:
 
     def get_occupied_well_errors(self) -> list[OccupiedWellError]:
         """Get errors for samples assigned to wells that are already occupied."""
-        conflicting_samples: list[MicrosaltSample] = []
+        conflicting_samples: list[Sample] = []
         for samples_indices in self.wells.values():
             if len(samples_indices) > 1:
                 conflicting_samples.extend(samples_indices[1:])
@@ -57,10 +53,10 @@ def get_missing_well_errors(sample_indices: list[int]) -> list[WellPositionMissi
     return [WellPositionMissingError(sample_index) for sample_index in sample_indices]
 
 
-def get_indices_for_repeated_sample_names(order: MicrosaltOrder) -> list[int]:
+def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
     counter = Counter([sample.name for sample in order.samples])
     indices: list[int] = []
-    for index, sample in order.enumerated_new_samples:
+    for index, sample in order.enumerated_samples:
         if counter.get(sample.name) > 1:
             indices.append(index)
     return indices
