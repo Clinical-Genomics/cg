@@ -6,14 +6,12 @@ from cg.services.order_validation_service.models.discriminators import has_inter
 from cg.services.order_validation_service.models.existing_case import ExistingCase
 from cg.services.order_validation_service.models.order import Order
 
+NewCaseType = Annotated[Case, Tag("new")]
+ExistingCaseType = Annotated[ExistingCase, Tag("existing")]
+
 
 class OrderWithCases(Order):
-    cases: list[
-        Annotated[
-            Annotated[Case, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
-            Discriminator(has_internal_id),
-        ]
-    ]
+    cases: list[Annotated[NewCaseType | ExistingCaseType, Discriminator(has_internal_id)]]
 
     @property
     def enumerated_cases(self) -> enumerate[Case]:
