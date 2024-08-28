@@ -39,7 +39,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
             delivery_files.sample_files[0].file_path
         )
         self._create_ticket_dir(ticket_dir_path)
-        formatted_files = self._format_sample_and_case_files(
+        formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
             ticket_dir_path=ticket_dir_path,
@@ -50,12 +50,12 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
         self, sample_files, case_files, ticket_dir_path
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
-        formatted_files = self.sample_file_formatter.format_files(
+        formatted_files: list[FormattedFile] = self.sample_file_formatter.format_files(
             moved_files=sample_files,
             ticket_dir_path=ticket_dir_path,
         )
         if case_files:
-            formatted_case_files = self.case_file_formatter.format_files(
+            formatted_case_files: list[FormattedFile] = self.case_file_formatter.format_files(
                 moved_files=case_files,
                 ticket_dir_path=ticket_dir_path,
             )
@@ -65,7 +65,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
     @staticmethod
     def get_folder_under_inbox(file_path: Path) -> Path:
         try:
-            inbox_index = file_path.parts.index(INBOX_NAME)
+            inbox_index: int = file_path.parts.index(INBOX_NAME)
             return Path(*file_path.parts[: inbox_index + 2])
         except ValueError:
             raise ValueError(f"Could not find the inbox directory in the path: {file_path}")
