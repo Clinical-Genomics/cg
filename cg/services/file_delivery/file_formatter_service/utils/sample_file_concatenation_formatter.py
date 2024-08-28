@@ -44,8 +44,7 @@ class SampleFileConcatenationFormatter(SampleFileFormatter):
         )
         forward_paths: list[Path] = []
         reverse_paths: list[Path] = []
-        for sample_dir_path in unique_sample_dir_paths:
-            fastq_directory: Path = sample_dir_path
+        for fastq_directory in unique_sample_dir_paths:
             sample_name: str = fastq_directory.name
 
             forward_path: Path = generate_concatenated_fastq_delivery_path(
