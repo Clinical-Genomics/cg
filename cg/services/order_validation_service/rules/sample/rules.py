@@ -68,7 +68,8 @@ def validate_organism_exists(
 
 
 def validate_buffer_required(
-    order: OrderWithNonHumanSamples, **kwargs,
+    order: OrderWithNonHumanSamples,
+    **kwargs,
 ) -> list[ElutionBufferMissingError]:
     errors: list[ElutionBufferMissingError] = []
     for sample_index, sample in order.enumerated_samples:
