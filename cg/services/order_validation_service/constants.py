@@ -9,6 +9,12 @@ class TissueBlockEnum(StrEnum):
     BLANK: str = ""
 
 
+class ElutionBuffer(StrEnum):
+    OTHER = "Other (add to comment)"
+    TRIS_HCL = "Tris-HCl"
+    WATER = "Nuclease-free water"
+
+
 ALLOWED_SKIP_RC_BUFFERS = ["Nuclease-free water", "Tris-HCl"]
 
 WORKFLOW_PREP_CATEGORIES: dict[Workflow, list[PrepCategory]] = {
