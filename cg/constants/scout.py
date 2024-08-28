@@ -103,7 +103,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
 
 RAREDISEASE_SAMPLE_TAGS = dict(
     bam_file={"bam"},
-    alignment_file={"cram"},
+    # alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
     chromograph_autozyg={"chromograph", "autozyg"},
