@@ -14,7 +14,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ValidatePacbioFileTransferService(ValidateFileTransferService):
-
     def __init__(self, config: CGConfig):
         super().__init__()
         self.config: CGConfig = config

@@ -162,10 +162,6 @@ class IlluminaCleanRunsService:
                 self.sequencing_run_dir_data.id
             )
         )
-        if not sequencing_run:
-            raise ValueError(
-                f"Sequencing run for flow cell {self.sequencing_run_dir_data.id} not found in StatusDB."
-            )
         return sequencing_run
 
     def get_sequencing_metrics_for_sequencing_run(

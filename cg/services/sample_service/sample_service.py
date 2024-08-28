@@ -1,16 +1,17 @@
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.server.dto.samples.samples_response import SamplesResponse
-from cg.store.models import Sample
 from cg.services.sample_service.utils import (
     create_samples_response,
     get_cancel_comment,
     get_confirmation_message,
 )
+from cg.store.models import Sample
 from cg.store.store import Store
 
 
 class SampleService:
-
     def __init__(self, store: Store):
         self.store = store
 

@@ -118,6 +118,7 @@ class TrailblazerAPI:
         workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
+        tower_workflow_id: str | None = None,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -130,6 +131,7 @@ class TrailblazerAPI:
             "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
+            "tower_workflow_id": tower_workflow_id,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
         if response := self.query_trailblazer(

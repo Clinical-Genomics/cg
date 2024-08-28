@@ -2,26 +2,30 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
+
 from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
+from cg.services.orders.validate_order_services.validate_case_order import (
+    ValidateCaseOrderService,
+)
 from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
-SUBMITTERS = [
-    "fastq_submitter",
-    "metagenome_submitter",
-    "microbial_submitter",
-    "case_submitter",
-    "pool_submitter",
-]
+
+def monkeypatch_process_lims(monkeypatch, order_data) -> None:
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    monkeypatch.setattr(
+        "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
+        lambda *args, **kwargs: (lims_project_data, lims_map),
+    )
 
 
 def test_too_long_order_name():
@@ -165,7 +169,7 @@ def test_submit_illegal_sample_customer(
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
-
+    orders_api.ticket_handler = Mock()
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
     new_customer = sample_store.add_customer(
@@ -219,7 +223,8 @@ def test_submit_scout_legal_sample_customer(
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
 
-        # GIVEN we have an order with a customer that is in the same customer group as the customer
+        orders_api.ticket_handler = Mock()
+    # GIVEN we have an order with a customer that is in the same customer group as the customer
         # that the samples originate from
         collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
         sample_store.session.add(collaboration)
@@ -274,7 +279,7 @@ def test_submit_duplicate_sample_case_name(
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
+    orders_api.ticket_handler = Mock()
     for sample in order_data.samples:
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
@@ -406,12 +411,12 @@ def test_validate_sex_inconsistent_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_subject_sex
     # THEN an OrderError should be raised on non-matching sex
     with pytest.raises(OrderError):
-        submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+        validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
 
 def test_validate_sex_consistent_sex(
@@ -436,10 +441,10 @@ def test_validate_sex_consistent_sex(
         store.session.commit()
         assert sample_obj.sex == sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=orders_api.status)
 
     # WHEN calling _validate_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
@@ -467,10 +472,10 @@ def test_validate_sex_unknown_existing_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=orders_api.status)
 
-    # WHEN calling _validate_subject_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    # WHEN calling _validate_sex
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
@@ -500,10 +505,10 @@ def test_validate_sex_unknown_new_sex(
     for sample in order_data.samples:
         assert sample_obj.sex != sample.sex
 
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=orders_api.status)
 
-    # WHEN calling _validate_subject_sex
-    submitter._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
+    # WHEN calling _validate_sex
+    validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
 
     # THEN no OrderError should be raised on non-matching sex
 
