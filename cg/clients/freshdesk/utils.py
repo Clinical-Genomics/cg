@@ -35,23 +35,21 @@ def handle_client_errors(func):
                     error_detail = error.response.text
 
             LOG.error(
-                "Failed request to Freshdesk: %s - Status code: %s, Details: %s",
-                error,
-                error.response.status_code if error.response else "N/A",
-                error_detail,
+                f"Failed request to Freshdesk: {error} - Status code: "
+                f"{error.response.status_code if error.response else 'N/A'}, Details: {error_detail}"
             )
             raise FreshdeskAPIException(error) from error
         except (MissingSchema, ConnectionError) as error:
-            LOG.error("Request to Freshdesk failed: %s", error)
+            LOG.error(f"Request to Freshdesk failed: {error}")
             raise FreshdeskAPIException(error) from error
         except ValidationError as error:
-            LOG.error("Invalid response from Freshdesk: %s", error)
+            LOG.error(f"Invalid response from Freshdesk: {error}")
             raise FreshdeskModelException(error) from error
         except ValueError as error:
-            LOG.error("Operation failed: %s", error)
+            LOG.error(f"Operation failed: {error}")
             raise FreshdeskAPIException(error) from error
         except Exception as error:
-            LOG.error("Unexpected error in Freshdesk client: %s", error)
+            LOG.error(f"Unexpected error in Freshdesk client: {error}")
             raise FreshdeskAPIException(error) from error
 
     return wrapper

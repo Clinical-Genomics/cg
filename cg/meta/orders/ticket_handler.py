@@ -193,7 +193,7 @@ class TicketHandler:
         self, order: OrderIn, user_name: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
-        LOG.info("Connecting order to ticket %s", ticket_number)
+        LOG.info(f"Connecting order to ticket {ticket_number}")
 
         message: str = self.add_existing_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
@@ -211,4 +211,4 @@ class TicketHandler:
                 attachments=[attachments],
             )
 
-            LOG.info("Connected order to ticket %s in Freshdesk", ticket_number)
+            LOG.info(f"Connected order to ticket {ticket_number} in Freshdesk")
