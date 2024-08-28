@@ -15,6 +15,9 @@ from cg.models.cg_config import CGConfig
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+    DeliveryServiceBuilder,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -79,41 +82,23 @@ def deliver_analysis(
     if not (case_id or ticket):
         LOG.info("Please provide a case-id or ticket-id")
         return
-
     inbox: str = context.delivery_path
     if not inbox:
         LOG.info("Please specify the root path for where files should be delivered")
         return
-
-    status_db: Store = context.status_db
+    service_builder = DeliveryServiceBuilder(
+        store=context.status_db, hk_api=context.housekeeper_api
+    )
     for delivery in delivery_type:
-        deliver_api = DeliverAPI(
-            store=status_db,
-            hk_api=context.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
-            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
-            project_base_path=Path(inbox),
-            delivery_type=delivery,
-            force_all=force_all,
-            ignore_missing_bundles=ignore_missing_bundles,
-            fastq_file_service=FastqConcatenationService(),
+        delivery_service = service_builder.build_delivery_service(
+            delivery_type=delivery, workflow=case.workflow
         )
-        deliver_api.set_dry_run(dry_run)
-        cases: list[Case] = []
         if case_id:
-            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-            if not case_obj:
-                LOG.warning(f"Could not find case {case_id}")
-                return
-            cases.append(case_obj)
+            delivery_service.deliver_files_for_case(case_id=case_id, delivery_base_path=Path(inbox))
         else:
-            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
-            if not cases:
-                LOG.warning(f"Could not find cases for ticket {ticket}")
-                return
-
-        for case_obj in cases:
-            deliver_api.deliver_files(case_obj=case_obj)
+            delivery_service.deliver_files_for_ticket(
+                ticket_id=ticket, delivery_base_path=Path(inbox)
+            )
 
 
 @deliver.command(name="rsync")

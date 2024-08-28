@@ -101,4 +101,5 @@ class DeliveryServiceBuilder:
             delivery_file_manager_service=file_fetcher,
             move_file_service=MoveDeliveryFilesService(),
             file_formatter_service=file_formatter,
+            status_db=self.store,
         )
