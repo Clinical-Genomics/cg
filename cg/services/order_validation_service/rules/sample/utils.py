@@ -4,18 +4,18 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
+from cg.services.order_validation_service.models.order_with_samples import OrderWithNonHumanSamples
 from cg.services.order_validation_service.models.sample import Sample
 
 
 class PlateSamplesValidator:
 
-    def __init__(self, order: OrderWithSamples):
+    def __init__(self, order: OrderWithNonHumanSamples):
         self.wells: dict[tuple[str, str], list[int]] = {}
         self.plate_samples: list[tuple[int, Sample]] = []
         self._initialize_wells(order)
 
-    def _initialize_wells(self, order: OrderWithSamples):
+    def _initialize_wells(self, order: OrderWithNonHumanSamples):
         """
         Construct a dict with keys being a (container_name, well_position) pair.
         The value will be a list of sample indices for samples located in the well.
@@ -53,7 +53,7 @@ def get_missing_well_errors(sample_indices: list[int]) -> list[WellPositionMissi
     return [WellPositionMissingError(sample_index) for sample_index in sample_indices]
 
 
-def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
+def get_indices_for_repeated_sample_names(order: OrderWithNonHumanSamples) -> list[int]:
     counter = Counter([sample.name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
