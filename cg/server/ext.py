@@ -6,7 +6,6 @@ from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
-from cg.apps.osticket import OsTicket
 from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.meta.orders import OrdersAPI
@@ -81,21 +80,19 @@ db = FlaskStore()
 
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
-osticket = OsTicket()
 analysis_client = AnalysisClient()
 delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=analysis_client)
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
 freshdesk_client = FreshdeskClient(
-    base_url=app_config.freshdesk_url,
-    api_key=app_config.freshdesk_api_key,
-    order_email_id=app_config.freshdesk_order_email_id,
-    env=app_config.freshdesk_environment,
+    base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
 ticket_handler = TicketHandler(
     client=freshdesk_client,
     status_db=db,
+    system_email_id=app_config.freshdesk_order_email_id,
+    env=app_config.freshdesk_environment,
 )
 orders_api = OrdersAPI(
     lims=lims,

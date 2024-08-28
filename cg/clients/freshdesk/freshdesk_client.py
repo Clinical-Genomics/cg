@@ -1,38 +1,33 @@
-import logging
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import Response, Session
+from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse, ReplyCreate
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
-LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, base_url: str, api_key: str, order_email_id: int, env: str):
+    def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url
         self.api_key = api_key
-        self.order_email_id = order_email_id
-        self.env = env
         self.session = self._get_session()
 
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
-        """Create a ticket."""
-        ticket_data = ticket.model_dump(exclude_none=True)
+        """Create a ticket with multipart form data."""
+        multipart_data = ticket.to_multipart_data()
         files = prepare_attachments(attachments) if attachments else None
 
-        LOG.info(ticket_data)
-        response: Response = self.session.post(
-            url=f"{self.base_url}{EndPoints.TICKETS}", data=ticket_data, files=files
+        response = self.session.post(
+            url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
         )
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
@@ -60,3 +55,14 @@ class FreshdeskClient:
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
+
+    @handle_client_errors
+    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
+        """Send a reply to an existing ticket in Freshdesk."""
+        url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
+
+        files = prepare_attachments(attachments) if attachments else None
+        multipart_data = reply.to_multipart_data()
+
+        response = self.session.post(url=url, data=multipart_data, files=files)
+        response.raise_for_status()

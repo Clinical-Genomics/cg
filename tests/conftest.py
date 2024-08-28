@@ -75,7 +75,6 @@ from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.osticket import MockOsTicket
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
@@ -640,22 +639,9 @@ def ticket_id() -> str:
 
 
 @pytest.fixture
-def osticket(ticket_id: str) -> MockOsTicket:
-    """Return a api that mock the os ticket api."""
-    api = MockOsTicket()
-    api.set_ticket_nr(ticket_id)
-    return api
-
-
-@pytest.fixture
 def freshdesk_client() -> FreshdeskClient:
     """Return a FreshdeskClient instance with mock parameters."""
-    client = FreshdeskClient(
-        base_url="https://mock.freshdesk.com",
-        api_key="mock_api_key",
-        order_email_id=2024,
-        env="dev",
-    )
+    client = FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
     return client
 
 

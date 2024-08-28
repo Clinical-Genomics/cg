@@ -48,7 +48,7 @@ def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order_data: OrderI
         )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str, user_mail: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
         id=int(ticket_id),
@@ -57,6 +57,11 @@ def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str, user_mail
         status=2,
         priority=1,
     )
+
+
+def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket):
+    """Helper function to mock Freshdesk reply to ticket."""
+    mock_reply_to_ticket.return_value = None
 
 
 @pytest.mark.parametrize(
@@ -84,10 +89,13 @@ def test_submit(
     user_mail: str,
     user_name: str,
 ):
-    with patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None), patch(
+    with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
@@ -198,10 +206,16 @@ def test_submit_scout_legal_sample_customer(
     sample_store: Store,
     user_mail: str,
     user_name: str,
+    ticket_id: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch:
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
+
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -299,10 +313,16 @@ def test_submit_fluffy_duplicate_sample_case_name(
     orders_api: OrdersAPI,
     user_mail: str,
     user_name: str,
+    ticket_id: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch:
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
+
         # GIVEN we have an order with a case that is already in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
@@ -331,11 +351,12 @@ def test_submit_unique_sample_case_name(
     ticket_id: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN we have an order with a case that is not existing in the database
         order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
@@ -512,11 +533,12 @@ def test_submit_unique_sample_name(
     user_name: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN we have an order with a sample that is not existing in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -599,11 +621,12 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     user_name: str,
 ):
     with patch(
-        "cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None
-    ) as mail_patch, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id, user_mail)
+    ) as mock_create_ticket, patch(
+        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+    ) as mock_reply_to_ticket:
+        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN we have an order with samples that are already in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)

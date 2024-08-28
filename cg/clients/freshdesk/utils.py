@@ -20,16 +20,34 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 def handle_client_errors(func):
+    """Decorator to handle and log errors in Freshdesk client methods."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (MissingSchema, HTTPError, ConnectionError) as error:
+        except HTTPError as error:
+            error_detail = None
+            if error.response is not None:
+                try:
+                    error_detail = error.response.json()
+                except ValueError:
+                    error_detail = error.response.text
+
+            LOG.error(
+                f"Failed request to Freshdesk: {error} - Status code: "
+                f"{error.response.status_code if error.response else 'N/A'}, Details: {error_detail}"
+            )
+            raise FreshdeskAPIException(error) from error
+        except (MissingSchema, ConnectionError) as error:
             LOG.error(f"Request to Freshdesk failed: {error}")
             raise FreshdeskAPIException(error) from error
         except ValidationError as error:
             LOG.error(f"Invalid response from Freshdesk: {error}")
             raise FreshdeskModelException(error) from error
+        except ValueError as error:
+            LOG.error(f"Operation failed: {error}")
+            raise FreshdeskAPIException(error) from error
         except Exception as error:
             LOG.error(f"Unexpected error in Freshdesk client: {error}")
             raise FreshdeskAPIException(error) from error
