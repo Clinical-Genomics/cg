@@ -50,18 +50,16 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
         self, sample_files, case_files, ticket_dir_path
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
-        formatted_sample_files = self.sample_file_formatter.format_files(
+        formatted_files = self.sample_file_formatter.format_files(
             moved_files=sample_files,
             ticket_dir_path=ticket_dir_path,
         )
-        formatted_files = formatted_sample_files
         if case_files:
             formatted_case_files = self.case_file_formatter.format_files(
                 moved_files=case_files,
                 ticket_dir_path=ticket_dir_path,
             )
             formatted_files.extend(formatted_case_files)
-
         return formatted_files
 
     @staticmethod
