@@ -1,15 +1,22 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
+from typing_extensions import Annotated
 
 from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
+from cg.services.order_validation_service.models.discriminators import has_internal_id
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.models.sample import Sample
 
 
 class Case(BaseModel):
-    internal_id: str | None = None
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
-    samples: list[Sample]
+    samples: list[
+        Annotated[
+            Annotated[Sample, Tag("new")] | Annotated[ExistingSample, Tag("existing")],
+            Discriminator(has_internal_id),
+        ]
+    ]
 
     @property
     def enumerated_samples(self):
@@ -17,7 +24,7 @@ class Case(BaseModel):
 
     @property
     def is_new(self) -> bool:
-        return not self.internal_id
+        return True
 
     @property
     def enumerated_new_samples(self):

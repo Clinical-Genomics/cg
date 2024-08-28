@@ -1,10 +1,14 @@
 from pydantic_core import ErrorDetails, ValidationError
 
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    CaseSampleError,
+)
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
-from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
+from cg.services.order_validation_service.errors.validation_errors import (
+    ValidationErrors,
+)
 
 
 def convert_errors(pydantic_errors: ValidationError) -> ValidationErrors:
@@ -126,11 +130,11 @@ def is_sample_error(error: ErrorDetails) -> bool:
 
 
 def is_case_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 3 and error["loc"][0] == "cases"
+    return len(error["loc"]) == 4 and error["loc"][0] == "cases"
 
 
 def is_case_sample_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 5
+    return len(error["loc"]) == 7
 
 
 def is_order_error(error: ErrorDetails) -> bool:
@@ -146,11 +150,11 @@ def get_sample_field_name(error: ErrorDetails) -> str:
 
 
 def get_case_field_name(error: ErrorDetails) -> str:
-    return error["loc"][2]
+    return error["loc"][3]
 
 
 def get_case_sample_field_name(error: ErrorDetails) -> str:
-    return error["loc"][4]
+    return error["loc"][6]
 
 
 def get_order_field_name(error: ErrorDetails) -> str:
@@ -166,4 +170,4 @@ def get_case_index(error: ErrorDetails) -> int:
 
 
 def get_case_sample_index(error: ErrorDetails) -> int:
-    return error["loc"][3]
+    return error["loc"][4]

@@ -1,7 +1,7 @@
 import pytest
 
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
+from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
 from cg.services.order_validation_service.workflows.tomte.constants import (
     TomteDeliveryType,
@@ -24,6 +24,7 @@ def create_tomte_sample(id: int) -> TomteSample:
         application="RNAPOAR100",
         container=ContainerEnum.plate,
         container_name="ContainerName",
+        control=ControlEnum.not_control,
         require_qc_ok=True,
         reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,

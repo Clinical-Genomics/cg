@@ -1,4 +1,9 @@
+from pydantic import Discriminator, Tag
+from typing_extensions import Annotated
+
 from cg.services.order_validation_service.models.case import Case
+from cg.services.order_validation_service.models.discriminators import has_internal_id
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.workflows.tomte.models.sample import (
     TomteSample,
 )
@@ -8,7 +13,12 @@ class TomteCase(Case):
     cohorts: list[str] | None = None
     panels: list[str]
     synopsis: str | None = None
-    samples: list[TomteSample]
+    samples: list[
+        Annotated[
+            Annotated[TomteSample, Tag("new")] | Annotated[ExistingSample, Tag("existing")],
+            Discriminator(has_internal_id),
+        ]
+    ]
 
     def get_sample(self, sample_name: str) -> TomteSample | None:
         for sample in self.samples:
