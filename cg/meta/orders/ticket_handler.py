@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse, ReplyCreate
+from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -19,12 +19,13 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, status_db: Store, client: FreshdeskClient, system_email_id: int, env: str):
+    def __init__(self, config: dict, db:Store, client: FreshdeskClient ):
         self.client: FreshdeskClient = client
-        self.status_db: Store = status_db
-        self.system_email_id: int = system_email_id
-        self.env = env
+        self.status_db: Store = db
+        self.system_email_id: int = config["freshdesk_order_email_id"]
+        self.env: str = config["freshdesk_environment"]
 
+    
     @staticmethod
     def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
