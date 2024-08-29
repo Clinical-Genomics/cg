@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from pathlib import Path
 
-from flask import Flask
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
