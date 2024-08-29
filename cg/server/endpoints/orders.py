@@ -28,8 +28,12 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
@@ -38,18 +42,14 @@ from cg.server.ext import (
     db,
     delivery_message_service,
     lims,
-    order_service,
-    osticket,
-    order_submitter_registry,
     microsalt_validation_service,
-    tomte_validation_service,
     mip_dna_validation_service,
+    order_service,
+    order_submitter_registry,
+    osticket,
+    tomte_validation_service,
 )
-from cg.store.models import (
-    Application,
-    Customer,
-)
-
+from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
 ORDERS_BLUEPRINT.before_request(before_request)
@@ -268,6 +268,8 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
 def validate_order(workflow: str):
     raw_order = request.get_json()
+    raw_order["workflow"] = workflow
+    raw_order["user_id"] = g.current_user.id
     response = {}
     if workflow == Workflow.TOMTE:
         response = tomte_validation_service.validate(raw_order)
