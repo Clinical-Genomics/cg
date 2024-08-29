@@ -4,7 +4,10 @@ from pathlib import Path
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
+<<<<<<< HEAD:cg/services/file_delivery/deliver_files_service/deliver_files_service.py
 from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
+=======
+>>>>>>> dev-new-delivery-service:cg/services/file_delivery/abstract_classes.py
 
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
@@ -16,6 +19,7 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
 
 
 class DeliverFilesService:
+
     """
     Abstract class that encapsulates the logic required for delivering files to the customer.
 
