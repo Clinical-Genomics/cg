@@ -17,7 +17,7 @@ class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
     def __init__(self, config: dict):
-        self.base_url = config["freshdesk_base_url"]
+        self.base_url = config["freshdesk_url"]
         self.api_key = config["freshdesk_api_key"]
         self.session = self._get_session()
        
