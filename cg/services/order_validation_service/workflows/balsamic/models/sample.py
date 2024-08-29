@@ -11,7 +11,7 @@ class BalsamicSample(Sample):
     comment: str | None = None
     concentration_ng_ul: float | None = None
     control: ControlEnum | None = None
-    elution_buffer: ElutionBuffer
+    elution_buffer: ElutionBuffer | None = None
     formalin_fixation_time: int | None = None
     is_tumour: bool
     phenotype_groups: list[str] | None = None
