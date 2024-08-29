@@ -10,6 +10,7 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
+from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.balsamic.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
