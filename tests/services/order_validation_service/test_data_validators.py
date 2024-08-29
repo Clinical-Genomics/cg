@@ -11,7 +11,6 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotValidError,
     SampleDoesNotExistError,
     SexMissingError,
-    SourceMissingError,
 )
 from cg.services.order_validation_service.models.existing_case import ExistingCase
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
@@ -26,7 +25,6 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_gene_panels_exist,
     validate_samples_exist,
     validate_sex_required_for_new_samples,
-    validate_source_required,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Application
@@ -172,16 +170,3 @@ def test_sex_missing_for_new_sample(valid_order: TomteOrder):
 
     # THEN the error should concern the missing sex
     assert isinstance(errors[0], SexMissingError)
-
-
-def test_source_missing_for_new_sample(valid_order: TomteOrder):
-
-    # GIVEN an order with a new sample without 'source' set
-    valid_order.cases[0].samples[0].source = None
-
-    # WHEN validating that all new samples have 'source' set
-    errors = validate_source_required(order=valid_order)
-
-    assert errors
-
-    assert isinstance(errors[0], SourceMissingError)

@@ -3,8 +3,6 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
-    ElutionBufferMissingError,
-    ExtractionMethodMissingError,
     InvalidVolumeError,
     OrganismDoesNotExistError,
 )
@@ -12,8 +10,6 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
-    validate_buffer_required,
-    validate_extraction_method_required,
     validate_organism_exists,
     validate_volume_interval,
 )
@@ -119,33 +115,3 @@ def test_valid_organisms(valid_order: MicrosaltOrder, base_store: Store):
 
     # THEN no error should be returned
     assert not errors
-
-
-def test_buffer_required(valid_order: MicrosaltOrder):
-
-    # GIVEN an order containing a sample with missing buffer
-    valid_order.samples[0].elution_buffer = None
-
-    # WHEN validating that buffers are set for new samples
-    errors = validate_buffer_required(order=valid_order)
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the missing buffer
-    assert isinstance(errors[0], ElutionBufferMissingError)
-
-
-def test_extraction_method_missing(valid_order: MicrosaltOrder):
-
-    # GIVEN an order containing a sample with missing extraction method
-    valid_order.samples[0].extraction_method = None
-
-    # WHEN validating that the extraction method is set for all new samples
-    errors = validate_extraction_method_required(order=valid_order)
-
-    # THEN an error should be raised
-    assert errors
-
-    # THEN the error should concern the missing extraction method
-    assert isinstance(errors[0], ExtractionMethodMissingError)

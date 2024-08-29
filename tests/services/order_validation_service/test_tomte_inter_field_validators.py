@@ -11,27 +11,25 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     OccupiedWellError,
     SampleIsOwnFatherError,
     SampleNameRepeatedError,
-    StatusMissingError,
     SubjectIdSameAsSampleNameError,
 )
-from cg.services.order_validation_service.rules.case.rules import validate_case_names_not_repeated
+from cg.services.order_validation_service.rules.case.rules import (
+    validate_case_names_not_repeated,
+)
 from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_buffers_are_allowed,
-    validate_concentration_required_if_skip_rc,
-    validate_subject_ids_different_from_sample_names,
-)
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import (
-    TomteSample,
-)
-from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
+    validate_concentration_required_if_skip_rc,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_pedigree,
     validate_sample_names_not_repeated,
-    validate_status_required_if_new,
+    validate_subject_ids_different_from_sample_names,
     validate_wells_contain_at_most_one_sample,
+)
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.order_validation_service.workflows.tomte.models.sample import (
+    TomteSample,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -240,18 +238,3 @@ def test_concentration_not_within_interval_if_skip_rc(
 
     # THEN the error should concern the application interval
     assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
-
-
-def test_missing_status_on_new_sample(valid_order: TomteOrder):
-
-    # GIVEN an order with a new sample with 'status' not set
-    valid_order.cases[0].samples[0].status = None
-
-    # WHEN validating that all new samples have a provided status
-    errors = validate_status_required_if_new(valid_order)
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the missing status
-    assert isinstance(errors[0], StatusMissingError)

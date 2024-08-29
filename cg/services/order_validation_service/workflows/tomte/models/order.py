@@ -9,12 +9,10 @@ from cg.services.order_validation_service.workflows.tomte.constants import (
 )
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 
+NewCase = Annotated[TomteCase, Tag("new")]
+OldCase = Annotated[ExistingCase, Tag("existing")]
+
 
 class TomteOrder(OrderWithCases):
-    cases: list[
-        Annotated[
-            Annotated[TomteCase, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
-            Discriminator(has_internal_id),
-        ]
-    ]
+    cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: TomteDeliveryType

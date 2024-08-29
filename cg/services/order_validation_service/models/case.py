@@ -7,24 +7,27 @@ from cg.services.order_validation_service.models.discriminators import has_inter
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.models.sample import Sample
 
+NewSample = Annotated[Sample, Tag("new")]
+ExistingSampleType = Annotated[ExistingSample, Tag("existing")]
+
 
 class Case(BaseModel):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
     samples: list[
         Annotated[
-            Annotated[Sample, Tag("new")] | Annotated[ExistingSample, Tag("existing")],
+            NewSample | ExistingSampleType,
             Discriminator(has_internal_id),
         ]
     ]
 
     @property
-    def enumerated_samples(self):
-        return enumerate(self.samples)
-
-    @property
     def is_new(self) -> bool:
         return True
+
+    @property
+    def enumerated_samples(self):
+        return enumerate(self.samples)
 
     @property
     def enumerated_new_samples(self):
