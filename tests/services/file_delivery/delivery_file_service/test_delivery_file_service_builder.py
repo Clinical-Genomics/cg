@@ -6,7 +6,7 @@ from cg.services.file_delivery.deliver_files_service.deliver_files_service impor
     DeliverFilesService,
 )
 from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
-    DeliveryServiceBuilder,
+    DeliveryServiceFactory,
 )
 from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
     FetchSampleAndCaseDeliveryFileTagsService,
@@ -71,7 +71,7 @@ def test_build_delivery_service(
     # GIVEN a delivery service builder with mocked store and hk_api
     store_mock = MagicMock()
     hk_api_mock = MagicMock()
-    builder = DeliveryServiceBuilder(store=store_mock, hk_api=hk_api_mock)
+    builder = DeliveryServiceFactory(store=store_mock, hk_api=hk_api_mock)
 
     # WHEN building a delivery service
     delivery_service: DeliverFilesService = builder.build_delivery_service(

@@ -48,7 +48,7 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
 from cg.store.store import Store
 
 
-class DeliveryServiceBuilder:
+class DeliveryServiceFactory:
     """Class to build the delivery services based on workflow and delivery type."""
 
     def __init__(self, store: Store, hk_api: HousekeeperAPI):
