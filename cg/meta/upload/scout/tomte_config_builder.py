@@ -42,10 +42,10 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         LOG.info("Build load config for Tomte case")
         self.add_common_info_to_load_config()
         self.load_config.human_genome_build = GenomeBuild.hg19
-        self.load_config.rna_genome_build = getattr(
-            GenomeBuild,
-            self.analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
-        )
+        # self.load_config.rna_genome_build = getattr(
+        #     GenomeBuild,
+        #     self.analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
+        # )
 
         self.load_config.gene_panels: list[str] = self.analysis_api.get_aggregated_panels(
             customer_id=self.analysis_obj.case.customer.internal_id,
