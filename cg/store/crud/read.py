@@ -1562,3 +1562,16 @@ class ReadHandler(BaseHandler):
         for sample_id in sample_ids:
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
+
+    def sample_exists_with_different_sex(
+        self,
+        customer_internal_id: str,
+        subject_id: str,
+        sex: str,
+    ) -> bool:
+        samples: list[Sample] = self.get_samples_by_customer_and_subject_id(
+            customer_internal_id=customer_internal_id,
+            subject_id=subject_id,
+        )
+        existing_sex: set[str] = {sample.sex for sample in samples}
+        return bool(samples) and sex not in existing_sex
