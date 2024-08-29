@@ -6,7 +6,7 @@ from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.u
 from cg.store.store import Store
 
 
-def validate_subject_id_sex_consistency(
+def validate_subject_sex_consistency(
     order: BalsamicOrder,
     store: Store,
 ) -> list[SubjectIdGenderError]:
