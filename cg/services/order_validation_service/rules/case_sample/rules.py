@@ -24,8 +24,6 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleDoesNotExistError,
     SampleNameRepeatedError,
     SexMissingError,
-    SourceMissingError,
-    StatusMissingError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     WellPositionMissingError,
@@ -232,16 +230,6 @@ def validate_sex_required_for_new_samples(order: OrderWithCases, **kwargs) -> li
     return errors
 
 
-def validate_source_required(order: OrderWithCases, **kwargs) -> list[SourceMissingError]:
-    errors: list[SourceMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if not sample.source:
-                error = SourceMissingError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
-    return errors
-
-
 def validate_wells_contain_at_most_one_sample(
     order: OrderWithCases, **kwargs
 ) -> list[OccupiedWellError]:
@@ -349,14 +337,4 @@ def validate_concentration_interval_if_skip_rc(
             store=store,
         )
         errors.extend(case_errors)
-    return errors
-
-
-def validate_status_required_if_new(order: OrderWithCases, **kwargs) -> list[StatusMissingError]:
-    errors: list[StatusMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if not sample.status:
-                error = StatusMissingError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
     return errors

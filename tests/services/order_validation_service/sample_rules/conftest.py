@@ -1,9 +1,10 @@
 import pytest
 
 from cg.constants.constants import Workflow
-from cg.models.orders.sample_base import ContainerEnum
+from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
 from cg.services.order_validation_service.constants import (
     MINIMUM_VOLUME,
+    ElutionBuffer,
     ExtractionMethod,
 )
 from cg.services.order_validation_service.workflows.microsalt.constants import (
@@ -25,8 +26,10 @@ def create_microsalt_sample(id: int) -> MicrosaltSample:
         application="MWRNXTR003",
         container=ContainerEnum.plate,
         container_name="ContainerName",
+        elution_buffer=ElutionBuffer.WATER,
         extraction_method=ExtractionMethod.MAELSTROM,
         organism="C. jejuni",
+        priority=PriorityEnum.standard,
         require_qc_ok=True,
         reference_genome="NC_00001",
         well_position=f"A:{id}",

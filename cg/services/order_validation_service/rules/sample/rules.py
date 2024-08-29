@@ -4,8 +4,6 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
-    ElutionBufferMissingError,
-    ExtractionMethodMissingError,
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
@@ -64,29 +62,6 @@ def validate_organism_exists(
     for sample_index, sample in order.enumerated_samples:
         if not store.get_organism_by_internal_id(sample.organism):
             error = OrganismDoesNotExistError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_buffer_required(
-    order: OrderWithNonHumanSamples,
-    **kwargs,
-) -> list[ElutionBufferMissingError]:
-    errors: list[ElutionBufferMissingError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if not sample.elution_buffer:
-            error = ElutionBufferMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_extraction_method_required(
-    order: OrderWithNonHumanSamples, **kwargs
-) -> list[ExtractionMethodMissingError]:
-    errors: list[ExtractionMethodMissingError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if not sample.extraction_method:
-            error = ExtractionMethodMissingError(sample_index=sample_index)
             errors.append(error)
     return errors
 
