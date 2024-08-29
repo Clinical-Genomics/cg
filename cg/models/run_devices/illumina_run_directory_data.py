@@ -23,9 +23,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.run_devices.utils import parse_date
-from cg.services.illumina.file_parsing.run_completion_status_service import (
-    ParseRunCompletionStatusService,
-)
 from cg.utils.files import get_source_creation_time_stamp
 from cg.utils.time import format_time_from_ctime
 
@@ -83,7 +80,7 @@ class IlluminaRunDirectoryData:
         return self.path.name
 
     @property
-    def sequenced_at(self) -> list[str]:
+    def sequenced_at(self) -> datetime:
         """Return the sequencing date for the sequencing run."""
         date_part: str = self.full_name.split("_")[0]
         return parse_date(date_part)
@@ -95,6 +92,25 @@ class IlluminaRunDirectoryData:
         """
         return Path(
             self.get_sequencing_runs_dir(), DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+
+    @property
+    def get_sequencing_completed_path(self) -> Path | None:
+        """Return the path to the sequencing completed file."""
+        sequencing_completed_paths: dict = {
+            Sequencers.NOVASEQ: Path(
+                self.get_sequencing_runs_dir(),
+                DemultiplexingDirsAndFiles.SEQUENCE_COMPLETED,
+            ),
+            Sequencers.HISEQX: Path(
+                self.get_sequencing_runs_dir(),
+                DemultiplexingDirsAndFiles.SEQUENCING_COMPLETED,
+            ),
+        }
+        return (
+            sequencing_completed_paths[self.sequencer_type]
+            if self.sequencer_type in sequencing_completed_paths.keys()
+            else None
         )
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
@@ -288,18 +304,6 @@ class IlluminaRunDirectoryData:
         if file_path.exists():
             return file_path
         return None
-
-    @property
-    def sequencing_started_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_start_time(file_path) if file_path else None
-
-    @property
-    def sequencing_completed_at(self) -> datetime.datetime | None:
-        parser = ParseRunCompletionStatusService()
-        file_path: Path = self.get_run_completion_status()
-        return parser.get_end_time(file_path) if file_path else None
 
     @property
     def demultiplexing_started_at(self) -> datetime.datetime | None:

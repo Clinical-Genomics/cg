@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -19,6 +20,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
@@ -28,6 +30,23 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
     FastqConcatenationService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
+    PacBioStoreService,
+)
+from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
+    PacBioDataTransferService,
+)
+from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+    PacBioHousekeeperService,
+)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
+    PacBioRunDataGenerator,
+)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -94,7 +113,7 @@ class DownsampleConfig(BaseModel):
     account: str
 
 
-class JanusConfig(BaseModel):
+class ClientConfig(BaseModel):
     host: str
 
 
@@ -324,6 +343,13 @@ class RunInstruments(BaseModel):
     illumina: IlluminaConfig
 
 
+class PostProcessingServices(BaseModel):
+    pacbio: PacBioPostProcessingService
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -349,6 +375,8 @@ class CGConfig(BaseModel):
     illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    chanjo2: ClientConfig | None = None
+    chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -364,7 +392,7 @@ class CGConfig(BaseModel):
     gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
-    janus: JanusConfig | None = None
+    janus: ClientConfig | None = None
     janus_api_: JanusAPIClient | None = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
@@ -378,6 +406,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None
+    post_processing_services_: PostProcessingServices | None = None
     pigz: CommonAppConfig | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
@@ -409,6 +438,7 @@ class CGConfig(BaseModel):
         fields = {
             "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
+            "chanjo2_api_": "chanjo2_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
             "genotype_api_": "genotype_api",
@@ -420,6 +450,7 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "pdc_service_": "pdc_service",
+            "post_processing_services_": "post_processing_services",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -443,6 +474,16 @@ class CGConfig(BaseModel):
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
         return api
+
+    @property
+    def chanjo2_api(self) -> Chanjo2APIClient:
+        chanjo2_api = self.__dict__.get("chanjo2_api_")
+        if chanjo2_api is None:
+            LOG.debug("Instantiating Chanjo2 API")
+            config: dict[str, Any] = self.dict()
+            chanjo2_api = Chanjo2APIClient(base_url=config["chanjo2"]["host"])
+            self.chanjo2_api_ = chanjo2_api
+        return chanjo2_api
 
     @property
     def crunchy_api(self) -> CrunchyAPI:
@@ -547,6 +588,38 @@ class CGConfig(BaseModel):
             api = MutaccAutoAPI(config=self.dict())
             self.mutacc_auto_api_ = api
         return api
+
+    @property
+    def post_processing_services(self) -> PostProcessingServices:
+        services = self.__dict__.get("post_processing_services_")
+        if services is None:
+            LOG.debug("Instantiating post-processing services")
+            services = PostProcessingServices(
+                pacbio=self.get_pacbio_post_processing_service(),
+            )
+            self.post_processing_services_ = services
+        return services
+
+    def get_pacbio_post_processing_service(self) -> PacBioPostProcessingService:
+        LOG.debug("Instantiating PacBio post-processing service")
+        run_data_generator = PacBioRunDataGenerator()
+        file_manager = PacBioRunFileManager()
+        metrics_parser = PacBioMetricsParser(file_manager=file_manager)
+        transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
+        store_service = PacBioStoreService(
+            store=self.status_db, data_transfer_service=transfer_service
+        )
+        hk_service = PacBioHousekeeperService(
+            hk_api=self.housekeeper_api,
+            file_manager=file_manager,
+            metrics_parser=metrics_parser,
+        )
+        return PacBioPostProcessingService(
+            run_data_generator=run_data_generator,
+            hk_service=hk_service,
+            store_service=store_service,
+            sequencing_dir=self.run_instruments.pacbio.data_dir,
+        )
 
     @property
     def pdc_service(self) -> PdcService:

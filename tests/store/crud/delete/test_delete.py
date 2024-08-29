@@ -1,5 +1,13 @@
-from cg.store.models import Case, CaseSample, Sample, IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.exc import EntryNotFoundError
+from cg.store.models import (
+    Case,
+    CaseSample,
+    IlluminaFlowCell,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
+import pytest
 
 
 def test_store_api_delete_relationships_between_sample_and_cases(
@@ -23,7 +31,7 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     assert sample_in_multiple_cases
 
     # WHEN removing the relationships between one sample and its cases
-    store_with_multiple_cases_and_samples.delete_relationships_sample(sample=sample_in_single_case)
+    store_with_multiple_cases_and_samples.decouple_sample_from_cases(sample_in_single_case.id)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results: list[CaseSample] = (
@@ -129,16 +137,11 @@ def test_delete_illumina_flow_cell(
     store_with_illumina_sequencing_data.delete_illumina_flow_cell(novaseq_x_flow_cell_id)
 
     # THEN the flow cell should no longer be found in the store
-    deleted_flow_cell: IlluminaFlowCell = (
+    with pytest.raises(EntryNotFoundError):
         store_with_illumina_sequencing_data.get_illumina_flow_cell_by_internal_id(
             novaseq_x_flow_cell_id
         )
-    )
-    deleted_sequencing_run: IlluminaSequencingRun = (
+    with pytest.raises(EntryNotFoundError):
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
         )
-    )
-
-    assert not deleted_flow_cell
-    assert not deleted_sequencing_run

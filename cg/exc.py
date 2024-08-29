@@ -60,6 +60,12 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.
@@ -276,6 +282,10 @@ class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
 
 
+class MissingSequencingMetricsError(CgError):
+    """Exception raised when sequencing metrics are missing."""
+
+
 class ArchiveJobFailedError(CgError):
     """Exception raised when an archival or retrieval job has failed."""
 
@@ -306,3 +316,15 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class Chanjo2APIClientError(CgError):
+    """Exception related to the Chanjo2 API client."""
+
+
+class Chanjo2RequestError(Chanjo2APIClientError):
+    """Exception raised when a request to the Chanjo2 API client fails."""
+
+
+class Chanjo2ResponseError(Chanjo2APIClientError):
+    """Exception raised when the response from Chanjo2 API client fails validation."""

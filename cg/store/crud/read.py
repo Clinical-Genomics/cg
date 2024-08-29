@@ -9,9 +9,11 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
+from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
@@ -46,6 +48,10 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_pacbio_smrt_cell_filters import (
+    apply_pac_bio_smrt_cell_filters,
+    PacBioSMRTCellFilter,
+)
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
@@ -72,6 +78,7 @@ from cg.store.models import (
     Sample,
     SampleRunMetrics,
     User,
+    PacBioSMRTCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -381,11 +388,14 @@ class ReadHandler(BaseHandler):
         self, device_internal_id: str
     ) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
-        return apply_illumina_sequencing_run_filter(
+        sequencing_run: IlluminaSequencingRun | None = apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
         ).first()
+        if not sequencing_run:
+            raise EntryNotFoundError(f"No sequencing run found for device {device_internal_id}")
+        return sequencing_run
 
     def get_latest_illumina_sequencing_run_for_nipt_case(
         self, case_internal_id: str
@@ -605,6 +615,25 @@ class ReadHandler(BaseHandler):
             customer_entry_ids=customer_entry_ids,
             search_pattern=pattern,
             filter_functions=filter_functions,
+        ).all()
+
+    def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
+        customer: Customer | None = self.get_customer_by_internal_id(request.customer)
+        collaborator_ids = [collaborator.id for collaborator in customer.collaborators]
+
+        filters = [
+            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
+            SampleFilter.ORDER_BY_CREATED_AT_DESC,
+            SampleFilter.IS_NOT_CANCELLED,
+            SampleFilter.LIMIT,
+        ]
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            customer_entry_ids=collaborator_ids,
+            search_pattern=request.enquiry,
+            filter_functions=filters,
+            limit=request.limit,
         ).all()
 
     def _get_samples_by_customer_and_subject_id_query(
@@ -1009,11 +1038,16 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
-        return apply_sample_filter(
+        sample: Sample | None = apply_sample_filter(
             filter_functions=[SampleFilter.BY_ENTRY_ID],
             samples=self._get_query(table=Sample),
             entry_id=entry_id,
         ).first()
+
+        if not sample:
+            LOG.error(f"Could not find sample with entry id {entry_id}")
+            raise SampleNotFoundError(f"Could not find sample with entry id {entry_id}")
+        return sample
 
     def get_sample_by_internal_id(self, internal_id: str) -> Sample | None:
         """Return a sample by lims id."""
@@ -1422,13 +1456,35 @@ class ReadHandler(BaseHandler):
             cases_to_exclude=cases_to_exclude,
         ).count()
 
+    def get_case_failed_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_SEQUENCED,
+            CaseSampleFilter.CASES_FAILED_SEQUENCING_QC,
+            CaseSampleFilter.EXCLUDE_CASES,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
+        ).count()
+
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
-        return apply_illumina_flow_cell_filters(
+        flow_cell: IlluminaFlowCell | None = apply_illumina_flow_cell_filters(
             filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+        if not flow_cell:
+            raise EntryNotFoundError(
+                f"Could not find Illumina flow cell with internal id {internal_id}"
+            )
+        return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """Return all cases that are ready for sequencing QC."""
@@ -1446,3 +1502,21 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+        return apply_pac_bio_smrt_cell_filters(
+            filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
+            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            internal_id=internal_id,
+        ).first()
+
+    def get_case_ids_with_sample(self, sample_id: int) -> list[str]:
+        """Return all case ids with a sample."""
+        sample: Sample = self.get_sample_by_entry_id(sample_id)
+        return [link.case.internal_id for link in sample.links] if sample else []
+
+    def get_case_ids_for_samples(self, sample_ids: list[int]) -> list[str]:
+        case_ids: list[str] = []
+        for sample_id in sample_ids:
+            case_ids.extend(self.get_case_ids_with_sample(sample_id))
+        return list(set(case_ids))

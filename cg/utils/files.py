@@ -23,6 +23,18 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
 
 
+def get_file_with_pattern_from_list(files: list[Path], pattern: str) -> Path | None:
+    """
+    Return the path whose name matches a pattern from a list of paths.
+    Raises:
+        FileNotFoundError: If no file matches the pattern.
+    """
+    for file in files:
+        if pattern in file.name:
+            return file
+    raise FileNotFoundError(f"No {pattern} file found in given file list")
+
+
 def get_files_in_directory_with_pattern(directory: Path, pattern: str) -> list[Path]:
     """Get files with a pattern in a directory and subdirectories.
     Raises:
@@ -109,3 +121,14 @@ def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
         subdir = Path(subdir).relative_to(directory)
         files_in_directory.extend([Path(subdir, file) for file in files])
     return files_in_directory
+
+
+def get_source_modified_time_stamp(source_path: Path) -> float:
+    """
+    Return time stamp that a source is modified. Works for files and directories.
+    Raises:
+        FileNotFoundError if the source does not exist.
+    """
+    if not source_path.exists():
+        raise FileNotFoundError(f"Directory with path {source_path} is not found.")
+    return os.stat(source_path).st_mtime
