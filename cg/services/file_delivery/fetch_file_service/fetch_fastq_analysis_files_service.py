@@ -30,8 +30,12 @@ class FetchFastqAndAnalysisDeliveryFilesService(FetchDeliveryFilesService):
 
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         case = self._get_case(case_id)
-        fastq_files = self._fetch_files(FetchFastqDeliveryFilesService, case_id)
-        analysis_files = self._fetch_files(FetchAnalysisDeliveryFilesService, case_id)
+        fastq_files: DeliveryFiles = self._fetch_files(
+            service_class=FetchFastqDeliveryFilesService, case_id=case_id
+        )
+        analysis_files: DeliveryFiles = self._fetch_files(
+            service_class=FetchAnalysisDeliveryFilesService, case_id=case_id
+        )
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
