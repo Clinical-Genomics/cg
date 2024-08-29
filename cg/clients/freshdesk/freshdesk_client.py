@@ -9,8 +9,6 @@ from cg.clients.freshdesk.constants import EndPoints
 from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
-TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
-
 
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
