@@ -4,3 +4,5 @@ from cg.services.order_validation_service.workflows.balsamic.models.sample impor
 
 class BalsamicCase(Case):
     samples: list[BalsamicSample]
+    cohorts: list[str] | None = None
+    synopsis: str | None = None
