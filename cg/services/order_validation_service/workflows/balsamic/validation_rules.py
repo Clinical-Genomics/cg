@@ -2,7 +2,6 @@ from cg.services.order_validation_service.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
-    validate_gene_panels_unique,
 )
 from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_compatibility,
@@ -11,7 +10,6 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_buffer_skip_rc_condition,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
-    validate_gene_panels_exist,
     validate_sample_names_not_repeated,
     validate_samples_exist,
     validate_sex_required_for_new_samples,
