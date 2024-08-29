@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
 from cg.constants.delivery import INBOX_NAME
-
 from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles, SampleFile, CaseFile
-
 from cg.services.file_delivery.file_formatter_service.utils.case_file_formatter import (
     CaseFileFormatter,
 )
