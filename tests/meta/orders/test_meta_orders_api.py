@@ -1,5 +1,5 @@
 import datetime as dt
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -27,31 +27,6 @@ def monkeypatch_process_lims(monkeypatch, order_data) -> None:
         lambda *args, **kwargs: (lims_project_data, lims_map),
     )
 
-
-def test_too_long_order_name():
-    # GIVEN order with more than allowed characters name
-    long_name = "A super long order name that is longer than sixty-four characters."
-    assert len(long_name) > Sample.order.property.columns[0].type.length
-
-    # WHEN placing it in the pydantic order model
-    # THEN an error is raised
-    with pytest.raises(ValueError):
-        OrderIn(name=long_name, customer="", comment="", samples=[])
-
-
-def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order_data: OrderIn):
-    """
-    Helper function to mock LIMS processing.
-    """
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
-
-
 def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
@@ -62,10 +37,20 @@ def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str):
         priority=1,
     )
 
-
 def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket):
     """Helper function to mock Freshdesk reply to ticket."""
     mock_reply_to_ticket.return_value = None
+
+
+def test_too_long_order_name():
+    # GIVEN order with more than allowed characters name
+    long_name = "A super long order name that is longer than sixty-four characters."
+    assert len(long_name) > Sample.order.property.columns[0].type.length
+
+    # WHEN placing it in the pydantic order model
+    # THEN an error is raised
+    with pytest.raises(ValueError):
+        OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
 @pytest.mark.parametrize(
@@ -108,6 +93,7 @@ def test_submit(
         assert not base_store._get_query(table=Sample).first()
 
         # WHEN submitting the order
+
         result = orders_api.submit(
             project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
@@ -128,7 +114,7 @@ def test_submit(
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_ticketexception(
-    all_orders_to_submit: dict,
+    all_orders_to_submit,
     orders_api: OrdersAPI,
     order_type: OrderType,
     user_mail: str,
@@ -143,7 +129,7 @@ def test_submit_ticketexception(
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         order_data.name = "dummy_name"
 
-        # WHEN the order is submitted and a TicketCreationError is raised
+        # WHEN the order is submitted and a TicketCreationError raised
         # THEN the TicketCreationError is not excepted
         with pytest.raises(TicketCreationError):
             orders_api.submit(
@@ -169,7 +155,6 @@ def test_submit_illegal_sample_customer(
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
-    orders_api.ticket_handler = Mock()
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
     new_customer = sample_store.add_customer(
@@ -219,12 +204,9 @@ def test_submit_scout_legal_sample_customer(
     ) as mock_reply_to_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
-
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
-
-        orders_api.ticket_handler = Mock()
-    # GIVEN we have an order with a customer that is in the same customer group as the customer
+        # GIVEN we have an order with a customer that is in the same customer group as customer
         # that the samples originate from
         collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
         sample_store.session.add(collaboration)
@@ -279,7 +261,6 @@ def test_submit_duplicate_sample_case_name(
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-    orders_api.ticket_handler = Mock()
     for sample in order_data.samples:
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
@@ -327,7 +308,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
     ) as mock_reply_to_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
-
         # GIVEN we have an order with a case that is already in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
@@ -363,6 +343,7 @@ def test_submit_unique_sample_case_name(
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
+        
         # GIVEN we have an order with a case that is not existing in the database
         order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
 
@@ -413,7 +394,7 @@ def test_validate_sex_inconsistent_sex(
 
     validator = ValidateCaseOrderService(status_db=orders_api.status)
 
-    # WHEN calling _validate_subject_sex
+    # WHEN calling _validate_sex
     # THEN an OrderError should be raised on non-matching sex
     with pytest.raises(OrderError):
         validator._validate_subject_sex(samples=order_data.samples, customer_id=order_data.customer)
@@ -524,7 +505,6 @@ def test_validate_sex_unknown_new_sex(
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
         OrderType.RML,
-        OrderType.RNAFUSION,
         OrderType.SARS_COV_2,
     ],
 )
@@ -533,9 +513,9 @@ def test_submit_unique_sample_name(
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
+    ticket_id: str,
 ):
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
@@ -544,7 +524,6 @@ def test_submit_unique_sample_name(
     ) as mock_reply_to_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
-
         # GIVEN we have an order with a sample that is not existing in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         store = orders_api.status
@@ -620,10 +599,9 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    sample_store: Store,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
+    ticket_id: str,
 ):
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
@@ -632,8 +610,7 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     ) as mock_reply_to_ticket:
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
-
-        # GIVEN we have an order with samples that are already in the database
+        # GIVEN we have an order with samples that is already in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         monkeypatch_process_lims(monkeypatch, order_data)
         store_samples_with_names_from_order(orders_api.status, helpers, order_data)
@@ -642,4 +619,5 @@ def test_not_sarscov2_submit_duplicate_sample_name(
         orders_api.submit(
             project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
+
         # THEN no OrderError should be raised on duplicate sample name
