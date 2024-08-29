@@ -9,7 +9,7 @@ from cg.services.order_validation_service.utils import (
     apply_sample_validation,
 )
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
-from cg.services.order_validation_service.workflows.mutant.rules.sample.rules import SAMPLE_RULES
+from cg.services.order_validation_service.workflows.mutant.validation_rules import SAMPLE_RULES
 from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
 from cg.store.store import Store
 

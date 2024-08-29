@@ -24,6 +24,7 @@ from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.r
     validate_subject_sex_consistency,
 )
 
+
 CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
