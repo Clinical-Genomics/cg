@@ -79,11 +79,6 @@ class MotherNotInCaseError(CaseSampleError):
     message: str = "Mother must be in the same case"
 
 
-class StatusMissingError(CaseSampleError):
-    field: str = "status"
-    message: str = "Carrier status is required"
-
-
 class SampleDoesNotExistError(CaseSampleError):
     field: str = "internal_id"
     message: str = "The sample does not exist"
@@ -92,11 +87,6 @@ class SampleDoesNotExistError(CaseSampleError):
 class SexMissingError(CaseSampleError):
     field: str = "sex"
     message: str = "Sex is required"
-
-
-class SourceMissingError(CaseSampleError):
-    field: str = "source"
-    message: str = "Source is required"
 
 
 class SubjectIdSameAsCaseNameError(CaseSampleError):
