@@ -4,7 +4,7 @@ from cg.services.order_validation_service.constants import TissueBlockEnum
 from cg.services.order_validation_service.models.sample import Sample
 
 
-class MipDnaSample(Sample):
+class BalsamicSample(Sample):
     age_at_sampling: float | None = None
     control: ControlEnum | None = None
     elution_buffer: str | None = None

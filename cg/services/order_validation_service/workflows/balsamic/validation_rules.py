@@ -1,0 +1,2 @@
+CASE_RULES = []
+CASE_SAMPLE_RULES = []
