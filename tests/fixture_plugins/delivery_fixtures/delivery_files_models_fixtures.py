@@ -24,20 +24,26 @@ def expected_fastq_delivery_files(
     delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
     sample_id: str,
+    sample_name: str,
     another_sample_id: str,
+    another_sample_name: str,
     delivery_store_microsalt: Store,
 ) -> DeliveryFiles:
     """Return the expected fastq delivery files."""
-    hk_bundle_names: list[str] = [sample_id, another_sample_id]
+    sample_info: list[tuple[str, str]] = [
+        (sample_id, sample_name),
+        (another_sample_id, another_sample_name),
+    ]
     sample_files: list[SampleFile] = [
         SampleFile(
             case_id=case_id,
-            sample_id=sample,
+            sample_id=sample[0],
+            sample_name=sample[1],
             file_path=delivery_housekeeper_api.get_files_from_latest_version(
-                bundle_name=sample, tags=[SequencingFileTag.FASTQ]
+                bundle_name=sample[0], tags=[SequencingFileTag.FASTQ]
             )[0].full_path,
         )
-        for sample in hk_bundle_names
+        for sample in sample_info
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
@@ -52,29 +58,37 @@ def expected_fastq_delivery_files(
 def expected_analysis_delivery_files(
     delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
+    case_name: str,
     sample_id: str,
+    sample_name: str,
     another_sample_id: str,
+    another_sample_name: str,
     delivery_store_balsamic: Store,
 ) -> DeliveryFiles:
     """Return the expected analysis delivery files."""
-    hk_bundle_names: list[str] = [sample_id, another_sample_id]
+    sample_info: list[tuple[str, str]] = [
+        (sample_id, sample_name),
+        (another_sample_id, another_sample_name),
+    ]
     sample_files: list[SampleFile] = []
-    for sample in hk_bundle_names:
+    for sample in sample_info:
         sample_files.extend(
             [
                 SampleFile(
                     case_id=case_id,
-                    sample_id=sample,
+                    sample_id=sample[0],
+                    sample_name=sample[1],
                     file_path=file.full_path,
                 )
                 for file in delivery_housekeeper_api.get_files_from_latest_version(
-                    bundle_name=case_id, tags=[AlignmentFileTag.CRAM, sample]
+                    bundle_name=case_id, tags=[AlignmentFileTag.CRAM, sample[0]]
                 )
             ]
         )
     case_files: list[CaseFile] = [
         CaseFile(
             case_id=case_id,
+            case_name=case_name,
             file_path=delivery_housekeeper_api.get_files_from_latest_version(
                 bundle_name=case_id, tags=[HK_DELIVERY_REPORT_TAG]
             )[0].full_path,
@@ -134,6 +148,40 @@ def expected_moved_analysis_delivery_files(
         case_files=new_case_files,
         sample_files=new_sample_files,
     )
+
+
+@pytest.fixture
+def expected_moved_analysis_sample_delivery_files(
+    expected_moved_analysis_delivery_files: DeliveryFiles,
+) -> list[SampleFile]:
+    return expected_moved_analysis_delivery_files.sample_files
+
+
+@pytest.fixture
+def expected_moved_analysis_case_delivery_files(
+    expected_moved_analysis_delivery_files: DeliveryFiles,
+) -> list[CaseFile]:
+    return expected_moved_analysis_delivery_files.case_files
+
+
+@pytest.fixture
+def fastq_concatenation_sample_files(tmp_path: Path) -> list[SampleFile]:
+    some_ticket: str = "some_ticket"
+    fastq_paths: list[Path] = [
+        Path(tmp_path, some_ticket, "S1_1_R1_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_2_R1_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_1_R2_1.fastq.gz"),
+        Path(tmp_path, some_ticket, "S1_2_R2_1.fastq.gz"),
+    ]
+    return [
+        SampleFile(
+            sample_id="S1",
+            case_id="Case1",
+            sample_name="Sample1",
+            file_path=fastq_path,
+        )
+        for fastq_path in fastq_paths
+    ]
 
 
 def swap_file_paths_with_inbox_paths(
