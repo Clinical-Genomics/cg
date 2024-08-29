@@ -27,6 +27,7 @@ def monkeypatch_process_lims(monkeypatch, order_data) -> None:
         lambda *args, **kwargs: (lims_project_data, lims_map),
     )
 
+
 def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
@@ -36,6 +37,7 @@ def mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id: str):
         status=2,
         priority=1,
     )
+
 
 def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket):
     """Helper function to mock Freshdesk reply to ticket."""
@@ -343,7 +345,6 @@ def test_submit_unique_sample_case_name(
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
-        
         # GIVEN we have an order with a case that is not existing in the database
         order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
 

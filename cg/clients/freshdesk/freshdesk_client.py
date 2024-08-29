@@ -20,7 +20,7 @@ class FreshdeskClient:
         self.base_url = config["freshdesk_url"]
         self.api_key = config["freshdesk_api_key"]
         self.session = self._get_session()
-       
+
     @handle_client_errors
     def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
         """Create a ticket with multipart form data."""

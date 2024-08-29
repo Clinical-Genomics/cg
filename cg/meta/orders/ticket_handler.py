@@ -19,13 +19,12 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(self, config: dict, db:Store, client: FreshdeskClient ):
+    def __init__(self, config: dict, db: Store, client: FreshdeskClient):
         self.client: FreshdeskClient = client
         self.status_db: Store = db
         self.system_email_id: int = config["freshdesk_order_email_id"]
         self.env: str = config["freshdesk_environment"]
 
-    
     @staticmethod
     def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
