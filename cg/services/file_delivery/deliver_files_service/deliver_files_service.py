@@ -1,25 +1,17 @@
-from abc import abstractmethod, ABC
 from pathlib import Path
-
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
-<<<<<<< HEAD:cg/services/file_delivery/deliver_files_service/deliver_files_service.py
 from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
-=======
->>>>>>> dev-new-delivery-service:cg/services/file_delivery/abstract_classes.py
-
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
-
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )
 
 
 class DeliverFilesService:
-
     """
     Abstract class that encapsulates the logic required for delivering files to the customer.
 
@@ -28,7 +20,6 @@ class DeliverFilesService:
     3. Reformatting of output / renaming of files
     """
 
-    @abstractmethod
     def __init__(
         self,
         delivery_file_manager_service: FetchDeliveryFilesService,
@@ -39,7 +30,6 @@ class DeliverFilesService:
         self.file_mover = move_file_service
         self.file_formatter = file_formatter_service
 
-    @abstractmethod
     def deliver_files_for_case(self, case_id: str, delivery_base_path: Path) -> None:
         """Deliver the files to the customer folder."""
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(case_id)
