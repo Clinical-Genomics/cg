@@ -46,8 +46,3 @@ class CaseFileFormatter:
                 FormattedFile(original_path=case_file.file_path, formatted_path=formatted_file_path)
             )
         return formatted_files
-
-    @staticmethod
-    def _create_case_name_folder(ticket_path: Path, case_name: str) -> None:
-        case_dir_path = Path(ticket_path, case_name)
-        case_dir_path.mkdir(exist_ok=True)
