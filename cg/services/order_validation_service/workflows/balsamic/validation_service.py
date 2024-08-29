@@ -18,7 +18,7 @@ from cg.services.order_validation_service.workflows.order_validation_rules impor
 from cg.store.store import Store
 
 
-class MicroSaltValidationService(OrderValidationService):
+class BalsamicValidationService(OrderValidationService):
 
     def __init__(self, store: Store):
         self.store = store
