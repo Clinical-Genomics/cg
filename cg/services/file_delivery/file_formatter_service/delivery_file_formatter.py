@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from cg.constants.delivery import INBOX_NAME
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
+from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles, SampleFile, CaseFile
 from cg.services.file_delivery.file_formatter_service.utils.case_file_formatter import (
     CaseFileFormatter,
 )
@@ -47,7 +47,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
         return FormattedFiles(files=formatted_files)
 
     def _format_sample_and_case_files(
-        self, sample_files, case_files, ticket_dir_path
+        self, sample_files: list[SampleFile], case_files: list[CaseFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
         formatted_files: list[FormattedFile] = self.sample_file_formatter.format_files(
