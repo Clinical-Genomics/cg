@@ -145,6 +145,6 @@ class InvalidBufferError(CaseSampleError):
     message: str = "The chosen buffer is not allowed when skipping reception control"
 
 
-class SubjectIdGenderError(CaseSampleError):
-    field: str = "subject_id"
-    message: str = "Another sample with the same subject id has a different gender"
+class SexSubjectIdError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Another sample with the same subject id has a different sex"
