@@ -20,6 +20,10 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_volume_interval,
     validate_wells_contain_at_most_one_sample,
 )
+from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.rules import (
+    validate_subject_sex_consistency,
+)
+
 
 CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
@@ -43,4 +47,5 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_subject_ids_different_from_sample_names,
     validate_volume_interval,
     validate_wells_contain_at_most_one_sample,
+    validate_subject_sex_consistency,
 ]

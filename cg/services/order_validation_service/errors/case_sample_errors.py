@@ -133,3 +133,8 @@ class InvalidVolumeError(CaseSampleError):
 class InvalidBufferError(CaseSampleError):
     field: str = "elution_buffer"
     message: str = "The chosen buffer is not allowed when skipping reception control"
+
+
+class SexSubjectIdError(CaseSampleError):
+    field: str = "sex"
+    message: str = "Another sample with the same subject id has a different sex"
