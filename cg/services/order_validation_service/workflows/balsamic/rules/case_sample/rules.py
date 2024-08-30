@@ -1,4 +1,4 @@
-from cg.services.order_validation_service.errors.case_sample_errors import SubjectIdGenderError
+from cg.services.order_validation_service.errors.case_sample_errors import SexSubjectIdError
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.utils import (
     has_sex_and_subject,
@@ -9,8 +9,8 @@ from cg.store.store import Store
 def validate_subject_sex_consistency(
     order: BalsamicOrder,
     store: Store,
-) -> list[SubjectIdGenderError]:
-    errors: list[SubjectIdGenderError] = []
+) -> list[SexSubjectIdError]:
+    errors: list[SexSubjectIdError] = []
 
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -22,7 +22,7 @@ def validate_subject_sex_consistency(
                 subject_id=sample.subject_id,
                 sex=sample.sex,
             ):
-                error = SubjectIdGenderError(
+                error = SexSubjectIdError(
                     case_index=case_index,
                     sample_index=sample_index,
                 )
