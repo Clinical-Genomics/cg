@@ -282,6 +282,10 @@ class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
 
 
+class MissingSequencingMetricsError(CgError):
+    """Exception raised when sequencing metrics are missing."""
+
+
 class ArchiveJobFailedError(CgError):
     """Exception raised when an archival or retrieval job has failed."""
 
