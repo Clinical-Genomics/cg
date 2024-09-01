@@ -73,7 +73,7 @@ from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.osticket import MockOsTicket
 from tests.mocks.process_mock import ProcessMock
@@ -118,6 +118,8 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
@@ -703,6 +705,12 @@ def analysis_dir(fixtures_dir: Path) -> Path:
 def microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
+
+
+@pytest.fixture(scope="session")
+def mutant_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the mutant analysis directory"""
+    return Path(analysis_dir, "mutant")
 
 
 @pytest.fixture(scope="session")
@@ -1670,6 +1678,27 @@ def trailblazer_api() -> MockTB:
 def lims_api() -> MockLimsAPI:
     """Return a mock LIMS API."""
     return MockLimsAPI()
+
+
+@pytest.fixture
+def lims_api_with_sample_and_internal_negative_control(lims_api: MockLimsAPI) -> MockLimsAPI:
+    sample_qc_pass = LimsSample(id="sample", name="sample")
+
+    internal_negative_control_qc_pass = LimsSample(
+        id="internal_negative_control",
+        name="internal_negative_control",
+        udfs=LimsUDF(control="negative", customer="cust000"),
+    )
+
+    # Create pools
+    samples_qc_pass = [
+        sample_qc_pass,
+        internal_negative_control_qc_pass,
+    ]
+    # Add pool artifacts
+    lims_api.add_artifact_for_sample(sample_id=sample_qc_pass.id, samples=samples_qc_pass)
+
+    return lims_api
 
 
 @pytest.fixture(scope="session")
