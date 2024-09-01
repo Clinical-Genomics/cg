@@ -161,7 +161,7 @@ def test_get_gisaid_accession_numbers(
 ):
     """Test getting GISAID accession numbers from log"""
     # GIVEN a mock file with a size greater than 0
-    with mock.patch.object(GisaidAPI, "get_gisaid_log_path", return_value=csv_file_path):
+    with mock.patch.object(GisaidAPI, "get_gisaid_log_file", return_value=csv_file_path):
 
         # GIVEN a raw GISAID log
         with mock.patch.object(ReadFile, "get_content_from_file", return_value=gisaid_log_raw):
