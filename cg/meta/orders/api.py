@@ -13,7 +13,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
+from cg.services.orders.submitters.order_submitter_registry import (
+    OrderSubmitterRegistry,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,6 +43,7 @@ class OrdersAPI:
         Main entry point for the class towards interfaces that implements it.
         """
         submit_handler = self.submitter_registry.get_order_submitter(project)
+        submit_handler.order_validation_service.validate_order(order_in)
         # detect manual ticket assignment
         ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
         if not ticket_number:

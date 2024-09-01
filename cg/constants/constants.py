@@ -255,6 +255,13 @@ class MicrosaltAppTags(StrEnum):
     PREP_CATEGORY: str = "mic"
 
 
+class MutantQC:
+    EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
+    INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
+    QUALITY_REPORT_FILE_NAME: str = f"QC_report{FileExtensions.JSON}"
+
+
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
 
 
