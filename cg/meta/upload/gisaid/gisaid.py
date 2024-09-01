@@ -326,13 +326,16 @@ class GisaidAPI:
         )
         temp_log.unlink()
 
-    def get_gisaid_accession_numbers(self, case_id: str) -> dict[str, str]:
-        """Parse and return GISAID accession numbers and sample ids from log file."""
-        log_file = Path(
+    def get_gisaid_log_path(self, case_id: str) -> Path:
+        return Path(
             self.housekeeper_api.get_files(bundle=case_id, tags=[GisaidTag.LOG, case_id])
             .first()
             .full_path
         )
+
+    def get_gisaid_accession_numbers(self, case_id: str) -> dict[str, str]:
+        """Parse and return GISAID accession numbers and sample ids from log file."""
+        log_file: Path = self.get_gisaid_log_path(case_id)
         LOG.info(f"Parsing accession numbers from log file: {log_file}")
         accession_numbers = {}
 

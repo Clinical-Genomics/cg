@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import mock
+
+from cg.io.controller import ReadFile
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.gisaid.reports import GisaidComplementaryReport
 
@@ -147,3 +150,24 @@ def test_are_gisaid_samples_uploaded_when_not_uploaded(
 
     # THEN return false
     assert not is_uploaded
+
+
+def test_get_gisaid_accession_numbers(
+    gisaid_accession_nr: str,
+    gisaid_log_raw: list[dict[str, str]],
+    gisaid_api: GisaidAPI,
+    sars_cov_sample_number: str,
+    csv_file_path: Path,
+):
+    """Test getting GISAID accession numbers from log"""
+    # GIVEN a mock file with a size greater than 0
+    with mock.patch.object(GisaidAPI, "get_gisaid_log_path", return_value=csv_file_path):
+
+        # GIVEN a raw GISAID log
+        with mock.patch.object(ReadFile, "get_content_from_file", return_value=gisaid_log_raw):
+
+            # WHEN getting accession numbers
+            accession_number: dict[str, str] = gisaid_api.get_gisaid_accession_numbers("a_case_id")
+
+            # THEN the accession number should be returned
+            assert accession_number.get(sars_cov_sample_number) == gisaid_accession_nr
