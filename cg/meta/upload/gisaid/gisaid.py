@@ -146,7 +146,6 @@ class GisaidAPI:
         self, gisaid_samples: list[GisaidSample], case_id: str
     ) -> None:
         """Create and include a FASTA with headers adjusted for GISAID upload results to GISAID."""
-
         gisaid_fasta: File | None = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags={GisaidTag.FASTA, case_id}
         )
@@ -156,7 +155,6 @@ class GisaidAPI:
             gisaid_fasta_file: Path = self.get_gisaid_fasta_file_path(case_id=case_id)
 
         fasta_lines: list[str] = []
-
         for sample in gisaid_samples:
             fasta_file: File | None = self.housekeeper_api.get_file_from_latest_version(
                 bundle_name=case_id, tags={sample.cg_lims_id, GisaidTag.CONSENSUS_SAMPLE}
