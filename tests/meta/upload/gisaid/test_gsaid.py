@@ -153,11 +153,11 @@ def test_are_gisaid_samples_uploaded_when_not_uploaded(
 
 
 def test_get_gisaid_accession_numbers(
-    gisaid_accession_nr: str,
-    gisaid_log_raw: list[dict[str, str]],
-    gisaid_api: GisaidAPI,
-    sars_cov_sample_number: str,
     csv_file_path: Path,
+    gisaid_accession_nr: str,
+    gisaid_api: GisaidAPI,
+    gisaid_log_raw: list[dict[str, str]],
+    sars_cov_sample_number: str,
 ):
     """Test getting GISAID accession numbers from log"""
     # GIVEN a mock file with a size greater than 0
