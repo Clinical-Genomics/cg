@@ -84,11 +84,6 @@ class SampleDoesNotExistError(CaseSampleError):
     message: str = "The sample does not exist"
 
 
-class SexMissingError(CaseSampleError):
-    field: str = "sex"
-    message: str = "Sex is required"
-
-
 class SubjectIdSameAsCaseNameError(CaseSampleError):
     field: str = "subject_id"
     message: str = "Subject id must be different from the case name"
