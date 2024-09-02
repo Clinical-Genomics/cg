@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileExtensions
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
@@ -39,11 +39,11 @@ def store_downsampled_fastq_files_from_dir(
     """
     fastq_file_paths: list[Path] = get_files_matching_pattern(
         directory=Path(fastq_file_output_directory),
-        pattern=f"*{sample_id.split(sep='DS')[0]}*.{FileFormat.FASTQ}.gz",
+        pattern=f"*{sample_id.split(sep='DS')[0]}*{FileExtensions.FASTQ_GZ}",
     )
     if not fastq_file_paths:
         raise FileNotFoundError(
-            f"No fastq files found with pattern: *{sample_id}*.{FileFormat.FASTQ}.gz"
+            f"No fastq files found with pattern: *{sample_id}*{FileExtensions.FASTQ_GZ}"
         )
     for fastq_file_path in fastq_file_paths:
         LOG.debug(f"Found file: {fastq_file_path}")
