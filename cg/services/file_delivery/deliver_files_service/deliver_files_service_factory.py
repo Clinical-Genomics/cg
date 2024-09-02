@@ -48,7 +48,7 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
 from cg.store.store import Store
 
 
-class DeliveryServiceBuilder:
+class DeliveryServiceFactory:
     """Class to build the delivery services based on workflow and delivery type."""
 
     def __init__(self, store: Store, hk_api: HousekeeperAPI):
@@ -58,7 +58,7 @@ class DeliveryServiceBuilder:
     @staticmethod
     def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
         """Get the file tag fetcher based on the delivery type."""
-        service_map = {
+        service_map: dict[DataDelivery, FetchDeliveryFileTagsService] = {
             DataDelivery.FASTQ: FetchSampleAndCaseDeliveryFileTagsService,
             DataDelivery.ANALYSIS_FILES: FetchSampleAndCaseDeliveryFileTagsService,
             DataDelivery.FASTQ_ANALYSIS: FetchSampleAndCaseDeliveryFileTagsService,
@@ -67,12 +67,12 @@ class DeliveryServiceBuilder:
 
     def _get_file_fetcher(self, delivery_type: DataDelivery) -> FetchDeliveryFilesService:
         """Get the file fetcher based on the delivery type."""
-        service_map = {
+        service_map: dict[DataDelivery, FetchDeliveryFilesService] = {
             DataDelivery.FASTQ: FetchFastqDeliveryFilesService,
             DataDelivery.ANALYSIS_FILES: FetchAnalysisDeliveryFilesService,
             DataDelivery.FASTQ_ANALYSIS: FetchFastqAndAnalysisDeliveryFilesService,
         }
-        file_tag_fetcher = self._get_file_tag_fetcher(delivery_type)
+        file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(delivery_type)
         return service_map[delivery_type](
             status_db=self.store,
             hk_api=self.hk_api,
@@ -92,8 +92,10 @@ class DeliveryServiceBuilder:
         self, workflow: Workflow, delivery_type: DataDelivery
     ) -> DeliverFilesService:
         """Build a delivery service based on the workflow and delivery type."""
-        file_fetcher = self._get_file_fetcher(delivery_type)
-        sample_file_formatter = self._get_sample_file_formatter(workflow)
+        file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
+        sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
+            self._get_sample_file_formatter(workflow)
+        )
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
         )

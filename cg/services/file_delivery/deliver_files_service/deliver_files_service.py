@@ -1,15 +1,11 @@
-from abc import abstractmethod, ABC
 from pathlib import Path
-
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
 from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
-
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
-
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )
@@ -20,8 +16,7 @@ from cg.store.store import Store
 
 class DeliverFilesService:
     """
-    Abstract class that encapsulates the logic required for delivering files to the customer.
-
+    Deliver files to the customer inbox on hasta.
     1. Get the files to deliver from Housekeeper based on workflow and data delivery
     2. Create a delivery folder structure in the customer folder on Hasta and move the files there
     3. Reformatting of output / renaming of files
