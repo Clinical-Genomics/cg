@@ -18,7 +18,7 @@ class TicketCreate(BaseModel):
     subject: str
     tags: list[str] = []
     type: str | None = None
-    custom_fields: dict[str, Union[str, int, float, None]] = Field(default_factory=dict)
+    custom_fields: dict[str, str | int | float | None] = Field(default_factory=dict)
 
     def to_multipart_data(self) -> list[Tuple[str, Union[str, int, bytes]]]:
         """Custom converter to multipart form data."""
