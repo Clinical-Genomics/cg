@@ -37,11 +37,11 @@ def render_xlsx(data: dict) -> Workbook:
             }]
         }
     """
-    project_root_dir_parent = get_project_root_dir().parent
+    project_root_dir = get_project_root_dir()
     sample_type = "pool" if data["pooled_samples"] else "sample"
     costcenter = data["cost_center"]
     template_path = Path(
-        project_root_dir_parent,
+        project_root_dir,
         "templates",
         f"{costcenter}_{sample_type}_invoice{FileExtensions.XLSX}",
     )
