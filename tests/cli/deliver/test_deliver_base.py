@@ -5,7 +5,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.cli.deliver.base import deliver as deliver_cmd
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.deliver import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 
@@ -66,7 +66,7 @@ def test_run_deliver_delivered_ticket(
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.FASTQ],
         obj=cg_context,
     )
 
@@ -93,7 +93,15 @@ def test_deliver_ticket_with_force_all_flag(
     # WHEN running cg deliver ticket with --force-all flag
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
+        [
+            "ticket",
+            "--dry-run",
+            "--ticket",
+            ticket_id,
+            "--delivery-type",
+            Workflow.FASTQ,
+            "--force-all",
+        ],
         obj=cg_context,
     )
 
@@ -115,7 +123,7 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
     # WHEN running cg deliver ticket
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.FASTQ],
         obj=cg_context,
     )
 

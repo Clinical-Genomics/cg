@@ -10,16 +10,16 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.constants import DataDelivery, Workflow
+from cg.constants.constants import Workflow
 from cg.exc import MissingFilesError
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
-from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
 )
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -114,7 +114,7 @@ class DeliverAPI:
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
-                if self.delivery_type == DataDelivery.FASTQ:
+                if self.delivery_type == Workflow.FASTQ:
                     last_version: Version = self.hk_api.last_version(bundle=sample_id)
                 if not last_version:
                     if self.skip_missing_bundle:
@@ -314,7 +314,7 @@ class DeliverAPI:
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            if self.delivery_type != "fastq":
+            if self.delivery_type != Workflow.FASTQ:
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True

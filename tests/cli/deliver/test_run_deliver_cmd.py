@@ -6,6 +6,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from cg.cli.deliver.base import deliver_analysis, deliver_ticket
+from cg.constants import Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -147,7 +148,14 @@ def test_run_deliver_multiple_delivery_flags(
 
     result = cli_runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "fastq", "--delivery-type", "mip-dna"],
+        [
+            "--case-id",
+            case_id,
+            "--delivery-type",
+            Workflow.FASTQ,
+            "--delivery-type",
+            Workflow.MIP_DNA,
+        ],
         obj=populated_mip_context,
     )
 
