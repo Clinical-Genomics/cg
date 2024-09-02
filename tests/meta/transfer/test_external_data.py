@@ -8,7 +8,7 @@ from pytest_mock import MockFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, FileExtensions
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -174,14 +174,14 @@ def test_get_fastq_paths_to_add(
     ExternalDataAPI._get_destination_path.return_value = fastq_dir
 
     # GIVEN a sample id
-    sample_id: str = "fastq"
+    sample_id: str = "EXT01"
 
     # WHEN getting the fastq paths to add
     fastq_paths: list[Path] = external_data_api._get_fastq_paths_to_add(sample_id=sample_id)
 
     # THEN the function should return a list of fastq file paths
     assert isinstance(fastq_paths[0], Path)
-    assert fastq_paths[0].as_posix().endswith(".fastq.gz")
+    assert fastq_paths[0].as_posix().endswith(FileExtensions.FASTQ_GZ)
 
 
 def test_add_and_include_files_to_bundles(

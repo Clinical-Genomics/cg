@@ -1131,7 +1131,11 @@ def compress_hk_fastq_bundle(
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
         os.utime(fastq_file, (before_timestamp, before_timestamp))
-        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+        fastq_file_info = {
+            "path": str(fastq_file),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ],
+        }
 
         hk_bundle_data["files"].append(fastq_file_info)
     return hk_bundle_data
