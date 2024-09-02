@@ -23,7 +23,6 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     PedigreeError,
     SampleDoesNotExistError,
     SampleNameRepeatedError,
-    SexMissingError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     WellPositionMissingError,
@@ -216,16 +215,6 @@ def validate_samples_exist(
             sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
             if not sample:
                 error = SampleDoesNotExistError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
-    return errors
-
-
-def validate_sex_required_for_new_samples(order: OrderWithCases, **kwargs) -> list[SexMissingError]:
-    errors: list[SexMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if not sample.sex:
-                error = SexMissingError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 
