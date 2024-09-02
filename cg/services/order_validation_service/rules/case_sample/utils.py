@@ -1,10 +1,11 @@
 from collections import Counter
-from cg.constants.constants import PrepCategory
+
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
-from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
+from cg.services.order_validation_service.errors.case_errors import (
+    RepeatedCaseNameError,
+)
 from cg.services.order_validation_service.errors.case_sample_errors import (
     FatherNotInCaseError,
     InvalidConcentrationIfSkipRCError,
@@ -78,7 +79,7 @@ def get_well_sample_map(
 
 def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[OccupiedWellError]:
     errors: list[OccupiedWellError] = []
-    for sample_index, case_index in colliding_samples:
+    for case_index, sample_index in colliding_samples:
         error = OccupiedWellError(case_index=case_index, sample_index=sample_index)
         errors.append(error)
     return errors
