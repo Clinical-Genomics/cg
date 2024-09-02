@@ -4,15 +4,15 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HermesFileTag
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
-    Workflow.RAW_DATA,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 SKIP_MISSING: list[Workflow] = [
-    Workflow.RAW_DATA,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -172,10 +172,6 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.RAW_DATA: {
-        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
-        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
-    },
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
@@ -183,6 +179,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.RAREDISEASE: {
         "case_tags": CLINICAL_DELIVERY_TAGS,
         "sample_tags": CLINICAL_DELIVERY_TAGS,
+    },
+    Workflow.RAW_DATA: {
+        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
+        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RNAFUSION: {
         "case_tags": CLINICAL_DELIVERY_TAGS,
