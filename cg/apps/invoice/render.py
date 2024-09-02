@@ -42,6 +42,8 @@ def render_xlsx(data: dict) -> Workbook:
     costcenter = data["cost_center"]
     template_path = Path(
         project_root_dir,
+        "apps",
+        "invoice",
         "templates",
         f"{costcenter}_{sample_type}_invoice{FileExtensions.XLSX}",
     )
