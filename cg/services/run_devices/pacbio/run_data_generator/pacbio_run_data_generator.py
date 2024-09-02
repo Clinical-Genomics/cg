@@ -1,10 +1,16 @@
 from pathlib import Path
 
 from cg.services.run_devices.abstract_classes import RunDataGenerator
-from cg.services.run_devices.error_handler import handle_post_processing_errors
+from cg.services.run_devices.error_handler import (
+    handle_post_processing_errors,
+)
 from cg.services.run_devices.exc import PostProcessingRunDataGeneratorError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.run_devices.validators import validate_has_expected_parts, validate_name_pre_fix
+from cg.services.run_devices.validators import (
+    validate_has_expected_parts,
+    validate_name_pre_fix,
+)
+from cg.utils.string import get_element_from_split
 
 
 class PacBioRunDataGenerator(RunDataGenerator):
@@ -34,16 +40,16 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
     @staticmethod
     def _get_sequencing_run_name(run_name: str) -> str:
-        return run_name.split("/")[0]
+        return get_element_from_split(value=run_name, element_position=0, split="/")
 
     @staticmethod
     def _get_plate_well(run_name: str) -> str:
-        return run_name.split("/")[1]
+        return get_element_from_split(value=run_name, element_position=-1, split="/")
 
     def _get_plate(self, run_name: str) -> str:
         plate_well: str = self._get_plate_well(run_name)
-        return plate_well.split("_")[0]
+        return get_element_from_split(value=plate_well, element_position=0, split="_")
 
     def _get_well(self, run_name: str) -> str:
         plate_well: str = self._get_plate_well(run_name)
-        return plate_well.split("_")[-1]
+        return get_element_from_split(value=plate_well, element_position=-1, split="_")

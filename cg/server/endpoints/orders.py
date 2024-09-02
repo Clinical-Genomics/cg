@@ -40,7 +40,6 @@ from cg.server.ext import (
     lims,
     order_service,
     osticket,
-    order_submitter_registry,
 )
 from cg.store.models import (
     Application,
@@ -156,9 +155,7 @@ def create_order_from_form():
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(
-        lims=lims, status=db, osticket=osticket, submitter_registry=order_submitter_registry
-    )
+    api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     error_message: str
     try:
         request_json = request.get_json()

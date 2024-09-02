@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from pydantic import BaseModel
 
 from cg.constants.subject import Sex
@@ -89,7 +88,7 @@ class SampleDTO(BaseModel):
     concentration_ng_ul: int | None = None
     panels: list[str] | None = None
     status: str | None = None
-    is_tumour: bool | None = None
+    tumour: bool | None = None
     reference_genome: str | None = None
     customer: CustomerDto | None = None
 

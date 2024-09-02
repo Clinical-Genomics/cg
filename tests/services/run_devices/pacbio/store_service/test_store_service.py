@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 
 from cg.services.run_devices.exc import (
-    PostProcessingDataTransferError,
     PostProcessingStoreDataError,
+    PostProcessingDataTransferError,
 )
 from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
@@ -17,6 +17,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
+
 from cg.store.store import Store
 
 
@@ -27,7 +28,7 @@ def test_store_post_processing_data(
 ):
     # GIVEN a PacBioStoreService
 
-    # GIVEN a data transfer service that returns the correct DTOs
+    # GIVEN a successful data transfer service
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(
@@ -66,7 +67,7 @@ def test_store_post_processing_data_error_database(
 ):
     # GIVEN a PacBioStoreService
 
-    # GIVEN a data transfer service that returns the correct DTOs
+    # GIVEN a successful data transfer service
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(
@@ -84,7 +85,7 @@ def test_store_post_processing_data_error_parser(
 ):
     # GIVEN a PacBioStoreService
 
-    # GIVEN a data transfer service that returns the correct DTOs
+    # GIVEN a successful data transfer service
 
     # WHEN storing data for a PacBio instrument run
     with mock.patch(

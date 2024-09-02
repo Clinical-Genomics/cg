@@ -1,11 +1,8 @@
 import datetime as dt
-from pathlib import Path
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Border, Font, PatternFill, Side
-
-from cg.constants import FileExtensions
-from cg.utils.files import get_project_root_dir
+from pkg_resources import resource_filename
 
 
 def render_xlsx(data: dict) -> Workbook:
@@ -37,17 +34,11 @@ def render_xlsx(data: dict) -> Workbook:
             }]
         }
     """
-    project_root_dir = get_project_root_dir()
+    pkg_dir = __name__.rpartition(".")[0]
     sample_type = "pool" if data["pooled_samples"] else "sample"
     costcenter = data["cost_center"]
-    template_path = Path(
-        project_root_dir,
-        "apps",
-        "invoice",
-        "templates",
-        f"{costcenter}_{sample_type}_invoice{FileExtensions.XLSX}",
-    )
-    workbook = load_workbook(template_path.as_posix())
+    template_path = resource_filename(pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx")
+    workbook = load_workbook(template_path)
     if data["pooled_samples"]:
         worksheet = workbook["Bilaga Prover"]
         worksheet["C1"] = costcenter.upper()

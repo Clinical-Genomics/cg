@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from cg.constants import FileExtensions
-from cg.utils.files import get_project_root_dir
+import pkg_resources
 
-project_root_dir: Path = get_project_root_dir()
+from cg.constants import FileExtensions
 
 RAREDISEASE_BUNDLE_FILENAMES: str = (
     Path("resources", "raredisease_bundle_filenames").with_suffix(FileExtensions.YAML).as_posix()
@@ -21,10 +20,18 @@ TOMTE_BUNDLE_FILENAMES: str = (
     Path("resources", "tomte_bundle_filenames").with_suffix(FileExtensions.YAML).as_posix()
 )
 
-RAREDISEASE_BUNDLE_FILENAMES_PATH = Path(project_root_dir, RAREDISEASE_BUNDLE_FILENAMES)
+RAREDISEASE_BUNDLE_FILENAMES_PATH = Path(
+    pkg_resources.resource_filename("cg", RAREDISEASE_BUNDLE_FILENAMES)
+)
 
-RNAFUSION_BUNDLE_FILENAMES_PATH = Path(project_root_dir, RNAFUSION_BUNDLE_FILENAMES)
+RNAFUSION_BUNDLE_FILENAMES_PATH: Path = Path(
+    pkg_resources.resource_filename("cg", RNAFUSION_BUNDLE_FILENAMES)
+)
 
-TAXPROFILER_BUNDLE_FILENAMES_PATH = Path(project_root_dir, TAXPROFILER_BUNDLE_FILENAMES)
+TAXPROFILER_BUNDLE_FILENAMES_PATH: Path = Path(
+    pkg_resources.resource_filename("cg", TAXPROFILER_BUNDLE_FILENAMES)
+)
 
-TOMTE_BUNDLE_FILENAMES_PATH = Path(project_root_dir, TOMTE_BUNDLE_FILENAMES)
+TOMTE_BUNDLE_FILENAMES_PATH: Path = Path(
+    pkg_resources.resource_filename("cg", TOMTE_BUNDLE_FILENAMES)
+)
