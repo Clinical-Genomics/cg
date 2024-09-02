@@ -306,3 +306,6 @@ class SequencingQCStatus(Enum):
     FAILED = auto()
     PASSED = auto()
     PENDING = auto()
+
+
+DEVELOPMENT_CUSTOMER_ID = "cust000"
