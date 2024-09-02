@@ -109,19 +109,6 @@ def deliver_analysis(
             )
 
 
-@deliver.command(name="concatenate")
-@DRY_RUN
-@TICKET_ID_ARG
-@click.pass_context
-def concatenate(context: click.Context, ticket: str, dry_run: bool):
-    """The fastq files in the folder generated using "cg deliver analysis"
-    will be concatenated into one forward and one reverse fastq file
-    """
-    cg_context: CGConfig = context.obj
-    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    deliver_ticket_api.concatenate_fastq_files(ticket=ticket, dry_run=dry_run)
-
-
 @deliver.command(name="ticket")
 @DELIVERY_TYPE
 @DRY_RUN
