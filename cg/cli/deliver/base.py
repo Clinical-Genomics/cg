@@ -8,18 +8,13 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.meta.deliver import DeliverAPI, DeliverTicketAPI
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
-    DeliveryServiceBuilder,
+    DeliveryServiceFactory,
 )
 from cg.store.models import Case
-from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -30,23 +25,7 @@ DELIVERY_TYPE = click.option(
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
 )
-FORCE_ALL = click.option(
-    "--force-all",
-    help=(
-        "Force delivery of all sample files "
-        "- disregarding of amount of reads or previous deliveries"
-    ),
-    is_flag=True,
-)
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
-
-IGNORE_MISSING_BUNDLES = click.option(
-    "-i",
-    "--ignore-missing-bundles",
-    help="Ignore errors due to missing case bundles",
-    is_flag=True,
-    default=False,
-)
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
@@ -72,84 +51,56 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     )
 
 
-@deliver.command(name="analysis")
-@DRY_RUN
+@deliver.command(name="case")
 @DELIVERY_TYPE
-@click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
-    "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
+    "-c",
+    "--case-id",
+    required=True,
+    help="Deliver the files for a specific case",
 )
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
-    case_id: str | None,
-    ticket: str | None,
+    case_id: str,
     delivery_type: list[str],
 ):
-    """Deliver analysis files to customer inbox on the HPC.
-    Files can be delivered either on case level or for all cases connected to a ticket.
-    Any of those needs to be specified.
+    """
+    Deliver all case files based on delivery type to the customer inbox on the HPC
     """
     inbox: str = context.delivery_path
-    if not (case_id or ticket):
-        LOG.info("Please provide a case-id or ticket-id")
-        return
-    service_builder = DeliveryServiceBuilder(
+    service_builder = DeliveryServiceFactory(
         store=context.status_db, hk_api=context.housekeeper_api
     )
+    case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
     for delivery in delivery_type:
         delivery_service = service_builder.build_delivery_service(
             delivery_type=delivery, workflow=case.workflow
         )
-        if case_id:
-            delivery_service.deliver_files_for_case(case_id=case_id, delivery_base_path=Path(inbox))
-        else:
-            delivery_service.deliver_files_for_ticket(
-                ticket_id=ticket, delivery_base_path=Path(inbox)
-            )
+        delivery_service.deliver_files_for_case(
+            case_id=case.internal_id, delivery_base_path=Path(inbox)
+        )
 
 
 @deliver.command(name="ticket")
 @DELIVERY_TYPE
-@DRY_RUN
-@FORCE_ALL
-@IGNORE_MISSING_BUNDLES
-@click.option(
-    "-t",
-    "--ticket",
-    type=str,
-    help="Deliver and rsync the files for ALL cases connected to a ticket",
-    required=True,
-)
-@click.pass_context
+@TICKET_ID_ARG
+@click.pass_obj
 def deliver_ticket(
-    context: click.Context,
+    context: CGConfig,
     delivery_type: list[str],
-    dry_run: bool,
-    force_all: bool,
     ticket: str,
-    ignore_missing_bundles: bool,
 ):
-    """Will first collect hard links in the customer inbox then
-    concatenate fastq files if needed and finally send the folder
-    from customer inbox hasta to the customer inbox on the delivery server
     """
-    cg_context: CGConfig = context.obj
-    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
-    if is_upload_needed or force_all:
-        LOG.info("Delivering files to customer inbox on the HPC")
-        context.invoke(
-            deliver_analysis,
-            delivery_type=delivery_type,
-            dry_run=dry_run,
-            force_all=force_all,
-            ticket=ticket,
-            ignore_missing_bundles=ignore_missing_bundles,
+    Deliver all case files based on delivery type to the customer inbox on the HPC for cases connected to a ticket.
+    """
+    inbox: str = context.delivery_path
+    service_builder = DeliveryServiceFactory(
+        store=context.status_db, hk_api=context.housekeeper_api
+    )
+    case: Case = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)[0]
+    for delivery in delivery_type:
+        delivery_service = service_builder.build_delivery_service(
+            delivery_type=delivery, workflow=case.workflow
         )
-    else:
-        LOG.info("Files already delivered to customer inbox on the HPC")
-        return
-
-    deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=dry_run)
-    context.invoke(rsync, ticket=ticket, dry_run=dry_run)
+        delivery_service.deliver_files_for_ticket(ticket_id=ticket, delivery_base_path=Path(inbox))
