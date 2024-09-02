@@ -551,7 +551,13 @@ class SampleView(BaseView):
         "last_sequenced_at",
         "sex",
     ]
-    column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
+    column_filters = [
+        "customer.internal_id",
+        "priority",
+        "sex",
+        "application_version.application",
+        "capture_kit",
+    ]
     column_formatters = {
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
