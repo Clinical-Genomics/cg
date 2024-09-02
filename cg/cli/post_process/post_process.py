@@ -35,5 +35,4 @@ def post_process_sequencing_run(context: CGConfig, run_name: str, dry_run: bool)
     post_processing_service.post_process(run_name=run_name, dry_run=dry_run)
 
 
-post_process_group: click.Group
 post_process_group.add_command(post_process_sequencing_run)
