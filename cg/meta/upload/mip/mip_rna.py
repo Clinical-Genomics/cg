@@ -7,7 +7,7 @@ import click
 
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_rna_to_scout
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, Workflow
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -34,7 +34,7 @@ class MipRNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             try:
-                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
+                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id, analysis=Workflow.MIP_RNA)
             except CalledProcessError as error:
                 LOG.error(error)
                 return

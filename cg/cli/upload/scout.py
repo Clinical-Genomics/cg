@@ -21,6 +21,7 @@ from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Case
@@ -173,16 +174,18 @@ def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
+def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool, analysis: str) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
-    context.invoke(
-        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
-    )
+    if analysis != Workflow.TOMTE:
+        context.invoke(
+            upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
+        )
+    context.invoke(upload_omics_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
@@ -228,6 +231,20 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
 
 
+@click.command(name="rna-omics-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_omics_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA omics files to Scout."""
+    LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+
+    scout_upload_api.upload_omics_to_scout(dry_run=dry_run, case_id=case_id)
+
+
+
 @click.command(name="multiqc-to-scout")
 @DRY_RUN
 @click.argument("case_id")
@@ -267,6 +284,7 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
+        Workflow.TOMTE: TomteAnalysisAPI,
     }
 
     return UploadAPI(

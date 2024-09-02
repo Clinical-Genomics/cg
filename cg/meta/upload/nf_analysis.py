@@ -7,6 +7,7 @@ import click
 
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+from cg.cli.upload.scout import upload_rna_to_scout
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
@@ -46,7 +47,10 @@ class NfAnalysisUploadAPI(UploadAPI):
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
-            ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
+            if case.data_analysis == Workflow.TOMTE:
+                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id, re_upload=restart, analysis=case.data_analysis)
+            else:
+                ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
