@@ -7,7 +7,7 @@ from cg.clients.freshdesk.constants import Priority, Source, Status
 class TicketCreate(BaseModel):
     """Freshdesk ticket."""
 
-    attachments: list[Union[str, bytes]] = Field(default_factory=list)
+    attachments: list[str | bytes] = Field(default_factory=list)
     email: EmailStr
     email_config_id: int | None = None
     description: str
