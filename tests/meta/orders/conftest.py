@@ -15,8 +15,7 @@ from tests.mocks.limsmock import MockLimsAPI
 
 @pytest.fixture
 def freshdesk_client():
-    config = {"freshdesk_url": "https://example.com", "freshdesk_api_key": "dummy_api_key"}
-    return FreshdeskClient(config=config)
+    return FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
 
 
 @pytest.fixture(scope="function")
@@ -36,8 +35,7 @@ def orders_api(
 
 @pytest.fixture
 def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHandler:
-    config = {"freshdesk_order_email_id": 12345, "freshdesk_environment": "production"}
-    return TicketHandler(config=config, db=store, client=freshdesk_client)
+    return TicketHandler(db=store, client=freshdesk_client, system_email_id=12345, env="production")
 
 
 @pytest.fixture

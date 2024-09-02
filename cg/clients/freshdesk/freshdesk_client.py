@@ -13,9 +13,9 @@ from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
-    def __init__(self, config: dict):
-        self.base_url = config["freshdesk_url"]
-        self.api_key = config["freshdesk_api_key"]
+    def __init__(self, base_url: str, api_key: str):
+        self.base_url = base_url
+        self.api_key = api_key
         self.session = self._get_session()
 
     @handle_client_errors

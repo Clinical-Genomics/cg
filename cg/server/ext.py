@@ -96,5 +96,12 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
     lims=lims,
     status_db=db,
 )
-freshdesk_client = FreshdeskClient(app_config.model_dump())
-ticket_handler = TicketHandler(config=app_config.model_dump(), db=db, client=freshdesk_client)
+freshdesk_client = FreshdeskClient(
+    base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
+)
+ticket_handler = TicketHandler(
+    db=db,
+    client=freshdesk_client,
+    system_email_id=app_config.freshdesk_order_email_id,
+    env=app_config.freshdesk_environment,
+)
