@@ -9,10 +9,19 @@ from cg.utils.files import (
     get_file_with_pattern_from_list,
     get_files_in_directory_with_pattern,
     get_files_matching_pattern,
+    get_project_root_dir,
     get_source_creation_time_stamp,
     remove_directory_and_contents,
     rename_file,
 )
+
+
+def test_get_project_root_dir():
+    # WHEN getting the project root dir
+    root_dir: Path = get_project_root_dir()
+
+    # THEN return the dir path
+    assert root_dir.name == "cg"
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
