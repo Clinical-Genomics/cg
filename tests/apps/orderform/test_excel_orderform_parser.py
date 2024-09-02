@@ -207,7 +207,7 @@ def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform:
     assert len(order_form_parser.samples) == nr_samples_fastq_orderform
 
     # THEN it should determine the project type
-    assert order_form_parser.project_type == Workflow.FASTQ
+    assert order_form_parser.project_type == Workflow.RAW_DATA
 
     # THEN it should determine the correct customer should have been parsed
     assert order_form_parser.customer_id == "cust000"

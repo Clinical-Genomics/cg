@@ -135,7 +135,7 @@ class Workflow(StrEnum):
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
-    FASTQ: str = "raw-data"
+    RAW_DATA: str = "raw-data"
     FLUFFY: str = "fluffy"
     JASEN: str = "jasen"
     MICROSALT: str = "microsalt"

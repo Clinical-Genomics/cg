@@ -66,7 +66,7 @@ def test_run_deliver_delivered_ticket(
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.FASTQ],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.RAW_DATA],
         obj=cg_context,
     )
 
@@ -99,7 +99,7 @@ def test_deliver_ticket_with_force_all_flag(
             "--ticket",
             ticket_id,
             "--delivery-type",
-            Workflow.FASTQ,
+            Workflow.RAW_DATA,
             "--force-all",
         ],
         obj=cg_context,
@@ -123,7 +123,7 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
     # WHEN running cg deliver ticket
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.FASTQ],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", Workflow.RAW_DATA],
         obj=cg_context,
     )
 

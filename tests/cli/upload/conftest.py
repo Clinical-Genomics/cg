@@ -14,11 +14,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
 from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkMipAnalysisTag,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
@@ -201,9 +197,9 @@ def fastq_context(
     base_context.meta_apis["delivery_api"] = DeliverAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
-        delivery_type="fastq",
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.RAW_DATA]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.RAW_DATA]["sample_tags"],
+        delivery_type=Workflow.RAW_DATA,
         project_base_path=Path(base_context.delivery_path),
         fastq_file_service=FastqConcatenationService(),
     )

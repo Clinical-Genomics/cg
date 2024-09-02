@@ -114,7 +114,7 @@ class DeliverAPI:
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
-                if self.delivery_type == Workflow.FASTQ:
+                if self.delivery_type == Workflow.RAW_DATA:
                     last_version: Version = self.hk_api.last_version(bundle=sample_id)
                 if not last_version:
                     if self.skip_missing_bundle:
@@ -226,7 +226,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-        if self.delivery_type == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
+        if self.delivery_type == Workflow.RAW_DATA and case.data_analysis == Workflow.MICROSALT:
             LOG.debug(f"Concatenating fastqs for sample {sample_name}")
             self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
 
@@ -314,7 +314,7 @@ class DeliverAPI:
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            if self.delivery_type != Workflow.FASTQ:
+            if self.delivery_type != Workflow.RAW_DATA:
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True

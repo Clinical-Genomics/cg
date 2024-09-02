@@ -173,7 +173,7 @@ def test_get_delivery_scope_case_only():
 def test_get_delivery_scope_sample_only():
     """Testing the delivery scope of a sample only delivery."""
     # GIVEN a sample only delivery type
-    delivery_type = {Workflow.FASTQ}
+    delivery_type = {Workflow.RAW_DATA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)

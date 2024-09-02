@@ -149,7 +149,7 @@ class DeliveryAPI:
     ) -> list[DeliveryFile]:
         """Return a list of FASTQ files to be delivered for a specific sample."""
         delivery_files: list[DeliveryFile] = []
-        fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
+        fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.RAW_DATA)
         if not self.is_sample_deliverable(sample=sample, force=force):
             LOG.warning(f"Sample {sample.internal_id} is not deliverable")
             return delivery_files

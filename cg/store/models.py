@@ -560,7 +560,7 @@ class Case(Base, PriorityMixin):
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_workflow_map: dict[str, str] = {
-            DataDelivery.FASTQ: Workflow.FASTQ,
+            DataDelivery.FASTQ: Workflow.RAW_DATA,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
         for data_delivery, workflow in delivery_per_workflow_map.items():

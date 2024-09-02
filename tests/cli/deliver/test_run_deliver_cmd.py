@@ -152,7 +152,7 @@ def test_run_deliver_multiple_delivery_flags(
             "--case-id",
             case_id,
             "--delivery-type",
-            Workflow.FASTQ,
+            Workflow.RAW_DATA,
             "--delivery-type",
             Workflow.MIP_DNA,
         ],

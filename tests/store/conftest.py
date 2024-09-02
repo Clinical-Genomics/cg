@@ -19,9 +19,9 @@ from cg.store.models import (
     Case,
     CaseSample,
     Customer,
+    IlluminaFlowCell,
     Organism,
     Sample,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -118,7 +118,7 @@ def microbial_submitted_order() -> dict:
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=Workflow.FASTQ,
+            analysis=Workflow.RAW_DATA,
             concentration_sample="1",
             mother=None,
             father=None,

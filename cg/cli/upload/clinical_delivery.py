@@ -102,7 +102,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.get_analyses_to_upload(workflow=Workflow.FASTQ):
+    for analysis_obj in status_db.get_analyses_to_upload(workflow=Workflow.RAW_DATA):
         if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
                 f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"

@@ -76,7 +76,7 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
         "name": family_name,
         "panels": None,
         "internal_id": case_id,
-        "data_analysis": Workflow.FASTQ,
+        "data_analysis": Workflow.RAW_DATA,
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,

@@ -1,20 +1,16 @@
 """Constants for delivery."""
 
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import (
-    AlignmentFileTag,
-    AnalysisTag,
-    HermesFileTag,
-)
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HermesFileTag
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
-    Workflow.FASTQ,
+    Workflow.RAW_DATA,
     Workflow.MICROSALT,
     Workflow.MUTANT,
 ]
 
 SKIP_MISSING: list[Workflow] = [
-    Workflow.FASTQ,
+    Workflow.RAW_DATA,
     Workflow.MICROSALT,
     Workflow.MUTANT,
 ]
@@ -176,7 +172,7 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.FASTQ: {
+    Workflow.RAW_DATA: {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },

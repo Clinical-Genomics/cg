@@ -12,7 +12,7 @@ def test_auto_fastq_not_started(
     """Tests if the command finds a non-uploaded analysis and attempts to start it"""
     caplog.set_level(logging.INFO)
     # GIVEN a case to be delivered
-    analysis_obj.workflow = Workflow.FASTQ
+    analysis_obj.workflow = Workflow.RAW_DATA
     analysis_obj.case.data_delivery = DataDelivery.FASTQ
     base_context.status_db.session.commit()
     base_context.status_db.session.close()
