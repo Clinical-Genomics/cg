@@ -55,52 +55,6 @@ def deliver():
     LOG.info("Running CG deliver")
 
 
-@deliver.command(name="analysis")
-@DRY_RUN
-@DELIVERY_TYPE
-@click.option("-c", "--case-id", help="Deliver the files for a specific case")
-@click.option(
-    "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
-)
-@FORCE_ALL
-@IGNORE_MISSING_BUNDLES
-@click.pass_obj
-def deliver_analysis(
-    context: CGConfig,
-    case_id: str | None,
-    ticket: str | None,
-    delivery_type: list[str],
-    dry_run: bool,
-    force_all: bool,
-    ignore_missing_bundles: bool,
-):
-    """Deliver analysis files to customer inbox
-
-    Files can be delivered either on case level or for all cases connected to a ticket.
-    Any of those needs to be specified.
-    """
-    if not (case_id or ticket):
-        LOG.info("Please provide a case-id or ticket-id")
-        return
-    inbox: str = context.delivery_path
-    if not inbox:
-        LOG.info("Please specify the root path for where files should be delivered")
-        return
-    service_builder = DeliveryServiceBuilder(
-        store=context.status_db, hk_api=context.housekeeper_api
-    )
-    for delivery in delivery_type:
-        delivery_service = service_builder.build_delivery_service(
-            delivery_type=delivery, workflow=case.workflow
-        )
-        if case_id:
-            delivery_service.deliver_files_for_case(case_id=case_id, delivery_base_path=Path(inbox))
-        else:
-            delivery_service.deliver_files_for_ticket(
-                ticket_id=ticket, delivery_base_path=Path(inbox)
-            )
-
-
 @deliver.command(name="rsync")
 @DRY_RUN
 @TICKET_ID_ARG
@@ -116,6 +70,43 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )
+
+
+@deliver.command(name="analysis")
+@DRY_RUN
+@DELIVERY_TYPE
+@click.option("-c", "--case-id", help="Deliver the files for a specific case")
+@click.option(
+    "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
+)
+@click.pass_obj
+def deliver_analysis(
+    context: CGConfig,
+    case_id: str | None,
+    ticket: str | None,
+    delivery_type: list[str],
+):
+    """Deliver analysis files to customer inbox on the HPC.
+    Files can be delivered either on case level or for all cases connected to a ticket.
+    Any of those needs to be specified.
+    """
+    inbox: str = context.delivery_path
+    if not (case_id or ticket):
+        LOG.info("Please provide a case-id or ticket-id")
+        return
+    service_builder = DeliveryServiceBuilder(
+        store=context.status_db, hk_api=context.housekeeper_api
+    )
+    for delivery in delivery_type:
+        delivery_service = service_builder.build_delivery_service(
+            delivery_type=delivery, workflow=case.workflow
+        )
+        if case_id:
+            delivery_service.deliver_files_for_case(case_id=case_id, delivery_base_path=Path(inbox))
+        else:
+            delivery_service.deliver_files_for_ticket(
+                ticket_id=ticket, delivery_base_path=Path(inbox)
+            )
 
 
 @deliver.command(name="concatenate")
