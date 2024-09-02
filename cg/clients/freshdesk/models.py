@@ -1,4 +1,5 @@
 from typing import Tuple, Union
+
 from pydantic import BaseModel, EmailStr, Field
 
 from cg.clients.freshdesk.constants import Priority, Source, Status

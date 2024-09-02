@@ -2,7 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class AppConfig(BaseSettings):
-"""Default values are overridden by environment variable at run-time."""
+    """Default values are overridden by environment variable at run-time."""
+
     gunicorn_workers: int = 4
     gunicorn_threads: int = 4
     gunicorn_bind: str = "0.0.0.0:8000"
