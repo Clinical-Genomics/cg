@@ -198,7 +198,11 @@ def get_sequencing_run(context: click.Context, samples: bool, flow_cell_id: str)
         sequencing_run.device.internal_id,
         sequencing_run.sequencer_type,
         sequencing_run.sequencer_name,
-        sequencing_run.sequencing_started_at.date(),
+        (
+            sequencing_run.sequencing_started_at.date()
+            if sequencing_run.sequencing_started_at
+            else "Not available"
+        ),
         sequencing_run.sequencing_completed_at.date(),
         sequencing_run.archived_at.date() if sequencing_run.archived_at else "No",
         sequencing_run.data_availability,

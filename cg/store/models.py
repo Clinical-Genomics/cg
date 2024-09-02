@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
+from pydantic import ConfigDict
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -24,6 +25,7 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
+    CustomerId,
     PrepCategory,
     SequencingQCStatus,
     SexOptions,
@@ -815,6 +817,18 @@ class Sample(Base, PriorityMixin):
         return bool(self.reads)
 
     @property
+    def is_negative_control(self) -> bool:
+        return self.control == ControlOptions.NEGATIVE
+
+    @property
+    def is_internal_negative_control(self) -> bool:
+        return self.is_negative_control and self.customer == CustomerId.CG_INTERNAL_CUSTOMER
+
+    @property
+    def is_external_negative_control(self) -> bool:
+        return self.is_negative_control and self.customer != CustomerId.CG_INTERNAL_CUSTOMER
+
+    @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flowcell for metric in self.sequencing_metrics})
@@ -967,7 +981,7 @@ class Order(Base):
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
-    order_date: Mapped[datetime] = mapped_column(default=datetime.now())
+    order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     is_delivered: Mapped[bool] = mapped_column(default=False)
@@ -1089,9 +1103,9 @@ class PacBioSequencingRun(InstrumentRun):
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
+    movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
-    movie_name: Mapped[Str32]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1152,7 +1166,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
 class PacBioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
-    __tablename__ = "pacbio_sample_sequencing_metrics"
+    __tablename__ = "pacbio_sample_run_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
     hifi_reads: Mapped[BigInt]
