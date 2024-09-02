@@ -1,17 +1,17 @@
 """Rename order status
 Revision ID: 7770dcad8bde
-Revises: 817cf7fea40d
+Revises: bb4c6dbad991
 Create Date: 2024-08-09 09:47:47.814700
 """
 
 import sqlalchemy as sa
+from sqlalchemy import orm
 
 from alembic import op
-from sqlalchemy import orm
 
 # revision identifiers, used by Alembic.
 revision = "7770dcad8bde"
-down_revision = "817cf7fea40d"
+down_revision = "bb4c6dbad991"
 branch_labels = None
 depends_on = None
 
