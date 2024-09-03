@@ -112,20 +112,29 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
             LOG.info(f"Scout key: {scout_key}")
-            self._include_file(scout_key)
+            self._include_case_file(scout_key)
 
     def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
             scout_key = scout_key.replace("chromograph_", "chromograph_images.")
-            self._include_file(scout_key)
+            self._include_sample_file(scout_key)
 
-    def _include_file(self, scout_key) -> None:
+    def _include_case_file(self, scout_key) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         setattr(
             self.load_config,
             scout_key,
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
+        )
+
+    def _include_sample_file(self, scout_key) -> None:
+        """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
+        are found. Otherwise return None."""
+        setattr(
+            self.load_config,
+            scout_key,
+            self.get_file_from_hk(getattr(self.sample_tags, scout_key)),
         )
 
     @staticmethod
