@@ -1,0 +1,3 @@
+Sample,Selection,Region Code,Ticket,%N_bases,%10X_coverage,QC_pass,Lineage,Pangolin_data_version,VOC,Mutations
+sample_qc_pass,Allmän övervakning,01,208455,8.53,91.38,TRUE,EG.5.1.3,PUSHER-v1.23.1,No,G142D;D614G;H655Y;N679K;P681H;N764K;D796Y;Q954H;N969K
+external_negative_control_qc_pass,Information saknas,01,208455,95.71,4.29,FALSE,Unassigned,PUSHER-v1.23.1,No,-
