@@ -27,10 +27,12 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.RNAFUSION,
 ]
 
-ANALYSIS_API: dict[Workflow, UploadAPI] = [
-    (Workflow.BALSAMIC, BalsamicAnalysisAPI)(Workflow.MIP_DNA, MipDNAAnalysisAPI)(
-        Workflow.MIP_RNA, MipRNAAnalysisAPI
-    )(Workflow.RNAFUSION, RnafusionAnalysisAPI)(Workflow.TOMTE, TomteAnalysisAPI)
+ANALYSIS_API: list = [
+    (Workflow.BALSAMIC, BalsamicAnalysisAPI),
+    (Workflow.MIP_DNA, MipDNAAnalysisAPI),
+    (Workflow.MIP_RNA, MipRNAAnalysisAPI),
+    (Workflow.RNAFUSION, RnafusionAnalysisAPI),
+    (Workflow.TOMTE, TomteAnalysisAPI),
 ]
 
 
@@ -50,7 +52,7 @@ def test_get_upload_api(
 
     # GIVEN a case with a balsamic analysis
     case: Case = helpers.ensure_case(
-        store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
+        store=status_db, data_analysis=workflow, case_id=case_id
     )
     helpers.add_analysis(store=status_db, case=case, workflow=workflow)
 
