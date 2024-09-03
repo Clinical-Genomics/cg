@@ -10,7 +10,6 @@ be validated and if passing all checks be accepted as new samples.
 import logging
 
 from cg.apps.lims import LimsAPI
-from cg.apps.osticket import OsTicket
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.submitters.order_submitter_registry import (
@@ -28,13 +27,13 @@ class OrdersAPI:
         self,
         lims: LimsAPI,
         status: Store,
-        osticket: OsTicket,
+        ticket_handler: TicketHandler,
         submitter_registry: OrderSubmitterRegistry,
     ):
         super().__init__()
         self.lims = lims
         self.status = status
-        self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
+        self.ticket_handler = ticket_handler
         self.submitter_registry = submitter_registry
 
     def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
@@ -45,7 +44,7 @@ class OrdersAPI:
         submit_handler = self.submitter_registry.get_order_submitter(project)
         submit_handler.order_validation_service.validate_order(order_in)
         # detect manual ticket assignment
-        ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        ticket_number: str | None = self.ticket_handler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
@@ -54,7 +53,6 @@ class OrdersAPI:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
                 user_name=user_name,
-                user_mail=user_mail,
                 project=project,
                 ticket_number=ticket_number,
             )
