@@ -25,7 +25,6 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.MIP_DNA,
     Workflow.MIP_RNA,
     Workflow.RNAFUSION,
-    Workflow.TOMTE,
 ]
 
 ANALYSIS_API: dict[Workflow, UploadAPI] = [
@@ -46,7 +45,7 @@ def test_get_upload_api(
     workflow: Workflow,
     analysis_api: AnalysisAPI,
 ):
-    """Test to get the correct upload API for a BALSAMIC case."""
+    """Test to get the correct upload API for a case."""
     status_db: Store = cg_context.status_db
 
     # GIVEN a case with a balsamic analysis
@@ -74,7 +73,7 @@ def test_create_scout_load_config(
     helpers: StoreHelpers,
     workflow: Workflow,
 ):
-    """Test to create a scout load config for a BALSAMIC case."""
+    """Test to create a scout load config for a case."""
     caplog.set_level(logging.DEBUG)
     status_db: Store = cg_context.status_db
 
