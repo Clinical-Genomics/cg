@@ -29,7 +29,7 @@ class TicketHandler:
     def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6,10})", name)
+        ticket_match = re.fullmatch(r"#(\d{6,10})", name)
         if ticket_match:
             ticket_id = ticket_match.group(1)
             LOG.info(f"{ticket_id}: detected ticket in order name")
