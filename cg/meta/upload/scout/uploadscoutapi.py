@@ -539,13 +539,6 @@ class UploadScoutAPI:
             Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Workflow.TOMTE: TomteConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
-                lims_api=self.lims,
-                madeline_api=self.madeline_api,
-            ),
         }
 
         return config_builders[analysis.workflow]

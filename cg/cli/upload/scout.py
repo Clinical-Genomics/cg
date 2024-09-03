@@ -50,6 +50,12 @@ def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str)
         suggest_cases_to_upload(status_db=status_db)
         return
 
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    if case_obj.analyses == Workflow.TOMTE:
+        context.invoke(
+            upload_rna_to_scout, case_id=case_id, re_upload=re_upload, analysis=case_obj.analyses
+        )
+
     context.invoke(
         create_scout_load_config, case_id=case_id, print_console=print_console, re_upload=re_upload
     )
