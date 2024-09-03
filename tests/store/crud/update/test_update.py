@@ -61,6 +61,7 @@ def test_update_sample_reads_illumina(
         total_reads_for_sample += sample_metric.total_reads_in_lane
     assert sample.reads == total_reads_for_sample
 
+
 def test_update_sample_reads_illumina_fail_q30(
     store_with_illumina_sequencing_data: Store, selected_novaseq_x_sample_ids: list[str]
 ):
@@ -79,6 +80,7 @@ def test_update_sample_reads_illumina_fail_q30(
 
     # THEN the total reads for the sample is updated
     assert sample.reads == 0
+
 
 def test_update_sample_last_sequenced_at(
     store_with_illumina_sequencing_data: Store,
