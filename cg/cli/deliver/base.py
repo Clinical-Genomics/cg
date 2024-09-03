@@ -87,7 +87,7 @@ def deliver_case(
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else case.data_delivery,
-        workflow=case.workflow,
+        workflow=case.data_analysis,
     )
     delivery_service.deliver_files_for_case(
         case=case, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -123,7 +123,7 @@ def deliver_ticket(
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
-        workflow=cases[0].workflow,
+        workflow=cases[0].data_analysis,
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
