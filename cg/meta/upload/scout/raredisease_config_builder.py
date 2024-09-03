@@ -60,7 +60,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             GenomeBuild,
             self.raredisease_analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
         )
-        self.load_config.rank_score_threshold = rank_score_threshold
+        # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
         # self.load_config.sv_rank_model_version = raredisease_analysis_data.sv_rank_model_version
 
@@ -90,8 +90,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             LOG.info("family of 1 sample - skip pedigree graph")
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutRarediseaseIndividual:
-        """Build a sample with mip specific information"""
-
+        """Build a sample with specific information"""
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
@@ -117,6 +116,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
+            scout_key = scout_key.replace("chromograph_", "chromograph_images.")
             self._include_file(scout_key)
 
     def _include_file(self, scout_key) -> None:
@@ -127,16 +127,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             scout_key,
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
-
-    @staticmethod
-    def extract_generic_filepath(file_path: str | None) -> str | None:
-        """Remove a file's suffix and identifying integer or X/Y
-        Example:
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
-        if file_path is None:
-            return file_path
-        return re.split("(\d+|X|Y)\.png", file_path)[0]
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:

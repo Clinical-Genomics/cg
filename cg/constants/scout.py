@@ -41,18 +41,20 @@ class ScoutUploadKey(StrEnum):
 
 RAREDISEASE_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
-    multiqc_report={"multiqc-html"},
+    multiqc={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     peddy_sex={"sex-check", "peddy"},
     smn_tsv={"smn-calling"},
-    snv_research_vcf={"vcf-snv-research"},
-    snv_vcf={"vcf-snv-clinical"},
-    str_catalog={"expansionhunter", "variant-catalog"},
-    sv_research_vcf={"vcf-sv-research"},
-    sv_vcf={"vcf-sv-clinical"},
     vcf_mei={"mobile-elements", "clinical", "vcf"},
     vcf_mei_research={"mobile-elements", "research", "vcf"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
+    vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
+    vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
+    str_catalog={"expansionhunter", "variant-catalog"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
 )
 
@@ -101,9 +103,9 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_fusion={"vcf-fusion"},
 )
 
-RAREDISEASE_SAMPLE_TAGS = dict(
+RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     bam_file={"bam"},
-    # alignment_file={"cram"},
+    alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
     chromograph_autozyg={"chromograph", "autozyg"},
@@ -116,7 +118,20 @@ RAREDISEASE_SAMPLE_TAGS = dict(
     mitodel_file={"mitodel"},
 )
 
-MIP_SAMPLE_TAGS: dict[str, set[str]] = RAREDISEASE_SAMPLE_TAGS
+MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    bam_file={"bam"},
+    alignment_file={"cram"},
+    vcf2cytosure={"vcf2cytosure"},
+    mt_bam={"bam-mt"},
+    chromograph_autozyg={"chromograph", "autozyg"},
+    chromograph_coverage={"chromograph", "tcov"},
+    chromograph_regions={"chromograph", "regions"},
+    chromograph_sites={"chromograph", "sites"},
+    reviewer_alignment={"expansionhunter", "bam"},
+    reviewer_alignment_index={"expansionhunter", "bam-index"},
+    reviewer_vcf={"expansionhunter", "vcf-str"},
+    mitodel_file={"mitodel"},
+)
 
 BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},

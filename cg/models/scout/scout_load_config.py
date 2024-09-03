@@ -70,12 +70,12 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutRarediseaseIndividual(ScoutIndividual):
     mt_bam: str | None = None
     bam_file: str | None = None
-    chromograph_autozyg: str | None = None
-    chromograph_coverage: str | None = None
-    chromograph_regions: ChromographImages = ChromographImages()
-    chromograph_sites: ChromographImages = ChromographImages()
-    reviewer_alignment: Reviewer = Reviewer()
-    reviewer_alignment_index: Reviewer = Reviewer()
+    # chromograph_autozyg: str | None = None
+    # chromograph_coverage: str | None = None
+    # chromograph_regions: ChromographImages = ChromographImages()
+    # chromograph_sites: ChromographImages = ChromographImages()
+    # reviewer_alignment: Reviewer = Reviewer()
+    # reviewer_alignment_index: Reviewer = Reviewer()
     rhocall_bed: str | None = None
     rhocall_wig: str | None = None
     tiddit_coverage_wig: str | None = None
@@ -83,7 +83,8 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     upd_sites_bed: str | None = None
     vcf2cytosure: str | None = None
     mitodel_file: str | None = None
-
+    chromograph_images: ChromographImages = ChromographImages()
+    reviewer: Reviewer = Reviewer()
 
 class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: str | None = None
@@ -114,7 +115,6 @@ class ScoutLoadConfig(BaseModel):
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
     multiqc: str | None = None
-    multiqc_report: str | None = None
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )
@@ -155,8 +155,8 @@ class MipLoadConfig(ScoutLoadConfig):
 
 
 class RarediseaseLoadConfig(ScoutLoadConfig):
-    chromograph_image_files: list[str] | None = None
-    chromograph_prefixes: list[str] | None = None
+    # chromograph_image_files: list[str] | None = None
+    # chromograph_prefixes: list[str] | None = None
     madeline: str | None = None
     peddy_check: str | None = None
     peddy_ped: str | None = None
@@ -166,12 +166,13 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     str_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
-    snv_vcf: Annotated[str, BeforeValidator(field_not_none)] = None
-    snv_research_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_snv_mt: str | None = None
+    vcf_snv_research_mt: str | None = None
+    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
-    sv_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    sv_research_vcf: Annotated[str | None, BeforeValidator(field_not_none)] = None
-
 
 class RnafusionLoadConfig(ScoutLoadConfig):
     multiqc_rna: str | None = None
