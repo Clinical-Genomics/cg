@@ -70,4 +70,6 @@ class DeliverFilesService:
         if not cases:
             raise EntryNotFoundError(f"No cases found for ticket {ticket_id}")
         for case in cases:
-            self.deliver_files_for_case(case=case, delivery_base_path=delivery_base_path)
+            self.deliver_files_for_case(
+                case=case, delivery_base_path=delivery_base_path, dry_run=dry_run
+            )
