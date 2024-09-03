@@ -28,7 +28,7 @@ DELIVERY_TYPE = click.option(
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
 )
-TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
+TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
@@ -38,9 +38,9 @@ def deliver():
 
 
 @deliver.command(name="rsync")
-@DRY_RUN
-@TICKET_ID_ARG
 @click.pass_obj
+@TICKET_ID_ARG
+@DRY_RUN
 def rsync(context: CGConfig, ticket: str, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on the delivery server
@@ -55,15 +55,15 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
 
 
 @deliver.command(name="case")
+@click.pass_obj
 @click.option(
     "-c",
     "--case-id",
     required=True,
     help="Deliver the files for a specific case",
 )
-@click.pass_obj
 @DRY_RUN
-def deliver_analysis(
+def deliver_case(
     context: CGConfig,
     case_id: str,
     dry_run: bool,
@@ -77,6 +77,9 @@ def deliver_analysis(
         hk_api=context.housekeeper_api,
     )
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
+    if not case:
+        LOG.error(f"Could not find case with id {case_id}")
+        return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=case.data_delivery,
         workflow=case.workflow,
@@ -94,8 +97,8 @@ def deliver_analysis(
 
 
 @deliver.command(name="ticket")
-@TICKET_ID_ARG
 @click.pass_obj
+@TICKET_ID_ARG
 @DRY_RUN
 def deliver_ticket(
     context: CGConfig,
@@ -110,10 +113,13 @@ def deliver_ticket(
         store=context.status_db,
         hk_api=context.housekeeper_api,
     )
-    case: Case = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)[0]
+    cases: list[Case] = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)
+    if not cases:
+        LOG.error(f"Could not find case connected to ticket {ticket}")
+        return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=case.data_delivery,
-        workflow=case.workflow,
+        delivery_type=cases[0].data_delivery,
+        workflow=cases[0].workflow,
     )
     delivery_service.deliver_files_for_ticket(ticket_id=ticket, delivery_base_path=Path(inbox))
     tb_api: TrailblazerAPI = context.trailblazer_api

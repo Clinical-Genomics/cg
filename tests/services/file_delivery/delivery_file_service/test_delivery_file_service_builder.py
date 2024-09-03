@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from cg.constants import Workflow, DataDelivery
 from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
