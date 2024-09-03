@@ -116,6 +116,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
+            LOG.info(f"Scout key: {scout_key}")
             scout_key = scout_key.replace("chromograph_", "chromograph_images.")
             self._include_sample_file(scout_key)
 
