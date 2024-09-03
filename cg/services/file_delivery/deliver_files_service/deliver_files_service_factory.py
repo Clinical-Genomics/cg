@@ -1,7 +1,9 @@
 """Module for the factory of the deliver files service."""
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
+from cg.meta.rsync import RsyncAPI
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -51,9 +53,17 @@ from cg.store.store import Store
 class DeliveryServiceFactory:
     """Class to build the delivery services based on workflow and delivery type."""
 
-    def __init__(self, store: Store, hk_api: HousekeeperAPI):
+    def __init__(
+        self,
+        store: Store,
+        hk_api: HousekeeperAPI,
+        rsync_service: RsyncAPI,
+        tb_service: TrailblazerAPI,
+    ):
         self.store = store
         self.hk_api = hk_api
+        self.rsync_service = rsync_service
+        self.tb_service = tb_service
 
     @staticmethod
     def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
@@ -104,4 +114,6 @@ class DeliveryServiceFactory:
             move_file_service=MoveDeliveryFilesService(),
             file_formatter_service=file_formatter,
             status_db=self.store,
+            rsync_service=self.rsync_service,
+            tb_service=self.tb_service,
         )

@@ -1,4 +1,7 @@
 from pathlib import Path
+
+from cg.apps.tb import TrailblazerAPI
+from cg.meta.rsync import RsyncAPI
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
@@ -27,27 +30,44 @@ class DeliverFilesService:
         delivery_file_manager_service: FetchDeliveryFilesService,
         move_file_service: MoveDeliveryFilesService,
         file_formatter_service: DeliveryFileFormattingService,
+        rsync_service: RsyncAPI,
+        tb_service: TrailblazerAPI,
         status_db: Store,
     ):
         self.file_manager = delivery_file_manager_service
         self.file_mover = move_file_service
         self.file_formatter = file_formatter_service
         self.status_db = status_db
+        self.rsync_service = rsync_service
+        self.tb_service = tb_service
 
-    def deliver_files_for_case(self, case_id: str, delivery_base_path: Path) -> None:
+    def deliver_files_for_case(
+        self, case: Case, delivery_base_path: Path, dry_run: bool = False
+    ) -> None:
         """Deliver the files for a case to the customer folder."""
-        delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(case_id)
+        delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
+            case_id=case.internal_id
+        )
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
         self.file_formatter.format_files(moved_files)
+        slurm_id: int = self.rsync_service.run_rsync_on_slurm(
+            ticket=case.latest_ticket, dry_run=dry_run
+        )
+        self.rsync_service.add_to_trailblazer_api(
+            tb_api=self.tb_service,
+            slurm_job_id=slurm_id,
+            ticket=case.latest_ticket,
+            dry_run=dry_run,
+        )
 
-    def deliver_files_for_ticket(self, ticket_id: str, delivery_base_path: Path) -> None:
+    def deliver_files_for_ticket(
+        self, ticket_id: str, delivery_base_path: Path, dry_run: bool = False
+    ) -> None:
         """Deliver the files for all cases in a ticket to the customer folder."""
         cases: list[Case] = self.status_db.get_cases_by_ticket_id(ticket_id)
         if not cases:
             raise EntryNotFoundError(f"No cases found for ticket {ticket_id}")
         for case in cases:
-            self.deliver_files_for_case(
-                case_id=case.internal_id, delivery_base_path=delivery_base_path
-            )
+            self.deliver_files_for_case(case=case, delivery_base_path=delivery_base_path)

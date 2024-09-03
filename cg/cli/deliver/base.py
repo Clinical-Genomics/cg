@@ -72,9 +72,12 @@ def deliver_case(
     Deliver all case files based on delivery type to the customer inbox on the HPC
     """
     inbox: str = context.delivery_path
+    rsync_api: RsyncAPI = RsyncAPI(config=context)
     service_builder = DeliveryServiceFactory(
         store=context.status_db,
         hk_api=context.housekeeper_api,
+        tb_service=context.trailblazer_api,
+        rsync_service=rsync_api,
     )
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
     if not case:
@@ -85,14 +88,7 @@ def deliver_case(
         workflow=case.workflow,
     )
     delivery_service.deliver_files_for_case(
-        case_id=case.internal_id, delivery_base_path=Path(inbox)
-    )
-    tb_api: TrailblazerAPI = context.trailblazer_api
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
-    slurm_id: int = rsync_api.run_rsync_on_slurm(ticket=case.latest_ticket, dry_run=dry_run)
-    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
-    rsync_api.add_to_trailblazer_api(
-        tb_api=tb_api, slurm_job_id=slurm_id, ticket=case.latest_ticket, dry_run=dry_run
+        case=case, delivery_base_path=Path(inbox), dry_run=dry_run
     )
 
 
@@ -109,10 +105,14 @@ def deliver_ticket(
     Deliver all case files based on delivery type to the customer inbox on the HPC for cases connected to a ticket.
     """
     inbox: str = context.delivery_path
+    rsync_api: RsyncAPI = RsyncAPI(config=context)
     service_builder = DeliveryServiceFactory(
         store=context.status_db,
         hk_api=context.housekeeper_api,
+        tb_service=context.trailblazer_api,
+        rsync_service=rsync_api,
     )
+
     cases: list[Case] = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)
     if not cases:
         LOG.error(f"Could not find case connected to ticket {ticket}")
@@ -121,11 +121,6 @@ def deliver_ticket(
         delivery_type=cases[0].data_delivery,
         workflow=cases[0].workflow,
     )
-    delivery_service.deliver_files_for_ticket(ticket_id=ticket, delivery_base_path=Path(inbox))
-    tb_api: TrailblazerAPI = context.trailblazer_api
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
-    slurm_id: int = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
-    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
-    rsync_api.add_to_trailblazer_api(
-        tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
+    delivery_service.deliver_files_for_ticket(
+        ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
     )
