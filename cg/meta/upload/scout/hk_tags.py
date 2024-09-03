@@ -16,6 +16,10 @@ class CaseTags(BaseModel):
         None, description="vcf_snv for rare disease and vcf_cancer for cancer"
     )
     vcf_snv_research: set[str] | None = Field(None, description="vcf_snv_research for rare disease")
+    vcf_snv_mt: set[str] | None = Field(
+        None, description="vcf_snv for rare disease, mitochondria"
+    )
+    vcf_snv_research_mt: set[str] | None = Field(None, description="vcf_snv_research for rare disease, mitochondria")
     vcf_sv: set[str] | None = Field(
         None, description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
     )
