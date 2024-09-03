@@ -8,7 +8,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS
+from cg.constants.delivery import FileDeliveryOption
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
@@ -24,9 +24,9 @@ LOG = logging.getLogger(__name__)
 DELIVERY_TYPE = click.option(
     "-d",
     "--delivery-type",
-    multiple=True,
-    type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
-    required=True,
+    multiple=False,
+    type=click.Choice(choices=[option for option in FileDeliveryOption]),
+    required=False,
 )
 TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
@@ -62,10 +62,12 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     required=True,
     help="Deliver the files for a specific case",
 )
+@DELIVERY_TYPE
 @DRY_RUN
 def deliver_case(
     context: CGConfig,
     case_id: str,
+    delivery_type: FileDeliveryOption,
     dry_run: bool,
 ):
     """
@@ -84,7 +86,7 @@ def deliver_case(
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=case.data_delivery,
+        delivery_type=delivery_type if delivery_type else case.data_delivery,
         workflow=case.workflow,
     )
     delivery_service.deliver_files_for_case(
@@ -95,10 +97,12 @@ def deliver_case(
 @deliver.command(name="ticket")
 @click.pass_obj
 @TICKET_ID_ARG
+@DELIVERY_TYPE
 @DRY_RUN
 def deliver_ticket(
     context: CGConfig,
     ticket: str,
+    delivery_type: FileDeliveryOption,
     dry_run: bool,
 ):
     """
@@ -118,7 +122,7 @@ def deliver_ticket(
         LOG.error(f"Could not find case connected to ticket {ticket}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=cases[0].data_delivery,
+        delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
         workflow=cases[0].workflow,
     )
     delivery_service.deliver_files_for_ticket(
