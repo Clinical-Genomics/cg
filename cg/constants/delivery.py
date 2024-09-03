@@ -1,5 +1,7 @@
 """Constants for delivery."""
 
+from enum import StrEnum
+
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import (
     AlignmentFileTag,
@@ -206,3 +208,9 @@ PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
 
 INBOX_NAME: str = "inbox"
 OUTBOX_NAME: str = "outbox"
+
+
+class FileDeliveryOption(StrEnum):
+    FASTQ: str = "fastq"
+    ANALYSIS: str = "analysis"
+    FASTQ_ANALYSIS: str = "fastq-analysis"

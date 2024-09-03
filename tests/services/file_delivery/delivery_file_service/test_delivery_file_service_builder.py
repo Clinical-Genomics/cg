@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from cg.constants import Workflow, DataDelivery
 from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
@@ -69,9 +69,9 @@ def test_build_delivery_service(
     expected_sample_file_formatter,
 ):
     # GIVEN a delivery service builder with mocked store and hk_api
-    store_mock = MagicMock()
-    hk_api_mock = MagicMock()
-    builder = DeliveryServiceFactory(store=store_mock, hk_api=hk_api_mock)
+    builder = DeliveryServiceFactory(
+        store=MagicMock(), hk_api=MagicMock(), rsync_service=MagicMock(), tb_service=MagicMock()
+    )
 
     # WHEN building a delivery service
     delivery_service: DeliverFilesService = builder.build_delivery_service(
