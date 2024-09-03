@@ -70,6 +70,7 @@ class SampleTags(BaseModel):
     # If cram does not exist
     bam_file: set[str] | None = None
     alignment_file: set[str] | None = None
+    alignment_path: set[str] | None = None
     vcf2cytosure: set[str] | None = None
     mt_bam: set[str] | None = None
     chromograph_autozyg: set[str] | None = None
