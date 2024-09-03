@@ -10,6 +10,7 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
+from cg.services.file_delivery.deliver_files_service.exc import DeliveryTypeNotSupported
 from cg.services.file_delivery.fetch_delivery_files_tags.fetch_delivery_file_tags_service import (
     FetchDeliveryFileTagsService,
 )
@@ -98,10 +99,24 @@ class DeliveryServiceFactory:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
         return SampleFileFormatter()
 
+    @staticmethod
+    def _validate_delivery_type(delivery_type: DataDelivery):
+        """Check if the delivery type is supported."""
+        if delivery_type in [
+            DataDelivery.FASTQ,
+            DataDelivery.ANALYSIS_FILES,
+            DataDelivery.FASTQ_ANALYSIS,
+        ]:
+            return
+        raise DeliveryTypeNotSupported(
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}."
+        )
+
     def build_delivery_service(
         self, workflow: Workflow, delivery_type: DataDelivery
     ) -> DeliverFilesService:
         """Build a delivery service based on the workflow and delivery type."""
+        self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
         sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
             self._get_sample_file_formatter(workflow)
