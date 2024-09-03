@@ -278,10 +278,7 @@ class ScoutAPI:
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
 
-
-    def upload_rna_fraser(
-        self, file_path: str, case_id: str, customer_sample_id: str
-    ) -> None:
+    def upload_rna_fraser(self, file_path: str, case_id: str, customer_sample_id: str) -> None:
         """Load a rna fraser file into a case in the database."""
 
         upload_command: list[str] = [
@@ -298,13 +295,9 @@ class ScoutAPI:
             LOG.info(f"Uploading rna fraser file {file_path} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
-            raise ScoutUploadError(
-                "Something went wrong when uploading rna fraser file"
-            ) from error
+            raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error
 
-    def upload_rna_outrider(
-        self, file_path: str, case_id: str, customer_sample_id: str
-    ) -> None:
+    def upload_rna_outrider(self, file_path: str, case_id: str, customer_sample_id: str) -> None:
         """Load a rna outrider file into a case in the database."""
 
         upload_command: list[str] = [
@@ -324,7 +317,6 @@ class ScoutAPI:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna outrider file"
             ) from error
-
 
     def upload_rna_alignment_file(
         self, case_id: str, customer_sample_id: str, file_path: str

@@ -89,8 +89,8 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = RarediseaseUploadAPI(config_object)
         elif case.data_analysis in {
             Workflow.RNAFUSION,
-            Workflow.TOMTE,
             Workflow.TAXPROFILER,
+            Workflow.TOMTE,
         }:
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
 

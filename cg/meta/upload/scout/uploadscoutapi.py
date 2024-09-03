@@ -159,18 +159,15 @@ class UploadScoutAPI:
         tags: set[str] = {AnalysisTag.COVERAGE, AnalysisTag.BIGWIG, sample_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-
     def get_rna_omics_fraser(self, case_id: str, sample_id: str) -> File | None:
         """Return an fraser file for a case in Housekeeper."""
         tags: set[str] = {AnalysisTag.COVERAGE, AnalysisTag.FRASER, sample_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-
     def get_rna_omics_outrider(self, case_id: str, sample_id: str) -> File | None:
         """Return an outrider file for a case in Housekeeper."""
         tags: set[str] = {AnalysisTag.COVERAGE, AnalysisTag.OUTRIDER, sample_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
-
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
@@ -337,7 +334,6 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
 
-
     def upload_rna_fraser_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload omics fraser file for a case to Scout."""
         status_db: Store = self.status_db
@@ -375,7 +371,6 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Upload RNA fraser file finished!")
 
-
     def upload_rna_outrider_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload omics outrider file for a case to Scout."""
         status_db: Store = self.status_db
@@ -410,8 +405,6 @@ class UploadScoutAPI:
         for upload_statement in self.get_rna_outrider_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload RNA outrider file finished!")
-
-
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
@@ -516,12 +509,10 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-
     def upload_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA omics files to Scout."""
         self.upload_rna_fraser_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_outrider_to_scout(case_id=case_id, dry_run=dry_run)
-
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
@@ -547,6 +538,13 @@ class UploadScoutAPI:
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Workflow.TOMTE: TomteConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
             ),
         }
 
