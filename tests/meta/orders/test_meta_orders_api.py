@@ -126,7 +126,7 @@ def test_submit_ticketexception(
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
         side_effect=TicketCreationError("ERROR"),
-    ) as mock_create_ticket:
+    ):
         # GIVEN an order that does not have a name (ticket_nr)
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
         order_data.name = "dummy_name"
