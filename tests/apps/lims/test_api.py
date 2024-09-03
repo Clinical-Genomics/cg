@@ -4,6 +4,9 @@ import datetime as dt
 
 from requests.exceptions import HTTPError
 
+from cg.constants.lims import LimsProcess
+from tests.mocks.limsmock import MockLimsAPI
+
 
 def test_get_received_date(lims_mock, mocker):
     """Test to get the received date"""
@@ -90,3 +93,18 @@ def test_get_delivery_date_no_sample(lims_api, mocker):
 
     # THEN assert that None is returned since a exception was raised
     assert res is None
+
+
+def test_get_internal_negative_control_id_from_sample_in_pool(
+    lims_api_with_sample_and_internal_negative_control: MockLimsAPI,
+):
+    # GIVEN a sample_id
+    sample_id: str = "sample"
+
+    # WHEN retrieving the internal_negative_control_id_from_lims
+    internal_negative_control_id = lims_api_with_sample_and_internal_negative_control.get_internal_negative_control_id_from_sample_in_pool(
+        sample_internal_id=sample_id, pooling_step=LimsProcess.COVID_POOLING_STEP
+    )
+
+    # THEN no errors are raised and the correct internal_negative_control_id is retrieved
+    assert internal_negative_control_id == "internal_negative_control"
