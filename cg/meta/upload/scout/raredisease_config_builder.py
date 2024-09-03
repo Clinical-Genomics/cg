@@ -93,7 +93,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Build a sample with specific information"""
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        # self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         self.include_sample_files(config_sample)
         config_sample.father = (
             case_sample.father.internal_id
