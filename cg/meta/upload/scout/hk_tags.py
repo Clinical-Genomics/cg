@@ -80,3 +80,4 @@ class SampleTags(BaseModel):
     reviewer_alignment_index: set[str] | None = None
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
+

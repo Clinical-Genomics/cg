@@ -118,6 +118,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
             LOG.info(f"Scout key: {scout_key}")
             scout_key = scout_key.replace("chromograph_", "chromograph_images.")
+            scout_key = scout_key.replace("reviewer_", "reviewer.")
+
             self._include_sample_file(scout_key)
 
     def _include_case_file(self, scout_key) -> None:
