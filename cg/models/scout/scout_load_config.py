@@ -68,7 +68,6 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
-    alignment_path: str | None = None
     mt_bam: str | None = None
     bam_file: str | None = None
     chromograph_autozyg: str | None = None

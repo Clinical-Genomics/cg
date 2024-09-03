@@ -94,7 +94,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         # self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
-        self.include_sample_files(config_sample)
+        self.include_sample_files(config_sample=config_sample, case_sample=case_sample)
         config_sample.father = (
             case_sample.father.internal_id
             if case_sample.father
@@ -114,13 +114,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             LOG.info(f"Scout key: {scout_key}")
             self._include_case_file(scout_key)
 
-    def include_sample_files(self, config_sample: ScoutIndividual = None) -> None:
+    def include_sample_files(self, case_sample: CaseSample, config_sample: ScoutIndividual = None, ) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
             LOG.info(f"Scout key: {scout_key}")
             scout_key = scout_key.replace("chromograph_", "chromograph_images.")
             scout_key = scout_key.replace("reviewer_", "reviewer.")
 
-            self._include_sample_file(scout_key)
+            self._include_sample_file(scout_key, case_sample)
 
     def _include_case_file(self, scout_key) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
@@ -131,13 +131,14 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-    def _include_sample_file(self, scout_key) -> None:
+    def _include_sample_file(self, scout_key, case_sample) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
+        tags = getattr(self.sample_tags, scout_key)
         setattr(
             self.load_config,
             scout_key,
-            self.get_file_from_hk(getattr(self.sample_tags, scout_key)),
+            self.get_sample_file(hk_tags=tags, sample_id=case_sample),
         )
 
     @staticmethod
