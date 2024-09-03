@@ -33,21 +33,21 @@ def test_run_deliver_without_specifying_case(cli_runner: CliRunner, base_context
 
 def test_run_deliver_non_existing_case(
     cli_runner: CliRunner,
-    base_context: CGConfig,
+    cg_context: CGConfig,
     case_id: str,
 ):
     """Test to run the deliver command when the provided case does not exist"""
     # GIVEN a cli runner and a base context
 
     # GIVEN a case_id that does not exist in the database
-    store: Store = base_context.status_db
+    store: Store = cg_context.status_db
     assert store.get_case_by_internal_id(internal_id=case_id) is None
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
         deliver_case,
         ["--case-id", case_id],
-        obj=base_context,
+        obj=cg_context,
     )
 
     # THEN assert the command exits without problems
