@@ -12,6 +12,14 @@ class CaseTags(BaseModel):
         None, description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
     )
     sv_research_vcf: set[str] | None = Field(None, description="vcf_sv_research for rare disease")
+    vcf_snv: set[str] | None = Field(
+        None, description="vcf_snv for rare disease and vcf_cancer for cancer"
+    )
+    vcf_snv_research: set[str] | None = Field(None, description="vcf_snv_research for rare disease")
+    vcf_sv: set[str] | None = Field(
+        None, description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
+    )
+    vcf_sv_research: set[str] | None = Field(None, description="vcf_sv_research for rare disease")
     vcf_str: set[str] = Field(
         None, description="Short Tandem Repeat variants, only for rare disease"
     )
@@ -21,6 +29,7 @@ class CaseTags(BaseModel):
     peddy_sex: set[str] | None = Field(None, description="Peddy sex check, only for rare disease")
     peddy_check: set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
     multiqc_report: set[str] | None = Field(None, description="MultiQC report")
+    multiqc: set[str] | None = Field(None, description="MultiQC report")
     delivery_report: set[str] | None = Field(None, description="Delivery report")
     str_catalog: set[str] | None = Field(
         None, description="Variant catalog used with expansionhunter"

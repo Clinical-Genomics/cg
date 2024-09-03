@@ -70,12 +70,12 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutRarediseaseIndividual(ScoutIndividual):
     mt_bam: str | None = None
     bam_file: str | None = None
-    # chromograph_autozyg: str | None = None
-    # chromograph_coverage: str | None = None
-    # chromograph_regions: ChromographImages = ChromographImages()
-    # chromograph_sites: ChromographImages = ChromographImages()
-    # reviewer_alignment: Reviewer = Reviewer()
-    # reviewer_alignment_index: Reviewer = Reviewer()
+    chromograph_autozyg: str | None = None
+    chromograph_coverage: str | None = None
+    chromograph_regions: ChromographImages = ChromographImages()
+    chromograph_sites: ChromographImages = ChromographImages()
+    reviewer_alignment: Reviewer = Reviewer()
+    reviewer_alignment_index: Reviewer = Reviewer()
     rhocall_bed: str | None = None
     rhocall_wig: str | None = None
     tiddit_coverage_wig: str | None = None
