@@ -11,6 +11,7 @@ from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.store.models import Case
 from cg.store.store import Store
+from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
@@ -120,20 +121,28 @@ def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog
 
 
 def test_concatenate_rsync_commands(
-    analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket_id: str
+    rsync_api: RsyncAPI,
+    folders_to_deliver: set[Path],
+    analysis_family: dict,
+    analysis_store_trio,
+    project_dir,
+    customer_id,
+    ticket_id: str,
+    case: Case,
 ):
     """Tests the function to concatenate rsync commands for transferring multiple files."""
     # GIVEN a list with a case and a sample name
-    folder_list: list[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
+
     source_and_destination_paths = {
         "delivery_source_path": project_dir / customer_id / ticket_id,
         "rsync_destination_path": project_dir / customer_id,
     }
     # WHEN then commands are generated
-    commands: str = RsyncAPI.concatenate_rsync_commands(
-        folder_list=folder_list,
+    commands: str = rsync_api.concatenate_rsync_commands(
+        folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
+        case=case,
     )
     # THEN the correct folder should be added to the source path
     assert (
@@ -167,6 +176,7 @@ def test_slurm_rsync_single_case(
     caplog,
     mocker,
     ticket_id: str,
+    folders_to_deliver: set[Path],
 ):
     """Test for running rsync on a single case using SLURM."""
     caplog.set_level(logging.INFO)
@@ -187,7 +197,7 @@ def test_slurm_rsync_single_case(
     sbatch_number = rsync_api.run_rsync_for_case(
         case=case,
         dry_run=True,
-        folders_to_deliver=[case.links[0].sample.name],
+        folders_to_deliver=folders_to_deliver,
     )
 
     # THEN check that an integer was returned as sbatch number and the delivery should be complete
@@ -202,6 +212,7 @@ def test_slurm_rsync_single_case_missing_file(
     caplog,
     mocker,
     ticket_id: str,
+    folders_to_deliver: set[Path],
 ):
     """Test for running rsync on a single case with a missing file using SLURM."""
     caplog.set_level(logging.INFO)
@@ -223,14 +234,11 @@ def test_slurm_rsync_single_case_missing_file(
     sbatch_number: int
 
     sbatch_number = rsync_api.run_rsync_for_case(
-        case=case,
-        dry_run=True,
-        folders_to_deliver=
+        case=case, dry_run=True, folders_to_deliver=folders_to_deliver
     )
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
-
 
 
 def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
