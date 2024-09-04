@@ -42,7 +42,7 @@ class OrderService:
         return create_order_response(order)
 
     def set_open(self, order_id: int, open: bool) -> OrderResponse:
-        order: Order = self.store.update_order_delivery(order_id=order_id, open=open)
+        order: Order = self.store.update_order_status(order_id=order_id, open=open)
         return create_order_response(order)
 
     def update_is_open(self, order_id: int, delivered_analyses: int) -> None:

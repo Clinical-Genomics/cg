@@ -28,7 +28,10 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
@@ -38,14 +41,10 @@ from cg.server.ext import (
     delivery_message_service,
     lims,
     order_service,
-    osticket,
     order_submitter_registry,
+    osticket,
 )
-from cg.store.models import (
-    Application,
-    Customer,
-)
-
+from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
 ORDERS_BLUEPRINT.before_request(before_request)
@@ -73,7 +72,7 @@ def get_order(order_id: int):
 
 
 @ORDERS_BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
-def set_order_delivered(order_id: int):
+def set_order_open(order_id: int):
     try:
         request_data = OrderOpenPatch.model_validate(request.json)
         is_open: bool = request_data.is_open
@@ -84,10 +83,10 @@ def set_order_delivered(order_id: int):
 
 
 @ORDERS_BLUEPRINT.route("/orders/<order_id>/update-open-status", methods=["POST"])
-def update_order_delivered(order_id: int):
+def update_order_open(order_id: int):
     """Update the openness status of an order based on the number of delivered analyses."""
     try:
-        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        request_data = OrderOpenUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
         order_service.update_is_open(order_id=order_id, delivered_analyses=delivered_analyses)
     except OrderNotFoundError as error:
