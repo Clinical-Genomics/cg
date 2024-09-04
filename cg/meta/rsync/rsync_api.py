@@ -16,7 +16,12 @@ from cg.constants.tb import AnalysisTypes
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
+from cg.meta.rsync.sbatch import (
+    COVID_RSYNC,
+    ERROR_RSYNC_FUNCTION,
+    RSYNC_COMMAND,
+    COVID_REPORT_RSYNC,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case
@@ -99,20 +104,21 @@ class RsyncAPI(MetaAPI):
             destination_path: Path = Path(
                 source_and_destination_paths["rsync_destination_path"], ticket
             )
-            if case.data_analysis == Workflow.MUTANT:
-                commands = COVID_RSYNC.format(
-                    source_path=source_and_destination_paths["delivery_source_path"],
-                    destination_path=source_and_destination_paths["rsync_destination_path"],
-                    covid_report_path=self.format_covid_report_path(case=case, ticket=ticket),
-                    covid_destination_path=self.format_covid_destination_path(
-                        self.covid_destination_path, customer_internal_id=case.customer.internal_id
-                    ),
-                    log_dir=self.log_dir,
-                )
-            else:
-                commands += RSYNC_COMMAND.format(
-                    source_path=source_path, destination_path=destination_path
-                )
+
+            commands += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+        if case.data_analysis == Workflow.MUTANT:
+            # Adds the covid report rsync command
+            report_path = self.format_covid_report_path(case=case, ticket=ticket)
+            covid_destination_path = self.format_covid_destination_path(
+                self.covid_destination_path, customer_internal_id=case.customer.internal_id
+            )
+            commands += COVID_REPORT_RSYNC.format(
+                covid_report_path=report_path,
+                covid_destination_path=covid_destination_path,
+                log_dir=self.log_dir,
+            )
         return commands
 
     def set_log_dir(self, folder_prefix: str) -> None:

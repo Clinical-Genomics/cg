@@ -13,6 +13,10 @@ rsync -rvL {source_path} {destination_path}
 rsync -rvL --chmod=777 {covid_report_path} {covid_destination_path}
 """
 
+COVID_REPORT_RSYNC = """
+rsync -rvL --chmod=777 {covid_report_path} {covid_destination_path}
+"""
+
 ERROR_RSYNC_FUNCTION = """
 echo "Rsync failed"
 """

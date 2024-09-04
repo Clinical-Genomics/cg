@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
@@ -166,6 +167,44 @@ def test_concatenate_rsync_commands(
         )
         in commands
     )
+
+
+def test_concatenate_rsync_commands_mutant(
+    rsync_api: RsyncAPI,
+    folders_to_deliver: set[Path],
+    analysis_family: dict,
+    analysis_store_trio,
+    project_dir,
+    customer_id,
+    ticket_id: str,
+    case: Case,
+    mocker,
+):
+    """Tests the function to concatenate rsync commands for transferring multiple files."""
+    # GIVEN a list with a mutant case and a sample name and a mutant report file
+    case.data_analysis = Workflow.MUTANT
+    source_and_destination_paths = {
+        "delivery_source_path": project_dir / customer_id / ticket_id,
+        "rsync_destination_path": project_dir / customer_id,
+    }
+    report_path = Path(project_dir, customer_id, ticket_id, "mutant_report.txt")
+    covid_destination_path = Path(project_dir, "destination")
+    rsync_api.covid_destination_path = covid_destination_path
+    # WHEN then commands are generated
+    mocker.patch.object(RsyncAPI, "format_covid_report_path", return_value=report_path)
+    mocker.patch.object(
+        RsyncAPI, "format_covid_destination_path", return_value=covid_destination_path
+    )
+    commands: str = rsync_api.concatenate_rsync_commands(
+        folder_list=folders_to_deliver,
+        source_and_destination_paths=source_and_destination_paths,
+        ticket=ticket_id,
+        case=case,
+    )
+    # THEN the correct folder should be added to the source path
+
+    assert report_path.name in commands
+    assert covid_destination_path.as_posix() in commands
 
 
 def test_slurm_rsync_single_case(
