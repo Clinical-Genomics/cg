@@ -15,6 +15,19 @@ class ChromographImages(BaseModel):
     upd_regions: str | None = None
     upd_sites: str | None = None
 
+class eKLIPse(BaseModel):
+    title: str | None = None
+    description: str = "eKLIPse MT images"
+    width: str = "800"
+    height: str = "800"
+    path: str | None = None
+
+class CaseImages(BaseModel):
+    eKLIPse = eKLIPse()
+
+class CustomImages(BaseModel):
+    case_images: CaseImages = CaseImages()
+
 
 class Reviewer(BaseModel):
     alignment: str | None = None
@@ -68,11 +81,9 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
+    custom_images: CustomImages = CustomImages()
     mt_bam: str | None = None
-    bam_file: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
-    # reviewer_alignment: Reviewer = Reviewer()
-    # reviewer_alignment_index: Reviewer = Reviewer()
     rhocall_bed: str | None = None
     rhocall_wig: str | None = None
     tiddit_coverage_wig: str | None = None

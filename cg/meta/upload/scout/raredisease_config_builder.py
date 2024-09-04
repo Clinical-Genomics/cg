@@ -168,7 +168,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
-
+        config_sample.custom_images.case_images.eKLIPse.title = sample_id
+        config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(hk_tags=self.sample_tags.str_catalog)
+        config_sample.mitodel_file = self.get_sample_file(
+            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        )
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
         """Check if there are any linked individuals in a case"""
