@@ -23,8 +23,6 @@ from cg.meta.deliver.fastq_path_generator import (
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
-LOG = logging.getLogger(__name__)
-
 
 class DeliverAPI:
     """Deliver API for workflows files."""

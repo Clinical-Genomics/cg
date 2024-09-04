@@ -60,7 +60,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
-    is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
+    is_complete_delivery, job_id = rsync_api.run_rsync_for_case(
         case=case,
         dry_run=dry_run,
         sample_files_present=is_sample_delivery,

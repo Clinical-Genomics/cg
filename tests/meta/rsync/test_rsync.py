@@ -96,7 +96,7 @@ def test_run_rsync_on_slurm(
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket=ticket_id, dry_run=True)
+    sbatch_number: int = rsync_api.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
 
     # THEN check that SARS-COV-2 analysis is not delivered
     assert "Delivering report for SARS-COV-2 analysis" not in caplog.text
@@ -115,7 +115,7 @@ def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog
 
     # WHEN the job is submitted
     with pytest.raises(CgError):
-        rsync_api.run_rsync_on_slurm(ticket=ticket_id, dry_run=True)
+        rsync_api.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
 
         # THEN check that error is raised based on no cases being present
         assert "Could not find any cases for ticket" in caplog.text
@@ -206,7 +206,7 @@ def test_slurm_rsync_single_case(
     # WHEN the destination path is created
     sbatch_number: int
     is_complete_delivery: bool
-    is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
+    is_complete_delivery, sbatch_number = rsync_api.run_rsync_for_case(
         case=case,
         case_files_present=True,
         dry_run=True,
@@ -246,7 +246,7 @@ def test_slurm_rsync_single_case_missing_file(
     # WHEN the destination path is created
     sbatch_number: int
     is_complete_delivery: bool
-    is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
+    is_complete_delivery, sbatch_number = rsync_api.run_rsync_for_case(
         case=case,
         case_files_present=True,
         dry_run=True,

@@ -83,3 +83,8 @@ class UploadAPI(MetaAPI):
                     f"The upload has already started: {analysis_obj.upload_started_at.time()}"
                 )
                 raise AnalysisAlreadyUploadedError
+
+    def upload_files_to_customer_inbox(self, case: Case) -> None:
+        """Uploads the analysis files to the customer inbox"""
+
+        raise NotImplementedError
