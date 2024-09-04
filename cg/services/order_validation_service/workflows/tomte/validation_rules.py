@@ -11,6 +11,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_buffer_skip_rc_condition,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
+    validate_container_name_required,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_gene_panels_exist,
@@ -22,6 +23,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_volume_interval,
+    validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
 
@@ -40,6 +42,7 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_buffer_skip_rc_condition,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
+    validate_container_name_required,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_mothers_are_female,
@@ -50,5 +53,6 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_volume_interval,
+    validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 ]
