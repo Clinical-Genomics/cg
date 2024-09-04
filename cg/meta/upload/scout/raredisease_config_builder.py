@@ -127,7 +127,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
         """Include sample level files that are optional for mip samples"""
-        LOG.info("Including MIP specific sample level files")
+        LOG.info("Including RAREDISEASE specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
@@ -172,9 +172,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
             hk_tags=self.sample_tags.eklipse_path
         )
-        print(config_sample.custom_images.case_images.eKLIPse.dict())
-        print(config_sample.custom_images.dict())
-
         print(config_sample.dict())
 
     @staticmethod
