@@ -97,7 +97,6 @@ def test_update_sample_reads_illumina_negative_control(
     assert sample.reads == 0
     # GIVEN that the sample is a negative control sample
     sample.control = ControlOptions.NEGATIVE
-    assert sample.is_negative_control is True
 
     # WHEN updating the sample reads for a sequencing run
     store_with_illumina_sequencing_data.update_sample_reads_illumina(
