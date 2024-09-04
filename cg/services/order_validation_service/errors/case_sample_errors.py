@@ -133,3 +133,8 @@ class InvalidBufferError(CaseSampleError):
 class SexSubjectIdError(CaseSampleError):
     field: str = "sex"
     message: str = "Another sample with the same subject id has a different sex"
+
+
+class CaptureKitMissingError(CaseSampleError):
+    field: str = "capture_kit"
+    message: str = "Bait set is required for TGS analyses"
