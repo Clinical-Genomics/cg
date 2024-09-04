@@ -126,17 +126,16 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-    def _include_sample_file(self, scout_key, case_sample, config_sample) -> None:
+    def _include_sample_file(self, scout_key, case_sample: CaseSample, config_sample: ScoutRarediseaseIndividual) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         tags = getattr(self.sample_tags, scout_key)
         sample_id: str = case_sample.sample.internal_id
-        scout_key = scout_key.replace("chromograph_", "chromograph_images.")
-        scout_key = scout_key.replace("reviewer_", "reviewer.")
+        scout_sample_tag: ScoutRarediseaseIndividual = scout_key.to_dot_notation_config()
         LOG.info(f"Scout key: {scout_key}")
         setattr(
             config_sample,
-            scout_key,
+            scout_sample_tag,
             self.get_sample_file(hk_tags=tags, sample_id=sample_id),
         )
 

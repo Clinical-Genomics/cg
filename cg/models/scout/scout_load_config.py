@@ -86,6 +86,30 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     chromograph_images: ChromographImages = ChromographImages()
     reviewer: Reviewer = Reviewer()
 
+    def to_dot_notation_config(self) -> dict:
+        # Mapping of class attributes to dot-notated keys
+        attribute_mapping = {
+            "chromograph_autozyg": "chromograph_images.autozyg",
+            "chromograph_coverage": "chromograph_images.coverage",
+            "chromograph_regions": "chromograph_images.regions",
+            "chromograph_sites": "chromograph_images.sites",
+            "reviewer_alignment": "reviewer.alignment",
+            "reviewer_alignment_index": "reviewer.alignment_index",
+            "reviewer_catalog": "reviewer.catalog",
+            "reviewer_vcf": "reviewer.vcf",
+        }
+
+        # Create the configuration dictionary
+        config = {}
+        for attr, value in self.__dict__.items():
+            if value is not None:
+                # Apply dot notation if the attribute is in the mapping
+                key = attribute_mapping.get(attr, attr)
+                config[key] = value
+
+        return config
+
+
 class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: str | None = None
     tmb: str | None = None
