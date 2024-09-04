@@ -2,7 +2,6 @@ from abc import abstractmethod, ABC
 
 from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
 from cg.services.file_delivery.file_formatter_service.models import FormattedFiles
-from cg.store.store import Store
 
 
 class DeliveryFileFormattingService(ABC):

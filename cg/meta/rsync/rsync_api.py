@@ -149,11 +149,11 @@ class RsyncAPI(MetaAPI):
             self.covid_report_path % (case.internal_id, ticket)
         )
         if not covid_report_options:
-            LOG.error(
+
+            raise FileNotFoundError(
                 f"No report file could be found with path"
                 f" {self.covid_report_path % (case.internal_id, ticket)}!"
             )
-            raise CgError()
         return covid_report_options[0]
 
     def create_log_dir(self, dry_run: bool) -> None:
