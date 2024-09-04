@@ -22,6 +22,7 @@ RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "PCT_EXC_ADAPTER": {"norm": "lt", "threshold": 0.0005},
     "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+    "parent_error_ped_check": {"norm": "eq", "threshold": False},
 }
 
 RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
