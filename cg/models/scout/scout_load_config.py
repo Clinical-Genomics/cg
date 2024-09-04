@@ -70,12 +70,9 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutRarediseaseIndividual(ScoutIndividual):
     mt_bam: str | None = None
     bam_file: str | None = None
-    chromograph_autozyg: str | None = None
-    chromograph_coverage: str | None = None
-    chromograph_regions: ChromographImages = ChromographImages()
-    chromograph_sites: ChromographImages = ChromographImages()
-    reviewer_alignment: Reviewer = Reviewer()
-    reviewer_alignment_index: Reviewer = Reviewer()
+    chromograph_images: ChromographImages = ChromographImages()
+    # reviewer_alignment: Reviewer = Reviewer()
+    # reviewer_alignment_index: Reviewer = Reviewer()
     rhocall_bed: str | None = None
     rhocall_wig: str | None = None
     tiddit_coverage_wig: str | None = None
@@ -83,31 +80,7 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     upd_sites_bed: str | None = None
     vcf2cytosure: str | None = None
     mitodel_file: str | None = None
-    chromograph_images: ChromographImages = ChromographImages()
     reviewer: Reviewer = Reviewer()
-
-    def to_dot_notation_config(self) -> dict:
-        # Mapping of class attributes to dot-notated keys
-        attribute_mapping = {
-            "chromograph_autozyg": "chromograph_images.autozyg",
-            "chromograph_coverage": "chromograph_images.coverage",
-            "chromograph_regions": "chromograph_images.regions",
-            "chromograph_sites": "chromograph_images.sites",
-            "reviewer_alignment": "reviewer.alignment",
-            "reviewer_alignment_index": "reviewer.alignment_index",
-            "reviewer_catalog": "reviewer.catalog",
-            "reviewer_vcf": "reviewer.vcf",
-        }
-
-        # Create the configuration dictionary
-        config = {}
-        for attr, value in self.__dict__.items():
-            if value is not None:
-                # Apply dot notation if the attribute is in the mapping
-                key = attribute_mapping.get(attr, attr)
-                config[key] = value
-
-        return config
 
 
 class ScoutCancerIndividual(ScoutIndividual):
