@@ -128,7 +128,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
         sample_id: str = config_sample.sample_id
-        config_sample.vcf2cytoxsure = self.get_sample_file(
+        config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
         config_sample.mt_bam = self.get_sample_file(
