@@ -286,7 +286,7 @@ metrics:
   value: 24.546493
 - condition:
     norm: gt
-    threshold: 26.0
+    threshold: 25.0
   header: null
   id: ADM1
   input: multiqc_data.json

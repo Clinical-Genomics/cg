@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from itertools import combinations
 from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
@@ -634,7 +635,10 @@ class NfAnalysisAPI(AnalysisAPI):
         Multiple search patterns can be added. Ideally patterns used should be sample ids, e.g.
         {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
+        sample_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
+        sample_ids_list = list(sample_ids)
+        pairwise_patterns: dict[str, str] = {f"{sample1}-{sample2}": f"{sample1}-{sample2}" for sample1, sample2 in combinations(sample_ids_list, 2)}
+        search_patterns = {**sample_patterns, **pairwise_patterns}
         return search_patterns
 
     @staticmethod
