@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion, Workflow
+from cg.constants.constants import GenomeVersion, PrepCategory, Workflow
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
 from cg.services.order_validation_service.workflows.tomte.constants import (
@@ -238,3 +238,17 @@ def tomte_validation_service(
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
     return TomteValidationService(base_store)
+
+
+@pytest.fixture
+def application_tgs(base_store: Store) -> Application:
+    application: Application = base_store.add_application(
+        tag="PANKTTR020",
+        prep_category=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        description="Panel-based sequencing, 20 M read pairs.",
+        percent_kth=59,
+        percent_reads_guaranteed=75,
+    )
+    base_store.session.add(application)
+    base_store.commit_to_store()
+    return application
