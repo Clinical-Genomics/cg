@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import SequencingQCStatus
+from cg.constants.sequencing import Sequencers
+from cg.services.illumina.post_processing.utils import get_q30_threshold
 from cg.store.base import BaseHandler
 from cg.store.models import (
     Case,
@@ -58,12 +60,20 @@ class UpdateHandler(BaseHandler):
         case.aggregated_sequencing_qc = status
         self.session.commit()
 
-    def update_sample_reads_illumina(self, internal_id: str):
+    def update_sample_reads_illumina(self, internal_id: str, sequencer_type: Sequencers):
         sample: Sample = self.get_sample_by_internal_id(internal_id)
         total_reads_for_sample: int = 0
         sample_metrics: list[IlluminaSampleSequencingMetrics] = sample.sample_run_metrics
+
+        q30_threshold: int = get_q30_threshold(sequencer_type)
+
         for sample_metric in sample_metrics:
-            total_reads_for_sample += sample_metric.total_reads_in_lane
+            if (
+                sample_metric.base_passing_q30_percent >= q30_threshold
+                or sample.is_negative_control
+            ):
+                total_reads_for_sample += sample_metric.total_reads_in_lane
+
         sample.reads = total_reads_for_sample
         self.session.commit()
 
