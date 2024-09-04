@@ -19,7 +19,6 @@ from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.file_delivery.file_formatter_service.models import FormattedFiles
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)

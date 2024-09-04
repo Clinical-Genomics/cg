@@ -29,7 +29,7 @@ class MipRNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         # Clinical delivery upload
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case=case)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
