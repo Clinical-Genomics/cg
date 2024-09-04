@@ -58,7 +58,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.add_common_info_to_load_config()
         self.load_config.human_genome_build = getattr(
             GenomeBuild,
-            self.raredisease_analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
+            self.raredisease_analysis_api.get_genome_build(
+                case_id=self.analysis_obj.case.internal_id
+            ),
         )
         # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version

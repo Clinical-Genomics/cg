@@ -648,7 +648,6 @@ def raredisease_analysis(
     return analysis
 
 
-
 @pytest.fixture
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
@@ -814,7 +813,6 @@ def upload_balsamic_analysis_scout_api(
 #         lims_api=lims_api,
 #         status_db=store,
 #     )
-
 
 
 @pytest.fixture

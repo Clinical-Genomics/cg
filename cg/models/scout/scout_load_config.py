@@ -171,6 +171,7 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
 
+
 class RnafusionLoadConfig(ScoutLoadConfig):
     multiqc_rna: str | None = None
     gene_fusion: str | None = None
