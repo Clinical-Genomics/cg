@@ -3,7 +3,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
-from pydantic import ConfigDict
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -822,11 +821,17 @@ class Sample(Base, PriorityMixin):
 
     @property
     def is_internal_negative_control(self) -> bool:
-        return self.is_negative_control and self.customer == CustomerId.CG_INTERNAL_CUSTOMER
+        return (
+            self.is_negative_control
+            and self.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
+        )
 
     @property
     def is_external_negative_control(self) -> bool:
-        return self.is_negative_control and self.customer != CustomerId.CG_INTERNAL_CUSTOMER
+        return (
+            self.is_negative_control
+            and self.customer.internal_id != CustomerId.CG_INTERNAL_CUSTOMER
+        )
 
     @property
     def flow_cells(self) -> list[Flowcell]:
