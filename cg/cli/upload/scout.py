@@ -93,7 +93,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     if print_console:
         click.echo(
             WriteStream.write_stream_from_content(
-                content=scout_load_config.dict(exclude_none=True), file_format=FileFormat.YAML
+                content=scout_load_config.dict(exclude_none=False), file_format=FileFormat.YAML
             )
         )
         LOG.info(f"Would save file to {file_path}")
