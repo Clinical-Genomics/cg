@@ -3,7 +3,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
-from pydantic import ConfigDict
 from sqlalchemy import (
     BLOB,
     DECIMAL,
