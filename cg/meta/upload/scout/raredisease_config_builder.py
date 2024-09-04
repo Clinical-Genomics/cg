@@ -175,6 +175,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         print(config_sample.custom_images.case_images.eKLIPse.dict())
         print(config_sample.custom_images.dict())
 
+        print(config_sample.dict())
+
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
         """Check if there are any linked individuals in a case"""
