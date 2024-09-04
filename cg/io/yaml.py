@@ -25,8 +25,7 @@ def write_yaml(content: Any, file_path: Path) -> None:
 
 def write_yaml_stream(content: Any) -> str:
     """Write content to a yaml stream"""
-    print(content)
-    return yaml.dump(content)
+    return yaml.dump(content, default_flow_style=False)
 
 
 def write_yaml_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
