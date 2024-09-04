@@ -172,6 +172,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
             hk_tags=self.sample_tags.eklipse_path
         )
+        print(config_sample.custom_images.case_images.eKLIPse.dict())
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
