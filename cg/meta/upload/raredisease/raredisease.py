@@ -6,7 +6,7 @@ import logging
 import click
 
 from cg.cli.generate.report.base import generate_delivery_report
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb

@@ -1,10 +1,11 @@
 from pathlib import Path
 
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
-from cg.meta.deliver.fastq_path_generator import generate_concatenated_fastq_delivery_path
+
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
 from cg.services.file_delivery.fetch_file_service.models import SampleFile
 from cg.services.file_delivery.file_formatter_service.models import FormattedFile
 from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter import (

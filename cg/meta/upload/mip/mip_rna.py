@@ -5,7 +5,7 @@ from subprocess import CalledProcessError
 
 import click
 
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+
 from cg.cli.upload.scout import upload_rna_to_scout
 from cg.constants import DataDelivery
 from cg.meta.upload.upload_api import UploadAPI

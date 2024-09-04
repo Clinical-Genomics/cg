@@ -80,6 +80,7 @@ def deliver_case(
         hk_api=context.housekeeper_api,
         tb_service=context.trailblazer_api,
         rsync_service=rsync_api,
+        analysis_service=context.analysis_service,
     )
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
     if not case:
@@ -115,6 +116,7 @@ def deliver_ticket(
         hk_api=context.housekeeper_api,
         tb_service=context.trailblazer_api,
         rsync_service=rsync_api,
+        analysis_service=context.analysis_service,
     )
 
     cases: list[Case] = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)

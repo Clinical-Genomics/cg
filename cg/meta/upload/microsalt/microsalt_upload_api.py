@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.microsalt.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig

@@ -11,8 +11,6 @@ from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.store.models import Case
 from cg.store.store import Store
-from tests.meta.deliver.conftest import all_samples_in_inbox, dummy_file_name
-from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
@@ -121,26 +119,6 @@ def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog
         assert "Could not find any cases for ticket" in caplog.text
 
 
-def test_get_folders_to_deliver(
-    analysis_family: dict, analysis_store_trio, rsync_api: RsyncAPI, case_id: str
-):
-    """Tests the ability for the rsync api to get case and sample names."""
-    # GIVEN a case
-
-    # WHEN the function gets the folders
-    folder_list: list[str] = rsync_api.get_folders_to_deliver(
-        case_id=case_id, sample_files_present=True, case_files_present=True
-    )
-
-    # THEN it the list should contain the case name and all the samples
-    assert folder_list == [
-        analysis_family["samples"][0]["name"],
-        analysis_family["samples"][1]["name"],
-        analysis_family["samples"][2]["name"],
-        analysis_family["name"],
-    ]
-
-
 def test_concatenate_rsync_commands(
     analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket_id: str
 ):
@@ -206,16 +184,14 @@ def test_slurm_rsync_single_case(
     # WHEN the destination path is created
     sbatch_number: int
     is_complete_delivery: bool
-    is_complete_delivery, sbatch_number = rsync_api.run_rsync_for_case(
+    sbatch_number = rsync_api.run_rsync_for_case(
         case=case,
-        case_files_present=True,
         dry_run=True,
-        sample_files_present=True,
+        folders_to_deliver=[case.links[0].sample.name],
     )
 
     # THEN check that an integer was returned as sbatch number and the delivery should be complete
     assert isinstance(sbatch_number, int)
-    assert is_complete_delivery
 
 
 def test_slurm_rsync_single_case_missing_file(
@@ -245,17 +221,16 @@ def test_slurm_rsync_single_case_missing_file(
 
     # WHEN the destination path is created
     sbatch_number: int
-    is_complete_delivery: bool
-    is_complete_delivery, sbatch_number = rsync_api.run_rsync_for_case(
+
+    sbatch_number = rsync_api.run_rsync_for_case(
         case=case,
-        case_files_present=True,
         dry_run=True,
-        sample_files_present=True,
+        folders_to_deliver=
     )
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
-    assert not is_complete_delivery
+
 
 
 def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
