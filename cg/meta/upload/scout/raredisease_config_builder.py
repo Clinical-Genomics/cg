@@ -95,6 +95,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Build a sample with specific information"""
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         self.include_sample_files(config_sample=config_sample)
         config_sample.father = (
             case_sample.father.internal_id
@@ -206,3 +207,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         if file_path is None:
             return file_path
         return re.split("(\d+|X|Y)\.png", file_path)[0]
+
+
+    def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
+        """Include the CRAM alignment file for a sample
+
+        """
+        sample_id: str = config_sample.sample_id
+        config_sample.alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
+        )
