@@ -48,7 +48,7 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
             FetchSampleAndCaseDeliveryFileTagsService,
             FetchAnalysisDeliveryFilesService,
             MoveDeliveryFilesService,
-            SampleFileConcatenationFormatter,
+            SampleFileFormatter,
         ),
         (
             Workflow.BALSAMIC,
