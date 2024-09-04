@@ -68,10 +68,7 @@ class UpdateHandler(BaseHandler):
         q30_threshold: int = get_q30_threshold(sequencer_type)
 
         for sample_metric in sample_metrics:
-            if (
-                sample_metric.base_passing_q30_percent >= q30_threshold
-                or sample.is_negative_control
-            ):
+            if sample_metric.base_passing_q30_percent >= q30_threshold:
                 total_reads_for_sample += sample_metric.total_reads_in_lane
 
         sample.reads = total_reads_for_sample
