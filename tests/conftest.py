@@ -75,12 +75,12 @@ from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.osticket import MockOsTicket
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
@@ -645,11 +645,10 @@ def ticket_id() -> str:
 
 
 @pytest.fixture
-def osticket(ticket_id: str) -> MockOsTicket:
-    """Return a api that mock the os ticket api."""
-    api = MockOsTicket()
-    api.set_ticket_nr(ticket_id)
-    return api
+def freshdesk_client() -> FreshdeskClient:
+    """Return a FreshdeskClient instance with mock parameters."""
+    client = FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
+    return client
 
 
 # Files fixtures
