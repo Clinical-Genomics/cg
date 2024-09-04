@@ -85,7 +85,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     except SyntaxError as error:
         LOG.warning(repr(error))
         raise click.Abort from error
-    LOG.info(f"Found load config {scout_load_config}")
+    LOG.info(f"Found load config: {scout_load_config}")
     root_dir: str = context.meta_apis["upload_api"].analysis_api.root
     LOG.info(f"Set root dir to {root_dir}")
     file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
