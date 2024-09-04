@@ -13,9 +13,9 @@ from cg.apps.environ import environ_email
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
-    DEVELOPMENT_CUSTOMER_ID,
     AnalysisType,
     CaseActions,
+    CustomerId,
     FileFormat,
     GenomeVersion,
     WorkflowManager,
@@ -311,7 +311,7 @@ class AnalysisAPI(MetaAPI):
 
     def _is_case_for_development(self, case_id: str) -> bool:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
-        return case.customer.internal_id == DEVELOPMENT_CUSTOMER_ID
+        return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
