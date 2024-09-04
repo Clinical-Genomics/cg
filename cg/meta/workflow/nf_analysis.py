@@ -637,7 +637,10 @@ class NfAnalysisAPI(AnalysisAPI):
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
         sample_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
         sample_ids_list = list(sample_ids)
-        pairwise_patterns: dict[str, str] = {f"{sample1}-{sample2}": f"{sample1}-{sample2}" for sample1, sample2 in combinations(sample_ids_list, 2)}
+        pairwise_patterns: dict[str, str] = {
+            f"{sample1}-{sample2}": f"{sample1}-{sample2}"
+            for sample1, sample2 in combinations(sample_ids_list, 2)
+        }
         search_patterns = {**sample_patterns, **pairwise_patterns}
         return search_patterns
 
