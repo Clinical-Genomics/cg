@@ -196,3 +196,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         ]
         svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path
+
+    @staticmethod
+    def extract_generic_filepath(file_path: str | None) -> str | None:
+        """Remove a file's suffix and identifying integer or X/Y
+        Example:
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
+        if file_path is None:
+            return file_path
+        return re.split("(\d+|X|Y)\.png", file_path)[0]
