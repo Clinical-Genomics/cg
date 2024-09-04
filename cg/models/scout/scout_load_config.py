@@ -15,6 +15,7 @@ class ChromographImages(BaseModel):
     upd_regions: str | None = None
     upd_sites: str | None = None
 
+
 class Eklipse(BaseModel):
     title: str | None = None
     description: str = "eKLIPse MT images"
@@ -22,8 +23,10 @@ class Eklipse(BaseModel):
     height: str = "800"
     path: str | None = None
 
+
 class CaseImages(BaseModel):
     eKLIPse: Eklipse = Eklipse()
+
 
 class CustomImages(BaseModel):
     case_images: CaseImages = CaseImages()

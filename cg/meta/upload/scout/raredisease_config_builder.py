@@ -169,10 +169,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
         config_sample.custom_images.case_images.eKLIPse.title = sample_id
-        config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(hk_tags=self.sample_tags.str_catalog)
-        config_sample.mitodel_file = self.get_sample_file(
-            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
+            hk_tags=self.sample_tags.eklipse_path
         )
+
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
         """Check if there are any linked individuals in a case"""
@@ -212,11 +212,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             return file_path
         return re.split("(\d+|X|Y)\.png", file_path)[0]
 
-
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
-        """Include the CRAM alignment file for a sample
-
-        """
+        """Include the CRAM alignment file for a sample"""
         sample_id: str = config_sample.sample_id
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
