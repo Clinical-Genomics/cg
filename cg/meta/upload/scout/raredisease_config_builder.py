@@ -115,10 +115,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, case_sample: CaseSample, config_sample: ScoutIndividual = None, ) -> None:
         for scout_key in RAREDISEASE_SAMPLE_TAGS.keys():
-            LOG.info(f"Scout key: {scout_key}")
-            scout_key = scout_key.replace("chromograph_", "chromograph_images.")
-            scout_key = scout_key.replace("reviewer_", "reviewer.")
-
             self._include_sample_file(scout_key, case_sample, config_sample)
 
     def _include_case_file(self, scout_key) -> None:
@@ -135,6 +131,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         are found. Otherwise return None."""
         tags = getattr(self.sample_tags, scout_key)
         sample_id: str = case_sample.sample.internal_id
+        scout_key = scout_key.replace("chromograph_", "chromograph_images.")
+        scout_key = scout_key.replace("reviewer_", "reviewer.")
+        LOG.info(f"Scout key: {scout_key}")
         setattr(
             config_sample,
             scout_key,
