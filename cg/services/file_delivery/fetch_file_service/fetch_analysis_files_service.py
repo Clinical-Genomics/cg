@@ -3,6 +3,7 @@ from cg.constants import Workflow
 from cg.services.file_delivery.fetch_delivery_files_tags.fetch_delivery_file_tags_service import (
     FetchDeliveryFileTagsService,
 )
+from cg.services.file_delivery.fetch_file_service.error_handling import handle_missing_bundle_errors
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
@@ -76,6 +77,7 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             delivery_files.extend(sample_delivery_files)
         return delivery_files
 
+    @handle_missing_bundle_errors
     def get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample

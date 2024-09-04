@@ -31,11 +31,9 @@ class MoveDeliveryFilesService:
     def _create_ticket_inbox_folder(
         inbox_dir_path: Path,
     ) -> Path:
-        """Create a ticket inbox folder in the customer folder."""
-        if not inbox_dir_path.exists():
-            inbox_dir_path.mkdir(parents=True)
-            return inbox_dir_path
-        raise FileExistsError(f"Ticket inbox folder {inbox_dir_path} already exists for ticket.")
+        """Create a ticket inbox folder in the customer folder, overwrites if already present."""
+        inbox_dir_path.mkdir(parents=True, exist_ok=True)
+        return inbox_dir_path
 
     @staticmethod
     def _create_ticket_inbox_dir_path(
