@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from cg.constants.delivery import INBOX_NAME
 from cg.services.file_delivery.fetch_file_service.models import (
@@ -32,6 +33,8 @@ class MoveDeliveryFilesService:
         inbox_dir_path: Path,
     ) -> Path:
         """Create a ticket inbox folder in the customer folder, overwrites if already present."""
+        if inbox_dir_path.exists():
+            shutil.rmtree(inbox_dir_path, ignore_errors=True)
         inbox_dir_path.mkdir(parents=True, exist_ok=True)
         return inbox_dir_path
 
