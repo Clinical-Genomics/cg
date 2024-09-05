@@ -84,7 +84,6 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
-    custom_images: CustomImages = CustomImages()
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
     rhocall_bed: str | None = None
@@ -122,6 +121,7 @@ class ScoutLoadConfig(BaseModel):
     sv_rank_model_version: str | None = None
     analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
+    custom_images: CustomImages = CustomImages()
     delivery_report: str
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
@@ -166,8 +166,6 @@ class MipLoadConfig(ScoutLoadConfig):
 
 
 class RarediseaseLoadConfig(ScoutLoadConfig):
-    # chromograph_image_files: list[str] | None = None
-    # chromograph_prefixes: list[str] | None = None
     madeline: str | None = None
     peddy_check: str | None = None
     peddy_ped: str | None = None
