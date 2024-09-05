@@ -8,7 +8,6 @@ Create Date: 2024-09-04 13:15:11.876822
 
 from enum import StrEnum
 
-import sqlalchemy as sa
 from sqlalchemy import orm, types
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -94,14 +93,18 @@ def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
     try:
-        op.alter_column("case", "data_analysis", type_=new_enum)
+        # Case
+        op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
         session.query(Case).filter(Case.data_analysis == "fastq").update(
             {"data_analysis": Workflow.RAW_DATA}, synchronize_session="evaluate"
         )
-        op.alter_column("analysis", "workflow", type_=new_enum)
+        op.alter_column("case", "data_analysis", type_=new_enum, existing_nullable=True)
+        # Analysis
+        op.alter_column("analysis", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True)
         session.query(Analysis).filter(Analysis.workflow == "fastq").update(
             {"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate"
         )
+        op.alter_column("analysis", "workflow", type_=new_enum, existing_nullable=True)
         session.commit()
     finally:
         session.close()
@@ -111,14 +114,18 @@ def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
     try:
-        op.alter_column("case", "data_analysis", type_=old_enum)
+        # Case
+        op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
         session.query(Case).filter(Case.data_analysis == Workflow.RAW_DATA).update(
             {"data_analysis": "fastq"}, synchronize_session="evaluate"
         )
-        op.alter_column("analysis", "workflow", type_=old_enum)
+        op.alter_column("case", "data_analysis", type_=old_enum, existing_nullable=True)
+        # Analysis
+        op.alter_column("analysis", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True)
         session.query(Analysis).filter(Analysis.workflow == Workflow.RAW_DATA).update(
             {"workflow": "fastq"}, synchronize_session="evaluate"
         )
+        op.alter_column("analysis", "workflow", type_=old_enum, existing_nullable=True)
         session.commit()
     finally:
         session.close()
