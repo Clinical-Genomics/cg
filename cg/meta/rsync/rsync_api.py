@@ -98,9 +98,7 @@ class RsyncAPI(MetaAPI):
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
-            source_path = Path(
-                source_and_destination_paths["delivery_source_path"], folder.name
-            )
+            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
             destination_path: Path = Path(
                 source_and_destination_paths["rsync_destination_path"], ticket
             )

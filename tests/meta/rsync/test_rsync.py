@@ -122,24 +122,24 @@ def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog
 
 
 def test_concatenate_rsync_commands(
-    rsync_api: RsyncAPI,
-    folders_to_deliver: set[Path],
     analysis_family: dict,
     analysis_store_trio,
-    project_dir,
-    customer_id,
-    ticket_id: str,
     case: Case,
+    customer_id,
+    folders_to_deliver: set[Path],
+    project_dir,
+    rsync_api: RsyncAPI,
+    ticket_id: str,
 ):
     """Tests the function to concatenate rsync commands for transferring multiple files."""
     # GIVEN a list with a case and a sample name
 
     source_and_destination_paths = {
-        "delivery_source_path": project_dir / customer_id / ticket_id,
-        "rsync_destination_path": project_dir / customer_id,
+        "delivery_source_path": Path(project_dir, customer_id, ticket_id),
+        "rsync_destination_path": Path(project_dir, customer_id),
     }
     # WHEN then commands are generated
-    commands: str = rsync_api.concatenate_rsync_commands(
+    command: str = rsync_api.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -153,7 +153,7 @@ def test_concatenate_rsync_commands(
                 str(source_and_destination_paths["delivery_source_path"]),
             ]
         )
-        in commands
+        in command
     )
     assert (
         " ".join(
@@ -165,29 +165,29 @@ def test_concatenate_rsync_commands(
                 str(source_and_destination_paths["delivery_source_path"]),
             ]
         )
-        in commands
+        in command
     )
 
 
 def test_concatenate_rsync_commands_mutant(
-    rsync_api: RsyncAPI,
-    folders_to_deliver: set[Path],
     analysis_family: dict,
     analysis_store_trio,
-    project_dir,
-    customer_id,
-    ticket_id: str,
     case: Case,
+    customer_id,
+    folders_to_deliver: set[Path],
     mocker,
+    project_dir,
+    rsync_api: RsyncAPI,
+    ticket_id: str,
 ):
     """Tests the function to concatenate Rsync commands for transferring multiple files."""
     # GIVEN a list with a Mutant case and a sample name and a Mutant report file
     case.data_analysis = Workflow.MUTANT
     source_and_destination_paths = {
-        "delivery_source_path": project_dir / customer_id / ticket_id,
-        "rsync_destination_path": project_dir / customer_id,
+        "delivery_source_path": Path(project_dir, customer_id, ticket_id),
+        "rsync_destination_path": Path(project_dir, customer_id),
     }
-    report_path = Path(project_dir, customer_id, ticket_id, "mutant_report.txt")
+    report_path = Path(project_dir, customer_id, ticket_id, "a_report_file")
     covid_destination_path = Path(project_dir, "destination")
     rsync_api.covid_destination_path = covid_destination_path
 
@@ -196,7 +196,7 @@ def test_concatenate_rsync_commands_mutant(
     mocker.patch.object(
         RsyncAPI, "format_covid_destination_path", return_value=covid_destination_path
     )
-    commands: str = rsync_api.concatenate_rsync_commands(
+    command: str = rsync_api.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -204,8 +204,8 @@ def test_concatenate_rsync_commands_mutant(
     )
 
     # THEN the correct folder should be added to the source path
-    assert report_path.name in commands
-    assert covid_destination_path.as_posix() in commands
+    assert report_path.name in command
+    assert covid_destination_path.as_posix() in command
 
 
 def test_slurm_rsync_single_case(
