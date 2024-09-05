@@ -85,10 +85,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture()
 
         LOG.info("Adding custom images")
-        for db_sample in self.analysis_obj.case.links:
-            self.load_config.custom_images.append(self.build_custom_image_sample(case_sample=db_sample))
-        print("LOG D")
-        print(self.load_config.dict())
+        # for db_sample in self.analysis_obj.case.links:
+            # self.load_config.custom_images.append(self.build_custom_image_sample(case_sample=db_sample))
+        # print("LOG D")
+        # print(self.load_config.dict())
 
 
     def include_pedigree_picture(self) -> None:
@@ -196,10 +196,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
-        # config_sample.custom_images.case_images.eKLIPse.title = sample_id
-        # config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
-        #     hk_tags=self.sample_tags.eklipse_path
-        # )
+        config_sample.custom_images.case_images.eKLIPse.title = sample_id
+        config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
+            hk_tags=self.sample_tags.eklipse_path
+        )
         # print(config_sample.dict())
 
     @staticmethod

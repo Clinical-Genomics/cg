@@ -66,7 +66,6 @@ class ScoutIndividual(BaseModel):
     sex: Annotated[str | None, BeforeValidator(field_not_none)] = None
     subject_id: str | None = None
     tissue_type: str | None = None
-
     model_config = ConfigDict(validate_assignment=True)
 
 
@@ -170,7 +169,7 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
-    samples: list[ScoutMipIndividual] = []
+    samples: list[ScoutRarediseaseIndividual] = []
     smn_tsv: str | None = None
     str_catalog: str | None = None
     vcf_mei: str | None = None
