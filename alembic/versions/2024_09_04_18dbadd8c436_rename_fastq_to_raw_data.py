@@ -22,7 +22,7 @@ branch_labels = None
 depends_on = None
 
 
-old_options = (
+base_options = (
     "balsamic",
     "balsamic-pon",
     "balsamic-qc",
@@ -35,14 +35,14 @@ old_options = (
     "mip-rna",
     "mutant",
     "raredisease",
-    "raw-data",
     "rnafusion",
     "rsync",
     "spring",
     "taxprofiler",
     "tomte",
 )
-new_options = sorted(old_options + ("taxprofiler",))
+old_options = sorted(base_options + ("fastq",))
+new_options = sorted(base_options + ("raw-data",))
 
 old_enum = mysql.ENUM(*old_options)
 new_enum = mysql.ENUM(*new_options)
@@ -93,11 +93,12 @@ class Analysis(Base):
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-
     try:
+        op.alter_column("case", "data_analysis", type_=new_enum)
         session.query(Case).filter(Case.data_analysis == "fastq").update(
             {"data_analysis": Workflow.RAW_DATA}, synchronize_session="evaluate"
         )
+        op.alter_column("analysis", "workflow", type_=new_enum)
         session.query(Analysis).filter(Analysis.workflow == "fastq").update(
             {"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate"
         )
@@ -110,9 +111,11 @@ def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
     try:
+        op.alter_column("case", "data_analysis", type_=old_enum)
         session.query(Case).filter(Case.data_analysis == Workflow.RAW_DATA).update(
             {"data_analysis": "fastq"}, synchronize_session="evaluate"
         )
+        op.alter_column("analysis", "workflow", type_=old_enum)
         session.query(Analysis).filter(Analysis.workflow == Workflow.RAW_DATA).update(
             {"workflow": "fastq"}, synchronize_session="evaluate"
         )
