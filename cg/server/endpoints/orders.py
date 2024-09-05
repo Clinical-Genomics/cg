@@ -25,7 +25,6 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import (
@@ -33,7 +32,6 @@ from cg.server.dto.delivery_message.delivery_message_response import (
 )
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
-
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
@@ -43,7 +41,6 @@ from cg.server.ext import (
     lims,
     order_service,
     order_submitter_registry,
-    osticket,
     ticket_handler,
 )
 from cg.store.models import Application, Customer
