@@ -45,7 +45,6 @@ class MipDNAUploadAPI(UploadAPI):
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
 
         # Scout specific upload

@@ -28,7 +28,6 @@ class MipRNAUploadAPI(UploadAPI):
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
 
-        # Clinical delivery upload
         self.upload_files_to_customer_inbox(case=case)
 
         # Scout specific upload

@@ -27,11 +27,11 @@ LOG = logging.getLogger(__name__)
 
 class DeliverFilesService:
     """
-    Deliver files to the customer inbox on hasta and rsync them to the inbox folder on ceasar.
+    Deliver files to the customer inbox on the HPC and Rsync them to the inbox folder on the delivery server.
     1. Get the files to deliver from Housekeeper based on workflow and data delivery
     2. Create a delivery folder structure in the customer folder on Hasta and move the files there
     3. Reformatting of output / renaming of files
-    4. Rsync the files to the customer inbox on Caesar
+    4. Rsync the files to the customer inbox on the delivery server
     5. Add the rsync job to Trailblazer
     """
 
@@ -85,7 +85,7 @@ class DeliverFilesService:
             )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
-        job_id = self.rsync_service.run_rsync_for_case(
+        job_id: int = self.rsync_service.run_rsync_for_case(
             case=case,
             dry_run=dry_run,
             folders_to_deliver=folders_to_deliver,

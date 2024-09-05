@@ -92,7 +92,7 @@ class UploadAPI(MetaAPI):
 
     @handle_delivery_type_errors
     def upload_files_to_customer_inbox(self, case: Case) -> None:
-        """Uploads the analysis files to the customer inbox"""
+        """Uploads the analysis files to the customer inbox."""
         rsync_service = RsyncAPI(config=self.config)
         factory_service = DeliveryServiceFactory(
             store=self.status_db,

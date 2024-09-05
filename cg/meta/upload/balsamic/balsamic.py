@@ -38,8 +38,7 @@ class BalsamicUploadAPI(UploadAPI):
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery
-        self.upload_files_to_customer_inbox(case=case)
+        self.upload_files_to_customer_inbox(case)
 
         if GensAPI.is_suitable_for_upload(case):
             ctx.invoke(upload_to_gens, case_id=case.internal_id)

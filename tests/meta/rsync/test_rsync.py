@@ -180,8 +180,8 @@ def test_concatenate_rsync_commands_mutant(
     case: Case,
     mocker,
 ):
-    """Tests the function to concatenate rsync commands for transferring multiple files."""
-    # GIVEN a list with a mutant case and a sample name and a mutant report file
+    """Tests the function to concatenate Rsync commands for transferring multiple files."""
+    # GIVEN a list with a Mutant case and a sample name and a Mutant report file
     case.data_analysis = Workflow.MUTANT
     source_and_destination_paths = {
         "delivery_source_path": project_dir / customer_id / ticket_id,
@@ -190,6 +190,7 @@ def test_concatenate_rsync_commands_mutant(
     report_path = Path(project_dir, customer_id, ticket_id, "mutant_report.txt")
     covid_destination_path = Path(project_dir, "destination")
     rsync_api.covid_destination_path = covid_destination_path
+
     # WHEN then commands are generated
     mocker.patch.object(RsyncAPI, "format_covid_report_path", return_value=report_path)
     mocker.patch.object(
@@ -201,8 +202,8 @@ def test_concatenate_rsync_commands_mutant(
         ticket=ticket_id,
         case=case,
     )
-    # THEN the correct folder should be added to the source path
 
+    # THEN the correct folder should be added to the source path
     assert report_path.name in commands
     assert covid_destination_path.as_posix() in commands
 
@@ -233,7 +234,7 @@ def test_slurm_rsync_single_case(
     # WHEN the destination path is created
     sbatch_number: int
     is_complete_delivery: bool
-    sbatch_number = rsync_api.run_rsync_for_case(
+    sbatch_number: int = rsync_api.run_rsync_for_case(
         case=case,
         dry_run=True,
         folders_to_deliver=folders_to_deliver,
@@ -272,7 +273,7 @@ def test_slurm_rsync_single_case_missing_file(
     # WHEN the destination path is created
     sbatch_number: int
 
-    sbatch_number = rsync_api.run_rsync_for_case(
+    sbatch_number: int = rsync_api.run_rsync_for_case(
         case=case, dry_run=True, folders_to_deliver=folders_to_deliver
     )
 

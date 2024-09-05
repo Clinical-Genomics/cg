@@ -98,7 +98,7 @@ class RsyncAPI(MetaAPI):
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
-            source_path: Path = Path(
+            source_path = Path(
                 source_and_destination_paths["delivery_source_path"], folder.name
             )
             destination_path: Path = Path(
@@ -109,8 +109,7 @@ class RsyncAPI(MetaAPI):
                 source_path=source_path, destination_path=destination_path
             )
         if case.data_analysis == Workflow.MUTANT:
-            # Adds the covid report rsync command
-            report_path = self.format_covid_report_path(case=case, ticket=ticket)
+            covid_report_path: Path = self.format_covid_report_path(case=case, ticket=ticket)
             covid_destination_path = self.format_covid_destination_path(
                 self.covid_destination_path, customer_internal_id=case.customer.internal_id
             )
@@ -190,7 +189,7 @@ class RsyncAPI(MetaAPI):
             log_dir.mkdir(parents=True, exist_ok=True)
 
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
-        """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
+        """Submit Rsync commands for a single case for delivery to the delivery server."""
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case.internal_id)
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id

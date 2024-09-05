@@ -41,9 +41,9 @@ def destination_path() -> Path:
 
 @pytest.fixture
 def all_samples_in_inbox(
-    analysis_family, dummy_file_name: str, tmpdir_factory, ticket_id: str
+    analysis_family: dict[str, any], dummy_file_name: str, tmpdir_factory, ticket_id: str
 ) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered."""
+    """Returns a customer inbox path with all samples delivered."""
     inbox = tmpdir_factory.mktemp(INBOX_NAME)
     for index in range(3):
         Path(inbox, ticket_id, analysis_family["samples"][index]["name"]).mkdir(
