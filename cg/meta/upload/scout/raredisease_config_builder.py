@@ -128,7 +128,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.config_custom_images()
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
-            sample_id: str = case_sample.sample.internal_id
+            sample_id: str = db_sample.sample.internal_id
             config_custom_images.case_images.eKLIPse.title = sample_id
             config_custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
             hk_tags=self.sample_tags.eklipse_path
