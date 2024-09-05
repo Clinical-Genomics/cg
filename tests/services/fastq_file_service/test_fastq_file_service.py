@@ -132,6 +132,11 @@ def test_concatenate_missing_reverse(
 def test_generate_concatenated_fastq_delivery_path(
     fastq_directory: Path, sample_name: str, direction: int, expected_output_path: Path
 ):
+    # GIVEN a fastq direcrory, a sample name and a read direction
+
+    # WHEN generating the concatenated fastq delivery path
+
+    # THEN the output path should be as expected
     assert (
         generate_concatenated_fastq_delivery_path(
             fastq_directory=fastq_directory, sample_name=sample_name, direction=direction
