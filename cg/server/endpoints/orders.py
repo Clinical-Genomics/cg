@@ -33,6 +33,7 @@ from cg.server.dto.delivery_message.delivery_message_response import (
 )
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
+
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
@@ -43,6 +44,7 @@ from cg.server.ext import (
     order_service,
     order_submitter_registry,
     osticket,
+    ticket_handler,
 )
 from cg.store.models import Application, Customer
 
@@ -155,7 +157,10 @@ def create_order_from_form():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(
-        lims=lims, status=db, osticket=osticket, submitter_registry=order_submitter_registry
+        lims=lims,
+        status=db,
+        ticket_handler=ticket_handler,
+        submitter_registry=order_submitter_registry,
     )
     error_message: str
     try:
@@ -168,7 +173,7 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
