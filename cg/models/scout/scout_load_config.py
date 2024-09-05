@@ -170,6 +170,7 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     peddy_ped: str | None = None
     peddy_sex: str | None = None
     samples: list[ScoutRarediseaseIndividual] = []
+    custom_images: list[CustomImages] = []
     smn_tsv: str | None = None
     str_catalog: str | None = None
     vcf_mei: str | None = None
