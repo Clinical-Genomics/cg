@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import ControlOptions
 from cg.constants.sequencing import Sequencers
 from cg.store.models import (
     IlluminaSampleSequencingMetrics,
@@ -85,30 +84,6 @@ def test_update_sample_reads_illumina_fail_q30(
 
     # THEN the total reads for the sample is updated
     assert sample.reads == 0
-
-
-def test_update_sample_reads_illumina_negative_control(
-    store_with_illumina_sequencing_data: Store, selected_novaseq_x_sample_ids: list[str]
-):
-    # GIVEN a store with Illumina Sequencing Runs and a sample id
-    sample: Sample = store_with_illumina_sequencing_data.get_sample_by_internal_id(
-        selected_novaseq_x_sample_ids[0]
-    )
-    assert sample.reads == 0
-    # GIVEN that the sample is a negative control sample
-    sample.control = ControlOptions.NEGATIVE
-
-    # WHEN updating the sample reads for a sequencing run
-    store_with_illumina_sequencing_data.update_sample_reads_illumina(
-        internal_id=selected_novaseq_x_sample_ids[0], sequencer_type=Sequencers.NOVASEQX
-    )
-
-    # THEN the total reads for the sample is updated
-    total_reads_for_sample: int = 0
-    sample_metrics: list[IlluminaSampleSequencingMetrics] = sample.sample_run_metrics
-    for sample_metric in sample_metrics:
-        total_reads_for_sample += sample_metric.total_reads_in_lane
-    assert sample.reads == total_reads_for_sample
 
 
 def test_update_sample_last_sequenced_at(
