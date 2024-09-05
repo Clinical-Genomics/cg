@@ -75,18 +75,14 @@ class Base(DeclarativeBase):
 class Case(Base):
     __tablename__ = "case"
     id: Mapped[int] = mapped_column(primary_key=True)
-    data_analysis: Mapped[str | None] = mapped_column(
-        types.Enum(*(workflow.value for workflow in Workflow))
-    )
+    data_analysis: Mapped[str | None]
 
 
 class Analysis(Base):
     __tablename__ = "analysis"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    workflow: Mapped[str | None] = mapped_column(
-        types.Enum(*(workflow.value for workflow in Workflow))
-    )
+    workflow: Mapped[str | None]
 
 
 def upgrade():
