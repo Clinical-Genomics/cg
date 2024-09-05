@@ -83,6 +83,7 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
+    custom_images: CustomImages = CustomImages()
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
     rhocall_bed: str | None = None
@@ -114,7 +115,6 @@ class ScoutLoadConfig(BaseModel):
     default_gene_panels: list[str] = []
     cohorts: list[str] | None = None
     human_genome_build: str = None
-
     rank_model_version: str | None = None
     rank_score_threshold: int = None
     sv_rank_model_version: str | None = None
