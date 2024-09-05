@@ -125,7 +125,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def build_custom_image_sample(self, case_sample: CaseSample) -> CustomImages:
         "Build custom images config"
         config_custom_images = CustomImages()
-        self.config_custom_images()
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
