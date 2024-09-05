@@ -96,27 +96,27 @@ class RsyncAPI(MetaAPI):
         case: Case,
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred."""
-        commands = ""
+        command: str = ""
         for folder in folder_list:
             source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
             destination_path: Path = Path(
                 source_and_destination_paths["rsync_destination_path"], ticket
             )
 
-            commands += RSYNC_COMMAND.format(
+            command += RSYNC_COMMAND.format(
                 source_path=source_path, destination_path=destination_path
             )
         if case.data_analysis == Workflow.MUTANT:
-            covid_report_path: Path = self.format_covid_report_path(case=case, ticket=ticket)
-            covid_destination_path = self.format_covid_destination_path(
+            covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
+            covid_destination_path: str = self.format_covid_destination_path(
                 self.covid_destination_path, customer_internal_id=case.customer.internal_id
             )
-            commands += COVID_REPORT_RSYNC.format(
-                covid_report_path=report_path,
+            command += COVID_REPORT_RSYNC.format(
+                covid_report_path=covid_report_path,
                 covid_destination_path=covid_destination_path,
                 log_dir=self.log_dir,
             )
-        return commands
+        return command
 
     def set_log_dir(self, folder_prefix: str) -> None:
         if folder_prefix not in str(self.log_dir.as_posix()):
@@ -188,20 +188,20 @@ class RsyncAPI(MetaAPI):
 
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         """Submit Rsync commands for a single case for delivery to the delivery server."""
-        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case.internal_id)
+        ticket: str = case.latest_ticket
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id
         )
         self.set_log_dir(folder_prefix=case.internal_id)
         self.create_log_dir(dry_run=dry_run)
-        commands: str = self.concatenate_rsync_commands(
+        command: str = self.concatenate_rsync_commands(
             folder_list=folders_to_deliver,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
             case=case,
         )
         return self.sbatch_rsync_commands(
-            commands=commands, job_prefix=case.internal_id, dry_run=dry_run
+            commands=command, job_prefix=case.internal_id, dry_run=dry_run
         )
 
     def run_rsync_for_ticket(self, ticket: str, dry_run: bool) -> int:
