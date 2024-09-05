@@ -15,7 +15,5 @@ def handle_delivery_type_errors(func):
         except DeliveryTypeNotSupported as error:
             LOG.info("Delivery type not supported or no delivery needed. Skipping delivery.")
             return
-        except Exception as error:
-            raise CgError(f"{error}") from error
 
     return wrapper
