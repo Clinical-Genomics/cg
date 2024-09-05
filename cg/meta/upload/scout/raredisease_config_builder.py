@@ -80,7 +80,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
-
+        print("LOG B")
+        print(self.load_config.dict())
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
@@ -107,6 +108,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             if case_sample.mother
             else RelationshipStatus.HAS_NO_PARENT
         )
+        print("LOG A")
+        print(config_sample.dict())
         return config_sample
 
     def include_case_files(self) -> None:

@@ -73,7 +73,6 @@ class UploadScoutAPI:
         config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
-        print(config_builder.load_config.dict())
         return config_builder.load_config
 
     @staticmethod
