@@ -2,14 +2,23 @@
 
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import click
 
 from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
+from cg.meta.rsync import RsyncAPI
+from cg.meta.upload.error_handling import handle_delivery_type_errors
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
+    DeliverFilesService,
+)
+from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+    DeliveryServiceFactory,
+)
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -83,3 +92,22 @@ class UploadAPI(MetaAPI):
                     f"The upload has already started: {analysis_obj.upload_started_at.time()}"
                 )
                 raise AnalysisAlreadyUploadedError
+
+    @handle_delivery_type_errors
+    def upload_files_to_customer_inbox(self, case: Case) -> None:
+        """Uploads the analysis files to the customer inbox."""
+        rsync_service = RsyncAPI(config=self.config)
+        factory_service = DeliveryServiceFactory(
+            store=self.status_db,
+            hk_api=self.housekeeper_api,
+            tb_service=self.trailblazer_api,
+            rsync_service=rsync_service,
+            analysis_service=self.config.analysis_service,
+        )
+        delivery_service: DeliverFilesService = factory_service.build_delivery_service(
+            delivery_type=case.data_delivery,
+            workflow=case.data_analysis,
+        )
+        delivery_service.deliver_files_for_case(
+            case=case, delivery_base_path=Path(self.config.delivery_path)
+        )

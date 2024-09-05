@@ -20,7 +20,6 @@ from cg.constants.housekeeper_tags import (
     HkMipAnalysisTag,
 )
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI

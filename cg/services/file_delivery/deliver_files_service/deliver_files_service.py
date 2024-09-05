@@ -1,7 +1,12 @@
+import logging
 from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Priority, Workflow
+from cg.constants.tb import AnalysisTypes
 from cg.meta.rsync import RsyncAPI
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
 )
@@ -9,6 +14,7 @@ from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles
 from cg.services.file_delivery.file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
+from cg.services.file_delivery.file_formatter_service.models import FormattedFiles
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )
@@ -16,13 +22,17 @@ from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class DeliverFilesService:
     """
-    Deliver files to the customer inbox on hasta.
+    Deliver files to the customer inbox on the HPC and Rsync them to the inbox folder on the delivery server.
     1. Get the files to deliver from Housekeeper based on workflow and data delivery
     2. Create a delivery folder structure in the customer folder on Hasta and move the files there
     3. Reformatting of output / renaming of files
+    4. Rsync the files to the customer inbox on the delivery server
+    5. Add the rsync job to Trailblazer
     """
 
     def __init__(
@@ -32,6 +42,7 @@ class DeliverFilesService:
         file_formatter_service: DeliveryFileFormattingService,
         rsync_service: RsyncAPI,
         tb_service: TrailblazerAPI,
+        analysis_service: AnalysisService,
         status_db: Store,
     ):
         self.file_manager = delivery_file_manager_service
@@ -40,6 +51,7 @@ class DeliverFilesService:
         self.status_db = status_db
         self.rsync_service = rsync_service
         self.tb_service = tb_service
+        self.analysis_service = analysis_service
 
     def deliver_files_for_case(
         self, case: Case, delivery_base_path: Path, dry_run: bool = False
@@ -51,16 +63,14 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
-        self.file_formatter.format_files(moved_files)
-        slurm_id: int = self.rsync_service.run_rsync_on_slurm(
-            ticket=case.latest_ticket, dry_run=dry_run
+        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        folders_to_deliver: set[Path] = set(
+            [formatted_file.formatted_path.parent for formatted_file in formatted_files]
         )
-        self.rsync_service.add_to_trailblazer_api(
-            tb_api=self.tb_service,
-            slurm_job_id=slurm_id,
-            ticket=case.latest_ticket,
-            dry_run=dry_run,
+        job_id: int = self._start_rsync_job(
+            case=case, dry_run=dry_run, folders_to_deliver=folders_to_deliver
         )
+        self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
     def deliver_files_for_ticket(
         self, ticket_id: str, delivery_base_path: Path, dry_run: bool = False
@@ -73,3 +83,32 @@ class DeliverFilesService:
             self.deliver_files_for_case(
                 case=case, delivery_base_path=delivery_base_path, dry_run=dry_run
             )
+
+    def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
+        job_id: int = self.rsync_service.run_rsync_for_case(
+            case=case,
+            dry_run=dry_run,
+            folders_to_deliver=folders_to_deliver,
+        )
+        self.rsync_service.write_trailblazer_config(
+            content={"jobs": [str(job_id)]},
+            config_path=self.rsync_service.trailblazer_config_path,
+            dry_run=dry_run,
+        )
+        return job_id
+
+    def _add_trailblazer_tracking(self, case: Case, job_id: int, dry_run: bool) -> None:
+        if not dry_run:
+            analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
+                case_id=case.internal_id,
+                analysis_type=AnalysisTypes.OTHER,
+                config_path=self.rsync_service.trailblazer_config_path.as_posix(),
+                order_id=case.latest_order.id,
+                out_dir=self.rsync_service.log_dir.as_posix(),
+                slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
+                workflow=Workflow.RSYNC,
+                ticket=case.latest_ticket,
+            )
+            self.tb_service.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
+            self.analysis_service.add_upload_job(slurm_id=job_id, case_id=case.internal_id)
+            LOG.info(f"Transfer of case {case.internal_id} started with SLURM job id {job_id}")

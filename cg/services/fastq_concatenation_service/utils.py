@@ -84,3 +84,31 @@ def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: P
     for file in fastq_directory.iterdir():
         if file_can_be_removed(file=file, forward_file=forward_file, reverse_file=reverse_file):
             file.unlink()
+
+
+def generate_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str, direction: int
+) -> Path:
+    return Path(
+        fastq_directory, f"{sample_name}_{direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+
+def generate_forward_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str
+) -> Path:
+    return generate_concatenated_fastq_delivery_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.FORWARD,
+    )
+
+
+def generate_reverse_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str
+) -> Path:
+    return generate_concatenated_fastq_delivery_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.REVERSE,
+    )

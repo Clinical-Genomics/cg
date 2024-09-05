@@ -4,6 +4,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.meta.rsync import RsyncAPI
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -60,11 +61,13 @@ class DeliveryServiceFactory:
         hk_api: HousekeeperAPI,
         rsync_service: RsyncAPI,
         tb_service: TrailblazerAPI,
+        analysis_service: AnalysisService,
     ):
         self.store = store
         self.hk_api = hk_api
         self.rsync_service = rsync_service
         self.tb_service = tb_service
+        self.analysis_service = analysis_service
 
     @staticmethod
     def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
@@ -131,4 +134,5 @@ class DeliveryServiceFactory:
             status_db=self.store,
             rsync_service=self.rsync_service,
             tb_service=self.tb_service,
+            analysis_service=self.analysis_service,
         )

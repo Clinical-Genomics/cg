@@ -70,7 +70,11 @@ def test_build_delivery_service(
 ):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
-        store=MagicMock(), hk_api=MagicMock(), rsync_service=MagicMock(), tb_service=MagicMock()
+        store=MagicMock(),
+        hk_api=MagicMock(),
+        rsync_service=MagicMock(),
+        tb_service=MagicMock(),
+        analysis_service=MagicMock(),
     )
 
     # WHEN building a delivery service
