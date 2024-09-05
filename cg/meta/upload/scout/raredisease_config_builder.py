@@ -75,6 +75,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
 
         self.include_case_files()
+        print("LOG C")
+        print(self.load_config.dict())
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
