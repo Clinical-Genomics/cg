@@ -111,4 +111,4 @@ class DeliverFilesService:
             )
             self.tb_service.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
             self.analysis_service.add_upload_job(slurm_id=job_id, case_id=case.internal_id)
-        LOG.info(f"Transfer of case {case.internal_id} started with SLURM job id {job_id}")
+            LOG.info(f"Transfer of case {case.internal_id} started with SLURM job id {job_id}")
