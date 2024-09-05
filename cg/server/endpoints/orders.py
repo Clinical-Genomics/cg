@@ -74,7 +74,7 @@ def get_order(order_id: int):
 def set_order_open(order_id: int):
     try:
         request_data = OrderOpenPatch.model_validate(request.json)
-        is_open: bool = request_data.is_open
+        is_open: bool = request_data.open
         response_data: Order = order_service.set_open(order_id=order_id, open=is_open)
         return jsonify(response_data.model_dump()), HTTPStatus.OK
     except OrderNotFoundError as error:
