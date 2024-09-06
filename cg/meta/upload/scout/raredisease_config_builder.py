@@ -125,7 +125,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
             eklipse_image = Eklipse(
-                title=sample_id, path=self.get_file_from_hk(hk_tags=self.sample_tags.eklipse_path)
+                title=sample_id,
+                path=self.get_file_from_hk(hk_tags=self.sample_tags.eklipse_path),
+                description="eKLIPse MT images",
+                width="800",
+                height="800",
             )
             eklipse_images.append(eklipse_image)
 

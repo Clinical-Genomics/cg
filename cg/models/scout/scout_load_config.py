@@ -17,18 +17,18 @@ class ChromographImages(BaseModel):
 
 class Eklipse(BaseModel):
     title: str | None = None
-    description: str = "eKLIPse MT images"
-    width: str = "800"
-    height: str = "800"
+    description: str | None = None
+    width: str | None = None
+    height: str | None = None
     path: str | None = None
 
 
 class CaseImages(BaseModel):
-    eKLIPse: list[Eklipse] = list[Eklipse()]
+    eKLIPse: list[Eklipse] | None = None
 
 
 class CustomImages(BaseModel):
-    case_images: CaseImages = CaseImages()
+    case_images: CaseImages | None = None
 
 
 class Reviewer(BaseModel):
