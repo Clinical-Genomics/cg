@@ -166,3 +166,4 @@ class MultiqcDataJson(BaseModel):
 
     report_general_stats_data: list[dict] | None
     report_data_sources: dict | None
+    report_saved_raw_data: list[dict] | None

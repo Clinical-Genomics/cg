@@ -696,6 +696,16 @@ class NfAnalysisAPI(AnalysisAPI):
                             metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
                         )
                         metrics.append(metric)
+        for section in multiqc_json.report_saved_raw_data:
+            for section_name, section_values in section.items():
+                if exact_match:
+                    iss_pattern_found: bool = search_pattern == section_name
+                if iss_pattern_found:
+                    for metric_name, metric_value in section_values.items():
+                        metric: MetricsBase = self.get_multiqc_metric(
+                            metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
+                        )
+                        metrics.append(metric)
         return metrics
 
     def get_multiqc_metric(
