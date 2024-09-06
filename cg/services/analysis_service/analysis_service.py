@@ -35,7 +35,7 @@ class AnalysisService:
 
     @staticmethod
     def _is_analysis_uploaded(analysis: Analysis) -> bool:
-        return bool(analysis.case.analyses[0].uploaded_at)
+        return bool(analysis.uploaded_at)
 
     def _is_analysis_completed(self, analysis: Analysis) -> bool:
         return self.analysis_client.is_latest_analysis_completed(case_id=analysis.case.internal_id)

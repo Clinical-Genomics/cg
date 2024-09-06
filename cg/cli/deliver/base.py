@@ -134,23 +134,15 @@ def deliver_auto_fastq(context: CGConfig, dry_run: bool):
     """
     """Starts upload of all not previously uploaded cases with analysis type fastq to
        clinical-delivery."""
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
-    service_builder = DeliveryServiceFactory(
-        store=context.status_db,
-        hk_api=context.housekeeper_api,
-        tb_service=context.trailblazer_api,
-        rsync_service=rsync_api,
-        analysis_service=context.analysis_service,
-    )
-
+    service_builder: DeliveryServiceFactory = context.delivery_service_factory
     analyses: list[Analysis] = context.analysis_service.get_analyses_to_upload_for_workflow(
         workflow=Workflow.FASTQ
     )
     for analysis in analyses:
         case: Case = analysis.case
         delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-            delivery_type=DataDelivery.FASTQ,
-            workflow=case.data_analysis,
+            delivery_type=case.data_delivery,
+            workflow=Workflow.FASTQ,
         )
         delivery_service.deliver_files_for_case(
             case=case, delivery_base_path=Path(context.delivery_path), dry_run=dry_run
