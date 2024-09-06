@@ -83,7 +83,6 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
-    custom_images: CustomImages = CustomImages()
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
     rhocall_bed: str | None = None

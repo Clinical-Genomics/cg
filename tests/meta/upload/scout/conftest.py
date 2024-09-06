@@ -10,14 +10,15 @@ from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag
+from cg.constants.housekeeper_tags import AnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.constants.pedigree import Pedigree
-from cg.constants.scout import UploadTrack
+from cg.constants.scout import UploadTrack, RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
@@ -29,6 +30,7 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
 
@@ -455,6 +457,7 @@ def balsamic_analysis_hk_bundle_data(
 @pytest.fixture(scope="function")
 def raredisease_analysis_hk_bundle_data(
     case_id: str,
+    sample_id: str,
     timestamp: datetime,
     raredisease_analysis_dir: Path,
     delivery_report_html: Path,
@@ -464,6 +467,7 @@ def raredisease_analysis_hk_bundle_data(
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
+
         "files": [
             {
                 "path": str(raredisease_analysis_dir / "multiqc.html"),
@@ -474,6 +478,61 @@ def raredisease_analysis_hk_bundle_data(
                 "path": delivery_report_html.as_posix(),
                 "archive": False,
                 "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+            {
+                "path": str(raredisease_analysis_dir / "snv_vcf_file.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "snv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-snv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "str.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-str"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "smn.vcf").as_posix(),
+                "archive": False,
+                "tags": ["smn-calling"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.cram").as_posix(),
+                "archive": False,
+                "tags": ["cram", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "report.pdf").as_posix(),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.mt.bam").as_posix(),
+                "archive": False,
+                "tags": ["bam-mt", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "vcf2cytosure.txt").as_posix(),
+                "archive": False,
+                "tags": ["vcf2cytosure", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "multiqc.html").as_posix(),
+                "archive": False,
+                "tags": ["multiqc-html", sample_id],
             },
         ],
     }
@@ -779,7 +838,7 @@ def upload_balsamic_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockBalsamicAnalysis(config=cg_context, workflow=Workflow.BALSAMIC)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -792,27 +851,26 @@ def upload_balsamic_analysis_scout_api(
     )
 
 
-# @pytest.fixture
-# def upload_raredisease_analysis_scout_api(
-#     cg_context: CGConfig,
-#     scout_api: MockScoutAPI,
-#     madeline_api: MockMadelineAPI,
-#     lims_samples: list[dict],
-#     raredisease_analysis_hk_api: MockHousekeeperAPI,
-#     store: Store,
-# ) -> Generator[UploadScoutAPI, None, None]:
-#     """Return RAREDISEASE upload Scout API."""
-#     analysis_mock = MockRarediseaseAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE)
-#     lims_api = MockLimsAPI(samples=lims_samples)
+@pytest.fixture
+def upload_raredisease_analysis_scout_api(
+    raredisease_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    raredisease_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> Generator[UploadScoutAPI, None, None]:
+    """Return RAREDISEASE upload Scout API."""
+    lims_api = MockLimsAPI(samples=lims_samples)
 
-#     yield UploadScoutAPI(
-#         hk_api=raredisease_analysis_hk_api,
-#         scout_api=scout_api,
-#         madeline_api=madeline_api,
-#         analysis_api=analysis_mock,
-#         lims_api=lims_api,
-#         status_db=store,
-#     )
+    yield UploadScoutAPI(
+        hk_api=raredisease_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=raredisease_context.meta_apis["analysis_api"],
+        lims_api=lims_api,
+        status_db=store,
+    )
 
 
 @pytest.fixture

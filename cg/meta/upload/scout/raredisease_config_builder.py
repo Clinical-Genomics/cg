@@ -18,6 +18,7 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
+    CaseImages,
     CustomImages,
     RarediseaseLoadConfig,
     ScoutIndividual,
@@ -63,6 +64,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
                 case_id=self.analysis_obj.case.internal_id
             ),
         )
+        # raredisease_analysis_data: NextflowAnalysis = self.raredisease_analysis_api.get_latest_metadata(
+        #     self.analysis_obj.case.internal_id
+        # )
         # self.load_config.rank_score_threshold = rank_score_threshold
         # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
         # self.load_config.sv_rank_model_version = raredisease_analysis_data.sv_rank_model_version
@@ -74,10 +78,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
             or None
         )
-
         self.include_case_files()
-        print("LOG C")
-        print(self.load_config.dict())
+
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
@@ -87,9 +89,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         LOG.info("Adding custom images")
         for db_sample in self.analysis_obj.case.links:
             self.load_config.custom_images.append(self.build_custom_image_sample(case_sample=db_sample))
-        print("LOG D")
-        print(self.load_config.dict())
-
 
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
@@ -117,24 +116,20 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             if case_sample.mother
             else RelationshipStatus.HAS_NO_PARENT
         )
-        print("LOG A")
-        print(config_sample.dict())
         return config_sample
 
 
     def build_custom_image_sample(self, case_sample: CaseSample) -> CustomImages:
         "Build custom images config"
-        config_custom_images = CustomImages()
+        config_custom_images_case_images = CaseImages()
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
-            config_custom_images.case_images.eKLIPse.title = sample_id
-            config_custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
+            config_custom_images_case_images.eKLIPse.title = sample_id
+            config_custom_images_case_images.eKLIPse.path = self.get_file_from_hk(
             hk_tags=self.sample_tags.eklipse_path
         )
-        print("LOG E")
-        print(config_custom_images)
-        return config_custom_images
+        return config_custom_images_case_images
 
     def include_case_files(self) -> None:
         """Include case level files for mip case"""
@@ -195,11 +190,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
-        # config_sample.custom_images.case_images.eKLIPse.title = sample_id
-        # config_sample.custom_images.case_images.eKLIPse.path = self.get_file_from_hk(
-        #     hk_tags=self.sample_tags.eklipse_path
-        # )
-        # print(config_sample.dict())
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:

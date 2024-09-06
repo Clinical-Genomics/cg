@@ -8,6 +8,7 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     BalsamicUmiLoadConfig,
+    RarediseaseLoadConfig,
     RnafusionLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
@@ -68,6 +69,21 @@ def test_generate_balsamic_umi_load_config(
 
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
+
+def test_generate_raredisease_load_config(
+    raredisease_analysis: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
+):
+    """Test that a RAREDISEASE config is generated."""
+    # GIVEN an analysis object that have been run with RAREDISEASE
+    assert raredisease_analysis.workflow == Workflow.RAREDISEASE
+
+    # GIVEN an upload scout api with some RAREDISEASE information
+
+    # WHEN generating a load config
+    config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis)
+
+    # THEN assert that the config is a balsamic config
+    assert isinstance(config, RarediseaseLoadConfig)
 
 
 def test_generate_rnafusion_load_config(
