@@ -29,6 +29,9 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+    DeliveryServiceFactory,
+)
 from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.services.file_delivery.rsync_service.models import RsyncDeliveryConfig
 from cg.services.pdc_service.pdc_service import PdcService
@@ -385,6 +388,7 @@ class CGConfig(BaseModel):
     data_flow: DataFlowConfig | None = None
     delivery_api_: DeliveryAPI | None = None
     delivery_rsync_service_: DeliveryRsyncService | None = None
+    delivery_service_factory_: DeliveryServiceFactory | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -730,3 +734,18 @@ class CGConfig(BaseModel):
             )
             self.delivery_rsync_service_ = service
         return service
+
+    @property
+    def delivery_service_factory(self) -> DeliveryServiceFactory:
+        factory = self.delivery_service_factory_
+        if not factory:
+            LOG.debug("Instantiating delivery service factory")
+            factory = DeliveryServiceFactory(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                tb_service=self.trailblazer_api,
+                rsync_service=self.delivery_rsync_service,
+                analysis_service=self.analysis_service,
+            )
+            self.delivery_service_factory_ = factory
+        return factory

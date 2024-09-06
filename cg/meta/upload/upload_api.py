@@ -95,14 +95,7 @@ class UploadAPI(MetaAPI):
     @handle_delivery_type_errors
     def upload_files_to_customer_inbox(self, case: Case) -> None:
         """Uploads the analysis files to the customer inbox."""
-
-        factory_service = DeliveryServiceFactory(
-            store=self.status_db,
-            hk_api=self.housekeeper_api,
-            tb_service=self.trailblazer_api,
-            rsync_service=self.config.delivery_rsync_service,
-            analysis_service=self.config.analysis_service,
-        )
+        factory_service: DeliveryServiceFactory = self.config.delivery_service_factory
         delivery_service: DeliverFilesService = factory_service.build_delivery_service(
             delivery_type=case.data_delivery,
             workflow=case.data_analysis,
