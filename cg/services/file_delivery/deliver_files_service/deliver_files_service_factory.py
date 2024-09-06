@@ -3,7 +3,6 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
-from cg.meta.rsync import RsyncAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
@@ -49,6 +48,7 @@ from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatte
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.store.store import Store
 
 
@@ -59,7 +59,7 @@ class DeliveryServiceFactory:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        rsync_service: RsyncAPI,
+        rsync_service: DeliveryRsyncService,
         tb_service: TrailblazerAPI,
         analysis_service: AnalysisService,
     ):

@@ -15,31 +15,37 @@ from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.constants.tb import AnalysisTypes
 from cg.exc import CgError
 from cg.io.controller import WriteFile
-from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import (
+from cg.services.file_delivery.rsync_service.models import RsyncDeliveryConfig
+from cg.services.file_delivery.rsync_service.sbatch import (
     COVID_RSYNC,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
     COVID_REPORT_RSYNC,
 )
-from cg.models.cg_config import CGConfig
+
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-class RsyncAPI(MetaAPI):
-    def __init__(self, config: CGConfig):
-        super().__init__(config)
-        self.delivery_path: str = config.delivery_path
-        self.destination_path: str = config.data_delivery.destination_path
-        self.covid_destination_path: str = config.data_delivery.covid_destination_path
-        self.covid_report_path: str = config.data_delivery.covid_report_path
-        self.base_path: Path = Path(config.data_delivery.base_path)
-        self.account: str = config.data_delivery.account
-        self.log_dir: Path = Path(config.data_delivery.base_path)
-        self.mail_user: str = config.data_delivery.mail_user
+class DeliveryRsyncService:
+    def __init__(
+        self,
+        delivery_path: str,
+        rsync_config: RsyncDeliveryConfig,
+        status_db: Store,
+    ):
+        self.status_db = status_db
+        self.delivery_path: str = delivery_path
+        self.destination_path: str = rsync_config.destination_path
+        self.covid_destination_path: str = rsync_config.covid_destination_path
+        self.covid_report_path: str = rsync_config.covid_report_path
+        self.base_path: Path = Path(rsync_config.base_path)
+        self.account: str = rsync_config.account
+        self.log_dir: Path = Path(rsync_config.base_path)
+        self.mail_user: str = rsync_config.mail_user
         self.workflow: str = Workflow.RSYNC
 
     @property
