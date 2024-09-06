@@ -88,8 +88,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture()
 
         LOG.info("Adding custom images")
+        # self.load_config.custom_images = self.build_custom_image_sample()
         self.load_config.custom_images = self.build_custom_image_sample()
-
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
@@ -121,10 +121,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def build_custom_image_sample(self) -> CustomImages:
         "Build custom images config"
-        config_custom_images = CustomImages()
 
         eklipse_images: list =  []
-        db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
             eklipse_image = Eklipse(
@@ -135,15 +133,15 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
             eklipse_images.append(eklipse_image)
 
-        # case_images = CaseImages(eKLIPse=eklipse_images)
-
-        # Create a CaseImages object with the populated eklipse_images list
         case_images = CaseImages(eKLIPse=eklipse_images)
+        config_custom_images = CustomImages(case_images=case_images)
+        # Create a CaseImages object with the populated eklipse_images list
+        # case_images = CaseImages(eKLIPse=eklipse_images)
 
         # Finally, create the CustomImages object with the case_images
         # config_custom_images = CustomImages(case_images=case_images)
 
-        return case_images
+        return config_custom_images
 
     def include_case_files(self) -> None:
         """Include case level files for mip case"""
