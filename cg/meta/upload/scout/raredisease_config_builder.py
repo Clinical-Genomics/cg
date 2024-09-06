@@ -238,7 +238,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return file_path
-        return re.sub(r'(_(?:\d+|X|Y))\.png$', '', file_path)
+        return re.sub(r"(_(?:\d+|X|Y))\.png$", "", file_path)
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the CRAM alignment file for a sample"""
