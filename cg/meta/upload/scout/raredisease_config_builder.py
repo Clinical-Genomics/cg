@@ -124,7 +124,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         "Build custom images config"
         config_custom_images = CustomImages()
 
-        eklipse_images: dict = {}
+        eklipse_images: list =  []
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
@@ -135,6 +135,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
                 )
             )
             eklipse_images.append(eklipse_image)
+
         case_images = CaseImages(eKLIPse=eklipse_images)
         config_custom_images = CustomImages(case_images=case_images)
         return config_custom_images

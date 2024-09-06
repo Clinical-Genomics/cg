@@ -1,10 +1,10 @@
 """Class to hold information about scout load config"""
 
 from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
-
 from cg.constants.scout import UploadTrack
 from cg.models.scout.validators import field_not_none
 
@@ -25,8 +25,7 @@ class Eklipse(BaseModel):
 
 
 class CaseImages(BaseModel):
-    eKLIPse: Eklipse = Eklipse()
-
+    eKLIPse: List[Eklipse]
 
 class CustomImages(BaseModel):
     case_images: CaseImages = CaseImages()
