@@ -158,7 +158,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return metric_conditions
 
     def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
-        """Return search patterns for MultiQC."""
+        """Return sample-pair patterns for searching in MultiQC."""
         sample_ids: list[str] = list(self.status_db.get_sample_ids_by_case_id(case_id=case_id))
         pairwise_patterns: list[str] = [
             f"{sample1}-{sample2}" for sample1, sample2 in permutations(sample_ids, 2)
@@ -168,7 +168,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_parent_error_ped_check_metric(
         self, pair_sample_ids: str, multiqc_raw_data: dict[dict]
     ) -> MetricsBase | None:
-        """Return the value for Peddy parent error given a concatenated pair of sample ids."""
+        """Return the parsed metrics for pedigree error given a concatenated pair of sample ids."""
         metric_name: str = "parent_error_ped_check"
         peddy_metrics: dict[str, dict] = multiqc_raw_data["multiqc_peddy"]
         if sample_pair_metrics := peddy_metrics.get(pair_sample_ids, None):
@@ -182,7 +182,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
+        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
                 self.get_metrics_from_multiqc_json_with_pattern(
                     search_pattern=search_pattern,
