@@ -119,18 +119,16 @@ def deliver_ticket(
     )
 
 
-@deliver.command(name="auto-fastq")
+@deliver.command(name="auto-raw-data")
 @click.pass_obj
 @DRY_RUN
-def deliver_auto_fastq(context: CGConfig, dry_run: bool):
+def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
     """
-    Deliver all case files based on delivery type to the customer inbox on the HPC for cases connected to a ticket.
+    Deliver all case files for the raw data workflow to the customer inbox on the HPC and start a Rsync job.
     1. get all cases with analysis type fastq that need to be delivered
     2. check if their upload has started
     3. if not, start the upload
-    4. update the uploaded at
-    5. commit the changes
-
+    4. update the uploaded at field
     """
     """Starts upload of all not previously uploaded cases with analysis type fastq to
        clinical-delivery."""
