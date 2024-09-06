@@ -119,7 +119,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return config_sample
 
 
-    def build_custom_image_sample(self, case_sample: CaseSample) -> CustomImages:
+    def build_custom_image_sample(self, case_sample: CaseSample) -> CaseImages:
         "Build custom images config"
         config_custom_images_case_images = CaseImages()
         db_sample: CaseSample
