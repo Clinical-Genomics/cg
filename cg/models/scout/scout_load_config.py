@@ -1,7 +1,6 @@
 """Class to hold information about scout load config"""
 
 from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
@@ -25,7 +24,7 @@ class Eklipse(BaseModel):
 
 
 class CaseImages(BaseModel):
-    eKLIPse: List[Eklipse] = List[Eklipse()]
+    eKLIPse: list[Eklipse] = list[Eklipse()]
 
 class CustomImages(BaseModel):
     case_images: CaseImages = CaseImages()
@@ -168,7 +167,7 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     peddy_ped: str | None = None
     peddy_sex: str | None = None
     samples: list[ScoutRarediseaseIndividual] = []
-    custom_images: list[CustomImages] = []
+    custom_images: CustomImages | None = None
     smn_tsv: str | None = None
     str_catalog: str | None = None
     vcf_mei: str | None = None

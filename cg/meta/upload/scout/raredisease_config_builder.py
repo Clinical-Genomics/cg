@@ -88,8 +88,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture()
 
         LOG.info("Adding custom images")
-        # self.load_config.custom_images = self.build_custom_image_sample()
         self.load_config.custom_images = self.build_custom_image_sample()
+
+
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
