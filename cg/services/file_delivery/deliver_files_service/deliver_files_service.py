@@ -5,7 +5,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.tb import AnalysisTypes
-from cg.meta.rsync import RsyncAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.file_delivery.fetch_file_service.fetch_delivery_files_service import (
     FetchDeliveryFilesService,
@@ -18,6 +17,7 @@ from cg.services.file_delivery.file_formatter_service.models import FormattedFil
 from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
     MoveDeliveryFilesService,
 )
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
 from cg.store.store import Store
@@ -40,7 +40,7 @@ class DeliverFilesService:
         delivery_file_manager_service: FetchDeliveryFilesService,
         move_file_service: MoveDeliveryFilesService,
         file_formatter_service: DeliveryFileFormattingService,
-        rsync_service: RsyncAPI,
+        rsync_service: DeliveryRsyncService,
         tb_service: TrailblazerAPI,
         analysis_service: AnalysisService,
         status_db: Store,

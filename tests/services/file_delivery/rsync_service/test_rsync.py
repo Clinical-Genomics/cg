@@ -9,14 +9,14 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
-from cg.meta.rsync import RsyncAPI
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
-    mutant_case: Case, rsync_api: RsyncAPI, ticket_id: str, mocker
+    mutant_case: Case, delivery_rsync_service: DeliveryRsyncService, ticket_id: str, mocker
 ):
     """Test generating the source path before rsync."""
 
@@ -24,11 +24,11 @@ def test_get_source_and_destination_paths(
     case = mutant_case
 
     # GIVEN file exists
-    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
-    RsyncAPI.get_all_cases_from_ticket.return_value = [case]
+    mocker.patch.object(DeliveryRsyncService, "get_all_cases_from_ticket")
+    DeliveryRsyncService.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the source path is created
-    source_and_destination_paths = rsync_api.get_source_and_destination_paths(
+    source_and_destination_paths = delivery_rsync_service.get_source_and_destination_paths(
         ticket=ticket_id, customer_internal_id=case.customer.internal_id
     )
 
@@ -45,39 +45,44 @@ def test_get_source_and_destination_paths(
     )
 
 
-def test_set_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
+def test_set_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: str, caplog):
     """Test function to set log dir for path."""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN an RsyncAPI, with its base path as its log dir
-    base_path: Path = rsync_api.log_dir
+    # GIVEN an DeliveryRsyncService, with its base path as its log dir
+    base_path: Path = delivery_rsync_service.log_dir
 
     # WHEN setting the log directory
-    rsync_api.set_log_dir(folder_prefix=ticket_id)
+    delivery_rsync_service.set_log_dir(folder_prefix=ticket_id)
 
     # THEN the log dir should set to a new path, different from the base path
-    assert base_path.as_posix() != rsync_api.log_dir.as_posix()
+    assert base_path.as_posix() != delivery_rsync_service.log_dir.as_posix()
     assert "Setting log dir to:" in caplog.text
 
 
-def test_make_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
+def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: str, caplog):
     """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    rsync_api.set_log_dir(folder_prefix=ticket_id)
-    rsync_api.create_log_dir(dry_run=True)
+    delivery_rsync_service.set_log_dir(folder_prefix=ticket_id)
+    delivery_rsync_service.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
     # THEN the created path is
-    assert str(rsync_api.log_dir).startswith(f"/another/path/{ticket_id}")
+    assert str(delivery_rsync_service.log_dir).startswith(f"/another/path/{ticket_id}")
 
 
 def test_run_rsync_on_slurm(
-    microsalt_case: Case, rsync_api: RsyncAPI, ticket_id: str, caplog, mocker, helpers
+    microsalt_case: Case,
+    delivery_rsync_service: DeliveryRsyncService,
+    ticket_id: str,
+    caplog,
+    mocker,
+    helpers,
 ):
     """Test for running rsync using SLURM."""
     caplog.set_level(logging.INFO)
@@ -86,17 +91,17 @@ def test_run_rsync_on_slurm(
     case: Case = microsalt_case
 
     # GIVEN paths needed to run rsync
-    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
-    RsyncAPI.get_source_and_destination_paths.return_value = {
+    mocker.patch.object(DeliveryRsyncService, "get_source_and_destination_paths")
+    DeliveryRsyncService.get_source_and_destination_paths.return_value = {
         "delivery_source_path": Path("/path/to/source"),
         "rsync_destination_path": Path("/path/to/destination"),
     }
 
-    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
-    RsyncAPI.get_all_cases_from_ticket.return_value = [case]
+    mocker.patch.object(DeliveryRsyncService, "get_all_cases_from_ticket")
+    DeliveryRsyncService.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
+    sbatch_number: int = delivery_rsync_service.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
 
     # THEN check that SARS-COV-2 analysis is not delivered
     assert "Delivering report for SARS-COV-2 analysis" not in caplog.text
@@ -105,17 +110,19 @@ def test_run_rsync_on_slurm(
     assert isinstance(sbatch_number, int)
 
 
-def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog, mocker, helpers):
+def test_run_rsync_on_slurm_no_cases(
+    delivery_rsync_service: DeliveryRsyncService, ticket_id: str, caplog, mocker, helpers
+):
     """Test for running rsync using SLURM when there are no cases on the ticket."""
     caplog.set_level(logging.INFO)
 
     # GIVEN ticket without any cases
-    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
-    RsyncAPI.get_all_cases_from_ticket.return_value = None
+    mocker.patch.object(DeliveryRsyncService, "get_all_cases_from_ticket")
+    DeliveryRsyncService.get_all_cases_from_ticket.return_value = None
 
     # WHEN the job is submitted
     with pytest.raises(CgError):
-        rsync_api.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
+        delivery_rsync_service.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
 
         # THEN check that error is raised based on no cases being present
         assert "Could not find any cases for ticket" in caplog.text
@@ -128,7 +135,7 @@ def test_concatenate_rsync_commands(
     customer_id,
     folders_to_deliver: set[Path],
     project_dir,
-    rsync_api: RsyncAPI,
+    delivery_rsync_service: DeliveryRsyncService,
     ticket_id: str,
 ):
     """Tests the function to concatenate rsync commands for transferring multiple files."""
@@ -139,7 +146,7 @@ def test_concatenate_rsync_commands(
         "rsync_destination_path": Path(project_dir, customer_id),
     }
     # WHEN then commands are generated
-    command: str = rsync_api.concatenate_rsync_commands(
+    command: str = delivery_rsync_service.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -177,7 +184,7 @@ def test_concatenate_rsync_commands_mutant(
     folders_to_deliver: set[Path],
     mocker,
     project_dir,
-    rsync_api: RsyncAPI,
+    delivery_rsync_service: DeliveryRsyncService,
     ticket_id: str,
 ):
     """Tests the function to concatenate Rsync commands for transferring multiple files."""
@@ -189,14 +196,14 @@ def test_concatenate_rsync_commands_mutant(
     }
     report_path = Path(project_dir, customer_id, ticket_id, "a_report_file")
     covid_destination_path = Path(project_dir, "destination")
-    rsync_api.covid_destination_path = covid_destination_path
+    delivery_rsync_service.covid_destination_path = covid_destination_path
 
     # WHEN then commands are generated
-    mocker.patch.object(RsyncAPI, "format_covid_report_path", return_value=report_path)
+    mocker.patch.object(DeliveryRsyncService, "format_covid_report_path", return_value=report_path)
     mocker.patch.object(
-        RsyncAPI, "format_covid_destination_path", return_value=covid_destination_path
+        DeliveryRsyncService, "format_covid_destination_path", return_value=covid_destination_path
     )
-    command: str = rsync_api.concatenate_rsync_commands(
+    command: str = delivery_rsync_service.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -212,7 +219,7 @@ def test_slurm_rsync_single_case(
     all_samples_in_inbox: Path,
     case: Case,
     destination_path: Path,
-    rsync_api: RsyncAPI,
+    delivery_rsync_service: DeliveryRsyncService,
     caplog,
     mocker,
     ticket_id: str,
@@ -222,8 +229,8 @@ def test_slurm_rsync_single_case(
     caplog.set_level(logging.INFO)
 
     # GIVEN paths needed to run rsync
-    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
-    RsyncAPI.get_source_and_destination_paths.return_value = {
+    mocker.patch.object(DeliveryRsyncService, "get_source_and_destination_paths")
+    DeliveryRsyncService.get_source_and_destination_paths.return_value = {
         "delivery_source_path": all_samples_in_inbox,
         "rsync_destination_path": destination_path,
     }
@@ -234,7 +241,7 @@ def test_slurm_rsync_single_case(
     # WHEN the destination path is created
     sbatch_number: int
     is_complete_delivery: bool
-    sbatch_number: int = rsync_api.run_rsync_for_case(
+    sbatch_number: int = delivery_rsync_service.run_rsync_for_case(
         case=case,
         dry_run=True,
         folders_to_deliver=folders_to_deliver,
@@ -248,7 +255,7 @@ def test_slurm_rsync_single_case_missing_file(
     all_samples_in_inbox: Path,
     case: Case,
     destination_path: Path,
-    rsync_api: RsyncAPI,
+    delivery_rsync_service: DeliveryRsyncService,
     caplog,
     mocker,
     ticket_id: str,
@@ -261,8 +268,8 @@ def test_slurm_rsync_single_case_missing_file(
     shutil.rmtree(Path(all_samples_in_inbox, case.links[0].sample.name))
 
     # GIVEN paths needed to run rsync
-    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
-    RsyncAPI.get_source_and_destination_paths.return_value = {
+    mocker.patch.object(DeliveryRsyncService, "get_source_and_destination_paths")
+    DeliveryRsyncService.get_source_and_destination_paths.return_value = {
         "delivery_source_path": all_samples_in_inbox,
         "rsync_destination_path": destination_path,
     }
@@ -273,7 +280,7 @@ def test_slurm_rsync_single_case_missing_file(
     # WHEN the destination path is created
     sbatch_number: int
 
-    sbatch_number: int = rsync_api.run_rsync_for_case(
+    sbatch_number: int = delivery_rsync_service.run_rsync_for_case(
         case=case, dry_run=True, folders_to_deliver=folders_to_deliver
     )
 
@@ -281,21 +288,21 @@ def test_slurm_rsync_single_case_missing_file(
     assert isinstance(sbatch_number, int)
 
 
-def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
-    # GIVEN an RsyncAPI instance
+def test_slurm_quality_of_service_production(delivery_rsync_service: DeliveryRsyncService):
+    # GIVEN an DeliveryRsyncService instance
 
     # WHEN the account of the api is set to production
-    rsync_api.account = SlurmAccount.PRODUCTION
+    delivery_rsync_service.account = SlurmAccount.PRODUCTION
 
     # THEN the quality of service should be set to HIGH
-    assert rsync_api.slurm_quality_of_service == SlurmQos.HIGH
+    assert delivery_rsync_service.slurm_quality_of_service == SlurmQos.HIGH
 
 
-def test_slurm_quality_of_service_other(rsync_api: RsyncAPI):
-    # GIVEN an RsyncAPI instance
+def test_slurm_quality_of_service_other(delivery_rsync_service: DeliveryRsyncService):
+    # GIVEN an DeliveryRsyncService instance
 
     # WHEN the account of the api is set to development
-    rsync_api.account = SlurmAccount.DEVELOPMENT
+    delivery_rsync_service.account = SlurmAccount.DEVELOPMENT
 
     # THEN the quality of service should be set to LOW
-    assert rsync_api.slurm_quality_of_service == SlurmQos.LOW
+    assert delivery_rsync_service.slurm_quality_of_service == SlurmQos.LOW

@@ -8,7 +8,6 @@ import click
 
 from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.error_handling import handle_delivery_type_errors
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -96,12 +95,12 @@ class UploadAPI(MetaAPI):
     @handle_delivery_type_errors
     def upload_files_to_customer_inbox(self, case: Case) -> None:
         """Uploads the analysis files to the customer inbox."""
-        rsync_service = RsyncAPI(config=self.config)
+
         factory_service = DeliveryServiceFactory(
             store=self.status_db,
             hk_api=self.housekeeper_api,
             tb_service=self.trailblazer_api,
-            rsync_service=rsync_service,
+            rsync_service=self.config.delivery_rsync_service,
             analysis_service=self.config.analysis_service,
         )
         delivery_service: DeliverFilesService = factory_service.build_delivery_service(

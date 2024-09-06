@@ -29,6 +29,8 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
+from cg.services.file_delivery.rsync_service.models import RsyncDeliveryConfig
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
@@ -283,12 +285,12 @@ class GisaidConfig(CommonAppConfig):
 
 
 class DataDeliveryConfig(BaseModel):
-    destination_path: str
-    covid_destination_path: str
-    covid_source_path = str
-    covid_report_path: str
     account: str
     base_path: str
+    covid_destination_path: str
+    covid_source_path: str
+    covid_report_path: str
+    destination_path: str
     mail_user: str
 
 
@@ -382,6 +384,7 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
     delivery_api_: DeliveryAPI | None = None
+    delivery_rsync_service_: DeliveryRsyncService | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -713,3 +716,17 @@ class CGConfig(BaseModel):
     @property
     def sequencing_qc_service(self) -> SequencingQCService:
         return SequencingQCService(self.status_db)
+
+    @property
+    def delivery_rsync_service(self) -> DeliveryRsyncService:
+        service = self.__dict__.get("delivery_rsync_service_")
+        if service is None:
+            LOG.debug("Instantiating delivery rsync service")
+            rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
+            service = DeliveryRsyncService(
+                delivery_path=self.delivery_path,
+                rsync_config=rsync_config,
+                status_db=self.status_db,
+            )
+            self.delivery_rsync_service_ = service
+        return service

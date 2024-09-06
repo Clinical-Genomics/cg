@@ -9,7 +9,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
-from cg.meta.rsync.rsync_api import RsyncAPI
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.models.cg_config import CGConfig
 from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
@@ -46,7 +46,7 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     rsynced with this function to the customers inbox on the delivery server
     """
     tb_api: TrailblazerAPI = context.trailblazer_api
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
+    rsync_api: DeliveryRsyncService = DeliveryRsyncService(rsync_config=context)
     slurm_id = rsync_api.run_rsync_for_ticket(ticket=ticket, dry_run=dry_run)
     LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
@@ -74,12 +74,11 @@ def deliver_case(
     Deliver all case files based on delivery type to the customer inbox on the HPC
     """
     inbox: str = context.delivery_path
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
     service_builder = DeliveryServiceFactory(
         store=context.status_db,
         hk_api=context.housekeeper_api,
         tb_service=context.trailblazer_api,
-        rsync_service=rsync_api,
+        rsync_service=context.delivery_rsync_service,
         analysis_service=context.analysis_service,
     )
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -110,12 +109,12 @@ def deliver_ticket(
     Deliver all case files based on delivery type to the customer inbox on the HPC for cases connected to a ticket.
     """
     inbox: str = context.delivery_path
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
+
     service_builder = DeliveryServiceFactory(
         store=context.status_db,
         hk_api=context.housekeeper_api,
         tb_service=context.trailblazer_api,
-        rsync_service=rsync_api,
+        rsync_service=context.delivery_rsync_service,
         analysis_service=context.analysis_service,
     )
 

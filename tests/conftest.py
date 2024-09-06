@@ -38,7 +38,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
@@ -54,6 +53,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
@@ -606,9 +606,13 @@ def demultiplexing_api(
 
 
 @pytest.fixture
-def rsync_api(cg_context: CGConfig) -> RsyncAPI:
+def delivery_rsync_api(cg_context: CGConfig) -> DeliveryRsyncService:
     """RsyncAPI fixture."""
-    return RsyncAPI(config=cg_context)
+    return DeliveryRsyncService(
+        delivery_path=cg_context.delivery_path,
+        rsync_config=cg_context.data_delivery,
+        status_db=cg_context.status_db,
+    )
 
 
 @pytest.fixture
@@ -1956,6 +1960,7 @@ def context_config(
             "account": "development",
             "base_path": "/another/path",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_source_path": "a/source/path",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "destination_path": "server.name.se:/some",
             "mail_user": email_address,
