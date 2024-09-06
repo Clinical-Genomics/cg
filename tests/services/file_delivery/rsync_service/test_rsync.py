@@ -121,11 +121,10 @@ def test_run_rsync_on_slurm_no_cases(
     DeliveryRsyncService.get_all_cases_from_ticket.return_value = None
 
     # WHEN the job is submitted
+
+    # THEN an error is raised
     with pytest.raises(CgError):
         delivery_rsync_service.run_rsync_for_ticket(ticket=ticket_id, dry_run=True)
-
-        # THEN check that error is raised based on no cases being present
-        assert "Could not find any cases for ticket" in caplog.text
 
 
 def test_concatenate_rsync_commands(
