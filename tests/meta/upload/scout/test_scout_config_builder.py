@@ -10,6 +10,7 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
@@ -53,14 +54,18 @@ def test_balsamic_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 def test_raredisease_config_builder(
-    hk_version: Version, raredisease_analysis_api: NextflowAnalysis, lims_api: MockLimsAPI
+    hk_version: Version,
+    raredisease_analysis: Analysis,
+    lims_api: MockLimsAPI,
+    raredisease_analysis_api: RarediseaseAnalysisAPI,
+    madeline_api: MockMadelineAPI,
 ):
     """Test RAREDISEASE config builder class."""
     # GIVEN a RAREDISEASE file handler
 
     # WHEN instantiating
     file_handler = RarediseaseConfigBuilder(
-        hk_version_obj=hk_version, analysis_obj=raredisease_analysis, lims_api=lims_api
+        hk_version_obj=hk_version, analysis_obj=raredisease_analysis, lims_api=lims_api, raredisease_analysis_api=raredisease_analysis_api, madeline_api=madeline_api
     )
 
     # THEN assert that the correct case tags was used

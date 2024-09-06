@@ -12,18 +12,18 @@ from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.housekeeper_tags import AnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.constants.pedigree import Pedigree
-from cg.constants.scout import UploadTrack, RAREDISEASE_CASE_TAGS
+from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
+from cg.models.analysis import NextflowAnalysis
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -871,6 +871,12 @@ def upload_raredisease_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
+
+
+@pytest.fixture
+def raredisease_analysis_api(cg_context: CGConfig) -> NextflowAnalysis:
+    """Return a RAREDISEASE analysis API."""
+    return NextflowAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE, sample_metrics=dict())
 
 
 @pytest.fixture
