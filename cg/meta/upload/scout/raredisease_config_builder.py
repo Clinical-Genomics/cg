@@ -137,7 +137,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             eklipse_images.append(eklipse_image)
 
         # case_images = CaseImages(eKLIPse=eklipse_images)
-        config_custom_images = CustomImages(case_images=CaseImages(eKLIPse=eklipse_images))
+        config_custom_images = CustomImages(eKLIPse=eklipse_images)
         return config_custom_images
 
     def include_case_files(self) -> None:
