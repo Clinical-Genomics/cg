@@ -88,8 +88,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture()
 
         LOG.info("Adding custom images")
-        for db_sample in self.analysis_obj.case.links:
-            self.load_config.custom_images.append(self.build_custom_image_sample(case_sample=db_sample))
+        self.load_config.custom_images = self.build_custom_image_sample()
 
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
@@ -120,7 +119,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return config_sample
 
 
-    def build_custom_image_sample(self, case_sample: CaseSample) -> CustomImages:
+    def build_custom_image_sample(self) -> CustomImages:
         "Build custom images config"
         config_custom_images = CustomImages()
 
