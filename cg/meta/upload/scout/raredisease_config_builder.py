@@ -141,9 +141,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         case_images = CaseImages(eKLIPse=eklipse_images)
 
         # Finally, create the CustomImages object with the case_images
-        config_custom_images = CustomImages(case_images=case_images)
+        # config_custom_images = CustomImages(case_images=case_images)
 
-        return config_custom_images
+        return case_images
 
     def include_case_files(self) -> None:
         """Include case level files for mip case"""
