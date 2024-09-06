@@ -83,3 +83,17 @@ class UpdateHandler(BaseHandler):
         sample: Sample = self.get_sample_by_entry_id(sample_id)
         sample.is_cancelled = True
         self.session.commit()
+
+    def update_analysis_uploaded_at(self, analysis_id: int, uploaded_at: datetime) -> None:
+        """Update the uploaded at field of an analysis."""
+        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis.uploaded_at = uploaded_at
+        self.session.commit()
+
+    def update_analysis_upload_started_at(
+        self, analysis_id: int, upload_started_at: datetime
+    ) -> None:
+        """Update the upload started at field of an analysis."""
+        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis.upload_started_at = upload_started_at
+        self.session.commit()

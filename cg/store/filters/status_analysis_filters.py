@@ -90,13 +90,19 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
     return analyses.join(Case).filter(Case.action.is_(None))
 
 
+def filter_analysis_by_entry_id(analysis: Query, entry_id: int, **kwargs) -> Query:
+    """Return a query of analyses filtered by entry id."""
+    return analysis.filter(Analysis.id == entry_id)
+
+
 def apply_analysis_filter(
     filter_functions: list[Callable],
     analyses: Query,
-    workflow: Workflow = None,
     case_entry_id: int = None,
     completed_at_date: datetime = None,
+    entry_id: int = None,
     started_at_date: datetime = None,
+    workflow: Workflow = None,
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
@@ -106,6 +112,7 @@ def apply_analysis_filter(
             workflow=workflow,
             case_entry_id=case_entry_id,
             completed_at_date=completed_at_date,
+            entry_id=entry_id,
             started_at_date=started_at_date,
         )
     return analyses
@@ -129,3 +136,4 @@ class AnalysisFilter(Enum):
     CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
+    BY_ENTRY_ID: Callable = filter_analysis_by_entry_id
