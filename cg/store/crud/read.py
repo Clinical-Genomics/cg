@@ -11,11 +11,19 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -25,14 +33,23 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -47,10 +64,13 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
-    apply_pac_bio_smrt_cell_filters,
     PacBioSMRTCellFilter,
+    apply_pac_bio_smrt_cell_filters,
 )
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
@@ -73,12 +93,12 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
+    PacBioSMRTCell,
     Panel,
     Pool,
     Sample,
     SampleRunMetrics,
     User,
-    PacBioSMRTCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -1520,3 +1540,101 @@ class ReadHandler(BaseHandler):
         for sample_id in sample_ids:
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
+
+    def get_related_dna_cases_from_rna_case(self, rna_case: Case) -> list[Case]:
+        """Return a list of DNA cases related to the samples of an RNA case."""
+        dna_cases: list[Case] = []
+        for link in rna_case.links:
+            dna_cases_related_to_sample: list[Case] = self._get_related_dna_cases_from_rna_sample(
+                link.sample
+            )
+            dna_cases = dna_cases + dna_cases_related_to_sample
+        return dna_cases
+
+    def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
+        # if not rna_sample.subject_id:
+        #     raise CgDataError(
+        #         f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+        #     )
+
+        collaborators: set[Customer] = rna_sample.customer.collaborators
+
+        subject_id_samples: list[Sample] = (
+            self._get_samples_with_same_subject_id_as_sample_within_collaborators(
+                sample=rna_sample, collaborators=collaborators
+            )
+        )
+
+        subject_id_dna_samples: list[Sample] = self._get_dna_samples_from_sample_list(
+            subject_id_samples
+        )
+
+        # if len(subject_id_dna_samples) != 1:
+        #     raise CgDataError(
+        #         f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
+        #         f"{rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
+        #     )
+
+        dna_sample: Sample = subject_id_dna_samples[0]
+        dna_cases: list[Case] = self._get_dna_cases_from_dna_sample_within_collaborators(
+            dna_sample=dna_sample, collaborators=collaborators
+        )
+        return dna_cases
+
+    def _get_samples_with_same_subject_id_as_sample_within_collaborators(
+        self, sample: Sample, collaborators: set[Customer]
+    ) -> list[Sample]:
+        subject_id_samples: list[Sample] = (
+            self.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+                customer_ids=[customer.id for customer in collaborators],
+                subject_id=sample.subject_id,
+                is_tumour=sample.is_tumour,
+            )
+        )
+        return subject_id_samples
+
+    @staticmethod
+    def _get_dna_samples_from_sample_list(
+        sample_list: list[Sample],
+    ) -> list[Sample | None]:
+        """Filter a models Sample list, returning DNA samples selected on their preparation category."""
+        dna_sample_list: list[Sample | None] = [
+            sample
+            for sample in sample_list
+            if sample.prep_category
+            in [
+                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+            ]
+        ]
+        return dna_sample_list
+
+    def _get_dna_cases_from_dna_sample_within_collaborators(
+        self, dna_sample: Sample, collaborators: set[Customer]
+    ) -> list[Case]:
+        """Maps a list of uploaded DNA cases linked to DNA sample."""
+        cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
+        return self.filter_dna_cases_within_collaborators(
+            cases=cases_related_to_dna_sample, collaborators=collaborators
+        )
+
+    @staticmethod
+    def filter_dna_cases_within_collaborators(
+        cases: list[Case], collaborators: set[Customer]
+    ) -> list[Case]:
+        """Filters the given list of cases and returns a subset of cases ordered by customers in the
+        specified list of collaborators and within the correct workflow."""
+        filtered_dna_cases: list[Case] = []
+        for case in cases:
+            if (
+                case.data_analysis
+                in [
+                    Workflow.MIP_DNA,
+                    Workflow.BALSAMIC,
+                    Workflow.BALSAMIC_UMI,
+                ]
+                and case.customer in collaborators
+            ):
+                filtered_dna_cases.append(case.internal_id)
+        return filtered_dna_cases
