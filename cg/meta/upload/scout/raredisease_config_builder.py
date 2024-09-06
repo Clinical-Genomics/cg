@@ -20,6 +20,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
     CaseImages,
     CustomImages,
+    Eklipse,
     RarediseaseLoadConfig,
     ScoutIndividual,
     ScoutLoadConfig,
@@ -119,17 +120,28 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return config_sample
 
 
-    def build_custom_image_sample(self, case_sample: CaseSample) -> CaseImages:
+    def build_custom_image_sample(self, case_sample: CaseSample) -> CustomImages:
         "Build custom images config"
-        config_custom_images_case_images = CaseImages()
+        config_custom_images = CustomImages()
+
+        eklipse_images: list =  []
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
-            config_custom_images_case_images.eKLIPse.title = sample_id
-            config_custom_images_case_images.eKLIPse.path = self.get_file_from_hk(
-            hk_tags=self.sample_tags.eklipse_path
-        )
-        return config_custom_images_case_images
+            eklipse_image = Eklipse(
+                title=sample_id,
+                description='eKLIPse MT images',
+                width=800,
+                height=800,
+                path=self.get_file_from_hk(
+                    hk_tags=self.sample_tags.eklipse_path
+                )
+            )
+            eklipse_images.append(eklipse_image)
+
+        case_images = CaseImages(eKLIPse=eklipse_images)
+        config_custom_images = CustomImages(case_images=case_images)
+        return config_custom_images
 
     def include_case_files(self) -> None:
         """Include case level files for mip case"""
