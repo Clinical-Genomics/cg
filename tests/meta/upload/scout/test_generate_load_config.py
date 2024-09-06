@@ -70,6 +70,7 @@ def test_generate_balsamic_umi_load_config(
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
 
+
 def test_generate_raredisease_load_config(
     raredisease_analysis: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
 ):

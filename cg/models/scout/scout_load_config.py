@@ -26,6 +26,7 @@ class Eklipse(BaseModel):
 class CaseImages(BaseModel):
     eKLIPse: list[Eklipse] = list[Eklipse()]
 
+
 class CustomImages(BaseModel):
     case_images: CaseImages = CaseImages()
 

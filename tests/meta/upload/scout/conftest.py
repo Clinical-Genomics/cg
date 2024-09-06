@@ -467,7 +467,6 @@ def raredisease_analysis_hk_bundle_data(
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-
         "files": [
             {
                 "path": str(raredisease_analysis_dir / "multiqc.html"),

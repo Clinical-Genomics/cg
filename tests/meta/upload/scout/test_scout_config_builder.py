@@ -53,6 +53,7 @@ def test_balsamic_config_builder(
     # THEN assert that the correct case tags was used
     assert isinstance(file_handler.case_tags, CaseTags)
 
+
 def test_raredisease_config_builder(
     hk_version: Version,
     raredisease_analysis: Analysis,
@@ -65,13 +66,15 @@ def test_raredisease_config_builder(
 
     # WHEN instantiating
     file_handler = RarediseaseConfigBuilder(
-        hk_version_obj=hk_version, analysis_obj=raredisease_analysis, lims_api=lims_api, raredisease_analysis_api=raredisease_analysis_api, madeline_api=madeline_api
+        hk_version_obj=hk_version,
+        analysis_obj=raredisease_analysis,
+        lims_api=lims_api,
+        raredisease_analysis_api=raredisease_analysis_api,
+        madeline_api=madeline_api,
     )
 
     # THEN assert that the correct case tags was used
     assert isinstance(file_handler.case_tags, CaseTags)
-
-
 
 
 def test_rnafusion_config_builder(

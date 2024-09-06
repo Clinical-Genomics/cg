@@ -90,7 +90,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         LOG.info("Adding custom images")
         self.load_config.custom_images = self.build_custom_image_sample()
 
-
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
@@ -119,18 +118,14 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         return config_sample
 
-
     def build_custom_image_sample(self) -> CustomImages:
         "Build custom images config"
 
-        eklipse_images: list =  []
+        eklipse_images: list = []
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
             eklipse_image = Eklipse(
-                title=sample_id,
-                path=self.get_file_from_hk(
-                    hk_tags=self.sample_tags.eklipse_path
-                )
+                title=sample_id, path=self.get_file_from_hk(hk_tags=self.sample_tags.eklipse_path)
             )
             eklipse_images.append(eklipse_image)
 
