@@ -737,8 +737,8 @@ class CGConfig(BaseModel):
 
     @property
     def delivery_service_factory(self) -> DeliveryServiceFactory:
-        factory = self.__dict__.get("delivery_service_factory_")
-        if factory is None:
+        factory = self.delivery_service_factory_
+        if not factory:
             LOG.debug("Instantiating delivery service factory")
             factory = DeliveryServiceFactory(
                 store=self.status_db,
