@@ -7,6 +7,7 @@ from housekeeper.store.models import Version
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
 from tests.mocks.limsmock import MockLimsAPI
@@ -50,6 +51,22 @@ def test_balsamic_config_builder(
 
     # THEN assert that the correct case tags was used
     assert isinstance(file_handler.case_tags, CaseTags)
+
+def test_raredisease_config_builder(
+    hk_version: Version, raredisease_analysis_api: NextflowAnalysis, lims_api: MockLimsAPI
+):
+    """Test RAREDISEASE config builder class."""
+    # GIVEN a RAREDISEASE file handler
+
+    # WHEN instantiating
+    file_handler = RarediseaseConfigBuilder(
+        hk_version_obj=hk_version, analysis_obj=raredisease_analysis, lims_api=lims_api
+    )
+
+    # THEN assert that the correct case tags was used
+    assert isinstance(file_handler.case_tags, CaseTags)
+
+
 
 
 def test_rnafusion_config_builder(
