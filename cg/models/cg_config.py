@@ -723,7 +723,7 @@ class CGConfig(BaseModel):
 
     @property
     def delivery_rsync_service(self) -> DeliveryRsyncService:
-        service = self.__dict__.get("delivery_rsync_service_")
+        service = self.delivery_rsync_service_
         if service is None:
             LOG.debug("Instantiating delivery rsync service")
             rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())

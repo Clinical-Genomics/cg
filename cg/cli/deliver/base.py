@@ -46,7 +46,7 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     rsynced with this function to the customers inbox on the delivery server
     """
     tb_api: TrailblazerAPI = context.trailblazer_api
-    rsync_api: DeliveryRsyncService = DeliveryRsyncService(rsync_config=context)
+    rsync_api: DeliveryRsyncService = context.delivery_rsync_service
     slurm_id = rsync_api.run_rsync_for_ticket(ticket=ticket, dry_run=dry_run)
     LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
