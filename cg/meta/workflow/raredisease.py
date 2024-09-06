@@ -100,6 +100,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed
 
+    def get_germlinecnvcaller_flag(self, analysis_type: str)-> bool:
+        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            return True
+        else:
+            return False
+
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
@@ -110,6 +116,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             analysis_type=analysis_type,
             target_bed=Path(self.references, target_bed).as_posix(),
             save_mapped_as_cram=True,
+            skip_germlinecnvcaller=self.get_germlinecnvcaller_flag(case_id=case_id, analysis_type=analysis_type)
         )
 
     @staticmethod
