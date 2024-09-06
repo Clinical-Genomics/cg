@@ -83,7 +83,7 @@ def set_order_open(order_id: int):
 
 @ORDERS_BLUEPRINT.route("/orders/<order_id>/update-open-status", methods=["POST"])
 def update_order_open(order_id: int):
-    """Update the openness status of an order based on the number of delivered analyses."""
+    """Update the is_open parameter of an order based on the number of delivered analyses."""
     try:
         request_data = OrderOpenUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
