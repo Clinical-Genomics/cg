@@ -134,22 +134,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             eklipse_images.append(eklipse_image)
 
         case_images = CaseImages(eKLIPse=eklipse_images)
-        print(case_images)
         config_custom_images = CustomImages(case_images=case_images)
-        print(config_custom_images)
-        # Create a CaseImages object with the populated eklipse_images list
-        # case_images = CaseImages(eKLIPse=eklipse_images)
-
-        # Finally, create the CustomImages object with the case_images
-        # config_custom_images = CustomImages(case_images=case_images)
-
         return config_custom_images
 
     def include_case_files(self) -> None:
         """Include case level files for mip case"""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
-            LOG.info(f"Scout key: {scout_key}")
             self._include_case_file(scout_key)
 
     def _include_case_file(self, scout_key) -> None:
