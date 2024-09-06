@@ -606,13 +606,9 @@ def demultiplexing_api(
 
 
 @pytest.fixture
-def delivery_rsync_api(cg_context: CGConfig) -> DeliveryRsyncService:
-    """RsyncAPI fixture."""
-    return DeliveryRsyncService(
-        delivery_path=cg_context.delivery_path,
-        rsync_config=cg_context.data_delivery,
-        status_db=cg_context.status_db,
-    )
+def delivery_rsync_service(cg_context: CGConfig) -> DeliveryRsyncService:
+    """Delivery Rsync service fixture."""
+    return cg_context.delivery_rsync_service
 
 
 @pytest.fixture
