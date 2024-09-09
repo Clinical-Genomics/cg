@@ -121,3 +121,16 @@ def validate_sample_names_available(
             error = SampleNameNotAvailableError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def validate_sample_well_position_format(
+    order: OrderWithNonHumanSamples, **kwargs
+) -> list[WellFormatError]:
+    errors: list[WellFormatError] = []
+    plate_samples = PlateSamplesValidator(order)
+    plate_samples_wells = plate_samples.wells
+    for plate_samples_wells_key in plate_samples_wells.keys():
+        well_position = plate_samples_wells_key[1]
+        if not is_valid_well_format(well_position):
+            errors.append(WellFormatError(well_position=well_position))
+    return errors
