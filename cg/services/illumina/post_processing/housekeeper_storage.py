@@ -32,6 +32,7 @@ def _should_fastq_path_be_stored_in_housekeeper(
     Check if a sample fastq file should be tracked in Housekeeper.
     Only fastq files that pass the q30 threshold should be tracked.
     """
+
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
