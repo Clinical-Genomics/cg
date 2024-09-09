@@ -89,6 +89,7 @@ OPTION_FROM_START = click.option(
     help="Start workflow from start without resuming execution",
 )
 
+
 @click.command("config-case")
 @ARGUMENT_CASE_ID
 @DRY_RUN
