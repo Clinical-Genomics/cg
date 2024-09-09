@@ -14,7 +14,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
-    is_valid_well_format,
+    does_sample_have_an_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
@@ -130,8 +130,7 @@ def validate_sample_well_position_format(
 ) -> list[WellFormatError]:
     errors: list[WellFormatError] = []
     for sample_index, sample in order.enumerated_samples:
-        if sample.is_on_plate:
-            if not is_valid_well_format(sample.well_position):
-                error = WellFormatError(sample_index=sample_index)
-                errors.append(error)
+        if does_sample_have_an_invalid_well_format(sample=sample):
+            error = WellFormatError(sample_index=sample_index)
+            errors.append(error)
     return errors
