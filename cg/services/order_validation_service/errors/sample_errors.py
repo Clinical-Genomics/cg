@@ -56,4 +56,4 @@ class SampleNameNotAvailableError(SampleError):
 
 class WellFormatError(SampleError):
     field: str = "well_position"
-    message: str = "Well position is not in correct format"
+    message: str = "Well position must follow the format 'A-H:1-12"
