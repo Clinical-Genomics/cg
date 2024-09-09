@@ -8,7 +8,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.deliver.utils import deliver_raw_data_for_analyses
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants import DataDelivery, Workflow
+from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
 from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
