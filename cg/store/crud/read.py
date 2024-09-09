@@ -1544,9 +1544,9 @@ class ReadHandler(BaseHandler):
     def get_related_dna_cases_from_rna_case(self, rna_case: Case) -> list[Case]:
         """Return a list of DNA cases related to the samples of an RNA case."""
         dna_cases: list[Case] = []
-        for link in rna_case.links:
+        for sample in rna_case.samples:
             dna_cases_related_to_sample: list[Case] = self._get_related_dna_cases_from_rna_sample(
-                link.sample
+                sample
             )
             dna_cases = dna_cases + dna_cases_related_to_sample
         return dna_cases
