@@ -1541,21 +1541,20 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def get_related_dna_cases_from_rna_case(self, rna_case: Case) -> list[Case]:
+    def get_related_dna_cases_from_rna_case(self, rna_case_id: str) -> list[Case]:
         """Return a list of DNA cases related to the samples of an RNA case."""
+
+        rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
+
         dna_cases: list[Case] = []
         for sample in rna_case.samples:
             dna_cases_related_to_sample: list[Case] = self._get_related_dna_cases_from_rna_sample(
-                sample
+                rna_sample=sample
             )
             dna_cases = dna_cases + dna_cases_related_to_sample
         return dna_cases
 
     def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
-        # if not rna_sample.subject_id:
-        #     raise CgDataError(
-        #         f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
-        #     )
 
         collaborators: set[Customer] = rna_sample.customer.collaborators
 
@@ -1568,12 +1567,6 @@ class ReadHandler(BaseHandler):
         subject_id_dna_samples: list[Sample] = self._get_dna_samples_from_sample_list(
             subject_id_samples
         )
-
-        # if len(subject_id_dna_samples) != 1:
-        #     raise CgDataError(
-        #         f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
-        #         f"{rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
-        #     )
 
         dna_sample: Sample = subject_id_dna_samples[0]
         dna_cases: list[Case] = self._get_dna_cases_from_dna_sample_within_collaborators(
@@ -1615,12 +1608,12 @@ class ReadHandler(BaseHandler):
     ) -> list[Case]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
         cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
-        return self.filter_dna_cases_within_collaborators(
+        return self._filter_dna_cases_within_collaborators(
             cases=cases_related_to_dna_sample, collaborators=collaborators
         )
 
     @staticmethod
-    def filter_dna_cases_within_collaborators(
+    def _filter_dna_cases_within_collaborators(
         cases: list[Case], collaborators: set[Customer]
     ) -> list[Case]:
         """Filters the given list of cases and returns a subset of cases ordered by customers in the
