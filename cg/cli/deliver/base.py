@@ -6,7 +6,9 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
+from cg.cli.deliver.utils import deliver_raw_data_for_analyses
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants import DataDelivery, Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
 from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
@@ -17,7 +19,7 @@ from cg.services.file_delivery.deliver_files_service.deliver_files_service impor
 from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.store.models import Case
+from cg.store.models import Case, Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -114,4 +116,30 @@ def deliver_ticket(
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
+    )
+
+
+@deliver.command(name="auto-raw-data")
+@click.pass_obj
+@DRY_RUN
+def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
+    """
+    Deliver all case files for the raw data workflow to the customer inbox on the HPC and start a Rsync job.
+    1. get all cases with analysis type fastq that need to be delivered
+    2. check if their upload has started
+    3. if not, start the upload
+    4. update the uploaded at field
+    """
+    """Starts upload of all not previously uploaded cases with analysis type fastq to
+       clinical-delivery."""
+    service_builder: DeliveryServiceFactory = context.delivery_service_factory
+    analyses: list[Analysis] = context.analysis_service.get_analyses_to_upload_for_workflow(
+        workflow=Workflow.FASTQ
+    )
+    deliver_raw_data_for_analyses(
+        analyses=analyses,
+        status_db=context.status_db,
+        delivery_path=Path(context.delivery_path),
+        service_builder=service_builder,
+        dry_run=dry_run,
     )
