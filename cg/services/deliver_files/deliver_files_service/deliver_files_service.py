@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
@@ -22,7 +21,7 @@ from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service imp
     DeliveryRsyncService,
 )
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import Case, Analysis
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
