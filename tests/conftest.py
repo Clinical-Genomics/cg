@@ -2537,7 +2537,9 @@ def raredisease_parameters_default(
         skip_germlinecnvcaller=False,
         analysis_type=AnalysisTypes.WES,
         save_mapped_as_cram=True,
-        vcfanno_extra_resources=str(Path(raredisease_dir, raredisease_case_id+ScoutExportFileName.MANAGED_VARIANTS))
+        vcfanno_extra_resources=str(
+            Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
+        ),
     )
 
 
