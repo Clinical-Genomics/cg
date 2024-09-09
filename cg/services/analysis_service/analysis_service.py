@@ -29,7 +29,7 @@ class AnalysisService:
                 self.status_db.update_analysis_uploaded_at(
                     analysis_id=analysis.id, uploaded_at=datetime.now()
                 )
-            if not self._is_analysis_uploaded(analysis):
+            if not self._is_analysis_uploaded(analysis) and self._is_analysis_completed(analysis):
                 analysis_to_upload.append(analysis)
         return analysis_to_upload
 
