@@ -111,12 +111,12 @@ def test_update_analysis_uploaded_at(
     ).first()
     assert analysis.uploaded_at != timestamp_yesterday
 
-    # WHEN updating the uploaded at field
+    # WHEN updating the uploaded_at field
     store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
         analysis_id=analysis.id, uploaded_at=timestamp_yesterday
     )
 
-    # THEN the uploaded at field is updated
+    # THEN the uploaded_at field is updated
     assert analysis.uploaded_at == timestamp_yesterday
 
 
@@ -129,10 +129,10 @@ def test_update_analysis_upload_started_at(
     ).first()
     assert analysis.upload_started_at != timestamp_yesterday
 
-    # WHEN updating the upload started at field
+    # WHEN updating the upload_started_at field
     store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_upload_started_at(
         analysis_id=analysis.id, upload_started_at=timestamp_yesterday
     )
 
-    # THEN the uploaded at field is updated
+    # THEN the upload_started_at field is updated
     assert analysis.upload_started_at == timestamp_yesterday

@@ -342,4 +342,4 @@ def test_filter_by_analysis_entry_id(base_store: Store, helpers: StoreHelpers):
     assert isinstance(analyses, Query)
 
     # THEN only the analysis with the given entry id should be retrieved
-    assert analysis in analyses
+    assert analysis == analyses.one()
