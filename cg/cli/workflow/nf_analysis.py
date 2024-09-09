@@ -6,12 +6,15 @@ import click
 from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
+from cg.cli.workflow.raredisease.base import managed_variants
 from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -88,14 +91,20 @@ OPTION_FROM_START = click.option(
     help="Start workflow from start without resuming execution",
 )
 
-
 @click.command("config-case")
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create config files required by a workflow for a case."""
+    """Create config files required by a workflow for a case and extract managed variants for RAREDISEASE analyses."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    if isinstance(analysis_api, RarediseaseAnalysisAPI):
+        LOG.info(f"Including managed variants for {case_id}")
+        try:
+            context.invoke(managed_variants, case_id=case_id, dry_run=dry_run)
+        except (CgError, ValidationError, Exception) as error:
+            LOG.error(f"Could not extract managed variants from scout {case_id}: {error}")
+            raise click.Abort() from error
     try:
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
     except (CgError, ValidationError) as error:
