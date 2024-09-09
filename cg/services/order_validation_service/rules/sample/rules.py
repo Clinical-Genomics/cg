@@ -14,6 +14,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
+    is_valid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
