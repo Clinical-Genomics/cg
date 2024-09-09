@@ -2,7 +2,11 @@ from datetime import datetime
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.sequencing import Sequencers
-from cg.store.models import IlluminaSequencingRun, Sample, IlluminaSampleSequencingMetrics
+from cg.store.models import (
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
 
 
