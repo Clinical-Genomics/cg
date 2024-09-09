@@ -129,10 +129,10 @@ def validate_sample_well_position_format(
     order: OrderWithNonHumanSamples, **kwargs
 ) -> list[WellFormatError]:
     errors: list[WellFormatError] = []
-    plate_samples = PlateSamplesValidator(order)
-    plate_samples_wells = plate_samples.wells
+    plate_samples: PlateSamplesValidator = PlateSamplesValidator(order)
+    plate_samples_wells: dict[tuple[str, str], list[int]] = plate_samples.wells
     for plate_samples_wells_key in plate_samples_wells.keys():
-        well_position = plate_samples_wells_key[1]
+        well_position: str = plate_samples_wells_key[1]
         if not is_valid_well_format(well_position):
             errors.append(WellFormatError(well_position=well_position))
     return errors
