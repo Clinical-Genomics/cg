@@ -2,7 +2,7 @@ import logging
 from functools import wraps
 
 from cg.exc import CgError
-from cg.services.file_delivery.deliver_files_service.exc import DeliveryTypeNotSupported
+from cg.services.deliver_files.deliver_files_service.exc import DeliveryTypeNotSupported
 
 LOG = logging.getLogger(__name__)
 

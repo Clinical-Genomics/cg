@@ -2,32 +2,32 @@ import pytest
 from unittest.mock import MagicMock
 
 from cg.constants import Workflow, DataDelivery
-from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.file_delivery.fetch_delivery_files_tags.fetch_sample_and_case_delivery_file_tags_service import (
-    FetchSampleAndCaseDeliveryFileTagsService,
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+    SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.services.file_delivery.fetch_file_service.fetch_analysis_files_service import (
-    FetchAnalysisDeliveryFilesService,
+from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
+    AnalysisDeliveryFileFetcher,
 )
-from cg.services.file_delivery.fetch_file_service.fetch_fastq_analysis_files_service import (
-    FetchFastqAndAnalysisDeliveryFilesService,
+from cg.services.deliver_files.delivery_file_fetcher_service.fastq_and_analysis_delivery_file_fetcher import (
+    FastqAndAnalysisDeliveryFileFetcher,
 )
-from cg.services.file_delivery.fetch_file_service.fetch_fastq_files_service import (
-    FetchFastqDeliveryFilesService,
+from cg.services.deliver_files.delivery_file_fetcher_service.fastq_delivery_file_fetcher import (
+    FastqDeliveryFileFetcher,
 )
-from cg.services.file_delivery.file_formatter_service.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.file_delivery.file_formatter_service.utils.sample_file_formatter import (
+from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
-from cg.services.file_delivery.move_files_service.move_delivery_files_service import (
-    MoveDeliveryFilesService,
+from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover import (
+    DeliveryFilesMover,
 )
 
 
@@ -37,25 +37,25 @@ from cg.services.file_delivery.move_files_service.move_delivery_files_service im
         (
             Workflow.MICROSALT,
             DataDelivery.FASTQ,
-            FetchSampleAndCaseDeliveryFileTagsService,
-            FetchFastqDeliveryFilesService,
-            MoveDeliveryFilesService,
+            SampleAndCaseDeliveryTagsFetcher,
+            FastqDeliveryFileFetcher,
+            DeliveryFilesMover,
             SampleFileConcatenationFormatter,
         ),
         (
             Workflow.MUTANT,
             DataDelivery.ANALYSIS_FILES,
-            FetchSampleAndCaseDeliveryFileTagsService,
-            FetchAnalysisDeliveryFilesService,
-            MoveDeliveryFilesService,
+            SampleAndCaseDeliveryTagsFetcher,
+            AnalysisDeliveryFileFetcher,
+            DeliveryFilesMover,
             SampleFileFormatter,
         ),
         (
             Workflow.BALSAMIC,
             DataDelivery.FASTQ_ANALYSIS,
-            FetchSampleAndCaseDeliveryFileTagsService,
-            FetchFastqAndAnalysisDeliveryFilesService,
-            MoveDeliveryFilesService,
+            SampleAndCaseDeliveryTagsFetcher,
+            FastqAndAnalysisDeliveryFileFetcher,
+            DeliveryFilesMover,
             SampleFileFormatter,
         ),
     ],

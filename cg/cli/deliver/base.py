@@ -11,12 +11,14 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
-from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
 from cg.models.cg_config import CGConfig
-from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Case, Analysis

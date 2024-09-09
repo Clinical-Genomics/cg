@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.file_delivery.fetch_file_service.models import DeliveryFiles, SampleFile
-from cg.services.file_delivery.file_formatter_service.models import FormattedFile
+from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles, SampleFile
+from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFile
 
 
 @pytest.fixture

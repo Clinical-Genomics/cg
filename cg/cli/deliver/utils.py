@@ -3,10 +3,10 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Case, Analysis

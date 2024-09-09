@@ -8,7 +8,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.constants.constants import CaseActions
 from cg.meta.meta import MetaAPI
-from cg.services.file_delivery.rsync_service.sbatch import (
+from cg.services.deliver_files.delivery_rsync_service.sbatch import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
 )

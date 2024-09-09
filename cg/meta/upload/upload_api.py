@@ -12,10 +12,10 @@ from cg.meta.upload.error_handling import handle_delivery_type_errors
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.file_delivery.deliver_files_service.deliver_files_service import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.file_delivery.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Analysis, Case

@@ -24,7 +24,9 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.file_delivery.rsync_service.delivery_rsync_service import DeliveryRsyncService
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
 from cg.store.store import Store
 
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)

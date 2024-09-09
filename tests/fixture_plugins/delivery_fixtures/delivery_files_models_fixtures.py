@@ -9,7 +9,7 @@ from cg.constants.housekeeper_tags import (
     AlignmentFileTag,
     SequencingFileTag,
 )
-from cg.services.file_delivery.fetch_file_service.models import (
+from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     DeliveryFiles,
     SampleFile,
     CaseFile,
