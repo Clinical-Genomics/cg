@@ -21,6 +21,7 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -153,8 +154,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-        metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
-        self.set_order_sex_for_sample(sample, metric_conditions)
+        if "-" not in sample_id:
+            metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
+            self.set_order_sex_for_sample(sample, metric_conditions)
+        else:
+            metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
     def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
