@@ -9,6 +9,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     SampleNameNotAvailableError,
     SampleNameRepeatedError,
+    WellFormatError,
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,

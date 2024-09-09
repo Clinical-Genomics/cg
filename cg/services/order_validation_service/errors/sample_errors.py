@@ -52,3 +52,8 @@ class OrganismDoesNotExistError(SampleError):
 class SampleNameNotAvailableError(SampleError):
     field: str = "name"
     message: str = "Sample name already used in previous order"
+
+
+class WellFormatError(SampleError):
+    field: str = "well_position"
+    message: str = "Well position is not in correct format"
