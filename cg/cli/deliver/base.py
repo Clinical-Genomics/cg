@@ -58,13 +58,19 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     )
 
 
-@deliver.command(name="case")
+@deliver.command(
+    name="case",
+    help="Deliver all case files based on delivery type to the customer inbox on the HPC "
+    "and start an Rsync job to clinical-delivery. "
+    "NOTE: the dry-run flag will copy files to the customer inbox on Hasta, "
+    "but will not perform the Rsync job.",
+)
 @click.pass_obj
 @click.option(
     "-c",
     "--case-id",
     required=True,
-    help="Deliver the files for a specific case",
+    help="Deliver the files for a specific case.",
 )
 @DELIVERY_TYPE
 @DRY_RUN
@@ -92,7 +98,13 @@ def deliver_case(
     )
 
 
-@deliver.command(name="ticket")
+@deliver.command(
+    name="ticket",
+    help="Deliver all case files for cases in a ticket based on delivery type to the customer inbox on the HPC "
+    "and start an Rsync job to clinical-delivery. "
+    "NOTE: the dry-run flag will copy files to the customer inbox on Hasta, "
+    "but will not perform the Rsync job.",
+)
 @click.pass_obj
 @TICKET_ID_ARG
 @DELIVERY_TYPE
