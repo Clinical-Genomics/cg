@@ -64,13 +64,8 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
-        folders_to_deliver: set[Path] = set(
-            [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
-        )
-        job_id: int = self._start_rsync_job(
-            case=case, dry_run=dry_run, folders_to_deliver=folders_to_deliver
-        )
+        self.file_formatter.format_files(moved_files)
+        job_id: int = self._start_rsync_job(case=case, dry_run=dry_run)
         self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
     def deliver_files_for_ticket(
@@ -85,11 +80,10 @@ class DeliverFilesService:
                 case=case, delivery_base_path=delivery_base_path, dry_run=dry_run
             )
 
-    def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
+    def _start_rsync_job(self, case: Case, dry_run: bool) -> int:
         job_id: int = self.rsync_service.run_rsync_for_case(
             case=case,
             dry_run=dry_run,
-            folders_to_deliver=folders_to_deliver,
         )
         self.rsync_service.write_trailblazer_config(
             content={"jobs": [str(job_id)]},
