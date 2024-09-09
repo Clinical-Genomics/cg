@@ -8,7 +8,7 @@ Create Date: 2024-09-04 13:15:11.876822
 
 from enum import StrEnum
 
-from sqlalchemy import orm, types
+from sqlalchemy import orm
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -85,6 +85,18 @@ class Analysis(Base):
     workflow: Mapped[str | None]
 
 
+class Order(Base):
+    __tablename__ = "order"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    workflow: Mapped[str | None]
+
+
+class ApplicationLimitation(Base):
+    __tablename__ = "application_limitation"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    workflow: Mapped[str | None]
+
+
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
@@ -101,6 +113,22 @@ def upgrade():
             {"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate"
         )
         op.alter_column("analysis", "workflow", type_=new_enum, existing_nullable=True)
+        # Order
+        op.alter_column("order", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True)
+        session.query(Order).filter(Order.workflow == "fastq").update(
+            {"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate"
+        )
+        op.alter_column("order", "workflow", type_=new_enum, existing_nullable=True)
+        # Application Limitation
+        op.alter_column(
+            "application_limitation", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
+        )
+        session.query(ApplicationLimitation).filter(
+            ApplicationLimitation.workflow == "fastq"
+        ).update({"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate")
+        op.alter_column(
+            "application_limitation", "workflow", type_=new_enum, existing_nullable=True
+        )
         session.commit()
     finally:
         session.close()
@@ -122,6 +150,22 @@ def downgrade():
             {"workflow": "fastq"}, synchronize_session="evaluate"
         )
         op.alter_column("analysis", "workflow", type_=old_enum, existing_nullable=True)
+        # Order
+        op.alter_column("order", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True)
+        session.query(Order).filter(Order.workflow == Workflow.RAW_DATA).update(
+            {"workflow": "fastq"}, synchronize_session="evaluate"
+        )
+        op.alter_column("order", "workflow", type_=old_enum, existing_nullable=True)
+        # Application Limitation
+        op.alter_column(
+            "application_limitation", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
+        )
+        session.query(ApplicationLimitation).filter(
+            ApplicationLimitation.workflow == Workflow.RAW_DATA
+        ).update({"workflow": "fastq"}, synchronize_session="evaluate")
+        op.alter_column(
+            "application_limitation", "workflow", type_=old_enum, existing_nullable=True
+        )
         session.commit()
     finally:
         session.close()
