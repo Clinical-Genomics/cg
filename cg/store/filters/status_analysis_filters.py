@@ -90,9 +90,9 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
     return analyses.join(Case).filter(Case.action.is_(None))
 
 
-def filter_analysis_by_entry_id(analysis: Query, entry_id: int, **kwargs) -> Query:
+def filter_analysis_by_entry_id(analyses: Query, entry_id: int, **kwargs) -> Query:
     """Return a query of analyses filtered by entry id."""
-    return analysis.filter(Analysis.id == entry_id)
+    return analyses.filter(Analysis.id == entry_id)
 
 
 def apply_analysis_filter(

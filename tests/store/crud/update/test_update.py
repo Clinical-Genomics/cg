@@ -2,7 +2,7 @@ from datetime import datetime
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.sequencing import Sequencers
-from cg.store.models import IlluminaSequencingRun, Sample, IlluminaSampleSequencingMetrics
+from cg.store.models import IlluminaSequencingRun, Sample, IlluminaSampleSequencingMetrics, Analysis
 from cg.store.store import Store
 
 
@@ -100,3 +100,37 @@ def test_update_sample_last_sequenced_at(
 
     # THEN the last sequenced at date for the sample is updated
     assert sample.last_sequenced_at == timestamp_now
+
+
+def test_update_analysis_uploaded_at(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store, timestamp_yesterday: datetime
+):
+    # GIVEN a store with an analysis
+    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
+        Analysis
+    ).first()
+
+    # WHEN updating the uploaded at field
+    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
+        analysis_id=analysis.id, uploaded_at=timestamp_yesterday
+    )
+
+    # THEN the uploaded at field is updated
+    assert analysis.uploaded_at == timestamp_yesterday
+
+
+def test_update_analysis_upload_started_at(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store, timestamp_yesterday: datetime
+):
+    # GIVEN a store with an analysis
+    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
+        Analysis
+    ).first()
+
+    # WHEN updating the upload started at field
+    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
+        analysis_id=analysis.id, uploaded_at=timestamp_yesterday
+    )
+
+    # THEN the uploaded at field is updated
+    assert analysis.uploaded_at == timestamp_yesterday
