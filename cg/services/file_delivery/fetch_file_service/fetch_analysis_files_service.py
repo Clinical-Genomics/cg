@@ -46,6 +46,7 @@ class FetchAnalysisDeliveryFilesService(FetchDeliveryFilesService):
             sample_files=analysis_sample_files,
         )
 
+    @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
     ) -> list[SampleFile]:
