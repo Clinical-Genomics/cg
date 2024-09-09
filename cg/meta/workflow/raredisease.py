@@ -68,10 +68,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
-        """Return reference genome for a case. Currently fixed for hg19."""
-        return GenomeVersion.HG19
-
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
@@ -154,9 +150,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
-    def get_managed_variants(self) -> list[str]:
+    def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=GenePanelGenomeBuild.hg19)
+        return self._get_managed_variants(genome_build=self.get_genome_build(case_id=case_id))
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)

@@ -374,7 +374,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
         if self.workflow == Workflow.RAREDISEASE:
-            vcf_lines: list[str] = self.get_managed_variants()
+            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
             if dry_run:
                 echo_lines(lines=vcf_lines)
                 return
