@@ -91,8 +91,8 @@ class Order(Base):
     workflow: Mapped[str | None]
 
 
-class ApplicationLimitation(Base):
-    __tablename__ = "application_limitation"
+class ApplicationLimitations(Base):
+    __tablename__ = "application_limitations"
     id: Mapped[int] = mapped_column(primary_key=True)
     workflow: Mapped[str | None]
 
@@ -121,13 +121,13 @@ def upgrade():
         op.alter_column("order", "workflow", type_=new_enum, existing_nullable=True)
         # Application Limitation
         op.alter_column(
-            "application_limitation", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
+            "application_limitations", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
         )
-        session.query(ApplicationLimitation).filter(
-            ApplicationLimitation.workflow == "fastq"
+        session.query(ApplicationLimitations).filter(
+            ApplicationLimitations.workflow == "fastq"
         ).update({"workflow": Workflow.RAW_DATA}, synchronize_session="evaluate")
         op.alter_column(
-            "application_limitation", "workflow", type_=new_enum, existing_nullable=True
+            "application_limitations", "workflow", type_=new_enum, existing_nullable=True
         )
         session.commit()
     finally:
@@ -158,13 +158,13 @@ def downgrade():
         op.alter_column("order", "workflow", type_=old_enum, existing_nullable=True)
         # Application Limitation
         op.alter_column(
-            "application_limitation", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
+            "application_limitations", "workflow", type_=mysql.VARCHAR(64), existing_nullable=True
         )
-        session.query(ApplicationLimitation).filter(
-            ApplicationLimitation.workflow == Workflow.RAW_DATA
+        session.query(ApplicationLimitations).filter(
+            ApplicationLimitations.workflow == Workflow.RAW_DATA
         ).update({"workflow": "fastq"}, synchronize_session="evaluate")
         op.alter_column(
-            "application_limitation", "workflow", type_=old_enum, existing_nullable=True
+            "application_limitations", "workflow", type_=old_enum, existing_nullable=True
         )
         session.commit()
     finally:
