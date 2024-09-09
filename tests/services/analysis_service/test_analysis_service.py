@@ -36,6 +36,6 @@ def test_get_analyses_to_upload_for_workflow(
         workflow=Workflow.FASTQ
     )
 
-    # THEN the analyses should be returned
+    # THEN only the analyses to upload should be returned
     assert analyses == [analysis_upload]
     assert analysis_no_upload not in analyses
