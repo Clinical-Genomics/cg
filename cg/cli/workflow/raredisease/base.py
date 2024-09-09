@@ -62,7 +62,6 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
         return
     analysis_api.write_panel(case_id=case_id, content=bed_lines)
 
-
 @raredisease.command("managed-variants")
 @DRY_RUN
 @ARGUMENT_CASE_ID

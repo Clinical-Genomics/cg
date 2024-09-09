@@ -3,7 +3,8 @@ from pathlib import Path
 from click.testing import CliRunner
 from mock import mock
 
-from cg.cli.workflow.raredisease.base import managed_variants, panel
+from cg.cli.workflow.raredisease.base import panel
+from cg.cli.workflow.raredisease.managed_variants import managed_variants
 from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
