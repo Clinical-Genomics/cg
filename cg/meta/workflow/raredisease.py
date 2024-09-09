@@ -119,7 +119,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             target_bed=Path(self.references, target_bed).as_posix(),
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
-            vcfanno_extra_resources=outdir + "/" + ScoutExportFileName.MANAGED_VARIANTS,
+            vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
         )
 
     @staticmethod
