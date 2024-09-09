@@ -66,7 +66,7 @@ class DeliverFilesService:
         )
         formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
         folders_to_deliver: set[Path] = set(
-            [formatted_file.formatted_path.parent for formatted_file in formatted_files]
+            [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
         )
         job_id: int = self._start_rsync_job(
             case=case, dry_run=dry_run, folders_to_deliver=folders_to_deliver
