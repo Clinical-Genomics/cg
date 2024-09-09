@@ -32,6 +32,7 @@ from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVe
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisTypes
@@ -2536,6 +2537,7 @@ def raredisease_parameters_default(
         skip_germlinecnvcaller=False,
         analysis_type=AnalysisTypes.WES,
         save_mapped_as_cram=True,
+        vcfanno_extra_resources=str(Path(raredisease_dir, raredisease_case_id+ScoutExportFileName.MANAGED_VARIANTS))
     )
 
 
