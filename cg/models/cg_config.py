@@ -669,7 +669,7 @@ class CGConfig(BaseModel):
 
     @property
     def analysis_service(self) -> AnalysisService:
-        return AnalysisService(analysis_client=self.trailblazer_api)
+        return AnalysisService(analysis_client=self.trailblazer_api, status_db=self.status_db)
 
     @property
     def scout_api(self) -> ScoutAPI:
