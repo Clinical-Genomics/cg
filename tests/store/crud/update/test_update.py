@@ -109,6 +109,7 @@ def test_update_analysis_uploaded_at(
     analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
         Analysis
     ).first()
+    assert analysis.uploaded_at != timestamp_yesterday
 
     # WHEN updating the uploaded at field
     store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
@@ -126,11 +127,12 @@ def test_update_analysis_upload_started_at(
     analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
         Analysis
     ).first()
+    assert analysis.upload_started_at != timestamp_yesterday
 
     # WHEN updating the upload started at field
-    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
-        analysis_id=analysis.id, uploaded_at=timestamp_yesterday
+    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_upload_started_at(
+        analysis_id=analysis.id, upload_started_at=timestamp_yesterday
     )
 
     # THEN the uploaded at field is updated
-    assert analysis.uploaded_at == timestamp_yesterday
+    assert analysis.upload_started_at == timestamp_yesterday
