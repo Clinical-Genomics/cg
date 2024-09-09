@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -12,6 +13,9 @@ from cg.store.models import Case, Analysis
 from cg.store.store import Store
 
 
+LOG = logging.getLogger(__name__)
+
+
 def deliver_raw_data_for_analyses(
     analyses: list[Analysis],
     status_db: Store,
@@ -21,14 +25,22 @@ def deliver_raw_data_for_analyses(
 ):
     """Deliver raw data for a list of analyses"""
     for analysis in analyses:
-        case: Case = analysis.case
-        delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-            delivery_type=case.data_delivery,
-            workflow=Workflow.FASTQ,
-        )
-        delivery_service.deliver_files_for_case(
-            case=case, delivery_base_path=delivery_path, dry_run=dry_run
-        )
-        status_db.update_analysis_upload_started_at(
-            analysis_id=analysis.id, upload_started_at=datetime.now()
-        )
+        try:
+            case: Case = analysis.case
+            delivery_service: DeliverFilesService = service_builder.build_delivery_service(
+                delivery_type=case.data_delivery,
+                workflow=Workflow.FASTQ,
+            )
+
+            delivery_service.deliver_files_for_case(
+                case=case, delivery_base_path=delivery_path, dry_run=dry_run
+            )
+            status_db.update_analysis_upload_started_at(
+                analysis_id=analysis.id, upload_started_at=datetime.now()
+            )
+        except Exception as error:
+            status_db.update_analysis_upload_started_at(
+                analysis_id=analysis.id, upload_started_at=None
+            )
+            LOG.error(f"Could not deliver files for analysis {analysis.id}: {error}")
+            continue

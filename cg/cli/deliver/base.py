@@ -1,7 +1,6 @@
 """CLI for delivering files with CG"""
 
 import logging
-from datetime import datetime
 from pathlib import Path
 
 import click
