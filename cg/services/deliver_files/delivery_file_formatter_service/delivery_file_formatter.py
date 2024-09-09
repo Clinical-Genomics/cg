@@ -71,6 +71,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
 
     @staticmethod
     def get_folder_under_inbox(file_path: Path) -> Path:
+        """Get the ticker folder that is located under the customer inbox folder."""
         try:
             inbox_index: int = file_path.parts.index(INBOX_NAME)
             return Path(*file_path.parts[: inbox_index + 2])
