@@ -94,19 +94,24 @@ class DeliveryRsyncService:
 
         return before > ctime
 
-    def create_rsync_commands(
+    def concatenate_rsync_commands(
         self,
+        folder_list: set[Path],
         source_and_destination_paths: dict[str, Path],
         ticket: str,
         case: Case,
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred."""
         command: str = ""
-        source_path = Path(source_and_destination_paths["delivery_source_path"])
-        destination_path: Path = Path(
-            source_and_destination_paths["rsync_destination_path"], ticket
-        )
-        command += RSYNC_COMMAND.format(source_path=source_path, destination_path=destination_path)
+        for folder in folder_list:
+            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
+            destination_path: Path = Path(
+                source_and_destination_paths["rsync_destination_path"], ticket
+            )
+
+            command += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
         if case.data_analysis == Workflow.MUTANT:
             covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
             covid_destination_path: str = self.format_covid_destination_path(
@@ -187,7 +192,7 @@ class DeliveryRsyncService:
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_rsync_for_case(self, case: Case, dry_run: bool) -> int:
+    def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         """Submit Rsync commands for a single case for delivery to the delivery server."""
         ticket: str = case.latest_ticket
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
@@ -195,7 +200,8 @@ class DeliveryRsyncService:
         )
         self.set_log_dir(folder_prefix=case.internal_id)
         self.create_log_dir(dry_run=dry_run)
-        command: str = self.create_rsync_commands(
+        command: str = self.concatenate_rsync_commands(
+            folder_list=folders_to_deliver,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
             case=case,
