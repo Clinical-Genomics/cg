@@ -201,6 +201,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS
 
+
 def config_case(self, case_id: str, dry_run: bool) -> None:
     """Configure a case for Raredisease analysis."""
     super().config_case(case_id=case_id, dry_run=dry_run)
