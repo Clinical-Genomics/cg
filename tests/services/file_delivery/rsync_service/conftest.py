@@ -10,7 +10,7 @@ from cg.store.models import Case
 
 @pytest.fixture
 def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Case:
-    """Return mutant case"""
+    """Return a Mutant case."""
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id=case_id,
