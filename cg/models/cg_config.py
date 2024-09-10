@@ -212,7 +212,7 @@ class RarediseaseConfig(CommonAppConfig):
     launch_directory: str
     workflow_path: str
     profile: str
-    references: str | None = None
+    references: str
     revision: str
     root: str
     slurm: SlurmConfig
