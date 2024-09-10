@@ -373,12 +373,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
-        if self.workflow == Workflow.RAREDISEASE:
-            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
-            if dry_run:
-                echo_lines(lines=vcf_lines)
-            else:
-                self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
         self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
