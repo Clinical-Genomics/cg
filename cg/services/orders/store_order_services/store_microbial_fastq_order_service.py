@@ -35,6 +35,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return {
             "customer": order.customer,
             "order": order.name,
+            "comment": order.comment,
             "samples": [
                 {
                     "application": sample.application,

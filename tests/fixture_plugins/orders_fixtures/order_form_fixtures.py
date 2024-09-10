@@ -243,6 +243,14 @@ def microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
+@pytest.fixture
+def microbial_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example microbial order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microbial_fastq.json")
+    )
+
+
 @pytest.fixture(scope="session")
 def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example sarscov2 order."""
