@@ -26,6 +26,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     WellPositionMissingError,
+    WellFormatError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
