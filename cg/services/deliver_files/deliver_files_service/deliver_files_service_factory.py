@@ -121,6 +121,7 @@ class DeliveryServiceFactory:
         self, workflow: Workflow, delivery_type: DataDelivery
     ) -> DeliverFilesService:
         """Build a delivery service based on the workflow and delivery type."""
+        delivery_type = self._sanitise_delivery_type(delivery_type)
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
         sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
@@ -138,3 +139,12 @@ class DeliveryServiceFactory:
             tb_service=self.tb_service,
             analysis_service=self.analysis_service,
         )
+
+    @staticmethod
+    def _sanitise_delivery_type(delivery_type: str) -> DataDelivery:
+        """Sanitise the delivery type."""
+        if delivery_type == DataDelivery.FASTQ_QC:
+            return DataDelivery.FASTQ
+        if delivery_type == DataDelivery.FASTQ_QC_ANALYSIS:
+            return DataDelivery.FASTQ_ANALYSIS
+        return delivery_type
