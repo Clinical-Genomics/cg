@@ -18,6 +18,9 @@ from cg.services.orders.store_order_services.store_case_order import StoreCaseOr
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
+from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
+    StoreMicrobialFastqOrderService,
+)
 from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 
@@ -452,6 +455,17 @@ def microbial_status_data(
     project: OrderType = OrderType.MICROSALT
     order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
     return store_microbial_order_service.order_to_status(order=order)
+
+
+@pytest.fixture
+def microbial_fastq_status_data(
+    microbial_order_to_submit: dict,
+    store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
+) -> dict:
+    """Parse microbial order example."""
+    project: OrderType = OrderType.MICROSALT
+    order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
+    return store_microbial_fastq_order_service.order_to_status(order=order)
 
 
 @pytest.fixture

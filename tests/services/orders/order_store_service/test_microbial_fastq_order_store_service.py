@@ -40,7 +40,7 @@ def test_microbial_samples_to_status(
 
 
 def test_store_samples(
-    microbial_fastq_order_to_submit: dict,
+    microbial_fastq_status_data: dict,
     ticket_id: str,
     store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
 ):
@@ -51,11 +51,11 @@ def test_store_samples(
 
     # WHEN storing the order
     new_samples = store_microbial_fastq_order_service.store_items_in_status(
-        customer_id=microbial_fastq_order_to_submit["customer"],
-        order=microbial_fastq_order_to_submit["order"],
+        customer_id=microbial_fastq_status_data["customer"],
+        order=microbial_fastq_status_data["order"],
         ordered=datetime.now(),
         ticket_id=ticket_id,
-        items=microbial_fastq_order_to_submit["samples"],
+        items=microbial_fastq_status_data["samples"],
     )
 
     # THEN it should store the samples and create a case for each sample
