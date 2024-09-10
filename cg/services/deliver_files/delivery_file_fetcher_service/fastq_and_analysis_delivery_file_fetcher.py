@@ -46,7 +46,6 @@ class FastqAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             sample_files=analysis_files.sample_files + fastq_files.sample_files,
         )
 
-
     def _fetch_files(self, service_class: type, case_id: str) -> DeliveryFiles:
         """Fetch files using the provided service class."""
         service = service_class(self.status_db, self.hk_api, tags_fetcher=self.tags_fetcher)

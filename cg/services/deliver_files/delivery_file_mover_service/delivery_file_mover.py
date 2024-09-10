@@ -18,7 +18,7 @@ class DeliveryFilesMover:
     def move_files(self, delivery_files: DeliveryFiles, delivery_base_path: Path) -> DeliveryFiles:
         """Move the files to the customer folder."""
         inbox_dir_path: Path = self._create_ticket_inbox_dir_path(
-            delivery_base_path, delivery_files.delivery_data
+            delivery_base_path=delivery_base_path, delivery_data=delivery_files.delivery_data
         )
         self._create_ticket_inbox_folder(inbox_dir_path)
         self._create_hard_links_for_delivery_files(

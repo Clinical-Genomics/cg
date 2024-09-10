@@ -106,9 +106,7 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _validate_delivery_type(delivery_type: DataDelivery):
-        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
-        
-        """
+        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
         if delivery_type in [
             DataDelivery.FASTQ,
             DataDelivery.ANALYSIS_FILES,
