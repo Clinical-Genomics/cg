@@ -336,6 +336,6 @@ def validate_case_sample_well_position_format(
     for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             if is_invalid_well_format(sample=sample):
-                error = WellFormatError(case=case, case_index=case_index, sample_index=sample_index)
+                error = WellFormatError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
