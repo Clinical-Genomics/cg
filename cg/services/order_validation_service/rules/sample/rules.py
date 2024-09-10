@@ -9,10 +9,12 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     SampleNameNotAvailableError,
     SampleNameRepeatedError,
+    WellFormatError,
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
+    is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
@@ -119,5 +121,16 @@ def validate_sample_names_available(
             sample_name=sample.name, customer_entry_id=[customer.id]
         ):
             error = SampleNameNotAvailableError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_well_position_format(
+    order: OrderWithNonHumanSamples, **kwargs
+) -> list[WellFormatError]:
+    errors: list[WellFormatError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_invalid_well_format(sample=sample):
+            error = WellFormatError(sample_index=sample_index)
             errors.append(error)
     return errors
