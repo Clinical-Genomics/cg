@@ -25,6 +25,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_volume_interval,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    validate_case_sample_well_position_format,
 )
 
 CASE_RULES: list[callable] = [
@@ -55,4 +56,5 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_volume_interval,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    validate_case_sample_well_position_format,
 ]
