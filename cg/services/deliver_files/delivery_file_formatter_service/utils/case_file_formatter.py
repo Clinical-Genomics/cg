@@ -10,7 +10,7 @@ class CaseFileFormatter:
     def format_files(
         self, moved_files: list[CaseFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
-        """Format the case files to deliver and return the formatted files.."""
+        """Format the case files to deliver and return the formatted files."""
         self._create_case_name_folder(
             ticket_path=ticket_dir_path, case_name=moved_files[0].case_name
         )
