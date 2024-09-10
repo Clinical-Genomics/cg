@@ -2535,6 +2535,7 @@ def raredisease_parameters_default(
         target_bed=bed_version_file_name,
         analysis_type=AnalysisTypes.WES,
         save_mapped_as_cram=True,
+        local_genomes=Path(raredisease_dir, "references"),
     )
 
 
