@@ -64,7 +64,7 @@ def get_indices_for_repeated_sample_names(order: OrderWithNonHumanSamples) -> li
     return indices
 
 
-def does_sample_have_an_invalid_well_format(sample: Sample) -> bool:
+def is_invalid_well_format(sample: Sample) -> bool:
     """Check if a sample has an invalid well format."""
     correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
     if sample.is_on_plate:
