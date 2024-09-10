@@ -43,10 +43,10 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     get_well_sample_map,
     is_concentration_missing,
     is_container_name_missing,
+    is_invalid_plate_well_format,
     is_well_position_missing,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
-    is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
@@ -335,7 +335,7 @@ def validate_well_position_format(order: OrderWithCases, **kwargs) -> list[WellF
     errors: list[WellFormatError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_invalid_well_format(sample=sample):
+            if is_invalid_plate_well_format(sample=sample):
                 error = WellFormatError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
