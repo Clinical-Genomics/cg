@@ -7,7 +7,7 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants.constants import FileFormat, SampleType, GenomeVersion
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
@@ -462,7 +462,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
             config_case.update(self.get_verified_gens_file_paths(sex=verified_sex))
-            if not verified_panel_bed
+            if not verified_panel_bed and genome_version == GenomeVersion.HG19
             else None
         )
 

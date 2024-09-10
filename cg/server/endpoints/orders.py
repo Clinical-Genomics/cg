@@ -28,8 +28,12 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
@@ -39,13 +43,10 @@ from cg.server.ext import (
     delivery_message_service,
     lims,
     order_service,
-    osticket,
+    order_submitter_registry,
+    ticket_handler,
 )
-from cg.store.models import (
-    Application,
-    Customer,
-)
-
+from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
 ORDERS_BLUEPRINT.before_request(before_request)
@@ -155,7 +156,12 @@ def create_order_from_form():
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(lims=lims, status=db, osticket=osticket)
+    api = OrdersAPI(
+        lims=lims,
+        status=db,
+        ticket_handler=ticket_handler,
+        submitter_registry=order_submitter_registry,
+    )
     error_message: str
     try:
         request_json = request.get_json()
@@ -167,7 +173,7 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 

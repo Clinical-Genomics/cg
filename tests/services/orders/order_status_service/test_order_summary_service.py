@@ -6,7 +6,6 @@ from cg.store.models import Order
 
 
 def test_get_status_summaries(summary_service: OrderSummaryService, order: Order):
-
     # GIVEN a store with orders
 
     # WHEN getting status summaries

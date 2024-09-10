@@ -1,8 +1,9 @@
 """Constants for delivery."""
 
+from enum import StrEnum
+
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
     AlignmentFileTag,
     AnalysisTag,
     HermesFileTag,
@@ -74,6 +75,8 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
+
+CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
@@ -149,7 +152,6 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
-CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
@@ -206,3 +208,9 @@ PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
 
 INBOX_NAME: str = "inbox"
 OUTBOX_NAME: str = "outbox"
+
+
+class FileDeliveryOption(StrEnum):
+    FASTQ: str = "fastq"
+    ANALYSIS: str = "analysis"
+    FASTQ_ANALYSIS: str = "fastq-analysis"

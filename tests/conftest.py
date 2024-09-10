@@ -28,13 +28,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    FileFormat,
-    GenomeVersion,
-    Strandedness,
-)
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -44,7 +38,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
@@ -55,21 +48,16 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import (
-    RarediseaseParameters,
-    RarediseaseSampleSheetHeaders,
-)
+from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import (
-    IlluminaDataTransferService,
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
 )
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -87,14 +75,14 @@ from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.osticket import MockOsTicket
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
@@ -107,6 +95,9 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_files_models_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_services_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_formatted_files_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
@@ -115,6 +106,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.device_fixtures",
     "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
     "tests.fixture_plugins.fohm.fohm_fixtures",
     "tests.fixture_plugins.io.csv_fixtures",
@@ -123,6 +115,7 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
@@ -130,6 +123,8 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
@@ -613,9 +608,9 @@ def demultiplexing_api(
 
 
 @pytest.fixture
-def rsync_api(cg_context: CGConfig) -> RsyncAPI:
-    """RsyncAPI fixture."""
-    return RsyncAPI(config=cg_context)
+def delivery_rsync_service(cg_context: CGConfig) -> DeliveryRsyncService:
+    """Delivery Rsync service fixture."""
+    return cg_context.delivery_rsync_service
 
 
 @pytest.fixture
@@ -655,11 +650,10 @@ def ticket_id() -> str:
 
 
 @pytest.fixture
-def osticket(ticket_id: str) -> MockOsTicket:
-    """Return a api that mock the os ticket api."""
-    api = MockOsTicket()
-    api.set_ticket_nr(ticket_id)
-    return api
+def freshdesk_client() -> FreshdeskClient:
+    """Return a FreshdeskClient instance with mock parameters."""
+    client = FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
+    return client
 
 
 # Files fixtures
@@ -715,6 +709,12 @@ def analysis_dir(fixtures_dir: Path) -> Path:
 def microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
+
+
+@pytest.fixture(scope="session")
+def mutant_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the mutant analysis directory"""
+    return Path(analysis_dir, "mutant")
 
 
 @pytest.fixture(scope="session")
@@ -1684,6 +1684,27 @@ def lims_api() -> MockLimsAPI:
     return MockLimsAPI()
 
 
+@pytest.fixture
+def lims_api_with_sample_and_internal_negative_control(lims_api: MockLimsAPI) -> MockLimsAPI:
+    sample_qc_pass = LimsSample(id="sample", name="sample")
+
+    internal_negative_control_qc_pass = LimsSample(
+        id="internal_negative_control",
+        name="internal_negative_control",
+        udfs=LimsUDF(control="negative", customer="cust000"),
+    )
+
+    # Create pools
+    samples_qc_pass = [
+        sample_qc_pass,
+        internal_negative_control_qc_pass,
+    ]
+    # Add pool artifacts
+    lims_api.add_artifact_for_sample(sample_id=sample_qc_pass.id, samples=samples_qc_pass)
+
+    return lims_api
+
+
 @pytest.fixture(scope="session")
 def config_root_dir() -> Path:
     """Return a path to the config root directory."""
@@ -1937,6 +1958,7 @@ def context_config(
             "account": "development",
             "base_path": "/another/path",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_source_path": "a/source/path",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "destination_path": "server.name.se:/some",
             "mail_user": email_address,
@@ -2518,6 +2540,7 @@ def raredisease_parameters_default(
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
         analysis_type=AnalysisTypes.WES,
+        save_mapped_as_cram=True,
     )
 
 
