@@ -63,8 +63,8 @@ def test_store_samples(
     assert len(store_microbial_fastq_order_service.status._get_query(table=Sample).all()) == 2
     assert store_microbial_fastq_order_service.status._get_query(table=Case).count() == 2
     first_sample = new_samples[0]
-    assert len(first_sample.links) == 2
+    assert len(first_sample.links) == 1
     case_link = first_sample.links[0]
     assert case_link.case in store_microbial_fastq_order_service.status.get_cases()
     assert case_link.case.data_analysis
-    assert case_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
+    assert case_link.case.data_delivery == DataDelivery.FASTQ
