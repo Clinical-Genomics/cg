@@ -55,7 +55,7 @@ class FastqDeliveryFileFetcher(FetchDeliveryFilesService):
         )
 
     @handle_missing_bundle_errors
-    def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile]:
+    def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile] | None:
         """Get the FASTQ files for a sample."""
         fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.FASTQ).sample_tags
         fastq_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(

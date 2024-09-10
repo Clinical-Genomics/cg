@@ -29,7 +29,7 @@ class FastqAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.tags_fetcher = tags_fetcher
 
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
-        case = self._get_case(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         fastq_files: DeliveryFiles = self._fetch_files(
             service_class=FastqDeliveryFileFetcher, case_id=case_id
         )
@@ -46,9 +46,6 @@ class FastqAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             sample_files=analysis_files.sample_files + fastq_files.sample_files,
         )
 
-    def _get_case(self, case_id: str) -> Case:
-        """Fetch the case from the database."""
-        return self.status_db.get_case_by_internal_id(internal_id=case_id)
 
     def _fetch_files(self, service_class: type, case_id: str) -> DeliveryFiles:
         """Fetch files using the provided service class."""

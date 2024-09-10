@@ -12,7 +12,7 @@ def handle_delivery_type_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except DeliveryTypeNotSupported as error:
+        except DeliveryTypeNotSupported:
             LOG.info("Delivery type not supported or no delivery needed. Skipping delivery.")
             return
 

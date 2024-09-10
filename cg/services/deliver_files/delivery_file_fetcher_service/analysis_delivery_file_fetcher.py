@@ -51,7 +51,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile]:
+    ) -> list[SampleFile] | None:
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
@@ -81,7 +81,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         return delivery_files
 
     @handle_missing_bundle_errors
-    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile]:
+    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile] | None:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
         files.

@@ -74,7 +74,7 @@ class DeliveryServiceFactory:
     @staticmethod
     def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
         """Get the file tag fetcher based on the delivery type."""
-        service_map: dict[DataDelivery, FetchDeliveryFileTagsService] = {
+        service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
@@ -83,7 +83,7 @@ class DeliveryServiceFactory:
 
     def _get_file_fetcher(self, delivery_type: DataDelivery) -> FetchDeliveryFilesService:
         """Get the file fetcher based on the delivery type."""
-        service_map: dict[DataDelivery, FetchDeliveryFilesService] = {
+        service_map: dict[DataDelivery, Type[FetchDeliveryFilesService]] = {
             DataDelivery.FASTQ: FastqDeliveryFileFetcher,
             DataDelivery.ANALYSIS_FILES: AnalysisDeliveryFileFetcher,
             DataDelivery.FASTQ_ANALYSIS: FastqAndAnalysisDeliveryFileFetcher,
@@ -106,7 +106,9 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _validate_delivery_type(delivery_type: DataDelivery):
-        """Check if the delivery type is supported."""
+        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
+        
+        """
         if delivery_type in [
             DataDelivery.FASTQ,
             DataDelivery.ANALYSIS_FILES,
