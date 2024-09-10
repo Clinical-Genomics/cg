@@ -43,3 +43,4 @@ def test_validate_sample_well_position_format(valid_order: MicrosaltOrder):
 
     # THEN the error should concern the invalid well position
     assert isinstance(errors[0], WellFormatError)
+    assert errors[0].sample_index == 0
