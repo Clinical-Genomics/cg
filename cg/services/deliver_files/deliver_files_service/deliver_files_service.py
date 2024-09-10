@@ -100,7 +100,9 @@ class DeliverFilesService:
         return job_id
 
     def _add_trailblazer_tracking(self, case: Case, job_id: int, dry_run: bool) -> None:
-        if not dry_run:
+        if dry_run:
+            LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
+        else:
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
                 case_id=case.internal_id,
                 analysis_type=AnalysisTypes.OTHER,
