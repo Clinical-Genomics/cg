@@ -35,7 +35,11 @@ def test_start(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked scout export of the managed variants
-    mocker.patch.object(RarediseaseAnalysisAPI, "get_managed_variants", return_value=scout_export_manged_variants_output)
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
@@ -87,7 +91,11 @@ def test_start_available(
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # GIVEN a mocked scout export of the managed variants
-    mocker.patch.object(RarediseaseAnalysisAPI, "get_managed_variants", return_value=scout_export_manged_variants_output)
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(

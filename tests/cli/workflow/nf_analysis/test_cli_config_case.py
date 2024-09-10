@@ -130,7 +130,11 @@ def test_config_case_default_parameters(
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # GIVEN a mocked scout export of the managed variants
-    mocker.patch.object(RarediseaseAnalysisAPI, "get_managed_variants", return_value=scout_export_manged_variants_output)
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # GIVEN a valid case
 
@@ -205,7 +209,11 @@ def test_config_case_dry_run(
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # GIVEN a mocked scout export of the managed variants
-    mocker.patch.object(RarediseaseAnalysisAPI, "get_managed_variants", return_value=scout_export_manged_variants_output)
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(
