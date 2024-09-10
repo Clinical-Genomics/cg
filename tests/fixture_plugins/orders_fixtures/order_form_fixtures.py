@@ -459,12 +459,12 @@ def microbial_status_data(
 
 @pytest.fixture
 def microbial_fastq_status_data(
-    microbial_order_to_submit: dict,
+    microbial_fastq_order_to_submit: dict,
     store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
 ) -> dict:
     """Parse microbial order example."""
-    project: OrderType = OrderType.MICROSALT
-    order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
+    project: OrderType = OrderType.MICROBIAL_FASTQ
+    order: OrderIn = OrderIn.parse_obj(obj=microbial_fastq_order_to_submit, project=project)
     return store_microbial_fastq_order_service.order_to_status(order=order)
 
 

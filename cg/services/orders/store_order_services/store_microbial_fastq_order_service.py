@@ -69,7 +69,11 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 sample=sample, customer=customer, case_name=case_name
             )
             db_sample: Sample = self._create_sample(
-                sample_dict=sample, order=order, ordered=ordered, ticket_id=ticket_id
+                sample_dict=sample,
+                order=order,
+                ordered=ordered,
+                ticket_id=ticket_id,
+                customer=customer,
             )
             db_sample = self._add_application_to_sample(
                 sample=db_sample, application_tag=sample["application"]
@@ -103,9 +107,13 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_sample(self, sample_dict: dict, order, ordered, ticket_id: str) -> Sample:
+    def _create_sample(
+        self, sample_dict: dict, order, ordered, ticket_id: str, customer: Customer
+    ) -> Sample:
+
         return self.status.add_sample(
             name=sample_dict["name"],
+            customer=customer,
             sex="unknown",
             comment=sample_dict["comment"],
             internal_id=sample_dict.get("internal_id"),
