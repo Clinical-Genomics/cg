@@ -94,5 +94,9 @@
   path_index: ~
   step: multiqc-json
   tag: multiqc-kraken
-
-
+- format: json
+  id: CASEID
+  path: PATHTOCASE/manifest.json
+  path_index: ~
+  step: manifest
+  tag: manifest
