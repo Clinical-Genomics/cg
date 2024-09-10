@@ -95,7 +95,7 @@ OPTION_FROM_START = click.option(
 @DRY_RUN
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create config files required by a workflow for a case and extract managed variants for RAREDISEASE analyses."""
+    """Create config files required by a workflow for a case."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
