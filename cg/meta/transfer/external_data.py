@@ -8,7 +8,10 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.constants.constants import CaseActions
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
+from cg.services.deliver_files.delivery_rsync_service.sbatch import (
+    ERROR_RSYNC_FUNCTION,
+    RSYNC_CONTENTS_COMMAND,
+)
 from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
