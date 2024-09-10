@@ -327,3 +327,15 @@ def validate_concentration_interval_if_skip_rc(
         )
         errors.extend(case_errors)
     return errors
+
+
+def validate_case_sample_well_position_format(
+    order: OrderWithCases, **kwargs
+) -> list[WellFormatError]:
+    errors: list[WellFormatError] = []
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_samples:
+            if is_invalid_well_format(sample=sample):
+                error = WellFormatError(case=case, case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
