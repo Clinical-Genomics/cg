@@ -4,7 +4,7 @@ import shutil
 import uuid
 
 from cg.services.fastq_concatenation_service.exceptions import ConcatenationError
-from cg.constants.constants import ReadDirection
+from cg.constants.constants import ReadDirection, FileFormat
 from cg.constants import FileExtensions
 
 
@@ -73,10 +73,42 @@ def sort_files_by_name(files: list[Path]) -> list[Path]:
 
 
 def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path) -> bool:
-    return file.suffix == FileExtensions.GZIP and file != forward_file and file != reverse_file
+    return (
+        f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file.name
+        and file != forward_file
+        and file != reverse_file
+    )
 
 
 def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: Path) -> None:
     for file in fastq_directory.iterdir():
         if file_can_be_removed(file=file, forward_file=forward_file, reverse_file=reverse_file):
             file.unlink()
+
+
+def generate_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str, direction: int
+) -> Path:
+    return Path(
+        fastq_directory, f"{sample_name}_{direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+
+def generate_forward_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str
+) -> Path:
+    return generate_concatenated_fastq_delivery_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.FORWARD,
+    )
+
+
+def generate_reverse_concatenated_fastq_delivery_path(
+    fastq_directory: Path, sample_name: str
+) -> Path:
+    return generate_concatenated_fastq_delivery_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.REVERSE,
+    )
