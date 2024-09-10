@@ -6,6 +6,7 @@ from typing import Any
 
 from housekeeper.store.models import File
 
+from cg.cli.utils import echo_lines
 from cg.clients.chanjo2.models import (
     CoverageMetrics,
     CoveragePostRequest,
@@ -199,3 +200,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS
+
+def config_case(self, case_id: str, dry_run: bool) -> None:
+    """Configure a case for Raredisease analysis."""
+    super().config_case(case_id=case_id, dry_run=dry_run)
+    vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
+    if dry_run:
+        echo_lines(lines=vcf_lines)
+    else:
+        self.write_managed_variants(case_id=case_id, content=vcf_lines)

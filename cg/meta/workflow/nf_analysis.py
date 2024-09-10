@@ -5,7 +5,6 @@ from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
 
-from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
