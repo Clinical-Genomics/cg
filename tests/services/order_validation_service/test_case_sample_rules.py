@@ -3,7 +3,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 )
 
 from cg.services.order_validation_service.rules.case_sample.rules import (
-    validate_case_sample_well_position_format,
+    validate_well_position_format,
 )
 
 from cg.services.order_validation_service.models.order_with_cases import (
@@ -11,13 +11,13 @@ from cg.services.order_validation_service.models.order_with_cases import (
 )
 
 
-def test_validate_case_sample_well_position_format(valid_order: OrderWithCases):
+def test_validate_well_position_format(valid_order: OrderWithCases):
 
     # GIVEN an order with invalid well position format
     valid_order.cases[0].samples[0].well_position = "D:0"
 
     # WHEN validating the well position format
-    errors = validate_case_sample_well_position_format(order=valid_order)
+    errors = validate_well_position_format(order=valid_order)
 
     # THEN an error should be returned
     assert errors
