@@ -3,7 +3,7 @@ from pathlib import Path
 from click.testing import CliRunner
 from mock import mock
 
-from cg.cli.workflow.raredisease.base import panel
+from cg.cli.workflow.raredisease.base import panel, managed_variants
 from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -32,7 +32,7 @@ def test_panel_dry_run(
         )
 
     # THEN the output should contain the output from Scout
-    assert result.stdout.strip() == scout_panel_output
+    assert result.stdout.strip() == scout_panel_output.strip()
 
 
 def test_panel_file_is_written(
