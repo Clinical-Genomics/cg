@@ -4,7 +4,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
 )
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_sample_names_available,
-    validate_sample_well_position_format,
+    validate_well_position_format,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
@@ -30,13 +30,13 @@ def test_sample_names_available(valid_order: MicrosaltOrder, sample_store: Store
     assert isinstance(errors[0], SampleNameNotAvailableError)
 
 
-def test_validate_sample_well_position_format(valid_order: MicrosaltOrder):
+def test_validate_well_position_format(valid_order: MicrosaltOrder):
 
     # GIVEN an order with a sample with an invalid well position
     valid_order.samples[0].well_position = "J:4"
 
     # WHEN validating the well position format
-    errors = validate_sample_well_position_format(order=valid_order)
+    errors = validate_well_position_format(order=valid_order)
 
     # THEN an error should be returned
     assert errors

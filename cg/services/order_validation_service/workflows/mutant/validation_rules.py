@@ -6,9 +6,9 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_sample_names_available,
     validate_sample_names_unique,
     validate_volume_interval,
+    validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
-    validate_sample_well_position_format,
 )
 
 SAMPLE_RULES: list[callable] = [
@@ -19,7 +19,7 @@ SAMPLE_RULES: list[callable] = [
     validate_sample_names_available,
     validate_sample_names_unique,
     validate_volume_interval,
+    validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
-    validate_sample_well_position_format,
 ]

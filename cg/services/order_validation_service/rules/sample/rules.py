@@ -125,7 +125,7 @@ def validate_sample_names_available(
     return errors
 
 
-def validate_sample_well_position_format(
+def validate_well_position_format(
     order: OrderWithNonHumanSamples, **kwargs
 ) -> list[WellFormatError]:
     errors: list[WellFormatError] = []
