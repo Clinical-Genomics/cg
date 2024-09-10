@@ -1,5 +1,5 @@
 """Module for the factory of the deliver files service."""
-
+from typing import Type
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
