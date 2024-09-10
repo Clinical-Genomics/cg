@@ -121,3 +121,18 @@ def validate_sample_names_available(
             error = SampleNameNotAvailableError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def validate_unique_tube_names(
+    order: OrderWithNonHumanSamples,
+    **kwargs,
+) -> list[SampleTubeNameError]:
+    errors: list[SampleTubeNameError] = []
+    tube_names: list = []
+    is_tube_name_repeated(order=order)
+    for sample_index, sample in order.enumerated_samples:
+        if sample.tube_name in tube_names:
+            error = SampleTubeNameError(sample_index=sample_index)
+            errors.append(error)
+        tube_names.append(sample.tube_name)
+    return errors
