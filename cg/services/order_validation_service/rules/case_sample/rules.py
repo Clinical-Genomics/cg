@@ -46,6 +46,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     is_well_position_missing,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
+    is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
