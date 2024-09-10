@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from cg.constants import Workflow, DataDelivery
 from cg.models.orders.order import OrderIn
 
@@ -5,6 +7,8 @@ from cg.models.orders.constants import OrderType
 from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
     StoreMicrobialFastqOrderService,
 )
+from cg.store.models import Sample, Case
+from cg.store.store import Store
 
 
 def test_microbial_samples_to_status(
@@ -33,3 +37,34 @@ def test_microbial_samples_to_status(
     assert sample_data["volume"] == "1"
     assert sample_data["data_analysis"] == Workflow.MICROSALT
     assert sample_data["data_delivery"] == str(DataDelivery.FASTQ)
+
+
+def test_store_samples(
+    microbial_fastq_order_to_submit: dict,
+    ticket_id: str,
+    store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
+):
+    # GIVEN a basic store with no samples and a fastq order
+
+    assert not store_microbial_fastq_order_service.status._get_query(table=Sample).first()
+    assert store_microbial_fastq_order_service.status._get_query(table=Case).count() == 0
+
+    # WHEN storing the order
+    new_samples = store_microbial_fastq_order_service.store_items_in_status(
+        customer_id=microbial_fastq_order_to_submit["customer"],
+        order=microbial_fastq_order_to_submit["order"],
+        ordered=datetime.now(),
+        ticket_id=ticket_id,
+        items=microbial_fastq_order_to_submit["samples"],
+    )
+
+    # THEN it should store the samples and create a case for each sample
+    assert len(new_samples) == 2
+    assert len(store_microbial_fastq_order_service.status._get_query(table=Sample).all()) == 2
+    assert store_microbial_fastq_order_service.status._get_query(table=Case).count() == 2
+    first_sample = new_samples[0]
+    assert len(first_sample.links) == 2
+    case_link = first_sample.links[0]
+    assert case_link.case in store_microbial_fastq_order_service.status.get_cases()
+    assert case_link.case.data_analysis
+    assert case_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]

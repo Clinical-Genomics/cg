@@ -1,12 +1,14 @@
 from datetime import datetime
 
+from cg.models.orders.sample_base import StatusEnum
+
 from cg.constants import Workflow, DataDelivery
 from cg.models.orders.order import OrderIn
 
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import Sample, Customer, Case
+from cg.store.models import Sample, Customer, Case, CaseSample
 from cg.store.store import Store
 
 
@@ -63,8 +65,12 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         new_samples: list[Sample] = []
         for sample in items:
             case_name: str = sample["name"]
-            case: Case = self._create_case_for_sample(sample, customer, case_name)
-            db_sample: Sample = self._create_sample(sample, order, ordered, ticket_id)
+            case: Case = self._create_case_for_sample(
+                sample=sample, customer=customer, case_name=case_name
+            )
+            db_sample: Sample = self._create_sample(
+                sample_dict=sample, order=order, ordered=ordered, ticket_id=ticket_id
+            )
             db_sample = self._add_application_to_sample(
                 sample=db_sample, application_tag=sample["application"]
             )
