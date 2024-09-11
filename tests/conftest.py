@@ -2553,6 +2553,9 @@ def raredisease_context(
     trailblazer_api: MockTB,
     raredisease_case_id: str,
     sample_id: str,
+    father_sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     wgs_application_tag: str,
@@ -2583,6 +2586,16 @@ def raredisease_context(
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=wgs_application_tag,
+    )
+
+    another_sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        name=another_sample_name,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
@@ -2592,6 +2605,12 @@ def raredisease_context(
         status_db,
         case=case_enough_reads,
         sample=sample_enough_reads,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=another_sample_enough_reads,
     )
 
     # Create case without enough reads
