@@ -6,6 +6,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
+from cg.constants.constants import PrepCategory
 from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -602,3 +603,54 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
 
     for sample in samples:
         assert "sample" in sample.name
+
+
+def test_get_related_dna_samples_from_sample_within_collaborators(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a database with an RNA sample and several DNA samples with the same subject_id and tumour status as the given sample
+    # GIVEN that all customers are in a collaboration
+
+    sample: Sample = helpers.add_sample(
+        store=store, subject_id="subject_1", is_tumour=True, customer_id="cust000"
+    )
+    related_dna_sample_1: Sample = helpers.add_sample(
+        store=store,
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust001",
+    )
+    related_dna_sample_2: Sample = helpers.add_sample(
+        store=store,
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust000",
+    )
+    related_dna_sample_3: Sample = helpers.add_sample(
+        store=store,
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust000",
+    )
+
+    dna_samples: list[Sample] = [related_dna_sample_1, related_dna_sample_2, related_dna_sample_3]
+
+    not_related_dna_sample: Sample = helpers.add_sample(
+        store=store,
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        subject_id="subject_2",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # WHEN getting the related DNA samples to the given sample
+    collaborators: set[Customer] = sample.customer.collaborators
+    related_dna_samples = store._get_related_dna_samples_from_sample_within_collaborators(
+        sample_internal_id=sample.internal_id, collaborators=collaborators
+    )
+
+    # THEN the correct set of samples is returned
+    assert set(dna_samples) == set(related_dna_samples)

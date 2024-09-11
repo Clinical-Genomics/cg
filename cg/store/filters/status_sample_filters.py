@@ -119,9 +119,9 @@ def filter_samples_on_tumour(samples: Query, is_tumour: bool, **kwargs) -> Query
 def filter_samples_is_dna_sample(samples: Query, **kwargs) -> Query:
     """Return samples that are DNA samples."""
     dna_prep_categories: list[str] = [
-        PrepCategory.WHOLE_GENOME_SEQUENCING.value,
-        PrepCategory.TARGETED_GENOME_SEQUENCING.value,
-        PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        PrepCategory.WHOLE_GENOME_SEQUENCING,
+        PrepCategory.TARGETED_GENOME_SEQUENCING,
+        PrepCategory.WHOLE_EXOME_SEQUENCING,
     ]
     return samples.filter(Sample.prep_category in dna_prep_categories)
 

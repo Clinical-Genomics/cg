@@ -1551,8 +1551,8 @@ class ReadHandler(BaseHandler):
     ) -> list[Sample]:
         """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
         samples = self._get_query(table=Sample)
-        rna_sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
-        customer_ids: list[str] = [customer.internal_id for customer in collaborators]
+        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+        customer_entry_ids: list[str] = [customer.id for customer in collaborators]
         filter_functions = [
             SampleFilter.IS_DNA_SAMPLE,
             SampleFilter.BY_SUBJECT_ID,
@@ -1561,9 +1561,9 @@ class ReadHandler(BaseHandler):
         ]
         return apply_sample_filter(
             samples=samples,
-            subject_id=rna_sample.subject_id,
-            is_tumour=rna_sample.is_tumour,
-            customer_entry_ids=customer_ids,
+            subject_id=sample.subject_id,
+            is_tumour=sample.is_tumour,
+            customer_entry_ids=customer_entry_ids,
             filter_functions=filter_functions,
         ).all()
 
@@ -1585,7 +1585,7 @@ class ReadHandler(BaseHandler):
             Workflow.BALSAMIC_UMI,
         ]
 
-        customer_ids: list[str] = [customer.internal_id for customer in collaborators]
+        customer_entry_ids: list[str] = [customer.id for customer in collaborators]
 
         filter_functions = [
             CaseFilter.BY_DATA_ANALYSES,
@@ -1594,6 +1594,6 @@ class ReadHandler(BaseHandler):
         return apply_case_filter(
             cases=cases,
             data_analyses=data_analyses,
-            customer_entry_ids=customer_ids,
+            customer_entry_ids=customer_entry_ids,
             filter_functions=filter_functions,
         ).all()
