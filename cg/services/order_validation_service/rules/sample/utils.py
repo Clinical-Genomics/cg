@@ -1,5 +1,7 @@
 from collections import Counter
 
+import re
+
 from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
@@ -69,3 +71,10 @@ def get_indices_for_repeated_container_name(order: OrderWithNonHumanSamples) -> 
         if counter.get(sample.container_name) > 1:
             indices.append(index)
     return indices
+
+def is_invalid_well_format(sample: Sample) -> bool:
+    """Check if a sample has an invalid well format."""
+    correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
+    if sample.is_on_plate:
+        return not bool(re.match(correct_well_position_pattern, sample.well_position))
+    return False

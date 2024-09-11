@@ -1,10 +1,12 @@
 from cg.services.order_validation_service.errors.sample_errors import (
     ContainerNameRepeatedError,
     SampleNameNotAvailableError,
+    WellFormatError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_tube_container_name_unique,
     validate_sample_names_available,
+    validate_well_position_format,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
@@ -39,11 +41,23 @@ def test_validate_tube_container_name_unique(valid_order: MicrosaltOrder):
 
     # WHEN validating the container names are unique
     errors = validate_tube_container_name_unique(order=valid_order)
-
-    # THEN an error should be returned
-    assert errors
-
+    
     # THEN the error should concern the reused container name
     assert isinstance(errors[0], ContainerNameRepeatedError)
     assert errors[0].sample_index == 0
     assert errors[1].sample_index == 1
+
+def test_validate_well_position_format(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a sample with an invalid well position
+    valid_order.samples[0].well_position = "J:4"
+
+    # WHEN validating the well position format
+    errors = validate_well_position_format(order=valid_order)
+    
+    # THEN the error should concern the invalid well position
+    assert isinstance(errors[0], WellFormatError)
+    assert errors[0].sample_index == 0
+
+    # THEN an error should be returned
+    assert errors
