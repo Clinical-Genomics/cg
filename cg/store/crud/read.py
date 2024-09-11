@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator, Literal
 
+from markdown_it.rules_block import table
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -687,16 +688,13 @@ class ReadHandler(BaseHandler):
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SUBJECT_ID,
+            SampleFilter.BY_TUMOUR,
         ]
-        (
-            filter_functions.append(SampleFilter.IS_TUMOUR)
-            if is_tumour
-            else filter_functions.append(SampleFilter.IS_NOT_TUMOUR)
-        )
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
+            is_tumour=is_tumour,
             filter_functions=filter_functions,
         ).all()
 
@@ -1541,93 +1539,54 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def get_related_dna_cases_from_rna_case(self, rna_case_id: str) -> list[Case]:
-        """Return a list of DNA cases related to the samples of an RNA case."""
-
-        rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
-
-        dna_cases: list[Case] = []
-        for sample in rna_case.samples:
-            dna_cases_related_to_sample: list[Case] = self._get_related_dna_cases_from_rna_sample(
-                rna_sample=sample
-            )
-            dna_cases = dna_cases + dna_cases_related_to_sample
-        return dna_cases
-
-    def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
-
-        collaborators: set[Customer] = rna_sample.customer.collaborators
-
-        subject_id_samples: list[Sample] = (
-            self._get_samples_with_same_subject_id_as_sample_within_collaborators(
-                sample=rna_sample, collaborators=collaborators
-            )
-        )
-
-        subject_id_dna_samples: list[Sample] = self._get_dna_samples_from_sample_list(
-            subject_id_samples
-        )
-
-        dna_sample: Sample = subject_id_dna_samples[0]
-        dna_cases: list[Case] = self._get_dna_cases_from_dna_sample_within_collaborators(
-            dna_sample=dna_sample, collaborators=collaborators
-        )
-        return dna_cases
-
-    def _get_samples_with_same_subject_id_as_sample_within_collaborators(
-        self, sample: Sample, collaborators: set[Customer]
+    def _get_related_dna_samples_from_rna_sample_within_collaborators(
+        self, rna_sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Sample]:
-        subject_id_samples: list[Sample] = (
-            self.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-                customer_ids=[customer.id for customer in collaborators],
-                subject_id=sample.subject_id,
-                is_tumour=sample.is_tumour,
-            )
-        )
-        return subject_id_samples
-
-    @staticmethod
-    def _get_dna_samples_from_sample_list(
-        sample_list: list[Sample],
-    ) -> list[Sample | None]:
-        """Filter a models Sample list, returning DNA samples selected on their preparation category."""
-        dna_sample_list: list[Sample | None] = [
-            sample
-            for sample in sample_list
-            if sample.prep_category
-            in [
-                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
-                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
-                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
-            ]
+        """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
+        samples = self._get_query(table=Sample)
+        rna_sample: Sample = self.get_sample_by_internal_id(internal_id=rna_sample_internal_id)
+        customer_ids: list[str] = [customer.internal_id for customer in collaborators]
+        filter_functions = [
+            SampleFilter.IS_DNA_SAMPLE,
+            SampleFilter.BY_SUBJECT_ID,
+            SampleFilter.BY_TUMOUR,
+            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
         ]
-        return dna_sample_list
+        return apply_sample_filter(
+            samples=samples,
+            subject_id=rna_sample.subject_id,
+            is_tumour=rna_sample.is_tumour,
+            customer_entry_ids=customer_ids,
+            filter_functions=filter_functions,
+        ).all()
 
     def _get_dna_cases_from_dna_sample_within_collaborators(
-        self, dna_sample: Sample, collaborators: set[Customer]
+        self, dna_sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Case]:
-        """Maps a list of uploaded DNA cases linked to DNA sample."""
-        cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
-        return self._filter_dna_cases_within_collaborators(
-            cases=cases_related_to_dna_sample, collaborators=collaborators
+        """Return a list of DNA cases linked to DNA sample with a list of customers in a collaboration."""
+
+        case_samples = self._get_join_case_sample_query()
+        cases = apply_case_sample_filter(
+            case_samples=case_samples,
+            sample_internal_id=dna_sample_internal_id,
+            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
         )
 
-    @staticmethod
-    def _filter_dna_cases_within_collaborators(
-        cases: list[Case], collaborators: set[Customer]
-    ) -> list[Case]:
-        """Filters the given list of cases and returns a subset of cases ordered by customers in the
-        specified list of collaborators and within the correct workflow."""
-        filtered_dna_cases: list[Case] = []
-        for case in cases:
-            if (
-                case.data_analysis
-                in [
-                    Workflow.MIP_DNA,
-                    Workflow.BALSAMIC,
-                    Workflow.BALSAMIC_UMI,
-                ]
-                and case.customer in collaborators
-            ):
-                filtered_dna_cases.append(case.internal_id)
-        return filtered_dna_cases
+        data_analyses = [
+            Workflow.MIP_DNA,
+            Workflow.BALSAMIC,
+            Workflow.BALSAMIC_UMI,
+        ]
+
+        customer_ids: list[str] = [customer.internal_id for customer in collaborators]
+
+        filter_functions = [
+            CaseFilter.BY_DATA_ANALYSES,
+            CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+        ]
+        return apply_case_filter(
+            cases=cases,
+            data_analyses=data_analyses,
+            customer_entry_ids=customer_ids,
+            filter_functions=filter_functions,
+        ).all()

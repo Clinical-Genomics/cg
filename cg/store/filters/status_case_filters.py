@@ -2,17 +2,22 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy import and_, exists, not_, or_
+from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
+from cg.constants.constants import (
+    CaseActions,
+    DataDelivery,
+    SequencingQCStatus,
+    Workflow,
+)
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Sample
+from cg.store.models import Analysis, Application, Case, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -74,6 +79,11 @@ def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
 def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Query:
     """Filter cases with names matching the search pattern."""
     return cases.filter(Case.name.contains(name_search))
+
+
+def filter_cases_by_data_analyses(cases: Query, data_analyses: list[str], **kwargs) -> Query:
+    """Filter cases with workflows."""
+    return cases.filter(Case.data_analysis.in_(data_analyses))
 
 
 def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs) -> Query:
@@ -274,6 +284,7 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    BY_DATA_ANALYSES: Callable = filter_cases_by_data_analyses
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
     BY_TICKET: Callable = filter_cases_by_ticket_id
