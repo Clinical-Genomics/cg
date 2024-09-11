@@ -143,7 +143,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
-    def is_manged_variants_required(self) -> bool:
+    def is_managed_variants_required(self) -> bool:
         """Return True if a managed variants needs to be exported from Scout."""
         return True
 
