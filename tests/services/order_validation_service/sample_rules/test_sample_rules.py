@@ -1,7 +1,9 @@
 from cg.services.order_validation_service.errors.sample_errors import (
+    ContainerNameRepeatedError,
     SampleNameNotAvailableError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
+    validate_tube_container_name_unique,
     validate_sample_names_available,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
@@ -26,3 +28,22 @@ def test_sample_names_available(valid_order: MicrosaltOrder, sample_store: Store
 
     # THEN the error should concern the reused sample name
     assert isinstance(errors[0], SampleNameNotAvailableError)
+
+
+def test_validate_tube_container_name_unique(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a sample with a container name that is reused
+    valid_order.samples[0].container_name = "container_name"
+    valid_order.samples[1].container_name = "container_name"
+    valid_order.samples[2].container_name = "ContainerName"
+
+    # WHEN validating the container names are unique
+    errors = validate_tube_container_name_unique(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the reused container name
+    assert isinstance(errors[0], ContainerNameRepeatedError)
+    assert errors[0].sample_index == 0
+    assert errors[1].sample_index == 1
