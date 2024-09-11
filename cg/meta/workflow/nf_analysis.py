@@ -5,6 +5,7 @@ from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
 
+from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -109,7 +110,12 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
+        return False
+
+    @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variant export needs to be exported it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -377,6 +383,12 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
+        if self.is_managed_variants_required:
+            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
+            if dry_run:
+                echo_lines(lines=vcf_lines)
+            else:
+                self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
