@@ -18,6 +18,7 @@ from cg.store.filters.status_analysis_filters import (
     filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
+    filter_analysis_by_entry_id,
 )
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -324,3 +325,21 @@ def test_filter_analyses_by_started_at(
     # THEN only the analysis that have been started after the given date should be retrieved
     assert analysis_started_now not in analyses
     assert analysis_started_old in analyses
+
+
+def test_filter_by_analysis_entry_id(base_store: Store, helpers: StoreHelpers):
+    """Test filtering of analyses by entry id."""
+
+    # GIVEN a set of mock analyses
+    analysis: Analysis = helpers.add_analysis(store=base_store)
+
+    # WHEN filtering the analyses by entry id
+    analyses: Query = filter_analysis_by_entry_id(
+        analyses=base_store._get_query(table=Analysis), entry_id=analysis.id
+    )
+
+    # ASSERT that analyses is a query
+    assert isinstance(analyses, Query)
+
+    # THEN only the analysis with the given entry id should be retrieved
+    assert analysis == analyses.one()

@@ -189,6 +189,14 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_date,
         ).first()
 
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+        """Return an analysis."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.BY_ENTRY_ID],
+            analyses=self._get_query(table=Analysis),
+            entry_id=entry_id,
+        ).first()
+
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
     ) -> list[Case]:
