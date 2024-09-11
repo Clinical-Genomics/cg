@@ -278,7 +278,7 @@ class ScoutAPI:
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
 
-    def upload_omics_sample_id(self, file_path: str, dna_case_id: str, customer_sample_id: str, rna_sample_internal_id: str) -> None:
+    def upload_omics_sample_id(self, dna_case_id: str, customer_sample_id: str, rna_sample_internal_id: str) -> None:
         """Load a omics sample id into a case in the database."""
 
         upload_command: list[str] = [
