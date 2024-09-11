@@ -7,7 +7,7 @@ class OrderType(StrEnum):
     BALSAMIC: str = Workflow.BALSAMIC
     BALSAMIC_QC: str = Workflow.BALSAMIC_QC
     BALSAMIC_UMI: str = Workflow.BALSAMIC_UMI
-    FASTQ: str = Workflow.FASTQ
+    FASTQ: str = "fastq"
     FLUFFY: str = Workflow.FLUFFY
     METAGENOME: str = "metagenome"
     MICROSALT: str = Workflow.MICROSALT

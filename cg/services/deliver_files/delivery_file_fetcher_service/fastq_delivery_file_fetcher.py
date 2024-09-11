@@ -1,22 +1,23 @@
+from housekeeper.store.models import File
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
-    SampleAndCaseDeliveryTagsFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
+    FetchDeliveryFilesService,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
-    FetchDeliveryFilesService,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    SampleFile,
     DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
+)
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+    SampleAndCaseDeliveryTagsFetcher,
 )
 from cg.store.models import Case
 from cg.store.store import Store
-from housekeeper.store.models import File
 
 
 class FastqDeliveryFileFetcher(FetchDeliveryFilesService):
@@ -57,7 +58,7 @@ class FastqDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile] | None:
         """Get the FASTQ files for a sample."""
-        fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.FASTQ).sample_tags
+        fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.RAW_DATA).sample_tags
         fastq_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=sample_id, tags=fastq_tags
         )
