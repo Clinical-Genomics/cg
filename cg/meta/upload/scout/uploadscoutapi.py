@@ -138,7 +138,7 @@ class UploadScoutAPI:
         self, case_id: str, workflow: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if workflow == Workflow.MIP_RNA:
+        if workflow == Workflow.MIP_RNA or workflow == Workflow.TOMTE:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -380,7 +380,7 @@ class UploadScoutAPI:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        cust_id = rna_case.customer
+        cust_id = "cust"+str(rna_case.customer_id)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
