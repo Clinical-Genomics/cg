@@ -54,3 +54,8 @@ def delivery_another_cram_file(tmp_path: Path, another_sample_id: str) -> Path:
     file = Path(tmp_path, f"{another_sample_id}{FileExtensions.CRAM}")
     file.touch()
     return file
+
+
+@pytest.fixture
+def delivery_ticket_dir_path(tmp_path: Path, ticket_id: str) -> Path:
+    return Path(tmp_path, ticket_id)

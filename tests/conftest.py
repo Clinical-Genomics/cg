@@ -38,7 +38,6 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
@@ -54,6 +53,9 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
@@ -93,6 +95,9 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_files_models_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_services_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.delivery_formatted_files_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
@@ -603,9 +608,9 @@ def demultiplexing_api(
 
 
 @pytest.fixture
-def rsync_api(cg_context: CGConfig) -> RsyncAPI:
-    """RsyncAPI fixture."""
-    return RsyncAPI(config=cg_context)
+def delivery_rsync_service(cg_context: CGConfig) -> DeliveryRsyncService:
+    """Delivery Rsync service fixture."""
+    return cg_context.delivery_rsync_service
 
 
 @pytest.fixture
@@ -1953,6 +1958,7 @@ def context_config(
             "account": "development",
             "base_path": "/another/path",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_source_path": "a/source/path",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "destination_path": "server.name.se:/some",
             "mail_user": email_address,
@@ -2546,6 +2552,9 @@ def raredisease_context(
     trailblazer_api: MockTB,
     raredisease_case_id: str,
     sample_id: str,
+    father_sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     wgs_application_tag: str,
@@ -2576,6 +2585,16 @@ def raredisease_context(
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=wgs_application_tag,
+    )
+
+    another_sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        name=another_sample_name,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
@@ -2585,6 +2604,12 @@ def raredisease_context(
         status_db,
         case=case_enough_reads,
         sample=sample_enough_reads,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=another_sample_enough_reads,
     )
 
     # Create case without enough reads
