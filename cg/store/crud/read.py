@@ -5,7 +5,6 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator, Literal
 
-from markdown_it.rules_block import table
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
