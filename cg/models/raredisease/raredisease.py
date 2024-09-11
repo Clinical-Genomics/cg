@@ -69,3 +69,4 @@ class RarediseaseParameters(WorkflowParameters):
     save_mapped_as_cram: bool
     skip_germlinecnvcaller: bool
     vcfanno_extra_resources: str
+    local_genomes: str

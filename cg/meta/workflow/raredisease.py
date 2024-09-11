@@ -111,6 +111,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
+            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
