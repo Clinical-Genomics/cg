@@ -90,7 +90,6 @@ class UploadScoutAPI:
             file_path=file_path,
         )
 
-
     @staticmethod
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome version for a case.
@@ -107,7 +106,6 @@ class UploadScoutAPI:
                 f"Samples linked to case {case_id} have different reference genome versions set"
             )
         raise CgError(f"No reference genome specified for case {case_id}")
-
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
@@ -373,14 +371,14 @@ class UploadScoutAPI:
                 self.scout_api.upload_omics_sample_id(
                     dna_case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
-                    rna_sample_internal_id=rna_sample_internal_id
+                    rna_sample_internal_id=rna_sample_internal_id,
                 )
 
     def upload_rna_fraser_outrider_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        cust_id = "cust"+str(rna_case.customer_id)
+        cust_id = "cust" + str(rna_case.customer_id)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
@@ -417,7 +415,7 @@ class UploadScoutAPI:
                     outrider_file_path=rna_outrider.full_path,
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
-                    cust_id = cust_id
+                    cust_id=cust_id,
                 )
 
         for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
@@ -446,8 +444,8 @@ class UploadScoutAPI:
                 self.scout_api.upload_rna_genome_build(
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
-                    cust_id = cust_id,
-                    rna_genome_build=rna_genome_build
+                    cust_id=cust_id,
+                    rna_genome_build=rna_genome_build,
                 )
 
         for upload_statement in self.get_rna_genome_build_upload_summary(rna_dna_collections):
@@ -477,7 +475,6 @@ class UploadScoutAPI:
         for upload_statement in self.get_variant_load_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Load RNA variants finished!")
-
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
@@ -588,8 +585,6 @@ class UploadScoutAPI:
                 for dna_case in rna_dna_collection.dna_case_ids
             )
         return upload_summary
-
-
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
