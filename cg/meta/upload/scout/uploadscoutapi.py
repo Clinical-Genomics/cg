@@ -380,7 +380,7 @@ class UploadScoutAPI:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        cust_id = rna_case.customer_id
+        cust_id = rna_case.customer
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
