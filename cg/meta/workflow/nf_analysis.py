@@ -375,7 +375,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create directory and config files required by a workflow for a case."""
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
-        LOG.info("Config-case for Nf-analyses")
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
