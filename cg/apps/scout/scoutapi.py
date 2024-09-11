@@ -278,45 +278,80 @@ class ScoutAPI:
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
 
-    def upload_rna_fraser(self, file_path: str, case_id: str, customer_sample_id: str) -> None:
+    def upload_omics_sample_id(self, file_path: str, dna_case_id: str, customer_sample_id: str, rna_sample_internal_id: str) -> None:
+        """Load a omics sample id into a case in the database."""
+
+        upload_command: list[str] = [
+            "update",
+            "individual",
+            "--case-id",
+            dna_case_id,
+            "--ind",
+            customer_sample_id,
+            "omics_sample_id",
+            rna_sample_internal_id,
+        ]
+        try:
+            LOG.info("Uploading omics_sample_id")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when uploading omics_sample_id") from error
+
+    def upload_rna_fraser_outrider(self, case_id: str, fraser_file_path: str, outrider_file_path: str, customer_sample_id: str, cust_id: str) -> None:
         """Load a rna fraser file into a case in the database."""
 
         upload_command: list[str] = [
             "update",
-            "individual",
-            "--case-id",
-            case_id,
-            "--ind",
+            "case",
+            "-n",
             customer_sample_id,
+            "-i",
+            cust_id,
             "--fraser",
-            file_path,
+            fraser_file_path,
+            "--outrider",
+            outrider_file_path
         ]
         try:
-            LOG.info(f"Uploading rna fraser file {file_path} to case {case_id}")
+            LOG.info(f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error
 
-    def upload_rna_outrider(self, file_path: str, case_id: str, customer_sample_id: str) -> None:
-        """Load a rna outrider file into a case in the database."""
+
+    def upload_rna_genome_build(self, case_id: str, customer_sample_id: str, cust_id: str, rna_genome_build: str) -> None:
+        """Load a rna fraser file into a case in the database."""
 
         upload_command: list[str] = [
             "update",
-            "individual",
-            "--case-id",
-            case_id,
-            "--ind",
+            "case",
+            "-n",
             customer_sample_id,
-            "--outrider",
-            file_path,
+            "-i",
+            cust_id,
+            "--rna-genome-build",
+            rna_genome_build
         ]
         try:
-            LOG.info(f"Uploading rna outrider file {file_path} to case {case_id}")
+            LOG.info(f"Uploading rna genome build {rna_genome_build} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
-            raise ScoutUploadError(
-                "Something went wrong when uploading rna outrider file"
-            ) from error
+            raise ScoutUploadError("Something went wrong when uploading rna genome build file") from error
+
+    def load_variant_outlier(self, dna_case_id: str) -> None:
+        """Load a rna fraser file into a case in the database."""
+
+        upload_command: list[str] = [
+            "load",
+            "variants",
+            "--outlier",
+            dna_case_id,
+        ]
+        try:
+            LOG.info(f"Loading variants outlier for case {dna_case_id}")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when loading variants outlier") from error
 
     def upload_rna_alignment_file(
         self, case_id: str, customer_sample_id: str, file_path: str

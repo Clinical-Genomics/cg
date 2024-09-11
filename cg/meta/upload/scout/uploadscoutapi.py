@@ -11,10 +11,10 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
 from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag
 from cg.constants.scout import ScoutCustomCaseReportTags
-from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
+from cg.exc import CgDataError, CgError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
@@ -22,6 +22,7 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -54,7 +55,7 @@ class UploadScoutAPI:
         self.housekeeper = hk_api
         self.scout_api = scout_api
         self.madeline_api = madeline_api
-        self.mip_analysis_api = analysis_api
+        self.analysis_api = analysis_api
         self.lims = lims_api
         self.status_db = status_db
 
@@ -89,6 +90,25 @@ class UploadScoutAPI:
             file_format=FileFormat.YAML,
             file_path=file_path,
         )
+
+
+    @staticmethod
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome version for a case.
+        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
+        """
+        reference_genome: set[str] = {
+            sample.reference_genome
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
+        if len(reference_genome) == 1:
+            return reference_genome.pop()
+        if len(reference_genome) > 1:
+            raise CgError(
+                f"Samples linked to case {case_id} have different reference genome versions set"
+            )
+        raise CgError(f"No reference genome specified for case {case_id}")
+
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
@@ -334,10 +354,34 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
 
-    def upload_rna_fraser_to_scout(self, dry_run: bool, case_id: str) -> None:
-        """Upload omics fraser file for a case to Scout."""
+    def upload_omics_sample_id_to_scout(self, dry_run: bool, case_id: str) -> None:
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
+
+            for dna_case_id in rna_dna_collection.dna_case_ids:
+                LOG.info(
+                    f"Uploading omics sample id for sample {dna_sample_name} "
+                    f"in case {dna_case_id} in Scout."
+                )
+
+                if dry_run:
+                    continue
+
+                self.scout_api.upload_omics_sample_id(
+                    dna_case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                    rna_sample_internal_id=rna_sample_internal_id
+                )
+
+    def upload_rna_fraser_outrider_to_scout(self, dry_run: bool, case_id: str) -> None:
+        """Upload omics fraser and outrider file for a case to Scout."""
+        status_db: Store = self.status_db
+        rna_case = status_db.get_case_by_internal_id(case_id)
+        cust_id = rna_case.customer_id
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
@@ -345,67 +389,99 @@ class UploadScoutAPI:
             rna_fraser: File | None = self.get_rna_omics_fraser(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
-
+            rna_outrider: File | None = self.get_rna_omics_outrider(
+                case_id=case_id, sample_id=rna_sample_internal_id
+            )
             if not rna_fraser:
                 raise FileNotFoundError(
                     f"No RNA fraser file was found in housekeeper for {rna_sample_internal_id}."
                 )
-
-            LOG.debug(f"RNA fraser file {rna_fraser.path} found.")
-            for dna_case_id in rna_dna_collection.dna_case_ids:
-                LOG.info(
-                    f"Uploading RNA fraser file for sample {dna_sample_name} "
-                    f"in case {dna_case_id} in Scout."
-                )
-
-                if dry_run:
-                    continue
-
-                self.scout_api.upload_rna_fraser(
-                    file_path=rna_fraser.full_path,
-                    case_id=dna_case_id,
-                    customer_sample_id=dna_sample_name,
-                )
-
-        for upload_statement in self.get_rna_fraser_upload_summary(rna_dna_collections):
-            LOG.info(upload_statement)
-        LOG.info("Upload RNA fraser file finished!")
-
-    def upload_rna_outrider_to_scout(self, dry_run: bool, case_id: str) -> None:
-        """Upload omics outrider file for a case to Scout."""
-        status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
-        for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
-            dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_outrider: File | None = self.get_rna_omics_outrider(
-                case_id=case_id, sample_id=rna_sample_internal_id
-            )
             if not rna_outrider:
                 raise FileNotFoundError(
                     f"No RNA outrider file was found in housekeeper for {rna_sample_internal_id}."
                 )
 
+            LOG.debug(f"RNA fraser file {rna_fraser.path} found.")
             LOG.debug(f"RNA outrider file {rna_outrider.path} found.")
+
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
-                    f"Uploading RNA outrider file for sample {dna_sample_name} "
+                    f"Uploading RNA fraser and outrider files for sample {dna_sample_name} "
                     f"in case {dna_case_id} in Scout."
                 )
 
                 if dry_run:
                     continue
 
-                self.scout_api.upload_rna_outrider(
-                    file_path=rna_outrider.full_path,
+                self.scout_api.upload_rna_fraser_outrider(
+                    fraser_file_path=rna_fraser.full_path,
+                    outrider_file_path=rna_outrider.full_path,
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
+                    cust_id = cust_id
                 )
-        for upload_statement in self.get_rna_outrider_upload_summary(rna_dna_collections):
-            LOG.info(upload_statement)
-        LOG.info("Upload RNA outrider file finished!")
 
+        for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
+        LOG.info("Upload RNA fraser and outrider file finished!")
+
+    def upload_rna_genome_build_to_scout(self, dry_run: bool, case_id: str) -> None:
+        """Upload RNA genome built for a RNA/DNA case to Scout."""
+        status_db: Store = self.status_db
+        rna_case = status_db.get_case_by_internal_id(case_id)
+        cust_id = rna_case.customer_id
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
+            rna_genome_build = self.get_genome_build(case_id=rna_sample_internal_id)
+            for dna_case_id in rna_dna_collection.dna_case_ids:
+                LOG.info(
+                    f"Uploading RNA genome built for sample {dna_sample_name} "
+                    f"in case {dna_case_id} in Scout."
+                )
+
+                if dry_run:
+                    continue
+
+                self.scout_api.upload_rna_genome_build(
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                    cust_id = cust_id,
+                    rna_genome_build=rna_genome_build
+                )
+
+        for upload_statement in self.get_rna_genome_build_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
+        LOG.info("Upload RNA fraser and outrider file finished!")
+
+    def load_rna_variant_outlier_to_scout(self, dry_run: bool, case_id: str) -> None:
+        """Upload RNA genome built for a RNA/DNA case to Scout."""
+        status_db: Store = self.status_db
+        rna_case = status_db.get_case_by_internal_id(case_id)
+        cust_id = rna_case.customer_id
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
+            for dna_case_id in rna_dna_collection.dna_case_ids:
+                LOG.info(
+                    f"Loading RNA variants for sample {dna_sample_name} "
+                    f"in case {dna_case_id} in Scout."
+                )
+
+                if dry_run:
+                    continue
+
+                self.scout_api.load_variant_outlier(
+                    case_id=dna_case_id,
+                )
+
+        for upload_statement in self.get_variant_load_summary(rna_dna_collections):
+            LOG.info(upload_statement)
+        LOG.info("Load RNA variants finished!")
+
+load_variant_outlier
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
 
@@ -481,38 +557,54 @@ class UploadScoutAPI:
         return upload_summary
 
     @staticmethod
-    def get_rna_fraser_upload_summary(
+    def get_rna_fraser_outrider_upload_summary(
         rna_dna_collections: list[RNADNACollection],
     ) -> list[str]:
         upload_summary: list[str] = []
         for rna_dna_collection in rna_dna_collections:
             upload_summary.extend(
-                f"Uploaded fraser coverage file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
+                f"Uploaded fraser and outrider files for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
                 for dna_case in rna_dna_collection.dna_case_ids
             )
         return upload_summary
 
     @staticmethod
-    def get_rna_outrider_upload_summary(
+    def get_rna_genome_build_upload_summary(
         rna_dna_collections: list[RNADNACollection],
     ) -> list[str]:
         upload_summary: list[str] = []
         for rna_dna_collection in rna_dna_collections:
             upload_summary.extend(
-                f"Uploaded outrider coverage file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
+                f"Uploaded RNA genome build file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
                 for dna_case in rna_dna_collection.dna_case_ids
             )
         return upload_summary
+
+    @staticmethod
+    def get_variant_load_summary(
+        rna_dna_collections: list[RNADNACollection],
+    ) -> list[str]:
+        upload_summary: list[str] = []
+        for rna_dna_collection in rna_dna_collections:
+            upload_summary.extend(
+                f"Loaded variant outlier for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
+                for dna_case in rna_dna_collection.dna_case_ids
+            )
+        return upload_summary
+
+
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    def upload_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
+    def upload_omics_to_scout(self, dry_run: bool, case_id: str, analysis_api: NfAnalysisAPI) -> None:
         """Upload RNA omics files to Scout."""
-        self.upload_rna_fraser_to_scout(dry_run=dry_run, case_id=case_id)
-        self.upload_rna_outrider_to_scout(case_id=case_id, dry_run=dry_run)
+        self.upload_omics_sample_id_to_scout(dry_run=dry_run, case_id=case_id)
+        self.upload_rna_fraser_outrider_to_scout(dry_run=dry_run, case_id=case_id)
+        self.upload_rna_genome_build_to_scout(dry_run=dry_run, case_id=case_id)
+        self.load_rna_variant_outlier_to_scout(dry_run=dry_run, case_id=case_id)
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
@@ -525,14 +617,14 @@ class UploadScoutAPI:
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),

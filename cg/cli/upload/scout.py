@@ -248,7 +248,6 @@ def upload_omics_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> Non
     LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-
     scout_upload_api.upload_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
