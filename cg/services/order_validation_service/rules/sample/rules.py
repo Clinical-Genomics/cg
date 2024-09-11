@@ -125,13 +125,13 @@ def validate_sample_names_available(
     return errors
 
 
-def validate_tube_container_name(
+def validate_tube_container_name_unique(
     order: OrderWithNonHumanSamples,
     **kwargs,
 ) -> list[ContainerNameRepeatedError]:
     errors: list[ContainerNameRepeatedError] = []
-    repeated_container_name_sample_indices: list = get_indices_for_repeated_container_name(order)
-    for sample_index in repeated_container_name_sample_indices:
+    repeated_container_name_indices: list = get_indices_for_repeated_container_name(order)
+    for sample_index in repeated_container_name_indices:
         error = ContainerNameRepeatedError(sample_index=sample_index)
         errors.append(error)
     return errors
