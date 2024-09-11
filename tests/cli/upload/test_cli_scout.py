@@ -51,9 +51,7 @@ def test_get_upload_api(
     status_db: Store = cg_context.status_db
 
     # GIVEN a case with a balsamic analysis
-    case: Case = helpers.ensure_case(
-        store=status_db, data_analysis=workflow, case_id=case_id
-    )
+    case: Case = helpers.ensure_case(store=status_db, data_analysis=workflow, case_id=case_id)
     helpers.add_analysis(store=status_db, case=case, workflow=workflow)
 
     # WHEN getting the upload API
