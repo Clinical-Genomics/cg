@@ -649,7 +649,6 @@ class NfAnalysisAPI(AnalysisAPI):
         return deduplicated_metrics
 
     def get_multiqc_data_json(self, case_id: str) -> MultiqcDataJson:
-        """Return a MultiqcDataJson object."""
         return MultiqcDataJson(**read_json(file_path=self.get_multiqc_json_path(case_id=case_id)))
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
