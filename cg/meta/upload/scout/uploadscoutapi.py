@@ -481,7 +481,7 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Load RNA variants finished!")
 
-load_variant_outlier
+
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
 
