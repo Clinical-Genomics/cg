@@ -138,6 +138,7 @@ def validate_tube_container_name_unique(
         errors.append(error)
     return errors
 
+
 def validate_well_position_format(
     order: OrderWithNonHumanSamples, **kwargs
 ) -> list[WellFormatError]:

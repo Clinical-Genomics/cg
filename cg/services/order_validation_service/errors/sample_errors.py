@@ -58,6 +58,7 @@ class ContainerNameRepeatedError(SampleError):
     field: str = "container_name"
     message: str = "Container name must be unique among samples"
 
+
 class WellFormatError(SampleError):
     field: str = "well_position"
     message: str = "Well position must follow the format A-H:1-12"

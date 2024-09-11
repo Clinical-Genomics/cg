@@ -72,6 +72,7 @@ def get_indices_for_repeated_container_name(order: OrderWithNonHumanSamples) -> 
             indices.append(index)
     return indices
 
+
 def is_invalid_well_format(sample: Sample) -> bool:
     """Check if a sample has an invalid well format."""
     correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
