@@ -144,8 +144,13 @@ class DeliveryServiceFactory:
     @staticmethod
     def _sanitise_delivery_type(delivery_type: DataDelivery) -> DataDelivery:
         """Sanitise the delivery type."""
-        if delivery_type == DataDelivery.FASTQ_QC:
+        if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
-        if delivery_type == DataDelivery.FASTQ_QC_ANALYSIS:
+        if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
+            return DataDelivery.FASTQ_ANALYSIS
+        if delivery_type in [
+            DataDelivery.FASTQ_ANALYSIS_SCOUT,
+            DataDelivery.FASTQ_QC_ANALYSIS,
+        ]:
             return DataDelivery.FASTQ_ANALYSIS
         return delivery_type
