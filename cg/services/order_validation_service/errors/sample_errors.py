@@ -52,3 +52,8 @@ class OrganismDoesNotExistError(SampleError):
 class SampleNameNotAvailableError(SampleError):
     field: str = "name"
     message: str = "Sample name already used in previous order"
+
+
+class ContainerNameRepeatedError(SampleError):
+    field: str = "container_name"
+    message: str = "Container name must be unique among samples"
