@@ -12,7 +12,6 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE, COMMENT
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import IlluminaRunsNeededError
-from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
@@ -25,6 +24,9 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
 from cg.store.store import Store
 
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
@@ -150,7 +152,7 @@ def rsync_past_run_dirs(
 ) -> None:
     """Remove deliver workflow commands."""
 
-    rsync_api: RsyncAPI = RsyncAPI(config=context)
+    rsync_api: DeliveryRsyncService = context.delivery_rsync_service
 
     before: dt.datetime = parse_date(before_str)
 
