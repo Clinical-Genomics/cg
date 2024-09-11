@@ -108,6 +108,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
         return RarediseaseParameters(
+            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             analysis_type=analysis_type,
