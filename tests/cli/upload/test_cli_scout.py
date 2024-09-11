@@ -58,7 +58,7 @@ def test_get_upload_api(
     upload_api: UploadAPI = get_upload_api(cg_config=cg_context, case=case)
 
     # THEN assert that the type of upload API is correct
-    assert type(upload_api.analysis_api) is analysis_api
+    assert isinstance(upload_api.analysis_api, analysis_api)
 
 
 @pytest.mark.parametrize(
