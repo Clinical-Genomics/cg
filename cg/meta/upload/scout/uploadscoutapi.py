@@ -22,7 +22,6 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -597,7 +596,7 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    def upload_omics_to_scout(self, dry_run: bool, case_id: str, analysis_api: NfAnalysisAPI) -> None:
+    def upload_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA omics files to Scout."""
         self.upload_omics_sample_id_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_fraser_outrider_to_scout(dry_run=dry_run, case_id=case_id)
