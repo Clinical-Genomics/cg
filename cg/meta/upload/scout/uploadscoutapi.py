@@ -178,12 +178,12 @@ class UploadScoutAPI:
         tags: set[str] = {AnalysisTag.COVERAGE, AnalysisTag.BIGWIG, sample_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_rna_omics_fraser(self, case_id: str, sample_id: str) -> File | None:
+    def get_rna_omics_fraser(self, case_id: str) -> File | None:
         """Return an fraser file for a case in Housekeeper."""
         tags: set[str] = {AnalysisTag.FRASER, case_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_rna_omics_outrider(self, case_id: str, sample_id: str) -> File | None:
+    def get_rna_omics_outrider(self, case_id: str) -> File | None:
         """Return an outrider file for a case in Housekeeper."""
         tags: set[str] = {AnalysisTag.OUTRIDER, case_id}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
