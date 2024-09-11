@@ -4,6 +4,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    ContainerNameRepeatedError,
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
@@ -123,16 +124,16 @@ def validate_sample_names_available(
     return errors
 
 
-def validate_unique_tube_names(
+def validate_tube_container_name(
     order: OrderWithNonHumanSamples,
     **kwargs,
-) -> list[SampleTubeNameError]:
-    errors: list[SampleTubeNameError] = []
+) -> list[ContainerNameRepeatedError]:
+    errors: list[ContainerNameRepeatedError] = []
     tube_names: list = []
     is_tube_name_repeated(order=order)
     for sample_index, sample in order.enumerated_samples:
         if sample.tube_name in tube_names:
-            error = SampleTubeNameError(sample_index=sample_index)
+            error = ContainerNameRepeatedError(sample_index=sample_index)
             errors.append(error)
         tube_names.append(sample.tube_name)
     return errors
