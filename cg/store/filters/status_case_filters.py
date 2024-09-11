@@ -81,8 +81,8 @@ def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Que
     return cases.filter(Case.name.contains(name_search))
 
 
-def filter_cases_by_data_analyses(cases: Query, data_analyses: list[str], **kwargs) -> Query:
-    """Filter cases with workflows."""
+def filter_cases_by_data_analyses(cases: Query, data_analyses: list[Workflow], **kwargs) -> Query:
+    """Filter cases by data analysis types."""
     return cases.filter(Case.data_analysis.in_(data_analyses))
 
 
@@ -240,6 +240,7 @@ def apply_case_filter(
     name: str | None = None,
     name_search: str | None = None,
     order_date: datetime | None = None,
+    data_analyses: list[Workflow] | None = None,
     workflow: Workflow | None = None,
     workflow_search: str | None = None,
     priority: str | None = None,
@@ -262,6 +263,7 @@ def apply_case_filter(
             name=name,
             name_search=name_search,
             order_date=order_date,
+            data_analyses=data_analyses,
             workflow=workflow,
             workflow_search=workflow_search,
             priority=priority,

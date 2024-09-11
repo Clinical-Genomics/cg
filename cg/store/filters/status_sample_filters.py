@@ -123,7 +123,6 @@ def filter_samples_is_dna_sample(samples: Query, **kwargs) -> Query:
         PrepCategory.TARGETED_GENOME_SEQUENCING.value,
         PrepCategory.WHOLE_EXOME_SEQUENCING.value,
     ]
-
     return samples.filter(Sample.prep_category in dna_prep_categories)
 
 

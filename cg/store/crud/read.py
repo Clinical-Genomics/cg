@@ -1538,12 +1538,12 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def _get_related_dna_samples_from_rna_sample_within_collaborators(
-        self, rna_sample_internal_id: str, collaborators: set[Customer]
+    def _get_related_dna_samples_from_sample_within_collaborators(
+        self, sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Sample]:
         """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
         samples = self._get_query(table=Sample)
-        rna_sample: Sample = self.get_sample_by_internal_id(internal_id=rna_sample_internal_id)
+        rna_sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
         customer_ids: list[str] = [customer.internal_id for customer in collaborators]
         filter_functions = [
             SampleFilter.IS_DNA_SAMPLE,
@@ -1559,15 +1559,15 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
         ).all()
 
-    def _get_dna_cases_from_dna_sample_within_collaborators(
-        self, dna_sample_internal_id: str, collaborators: set[Customer]
+    def _get_dna_cases_from_sample_within_collaborators(
+        self, sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Case]:
         """Return a list of DNA cases linked to DNA sample with a list of customers in a collaboration."""
 
         case_samples = self._get_join_case_sample_query()
         cases = apply_case_sample_filter(
             case_samples=case_samples,
-            sample_internal_id=dna_sample_internal_id,
+            sample_internal_id=sample_internal_id,
             filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
         )
 
