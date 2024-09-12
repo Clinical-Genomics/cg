@@ -384,10 +384,10 @@ class UploadScoutAPI:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_fraser: File | None = self.get_rna_omics_fraser(
-                case_id=case_id, sample_id=rna_sample_internal_id
+                case_id=case_id
             )
             rna_outrider: File | None = self.get_rna_omics_outrider(
-                case_id=case_id, sample_id=rna_sample_internal_id
+                case_id=case_id
             )
             if not rna_fraser:
                 raise FileNotFoundError(
