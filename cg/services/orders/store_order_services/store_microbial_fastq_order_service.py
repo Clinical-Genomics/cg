@@ -114,7 +114,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return self.status.add_sample(
             name=sample_dict["name"],
             customer=customer,
-            sex="unknown",
+            sex=SexEnum.UNKNOWN,
             comment=sample_dict["comment"],
             order=order,
             ordered=ordered,
