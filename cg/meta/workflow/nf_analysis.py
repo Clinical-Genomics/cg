@@ -872,7 +872,8 @@ class NfAnalysisAPI(AnalysisAPI):
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
         reference_genome: set[str] = {
-            sample.reference_genome for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+            sample.reference_genome
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
         }
         if len(reference_genome) == 1:
             return reference_genome.pop()
