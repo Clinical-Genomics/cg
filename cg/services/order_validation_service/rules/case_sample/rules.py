@@ -352,3 +352,4 @@ def validate_tube_container_name_unique(
         for sample_index in repeated_tube_name_indices:
             error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
+    return errors
