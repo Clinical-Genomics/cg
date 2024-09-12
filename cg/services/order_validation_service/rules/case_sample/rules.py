@@ -12,6 +12,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotValidError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
+    ContainerNameRepeatedError,
     FatherNotInCaseError,
     InvalidBufferError,
     InvalidConcentrationIfSkipRCError,
@@ -40,6 +41,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     get_mother_sex_errors,
     get_occupied_well_errors,
     get_repeated_sample_name_errors,
+    get_repeated_tube_names,
     get_well_sample_map,
     is_concentration_missing,
     is_container_name_missing,
@@ -339,3 +341,14 @@ def validate_well_position_format(order: OrderWithCases, **kwargs) -> list[WellF
                 error = WellFormatError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
+
+
+def validate_tube_container_name_unique(
+    order: OrderWithCases, **kwargs
+) -> list[ContainerNameRepeatedError]:
+    errors: list[ContainerNameRepeatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        repeated_tube_name_indices: list[str] = get_repeated_tube_names(case=case)
+        for sample_index in repeated_tube_name_indices:
+            error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
