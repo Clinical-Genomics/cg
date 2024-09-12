@@ -147,7 +147,7 @@ class DeliveryServiceFactory:
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
         if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
-            return DataDelivery.FASTQ_ANALYSIS
+            return DataDelivery.ANALYSIS_FILES
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,
