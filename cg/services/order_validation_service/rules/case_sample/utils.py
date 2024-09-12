@@ -1,5 +1,7 @@
 from collections import Counter
 
+import re
+
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum
@@ -284,3 +286,11 @@ def is_sample_concentration_within_interval(
     concentration: float, interval: tuple[float, float]
 ) -> bool:
     return interval[0] <= concentration <= interval[1]
+
+
+def is_invalid_plate_well_format(sample: Sample) -> bool:
+    """Check if a sample has an invalid well format."""
+    correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
+    if sample.is_on_plate:
+        return not bool(re.match(correct_well_position_pattern, sample.well_position))
+    return False

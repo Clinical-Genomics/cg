@@ -138,3 +138,8 @@ class SexSubjectIdError(CaseSampleError):
 class CaptureKitMissingError(CaseSampleError):
     field: str = "capture_kit"
     message: str = "Bait set is required for TGS analyses"
+
+
+class WellFormatError(CaseSampleError):
+    field: str = "well_position"
+    message: str = "Well position must follow the format A-H:1-12"

@@ -18,6 +18,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_volume_interval,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    validate_well_position_format,
 )
 from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.rules import (
     validate_capture_kit_panel_requirement,
@@ -45,6 +46,7 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_volume_interval,
+    validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 ]

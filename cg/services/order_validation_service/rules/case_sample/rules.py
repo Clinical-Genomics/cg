@@ -26,6 +26,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     WellPositionMissingError,
+    WellFormatError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
@@ -42,6 +43,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     get_well_sample_map,
     is_concentration_missing,
     is_container_name_missing,
+    is_invalid_plate_well_format,
     is_well_position_missing,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
@@ -326,4 +328,14 @@ def validate_concentration_interval_if_skip_rc(
             store=store,
         )
         errors.extend(case_errors)
+    return errors
+
+
+def validate_well_position_format(order: OrderWithCases, **kwargs) -> list[WellFormatError]:
+    errors: list[WellFormatError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_invalid_plate_well_format(sample=sample):
+                error = WellFormatError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
     return errors
