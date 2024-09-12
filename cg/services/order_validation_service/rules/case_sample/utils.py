@@ -299,6 +299,7 @@ def is_invalid_plate_well_format(sample: Sample) -> bool:
 
 
 def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
+    """Check if a tube container name is reused across samples."""
     return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
 
 
