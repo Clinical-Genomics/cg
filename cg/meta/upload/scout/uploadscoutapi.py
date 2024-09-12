@@ -13,7 +13,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
 from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag
-from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.constants.scout import GenomeBuild, ScoutCustomCaseReportTags
 from cg.exc import CgDataError, CgError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
