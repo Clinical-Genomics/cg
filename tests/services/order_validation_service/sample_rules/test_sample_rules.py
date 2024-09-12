@@ -14,7 +14,6 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 )
 from cg.store.models import Sample
 from cg.store.store import Store
-import pdb
 
 
 def test_sample_names_available(valid_order: MicrosaltOrder, sample_store: Store):
