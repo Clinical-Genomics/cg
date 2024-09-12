@@ -33,6 +33,8 @@ from cg.services.order_validation_service.rules.utils import (
 from cg.store.models import Application
 from cg.store.store import Store
 
+import pdb
+
 
 def is_concentration_missing(sample: SampleWithRelatives) -> bool:
     return not sample.concentration_ng_ul
@@ -294,3 +296,14 @@ def is_invalid_plate_well_format(sample: Sample) -> bool:
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
+
+
+def get_repeated_tube_names(case: Case) -> list[int]:
+    pdb.set_trace()
+    counter: Counter = Counter([sample[1].container_name for sample in case.enumerated_new_samples])
+    indices: list[int] = []
+    for index, sample in case.enumerated_new_samples:
+        if sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1:
+            indices.append(index)
+    breakpoint()
+    return indices
