@@ -147,4 +147,4 @@ class WellFormatError(CaseSampleError):
 
 class ContainerNameRepeatedError(CaseSampleError):
     field: str = "container_name"
-    message: str = "Container name must be unique among samples"
+    message: str = "Tube names must be unique among samples"
