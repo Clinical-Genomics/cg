@@ -100,7 +100,7 @@ def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
     assert mip_rna_sample.name == "s1"
     assert mip_rna_sample.container == "96 well plate"
     assert mip_rna_sample.data_analysis == "MIP RNA"
-    assert mip_rna_sample.data_delivery.lower() == str(DataDelivery.ANALYSIS_FILES)
+    assert mip_rna_sample.data_delivery.lower() == str(DataDelivery.ANALYSIS)
     assert mip_rna_sample.application == "RNAPOAR025"
     assert mip_rna_sample.sex == "male"
     # case-id on the case

@@ -77,7 +77,7 @@ class DeliveryServiceFactory:
         """Get the file tag fetcher based on the delivery type."""
         service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
+            DataDelivery.ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
         }
         return service_map[delivery_type]()
@@ -86,7 +86,7 @@ class DeliveryServiceFactory:
         """Get the file fetcher based on the delivery type."""
         service_map: dict[DataDelivery, Type[FetchDeliveryFilesService]] = {
             DataDelivery.FASTQ: FastqDeliveryFileFetcher,
-            DataDelivery.ANALYSIS_FILES: AnalysisDeliveryFileFetcher,
+            DataDelivery.ANALYSIS: AnalysisDeliveryFileFetcher,
             DataDelivery.FASTQ_ANALYSIS: FastqAndAnalysisDeliveryFileFetcher,
         }
         file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(delivery_type)
@@ -110,12 +110,12 @@ class DeliveryServiceFactory:
         """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
         if delivery_type in [
             DataDelivery.FASTQ,
-            DataDelivery.ANALYSIS_FILES,
+            DataDelivery.ANALYSIS,
             DataDelivery.FASTQ_ANALYSIS,
         ]:
             return
         raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}."
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS}, {DataDelivery.FASTQ_ANALYSIS}."
         )
 
     def build_delivery_service(
@@ -147,7 +147,7 @@ class DeliveryServiceFactory:
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
         if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
-            return DataDelivery.ANALYSIS_FILES
+            return DataDelivery.ANALYSIS
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,

@@ -47,7 +47,7 @@ def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
 
 
 message_map = {
-    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
+    DataDelivery.ANALYSIS: AnalysisMessage,
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: ScoutMessage,
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,

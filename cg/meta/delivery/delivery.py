@@ -53,7 +53,7 @@ class DeliveryAPI:
     @staticmethod
     def is_analysis_delivery(data_delivery: DataDelivery) -> bool:
         """Return whether analysis files should be delivered."""
-        return DataDelivery.ANALYSIS_FILES in data_delivery
+        return DataDelivery.ANALYSIS in data_delivery
 
     @staticmethod
     def is_sample_deliverable(sample: Sample, force: bool = False) -> bool:

@@ -176,7 +176,7 @@ class SampleType(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_FILES: str = "analysis"
+    ANALYSIS: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
     FASTQ: str = "fastq"
     FASTQ_SCOUT: str = "fastq-scout"
