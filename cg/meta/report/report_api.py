@@ -350,7 +350,7 @@ class ReportAPI(MetaAPI):
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
             delivered_files=delivered_files,
-            genome_build=get_genome_build(case.internal_id),
+            genome_build=get_genome_build(self, case.internal_id),
             panels=case.panels,
             pons=self.analysis_api.get_pons(case.internal_id),
             scout_files=self.get_scout_uploaded_files(case.internal_id),

@@ -869,7 +869,7 @@ class NfAnalysisAPI(AnalysisAPI):
         ]
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
-        get_genome_build(case_id)
+        get_genome_build(self, case_id)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
