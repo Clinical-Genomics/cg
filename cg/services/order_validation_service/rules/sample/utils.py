@@ -1,5 +1,7 @@
 from collections import Counter
 
+from cg.models.orders.sample_base import ContainerEnum
+
 import re
 
 from cg.services.order_validation_service.errors.sample_errors import (
@@ -68,7 +70,7 @@ def get_indices_for_tube_repeated_container_name(order: OrderWithNonHumanSamples
     counter = Counter([sample.container_name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
-        if sample.container_name == "Tube" and counter.get(sample.container_name) > 1:
+        if sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1:
             indices.append(index)
     return indices
 
