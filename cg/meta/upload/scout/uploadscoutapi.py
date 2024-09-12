@@ -13,8 +13,8 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
 from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag
-from cg.constants.scout import GenomeBuild, ScoutCustomCaseReportTags
-from cg.exc import CgDataError, CgError, HousekeeperBundleVersionMissingError
+from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
@@ -25,6 +25,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
+from cg.utils.get_genome_build import get_genome_build
 
 LOG = logging.getLogger(__name__)
 
@@ -90,23 +91,6 @@ class UploadScoutAPI:
             file_path=file_path,
         )
 
-    @staticmethod
-    def get_genome_build(self, case_id: str) -> GenomeVersion:
-        """Return reference genome version for a case.
-        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
-        """
-        reference_genome: set[str] = {
-            sample.reference_genome
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
-        if len(reference_genome) == 1:
-            return reference_genome.pop()
-        if len(reference_genome) > 1:
-            raise CgError(
-                f"Samples linked to case {case_id} have different reference genome versions set"
-            )
-        raise CgError(f"No reference genome specified for case {case_id}")
-
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
     ) -> File:
@@ -136,7 +120,7 @@ class UploadScoutAPI:
         self, case_id: str, workflow: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if workflow == Workflow.MIP_RNA or workflow == Workflow.TOMTE:
+        if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -427,7 +411,7 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = self.get_genome_build(case_id=rna_sample_internal_id)
+            rna_genome_build = GenomeVersion(get_genome_build(case_id=rna_sample_internal_id)).to_scout_format()
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
