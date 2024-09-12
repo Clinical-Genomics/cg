@@ -298,12 +298,14 @@ def is_invalid_plate_well_format(sample: Sample) -> bool:
     return False
 
 
+def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
+    return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
+
+
 def get_repeated_tube_names(case: Case) -> list[int]:
-    pdb.set_trace()
     counter: Counter = Counter([sample[1].container_name for sample in case.enumerated_new_samples])
     indices: list[int] = []
     for index, sample in case.enumerated_new_samples:
-        if sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1:
+        if is_tube_container_name_redundant(sample=sample, counter=counter):
             indices.append(index)
-    breakpoint()
     return indices
