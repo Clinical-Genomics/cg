@@ -66,11 +66,15 @@ def get_indices_for_repeated_sample_names(order: OrderWithNonHumanSamples) -> li
     return indices
 
 
+def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
+    return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
+
+
 def get_indices_for_tube_repeated_container_name(order: OrderWithNonHumanSamples) -> list[int]:
     counter = Counter([sample.container_name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
-        if sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1:
+        if is_tube_container_name_redundant(sample, counter):
             indices.append(index)
     return indices
 
