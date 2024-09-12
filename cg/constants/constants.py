@@ -183,7 +183,6 @@ class GenomeVersion(StrEnum):
         return mapping[self]
 
 
-
 class SampleType(StrEnum):
     TUMOR: str = "tumor"
     NORMAL: str = "normal"

@@ -122,11 +122,19 @@ class UploadScoutAPI:
         """Return a multiqc report for a case in Housekeeper."""
         if workflow == Workflow.MIP_RNA:
             tags: set[str] = {ScoutCustomCaseReportTags.MULTIQC_RNA, case_id}
-            return ScoutCustomCaseReportTags.MULTIQC_RNA, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+            return (
+                ScoutCustomCaseReportTags.MULTIQC_RNA,
+                self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags),
+            )
         tags: set[str] = {ScoutCustomCaseReportTags.MULTIQC, case_id}
         if workflow == Workflow.TOMTE:
-            return ScoutCustomCaseReportTags.MULTIQC_RNA, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
-        return ScoutCustomCaseReportTags.MULTIQC, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+            return (
+                ScoutCustomCaseReportTags.MULTIQC_RNA,
+                self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags),
+            )
+        return ScoutCustomCaseReportTags.MULTIQC, self.housekeeper.get_file_from_latest_version(
+            bundle_name=case_id, tags=tags
+        )
 
     def get_fusion_report(self, case_id: str, research: bool) -> File | None:
         """Return a fusion report for a case in housekeeper."""
@@ -384,7 +392,7 @@ class UploadScoutAPI:
                     f"Uploading RNA fraser and outrider files for sample {dna_sample_name} "
                     f"in case {dna_case_id} in Scout."
                 )
-                customer_case= status_db.get_case_by_internal_id(dna_case_id)
+                customer_case = status_db.get_case_by_internal_id(dna_case_id)
 
                 if dry_run:
                     continue
@@ -410,7 +418,9 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = GenomeVersion(get_genome_build(self, case_id=rna_sample_internal_id)).to_scout_format()
+            rna_genome_build = GenomeVersion(
+                get_genome_build(self, case_id=rna_sample_internal_id)
+            ).to_scout_format()
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
