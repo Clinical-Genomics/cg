@@ -14,7 +14,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
-    get_indices_for_repeated_container_name,
+    get_indices_for_tube_repeated_container_name,
     get_indices_for_repeated_sample_names,
     is_invalid_well_format,
 )
@@ -132,7 +132,7 @@ def validate_tube_container_name_unique(
     **kwargs,
 ) -> list[ContainerNameRepeatedError]:
     errors: list[ContainerNameRepeatedError] = []
-    repeated_container_name_indices: list = get_indices_for_repeated_container_name(order)
+    repeated_container_name_indices: list = get_indices_for_tube_repeated_container_name(order)
     for sample_index in repeated_container_name_indices:
         error = ContainerNameRepeatedError(sample_index=sample_index)
         errors.append(error)
