@@ -64,11 +64,11 @@ def get_indices_for_repeated_sample_names(order: OrderWithNonHumanSamples) -> li
     return indices
 
 
-def get_indices_for_repeated_container_name(order: OrderWithNonHumanSamples) -> list[int]:
+def get_indices_for_tube_repeated_container_name(order: OrderWithNonHumanSamples) -> list[int]:
     counter = Counter([sample.container_name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
-        if counter.get(sample.container_name) > 1:
+        if sample.container_name == "Tube" and counter.get(sample.container_name) > 1:
             indices.append(index)
     return indices
 
