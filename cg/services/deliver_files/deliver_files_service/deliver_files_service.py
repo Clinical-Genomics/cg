@@ -104,7 +104,7 @@ class DeliverFilesService:
             LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
         else:
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
-                case_id=case.internal_id,
+                case_id=f"{case.internal_id}_rsync",
                 analysis_type=AnalysisTypes.OTHER,
                 config_path=self.rsync_service.trailblazer_config_path.as_posix(),
                 order_id=case.latest_order.id,
