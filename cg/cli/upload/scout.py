@@ -54,12 +54,18 @@ def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str)
     if case_obj.data_analysis == Workflow.TOMTE:
         LOG.info("Tomte workflow detected, uploading RNA to linked DNA")
         context.invoke(
-            upload_rna_to_scout, case_id=case_id, re_upload=re_upload, analysis=case_obj.data_analysis
+            upload_rna_to_scout,
+            case_id=case_id,
+            re_upload=re_upload,
+            analysis=case_obj.data_analysis,
         )
 
     else:
         context.invoke(
-            create_scout_load_config, case_id=case_id, print_console=print_console, re_upload=re_upload
+            create_scout_load_config,
+            case_id=case_id,
+            print_console=print_console,
+            re_upload=re_upload,
         )
         if not print_console:
             context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
