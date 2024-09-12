@@ -1,3 +1,4 @@
+from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     ContainerNameRepeatedError,
     SampleNameNotAvailableError,
@@ -13,6 +14,7 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 )
 from cg.store.models import Sample
 from cg.store.store import Store
+import pdb
 
 
 def test_sample_names_available(valid_order: MicrosaltOrder, sample_store: Store):
@@ -34,7 +36,10 @@ def test_sample_names_available(valid_order: MicrosaltOrder, sample_store: Store
 
 def test_validate_tube_container_name_unique(valid_order: MicrosaltOrder):
 
-    # GIVEN an order with a sample with a container name that is reused
+    # GIVEN an order with three samples in tubes with 2 reused container names
+    valid_order.samples[0].container = ContainerEnum.tube
+    valid_order.samples[1].container = ContainerEnum.tube
+    valid_order.samples[2].container = ContainerEnum.tube
     valid_order.samples[0].container_name = "container_name"
     valid_order.samples[1].container_name = "container_name"
     valid_order.samples[2].container_name = "ContainerName"
