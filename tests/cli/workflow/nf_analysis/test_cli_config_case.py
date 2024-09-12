@@ -136,12 +136,6 @@ def test_config_case_default_parameters(
         return_value=scout_export_manged_variants_output,
     )
 
-    # GIVEN a genome build from StatusDB
-    mocker.patch.object(
-        NfAnalysisAPI,
-        "get_genome_build",
-        return_value=GenomeVersion.GRCh38,
-    )
     # GIVEN a valid case
 
     # WHEN running config case
