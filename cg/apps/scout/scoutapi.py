@@ -304,7 +304,7 @@ class ScoutAPI:
         case_id: str,
         fraser_file_path: str,
         outrider_file_path: str,
-        customer_sample_id: str,
+        customer_case_name: str,
         cust_id: str,
     ) -> None:
         """Load a rna fraser file into a case in the database."""
@@ -313,7 +313,7 @@ class ScoutAPI:
             "update",
             "case",
             "-n",
-            customer_sample_id,
+            customer_case_name,
             "-i",
             cust_id,
             "--fraser",
