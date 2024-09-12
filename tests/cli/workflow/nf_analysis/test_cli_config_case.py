@@ -11,7 +11,7 @@ from click.testing import CliRunner
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.constants.constants import FileFormat, MetaApis
+from cg.constants.constants import FileFormat, GenomeVersion, MetaApis
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -129,13 +129,19 @@ def test_config_case_default_parameters(
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
-    # GIVEN a mocked scout export of the managed variants
+    # GIVEN a mocked scout export of the managed variants for RAREDISEASE
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_managed_variants",
         return_value=scout_export_manged_variants_output,
     )
 
+    # GIVEN a genome build from StatusDB
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_genome_build",
+        return_value=GenomeVersion.GRCh38,
+    )
     # GIVEN a valid case
 
     # WHEN running config case
