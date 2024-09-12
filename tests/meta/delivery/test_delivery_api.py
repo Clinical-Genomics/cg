@@ -388,7 +388,7 @@ def test_get_delivery_files_analysis_delivery(
 
     # GIVEN a case object with analysis files as data delivery
     case: Case = status_db.get_case_by_internal_id(case_id)
-    case.data_delivery = DataDelivery.ANALYSIS
+    case.data_delivery = DataDelivery.ANALYSIS_FILES
 
     # WHEN retrieving the analysis delivery files
     delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)

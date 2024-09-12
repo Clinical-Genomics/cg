@@ -35,7 +35,7 @@ class JsonOrderformParser(OrderformParser):
             OrderType.METAGENOME: DataDelivery.FASTQ,
             OrderType.FASTQ: DataDelivery.FASTQ,
             OrderType.RML: DataDelivery.FASTQ,
-            OrderType.MIP_RNA: DataDelivery.ANALYSIS,
+            OrderType.MIP_RNA: DataDelivery.ANALYSIS_FILES,
             OrderType.FLUFFY: DataDelivery.STATINA,
         }
         if project_type not in project_to_order:

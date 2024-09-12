@@ -31,7 +31,7 @@ REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
 )
 
 REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
-    DataDelivery.ANALYSIS,
+    DataDelivery.ANALYSIS_FILES,
     DataDelivery.ANALYSIS_SCOUT,
     DataDelivery.FASTQ_ANALYSIS,
     DataDelivery.FASTQ_ANALYSIS_SCOUT,
