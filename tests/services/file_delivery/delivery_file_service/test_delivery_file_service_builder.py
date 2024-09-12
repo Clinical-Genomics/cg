@@ -44,7 +44,7 @@ from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover i
         ),
         (
             Workflow.MUTANT,
-            DataDelivery.ANALYSIS,
+            DataDelivery.ANALYSIS_FILES,
             SampleAndCaseDeliveryTagsFetcher,
             AnalysisDeliveryFileFetcher,
             DeliveryFilesMover,
