@@ -122,9 +122,11 @@ class UploadScoutAPI:
         """Return a multiqc report for a case in Housekeeper."""
         if workflow == Workflow.MIP_RNA:
             tags: set[str] = {ScoutCustomCaseReportTags.MULTIQC_RNA, case_id}
-            return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+            return ScoutCustomCaseReportTags.MULTIQC_RNA, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         tags: set[str] = {ScoutCustomCaseReportTags.MULTIQC, case_id}
-        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        if workflow == Workflow.TOMTE:
+            return ScoutCustomCaseReportTags.MULTIQC_RNA, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        return ScoutCustomCaseReportTags.MULTIQC, self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_fusion_report(self, case_id: str, research: bool) -> File | None:
         """Return a fusion report for a case in housekeeper."""
