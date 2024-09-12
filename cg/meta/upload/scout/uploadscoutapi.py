@@ -412,7 +412,7 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = GenomeVersion(get_genome_build(case_id=rna_sample_internal_id)).to_scout_format()
+            rna_genome_build = GenomeVersion(get_genome_build(case_id=rna_sample_internal_id)).to_scout_format(self)
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
