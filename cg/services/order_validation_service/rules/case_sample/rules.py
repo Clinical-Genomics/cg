@@ -1,3 +1,5 @@
+from collections import Counter
+
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import (
     ALLOWED_SKIP_RC_BUFFERS,
@@ -12,6 +14,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationNotValidError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
+    ContainerNameRepeatedError,
     FatherNotInCaseError,
     InvalidBufferError,
     InvalidConcentrationIfSkipRCError,
@@ -33,6 +36,7 @@ from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pe
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.rules.case_sample.utils import (
+    get_counter_container_names,
     get_father_case_errors,
     get_father_sex_errors,
     get_invalid_panels,
@@ -44,6 +48,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
+    is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
@@ -337,5 +342,20 @@ def validate_well_position_format(order: OrderWithCases, **kwargs) -> list[WellF
         for sample_index, sample in case.enumerated_new_samples:
             if is_invalid_plate_well_format(sample=sample):
                 error = WellFormatError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_tube_container_name_unique(
+    order: OrderWithCases, **kwargs
+) -> list[ContainerNameRepeatedError]:
+    errors: list[ContainerNameRepeatedError] = []
+
+    container_name_counter: Counter = get_counter_container_names(order)
+
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
+                error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors

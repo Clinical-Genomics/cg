@@ -294,3 +294,17 @@ def is_invalid_plate_well_format(sample: Sample) -> bool:
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
+
+
+def is_sample_tube_name_reused(sample: Sample, counter: Counter) -> bool:
+    """Check if a tube container name is reused across samples."""
+    return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
+
+
+def get_counter_container_names(order: OrderWithCases) -> Counter:
+    counter = Counter(
+        sample.container_name
+        for case_index, case in order.enumerated_new_cases
+        for sample_index, sample in case.enumerated_new_samples
+    )
+    return counter
