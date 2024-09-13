@@ -15,7 +15,6 @@ from cg.clients.chanjo2.models import (
 )
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
-from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
@@ -23,7 +22,7 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_METRIC_CONDITIONS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
-from cg.constants.scout import RAREDISEASE_CASE_TAGS
+from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -71,10 +70,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
-        """Return reference genome for a case. Currently fixed for hg19."""
-        return GenomeVersion.HG19
-
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
@@ -103,16 +98,27 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed
 
+    def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
+        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            return True
+        return False
+
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
+        outdir = self.get_case_path(case_id=case_id)
+
         return RarediseaseParameters(
+            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
+            outdir=outdir,
             analysis_type=analysis_type,
             target_bed=Path(self.references, target_bed).as_posix(),
             save_mapped_as_cram=True,
+            skip_germlinecnvcaller=skip_germlinecnvcaller,
+            vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
         )
 
     @staticmethod
@@ -141,15 +147,20 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variants needs to be exported from Scout."""
+        return True
+
+    @property
     def root(self) -> str:
         return self.config.raredisease.root
 
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
-    def get_managed_variants(self) -> list[str]:
+    def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=GenePanelGenomeBuild.hg19)
+        return self._get_managed_variants(genome_build=self.get_genome_build(case_id=case_id))
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
