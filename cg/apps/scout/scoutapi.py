@@ -330,7 +330,7 @@ class ScoutAPI:
             raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error
 
     def upload_rna_genome_build(
-        self, case_id: str, customer_sample_id: str, cust_id: str, rna_genome_build: str
+        self, case_id: str, customer_case_name: str, cust_id: str, rna_genome_build: str
     ) -> None:
         """Load a rna fraser file into a case in the database."""
 
@@ -338,7 +338,7 @@ class ScoutAPI:
             "update",
             "case",
             "-n",
-            customer_sample_id,
+            customer_case_name,
             "-i",
             cust_id,
             "--rna-genome-build",

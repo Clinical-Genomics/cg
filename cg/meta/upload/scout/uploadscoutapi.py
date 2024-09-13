@@ -425,13 +425,14 @@ class UploadScoutAPI:
                     f"Uploading RNA genome built for sample {dna_sample_name} "
                     f"in case {dna_case_id} in Scout."
                 )
+                customer_case = status_db.get_case_by_internal_id(dna_case_id)
 
                 if dry_run:
                     continue
 
                 self.scout_api.upload_rna_genome_build(
                     case_id=dna_case_id,
-                    customer_sample_id=dna_sample_name,
+                    customer_case_name=customer_case.name,
                     cust_id=cust_id,
                     rna_genome_build=rna_genome_build,
                 )
