@@ -166,8 +166,8 @@ class GenomeVersion(StrEnum):
     GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19 = auto()
-    HG38 = auto()
+    HG19: str = "HG19"
+    HG38: str = "HG38"
 
     def to_scout_format(self) -> str:
         # Mapping dictionary to translate genome builds to scout format
