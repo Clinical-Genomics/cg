@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from cg.models.orders.sample_base import StatusEnum, SexEnum
+from cg.models.orders.sample_base import StatusEnum
 
-from cg.constants import Workflow, DataDelivery
+from cg.constants import Workflow, DataDelivery, SexOptions
 from cg.models.orders.order import OrderIn
 
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
@@ -113,7 +113,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return self.status_db.add_sample(
             name=sample_dict["name"],
             customer=customer,
-            sex=SexEnum.UNKNOWN,
+            sex=SexOptions.UNKNOWN,
             comment=sample_dict["comment"],
             order=order,
             ordered=ordered,
