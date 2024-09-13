@@ -10,8 +10,8 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case
 from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
     AnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_delivery_file_fetcher import (
-    FastqDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+    RawDataDeliveryFileFetcher,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatter import (
     DeliveryFileFormatter,
@@ -32,10 +32,10 @@ from cg.store.store import Store
 def fastq_delivery_service(
     delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_microsalt: Store,
-) -> FastqDeliveryFileFetcher:
+) -> RawDataDeliveryFileFetcher:
     """Fixture to get an instance of FetchFastqDeliveryFilesService."""
     tag_service = SampleAndCaseDeliveryTagsFetcher()
-    return FastqDeliveryFileFetcher(
+    return RawDataDeliveryFileFetcher(
         hk_api=delivery_housekeeper_api,
         status_db=delivery_store_microsalt,
         tags_fetcher=tag_service,

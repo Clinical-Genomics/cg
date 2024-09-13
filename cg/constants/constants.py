@@ -188,6 +188,7 @@ class DataDelivery(StrEnum):
     NO_DELIVERY: str = "no-delivery"
     SCOUT: str = "scout"
     STATINA: str = "statina"
+    BAM: str = "bam"
 
 
 class HastaSlurmPartitions(StrEnum):

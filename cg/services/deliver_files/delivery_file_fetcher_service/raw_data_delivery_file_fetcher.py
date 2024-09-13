@@ -19,7 +19,7 @@ from cg.store.store import Store
 from housekeeper.store.models import File
 
 
-class FastqDeliveryFileFetcher(FetchDeliveryFilesService):
+class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
     """
     Fetch the fastq files for a case from Housekeeper.
     """
