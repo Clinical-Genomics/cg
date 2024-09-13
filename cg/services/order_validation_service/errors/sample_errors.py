@@ -56,7 +56,7 @@ class SampleNameNotAvailableError(SampleError):
 
 class ContainerNameRepeatedError(SampleError):
     field: str = "container_name"
-    message: str = "Container name must be unique among samples"
+    message: str = "Tube names must be unique among samples"
 
 
 class WellFormatError(SampleError):
