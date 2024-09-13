@@ -7,6 +7,7 @@ from housekeeper.store.models import Version
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
@@ -228,7 +229,7 @@ def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfi
     assert balsamic_config_builder.load_config.delivery_report
 
 
-def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
+def test_remove_chromosome_substring(scout_config_builder: ScoutConfigBuilder):
     """Test that parsing of file path."""
 
     # GIVEN files paths ending with
@@ -239,5 +240,5 @@ def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
     generic_path = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_"
 
     # THEN
-    assert mip_config_builder.extract_generic_filepath(file_path1) == generic_path
-    assert mip_config_builder.extract_generic_filepath(file_path2) == generic_path
+    assert scout_config_builder.remove_chromosome_substring(file_path1) == generic_path
+    assert scout_config_builder.remove_chromosome_substring(file_path2) == generic_path

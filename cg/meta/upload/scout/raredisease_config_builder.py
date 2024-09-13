@@ -8,7 +8,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
-    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     UploadTrack,
@@ -26,7 +25,7 @@ from cg.models.scout.scout_load_config import (
     ScoutLoadConfig,
     ScoutRarediseaseIndividual,
 )
-from cg.store.models import Analysis, Case, CaseSample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -55,72 +54,54 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
-    def build_load_config(self, rank_score_threshold: int = 5) -> None:
-        """Create a RAREDISEASE specific load config for uploading analysis to Scout"""
+    def build_load_config(self) -> ScoutLoadConfig:
+        """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for RAREDISEASE case")
-        self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = getattr(
-            GenomeBuild,
-            self.raredisease_analysis_api.get_genome_build(
-                case_id=self.analysis_obj.case.internal_id
-            ),
-        )
-        # raredisease_analysis_data: NextflowAnalysis = self.raredisease_analysis_api.get_latest_metadata(
-        #     self.analysis_obj.case.internal_id
-        # )
-        # self.load_config.rank_score_threshold = rank_score_threshold
-        # self.load_config.rank_model_version = raredisease_analysis_data.rank_model_version
-        # self.load_config.sv_rank_model_version = raredisease_analysis_data.sv_rank_model_version
-
-        self.load_config.gene_panels = (
+        load_config = ScoutLoadConfig()
+        load_config = self.add_common_info_to_load_config(load_config=load_config)
+        load_config.gene_panels = (
             self.raredisease_analysis_api.get_aggregated_panels(
                 customer_id=self.analysis_obj.case.customer.internal_id,
                 default_panels=set(self.analysis_obj.case.panels),
             )
-            or None
         )
-        self.include_case_files()
+        load_config = self.include_case_files(load_config=load_config)
+        load_config.samples = self._get_sample_information(load_config=load_config)
+        load_config = self.include_pedigree_picture(load_config=load_config)
+        load_config.custom_images = self.load_custom_image_sample()
+        return load_config
 
+
+    def _get_sample_information(self, load_config: ScoutLoadConfig):
         LOG.info("Building samples")
-        db_sample: CaseSample
-        for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        self.include_pedigree_picture()
+        db_sample: Sample
+        for db_sample in self.analysis_obj.case.samples:
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        return load_config
 
-        LOG.info("Adding custom images")
-        self.load_config.custom_images = self.build_custom_image_sample()
 
-    def include_pedigree_picture(self) -> None:
+    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                self.load_config.madeline = str(svg_path)
+                load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
+        return load_config
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutRarediseaseIndividual:
-        """Build a sample with specific information"""
+        """Build a sample with specific information."""
         config_sample = ScoutRarediseaseIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         self.include_sample_files(config_sample=config_sample)
-        config_sample.father = (
-            case_sample.father.internal_id
-            if case_sample.father
-            else RelationshipStatus.HAS_NO_PARENT
-        )
-        config_sample.mother = (
-            case_sample.mother.internal_id
-            if case_sample.mother
-            else RelationshipStatus.HAS_NO_PARENT
-        )
         return config_sample
 
-    def build_custom_image_sample(self) -> CustomImages:
-        "Build custom images config"
-
+    def load_custom_image_sample(self) -> CustomImages:
+        """Build custom images config."""
+        LOG.info("Adding custom images")
         eklipse_images: list = []
         for db_sample in self.analysis_obj.case.links:
             sample_id: str = db_sample.sample.internal_id
@@ -137,23 +118,20 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_custom_images = CustomImages(case_images=case_images)
         return config_custom_images
 
-    def include_case_files(self) -> None:
-        """Include case level files for mip case"""
+    def include_case_files(self, load_config: ScoutLoadConfig) -> None:
+        """Include case level files for mip case."""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
-            self._include_case_file(scout_key)
+            self._include_case_file(load_config, scout_key)
 
-    def _include_case_file(self, scout_key) -> None:
+    def _include_case_file(self, load_config: ScoutLoadConfig, scout_key: str) -> ScoutLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
-        setattr(
-            self.load_config,
-            scout_key,
-            self.get_file_from_hk(getattr(self.case_tags, scout_key)),
-        )
+        load_config[scout_key] = self.get_file_from_hk(getattr(self.case_tags, scout_key))
+        return load_config
 
-    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
-        """Include sample level files that are optional for mip samples"""
+    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> ScoutRarediseaseIndividual:
+        """Include sample level files that are optional for mip samples."""
         LOG.info("Including RAREDISEASE specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.vcf2cytosure = self.get_sample_file(
@@ -195,38 +173,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
+        return config_sample
 
     @staticmethod
-    def is_family_case(load_config: ScoutLoadConfig) -> bool:
-        """Check if there are any linked individuals in a case"""
-        for sample in load_config.samples:
-            if sample.mother and sample.mother != "0":
-                return True
-            if sample.father and sample.father != "0":
-                return True
-        return False
-
-    @staticmethod
-    def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
-        return len(load_config.samples) > 1
-
-    def run_madeline(self, family_obj: Case) -> Path:
-        """Generate a madeline file for an analysis. Use customer sample names"""
-        samples = [
-            {
-                "sample": link_obj.sample.name,
-                "sex": link_obj.sample.sex,
-                "father": link_obj.father.name if link_obj.father else None,
-                "mother": link_obj.mother.name if link_obj.mother else None,
-                "status": link_obj.status,
-            }
-            for link_obj in family_obj.links
-        ]
-        svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
-        return svg_path
-
-    @staticmethod
-    def extract_generic_filepath(file_path: str | None) -> str | None:
+    def remove_chromosome_substring(file_path: str | None) -> str | None:
         """Remove a file's suffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
@@ -236,7 +186,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return re.sub(r"(_(?:\d+|X|Y))\.png$", "", file_path)
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
-        """Include the CRAM alignment file for a sample"""
+        """Include the CRAM alignment file for a sample."""
         sample_id: str = config_sample.sample_id
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id

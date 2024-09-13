@@ -92,17 +92,6 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutMipIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
-        config_sample.father = (
-            case_sample.father.internal_id
-            if case_sample.father
-            else RelationshipStatus.HAS_NO_PARENT
-        )
-        config_sample.mother = (
-            case_sample.mother.internal_id
-            if case_sample.mother
-            else RelationshipStatus.HAS_NO_PARENT
-        )
-
         return config_sample
 
     def include_case_files(self):
@@ -131,22 +120,22 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.mt_bam = self.get_sample_file(
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
-        config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
+        config_sample.chromograph_images.autozygous = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.coverage = self.extract_generic_filepath(
+        config_sample.chromograph_images.coverage = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_regions = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_sites = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
@@ -166,16 +155,6 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
 
     @staticmethod
-    def extract_generic_filepath(file_path: str | None) -> str | None:
-        """Remove a file's suffix and identifying integer or X/Y
-        Example:
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
-        if file_path is None:
-            return file_path
-        return re.split("(\d+|X|Y)\.png", file_path)[0]
-
-    @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
         """Check if there are any linked individuals in a case"""
         for sample in load_config.samples:
@@ -185,21 +164,3 @@ class MipConfigBuilder(ScoutConfigBuilder):
                 return True
         return False
 
-    @staticmethod
-    def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
-        return len(load_config.samples) > 1
-
-    def run_madeline(self, family_obj: Case) -> Path:
-        """Generate a madeline file for an analysis. Use customer sample names"""
-        samples = [
-            {
-                "sample": link_obj.sample.name,
-                "sex": link_obj.sample.sex,
-                "father": link_obj.father.name if link_obj.father else None,
-                "mother": link_obj.mother.name if link_obj.mother else None,
-                "status": link_obj.status,
-            }
-            for link_obj in family_obj.links
-        ]
-        svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
-        return svg_path

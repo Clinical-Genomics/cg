@@ -45,11 +45,6 @@ class RarediseaseUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
-        else:
-            LOG.warning(
-                f"There is nothing to upload to Scout for case {case.internal_id} and "
-                f"the specified data delivery ({case.data_delivery})"
-            )
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
