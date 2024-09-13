@@ -417,9 +417,9 @@ class UploadScoutAPI:
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = GenomeVersion(
+            rna_genome_build = (GenomeVersion(
                 get_genome_build(case_id=case_id, status_db=status_db)
-            ).to_scout_format()
+            )).to_scout_format()
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
