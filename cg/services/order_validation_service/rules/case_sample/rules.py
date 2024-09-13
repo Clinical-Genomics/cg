@@ -46,7 +46,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
-    is_sample_tube_name_reused_in_order,
+    is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
     validate_subject_ids_in_case,
@@ -353,7 +353,7 @@ def validate_tube_container_name_unique(
 
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_sample_tube_name_reused_in_order(sample=sample, counter=counter):
+            if is_sample_tube_name_reused(sample=sample, counter=counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
