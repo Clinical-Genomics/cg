@@ -44,6 +44,7 @@ from cg.models.nf_analysis import (
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.get_genome_build import get_genome_build
+
 LOG = logging.getLogger(__name__)
 
 
@@ -871,7 +872,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        get_genome_build(case_id=case_id, status_db=self.status_db)
+        return get_genome_build(case_id=case_id, status_db=self.status_db)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
