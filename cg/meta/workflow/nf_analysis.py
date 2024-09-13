@@ -5,6 +5,7 @@ from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
 
+from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -109,7 +110,12 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
+        return False
+
+    @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variant export needs to be exported it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -376,6 +382,12 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
+        if self.is_managed_variants_required:
+            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
+            if dry_run:
+                echo_lines(lines=vcf_lines)
+            else:
+                self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -412,7 +424,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def _run_analysis_with_tower(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
-    ) -> None:
+    ) -> str | None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
         if command_args.resume:
@@ -434,6 +446,7 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
+            return tower_id
         LOG.info(self.process.stdout)
 
     def get_command_args(
@@ -501,7 +514,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
             self.check_analysis_ongoing(case_id=case_id)
             LOG.info(f"Running analysis for {case_id}")
-            self.run_analysis(
+            tower_workflow_id: str | None = self.run_analysis(
                 case_id=case_id,
                 command_args=command_args,
                 use_nextflow=use_nextflow,
@@ -519,7 +532,10 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError
 
         if not dry_run:
-            self.add_pending_trailblazer_analysis(case_id=case_id)
+            self.add_pending_trailblazer_analysis(
+                case_id=case_id,
+                tower_workflow_id=tower_workflow_id,
+            )
 
     def run_analysis(
         self,
@@ -527,7 +543,7 @@ class NfAnalysisAPI(AnalysisAPI):
         command_args: NfCommandArgs,
         use_nextflow: bool,
         dry_run: bool = False,
-    ) -> None:
+    ) -> str | None:
         """Execute run analysis with given options."""
         if use_nextflow:
             self._run_analysis_with_nextflow(
@@ -536,7 +552,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
         else:
-            self._run_analysis_with_tower(
+            return self._run_analysis_with_tower(
                 case_id=case_id,
                 command_args=command_args,
                 dry_run=dry_run,
@@ -627,11 +643,10 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
         """Return search patterns for MultiQC. Each key is a search pattern and each value
         corresponds to the metric ID to set in the metrics deliverables file.
-        Multiple search patterns can be added. Ideally patterns used should be sample ids, e.g.
+        Multiple search patterns can be added. Ideally, used patterns should be sample ids, e.g.
         {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
-        return search_patterns
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
+        return {sample_id: sample_id for sample_id in sample_ids}
 
     @staticmethod
     def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
@@ -645,11 +660,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 deduplicated_metrics.append(metric)
         return deduplicated_metrics
 
+    def get_multiqc_data_json(self, case_id: str) -> MultiqcDataJson:
+        return MultiqcDataJson(**read_json(file_path=self.get_multiqc_json_path(case_id=case_id)))
+
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
+        multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
         for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
@@ -664,6 +680,14 @@ class NfAnalysisAPI(AnalysisAPI):
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
+    @staticmethod
+    def _is_pattern_found(pattern: str, text: str, exact_match: bool) -> bool:
+        if exact_match:
+            is_pattern_found: bool = pattern == text
+        else:
+            is_pattern_found: bool = pattern in text
+        return is_pattern_found
+
     def get_metrics_from_multiqc_json_with_pattern(
         self,
         search_pattern: str,
@@ -674,13 +698,11 @@ class NfAnalysisAPI(AnalysisAPI):
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
         for section in multiqc_json.report_general_stats_data:
-            for section_name, section_values in section.items():
-                if exact_match:
-                    is_pattern_found: bool = search_pattern == section_name
-                else:
-                    is_pattern_found: bool = search_pattern in section_name
-                if is_pattern_found:
-                    for metric_name, metric_value in section_values.items():
+            for subsection, metrics_dict in section.items():
+                if self._is_pattern_found(
+                    pattern=search_pattern, text=subsection, exact_match=exact_match
+                ):
+                    for metric_name, metric_value in metrics_dict.items():
                         metric: MetricsBase = self.get_multiqc_metric(
                             metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
                         )
@@ -745,7 +767,12 @@ class NfAnalysisAPI(AnalysisAPI):
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
-            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            samples = self.status_db.get_samples_by_case_id(case_id=case_id)
+            for sample in samples:
+                trailblazer_comment = str(error).replace(
+                    f"{sample.internal_id} - ", f"{sample.name} ({sample.internal_id}) - "
+                )
+            self.trailblazer_api.add_comment(case_id=case_id, comment=trailblazer_comment)
             raise MetricsQCError from error
         except CgError as error:
             LOG.error(f"Could not create metrics deliverables file: {error}")
@@ -776,7 +803,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def store_analysis_housekeeper(
-        self, case_id: str, dry_run: bool = False, force: bool = False
+        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
     ) -> None:
         """
         Store a finished Nextflow analysis in Housekeeper and StatusDB.
@@ -789,7 +816,9 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_statusdb(
+                case_id=case_id, comment=comment, dry_run=dry_run, force=force
+            )
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
             raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
@@ -800,7 +829,9 @@ class NfAnalysisAPI(AnalysisAPI):
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
 
-    def store(self, case_id: str, dry_run: bool = False, force: bool = False):
+    def store(
+        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
+    ):
         """Generate deliverable files for a case and store in Housekeeper if they
         pass QC metrics checks."""
         is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id)
@@ -822,7 +853,9 @@ class NfAnalysisAPI(AnalysisAPI):
             self.metrics_deliver(case_id=case_id, dry_run=dry_run)
         LOG.info(f"Storing analysis for {case_id}")
         self.report_deliver(case_id=case_id, dry_run=dry_run, force=force)
-        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        self.store_analysis_housekeeper(
+            case_id=case_id, comment=comment, dry_run=dry_run, force=force
+        )
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

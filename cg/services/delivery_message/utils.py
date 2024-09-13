@@ -14,7 +14,11 @@ from cg.services.delivery_message.messages import (
     ScoutMessage,
     StatinaMessage,
 )
+from cg.services.delivery_message.messages.analysis_message import AnalysisMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
+from cg.services.delivery_message.messages.fastq_analysis_message import (
+    FastqAnalysisMessage,
+)
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
@@ -43,9 +47,11 @@ def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
 
 
 message_map = {
+    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: ScoutMessage,
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
     DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
     DataDelivery.STATINA: StatinaMessage,
@@ -53,10 +59,10 @@ message_map = {
 
 
 def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
-    if has_mwx_samples(case):
+    if has_mwx_samples(case) or has_vwg_samples(case):
         return MicrosaltMwxMessage()
 
-    if has_mwr_samples(case) or has_vwg_samples(case):
+    if has_mwr_samples(case):
         return MicrosaltMwrMessage()
 
     app_tag: str = get_case_app_tag(case)

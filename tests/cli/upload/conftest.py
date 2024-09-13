@@ -20,8 +20,6 @@ from cg.constants.housekeeper_tags import (
     HkMipAnalysisTag,
 )
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliverAPI
-from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -197,17 +195,6 @@ def fastq_context(
     cg_context: CGConfig,
 ) -> CGConfig:
     """Fastq context to use in cli"""
-
-    base_context.meta_apis["delivery_api"] = DeliverAPI(
-        store=base_context.status_db,
-        hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
-        delivery_type="fastq",
-        project_base_path=Path(base_context.delivery_path),
-        fastq_file_service=FastqConcatenationService(),
-    )
-    base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api
     return base_context
 

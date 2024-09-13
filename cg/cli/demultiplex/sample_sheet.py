@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError
@@ -26,7 +26,7 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     Validate a sample sheet.
     """
     LOG.info(f"Validating {sheet} sample sheet")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     try:
         sample_sheet_api.validate_sample_sheet(Path(sheet))
     except (CgError, ValidationError) as error:
@@ -46,7 +46,7 @@ def translate_sample_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool
     a Bcl2Fastq sample sheet in it.
     """
     LOG.info(f"Translating Bcl2Fastq sample sheet for flow cell {flow_cell_name}")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.translate_sample_sheet(flow_cell_name=flow_cell_name)
 
@@ -64,7 +64,7 @@ def create_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool, force: b
     Search the flow cell in the directory specified in config.
     """
     LOG.info(f"Getting a valid sample sheet for flow cell {flow_cell_name}")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force)
     sample_sheet_api.get_or_create_sample_sheet(flow_cell_name)
@@ -79,7 +79,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     Search flow cell directories for run parameters and create a sample sheets based on the
     information.
     """
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force=False)
     sample_sheet_api.get_or_create_all_sample_sheets()

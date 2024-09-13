@@ -62,30 +62,34 @@ class DataAnalysisModel(BaseModel):
     Model that describes the workflow attributes used for the data analysis
 
     Attributes:
+        comment: prod bioinfo comment regarding the data analysis; source: StatusDB/analysis/comment
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
+        delivered_files: list of analysis case files to be delivered
+        genome_build: build version of the genome reference; source: workflow
+        panels: list of case specific panels; source: StatusDB/family/panels
+        pons: panel of normals used for analysis; source: workflow
+        scout_files: list of file names uploaded to Scout
+        type: analysis type carried out; source: workflow
+        variant_callers: variant-calling filters; source: workflow
         workflow: actual workflow used for analysis; source: statusDB/analysis/workflow
         workflow_version: workflow version; source: statusDB/analysis/workflow_version
-        type: analysis type carried out; source: workflow
-        genome_build: build version of the genome reference; source: workflow
-        variant_callers: variant-calling filters; source: workflow
-        panels: list of case specific panels; source: StatusDB/family/panels
-        scout_files: list of file names uploaded to Scout
-        delivered_files: list of analysis case files to be delivered
     """
 
+    comment: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
-    genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
-    panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
-    scout_files: ScoutReportFiles
     delivered_files: Annotated[
         list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
     ] = None
+    genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
+    pons: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
+    scout_files: ScoutReportFiles
+    workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":
@@ -138,3 +142,17 @@ class ReportModel(BaseModel):
     date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
     accredited: bool | None = None
+
+
+class ReportRequiredFields(BaseModel):
+    """Model that defines the mandatory fields of the different sections of the delivery report."""
+
+    applications: dict[str, list[str]]
+    case: list[str]
+    customer: list[str]
+    data_analysis: list[str]
+    metadata: dict[str, list[str]]
+    methods: dict[str, list[str]]
+    report: list[str]
+    samples: dict[str, list[str]]
+    timestamps: dict[str, list[str]]

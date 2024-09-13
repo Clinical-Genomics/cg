@@ -1,6 +1,5 @@
 """Module for Flask-Admin views"""
 
-from datetime import datetime
 from gettext import gettext
 
 from flask import flash, redirect, request, session, url_for
@@ -10,8 +9,7 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
-from cg.server.ext import db
-from cg.store.models import Sample
+from cg.server.ext import db, sample_service
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -31,6 +29,18 @@ def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
     return Markup("%s" % model.priority.name) if model else ""
+
+
+def view_flow_cell_internal_id(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.internal_id)
+
+
+def view_flow_cell_model(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.model)
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
@@ -370,25 +380,6 @@ class CaseView(BaseView):
             flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
-class FlowcellView(BaseView):
-    """Admin view for Model.Flowcell"""
-
-    column_default_sort = ("sequenced_at", True)
-    column_editable_list = ["status"]
-    column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name", "status"]
-    column_searchable_list = ["name"]
-
-    @staticmethod
-    def view_flow_cell_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return Markup(
-            "<a href='%s'>%s</a>"
-            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
-        )
-
-
 class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
@@ -431,7 +422,7 @@ class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["is_primary"]
+    column_editable_list = ["is_primary", "comment"]
     column_filters = ["workflow", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
@@ -439,6 +430,70 @@ class AnalysisView(BaseView):
         "case.name",
     ]
     form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
+
+
+class IlluminaFlowCellView(BaseView):
+    """Admin view for Model.IlluminaSequencingRun"""
+
+    column_list = (
+        "internal_id",
+        "model",
+        "sequencer_type",
+        "sequencer_name",
+        "data_availability",
+        "has_backup",
+        "total_reads",
+        "total_undetermined_reads",
+        "percent_undetermined_reads",
+        "percent_q30",
+        "mean_quality_score",
+        "total_yield",
+        "yield_q30",
+        "cycles",
+        "demultiplexing_software",
+        "demultiplexing_software_version",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
+    )
+    column_formatters = {"internal_id": view_flow_cell_internal_id, "model": view_flow_cell_model}
+    column_default_sort = ("sequencing_completed_at", True)
+    column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
+    column_editable_list = ["data_availability"]
+    column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
+    column_sortable_list = [
+        ("internal_id", "device.internal_id"),
+        "sequencer_type",
+        "sequencer_name",
+        "data_availability",
+        "has_backup",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
+    ]
+
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                "<a href='%s'>%s</a>"
+                % (
+                    url_for(
+                        "illuminasequencingrun.index_view",
+                        search=model.instrument_run.device.internal_id,
+                    ),
+                    model.instrument_run.device.internal_id,
+                )
+            )
+            if model.instrument_run.device
+            else ""
+        )
 
 
 class OrganismView(BaseView):
@@ -496,7 +551,13 @@ class SampleView(BaseView):
         "last_sequenced_at",
         "sex",
     ]
-    column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
+    column_filters = [
+        "customer.internal_id",
+        "priority",
+        "sex",
+        "application_version.application",
+        "capture_kit",
+    ]
     column_formatters = {
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
@@ -541,64 +602,12 @@ class SampleView(BaseView):
         "Are you sure you want to cancel the selected samples?",
     )
     def cancel_samples(self, entry_ids: list[str]) -> None:
-        """
-        Action for cancelling samples:
-            - Comments each sample being cancelled with date and user.
-            - Deletes any relationship between the cancelled samples and cases.
-            - Deletes any cases that only contain samples being cancelled.
-        """
-        all_associated_case_ids: set = set()
-
-        for entry_id in entry_ids:
-            sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
-
-            sample_case_ids: list[str] = [
-                case_sample.case.internal_id for case_sample in sample.links
-            ]
-            all_associated_case_ids.update(sample_case_ids)
-
-            db.delete_relationships_sample(sample=sample)
-            self.write_cancel_comment(sample=sample)
-
-        case_ids: list[str] = list(all_associated_case_ids)
-        db.delete_cases_without_samples(case_internal_ids=case_ids)
-        cases_with_remaining_samples: list[str] = db.filter_cases_with_samples(case_ids=case_ids)
-
-        self.display_cancel_confirmation(
-            sample_entry_ids=entry_ids, remaining_cases=cases_with_remaining_samples
+        user_email: str | None = session.get("user_email")
+        message: str = sample_service.cancel_samples(
+            sample_ids=entry_ids,
+            user_email=user_email,
         )
-
-    def write_cancel_comment(self, sample: Sample) -> None:
-        """Add comment to sample with date and user cancelling the sample."""
-        user_name: str = db.get_user_by_email(session.get("user_email")).name
-        date: str = datetime.now().strftime("%Y-%m-%d")
-        comment: str = f"Cancelled {date} by {user_name}"
-
-        db.update_sample_comment(sample=sample, comment=comment)
-
-    def display_cancel_confirmation(
-        self, sample_entry_ids: list[str], remaining_cases: list[str]
-    ) -> None:
-        """Show a summary of the cancelled samples and any cases in which other samples were present."""
-        samples: str = "sample" if len(sample_entry_ids) == 1 else "samples"
-        cases: str = "case" if len(remaining_cases) == 1 else "cases"
-
-        message: str = f"Cancelled {len(sample_entry_ids)} {samples}. "
-        case_message: str = ""
-
-        for case_id in remaining_cases:
-            case_message = f"{case_message} {case_id},"
-
-        case_message = case_message.strip(",")
-
-        if remaining_cases:
-            message += (
-                f"Found {len(remaining_cases)} {cases} with additional samples: {case_message}."
-            )
-        else:
-            message += "No case contained additional samples."
-
-        flash(message=message)
+        flash(message)
 
 
 class DeliveryView(BaseView):
@@ -640,15 +649,20 @@ class UserView(BaseView):
     edit_modal = True
 
 
-class SampleLaneSequencingMetricsView(BaseView):
-    """Admin view for the Model.SampleLaneSequencingMetrics."""
-
-    column_filters = ["sample_internal_id", "flow_cell_name"]
-    column_searchable_list = ["sample_internal_id", "flow_cell_name"]
-    create_modal = True
-    edit_modal = True
-
+class IlluminaSampleSequencingMetricsView(BaseView):
+    column_list = [
+        "flow_cell",
+        "sample",
+        "flow_cell_lane",
+        "total_reads_in_lane",
+        "base_passing_q30_percent",
+        "base_mean_quality_score",
+        "yield_",
+        "yield_q30",
+        "created_at",
+    ]
     column_formatters = {
-        "flowcell": FlowcellView.view_flow_cell_link,
+        "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
         "sample": SampleView.view_sample_link,
     }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]

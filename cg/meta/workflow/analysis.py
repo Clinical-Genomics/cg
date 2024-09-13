@@ -10,15 +10,18 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
+from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
+    CustomerId,
     FileFormat,
+    GenomeVersion,
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.scout import ScoutExportFileName
+from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
@@ -34,14 +37,14 @@ from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+def add_gene_panel_combo(gene_panels: set[str]) -> set[str]:
     """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
     additional_panels = set()
-    for panel in default_panels:
+    for panel in gene_panels:
         if panel in GenePanelCombo.COMBO_1:
             additional_panels |= GenePanelCombo.COMBO_1.get(panel)
-    default_panels |= additional_panels
-    return default_panels
+    gene_panels |= additional_panels
+    return gene_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -192,6 +195,10 @@ class AnalysisAPI(MetaAPI):
 
         return application_types.pop()
 
+    def are_case_samples_rna(self, case_id: str) -> bool:
+        analysis_type: str = self.get_case_application_type(case_id)
+        return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
+
     def get_case_source_type(self, case_id: str) -> str | None:
         """
         Return the sample source type of a case.
@@ -239,18 +246,21 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
+    def upload_bundle_statusdb(
+        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
+    ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
         analysis_start: datetime.date = self.get_bundle_created_date(case_id)
         workflow_version: str = self.get_workflow_version(case_id)
-        new_analysis: Case = self.status_db.add_analysis(
+        new_analysis: Analysis = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
-            completed_at=datetime.now(),
+            completed_at=datetime.now() if not force else None,
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
+            comment=comment,
         )
         new_analysis.case = case_obj
         if dry_run:
@@ -266,7 +276,11 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id: str) -> None:
+    def add_pending_trailblazer_analysis(
+        self,
+        case_id: str,
+        tower_workflow_id: str | None = None,
+    ) -> None:
         self.check_analysis_ongoing(case_id)
         application_type: str = self.get_application_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
@@ -279,6 +293,7 @@ class AnalysisAPI(MetaAPI):
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
+        is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
             analysis_type=application_type,
             case_id=case_id,
@@ -290,7 +305,13 @@ class AnalysisAPI(MetaAPI):
             ticket=ticket,
             workflow=workflow,
             workflow_manager=workflow_manager,
+            tower_workflow_id=tower_workflow_id,
+            is_hidden=is_case_for_development,
         )
+
+    def _is_case_for_development(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -537,6 +558,10 @@ class AnalysisAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        return []
+
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
@@ -551,7 +576,9 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -559,7 +586,9 @@ class AnalysisAPI(MetaAPI):
         except FileNotFoundError:
             self.clean_analyses(case_id)
 
-        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+        if skip_confirmation or click.confirm(
+            f"Are you sure you want to remove all files in {case_path}?"
+        ):
             if case_path.is_symlink():
                 LOG.warning(
                     f"Will not automatically delete symlink: {case_path}, delete it manually",
@@ -571,22 +600,22 @@ class AnalysisAPI(MetaAPI):
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
 
-    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+    def _is_illumina_run_check_applicable(self, case_id) -> bool:
         """Returns true if the case is neither down sampled nor external."""
         return not (
             self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
-    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
-        """Check if flow cells are on disk for given case. If not, request flow cells."""
-        if not self._is_flow_cell_check_applicable(case_id):
+    def ensure_illumina_run_on_disk(self, case_id: str) -> None:
+        """Check if Illumina sequencing runs are on disk for given case."""
+        if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
-                "Flow cell check is not applicable - "
+                "Illumina run check is not applicable - "
                 "the case is either down sampled or external."
             )
             return
-        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
-            self.status_db.request_flow_cells_for_case(case_id)
+        if not self.status_db.are_all_illumina_runs_on_disk(case_id=case_id):
+            self.status_db.request_sequencing_runs_for_case(case_id)
 
     def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
@@ -602,10 +631,10 @@ class AnalysisAPI(MetaAPI):
 
     def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
-        if self._is_flow_cell_check_applicable(
+        if self._is_illumina_run_check_applicable(
             case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+        ) and not self.status_db.are_all_illumina_runs_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - not all Illumina runs present on disk.")
             return True
         else:
             if not self.are_all_spring_files_present(case_id):
@@ -622,9 +651,9 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):
-        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
-        self.ensure_flow_cells_on_disk(case_id)
+        self.ensure_illumina_run_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
             spring_archive_api = SpringArchiveAPI(
@@ -691,17 +720,16 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if customer should use the gene panel master list
+        """Check if customer is collaborator for gene panel master list
         and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO.
+        If not, add gene panel combo and broad non-specific gene panels.
         Return an aggregated gene panel."""
-        master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
-            master_list
+        if GenePanelMasterList.is_customer_collaborator_and_panels_in_gene_panels_master_list(
+            customer_id=customer_id, gene_panels=default_panels
         ):
-            return master_list
-        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+            return GenePanelMasterList.get_panel_names()
+        all_panels: set[str] = add_gene_panel_combo(gene_panels=default_panels)
+        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
         return list(all_panels)
 
     def run_analysis(self, *args, **kwargs):
@@ -722,3 +750,32 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
+
+    @staticmethod
+    def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
+        """Translates a genome reference assembly to its corresponding alternate name."""
+        translation_map = {
+            GenomeVersion.GRCh37: GenomeVersion.HG19,
+            GenomeVersion.GRCh38: GenomeVersion.HG38,
+            GenomeVersion.HG19: GenomeVersion.GRCh37,
+            GenomeVersion.HG38: GenomeVersion.GRCh38,
+        }
+        return translation_map.get(genome_version, genome_version)
+
+    def get_sample_coverage(
+        self, case_id: str, sample_id: str, gene_ids: list[int]
+    ) -> CoverageMetrics | None:
+        """Return sample coverage data from Chanjo2."""
+        raise NotImplementedError
+
+    def get_scout_upload_case_tags(self):
+        """Return workflow specific upload case tags."""
+        raise NotImplementedError
+
+    def get_gene_ids_from_scout(self, panels: list[str]) -> list[int]:
+        """Return HGNC IDs of genes from specified panels using the Scout API."""
+        gene_ids: list[int] = []
+        for panel in panels:
+            genes: list[dict] = self.scout_api.get_genes(panel)
+            gene_ids.extend(gene.get(HGNC_ID) for gene in genes if gene.get(HGNC_ID) is not None)
+        return gene_ids

@@ -6,7 +6,6 @@ import traceback
 
 import click
 
-from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
@@ -38,7 +37,9 @@ from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
+from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -82,7 +83,13 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = MipRNAUploadAPI(config_object)
         elif case.data_analysis == Workflow.MICROSALT:
             upload_api = MicrosaltUploadAPI(config_object)
-        elif case.data_analysis in {Workflow.RNAFUSION, Workflow.TOMTE, Workflow.TAXPROFILER}:
+        elif case.data_analysis == Workflow.RAREDISEASE:
+            upload_api = RarediseaseUploadAPI(config_object)
+        elif case.data_analysis in {
+            Workflow.RNAFUSION,
+            Workflow.TOMTE,
+            Workflow.TAXPROFILER,
+        }:
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
 
         context.obj.meta_apis["upload_api"] = upload_api
@@ -124,7 +131,6 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
     sys.exit(exit_code)
 
 
-upload.add_command(auto_fastq)
 upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
 upload.add_command(nipt)
@@ -132,7 +138,6 @@ upload.add_command(process_solved)
 upload.add_command(processed_solved)
 upload.add_command(upload_available_observations_to_loqusdb)
 upload.add_command(upload_case_to_scout)
-upload.add_command(upload_clinical_delivery)
 upload.add_command(upload_coverage)
 upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_genotypes)

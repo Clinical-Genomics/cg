@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Flowcell, Sample
+from cg.store.models import Case, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -190,14 +190,17 @@ def test_get_sample_cases_with_case(
         assert link.case.internal_id in result.output
 
 
-def test_hide_sample_flowcells_without_flowcell(
-    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
+def test_hide_sample_flow_cells_without_flow_cell(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test that we can query samples and hide flow cell even when there are none."""
     # GIVEN a database with a sample without related flow cell
-    sample = helpers.add_sample(disk_store)
-    returned_flow_cell: list[Flowcell] = disk_store._get_query(table=Flowcell)
-    assert not list(returned_flow_cell)
+    store: Store = base_context.status_db
+    sample = helpers.add_sample(store)
+    store_sequencing_runs: list[IlluminaSequencingRun] = store._get_query(
+        table=IlluminaSequencingRun
+    ).all()
+    assert not list(store_sequencing_runs)
 
     # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
@@ -208,23 +211,36 @@ def test_hide_sample_flowcells_without_flowcell(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_get_sample_flowcells_with_flowcell(
-    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
+def test_get_sample_flow_cells_with_flow_cell(
+    cli_runner: CliRunner,
+    new_demultiplex_context: CGConfig,
+    novaseq_x_flow_cell_id: str,
+    sample_id_sequenced_on_multiple_flow_cells: str,
 ):
     """Test query samples and hide flow cell, ensuring that no flow cell name is in the output."""
-    # GIVEN a database with a sample and a related flow cell
-    flow_cell = helpers.add_flow_cell(disk_store)
-    sample = helpers.add_sample(disk_store, flowcell=flow_cell)
-    returned_flow_cell: Flowcell = disk_store.get_flow_cell_by_name(flow_cell_name=flow_cell.name)
-    assert sample in returned_flow_cell.samples
+    # GIVEN a populated store
+    store: Store = new_demultiplex_context.status_db
+
+    # GIVEN that the store has a sample
+    sample: Sample = store.get_sample_by_internal_id(
+        internal_id=sample_id_sequenced_on_multiple_flow_cells
+    )
+    assert sample
+
+    # GIVEN that the store has a sequencing run associated with the sample
+    sequencing_run: IlluminaSequencingRun = store.get_illumina_sequencing_run_by_device_internal_id(
+        novaseq_x_flow_cell_id
+    )
+    assert sequencing_run
+    assert sample in sequencing_run.device.samples
 
     # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
-        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=base_context
+        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=new_demultiplex_context
     )
 
     # THEN the process should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the related flow cell should be listed in the output
-    assert flow_cell.name not in result.output
+    assert sequencing_run.device.internal_id not in result.output
