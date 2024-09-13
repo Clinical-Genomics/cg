@@ -1,3 +1,5 @@
+from collections import Counter
+
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import (
     ALLOWED_SKIP_RC_BUFFERS,
@@ -349,11 +351,11 @@ def validate_tube_container_name_unique(
 ) -> list[ContainerNameRepeatedError]:
     errors: list[ContainerNameRepeatedError] = []
 
-    counter = get_counter_container_names(order)
+    container_name_counter: Counter = get_counter_container_names(order)
 
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_sample_tube_name_reused(sample=sample, counter=counter):
+            if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
