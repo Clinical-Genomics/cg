@@ -352,17 +352,17 @@ class ScoutAPI:
                 "Something went wrong when uploading rna genome build file"
             ) from error
 
-    def load_variant_outlier(self, dna_case_id: str) -> None:
+    def load_variant_outlier(self, case_id: str) -> None:
         """Load a rna fraser file into a case in the database."""
 
         upload_command: list[str] = [
             "load",
             "variants",
             "--outlier",
-            dna_case_id,
+            case_id,
         ]
         try:
-            LOG.info(f"Loading variants outlier for case {dna_case_id}")
+            LOG.info(f"Loading variants outlier for case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError("Something went wrong when loading variants outlier") from error
