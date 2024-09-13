@@ -19,4 +19,3 @@ def get_genome_build(case_id: str, status_db: Store) -> GenomeVersion:
             f"Samples linked to case {case_id} have different reference genome versions set"
         )
     raise CgError(f"No reference genome specified for case {case_id}")
-
