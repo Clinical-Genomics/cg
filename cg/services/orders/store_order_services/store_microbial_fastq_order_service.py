@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.sample_base import StatusEnum, SexEnum
 
 from cg.constants import Workflow, DataDelivery
 from cg.models.orders.order import OrderIn
@@ -15,7 +15,7 @@ from cg.store.store import Store
 class StoreMicrobialFastqOrderService(StoreOrderService):
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
-        self.status = status_db
+        self.status_db = status_db
         self.lims = lims_service
 
     def store_order(self, order: OrderIn) -> dict:
@@ -64,9 +64,9 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         customer: Customer = self._get_customer(customer_id)
         new_samples: list[Sample] = []
         for sample in items:
-            case_name: str = sample["name"]
+            case_name: str = f'{sample["name"]}-case'
             case: Case = self._create_case_for_sample(
-                sample=sample, customer=customer, case_name=case_name
+                sample=sample, customer=customer, case_name=case_name, ticket_id=ticket_id
             )
             db_sample: Sample = self._create_sample(
                 sample_dict=sample,
@@ -78,31 +78,30 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             db_sample = self._add_application_to_sample(
                 sample=db_sample, application_tag=sample["application"]
             )
-            case_sample: CaseSample = self.status.relate_sample(
+            case_sample: CaseSample = self.status_db.relate_sample(
                 case=case, sample=db_sample, status=StatusEnum.unknown
             )
-            self.status.add_multiple_items_to_store([case, db_sample, case_sample])
+            self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
             new_samples.append(db_sample)
-        self.status.commit_to_store()
+        self.status_db.commit_to_store()
         return new_samples
 
     def _get_customer(self, customer_id: str) -> Customer:
-        if customer := self.status.get_customer_by_internal_id(customer_id):
+        if customer := self.status_db.get_customer_by_internal_id(customer_id):
             return customer
         raise EntryNotFoundError(f"could not find customer: {customer_id}")
 
-    def _create_case_for_sample(self, sample: dict, customer: Customer, case_name: str) -> Case:
-        if case := self.status.get_case_by_name_and_customer(
-            case_name=case_name, customer=customer
-        ):
-            return case
-        case: Case = self.status.add_case(
+    def _create_case_for_sample(
+        self, sample: dict, customer: Customer, case_name: str, ticket_id: str
+    ) -> Case:
+        if self.status_db.get_case_by_name_and_customer(case_name=case_name, customer=customer):
+            raise ValueError(f"Case already exists: {case_name}.")
+        case: Case = self.status_db.add_case(
             data_analysis=Workflow.FASTQ,
             data_delivery=DataDelivery.FASTQ,
             name=case_name,
-            panels=None,
             priority=sample["priority"],
-            ticket=case_name,
+            ticket=ticket_id,
         )
         case.customer = customer
         return case
@@ -111,7 +110,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self, sample_dict: dict, order, ordered, ticket_id: str, customer: Customer
     ) -> Sample:
 
-        return self.status.add_sample(
+        return self.status_db.add_sample(
             name=sample_dict["name"],
             customer=customer,
             sex=SexEnum.UNKNOWN,
@@ -123,7 +122,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         )
 
     def _add_application_to_sample(self, sample: Sample, application_tag: str) -> Sample:
-        if application_version := self.status.get_current_application_version_by_tag(
+        if application_version := self.status_db.get_current_application_version_by_tag(
             tag=application_tag
         ):
             sample.application_version = application_version
