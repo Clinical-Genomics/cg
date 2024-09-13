@@ -32,6 +32,7 @@ from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVe
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisTypes
@@ -2539,8 +2540,13 @@ def raredisease_parameters_default(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
+        skip_germlinecnvcaller=False,
         analysis_type=AnalysisTypes.WES,
         save_mapped_as_cram=True,
+        vcfanno_extra_resources=str(
+            Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
+        ),
+        local_genomes=Path(raredisease_dir, "references").as_posix(),
     )
 
 
@@ -2552,6 +2558,9 @@ def raredisease_context(
     trailblazer_api: MockTB,
     raredisease_case_id: str,
     sample_id: str,
+    father_sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     wgs_application_tag: str,
@@ -2582,6 +2591,16 @@ def raredisease_context(
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=wgs_application_tag,
+    )
+
+    another_sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        name=another_sample_name,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
@@ -2591,6 +2610,12 @@ def raredisease_context(
         status_db,
         case=case_enough_reads,
         sample=sample_enough_reads,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=another_sample_enough_reads,
     )
 
     # Create case without enough reads
