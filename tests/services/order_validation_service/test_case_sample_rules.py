@@ -44,6 +44,7 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
 
     # THEN an error should be returned
     assert errors
+
     # THEN the error should concern the non-unique tube container name
     assert isinstance(errors[0], ContainerNameRepeatedError)
     assert errors[0].sample_index == 0 and errors[0].case_index == 0

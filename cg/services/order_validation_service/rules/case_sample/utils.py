@@ -33,8 +33,6 @@ from cg.services.order_validation_service.rules.utils import (
 from cg.store.models import Application
 from cg.store.store import Store
 
-import pdb
-
 
 def is_concentration_missing(sample: SampleWithRelatives) -> bool:
     return not sample.concentration_ng_ul
@@ -298,15 +296,15 @@ def is_invalid_plate_well_format(sample: Sample) -> bool:
     return False
 
 
-def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
+def is_sample_tube_name_reused(sample: Sample, counter: Counter) -> bool:
     """Check if a tube container name is reused across samples."""
     return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
 
 
-def get_repeated_tube_names(case: Case) -> list[int]:
-    counter = Counter([sample[1].container_name for sample in case.enumerated_new_samples])
-    indices: list[int] = []
-    for index, sample in case.enumerated_new_samples:
-        if is_tube_container_name_redundant(sample=sample, counter=counter):
-            indices.append(index)
-    return indices
+def get_counter_container_names(order: OrderWithCases) -> Counter:
+    counter = Counter(
+        sample.container_name
+        for case_index, case in order.enumerated_new_cases
+        for sample_index, sample in case.enumerated_new_samples
+    )
+    return counter
