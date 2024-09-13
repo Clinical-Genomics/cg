@@ -6,7 +6,6 @@ import traceback
 
 import click
 
-from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
@@ -132,7 +131,6 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
     sys.exit(exit_code)
 
 
-upload.add_command(auto_fastq)
 upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
 upload.add_command(nipt)
@@ -140,7 +138,6 @@ upload.add_command(process_solved)
 upload.add_command(processed_solved)
 upload.add_command(upload_available_observations_to_loqusdb)
 upload.add_command(upload_case_to_scout)
-upload.add_command(upload_clinical_delivery)
 upload.add_command(upload_coverage)
 upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_genotypes)
