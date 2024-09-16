@@ -36,7 +36,6 @@ RUN pip install --no-cache-dir poetry \
     && poetry install --no-interaction --no-ansi
 
 COPY cg ./cg
-COPY templates ./templates
 
 CMD gunicorn \
     --workers=$GUNICORN_WORKERS \

@@ -73,7 +73,7 @@ def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
     analysis_api: RarediseaseAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    vcf_lines: list[str] = analysis_api.get_managed_variants()
+    vcf_lines: list[str] = analysis_api.get_managed_variants(case_id=case_id)
     if dry_run:
         echo_lines(lines=vcf_lines)
         return
