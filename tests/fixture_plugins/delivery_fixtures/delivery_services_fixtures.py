@@ -1,6 +1,9 @@
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+    BamDeliveryTagsFetcher,
+)
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -29,12 +32,26 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def fastq_delivery_service(
+def raw_data_delivery_service(
     delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_microsalt: Store,
 ) -> RawDataDeliveryFileFetcher:
     """Fixture to get an instance of FetchFastqDeliveryFilesService."""
     tag_service = SampleAndCaseDeliveryTagsFetcher()
+    return RawDataDeliveryFileFetcher(
+        hk_api=delivery_housekeeper_api,
+        status_db=delivery_store_microsalt,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
+def bam_data_delivery_service(
+    delivery_housekeeper_api: HousekeeperAPI,
+    delivery_store_microsalt: Store,
+) -> RawDataDeliveryFileFetcher:
+    """Fixture to get an instance of FetchFastqDeliveryFilesService."""
+    tag_service = BamDeliveryTagsFetcher()
     return RawDataDeliveryFileFetcher(
         hk_api=delivery_housekeeper_api,
         status_db=delivery_store_microsalt,

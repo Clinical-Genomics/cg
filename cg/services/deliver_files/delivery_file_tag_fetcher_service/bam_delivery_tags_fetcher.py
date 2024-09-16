@@ -8,7 +8,7 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.error_handling 
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
 
 
-class BamDeliveryFileTagsFetcher(FetchDeliveryFileTagsService):
+class BamDeliveryTagsFetcher(FetchDeliveryFileTagsService):
     """Class to fetch tags for bam files to deliver."""
 
     @handle_tag_errors
@@ -16,7 +16,7 @@ class BamDeliveryFileTagsFetcher(FetchDeliveryFileTagsService):
         """Fetch the tags for the bam files to deliver."""
         return DeliveryFileTags(
             case_tags=None,
-            sample_tags=["bam"],
+            sample_tags=[{"bam"}],
         )
 
     @staticmethod

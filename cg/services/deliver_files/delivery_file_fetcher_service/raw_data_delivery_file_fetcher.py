@@ -1,5 +1,8 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+    BamDeliveryTagsFetcher,
+)
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
     SampleAndCaseDeliveryTagsFetcher,
 )
@@ -28,7 +31,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         self,
         status_db: Store,
         hk_api: HousekeeperAPI,
-        tags_fetcher: SampleAndCaseDeliveryTagsFetcher,
+        tags_fetcher: SampleAndCaseDeliveryTagsFetcher | BamDeliveryTagsFetcher,
     ):
         self.status_db = status_db
         self.hk_api = hk_api
