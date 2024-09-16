@@ -38,7 +38,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         self.tags_fetcher = tags_fetcher
 
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
-        """Return a list of FASTQ files to be delivered for a case and its samples."""
+        """Return a list of RawData files to be delivered for a case and its samples."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_ids: list[str] = case.sample_ids
         fastq_files: list[SampleFile] = []
@@ -59,7 +59,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
 
     @handle_missing_bundle_errors
     def _get_fastq_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile] | None:
-        """Get the FASTQ files for a sample."""
+        """Get the RawData files for a sample."""
         fastq_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.FASTQ).sample_tags
         fastq_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=sample_id, tags=fastq_tags
