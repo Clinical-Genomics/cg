@@ -18,10 +18,14 @@ class NfTowerStatus(StrEnum):
 RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "percent_duplicates": {"norm": "lt", "threshold": 20},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
-    "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 26},
+    "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "PCT_EXC_ADAPTER": {"norm": "lt", "threshold": 0.0005},
     "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+}
+
+RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
+    "parent_error_ped_check": {"norm": "eq", "threshold": "False"},
 }
 
 RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {

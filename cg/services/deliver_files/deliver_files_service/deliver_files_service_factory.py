@@ -5,6 +5,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+    BamDeliveryTagsFetcher,
+)
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -24,11 +27,11 @@ from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_f
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_and_analysis_delivery_file_fetcher import (
-    FastqAndAnalysisDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_and_analysis_delivery_file_fetcher import (
+    RawDataAndAnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_delivery_file_fetcher import (
-    FastqDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+    RawDataDeliveryFileFetcher,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatter import (
     DeliveryFileFormatter,
@@ -79,15 +82,17 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
+            DataDelivery.BAM: BamDeliveryTagsFetcher,
         }
         return service_map[delivery_type]()
 
     def _get_file_fetcher(self, delivery_type: DataDelivery) -> FetchDeliveryFilesService:
         """Get the file fetcher based on the delivery type."""
         service_map: dict[DataDelivery, Type[FetchDeliveryFilesService]] = {
-            DataDelivery.FASTQ: FastqDeliveryFileFetcher,
+            DataDelivery.FASTQ: RawDataDeliveryFileFetcher,
             DataDelivery.ANALYSIS_FILES: AnalysisDeliveryFileFetcher,
-            DataDelivery.FASTQ_ANALYSIS: FastqAndAnalysisDeliveryFileFetcher,
+            DataDelivery.FASTQ_ANALYSIS: RawDataAndAnalysisDeliveryFileFetcher,
+            DataDelivery.BAM: RawDataDeliveryFileFetcher,
         }
         file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(delivery_type)
         return service_map[delivery_type](
@@ -112,10 +117,11 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ,
             DataDelivery.ANALYSIS_FILES,
             DataDelivery.FASTQ_ANALYSIS,
+            DataDelivery.BAM,
         ]:
             return
         raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}."
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
         )
 
     def build_delivery_service(
@@ -147,7 +153,7 @@ class DeliveryServiceFactory:
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
         if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
-            return DataDelivery.FASTQ_ANALYSIS
+            return DataDelivery.ANALYSIS_FILES
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,
