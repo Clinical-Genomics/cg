@@ -22,6 +22,6 @@ class BamDeliveryTagsFetcher(FetchDeliveryFileTagsService):
     @staticmethod
     def _validate_workflow(workflow: Workflow):
         """Validate the workflow."""
-        if not workflow == Workflow.FASTQ:
+        if workflow != Workflow.FASTQ:
             raise ValueError(f"Workflow {workflow} is not supported for only BAM file delivery.")
         return workflow
