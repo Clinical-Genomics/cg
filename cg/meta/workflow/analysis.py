@@ -15,6 +15,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, W
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
+    CustomerId,
     FileFormat,
     GenomeVersion,
     WorkflowManager,
@@ -292,6 +293,7 @@ class AnalysisAPI(MetaAPI):
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
+        is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
             analysis_type=application_type,
             case_id=case_id,
@@ -304,7 +306,12 @@ class AnalysisAPI(MetaAPI):
             workflow=workflow,
             workflow_manager=workflow_manager,
             tower_workflow_id=tower_workflow_id,
+            is_hidden=is_case_for_development,
         )
+
+    def _is_case_for_development(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)

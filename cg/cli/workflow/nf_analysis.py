@@ -12,6 +12,7 @@ from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

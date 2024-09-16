@@ -6,6 +6,9 @@ from cg.services.orders.store_order_services.store_case_order import StoreCaseOr
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
+from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
+    StoreMicrobialFastqOrderService,
+)
 from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.store import Store
@@ -41,3 +44,12 @@ def store_microbial_order_service(
     base_store: Store, lims_api: MockLimsAPI
 ) -> StoreMicrobialOrderService:
     return StoreMicrobialOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
+
+
+@pytest.fixture
+def store_microbial_fastq_order_service(
+    base_store: Store, lims_api: MockLimsAPI
+) -> StoreMicrobialFastqOrderService:
+    return StoreMicrobialFastqOrderService(
+        status_db=base_store, lims_service=OrderLimsService(lims_api)
+    )

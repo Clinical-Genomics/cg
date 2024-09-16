@@ -15,6 +15,7 @@ from cg.constants.constants import FileFormat, MetaApis
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
@@ -110,6 +111,7 @@ def test_config_case_default_parameters(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
+    scout_export_manged_variants_output: str,
     mocker,
 ):
     """Test that command generates config files."""
@@ -126,6 +128,13 @@ def test_config_case_default_parameters(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
+
+    # GIVEN a mocked scout export of the managed variants
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # GIVEN a valid case
 
@@ -183,6 +192,7 @@ def test_config_case_dry_run(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
+    scout_export_manged_variants_output: str,
     mocker,
 ):
     """Test dry-run."""
@@ -198,6 +208,13 @@ def test_config_case_dry_run(
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
+    # GIVEN a mocked scout export of the managed variants
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
+
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(
         workflow_cli, [workflow, "config-case", case_id, "--dry-run"], obj=context
@@ -205,7 +222,6 @@ def test_config_case_dry_run(
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
-
     # THEN sample sheet and parameters information should be collected
     assert "Getting sample sheet information" in caplog.text
     assert "Getting parameters information" in caplog.text

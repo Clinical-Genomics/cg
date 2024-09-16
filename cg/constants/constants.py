@@ -224,6 +224,7 @@ class FileExtensions(StrEnum):
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"
+    XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
 
