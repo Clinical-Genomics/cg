@@ -24,6 +24,7 @@ Answer the following questions:
 - Is there currently a workaround for this issue? If so, what is it?
 - How much time would be saved by implementing this feature on a weekly basis?
 - How many users are affected by this issue?
+- Are customers affected by this issue?
 
 
 # Acceptance Criteria
