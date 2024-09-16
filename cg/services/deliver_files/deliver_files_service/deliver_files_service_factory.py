@@ -5,6 +5,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+    BamDeliveryFileTagsFetcher,
+)
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -79,7 +82,7 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.BAM: SampleAndCaseDeliveryTagsFetcher,
+            DataDelivery.BAM: BamDeliveryFileTagsFetcher,
         }
         return service_map[delivery_type]()
 

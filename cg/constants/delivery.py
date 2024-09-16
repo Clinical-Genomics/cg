@@ -82,7 +82,6 @@ RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
 RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
-    {"bam"},
 ]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
