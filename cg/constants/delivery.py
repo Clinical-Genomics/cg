@@ -78,9 +78,9 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
+RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
@@ -179,8 +179,8 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.FASTQ: {
-        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
-        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": RAW_DATA_ANALYSIS_CASE_TAGS,
+        "sample_tags": RAW_DATA_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
@@ -211,6 +211,7 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
-    FASTQ: str = "fastq"
     ANALYSIS: str = "analysis"
+    BAM: str = "bam"
+    FASTQ: str = "fastq"
     FASTQ_ANALYSIS: str = "fastq-analysis"
