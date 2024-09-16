@@ -59,7 +59,7 @@ def test_bam_delivery_tags_fetcher():
     tag_fetcher = BamDeliveryTagsFetcher()
 
     # WHEN fetching the tags for the files to deliver
-    tags: DeliveryFileTags = tag_fetcher.fetch_tags(Workflow.FASTQ)
+    tags: DeliveryFileTags = tag_fetcher.fetch_tags(Workflow.RAW_DATA)
 
     # THEN assert that the tags are fetched
     assert tags.case_tags is None
