@@ -1,6 +1,8 @@
 import logging
+from pathlib import Path
 
 from cg.services.run_devices.abstract_classes import PostProcessingService
+from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingError,
@@ -52,3 +54,10 @@ class PacBioPostProcessingService(PostProcessingService):
         )
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
         self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
+        self._touch_post_processing_complete(run_data=run_data)
+
+    @staticmethod
+    def _touch_post_processing_complete(run_data: PacBioRunData) -> None:
+        """Touch the post-processing complete file."""
+        processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
+        processing_complete_file.touch()
