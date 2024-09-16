@@ -25,12 +25,12 @@ class StorePacBioOrderService(StoreOrderService):
         project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
         status_data: dict = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
-        new_samples = self.store_items_in_status(
+        new_samples = self._store_samples_in_statusdb(
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket_id=order.ticket,
-            items=status_data["samples"],
+            samples=status_data["samples"],
         )
         return {"project": project_data, "records": new_samples}
 
@@ -59,8 +59,8 @@ class StorePacBioOrderService(StoreOrderService):
         }
         return status_data
 
-    def store_items_in_status(
-        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
+    def _store_samples_in_statusdb(
+        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, samples: list[dict]
     ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status_db.get_customer_by_internal_id(
@@ -70,9 +70,9 @@ class StorePacBioOrderService(StoreOrderService):
         case: Case = self.status_db.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
-        submitted_case: dict = items[0]
+        submitted_case: dict = samples[0]
         with self.status_db.session.no_autoflush:
-            for sample in items:
+            for sample in samples:
                 new_sample = self.status_db.add_sample(
                     name=sample["name"],
                     sex=sample["sex"] or "unknown",
