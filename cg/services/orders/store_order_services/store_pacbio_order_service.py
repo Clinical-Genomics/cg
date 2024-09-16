@@ -20,7 +20,7 @@ class StorePacBioOrderService(StoreOrderService):
         self.lims = lims_service
 
     def store_order(self, order: OrderIn) -> dict:
-        """Submit a batch of samples for FASTQ delivery."""
+        """Submit a batch of samples for PacBio Long Read delivery."""
 
         project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
         status_data: dict = self.order_to_status(order)
@@ -36,7 +36,7 @@ class StorePacBioOrderService(StoreOrderService):
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
-        """Convert order input to status for fastq-only orders."""
+        """Convert order input to status for PacBio-only orders."""
         status_data = {
             "customer": order.customer,
             "order": order.name,
