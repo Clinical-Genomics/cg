@@ -81,9 +81,9 @@ def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Que
     return cases.filter(Case.name.contains(name_search))
 
 
-def filter_cases_by_data_analyses(cases: Query, data_analyses: list[Workflow], **kwargs) -> Query:
+def filter_cases_by_workflows(cases: Query, workflows: list[Workflow], **kwargs) -> Query:
     """Filter cases by data analysis types."""
-    return cases.filter(Case.data_analysis.in_(data_analyses))
+    return cases.filter(Case.data_analysis.in_(workflows))
 
 
 def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs) -> Query:
@@ -286,7 +286,7 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
-    BY_DATA_ANALYSES: Callable = filter_cases_by_data_analyses
+    BY_WORKFLOWS: Callable = filter_cases_by_workflows
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
     BY_TICKET: Callable = filter_cases_by_ticket_id

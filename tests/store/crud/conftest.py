@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Generator
+
 import pytest
+
 from cg.constants import Workflow
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
@@ -112,6 +114,55 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
         customer_id="unrelated_customer",
         internal_id="unrelated_id",
         name="unrelated_name",
+    )
+    return store
+
+
+@pytest.fixture
+def store_with_rna_and_dna_samples(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with 1 rna sample 3 dna samples related to the rna sample and 1 more dna sample not related to the dna sample."""
+    helpers.add_sample(
+        store=store,
+        name="rna_sample",
+        application_type=PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust000",
+    )
+    helpers.add_sample(
+        store=store,
+        name="related_dna_sample_1",
+        application_tag=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust001",
+    )
+    helpers.add_sample(
+        store=store,
+        name="related_dna_sample_2",
+        application_tag=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust000",
+    )
+    helpers.add_sample(
+        store=store,
+        name="related_dna_sample_3",
+        application_tag=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        subject_id="subject_1",
+        is_tumour=True,
+        customer_id="cust000",
+    )
+    helpers.add_sample(
+        store=store,
+        name="not_related_dna_sample",
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        subject_id="subject_2",
+        is_tumour=False,
+        customer_id="cust000",
     )
     return store
 

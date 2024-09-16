@@ -1550,22 +1550,29 @@ class ReadHandler(BaseHandler):
         self, sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Sample]:
         """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
-        samples = self._get_query(table=Sample)
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            filter_functions=[ApplicationFilter.IS_DNA],
+        )
+
         sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]
-        filter_functions = [
-            SampleFilter.IS_DNA_SAMPLE,
+        sample_filter_functions: list[SampleFilter] = [
             SampleFilter.BY_SUBJECT_ID,
             SampleFilter.BY_TUMOUR,
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
         ]
-        return apply_sample_filter(
-            samples=samples,
+
+        sample_application_version_query: Query = apply_sample_filter(
+            samples=sample_application_version_query,
             subject_id=sample.subject_id,
             is_tumour=sample.is_tumour,
             customer_entry_ids=customer_entry_ids,
-            filter_functions=filter_functions,
-        ).all()
+            filter_functions=sample_filter_functions,
+        )
+
+        return sample_application_version_query.all()
 
     def _get_dna_cases_from_sample_within_collaborators(
         self, sample_internal_id: str, collaborators: set[Customer]
@@ -1579,7 +1586,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
         )
 
-        data_analyses = [
+        workflows = [
             Workflow.MIP_DNA,
             Workflow.BALSAMIC,
             Workflow.BALSAMIC_UMI,
@@ -1588,12 +1595,12 @@ class ReadHandler(BaseHandler):
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]
 
         filter_functions = [
-            CaseFilter.BY_DATA_ANALYSES,
+            CaseFilter.BY_WORKFLOWS,
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
         ]
         return apply_case_filter(
             cases=cases,
-            data_analyses=data_analyses,
+            workflows=workflows,
             customer_entry_ids=customer_entry_ids,
             filter_functions=filter_functions,
         ).all()

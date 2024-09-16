@@ -3,6 +3,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
+from cg.constants import PrepCategory
 from cg.store.models import Application
 
 
@@ -24,6 +25,16 @@ def filter_applications_is_external(applications: Query, **kwargs) -> Query:
 def filter_applications_is_not_external(applications: Query, **kwargs) -> Query:
     """Return application which is not external."""
     return applications.filter(Application.is_external == False)
+
+
+def filter_application_is_dna(applications: Query, **kwargs) -> Query:
+    """Return application corresponding to dna sequencing."""
+    dna_prep_categories: list[str] = [
+        PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+    ]
+    return applications.filter(Application.prep_category.in_(dna_prep_categories))
 
 
 def apply_application_filter(
@@ -52,3 +63,4 @@ class ApplicationFilter(Enum):
     IS_NOT_EXTERNAL = filter_applications_is_not_external
     BY_TAG = filter_applications_by_tag
     IS_NOT_ARCHIVED = filter_applications_is_not_archived
+    IS_DNA = filter_application_is_dna

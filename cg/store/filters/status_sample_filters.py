@@ -4,7 +4,7 @@ from typing import Any, Callable
 from sqlalchemy import or_
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import PrepCategory, SampleType
+from cg.constants.constants import SampleType
 from cg.store.models import Customer, Sample
 
 
@@ -114,16 +114,6 @@ def filter_samples_by_subject_id(samples: Query, subject_id: str, **kwargs) -> Q
 def filter_samples_on_tumour(samples: Query, is_tumour: bool, **kwargs) -> Query:
     """Return samples on matching tumour status."""
     return samples.filter(Sample.is_tumour.is_(is_tumour))
-
-
-def filter_samples_is_dna_sample(samples: Query, **kwargs) -> Query:
-    """Return samples that are DNA samples."""
-    dna_prep_categories: list[str] = [
-        PrepCategory.WHOLE_GENOME_SEQUENCING,
-        PrepCategory.TARGETED_GENOME_SEQUENCING,
-        PrepCategory.WHOLE_EXOME_SEQUENCING,
-    ]
-    return samples.filter(Sample.prep_category in dna_prep_categories)
 
 
 def filter_samples_by_internal_id_pattern(
@@ -243,7 +233,6 @@ class SampleFilter(Enum):
     IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     IS_SEQUENCED: Callable = filter_samples_is_sequenced
     IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
-    IS_DNA_SAMPLE: Callable = filter_samples_is_dna_sample
     LIMIT: Callable = apply_limit
     WITH_LOQUSDB_ID: Callable = filter_samples_with_loqusdb_id
     WITHOUT_LOQUSDB_ID: Callable = filter_samples_without_loqusdb_id
