@@ -1,6 +1,6 @@
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import OrderInSample
+from cg.models.orders.samples import PacBioSample
 from cg.services.orders.submitters.order_submitter import ValidateOrderService
 from cg.store.models import ApplicationVersion, Customer
 from cg.store.store import Store
@@ -23,7 +23,7 @@ class ValidatePacbioOrderService(ValidateOrderService):
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
 
-    def _validate_applications_exist(self, samples: list[OrderInSample]) -> None:
+    def _validate_applications_exist(self, samples: list[PacBioSample]) -> None:
         for sample in samples:
             application_tag = sample.application
             application_version: ApplicationVersion = (
@@ -33,7 +33,7 @@ class ValidatePacbioOrderService(ValidateOrderService):
                 raise OrderError(f"Invalid application: {sample.application}")
 
     def _validate_sample_names_available(
-        self, samples: list[OrderInSample], customer_id: str
+        self, samples: list[PacBioSample], customer_id: str
     ) -> None:
         customer: Customer = self.status_db.get_customer_by_internal_id(customer_id)
         for sample in samples:
