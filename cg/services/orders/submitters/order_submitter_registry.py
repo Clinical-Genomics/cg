@@ -6,6 +6,9 @@ from cg.services.orders.store_order_services.store_case_order import StoreCaseOr
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
+from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
+    StoreMicrobialFastqOrderService,
+)
 from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.services.orders.submitters.fastq_order_submitter import FastqOrderSubmitter
@@ -127,6 +130,12 @@ order_service_mapping = {
         ValidateCaseOrderService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
+    ),
+    OrderType.MICROBIAL_FASTQ: (
+        OrderLimsService,
+        ValidateMicrobialOrderService,
+        StoreMicrobialFastqOrderService,
+        MicrobialOrderSubmitter,
     ),
 }
 
