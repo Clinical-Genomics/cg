@@ -194,7 +194,7 @@ class FastqSample(OrderInSample):
 
 class PacBioSample(OrderInSample):
     _suitable_project = OrderType.PACBIO_LONG_READ
-    volume: str | None
+    volume: str
 
 
 class RmlSample(OrderInSample):
