@@ -211,6 +211,7 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
-    FASTQ: str = "fastq"
     ANALYSIS: str = "analysis"
+    BAM: str = "bam"
+    FASTQ: str = "fastq"
     FASTQ_ANALYSIS: str = "fastq-analysis"

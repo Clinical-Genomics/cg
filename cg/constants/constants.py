@@ -178,6 +178,7 @@ class SampleType(StrEnum):
 class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
+    BAM: str = "bam"
     FASTQ: str = "fastq"
     FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"
@@ -188,7 +189,6 @@ class DataDelivery(StrEnum):
     NO_DELIVERY: str = "no-delivery"
     SCOUT: str = "scout"
     STATINA: str = "statina"
-    BAM: str = "bam"
 
 
 class HastaSlurmPartitions(StrEnum):

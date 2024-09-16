@@ -121,7 +121,7 @@ class DeliveryServiceFactory:
         ]:
             return
         raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}."
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
         )
 
     def build_delivery_service(

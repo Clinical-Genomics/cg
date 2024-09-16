@@ -1,4 +1,5 @@
 from cg.constants import Workflow
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
     FetchDeliveryFileTagsService,
 )
@@ -16,7 +17,7 @@ class BamDeliveryTagsFetcher(FetchDeliveryFileTagsService):
         """Fetch the tags for the bam files to deliver."""
         return DeliveryFileTags(
             case_tags=None,
-            sample_tags=[{"bam"}],
+            sample_tags=[{AlignmentFileTag.BAM}],
         )
 
     @staticmethod
