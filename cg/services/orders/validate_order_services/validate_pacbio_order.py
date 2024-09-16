@@ -38,7 +38,7 @@ class ValidatePacbioOrderService(ValidateOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(customer_id)
         for sample in samples:
             if self.status_db.get_sample_by_customer_and_name(
-                customer_entry_id=customer.id, sample_name=sample.name
+                customer_entry_id=[customer.id], sample_name=sample.name
             ):
                 raise OrderError(
                     f"Sample name already used in a previous order by the same customer: {sample.name}"
