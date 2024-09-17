@@ -872,7 +872,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        return get_genome_build(case_id=case_id, status_db=self.status_db)
+        case = self.status_db.get_case_by_internal_id(case_id)
+        return get_genome_build(case)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
