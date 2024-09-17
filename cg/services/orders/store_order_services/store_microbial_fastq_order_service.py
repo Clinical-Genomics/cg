@@ -1,14 +1,12 @@
 from datetime import datetime
 
-from cg.models.orders.sample_base import StatusEnum
-
-from cg.constants import Workflow, DataDelivery, SexOptions
+from cg.constants import DataDelivery, SexOptions, Workflow
 from cg.models.orders.order import OrderIn
-
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import Sample, Customer, Case, CaseSample
+from cg.store.models import Case, CaseSample, Customer, Sample
 from cg.store.store import Store
 
 
@@ -97,7 +95,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         if self.status_db.get_case_by_name_and_customer(case_name=case_name, customer=customer):
             raise ValueError(f"Case already exists: {case_name}.")
         case: Case = self.status_db.add_case(
-            data_analysis=Workflow.FASTQ,
+            data_analysis=Workflow.RAW_DATA,
             data_delivery=DataDelivery.FASTQ,
             name=case_name,
             priority=sample["priority"],
