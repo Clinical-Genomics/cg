@@ -1579,8 +1579,8 @@ class ReadHandler(BaseHandler):
     ) -> list[Case]:
         """Return a list of DNA cases linked to DNA sample with a list of customers in a collaboration."""
 
-        case_samples = self._get_join_case_sample_query()
-        cases = apply_case_sample_filter(
+        case_samples: Query = self._get_join_case_sample_query()
+        case_samples: Query = apply_case_sample_filter(
             case_samples=case_samples,
             sample_internal_id=sample_internal_id,
             filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
@@ -1598,9 +1598,12 @@ class ReadHandler(BaseHandler):
             CaseFilter.BY_WORKFLOWS,
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
         ]
-        return apply_case_filter(
-            cases=cases,
+
+        cases: Query = apply_case_filter(
+            cases=case_samples,
             workflows=workflows,
             customer_entry_ids=customer_entry_ids,
             filter_functions=filter_functions,
-        ).all()
+        )
+
+        return cases.all()

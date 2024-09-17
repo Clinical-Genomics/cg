@@ -605,33 +605,18 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
 
 
 def test_get_related_dna_samples_from_sample_within_collaborators(
-    store_with_rna_and_dna_samples: Store,
+    store_with_rna_and_dna_samples_and_cases: Store,
+    rna_sample: Sample,
+    related_dna_samples: list[Sample],
+    rna_sample_collaborators: set[Customer],
 ):
     # GIVEN a database with an RNA sample and several DNA samples with the same subject_id and tumour status as the given sample
     # GIVEN that all customers are in a collaboration
-    rna_sample: Sample = store_with_rna_and_dna_samples.get_sample_by_name("rna_sample")
-    related_dna_sample_1: Sample = store_with_rna_and_dna_samples.get_sample_by_name(
-        "related_dna_sample_1"
-    )
-    related_dna_sample_2: Sample = store_with_rna_and_dna_samples.get_sample_by_name(
-        "related_dna_sample_2"
-    )
-    related_dna_sample_3: Sample = store_with_rna_and_dna_samples.get_sample_by_name(
-        "related_dna_sample_3"
-    )
-    given_related_dna_samples: list[Sample] = [
-        related_dna_sample_1,
-        related_dna_sample_2,
-        related_dna_sample_3,
-    ]
 
     # WHEN getting the related DNA samples to the given sample
-    collaborators: set[Customer] = rna_sample.customer.collaborators
-    related_dna_samples = (
-        store_with_rna_and_dna_samples._get_related_dna_samples_from_sample_within_collaborators(
-            sample_internal_id=rna_sample.internal_id, collaborators=collaborators
-        )
+    fetched_related_dna_samples = store_with_rna_and_dna_samples_and_cases._get_related_dna_samples_from_sample_within_collaborators(
+        sample_internal_id=rna_sample.internal_id, collaborators=rna_sample_collaborators
     )
 
     # THEN the correct set of samples is returned
-    assert set(given_related_dna_samples) == set(related_dna_samples)
+    assert set(related_dna_samples) == set(fetched_related_dna_samples)

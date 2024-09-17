@@ -6,7 +6,7 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.store.models import CaseSample, Order
+from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -119,19 +119,19 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
 
 
 @pytest.fixture
-def store_with_rna_and_dna_samples(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with 1 rna sample 3 dna samples related to the rna sample and 1 more dna sample not related to the dna sample."""
     helpers.add_sample(
         store=store,
-        name="rna_sample",
+        internal_id="rna_sample",
         application_type=PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
         subject_id="subject_1",
         is_tumour=True,
         customer_id="cust000",
     )
-    helpers.add_sample(
+    related_dna_sample_1: Sample = helpers.add_sample(
         store=store,
-        name="related_dna_sample_1",
+        internal_id="related_dna_sample_1",
         application_tag=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
         subject_id="subject_1",
@@ -140,7 +140,7 @@ def store_with_rna_and_dna_samples(store: Store, helpers: StoreHelpers) -> Store
     )
     helpers.add_sample(
         store=store,
-        name="related_dna_sample_2",
+        internal_id="related_dna_sample_2",
         application_tag=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
         subject_id="subject_1",
@@ -149,7 +149,7 @@ def store_with_rna_and_dna_samples(store: Store, helpers: StoreHelpers) -> Store
     )
     helpers.add_sample(
         store=store,
-        name="related_dna_sample_3",
+        internal_id="related_dna_sample_3",
         application_tag=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
         application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
         subject_id="subject_1",
@@ -158,13 +158,92 @@ def store_with_rna_and_dna_samples(store: Store, helpers: StoreHelpers) -> Store
     )
     helpers.add_sample(
         store=store,
-        name="not_related_dna_sample",
+        internal_id="not_related_dna_sample",
+        application_tag=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
         application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
         subject_id="subject_2",
         is_tumour=False,
         customer_id="cust000",
     )
+
+    related_dna_case_1: Case = helpers.add_case(
+        store=store,
+        internal_id="related_dna_case_1",
+        data_analysis=Workflow.MIP_DNA,
+        customer_id="cust001",
+    )
+    helpers.add_relationship(store=store, sample=related_dna_sample_1, case=related_dna_case_1)
+
+    related_dna_case_2: Case = helpers.add_case(
+        store=store,
+        internal_id="related_dna_case_2",
+        data_analysis=Workflow.BALSAMIC,
+        customer_id="cust000",
+    )
+    helpers.add_relationship(store=store, sample=related_dna_sample_1, case=related_dna_case_2)
+
+    not_related_dna_case: Case = helpers.add_case(
+        store=store,
+        internal_id="not_related_dna_case",
+        name="not_related_dna_case",
+        data_analysis=Workflow.RNAFUSION,
+        customer_id="cust000",
+    )
+    helpers.add_relationship(store=store, sample=related_dna_sample_1, case=not_related_dna_case)
+
     return store
+
+
+@pytest.fixture
+def rna_sample(store_with_rna_and_dna_samples_and_cases: Store) -> Sample:
+    return store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+        internal_id="rna_sample"
+    )
+
+
+@pytest.fixture
+def rna_sample_collaborators(rna_sample: Sample) -> set[Customer]:
+    return rna_sample.customer.collaborators
+
+
+@pytest.fixture
+def related_dna_sample_1(store_with_rna_and_dna_samples_and_cases: Store) -> Sample:
+    return store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+        internal_id="related_dna_sample_1"
+    )
+
+
+@pytest.fixture
+def related_dna_samples(
+    store_with_rna_and_dna_samples_and_cases: Store, related_dna_sample_1: Sample
+) -> list[Sample]:
+    related_dna_sample_2: Sample = (
+        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+            internal_id="related_dna_sample_2"
+        )
+    )
+    related_dna_sample_3: Sample = (
+        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+            internal_id="related_dna_sample_3"
+        )
+    )
+
+    return [
+        related_dna_sample_1,
+        related_dna_sample_2,
+        related_dna_sample_3,
+    ]
+
+
+@pytest.fixture
+def related_dna_cases(store_with_rna_and_dna_samples_and_cases: Store) -> list[Case]:
+    related_dna_case_1: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        internal_id="related_dna_case_1"
+    )
+    related_dna_case_2: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        internal_id="related_dna_case_2"
+    )
+    return [related_dna_case_1, related_dna_case_2]
 
 
 @pytest.fixture
