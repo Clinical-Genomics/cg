@@ -72,8 +72,9 @@ def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Quer
 
 
 def filter_pools_by_customers(pools: Query, customers: list[Customer], **kwargs) -> Query:
-    """Return pools by customer id."""
-    return pools.filter(Pool.customer.in_(customers))
+    """Return pools by customers."""
+    customer_ids = [customer.id for customer in customers]
+    return pools.filter(Pool.customer_id.in_(customer_ids))
 
 
 def apply_pool_filter(

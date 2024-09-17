@@ -148,8 +148,9 @@ def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> 
 
 
 def filter_samples_by_customers(samples: Query, customers: list[Customer], **kwargs) -> Query:
-    """Return samples by customer."""
-    return samples.filter(Sample.customer.in_(customers))
+    """Return samples by customers."""
+    customer_ids = [customer.id for customer in customers]
+    return samples.filter(Sample.customer_id.in_(customer_ids))
 
 
 def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
