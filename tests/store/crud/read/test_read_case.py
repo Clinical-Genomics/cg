@@ -19,5 +19,4 @@ def test_get_dna_cases_from_sample_within_collaborators(
     )
 
     # THEN the correct set of cases is returned
-
     assert set(related_dna_cases) == set(fetched_related_dna_cases)

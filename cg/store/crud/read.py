@@ -1599,11 +1599,13 @@ class ReadHandler(BaseHandler):
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
         ]
 
-        cases: Query = apply_case_filter(
+        case_samples: list[CaseSample] = apply_case_filter(
             cases=case_samples,
             workflows=workflows,
             customer_entry_ids=customer_entry_ids,
             filter_functions=filter_functions,
-        )
+        ).all()
 
-        return cases.all()
+        cases: list[Case] = [case_sample.case for case_sample in case_samples]
+
+        return cases
