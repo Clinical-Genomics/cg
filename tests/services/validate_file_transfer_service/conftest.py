@@ -6,9 +6,6 @@ from cg.models.cg_config import CGConfig
 from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
     ValidateFileTransferService,
 )
-from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
-    ValidatePacbioFileTransferService,
-)
 
 
 @pytest.fixture
@@ -92,14 +89,3 @@ def pacbio_runs_dir(
     ).touch()
     tmp_path.joinpath("not_this_dir").mkdir()
     return tmp_path
-
-
-@pytest.fixture
-def validate_pacbio_service(
-    cg_context: CGConfig, pacbio_runs_dir: Path
-) -> ValidatePacbioFileTransferService:
-    """Return a PacBio file transfer service."""
-    validate_pacbio_file_transfer_service = ValidatePacbioFileTransferService(config=cg_context)
-    validate_pacbio_file_transfer_service.data_dir = pacbio_runs_dir.as_posix()
-    validate_pacbio_file_transfer_service.trigger_dir = pacbio_runs_dir.as_posix()
-    return validate_pacbio_file_transfer_service
