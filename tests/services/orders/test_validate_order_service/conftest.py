@@ -2,6 +2,7 @@ import pytest
 
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.order import OrderIn
+from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import PacBioSample
 from cg.services.orders.validate_order_services.validate_pacbio_order import (
     ValidatePacbioOrderService,
@@ -13,9 +14,12 @@ from cg.store.store import Store
 def pacbio_sample() -> PacBioSample:
     return PacBioSample(
         application="WGSPCFC060",
+        capture_kit=None,
         data_analysis=Workflow.RAW_DATA,
         data_delivery=DataDelivery.NO_DELIVERY,
         name="PacbioSample",
+        sex=SexEnum.unknown,
+        tumour=False,
         volume="50",
     )
 

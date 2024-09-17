@@ -18,11 +18,11 @@ def test_samples_to_status(
     order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
 
     # WHEN parsing for status
-    data = store_fastq_order_service.order_to_status(order=order)
+    data: dict = store_fastq_order_service.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
-    first_sample = data["samples"][0]
+    first_sample: dict = data["samples"][0]
     assert first_sample["name"] == "prov1"
     assert first_sample["application"] == "WGSPCFC060"
     assert first_sample["priority"] == "priority"
