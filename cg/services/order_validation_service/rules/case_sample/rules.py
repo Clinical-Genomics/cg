@@ -28,6 +28,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    VolumeRequiredCaseError,
     WellPositionMissingError,
     WellFormatError,
 )
@@ -48,6 +49,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
+    is_required_sample_volume_invalid,
     is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
@@ -207,6 +209,16 @@ def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVol
         for sample_index, sample in case.enumerated_new_samples:
             if is_volume_invalid(sample):
                 error = InvalidVolumeError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_case_required_volume(order: OrderWithCases, **kwargs) -> list[VolumeRequiredCaseError]:
+    errors: list[VolumeRequiredCaseError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_required_sample_volume_invalid(sample):
+                error = VolumeRequiredCaseError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 

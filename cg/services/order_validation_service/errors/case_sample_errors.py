@@ -125,6 +125,11 @@ class InvalidVolumeError(CaseSampleError):
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
 
 
+class VolumeRequiredCaseError(CaseSampleError):
+    field: str = "volume"
+    message: str = f"The volume must be provided"
+
+
 class InvalidBufferError(CaseSampleError):
     field: str = "elution_buffer"
     message: str = "The chosen buffer is not allowed when skipping reception control"

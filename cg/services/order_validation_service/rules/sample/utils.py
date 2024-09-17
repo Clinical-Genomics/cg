@@ -85,3 +85,10 @@ def is_invalid_well_format(sample: Sample) -> bool:
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
+
+
+def is_required_volume_invalid(sample: Sample) -> bool:
+    """Check if a sample has an invalid volume."""
+    if (sample.is_on_plate or sample.container == ContainerEnum.tube) and not sample.volume:
+        return True
+    return False
