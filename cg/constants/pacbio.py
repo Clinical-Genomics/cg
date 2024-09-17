@@ -80,3 +80,6 @@ file_pattern_to_bundle_type: dict[str, str] = {
     PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
     f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
 }
+
+ZIPPED_REPORTS_PATTERN: str = "*reports.zip"
+MANIFEST_FILE_PATTERN: str = "*.transferdone"
