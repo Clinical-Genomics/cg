@@ -147,6 +147,11 @@ def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> 
     return samples.filter(Sample.customer == customer)
 
 
+def filter_samples_by_customers(samples: Query, customers: list[Customer], **kwargs) -> Query:
+    """Return samples by customer."""
+    return samples.filter(Sample.customer.in_(customers))
+
+
 def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
     """Return samples ordered by created_at descending."""
     return samples.order_by(Sample.created_at.desc())
@@ -179,6 +184,7 @@ def apply_sample_filter(
     subject_id: str | None = None,
     name: str | None = None,
     customer: Customer | None = None,
+    customers: list[Customer] | None = None,
     name_pattern: str | None = None,
     internal_id_pattern: str | None = None,
     search_pattern: str | None = None,
@@ -200,6 +206,7 @@ def apply_sample_filter(
             subject_id=subject_id,
             name=name,
             customer=customer,
+            customers=customers,
             name_pattern=name_pattern,
             internal_id_pattern=internal_id_pattern,
             search_pattern=search_pattern,
@@ -214,6 +221,7 @@ class SampleFilter(Enum):
     """Define Sample filter functions."""
 
     BY_CUSTOMER: Callable = filter_samples_by_customer
+    BY_CUSTOMERS: Callable = filter_samples_by_customers
     BY_CUSTOMER_ENTRY_IDS: Callable = filter_samples_by_entry_customer_ids
     BY_ENTRY_ID: Callable = filter_samples_by_entry_id
     BY_IDENTIFIER_NAME_AND_VALUE: Callable = filter_samples_by_identifier_name_and_value
