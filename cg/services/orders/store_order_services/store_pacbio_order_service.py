@@ -61,7 +61,7 @@ class StorePacBioOrderService(StoreOrderService):
     def _store_samples_in_statusdb(
         self, customer_id: str, order: str, ordered: datetime, ticket_id: str, samples: list[dict]
     ) -> list[Sample]:
-        """Store fastq samples in the status database including family connection and delivery"""
+        """Store PacBio samples in the status database including case links and delivery"""
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )

@@ -1,8 +1,12 @@
 from datetime import datetime
 
-from cg.constants import DataDelivery
+import pytest
+
+from cg.constants import DataDelivery, Workflow
+from cg.exc import OrderError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.store_order_services.store_pacbio_order_service import (
     StorePacBioOrderService,
 )
@@ -10,9 +14,10 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
-def test_samples_to_status(
+def test_order_to_status(
     pacbio_order_to_submit: dict, store_pacbio_order_service: StorePacBioOrderService
 ):
+    """Test that a PacBio order is parsed correctly."""
     # GIVEN fastq order with two samples
     order = OrderIn.parse_obj(pacbio_order_to_submit, OrderType.PACBIO_LONG_READ)
 
@@ -32,13 +37,14 @@ def test_samples_to_status(
     assert data["samples"][1]["tumour"] is True
 
 
-def test_store_samples(
+def test_store_order(
     base_store: Store,
     pacbio_status_data: dict,
     ticket_id: str,
     store_pacbio_order_service: StorePacBioOrderService,
 ):
-    # GIVEN a basic store with no samples and a fastq order
+    """Test that a PacBio order is stored in the database."""
+    # GIVEN a basic store with no samples and a PacBio order
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
 
@@ -61,3 +67,9 @@ def test_store_samples(
     assert case_link.case in base_store.get_cases()
     assert case_link.case.data_analysis
     assert case_link.case.data_delivery in [DataDelivery.BAM, DataDelivery.NO_DELIVERY]
+
+    # THEN the sample sex should be stored
+    assert new_samples[0].sex == SexEnum.female
+
+    # THEN the analysis for the case should be RAW_DATA
+    assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA

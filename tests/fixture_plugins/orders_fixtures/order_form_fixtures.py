@@ -270,9 +270,9 @@ def fluffy_uploaded_json_order(orderforms: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def json_order_dict(
-    mip_uploaded_json_order,
-    fluffy_uploaded_json_order,
-    balsamic_uploaded_json_order,
+    mip_uploaded_json_order: dict,
+    fluffy_uploaded_json_order: dict,
+    balsamic_uploaded_json_order: dict,
 ) -> dict[str, dict]:
     """Return a dict of orders that can be uploaded in the json format."""
     return {

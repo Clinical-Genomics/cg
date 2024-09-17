@@ -134,7 +134,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
         items=fastq_status_data["samples"],
     )
 
-    # THEN the analysis for the case should be FASTQ
+    # THEN the analysis for the case should be RAW_DATA
     assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
@@ -167,7 +167,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         items=fastq_status_data["samples"],
     )
 
-    # THEN the analysis for the case should be fastq (none)
+    # THEN the analysis for the case should be RAW_DATA (none)
     assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
@@ -181,6 +181,7 @@ def test_store_samples_bad_apptag(
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
 
+    # GIVEN a non-existing application tag
     for sample in fastq_status_data["samples"]:
         sample["application"] = "nonexistingtag"
 
