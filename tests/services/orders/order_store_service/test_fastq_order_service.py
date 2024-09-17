@@ -1,5 +1,7 @@
 import datetime as dt
+
 import pytest
+
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import PrepCategory
 from cg.exc import OrderError
@@ -27,7 +29,7 @@ def test_samples_to_status(
     assert first_sample["tumour"] is False
     assert first_sample["volume"] == "1"
 
-    # ... and the other sample is a tumour
+    # THEN the other sample is a tumour
     assert data["samples"][1]["tumour"] is True
 
 
@@ -133,7 +135,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     )
 
     # THEN the analysis for the case should be FASTQ
-    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(
@@ -166,7 +168,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     )
 
     # THEN the analysis for the case should be fastq (none)
-    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
 def test_store_samples_bad_apptag(

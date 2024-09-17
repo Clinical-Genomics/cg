@@ -282,7 +282,7 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
     # WHEN fetching all analyses that was analysed with MIP
     records: list[Analysis] = [
         analysis_obj
-        for analysis_obj in sample_store.get_analyses_to_upload(workflow=Workflow.FASTQ)
+        for analysis_obj in sample_store.get_analyses_to_upload(workflow=Workflow.RAW_DATA)
     ]
 
     # THEN no analysis object should be returned, since there were no MIP analyses

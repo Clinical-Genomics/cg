@@ -1,27 +1,24 @@
 {
-    "name": "Fastq order",
+    "name": "Microbial Fastq order",
     "customer": "cust002",
     "comment": "",
     "samples": [
         {
             "application": "WGSPCFC060",
-            "comment": "",
+            "comment": "sample comment",
             "container": "Tube",
             "container_name": "prov1",
-            "data_analysis": "raw-data",
+            "data_analysis": "microsalt",
             "data_delivery": "fastq",
             "elution_buffer": "Nuclease-free water",
             "name": "prov1",
             "priority": "priority",
-            "sex": "male",
-            "source": "blood",
-            "tumour": false,
             "volume": "1",
             "well_position": ""
         },
         {
             "application": "WGSPCFC060",
-            "comment": "",
+            "comment": "sample comment",
             "container": "Tube",
             "container_name": "prov2",
             "data_analysis": "raw-data",
@@ -29,9 +26,6 @@
             "elution_buffer": "Nuclease-free water",
             "name": "prov2",
             "priority": "priority",
-            "sex": "male",
-            "source": "cell line",
-            "tumour": true,
             "volume": "2",
             "well_position": ""
         }
