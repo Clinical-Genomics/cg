@@ -50,25 +50,14 @@ def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str)
         suggest_cases_to_upload(status_db=status_db)
         return
 
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-    if case_obj.data_analysis == Workflow.TOMTE:
-        LOG.info("Tomte workflow detected, uploading RNA to linked DNA")
-        context.invoke(
-            upload_rna_to_scout,
-            case_id=case_id,
-            re_upload=re_upload,
-            analysis=case_obj.data_analysis,
-        )
-
-    else:
-        context.invoke(
-            create_scout_load_config,
-            case_id=case_id,
-            print_console=print_console,
-            re_upload=re_upload,
-        )
-        if not print_console:
-            context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
+    context.invoke(
+        create_scout_load_config,
+        case_id=case_id,
+        print_console=print_console,
+        re_upload=re_upload,
+    )
+    if not print_console:
+        context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
 
 
 @click.command(name="create-scout-load-config")
@@ -197,10 +186,23 @@ def upload_rna_to_scout(
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
-    if analysis != Workflow.TOMTE:
-        context.invoke(
-            upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
-        )
+    context.invoke(upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research)
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
+
+
+@click.command(name="tomte-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_context
+def upload_tomte_to_scout(
+    context, case_id: str, dry_run: bool,
+) -> None:
+    """Upload an Tomte RNA case's junction splice files and omics files for all samples connected via subject ID."""
+    LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
+
+    context.invoke(validate_case_samples_are_rna, case_id=case_id)
+    context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_omics_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
