@@ -1,5 +1,7 @@
 """Module to test fetching of file tags for delivery."""
 
+import pytest
+
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
@@ -8,18 +10,17 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_ta
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.exc import (
     FetchDeliveryFileTagsError,
 )
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
     SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
-import pytest
 
 
 @pytest.mark.parametrize(
     "workflow",
     [
         Workflow.BALSAMIC,
-        Workflow.FASTQ,
+        Workflow.RAW_DATA,
         Workflow.MIP_DNA,
         Workflow.MIP_RNA,
         Workflow.BALSAMIC_QC,
@@ -58,7 +59,7 @@ def test_bam_delivery_tags_fetcher():
     tag_fetcher = BamDeliveryTagsFetcher()
 
     # WHEN fetching the tags for the files to deliver
-    tags: DeliveryFileTags = tag_fetcher.fetch_tags(Workflow.FASTQ)
+    tags: DeliveryFileTags = tag_fetcher.fetch_tags(Workflow.RAW_DATA)
 
     # THEN assert that the tags are fetched
     assert tags.case_tags is None

@@ -1,19 +1,19 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
-    FetchDeliveryFileTagsService,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
     AnalysisDeliveryFileFetcher,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
-    RawDataDeliveryFileFetcher,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     DeliveryFiles,
     DeliveryMetaData,
+)
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+    RawDataDeliveryFileFetcher,
+)
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+    FetchDeliveryFileTagsService,
 )
 from cg.store.models import Case
 from cg.store.store import Store
