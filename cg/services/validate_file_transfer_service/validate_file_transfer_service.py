@@ -18,7 +18,7 @@ class ValidateFileTransferService:
             files_to_validate=files_in_manifest, source_dir=source_dir
         ):
             raise FileNotFoundError(
-                f"Not all files listed in the manifest file {manifest_file} are not present in the directory tree {source_dir}"
+                f"Not all files listed in the manifest file {manifest_file} are present in the directory tree {source_dir}"
             )
         return
 
