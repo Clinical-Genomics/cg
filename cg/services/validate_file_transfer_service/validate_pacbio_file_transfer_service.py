@@ -72,7 +72,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         LOG.debug(f"Created systemd trigger file {systemd_trigger_file_name}")
 
     def validate_transfer_done(self, manifest_file_path: Path) -> None:
-        if not self.is_transfer_completed(
+        if not self.validate_file_transfer(
             manifest_file=manifest_file_path,
             source_dir=self.get_smrt_cell_path(manifest_file_path),
             manifest_file_format=FileFormat.TXT,
@@ -88,7 +88,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         )
 
     def validate_all_transfer_done(self) -> None:
-        manifest_file_paths = self.get_manifest_file_paths(
+        manifest_file_paths = self._get_manifest_file_paths(
             source_dir=self.data_dir, pattern=PACBIO_MANIFEST_FILE_PATTERN
         )
         for manifest_file_path in manifest_file_paths:

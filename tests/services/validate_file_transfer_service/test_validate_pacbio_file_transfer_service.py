@@ -18,7 +18,7 @@ def test_create_systemd_trigger_file(
     """Test the create systemd trigger file method."""
     # GIVEN a manifest file
 
-    manifest_file: Path = validate_pacbio_service.get_manifest_file_paths(
+    manifest_file: Path = validate_pacbio_service._get_manifest_file_paths(
         source_dir=pacbio_runs_dir, pattern=PACBIO_MANIFEST_FILE_PATTERN
     )[0]
 
@@ -37,7 +37,7 @@ def test_create_validated_transfer_file(
     """Test the create validated transfer file method."""
     # GIVEN a manifest file
 
-    manifest_file: Path = validate_pacbio_service.get_manifest_file_paths(
+    manifest_file: Path = validate_pacbio_service._get_manifest_file_paths(
         source_dir=pacbio_runs_dir, pattern=PACBIO_MANIFEST_FILE_PATTERN
     )[0]
 
@@ -56,7 +56,7 @@ def test_get_run_id(
     """Test the get run ID method."""
     # GIVEN a manifest file
 
-    manifest_file: Path = validate_pacbio_service.get_manifest_file_paths(
+    manifest_file: Path = validate_pacbio_service._get_manifest_file_paths(
         source_dir=pacbio_runs_dir, pattern=PACBIO_MANIFEST_FILE_PATTERN
     )[0]
 
@@ -75,7 +75,7 @@ def test_get_smrt_cell_id(
     """Test the get smrt cell ID method."""
     # GIVEN a manifest file
 
-    manifest_file: Path = validate_pacbio_service.get_manifest_file_paths(
+    manifest_file: Path = validate_pacbio_service._get_manifest_file_paths(
         source_dir=pacbio_runs_dir, pattern=PACBIO_MANIFEST_FILE_PATTERN
     )[0]
 
