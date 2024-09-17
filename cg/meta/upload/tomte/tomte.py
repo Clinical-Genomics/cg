@@ -29,7 +29,6 @@ class TomteUploadAPI(UploadAPI):
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
 
-
         self.upload_files_to_customer_inbox(case)
 
         LOG.info(
