@@ -5,6 +5,7 @@ import pytest
 
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 
 
@@ -74,3 +75,17 @@ def test_get_files_to_parse_error(
         # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
             pac_bio_run_file_manager.get_files_to_parse(expected_pac_bio_run_data)
+
+
+def test_get_run_validator_files(
+    expected_pac_bio_run_data,
+    pac_bio_run_file_manager,
+):
+    # GIVEN a run data object
+
+    # WHEN getting the run validation file paths
+    validation_file_paths: PacBioRunValidatorFiles = (
+        pac_bio_run_file_manager.get_run_validation_files(expected_pac_bio_run_data)
+    )
+
+    # THEN the correct paths are returned

@@ -30,10 +30,16 @@ class PacBioRunFileManager(RunFileManager):
         run_path: Path = run_data.full_path
         return self.get_files_to_parse(run_data) + self._get_hifi_read_files(run_path)
 
+    @handle_post_processing_errors(
+        to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
+    )
     def get_run_validation_files(self, run_data: PacBioRunData) -> PacBioRunValidatorFiles:
         manifest_file: Path = self._get_manifest_file(run_data.full_path)
         decompression_target: Path = self._get_zipped_reports_file(run_data.full_path)
         decompression_destination: Path = self._get_unzipped_reports_dir(run_data.full_path)
+        validate_files_or_directories_exist(
+            [manifest_file, decompression_target, decompression_destination]
+        )
         return PacBioRunValidatorFiles(
             manifest_file=manifest_file,
             decompression_target=decompression_target,

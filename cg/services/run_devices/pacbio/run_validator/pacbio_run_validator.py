@@ -13,7 +13,7 @@ from cg.services.validate_file_transfer_service.validate_file_transfer_service i
 
 class PacBioRunValidator(RunValidator):
     """PacBio run validator.
-    Ensure that the run can start post-processing of a pacbio run can start.
+    Ensure that the post-processing of a pacbio run can start.
     """
 
     def __init__(
