@@ -323,7 +323,7 @@ class ScoutAPI:
         ]
         try:
             LOG.info(
-                f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id}"
+                f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id} with command {" ".join(upload_command)}"
             )
             self.process.run_command(upload_command)
         except CalledProcessError as error:
@@ -345,11 +345,11 @@ class ScoutAPI:
             rna_genome_build,
         ]
         try:
-            LOG.info(f"Uploading rna genome build {rna_genome_build} to case {case_id}")
+            LOG.info(f"Updating rna genome build {rna_genome_build} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError(
-                "Something went wrong when uploading rna genome build file"
+                "Something went wrong when updating rna genome build"
             ) from error
 
     def load_variant_outlier(self, case_id: str) -> None:
