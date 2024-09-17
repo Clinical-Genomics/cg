@@ -8,7 +8,7 @@ def create_order_response(order: DatabaseOrder, summary: OrderSummary | None = N
         ticket_id=order.ticket_id,
         order_date=str(order.order_date.date()),
         id=order.id,
-        is_delivered=order.is_delivered,
+        is_open=order.is_open,
         workflow=order.workflow,
         summary=summary,
     )
@@ -30,5 +30,5 @@ def _add_summaries(orders: list[Order], summaries: list[OrderSummary]) -> list[O
     return orders
 
 
-def order_is_delivered(case_count: int, delivered_analyses: int) -> bool:
+def order_is_closed(case_count: int, delivered_analyses: int) -> bool:
     return delivered_analyses >= case_count

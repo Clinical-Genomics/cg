@@ -9,8 +9,9 @@ from cg.services.deliver_files.delivery_file_fetcher_service.models import Deliv
 @pytest.mark.parametrize(
     "expected_delivery_files,delivery_file_service",
     [
-        ("expected_fastq_delivery_files", "fastq_delivery_service"),
+        ("expected_fastq_delivery_files", "raw_data_delivery_service"),
         ("expected_analysis_delivery_files", "analysis_delivery_service"),
+        ("expected_bam_delivery_files", "bam_data_delivery_service"),
     ],
 )
 def test_get_files_to_deliver(

@@ -3,22 +3,18 @@
 from enum import StrEnum
 
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import (
-    AlignmentFileTag,
-    AnalysisTag,
-    HermesFileTag,
-)
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HermesFileTag
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
-    Workflow.FASTQ,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 SKIP_MISSING: list[Workflow] = [
-    Workflow.FASTQ,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -78,9 +74,9 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
+RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
@@ -178,10 +174,6 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.FASTQ: {
-        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
-        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
-    },
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
@@ -189,6 +181,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.RAREDISEASE: {
         "case_tags": CLINICAL_DELIVERY_TAGS,
         "sample_tags": CLINICAL_DELIVERY_TAGS,
+    },
+    Workflow.RAW_DATA: {
+        "case_tags": RAW_DATA_ANALYSIS_CASE_TAGS,
+        "sample_tags": RAW_DATA_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RNAFUSION: {
         "case_tags": CLINICAL_DELIVERY_TAGS,
@@ -211,6 +207,7 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
-    FASTQ: str = "fastq"
     ANALYSIS: str = "analysis"
+    BAM: str = "bam"
+    FASTQ: str = "fastq"
     FASTQ_ANALYSIS: str = "fastq-analysis"

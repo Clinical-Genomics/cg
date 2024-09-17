@@ -7,6 +7,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
@@ -106,7 +107,9 @@ class PrepareFastqAPI:
             LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
             return
         version: Version = self.compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
-        fastq_files: dict[Path, File] = files.get_hk_files_dict(tags=["fastq"], version_obj=version)
+        fastq_files: dict[Path, File] = files.get_hk_files_dict(
+            tags=[SequencingFileTag.FASTQ], version_obj=version
+        )
         compressions: list[CompressionData] = files.get_spring_paths(version)
         for compression in compressions:
             self.add_decompressed_spring_object(

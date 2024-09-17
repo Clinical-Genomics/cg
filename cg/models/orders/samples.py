@@ -192,6 +192,10 @@ class FastqSample(OrderInSample):
         return OptionalIntValidator.str_to_int(v=v)
 
 
+class PacBioSample(OrderInSample):
+    _suitable_project = OrderType.PACBIO_LONG_READ
+
+
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
 
