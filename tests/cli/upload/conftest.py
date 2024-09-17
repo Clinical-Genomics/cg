@@ -12,22 +12,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
-from cg.constants.constants import FileFormat, Workflow
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkMipAnalysisTag,
-)
+from cg.constants.constants import FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
@@ -63,7 +55,7 @@ def upload_genotypes_hk_bundle(
 def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
-    """Return a analysis object with a trio"""
+    """Return an analysis object with a trio"""
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 

@@ -7,13 +7,13 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, FileFormat, PrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
 from cg.store.models import ApplicationVersion, Sample
+from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -195,7 +195,8 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in balsamic_mock_fastq_files
+                {"path": f, "tags": [SequencingFileTag.FASTQ], "archive": False}
+                for f in balsamic_mock_fastq_files
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
