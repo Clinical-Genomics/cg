@@ -186,7 +186,9 @@ def upload_rna_to_scout(
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
-    context.invoke(upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research)
+    context.invoke(
+        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
+    )
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
@@ -195,7 +197,9 @@ def upload_rna_to_scout(
 @click.argument("case_id")
 @click.pass_context
 def upload_tomte_to_scout(
-    context, case_id: str, dry_run: bool,
+    context,
+    case_id: str,
+    dry_run: bool,
 ) -> None:
     """Upload an Tomte RNA case's junction splice files and omics files for all samples connected via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
