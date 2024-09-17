@@ -62,3 +62,8 @@ class ContainerNameRepeatedError(SampleError):
 class WellFormatError(SampleError):
     field: str = "well_position"
     message: str = "Well position must follow the format A-H:1-12"
+
+
+class ContainerNameMissingError(SampleError):
+    field: str = "container_name"
+    message: str = "Container must have a name"

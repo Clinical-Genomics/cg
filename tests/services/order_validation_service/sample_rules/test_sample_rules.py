@@ -3,11 +3,13 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ContainerNameRepeatedError,
     SampleNameNotAvailableError,
     WellFormatError,
+    ContainerNameMissingError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_tube_container_name_unique,
     validate_sample_names_available,
     validate_well_position_format,
+    validate_sample_container_name,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
@@ -66,3 +68,49 @@ def test_validate_well_position_format(valid_order: MicrosaltOrder):
     # THEN the error should concern the invalid well position
     assert isinstance(errors[0], WellFormatError)
     assert errors[0].sample_index == 0
+
+
+def test_validate_missing_container_name(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a sample on a plate with no container name
+    valid_order.samples[0].container = ContainerEnum.plate
+    valid_order.samples[0].container_name = None
+
+    # WHEN validating the container name
+    errors = validate_sample_container_name(order=valid_order)
+
+    # THEN am error should be returned
+    assert errors
+
+    # THEN the error should concern the missing container name
+    assert isinstance(errors[0], ContainerNameMissingError)
+    assert errors[0].sample_index == 0
+
+
+def test_validate_valid_container_name(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a sample on a plate with a valid container name
+    valid_order.samples[0].container = ContainerEnum.plate
+    valid_order.samples[0].container_name = "Plate_123"
+
+    # WHEN validating the container name
+    errors = validate_sample_container_name(order=valid_order)
+
+    # THEN no error should be returned
+    assert not errors
+
+
+def test_validate_non_plate_container(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a samples in a tube and 'no container' with an invalid container name
+    valid_order.samples[0].container = ContainerEnum.tube
+    valid_order.samples[0].container_name = None
+
+    valid_order.samples[1].container = ContainerEnum.no_container
+    valid_order.samples[1].container_name = None
+
+    # WHEN validating the container name
+    errors = validate_sample_container_name(order=valid_order)
+
+    # THEN no error should be returned
+    assert not errors
