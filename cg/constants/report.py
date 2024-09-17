@@ -172,7 +172,7 @@ _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
 REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "sex",
     "mapped_reads",
-    "mean_coverage",
+    "mean_target_coverage",
     "pct_10x",
 ]
 

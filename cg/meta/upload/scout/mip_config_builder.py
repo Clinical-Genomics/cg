@@ -45,11 +45,11 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
-    def build_load_config(self, rank_score_threshold: int = 5) -> None:
+    def build_load_config(self, rank_score_threshold: int = 5) -> MipLoadConfig:
         """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
-
-        self.add_common_info_to_load_config()
+        self.load_config = MipLoadConfig()
+        self.load_config = self.add_common_info_to_load_config()
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.case.internal_id
         )
@@ -74,17 +74,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        self.include_pedigree_picture()
-
-    def include_pedigree_picture(self) -> None:
-        if self.is_multi_sample_case(self.load_config):
-            if self.is_family_case(self.load_config):
-                svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                self.load_config.madeline = str(svg_path)
-            else:
-                LOG.info("family of unconnected samples - skip pedigree graph")
-        else:
-            LOG.info("family of 1 sample - skip pedigree graph")
+        self.include_pedigree_picture(load_config=self.load_config)
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""

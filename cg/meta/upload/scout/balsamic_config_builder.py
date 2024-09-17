@@ -36,7 +36,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, latest=True
         )
-        self.include_cnv_report()
+        self.include_cnv_report(load_config=self.load_config)
         self.include_multiqc_report()
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:

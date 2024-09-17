@@ -79,7 +79,6 @@ def test_generate_raredisease_load_config(
     assert raredisease_analysis.workflow == Workflow.RAREDISEASE
 
     # GIVEN an upload scout api with some RAREDISEASE information
-
     # WHEN generating a load config
     config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis)
 

@@ -54,22 +54,21 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
-    def build_load_config(self) -> ScoutLoadConfig:
+    def build_load_config(self) -> RarediseaseLoadConfig:
         """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for RAREDISEASE case")
-        load_config = ScoutLoadConfig()
-        load_config = self.add_common_info_to_load_config(load_config=load_config)
-        load_config.gene_panels = (
+        self.load_config = self.add_common_info_to_load_config()
+        self.load_config.gene_panels = (
             self.raredisease_analysis_api.get_aggregated_panels(
                 customer_id=self.analysis_obj.case.customer.internal_id,
                 default_panels=set(self.analysis_obj.case.panels),
             )
         )
-        load_config = self.include_case_files(load_config=load_config)
-        load_config.samples = self._get_sample_information(load_config=load_config)
-        load_config = self.include_pedigree_picture(load_config=load_config)
-        load_config.custom_images = self.load_custom_image_sample()
-        return load_config
+        self.load_config = self.include_case_files(load_config=self.load_config)
+        self.load_config.samples = self._get_sample_information(load_config=self.load_config)
+        self.load_config = self.include_pedigree_picture(load_config=self.load_config)
+        self.load_config.custom_images = self.load_custom_image_sample()
+        return self.load_config
 
 
     def _get_sample_information(self, load_config: ScoutLoadConfig):
@@ -80,16 +79,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return load_config
 
 
-    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> None:
-        if self.is_multi_sample_case(self.load_config):
-            if self.is_family_case(self.load_config):
-                svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                load_config.madeline = str(svg_path)
-            else:
-                LOG.info("family of unconnected samples - skip pedigree graph")
-        else:
-            LOG.info("family of 1 sample - skip pedigree graph")
-        return load_config
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutRarediseaseIndividual:
         """Build a sample with specific information."""
@@ -140,22 +129,22 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.mt_bam = self.get_sample_file(
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
-        config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
+        config_sample.chromograph_images.autozygous = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.coverage = self.extract_generic_filepath(
+        config_sample.chromograph_images.coverage = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_regions = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
             )
         )
-        config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_sites = self.remove_chromosome_substring(
             file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
