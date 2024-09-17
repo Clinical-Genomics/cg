@@ -202,6 +202,7 @@ class FileExtensions(StrEnum):
     CONFIG: str = ".config"
     CRAM: str = ".cram"
     CSV: str = ".csv"
+    FASTA: str = ".fasta"
     FASTQ: str = ".fastq"
     FASTQ_GZ: str = ".fastq.gz"
     GPG: str = ".gpg"

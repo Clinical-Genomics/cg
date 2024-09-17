@@ -8,7 +8,7 @@ from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 def test_create_daily_delivery(fohm_upload_api: FOHMUploadAPI, csv_file_path: Path):
     # GIVEN a list of CSV files
 
-    # WHEN creating the reports content
+    # WHEN creating the report content
     contents: list[dict] = fohm_upload_api.get_reports_contents([csv_file_path, csv_file_path])
 
     # THEN each file is a list of dicts where each dict represents a row in a CSV file
@@ -47,11 +47,13 @@ def test_validate_fohm_pangolin_reports(
 
 
 def test_get_sars_cov_complementary_reports(
-    fohm_complementary_reports: list[FohmComplementaryReport], fohm_upload_api: FOHMUploadAPI
+    fohm_complementary_reports: list[FohmComplementaryReport],
+    fohm_upload_api: FOHMUploadAPI,
+    sars_cov_sample_number: str,
 ):
     # GIVEN a list of reports
 
-    # WHEN getting Sars-cov reports from reports
+    # WHEN getting, Sars-cov reports from reports
     content: list[FohmComplementaryReport] = fohm_upload_api.get_sars_cov_complementary_reports(
         fohm_complementary_reports
     )
@@ -61,7 +63,7 @@ def test_get_sars_cov_complementary_reports(
 
     # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
-    assert content[0].sample_number == "44CS000000"
+    assert content[0].sample_number == f"{sars_cov_sample_number}"
 
 
 def test_get_sars_cov_pangolin_reports(
@@ -69,7 +71,7 @@ def test_get_sars_cov_pangolin_reports(
 ):
     # GIVEN a list of reports
 
-    # WHEN getting Sars-cov reports from reports
+    # WHEN getting, Sars-cov reports from reports
     content: list[FohmPangolinReport] = fohm_upload_api.get_sars_cov_pangolin_reports(
         fohm_pangolin_reports
     )

@@ -79,7 +79,7 @@ def preprocess_all(
     upload_cases = []
     for case_id in cases:
         try:
-            gisaid_api.upload(case_id=case_id)
+            gisaid_api.upload_to_gisaid(case_id)
             fohm_api.update_upload_started_at(case_id=case_id)
             LOG.info(f"Upload of case {case_id} to GISAID was successful")
             upload_cases.append(case_id)

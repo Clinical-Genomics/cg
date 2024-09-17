@@ -30,6 +30,7 @@ def fohm_complementary_report(
 @pytest.fixture
 def fohm_complementary_reports(
     fohm_complementary_report: FohmComplementaryReport,
+    sars_cov_sample_number: str,
 ) -> list[FohmComplementaryReport]:
     """Return FOHM complementary reports."""
     report_1 = FohmComplementaryReport.model_validate(
@@ -39,7 +40,7 @@ def fohm_complementary_reports(
         {
             "urvalskriterium": "criteria",
             "GISAID_accession": "an_accession",
-            "provnummer": "44CS000000",
+            "provnummer": f"{sars_cov_sample_number}",
         }
     )
     return [fohm_complementary_report, complementary_report, report_1]
@@ -111,7 +112,7 @@ def fohm_upload_api(
     """FOHM upload API fixture."""
     fohm_upload_api = FOHMUploadAPI(cg_context)
 
-    # Mock getting Sample object from StatusDB
+    # Mock getting a sample object from StatusDB
     mocker.patch.object(
         Store,
         "get_sample_by_name",
