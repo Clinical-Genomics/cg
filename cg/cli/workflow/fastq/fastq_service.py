@@ -25,7 +25,7 @@ class FastqService:
 
     def _add_analysis_to_store(self, case: Case) -> None:
         new_analysis: Analysis = self.store.add_analysis(
-            workflow=Workflow.FASTQ,
+            workflow=Workflow.RAW_DATA,
             completed_at=dt.datetime.now(),
             primary=True,
             started_at=dt.datetime.now(),
@@ -42,7 +42,7 @@ class FastqService:
             order_id=case.latest_order.id,
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,
-            workflow=Workflow.FASTQ,
+            workflow=Workflow.RAW_DATA,
             ticket=case.latest_ticket,
         )
         self.trailblazer_api.set_analysis_status(
