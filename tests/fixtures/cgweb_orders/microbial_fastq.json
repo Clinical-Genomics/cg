@@ -21,7 +21,7 @@
             "comment": "sample comment",
             "container": "Tube",
             "container_name": "prov2",
-            "data_analysis": "fastq",
+            "data_analysis": "raw-data",
             "data_delivery": "fastq",
             "elution_buffer": "Nuclease-free water",
             "name": "prov2",
