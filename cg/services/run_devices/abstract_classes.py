@@ -17,7 +17,7 @@ class RunDataGenerator(ABC):
 
 
 class RunValidator(ABC):
-    """Abstract class that holds functionality to validate a run and enure it can start post processing."""
+    """Abstract class that holds functionality to validate a run and ensure it can start post processing."""
 
     @abstractmethod
     def ensure_post_processing_can_start(self, run_data: RunData):
