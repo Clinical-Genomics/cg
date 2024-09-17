@@ -11,9 +11,6 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
-    DeliveryRsyncService,
-)
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
@@ -21,7 +18,10 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.store.models import Case, Analysis
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
        clinical-delivery."""
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
     analyses: list[Analysis] = context.analysis_service.get_analyses_to_upload_for_workflow(
-        workflow=Workflow.FASTQ
+        workflow=Workflow.RAW_DATA
     )
     deliver_raw_data_for_analyses(
         analyses=analyses,

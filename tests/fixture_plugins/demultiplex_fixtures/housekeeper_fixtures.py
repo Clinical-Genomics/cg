@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from tests.store_helpers import StoreHelpers
 
 
@@ -47,7 +48,7 @@ def illumina_demultiplexed_runs_post_processing_hk_api(
                 "files": [
                     {
                         "path": tmp_fastq_path.as_posix(),
-                        "tags": ["fastq", flow_cell_id],
+                        "tags": [SequencingFileTag.FASTQ, flow_cell_id],
                         "archive": False,
                     },
                 ],

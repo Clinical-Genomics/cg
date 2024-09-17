@@ -13,7 +13,7 @@ from cg.store.store import Store
 def pacbio_sample() -> PacBioSample:
     return PacBioSample(
         application="WGSPCFC060",
-        data_analysis=Workflow.FASTQ,
+        data_analysis=Workflow.RAW_DATA,
         data_delivery=DataDelivery.NO_DELIVERY,
         name="PacbioSample",
         volume="50",
