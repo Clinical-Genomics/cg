@@ -6,6 +6,7 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -63,7 +64,11 @@ def fastq_delivery_bundle(
     """Return a sample bundle that includes a fastq file"""
     sample_hk_bundle_no_files["name"] = sample_id
     sample_hk_bundle_no_files["files"] = [
-        {"path": str(fastq_file), "archive": False, "tags": ["fastq", "deliver", "ADM1"]},
+        {
+            "path": str(fastq_file),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ, "deliver", "ADM1"],
+        },
     ]
     return sample_hk_bundle_no_files
 

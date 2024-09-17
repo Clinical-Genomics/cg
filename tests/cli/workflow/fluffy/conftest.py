@@ -5,7 +5,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
-from cg.constants import Workflow
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -118,7 +118,7 @@ def fluffy_fastq_hk_bundle_data(
         "files": [
             {
                 "path": fluffy_fastq_file_path.as_posix(),
-                "tags": ["fastq", novaseq_6000_post_1_5_kits_flow_cell_id],
+                "tags": [SequencingFileTag.FASTQ, novaseq_6000_post_1_5_kits_flow_cell_id],
                 "archive": False,
             }
         ],

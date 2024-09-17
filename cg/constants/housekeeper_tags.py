@@ -133,7 +133,6 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.FASTQ: [],
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
     Workflow.MICROSALT: [
         ["microsalt-log"],
@@ -212,6 +211,7 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.RAREDISEASE: [
         [HermesFileTag.LONG_TERM_STORAGE],
     ],
+    Workflow.RAW_DATA: [],
     Workflow.RNAFUSION: [
         [HermesFileTag.LONG_TERM_STORAGE],
         [AnalysisTag.FUSION, AnalysisTag.ARRIBA],  # legacy
