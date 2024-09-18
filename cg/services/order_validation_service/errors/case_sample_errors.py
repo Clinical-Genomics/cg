@@ -127,7 +127,7 @@ class InvalidVolumeError(CaseSampleError):
 
 class VolumeRequiredCaseError(CaseSampleError):
     field: str = "volume"
-    message: str = f"The volume must be provided"
+    message: str = "Volume is required"
 
 
 class InvalidBufferError(CaseSampleError):

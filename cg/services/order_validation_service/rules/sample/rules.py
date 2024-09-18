@@ -18,7 +18,7 @@ from cg.services.order_validation_service.rules.sample.utils import (
     get_indices_for_tube_repeated_container_name,
     get_indices_for_repeated_sample_names,
     is_invalid_well_format,
-    is_required_volume_invalid,
+    is_volume_missing,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
@@ -66,7 +66,7 @@ def validate_required_volume(
 ) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
     for sample_index, sample in order.enumerated_samples:
-        if is_required_volume_invalid(sample):
+        if is_volume_missing(sample):
             error = VolumeRequiredError(sample_index=sample_index)
             errors.append(error)
     return errors

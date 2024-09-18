@@ -47,9 +47,7 @@ class InvalidVolumeError(SampleError):
 
 class VolumeRequiredError(SampleError):
     field: str = "volume"
-    message: str = (
-        f"Volume is required"
-    )
+    message: str = "Volume is required"
 
 
 class OrganismDoesNotExistError(SampleError):
