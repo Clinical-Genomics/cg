@@ -1,9 +1,6 @@
 from datetime import datetime
 
-import pytest
-
 from cg.constants import DataDelivery, Workflow
-from cg.exc import OrderError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
@@ -49,7 +46,7 @@ def test_store_order(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_pacbio_order_service._store_samples_in_statusdb(
+    new_samples: list[Sample] = store_pacbio_order_service._store_samples_in_statusdb(
         customer_id=pacbio_status_data["customer"],
         order=pacbio_status_data["order"],
         ordered=datetime.now(),
@@ -61,12 +58,12 @@ def test_store_order(
     assert len(new_samples) == 2
     assert len(base_store._get_query(table=Sample).all()) == 2
     assert base_store._get_query(table=Case).count() == 1
-    first_sample = new_samples[0]
-    assert len(first_sample.links) == 1
-    case_link = first_sample.links[0]
-    assert case_link.case in base_store.get_cases()
-    assert case_link.case.data_analysis
-    assert case_link.case.data_delivery in [DataDelivery.BAM, DataDelivery.NO_DELIVERY]
+    for new_sample in new_samples:
+        assert len(new_sample.links) == 1
+        case_link = new_sample.links[0]
+        assert case_link.case in base_store.get_cases()
+        assert case_link.case.data_analysis
+        assert case_link.case.data_delivery in [DataDelivery.BAM, DataDelivery.NO_DELIVERY]
 
     # THEN the sample sex should be stored
     assert new_samples[0].sex == SexEnum.female

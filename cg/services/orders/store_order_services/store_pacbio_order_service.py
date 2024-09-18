@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
@@ -69,7 +69,7 @@ class StorePacBioOrderService(StoreOrderService):
         case: Case = self.status_db.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
-        submitted_case: dict = samples[0]
+        sample_data: dict = samples[0]
         with self.status_db.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status_db.add_sample(
@@ -93,11 +93,10 @@ class StorePacBioOrderService(StoreOrderService):
                 new_samples.append(new_sample)
                 if not case:
                     case = self.status_db.add_case(
-                        data_analysis=Workflow(submitted_case["data_analysis"]),
-                        data_delivery=DataDelivery(submitted_case["data_delivery"]),
+                        data_analysis=Workflow(sample_data["data_analysis"]),
+                        data_delivery=DataDelivery(sample_data["data_delivery"]),
                         name=ticket_id,
-                        panels=None,
-                        priority=submitted_case["priority"],
+                        priority=sample_data["priority"],
                         ticket=ticket_id,
                     )
                 case.customer = customer
