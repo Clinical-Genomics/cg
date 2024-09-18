@@ -64,7 +64,7 @@ def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def pacbio_order_to_submit(cgweb_orders_dir) -> dict:
     """Load an example PacBio order."""
     return ReadFile.get_content_from_file(
@@ -104,7 +104,6 @@ def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
-# TODO Include the PacBio order in the all_orders_to_submit fixture
 @pytest.fixture(scope="session")
 def all_orders_to_submit(
     balsamic_order_to_submit: dict,
@@ -113,6 +112,7 @@ def all_orders_to_submit(
     microbial_order_to_submit: dict,
     mip_order_to_submit: dict,
     mip_rna_order_to_submit: dict,
+    pacbio_order_to_submit: dict,
     rml_order_to_submit: dict,
     rnafusion_order_to_submit: dict,
     sarscov2_order_to_submit: dict,
@@ -130,6 +130,9 @@ def all_orders_to_submit(
         ),
         OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA),
         OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit, project=OrderType.MIP_RNA),
+        OrderType.PACBIO_LONG_READ: OrderIn.parse_obj(
+            pacbio_order_to_submit, project=OrderType.PACBIO_LONG_READ
+        ),
         OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
         OrderType.RNAFUSION: OrderIn.parse_obj(
             rnafusion_order_to_submit, project=OrderType.RNAFUSION
