@@ -16,6 +16,9 @@ from cg.services.orders.store_order_services.store_microbial_fastq_order_service
 from cg.services.orders.store_order_services.store_microbial_order import (
     StoreMicrobialOrderService,
 )
+from cg.services.orders.store_order_services.store_pacbio_order_service import (
+    StorePacBioOrderService,
+)
 from cg.services.orders.store_order_services.store_pool_order import (
     StorePoolOrderService,
 )
@@ -28,6 +31,7 @@ from cg.services.orders.submitters.microbial_order_submitter import (
     MicrobialOrderSubmitter,
 )
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
+from cg.services.orders.submitters.pacbio_order_submitter import PacbioOrderSubmitter
 from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
 from cg.services.orders.validate_order_services.validate_case_order import (
     ValidateCaseOrderService,
@@ -40,6 +44,9 @@ from cg.services.orders.validate_order_services.validate_metagenome_order import
 )
 from cg.services.orders.validate_order_services.validate_microbial_order import (
     ValidateMicrobialOrderService,
+)
+from cg.services.orders.validate_order_services.validate_pacbio_order import (
+    ValidatePacbioOrderService,
 )
 from cg.services.orders.validate_order_services.validate_pool_order import (
     ValidatePoolOrderService,
@@ -126,6 +133,12 @@ order_service_mapping = {
         ValidateCaseOrderService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
+    ),
+    OrderType.PACBIO_LONG_READ: (
+        OrderLimsService,
+        ValidatePacbioOrderService,
+        StorePacBioOrderService,
+        PacbioOrderSubmitter,
     ),
     OrderType.RML: (
         OrderLimsService,
