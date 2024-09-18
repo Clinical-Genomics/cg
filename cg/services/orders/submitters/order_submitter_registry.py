@@ -29,9 +29,6 @@ from cg.services.orders.submitters.microbial_order_submitter import (
 )
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
-from cg.services.orders.submitters.taxprofiler_submitter import (
-    TaxProfilerOrderSubmitter,
-)
 from cg.services.orders.validate_order_services.validate_case_order import (
     ValidateCaseOrderService,
 )
@@ -152,7 +149,7 @@ order_service_mapping = {
         OrderLimsService,
         ValidateMetagenomeOrderService,
         StoreMetagenomeOrderService,
-        TaxProfilerOrderSubmitter,
+        MetagenomeOrderSubmitter,
     ),
     OrderType.TOMTE: (
         OrderLimsService,
