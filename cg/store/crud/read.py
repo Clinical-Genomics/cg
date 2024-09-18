@@ -1550,26 +1550,26 @@ class ReadHandler(BaseHandler):
         self, sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Sample]:
         """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
+        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
         sample_application_version_query: Query = apply_application_filter(
             applications=sample_application_version_query,
             filter_functions=[ApplicationFilter.IS_DNA],
         )
 
-        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]
-        sample_filter_functions: list[SampleFilter] = [
-            SampleFilter.BY_SUBJECT_ID,
-            SampleFilter.BY_TUMOUR,
-            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
-        ]
 
         sample_application_version_query: Query = apply_sample_filter(
             samples=sample_application_version_query,
             subject_id=sample.subject_id,
             is_tumour=sample.is_tumour,
             customer_entry_ids=customer_entry_ids,
-            filter_functions=sample_filter_functions,
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
         )
 
         return sample_application_version_query.all()
@@ -1579,9 +1579,9 @@ class ReadHandler(BaseHandler):
     ) -> list[Case]:
         """Return a list of DNA cases linked to DNA sample with a list of customers in a collaboration."""
 
-        case_samples: Query = self._get_join_case_sample_query()
-        case_samples: Query = apply_case_sample_filter(
-            case_samples=case_samples,
+        cases_with_samples: Query = self._join_sample_and_case()
+        cases_with_samples: Query = apply_case_sample_filter(
+            case_samples=cases_with_samples,
             sample_internal_id=sample_internal_id,
             filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
         )
@@ -1594,18 +1594,12 @@ class ReadHandler(BaseHandler):
 
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]
 
-        filter_functions = [
-            CaseFilter.BY_WORKFLOWS,
-            CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-        ]
-
-        case_samples: list[CaseSample] = apply_case_filter(
-            cases=case_samples,
+        return apply_case_filter(
+            cases=cases_with_samples,
             workflows=workflows,
             customer_entry_ids=customer_entry_ids,
-            filter_functions=filter_functions,
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
         ).all()
-
-        cases: list[Case] = [case_sample.case for case_sample in case_samples]
-
-        return cases
