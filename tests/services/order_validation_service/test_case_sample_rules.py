@@ -67,7 +67,7 @@ def test_invalid_required_volume(valid_order: OrderWithCases):
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should concern the invalid sample index
+    # THEN the error should concern the missing volumes
     assert isinstance(errors[0], VolumeRequiredCaseError)
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
