@@ -78,9 +78,9 @@ def pac_bio_run_reports_dir_1_b01(pac_bio_run_statistics_dir_1_b01: Path) -> Pat
 
 
 @pytest.fixture
-def pac_bio_run_metadata_dir_1_b01(pac_bio_run_statistics_dir_1_b01: Path) -> Path:
+def pac_bio_run_metadata_dir_1_b01(pac_bio_smrt_cell_dir_1_b01: Path) -> Path:
     """Return the path to the PacBio SMRT cell metadata directory"""
-    return Path(pac_bio_run_statistics_dir_1_b01, PacBioDirsAndFiles.METADATA_DIR)
+    return Path(pac_bio_smrt_cell_dir_1_b01, PacBioDirsAndFiles.METADATA_DIR)
 
 
 @pytest.fixture
