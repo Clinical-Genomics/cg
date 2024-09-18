@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from cg.constants import SequencingRunDataAvailability
-from cg.store.models import IlluminaSequencingRun, Sample
+from cg.constants.sequencing import Sequencers
+from cg.store.models import IlluminaSequencingRun, Sample, IlluminaSampleSequencingMetrics, Analysis
 from cg.store.store import Store
 
 
@@ -50,7 +51,7 @@ def test_update_sample_reads_illumina(
 
     # WHEN updating the sample reads for a sequencing run
     store_with_illumina_sequencing_data.update_sample_reads_illumina(
-        internal_id=selected_novaseq_x_sample_ids[0]
+        internal_id=selected_novaseq_x_sample_ids[0], sequencer_type=Sequencers.NOVASEQX
     )
 
     # THEN the total reads for the sample is updated
@@ -59,6 +60,26 @@ def test_update_sample_reads_illumina(
     for sample_metric in sample_metrics:
         total_reads_for_sample += sample_metric.total_reads_in_lane
     assert sample.reads == total_reads_for_sample
+
+
+def test_update_sample_reads_illumina_fail_q30(
+    store_with_illumina_sequencing_data: Store, selected_novaseq_x_sample_ids: list[str]
+):
+    # GIVEN a store with Illumina Sequencing Runs and a sample id
+    sample: Sample = store_with_illumina_sequencing_data.get_sample_by_internal_id(
+        selected_novaseq_x_sample_ids[0]
+    )
+    assert sample.reads == 0
+    # GIVEN that the q30 for the lane is below the threshold for the sequencer type
+    sample.sample_run_metrics[0].base_passing_q30_percent = 30
+
+    # WHEN updating the sample reads for a sequencing run
+    store_with_illumina_sequencing_data.update_sample_reads_illumina(
+        internal_id=selected_novaseq_x_sample_ids[0], sequencer_type=Sequencers.NOVASEQX
+    )
+
+    # THEN the total reads for the sample is updated
+    assert sample.reads == 0
 
 
 def test_update_sample_last_sequenced_at(
@@ -79,3 +100,39 @@ def test_update_sample_last_sequenced_at(
 
     # THEN the last sequenced at date for the sample is updated
     assert sample.last_sequenced_at == timestamp_now
+
+
+def test_update_analysis_uploaded_at(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store, timestamp_yesterday: datetime
+):
+    # GIVEN a store with an analysis
+    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
+        Analysis
+    ).first()
+    assert analysis.uploaded_at != timestamp_yesterday
+
+    # WHEN updating the uploaded_at field
+    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_uploaded_at(
+        analysis_id=analysis.id, uploaded_at=timestamp_yesterday
+    )
+
+    # THEN the uploaded_at field is updated
+    assert analysis.uploaded_at == timestamp_yesterday
+
+
+def test_update_analysis_upload_started_at(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store, timestamp_yesterday: datetime
+):
+    # GIVEN a store with an analysis
+    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy._get_query(
+        Analysis
+    ).first()
+    assert analysis.upload_started_at != timestamp_yesterday
+
+    # WHEN updating the upload_started_at field
+    store_with_analyses_for_cases_not_uploaded_fluffy.update_analysis_upload_started_at(
+        analysis_id=analysis.id, upload_started_at=timestamp_yesterday
+    )
+
+    # THEN the upload_started_at field is updated
+    assert analysis.upload_started_at == timestamp_yesterday

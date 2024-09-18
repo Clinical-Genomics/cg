@@ -45,8 +45,8 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
     )
 
 
-def filter_orders_by_delivered(orders: Query, delivered: bool | None, **kwargs) -> Query:
-    return orders.filter(Order.is_delivered == delivered) if delivered is not None else orders
+def filter_orders_by_is_open(orders: Query, is_open: bool | None, **kwargs) -> Query:
+    return orders.filter(Order.is_open == is_open) if is_open is not None else orders
 
 
 def apply_sorting(
@@ -66,7 +66,7 @@ class OrderFilter(Enum):
     BY_SEARCH: Callable = filter_orders_by_search
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
-    BY_DELIVERED: Callable = filter_orders_by_delivered
+    BY_OPEN: Callable = filter_orders_by_is_open
     PAGINATE: Callable = apply_pagination
     SORT: Callable = apply_sorting
 
@@ -83,7 +83,7 @@ def apply_order_filters(
     sort_field: OrderSortField = None,
     sort_order: SortOrder = None,
     search: str = None,
-    delivered: bool = None,
+    is_open: bool = None,
 ) -> Query:
     for filter in filters:
         orders: Query = filter(
@@ -97,6 +97,6 @@ def apply_order_filters(
             sort_field=sort_field,
             sort_order=sort_order,
             search=search,
-            delivered=delivered,
+            is_open=is_open,
         )
     return orders

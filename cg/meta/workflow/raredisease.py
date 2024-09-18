@@ -1,6 +1,7 @@
 """Module for Raredisease Analysis API."""
 
 import logging
+from itertools import permutations
 from pathlib import Path
 from typing import Any
 
@@ -21,11 +22,13 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
-from cg.constants.scout import RAREDISEASE_CASE_TAGS
+from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
@@ -69,10 +72,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_genome_build(self, case_id: str | None = None) -> GenomeVersion:
-        """Return reference genome for a case. Currently fixed for hg19."""
-        return GenomeVersion.HG19
-
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
@@ -101,16 +100,27 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed
 
+    def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
+        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            return True
+        return False
+
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
+        outdir = self.get_case_path(case_id=case_id)
+
         return RarediseaseParameters(
+            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
+            outdir=outdir,
             analysis_type=analysis_type,
             target_bed=Path(self.references, target_bed).as_posix(),
             save_mapped_as_cram=True,
+            skip_germlinecnvcaller=skip_germlinecnvcaller,
+            vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
         )
 
     @staticmethod
@@ -139,21 +149,73 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variants needs to be exported from Scout."""
+        return True
+
+    @property
     def root(self) -> str:
         return self.config.raredisease.root
 
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
-    def get_managed_variants(self) -> list[str]:
+    def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=GenePanelGenomeBuild.hg19)
+        return self._get_managed_variants(genome_build=self.get_genome_build(case_id=case_id))
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
+        """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-        metric_conditions: dict[str, dict[str, Any]] = dict(RAREDISEASE_METRIC_CONDITIONS)
-        self.set_order_sex_for_sample(sample, metric_conditions)
+        if "-" not in sample_id:
+            metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
+            self.set_order_sex_for_sample(sample, metric_conditions)
+        else:
+            metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
+
+    def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
+        """Return sample-pair patterns for searching in MultiQC."""
+        sample_ids: list[str] = list(self.status_db.get_sample_ids_by_case_id(case_id=case_id))
+        pairwise_patterns: list[str] = [
+            f"{sample1}-{sample2}" for sample1, sample2 in permutations(sample_ids, 2)
+        ]
+        return pairwise_patterns
+
+    def get_parent_error_ped_check_metric(
+        self, pair_sample_ids: str, multiqc_raw_data: dict[dict]
+    ) -> MetricsBase | None:
+        """Return the parsed metrics for pedigree error given a concatenated pair of sample ids."""
+        metric_name: str = "parent_error_ped_check"
+        peddy_metrics: dict[str, dict] = multiqc_raw_data["multiqc_peddy"]
+        if sample_pair_metrics := peddy_metrics.get(pair_sample_ids, None):
+            return self.get_multiqc_metric(
+                metric_name=metric_name,
+                metric_value=sample_pair_metrics[metric_name],
+                metric_id=pair_sample_ids,
+            )
+
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Return a list of the metrics specified in a MultiQC json file."""
+        multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
+        metrics = []
+        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
+            metrics_for_pattern: list[MetricsBase] = (
+                self.get_metrics_from_multiqc_json_with_pattern(
+                    search_pattern=search_pattern,
+                    multiqc_json=multiqc_json,
+                    metric_id=metric_id,
+                    exact_match=self.is_multiqc_pattern_search_exact,
+                )
+            )
+            metrics.extend(metrics_for_pattern)
+        for sample_pair in self._get_sample_pair_patterns(case_id):
+            if parent_error_metric := self.get_parent_error_ped_check_metric(
+                pair_sample_ids=sample_pair, multiqc_raw_data=multiqc_json.report_saved_raw_data
+            ):
+                metrics.append(parent_error_metric)
+        metrics = self.get_deduplicated_metrics(metrics=metrics)
+        return metrics
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

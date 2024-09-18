@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class OrderDeliveredPatch(BaseModel):
-    delivered: bool
+class OrderOpenPatch(BaseModel):
+    open: bool

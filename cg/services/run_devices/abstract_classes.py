@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
+from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 
 
 class RunDataGenerator(ABC):
@@ -72,6 +73,12 @@ class PostProcessingService(ABC):
     def post_process(self, run_name: str, dry_run: bool = False):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass
+
+    @staticmethod
+    def _touch_post_processing_complete(run_data: RunData) -> None:
+        """Touch the post-processing complete file."""
+        processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
+        processing_complete_file.touch()
 
 
 class FileTransferValidationService(ABC):

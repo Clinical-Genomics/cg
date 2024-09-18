@@ -135,7 +135,6 @@ class Workflow(StrEnum):
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
-    FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
     JASEN: str = "jasen"
     MICROSALT: str = "microsalt"
@@ -143,6 +142,7 @@ class Workflow(StrEnum):
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
+    RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
     SPRING: str = "spring"
@@ -178,6 +178,7 @@ class SampleType(StrEnum):
 class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
+    BAM: str = "bam"
     FASTQ: str = "fastq"
     FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"
@@ -223,6 +224,7 @@ class FileExtensions(StrEnum):
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"
+    XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
 
@@ -252,6 +254,13 @@ class MicrosaltAppTags(StrEnum):
     MWXNXTR003: str = "MWXNXTR003"
     VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
+
+
+class MutantQC:
+    EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
+    INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
+    QUALITY_REPORT_FILE_NAME: str = f"QC_report{FileExtensions.JSON}"
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"

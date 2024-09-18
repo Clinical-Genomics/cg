@@ -144,12 +144,30 @@ class DeliveryAPI:
         )
         return delivery_files
 
+    def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
+        """Return a complete list of files to be delivered to the customer's inbox."""
+        delivery_files: list[DeliveryFile] = []
+        if self.is_fastq_delivery(case.data_delivery):
+            fastq_files: list[DeliveryFile] = self.get_fastq_delivery_files(case=case, force=force)
+            delivery_files.extend(fastq_files)
+        if self.is_analysis_delivery(case.data_delivery):
+            analysis_case_files: list[DeliveryFile] = self.get_analysis_case_delivery_files(case)
+            analysis_sample_files: list[DeliveryFile] = self.get_analysis_sample_delivery_files(
+                case=case
+            )
+            delivery_files.extend(analysis_case_files + analysis_sample_files)
+        return delivery_files
+
+    def link_delivery_files_to_inbox(self) -> None:
+        """Link files from Housekeeper bundle to the customer's inbox."""
+        raise NotImplementedError
+
     def get_fastq_delivery_files_by_sample(
         self, case: Case, sample: Sample, force: bool = False
     ) -> list[DeliveryFile]:
         """Return a list of FASTQ files to be delivered for a specific sample."""
         delivery_files: list[DeliveryFile] = []
-        fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
+        fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.RAW_DATA)
         if not self.is_sample_deliverable(sample=sample, force=force):
             LOG.warning(f"Sample {sample.internal_id} is not deliverable")
             return delivery_files
@@ -175,21 +193,3 @@ class DeliveryAPI:
             )
             delivery_files.extend(fastq_delivery_files)
         return delivery_files
-
-    def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
-        """Return a complete list of files to be delivered to the customer's inbox."""
-        delivery_files: list[DeliveryFile] = []
-        if self.is_fastq_delivery(case.data_delivery):
-            fastq_files: list[DeliveryFile] = self.get_fastq_delivery_files(case=case, force=force)
-            delivery_files.extend(fastq_files)
-        if self.is_analysis_delivery(case.data_delivery):
-            analysis_case_files: list[DeliveryFile] = self.get_analysis_case_delivery_files(case)
-            analysis_sample_files: list[DeliveryFile] = self.get_analysis_sample_delivery_files(
-                case=case
-            )
-            delivery_files.extend(analysis_case_files + analysis_sample_files)
-        return delivery_files
-
-    def link_delivery_files_to_inbox(self) -> None:
-        """Link files from Housekeeper bundle to the customer's inbox."""
-        raise NotImplementedError

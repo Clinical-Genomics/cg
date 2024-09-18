@@ -15,6 +15,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, W
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
+    CustomerId,
     FileFormat,
     GenomeVersion,
     WorkflowManager,
@@ -272,7 +273,11 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id: str) -> None:
+    def add_pending_trailblazer_analysis(
+        self,
+        case_id: str,
+        tower_workflow_id: str | None = None,
+    ) -> None:
         self.check_analysis_ongoing(case_id)
         application_type: str = self.get_application_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
@@ -285,6 +290,7 @@ class AnalysisAPI(MetaAPI):
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
+        is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
             analysis_type=application_type,
             case_id=case_id,
@@ -296,7 +302,13 @@ class AnalysisAPI(MetaAPI):
             ticket=ticket,
             workflow=workflow,
             workflow_manager=workflow_manager,
+            tower_workflow_id=tower_workflow_id,
+            is_hidden=is_case_for_development,
         )
+
+    def _is_case_for_development(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)

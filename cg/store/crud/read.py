@@ -169,6 +169,14 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_date,
         ).first()
 
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+        """Return an analysis."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.BY_ENTRY_ID],
+            analyses=self._get_query(table=Analysis),
+            entry_id=entry_id,
+        ).first()
+
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
     ) -> list[Case]:
@@ -1362,10 +1370,10 @@ class ReadHandler(BaseHandler):
         """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
+            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             workflow=orders_request.workflow,
             search=orders_request.search,
-            delivered=orders_request.delivered,
+            is_open=orders_request.is_open,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
