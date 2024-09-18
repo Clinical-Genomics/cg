@@ -154,7 +154,7 @@ def validate_well_position_format(
 
 
 def validate_sample_container_name(
-        order: OrderWithNonHumanSamples, **kwargs
+    order: OrderWithNonHumanSamples, **kwargs
 ) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
     for sample_index, sample in order.enumerated_samples:
