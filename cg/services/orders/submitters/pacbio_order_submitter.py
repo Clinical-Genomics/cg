@@ -1,4 +1,7 @@
 from cg.models.orders.order import OrderIn
+from cg.services.orders.store_order_services.store_pacbio_order_service import (
+    StorePacBioOrderService,
+)
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.validate_order_services.validate_pacbio_order import (
     ValidatePacbioOrderService,
