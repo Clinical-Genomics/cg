@@ -57,7 +57,7 @@ def test_store_order(
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
     assert len(base_store._get_query(table=Sample).all()) == 2
-    assert base_store._get_query(table=Case).count() == 1
+    assert base_store._get_query(table=Case).count() == 2
     for new_sample in new_samples:
         assert len(new_sample.links) == 1
         case_link = new_sample.links[0]

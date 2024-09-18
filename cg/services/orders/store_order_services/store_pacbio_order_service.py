@@ -61,19 +61,16 @@ class StorePacBioOrderService(StoreOrderService):
     def _store_samples_in_statusdb(
         self, customer_id: str, order: str, ordered: datetime, ticket_id: str, samples: list[dict]
     ) -> list[Sample]:
-        """Store PacBio samples in the status database including case links and delivery"""
+        """Store PacBio samples and cases in the StatusDB."""
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         new_samples = []
-        case: Case = self.status_db.get_case_by_name_and_customer(
-            customer=customer, case_name=ticket_id
-        )
-        sample_data: dict = samples[0]
         with self.status_db.session.no_autoflush:
             for sample in samples:
+                sample_name: str = sample["name"]
                 new_sample = self.status_db.add_sample(
-                    name=sample["name"],
+                    name=sample_name,
                     sex=sample["sex"] or "unknown",
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
@@ -91,14 +88,13 @@ class StorePacBioOrderService(StoreOrderService):
                 )
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                if not case:
-                    case = self.status_db.add_case(
-                        data_analysis=Workflow(sample_data["data_analysis"]),
-                        data_delivery=DataDelivery(sample_data["data_delivery"]),
-                        name=ticket_id,
-                        priority=sample_data["priority"],
-                        ticket=ticket_id,
-                    )
+                case = self.status_db.add_case(
+                    data_analysis=Workflow(sample["data_analysis"]),
+                    data_delivery=DataDelivery(sample["data_delivery"]),
+                    name=f"{sample_name}-case",
+                    priority=sample["priority"],
+                    ticket=ticket_id,
+                )
                 case.customer = customer
                 new_relationship: CaseSample = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
