@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from pydantic.v1 import ValidationError
@@ -17,6 +18,8 @@ from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class InvoiceAPI:
@@ -99,6 +102,7 @@ class InvoiceAPI:
                 pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
+            LOG.info(f"Processing record {raw_record.id}")
             record = self.get_invoice_entity_record(
                 cost_center=cost_center.lower(),
                 discount=self.invoice_obj.discount,
@@ -137,9 +141,7 @@ class InvoiceAPI:
         priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
         discount_factor = 1 - discount / 100
-        if not full_price:
-            return None
-        return round(full_price * discount_factor)
+        return round(full_price * discount_factor) if full_price else 0
 
     def _cost_center_split_factor(
         self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
@@ -162,7 +164,7 @@ class InvoiceAPI:
             self.log.append(
                 f"Could not get price for samples with application tag/version: {tag}/{version}."
             )
-            return None
+            return 0
         return split_price
 
     def get_invoice_entity_record(
@@ -170,7 +172,9 @@ class InvoiceAPI:
     ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
-
+        LOG.info(
+            f"Found application {application.tag}/{application.version} for record {record.id}"
+        )
         split_discounted_price = self._cost_center_split_factor(
             price=application.discounted_price,
             cost_center=cost_center,
@@ -190,6 +194,7 @@ class InvoiceAPI:
     def get_application(self, record: Sample or Pool, discount: int) -> InvoiceApplication | None:
         """Return the application information."""
         try:
+            LOG.info(f"discounted_price: {self._discount_price(record, discount)}")
             application = InvoiceApplication(
                 tag=record.application_version.application.tag,
                 version=record.application_version.version,
