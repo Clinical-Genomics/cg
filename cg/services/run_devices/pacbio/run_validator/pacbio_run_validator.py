@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.constants.constants import FileFormat
+from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.run_devices.abstract_classes import RunValidator
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
@@ -28,6 +29,8 @@ class PacBioRunValidator(RunValidator):
 
     def ensure_post_processing_can_start(self, run_data: PacBioRunData):
         """Ensure that a post processing run can start."""
+        if self._is_validated(run_data.full_path):
+            return
         paths_information: PacBioRunValidatorFiles = self.file_manager.get_run_validation_files(
             run_data
         )
@@ -36,8 +39,17 @@ class PacBioRunValidator(RunValidator):
             source_dir=run_data.full_path,
             manifest_file_format=FileFormat.TXT,
         )
-        if paths_information.decompression_target:
-            self.decompressor.decompress(
-                source_path=paths_information.decompression_target,
-                destination_path=paths_information.decompression_destination,
-            )
+
+        self.decompressor.decompress(
+            source_path=paths_information.decompression_target,
+            destination_path=paths_information.decompression_destination,
+        )
+        self._touch_is_validated(run_data.full_path)
+
+    @staticmethod
+    def _touch_is_validated(run_path: Path):
+        Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID)
+
+    @staticmethod
+    def _is_validated(run_path: Path) -> bool:
+        return Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()

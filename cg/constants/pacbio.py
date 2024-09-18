@@ -13,6 +13,7 @@ class PacBioDirsAndFiles:
     STATISTICS_DIR: str = "statistics"
     UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
     METADATA_DIR: str = "metadata"
+    RUN_IS_VALID: str = "is_valid"
 
 
 class CCSAttributeIDs:
