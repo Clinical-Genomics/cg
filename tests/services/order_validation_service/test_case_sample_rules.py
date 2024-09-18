@@ -97,7 +97,7 @@ def test_missing_volume_no_container(valid_order: OrderWithCases):
     valid_order.cases[0].samples[0].container = ContainerEnum.no_container
     valid_order.cases[0].samples[0].volume = None
 
-    # WHEN validating the two orders
+    # WHEN validating that the order has required volumes set
     errors = validate_case_required_volume(order=valid_order)
 
     # THEN no error should be returned
