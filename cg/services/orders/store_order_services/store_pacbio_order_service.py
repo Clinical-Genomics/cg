@@ -71,7 +71,7 @@ class StorePacBioOrderService(StoreOrderService):
                 sample_name: str = sample["name"]
                 new_sample = self.status_db.add_sample(
                     name=sample_name,
-                    sex=sample["sex"] or "unknown",
+                    sex=sample["sex"] or SexEnum.UNKNOWN,
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
                     order=order,
