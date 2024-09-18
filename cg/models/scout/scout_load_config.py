@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
-from typing_extensions import Annotated, Literal
+from typing_extensions import Annotated, Literal, Optional
 from cg.constants.scout import UploadTrack
 from cg.models.scout.validators import field_not_none
 
@@ -67,7 +67,6 @@ class ScoutIndividual(BaseModel):
     tissue_type: str | None = None
     model_config = ConfigDict(validate_assignment=True)
 
-
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
@@ -105,28 +104,27 @@ class ScoutCancerIndividual(ScoutIndividual):
 class ScoutLoadConfig(BaseModel):
     owner: Annotated[str, BeforeValidator(field_not_none)] = None
     family: Annotated[str, BeforeValidator(field_not_none)] = None
-    family_name: str | None = None
-    synopsis: str | None = None
-    phenotype_terms: list[str] | None = None
-    phenotype_groups: list[str] | None = None
-    gene_panels: list[str] | None = None
+    family_name: Optional[str] = None
+    synopsis: Optional[str] = None
+    phenotype_terms: Optional[list[str]] = None
+    phenotype_groups: Optional[list[str]] = None
+    gene_panels: Optional[list[str]] = None
     default_gene_panels: list[str] = []
-    cohorts: list[str] | None = None
-    human_genome_build: str = None
-    rank_model_version: str | None = None
-    rank_score_threshold: int = None
-    sv_rank_model_version: str | None = None
-    analysis_date: datetime | None = None
+    cohorts: Optional[list[str]] = None
+    human_genome_build: Optional[str] = None
+    rank_model_version: Optional[str] = None
+    rank_score_threshold: Optional[int] = None
+    sv_rank_model_version: Optional[str] = None
+    analysis_date: Optional[datetime] = None
     samples: list[ScoutIndividual] = []
     custom_images: CustomImages = CustomImages()
-    delivery_report: str
-    coverage_qc_report: str | None = None
-    cnv_report: str | None = None
-    multiqc: str | None = None
+    delivery_report: Optional[str] = None
+    coverage_qc_report: Optional[str] = None
+    cnv_report: Optional[str] = None
+    multiqc: Optional[str] = None
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )
-
     model_config = ConfigDict(validate_assignment=True)
 
 
@@ -180,7 +178,6 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
-
 
 class RnafusionLoadConfig(ScoutLoadConfig):
     multiqc_rna: str | None = None

@@ -19,6 +19,7 @@ from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store.models import Analysis, Case, Sample
@@ -733,6 +734,24 @@ def mip_config_builder(
         analysis_obj=mip_dna_analysis,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
+        madeline_api=madeline_api,
+    )
+
+
+@pytest.fixture
+def raredisease_config_builder(
+    raredisease_analysis_hk_version: Version,
+    raredisease_analysis: Analysis,
+    lims_api: MockLimsAPI,
+    analysis_api: RarediseaseAnalysisAPI,
+    madeline_api: MockMadelineAPI,
+) -> MipConfigBuilder:
+    """Return a MIP config builder."""
+    return MipConfigBuilder(
+        hk_version_obj=raredisease_analysis_hk_version,
+        analysis_obj=raredisease_analysis,
+        lims_api=lims_api,
+        analysis_api=analysis_api,
         madeline_api=madeline_api,
     )
 

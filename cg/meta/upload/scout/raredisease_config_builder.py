@@ -65,18 +65,19 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
-        self.load_config.samples = self._get_sample_information(load_config=self.load_config)
+        self.load_config.samples = self._get_sample_information()
         self.load_config = self.include_pedigree_picture(load_config=self.load_config)
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
 
 
-    def _get_sample_information(self, load_config: ScoutLoadConfig):
+    def _get_sample_information(self):
         LOG.info("Building samples")
-        db_sample: Sample
-        for db_sample in self.analysis_obj.case.samples:
-            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        return load_config
+        self.load_config = ScoutLoadConfig()
+        db_sample: CaseSample
+        for db_sample in self.analysis_obj.case.links:
+            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        return self.load_config
 
 
 
@@ -116,7 +117,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def _include_case_file(self, load_config: ScoutLoadConfig, scout_key: str) -> ScoutLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
-        load_config[scout_key] = self.get_file_from_hk(getattr(self.case_tags, scout_key))
+        file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key))
+        setattr(load_config, scout_key, file_path)
         return load_config
 
     def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> ScoutRarediseaseIndividual:

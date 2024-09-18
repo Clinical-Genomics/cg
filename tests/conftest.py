@@ -2643,6 +2643,7 @@ def raredisease_context(
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
     RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
+    samples = [sample_enough_reads, another_sample_enough_reads]
     return cg_context
 
 

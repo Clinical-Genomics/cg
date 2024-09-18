@@ -117,7 +117,7 @@ def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.load_config.phenotype_groups is None
 
     # WHEN including the phenotype groups
-    mip_config_builder.include_phenotype_groups()
+    mip_config_builder.include_phenotype_groups(load_config=mip_config_builder.load_config)
 
     # THEN assert that the phenotype groups were added
     assert mip_config_builder.load_config.phenotype_groups is not None
@@ -131,7 +131,7 @@ def test_include_phenotype_terms(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.load_config.phenotype_terms is None
 
     # WHEN including the phenotype terms
-    mip_config_builder.include_phenotype_terms()
+    mip_config_builder.include_phenotype_terms(load_config=mip_config_builder.load_config)
 
     # THEN assert that the phenotype terms were added
     assert mip_config_builder.load_config.phenotype_terms is not None
@@ -229,7 +229,7 @@ def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfi
     assert balsamic_config_builder.load_config.delivery_report
 
 
-def test_remove_chromosome_substring(scout_config_builder: ScoutConfigBuilder):
+def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):
     """Test that parsing of file path."""
 
     # GIVEN files paths ending with
@@ -240,5 +240,5 @@ def test_remove_chromosome_substring(scout_config_builder: ScoutConfigBuilder):
     generic_path = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_"
 
     # THEN
-    assert scout_config_builder.remove_chromosome_substring(file_path1) == generic_path
-    assert scout_config_builder.remove_chromosome_substring(file_path2) == generic_path
+    assert mip_config_builder.remove_chromosome_substring(file_path1) == generic_path
+    assert mip_config_builder.remove_chromosome_substring(file_path2) == generic_path
