@@ -93,7 +93,7 @@ def test_valid_required_volume(valid_order: OrderWithCases):
 
 def test_missing_volume_no_container(valid_order: OrderWithCases):
 
-    # GIVEN an orders with one sample with invalid required volume, in no container
+    # GIVEN an order with a sample with missing volume, but which is in no container
     valid_order.cases[0].samples[0].container = ContainerEnum.no_container
     valid_order.cases[0].samples[0].volume = None
 
