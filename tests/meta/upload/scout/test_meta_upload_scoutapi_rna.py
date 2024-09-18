@@ -654,7 +654,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different workflow than the expected workflow
-    dna_case.data_analysis = Workflow.FASTQ
+    dna_case.data_analysis = Workflow.RAW_DATA
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
     related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(

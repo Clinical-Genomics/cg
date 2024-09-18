@@ -15,8 +15,22 @@ def delivery_fastq_file(tmp_path: Path, sample_id: str) -> Path:
 
 
 @pytest.fixture
+def delivery_bam_file(tmp_path: Path, sample_id: str) -> Path:
+    file = Path(tmp_path, f"{sample_id}_R1_001{FileExtensions.BAM}")
+    file.touch()
+    return file
+
+
+@pytest.fixture
 def delivery_another_fastq_file(tmp_path: Path, another_sample_id: str) -> Path:
     file = Path(tmp_path, f"{another_sample_id}_R1_001{FileExtensions.FASTQ_GZ}")
+    file.touch()
+    return file
+
+
+@pytest.fixture
+def delivery_another_bam_file(tmp_path: Path, another_sample_id: str) -> Path:
+    file = Path(tmp_path, f"{another_sample_id}_R1_001{FileExtensions.BAM}")
     file.touch()
     return file
 
