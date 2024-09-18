@@ -18,7 +18,7 @@ def test_order_to_status(
     pacbio_order_to_submit: dict, store_pacbio_order_service: StorePacBioOrderService
 ):
     """Test that a PacBio order is parsed correctly."""
-    # GIVEN fastq order with two samples
+    # GIVEN a PacBio order with two samples
     order = OrderIn.parse_obj(pacbio_order_to_submit, OrderType.PACBIO_LONG_READ)
 
     # WHEN parsing for status
