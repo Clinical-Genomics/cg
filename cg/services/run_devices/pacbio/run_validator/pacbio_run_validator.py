@@ -29,7 +29,13 @@ class PacBioRunValidator(RunValidator):
         self.file_manager = file_manager
 
     def ensure_post_processing_can_start(self, run_data: PacBioRunData):
-        """Ensure that a post processing run can start."""
+        """
+        Ensure that a post-processing run can start.
+        1. Check if all files are present listed in a manifest file.
+        2. Decompresses the zipped reports.
+        3. Touches a file to indicate that the run is validated
+        4. Skips validation if the run is already validated
+        """
         if self._is_validated(run_data.full_path):
             return
         paths_information: PacBioRunValidatorFiles = self.file_manager.get_run_validation_files(
