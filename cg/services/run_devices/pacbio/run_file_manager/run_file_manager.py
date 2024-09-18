@@ -35,9 +35,8 @@ class PacBioRunFileManager(RunFileManager):
     )
     def get_run_validation_files(self, run_data: PacBioRunData) -> PacBioRunValidatorFiles:
         manifest_file: Path = self._get_manifest_file(run_data.full_path)
-        decompression_target: Path = self._get_zipped_reports_file(run_data.full_path)
+        decompression_target: Path | None = self._get_zipped_reports_file(run_data.full_path)
         decompression_destination: Path = self._get_unzipped_reports_dir(run_data.full_path)
-        validate_files_or_directories_exist([manifest_file])
         return PacBioRunValidatorFiles(
             manifest_file=manifest_file,
             decompression_target=decompression_target,
@@ -87,13 +86,20 @@ class PacBioRunFileManager(RunFileManager):
     def _get_statistics_dir(run_path) -> Path:
         return Path(run_path, PacBioDirsAndFiles.STATISTICS_DIR)
 
-    def _get_manifest_file(self, run_path) -> Path:
-        return get_files_matching_pattern(
+    @staticmethod
+    def _get_manifest_file(run_path) -> Path:
+        file_list: list[Path] = get_files_matching_pattern(
             directory=Path(run_path, PacBioDirsAndFiles.METADATA_DIR), pattern=MANIFEST_FILE_PATTERN
-        )[0]
+        )
+        if not file_list:
+            raise FileNotFoundError(f"No Manifest file found in {run_path}")
+        return file_list[0]
 
-    def _get_zipped_reports_file(self, run_path) -> Path:
-        return get_files_matching_pattern(
-            directory=self._get_statistics_dir(run_path),
-            pattern=ZIPPED_REPORTS_PATTERN,
-        )[0]
+    def _get_zipped_reports_file(self, run_path) -> Path | None:
+        try:
+            return get_files_matching_pattern(
+                directory=self._get_statistics_dir(run_path),
+                pattern=ZIPPED_REPORTS_PATTERN,
+            )[0]
+        except IndexError:
+            return None
