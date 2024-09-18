@@ -72,7 +72,7 @@ def test_validate_well_position_format(valid_order: MicrosaltOrder):
 
 def test_invalid_required_sample_volume(valid_order: MicrosaltOrder):
 
-    # GIVEN an order with samples in containers that require a volume, but the volume is invalid
+    # GIVEN an order with containerized samples missing volume
     valid_order.samples[0].container = ContainerEnum.tube
     valid_order.samples[0].volume = None
 
