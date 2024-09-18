@@ -1,15 +1,15 @@
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.sample_errors import (
+    ContainerNameMissingError,
     ContainerNameRepeatedError,
     SampleNameNotAvailableError,
     WellFormatError,
-    ContainerNameMissingError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
-    validate_tube_container_name_unique,
+    validate_container_name_required,
     validate_sample_names_available,
+    validate_tube_container_name_unique,
     validate_well_position_format,
-    validate_sample_container_name,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     MicrosaltOrder,
@@ -77,7 +77,7 @@ def test_validate_missing_container_name(valid_order: MicrosaltOrder):
     valid_order.samples[0].container_name = None
 
     # WHEN validating the container name
-    errors = validate_sample_container_name(order=valid_order)
+    errors = validate_container_name_required(order=valid_order)
 
     # THEN am error should be returned
     assert errors
@@ -94,7 +94,7 @@ def test_validate_valid_container_name(valid_order: MicrosaltOrder):
     valid_order.samples[0].container_name = "Plate_123"
 
     # WHEN validating the container name
-    errors = validate_sample_container_name(order=valid_order)
+    errors = validate_container_name_required(order=valid_order)
 
     # THEN no error should be returned
     assert not errors
@@ -110,7 +110,7 @@ def test_validate_non_plate_container(valid_order: MicrosaltOrder):
     valid_order.samples[1].container_name = None
 
     # WHEN validating the container name
-    errors = validate_sample_container_name(order=valid_order)
+    errors = validate_container_name_required(order=valid_order)
 
     # THEN no error should be returned
     assert not errors

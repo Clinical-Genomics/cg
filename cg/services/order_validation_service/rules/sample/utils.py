@@ -1,14 +1,14 @@
+import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
-
-import re
-
 from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.models.order_with_samples import OrderWithNonHumanSamples
+from cg.services.order_validation_service.models.order_with_samples import (
+    OrderWithNonHumanSamples,
+)
 from cg.services.order_validation_service.models.sample import Sample
 
 
@@ -87,7 +87,7 @@ def is_invalid_well_format(sample: Sample) -> bool:
     return False
 
 
-def is_invalid_container_name(sample: Sample) -> bool:
+def is_container_name_missing(sample: Sample) -> bool:
     """Checks if a sample has an invalid container name."""
     if sample.is_on_plate and not sample.container_name:
         return True
