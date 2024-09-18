@@ -6,6 +6,8 @@ class Decompressor:
 
     def decompress(self, source_path: Path, destination_path: Path) -> Path:
         """Decompress a file to a directory."""
+        if not source_path.exists():
+            raise FileNotFoundError(f"Source path {source_path} does not exist.")
         with zipfile.ZipFile(source_path, "r") as zip_file:
             zip_file.extractall(destination_path)
         if not self._decompressed_path_exists(destination_path):

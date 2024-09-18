@@ -12,6 +12,7 @@ class PacBioDirsAndFiles:
     SMRTLINK_DATASETS_REPORT: str = "smrtlink-datasets.json"
     STATISTICS_DIR: str = "statistics"
     UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
+    METADATA_DIR: str = "metadata"
 
 
 class CCSAttributeIDs:

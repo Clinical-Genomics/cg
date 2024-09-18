@@ -36,7 +36,12 @@ class PacBioRunValidator(RunValidator):
             source_dir=run_data.full_path,
             manifest_file_format=FileFormat.TXT,
         )
-        self.decompressor.decompress(
-            source_path=paths_information.decompression_target,
-            destination_path=paths_information.decompression_destination,
-        )
+        if not self._is_decompressed_folder_present(paths_information):
+            self.decompressor.decompress(
+                source_path=paths_information.decompression_target,
+                destination_path=paths_information.decompression_destination,
+            )
+
+    @staticmethod
+    def _is_decompressed_folder_present(paths_information: PacBioRunValidatorFiles) -> bool:
+        return paths_information.decompression_destination.exists()

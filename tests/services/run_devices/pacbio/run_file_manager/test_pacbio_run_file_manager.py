@@ -78,14 +78,14 @@ def test_get_files_to_parse_error(
 
 
 def test_get_run_validator_files(
-    expected_pac_bio_run_data,
-    pac_bio_run_file_manager,
+    expected_pac_bio_run_data_1_b01, pac_bio_run_file_manager, expected_1_b01_run_validation_files
 ):
     # GIVEN a run data object
 
     # WHEN getting the run validation file paths
     validation_file_paths: PacBioRunValidatorFiles = (
-        pac_bio_run_file_manager.get_run_validation_files(expected_pac_bio_run_data)
+        pac_bio_run_file_manager.get_run_validation_files(expected_pac_bio_run_data_1_b01)
     )
 
     # THEN the correct paths are returned
+    assert validation_file_paths == expected_1_b01_run_validation_files
