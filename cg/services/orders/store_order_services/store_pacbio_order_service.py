@@ -3,7 +3,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
@@ -71,7 +71,7 @@ class StorePacBioOrderService(StoreOrderService):
                 sample_name: str = sample["name"]
                 new_sample = self.status_db.add_sample(
                     name=sample_name,
-                    sex=sample["sex"] or SexEnum.UNKNOWN,
+                    sex=sample["sex"] or SexEnum.unknown,
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
                     order=order,
