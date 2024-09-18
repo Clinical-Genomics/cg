@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from pydantic.v1 import ValidationError
@@ -18,8 +17,6 @@ from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
 from cg.store.store import Store
-
-LOG = logging.getLogger(__name__)
 
 
 class InvoiceAPI:
@@ -102,7 +99,6 @@ class InvoiceAPI:
                 pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
-            LOG.info(f"Processing record {raw_record.id}")
             record = self.get_invoice_entity_record(
                 cost_center=cost_center.lower(),
                 discount=self.invoice_obj.discount,
@@ -172,9 +168,6 @@ class InvoiceAPI:
     ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
-        LOG.info(
-            f"Found application {application.tag}/{application.version} for record {record.id}"
-        )
         split_discounted_price = self._cost_center_split_factor(
             price=application.discounted_price,
             cost_center=cost_center,
@@ -194,7 +187,6 @@ class InvoiceAPI:
     def get_application(self, record: Sample or Pool, discount: int) -> InvoiceApplication | None:
         """Return the application information."""
         try:
-            LOG.info(f"discounted_price: {self._discount_price(record, discount)}")
             application = InvoiceApplication(
                 tag=record.application_version.application.tag,
                 version=record.application_version.version,
