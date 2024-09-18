@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import logging
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
@@ -10,6 +10,8 @@ from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import Pac
 from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
     ValidateFileTransferService,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class PacBioRunValidator(RunValidator):
@@ -28,7 +30,7 @@ class PacBioRunValidator(RunValidator):
         self.file_transfer_validator = file_transfer_validator
         self.file_manager = file_manager
 
-    def ensure_post_processing_can_start(self, run_data: PacBioRunData):
+    def ensure_post_processing_can_start(self, run_data: PacBioRunData) -> None:
         """
         Ensure that a post-processing run can start.
         1. Check if all files are present listed in a manifest file.
@@ -37,6 +39,7 @@ class PacBioRunValidator(RunValidator):
         4. Skips validation if the run is already validated
         """
         if self._is_validated(run_data.full_path):
+            LOG.debug(f"Run for {run_data.full_path} is validated.")
             return
         paths_information: PacBioRunValidatorFiles = self.file_manager.get_run_validation_files(
             run_data
@@ -52,6 +55,7 @@ class PacBioRunValidator(RunValidator):
             destination_path=paths_information.decompression_destination,
         )
         self._touch_is_validated(run_data.full_path)
+        LOG.debug(f"Run for {run_data.full_path} is validated.")
 
     @staticmethod
     def _touch_is_validated(run_path: Path):
