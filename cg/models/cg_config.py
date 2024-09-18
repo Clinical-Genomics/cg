@@ -26,6 +26,7 @@ from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -54,11 +55,15 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
+from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
+    ValidateFileTransferService,
+)
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -612,6 +617,11 @@ class CGConfig(BaseModel):
         LOG.debug("Instantiating PacBio post-processing service")
         run_data_generator = PacBioRunDataGenerator()
         file_manager = PacBioRunFileManager()
+        run_validator = PacBioRunValidator(
+            file_manager=file_manager,
+            decompressor=Decompressor(),
+            file_transfer_validator=ValidateFileTransferService(),
+        )
         metrics_parser = PacBioMetricsParser(file_manager=file_manager)
         transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
         store_service = PacBioStoreService(
@@ -623,6 +633,7 @@ class CGConfig(BaseModel):
             metrics_parser=metrics_parser,
         )
         return PacBioPostProcessingService(
+            run_validator=run_validator,
             run_data_generator=run_data_generator,
             hk_service=hk_service,
             store_service=store_service,

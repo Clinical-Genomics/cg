@@ -16,6 +16,15 @@ class RunDataGenerator(ABC):
         pass
 
 
+class RunValidator(ABC):
+    """Abstract class that holds functionality to validate a run and ensure it can start post processing."""
+
+    @abstractmethod
+    def ensure_post_processing_can_start(self, run_data: RunData):
+        """Ensure a post processing run can start."""
+        pass
+
+
 class RunFileManager(ABC):
     """Abstract class that manages files related to an instrument run."""
 
@@ -79,12 +88,3 @@ class PostProcessingService(ABC):
         """Touch the post-processing complete file."""
         processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
         processing_complete_file.touch()
-
-
-class FileTransferValidationService(ABC):
-    """Abstract class that validates file transfers for instrument runs from NAS to Hasta."""
-
-    @abstractmethod
-    def validate_file_transfer(self, run_data: RunData):
-        """Validate an instrument run transfer."""
-        pass
