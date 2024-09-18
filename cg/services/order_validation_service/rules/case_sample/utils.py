@@ -59,7 +59,7 @@ def is_volume_invalid(sample: Sample) -> bool:
     return in_container and not allowed_volume
 
 
-def is_required_sample_volume_invalid(sample: Sample) -> bool:
+def is_volume_missing(sample: Sample) -> bool:
     """Check if a sample has an invalid volume."""
     if (sample.is_on_plate or sample.container == ContainerEnum.tube) and not sample.volume:
         return True
