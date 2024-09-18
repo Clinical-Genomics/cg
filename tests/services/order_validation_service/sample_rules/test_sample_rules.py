@@ -102,7 +102,7 @@ def test_validate_valid_container_name(valid_order: MicrosaltOrder):
 
 def test_validate_non_plate_container(valid_order: MicrosaltOrder):
 
-    # GIVEN an order with a samples in a tube and 'no container' with an invalid container name
+    # GIVEN an order with missing container names but the samples are not on plates
     valid_order.samples[0].container = ContainerEnum.tube
     valid_order.samples[0].container_name = None
 
