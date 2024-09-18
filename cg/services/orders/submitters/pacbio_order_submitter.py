@@ -9,7 +9,7 @@ from cg.services.orders.validate_order_services.validate_pacbio_order import (
 
 
 class PacbioOrderSubmitter(OrderSubmitter):
-    """Submitter for fastq orders."""
+    """Submitter for Pacbio orders."""
 
     def __init__(
         self,
