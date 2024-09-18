@@ -48,7 +48,7 @@ class InvalidVolumeError(SampleError):
 class VolumeRequiredError(SampleError):
     field: str = "volume"
     message: str = (
-        f"Volume is required for samples in {ContainerEnum.tube} and {ContainerEnum.plate}"
+        f"Volume is required"
     )
 
 
