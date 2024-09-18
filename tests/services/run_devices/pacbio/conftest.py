@@ -17,3 +17,15 @@ def expected_pac_bio_run_data(
         well_name="A01",
         plate=1,
     )
+
+
+@pytest.fixture
+def expected_pac_bio_run_data_1_b01(
+    pac_bio_test_run_name: str, pac_bio_smrt_cell_dir_1_b01: Path
+) -> PacBioRunData:
+    return PacBioRunData(
+        full_path=pac_bio_smrt_cell_dir_1_b01,
+        sequencing_run_name=pac_bio_test_run_name,
+        well_name="B01",
+        plate=1,
+    )
