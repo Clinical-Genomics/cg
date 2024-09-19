@@ -692,8 +692,6 @@ def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
     return analysis_obj
 
 
-
-
 @pytest.fixture
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""

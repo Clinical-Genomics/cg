@@ -11,7 +11,13 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.models.scout.scout_load_config import ScoutCancerIndividual, ScoutIndividual, ScoutMipIndividual, ScoutRarediseaseIndividual, ScoutLoadConfig
+from cg.models.scout.scout_load_config import (
+    ScoutCancerIndividual,
+    ScoutIndividual,
+    ScoutMipIndividual,
+    ScoutRarediseaseIndividual,
+    ScoutLoadConfig,
+)
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from pathlib import Path
 
@@ -40,7 +46,7 @@ class ScoutConfigBuilder:
         self.load_config.family = self.analysis_obj.case.internal_id
         self.load_config.family_name = self.analysis_obj.case.name
         self.load_config.owner = self.analysis_obj.case.customer.internal_id
-        self.load_config.synopsis = self.analysis_obj.case.synopsis########TO DO
+        self.load_config.synopsis = self.analysis_obj.case.synopsis  ########TO DO
         # self.load_config.human_genome_build = self.analysis_api.get_genome_build(
         #         case_id=self.analysis_obj.case.internal_id
         #     )
@@ -79,7 +85,6 @@ class ScoutConfigBuilder:
                 return True
         return False
 
-
     def include_pedigree_picture(self) -> ScoutLoadConfig:
         if self.is_multi_sample_case(self):
             if self.is_family_case(self):
@@ -99,18 +104,15 @@ class ScoutConfigBuilder:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return file_path
-        return re.split(r"([0-9]+|X|Y)\.png", file_path)[0]
+        return re.split(r"(?:\d+|X|Y)\.png", file_path)[0]
 
-
-
-    def get_sample_information(self, load_config: ScoutLoadConfig)->list[ScoutIndividual]:
+    def get_sample_information(self, load_config: ScoutLoadConfig) -> list[ScoutIndividual]:
         LOG.info("Building samples")
         db_sample: CaseSample
 
         for db_sample in self.analysis_obj.case.links:
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         return load_config
-
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample with rnafusion specific information."""
@@ -122,10 +124,13 @@ class ScoutConfigBuilder:
             config_sample = ScoutMipIndividual()
         elif self.analysis_obj.workflow == Workflow.RNAFUSION:
             config_sample = ScoutIndividual()
-        config_sample = self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        config_sample = self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        config_sample = self.add_common_sample_info(
+            config_sample=config_sample, case_sample=case_sample
+        )
+        config_sample = self.add_common_sample_files(
+            config_sample=config_sample, case_sample=case_sample
+        )
         return config_sample
-
 
     def add_common_sample_info(
         self, config_sample: ScoutIndividual, case_sample: CaseSample
@@ -165,7 +170,6 @@ class ScoutConfigBuilder:
         self.include_sample_alignment_file(config_sample)
         self.include_sample_files(config_sample)
         return config_sample
-
 
     def build_load_config(self) -> ScoutLoadConfig:
         """Build a load config for uploading a case to Scout."""

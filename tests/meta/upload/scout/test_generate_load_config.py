@@ -87,7 +87,6 @@ def test_generate_mip_load_config(
     assert isinstance(config, MipLoadConfig)
 
 
-
 def test_generate_raredisease_load_config(
     raredisease_analysis_obj: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
 ):
@@ -97,7 +96,9 @@ def test_generate_raredisease_load_config(
 
     # GIVEN an upload scout api with some RAREDISEASE information
     # WHEN generating a load config
-    config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis_obj)
+    config = upload_raredisease_analysis_scout_api.generate_config(
+        analysis=raredisease_analysis_obj
+    )
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, RarediseaseLoadConfig)
@@ -168,7 +169,9 @@ def test_generate_config_adds_sample_paths_raredisease(
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: MipLoadConfig = upload_raredisease_analysis_scout_api.generate_config(raredisease_analysis_obj)
+    result_data: MipLoadConfig = upload_raredisease_analysis_scout_api.generate_config(
+        raredisease_analysis_obj
+    )
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual

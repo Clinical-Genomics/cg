@@ -59,20 +59,15 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         LOG.info("Build load config for RAREDISEASE case")
         self.load_config = RarediseaseLoadConfig()
         self.load_config = self.add_common_info_to_load_config()
-        self.load_config.gene_panels = (
-            self.raredisease_analysis_api.get_aggregated_panels(
-                customer_id=self.analysis_obj.case.customer.internal_id,
-                default_panels=set(self.analysis_obj.case.panels),
-            )
+        self.load_config.gene_panels = self.raredisease_analysis_api.get_aggregated_panels(
+            customer_id=self.analysis_obj.case.customer.internal_id,
+            default_panels=set(self.analysis_obj.case.panels),
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
         self.load_config = self.get_sample_information(load_config=self.load_config)
         self.load_config = self.include_pedigree_picture()
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
-
-
-
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
@@ -107,7 +102,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         setattr(load_config, scout_key, file_path)
         return load_config
 
-    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> ScoutRarediseaseIndividual:
+    def include_sample_files(
+        self, config_sample: ScoutRarediseaseIndividual
+    ) -> ScoutRarediseaseIndividual:
         """Include sample level files that are optional for mip samples."""
         LOG.info("Including RAREDISEASE specific sample level files")
         sample_id: str = config_sample.sample_id

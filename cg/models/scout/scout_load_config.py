@@ -67,6 +67,7 @@ class ScoutIndividual(BaseModel):
     tissue_type: str | None = None
     model_config = ConfigDict(validate_assignment=True)
 
+
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
@@ -178,6 +179,7 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
+
 
 class RnafusionLoadConfig(ScoutLoadConfig):
     multiqc_rna: str | None = None
