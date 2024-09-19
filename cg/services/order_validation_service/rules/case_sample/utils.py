@@ -1,6 +1,5 @@
-from collections import Counter
-
 import re
+from collections import Counter
 
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex

@@ -1,7 +1,7 @@
 import pytest
-
 from cg.models.orders.sample_base import ContainerEnum, StatusEnum
 from cg.models.orders.samples import TomteSample
+from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -17,6 +17,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    VolumeRequiredError,
     WellFormatError,
     WellPositionMissingError,
 )
@@ -34,6 +35,9 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.rules.case_sample.rules import (
+    validate_required_volume,
     validate_tube_container_name_unique,
     validate_volume_interval,
     validate_well_position_format,
@@ -80,6 +84,7 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
 
+
 def test_applications_exist(valid_order: OrderWithCases, base_store: Store):
     # GIVEN an order where one of the samples has an invalid application
     for case in valid_order.cases:
@@ -106,6 +111,21 @@ def test_applications_not_archived(
 
     # WHEN validating the order
     errors = validate_application_not_archived(order=valid_order, store=base_store)
+  
+    # THEN an error should be returned
+    assert errors
+
+def test_missing_required_volume(valid_order: OrderWithCases):
+
+    # GIVEN an orders with two samples with missing volumes
+    valid_order.cases[0].samples[0].container = ContainerEnum.tube
+    valid_order.cases[0].samples[0].volume = None
+
+    valid_order.cases[0].samples[1].container = ContainerEnum.plate
+    valid_order.cases[0].samples[1].volume = None
+
+    # WHEN validating that required volumes are set
+    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -310,3 +330,22 @@ def test_concentration_not_within_interval_if_skip_rc(
 
     # THEN the error should concern the application interval
     assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
+    # THEN the error should concern the missing volumes
+    assert isinstance(errors[0], VolumeRequiredError)
+    assert errors[0].sample_index == 0 and errors[0].case_index == 0
+
+    assert isinstance(errors[1], VolumeRequiredError)
+    assert errors[1].sample_index == 1 and errors[1].case_index == 0
+
+
+def test_missing_volume_no_container(valid_order: OrderWithCases):
+
+    # GIVEN an order with a sample with missing volume, but which is in no container
+    valid_order.cases[0].samples[0].container = ContainerEnum.no_container
+    valid_order.cases[0].samples[0].volume = None
+
+    # WHEN validating that the order has required volumes set
+    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
+
+    # THEN no error should be returned
+    assert not errors
