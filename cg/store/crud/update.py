@@ -31,10 +31,10 @@ class UpdateHandler(BaseHandler):
         sample.comment = f"{sample.comment} {comment}" if sample.comment else comment
         self.session.commit()
 
-    def update_order_delivery(self, order_id: int, delivered: bool) -> Order:
-        """Update the delivery status of an order."""
+    def update_order_status(self, order_id: int, open: bool) -> Order:
+        """Update the status of an order."""
         order: Order = self.get_order_by_id(order_id)
-        order.is_delivered = delivered
+        order.is_open = open
         self.session.commit()
         return order
 

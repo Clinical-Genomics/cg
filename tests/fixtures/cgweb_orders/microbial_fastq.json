@@ -1,0 +1,33 @@
+{
+    "name": "Microbial Fastq order",
+    "customer": "cust002",
+    "comment": "",
+    "samples": [
+        {
+            "application": "WGSPCFC060",
+            "comment": "sample comment",
+            "container": "Tube",
+            "container_name": "prov1",
+            "data_analysis": "microsalt",
+            "data_delivery": "fastq",
+            "elution_buffer": "Nuclease-free water",
+            "name": "prov1",
+            "priority": "priority",
+            "volume": "1",
+            "well_position": ""
+        },
+        {
+            "application": "WGSPCFC060",
+            "comment": "sample comment",
+            "container": "Tube",
+            "container_name": "prov2",
+            "data_analysis": "raw-data",
+            "data_delivery": "fastq",
+            "elution_buffer": "Nuclease-free water",
+            "name": "prov2",
+            "priority": "priority",
+            "volume": "2",
+            "well_position": ""
+        }
+    ]
+}

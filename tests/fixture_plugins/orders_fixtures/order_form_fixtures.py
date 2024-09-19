@@ -12,14 +12,6 @@ from cg.constants.constants import FileFormat
 from cg.constants.orderforms import Orderform
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
-from cg.models.orders.order import OrderIn
-from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
-from cg.services.orders.store_order_services.store_metagenome_order import (
-    StoreMetagenomeOrderService,
-)
-from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 
 
 def get_nr_samples_excel(orderform_path: str) -> int:
@@ -180,86 +172,6 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def mip_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example MIP order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RNA order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example TOMTE order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "tomte.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RNA order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rnafusion.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def fastq_order_to_submit(cgweb_orders_dir) -> dict:
-    """Load an example FASTQ order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RML order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example metagenome order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example microbial order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example sarscov2 order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
-    )
-
-
-@pytest.fixture(scope="session")
-def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example cancer order."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
-    )
-
-
-@pytest.fixture(scope="session")
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples."""
     return Path(
@@ -357,10 +269,10 @@ def fluffy_uploaded_json_order(orderforms: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
-def json_order_list(
-    mip_uploaded_json_order,
-    fluffy_uploaded_json_order,
-    balsamic_uploaded_json_order,
+def json_order_dict(
+    mip_uploaded_json_order: dict,
+    fluffy_uploaded_json_order: dict,
+    balsamic_uploaded_json_order: dict,
 ) -> dict[str, dict]:
     """Return a dict of orders that can be uploaded in the json format."""
     return {
@@ -368,119 +280,3 @@ def json_order_list(
         OrderType.FLUFFY: fluffy_uploaded_json_order,
         OrderType.BALSAMIC: balsamic_uploaded_json_order,
     }
-
-
-@pytest.fixture(scope="session")
-def all_orders_to_submit(
-    balsamic_order_to_submit: dict,
-    fastq_order_to_submit: dict,
-    metagenome_order_to_submit: dict,
-    microbial_order_to_submit: dict,
-    mip_order_to_submit: dict,
-    mip_rna_order_to_submit: dict,
-    rml_order_to_submit: dict,
-    rnafusion_order_to_submit: dict,
-    sarscov2_order_to_submit: dict,
-) -> dict:
-    """Returns a dict of parsed order for each order type."""
-    return {
-        OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
-        OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit, project=OrderType.FASTQ),
-        OrderType.FLUFFY: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.FLUFFY),
-        OrderType.METAGENOME: OrderIn.parse_obj(
-            metagenome_order_to_submit, project=OrderType.METAGENOME
-        ),
-        OrderType.MICROSALT: OrderIn.parse_obj(
-            microbial_order_to_submit, project=OrderType.MICROSALT
-        ),
-        OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA),
-        OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit, project=OrderType.MIP_RNA),
-        OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
-        OrderType.RNAFUSION: OrderIn.parse_obj(
-            rnafusion_order_to_submit, project=OrderType.RNAFUSION
-        ),
-        OrderType.SARS_COV_2: OrderIn.parse_obj(
-            sarscov2_order_to_submit, project=OrderType.SARS_COV_2
-        ),
-    }
-
-
-@pytest.fixture
-def balsamic_status_data(
-    balsamic_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
-) -> dict:
-    """Parse balsamic order example."""
-    project: OrderType = OrderType.BALSAMIC
-    order: OrderIn = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=project)
-    return store_generic_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def fastq_status_data(
-    fastq_order_to_submit, store_fastq_order_service: StoreFastqOrderService
-) -> dict:
-    """Parse fastq order example."""
-    project: OrderType = OrderType.FASTQ
-    order: OrderIn = OrderIn.parse_obj(obj=fastq_order_to_submit, project=project)
-    return store_fastq_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def metagenome_status_data(
-    metagenome_order_to_submit: dict, store_metagenome_order_service: StoreMetagenomeOrderService
-) -> dict:
-    """Parse metagenome order example."""
-    project: OrderType = OrderType.METAGENOME
-    order: OrderIn = OrderIn.parse_obj(obj=metagenome_order_to_submit, project=project)
-
-    return store_metagenome_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def microbial_status_data(
-    microbial_order_to_submit: dict, store_microbial_order_service: StoreMicrobialOrderService
-) -> dict:
-    """Parse microbial order example."""
-    project: OrderType = OrderType.MICROSALT
-    order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
-    return store_microbial_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def mip_rna_status_data(
-    mip_rna_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
-) -> dict:
-    """Parse rna order example."""
-    project: OrderType = OrderType.MIP_RNA
-    order: OrderIn = OrderIn.parse_obj(obj=mip_rna_order_to_submit, project=project)
-    return store_generic_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def mip_status_data(
-    mip_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
-) -> dict:
-    """Parse scout order example."""
-    project: OrderType = OrderType.MIP_DNA
-    order: OrderIn = OrderIn.parse_obj(obj=mip_order_to_submit, project=project)
-    return store_generic_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def rml_status_data(
-    rml_order_to_submit: dict, store_pool_order_service: StorePoolOrderService
-) -> dict:
-    """Parse rml order example."""
-    project: OrderType = OrderType.RML
-    order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
-    return store_pool_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def tomte_status_data(
-    tomte_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
-) -> dict:
-    """Parse TOMTE order example."""
-    project: OrderType = OrderType.TOMTE
-    order: OrderIn = OrderIn.parse_obj(obj=tomte_order_to_submit, project=project)
-    return store_generic_order_service.order_to_status(order=order)

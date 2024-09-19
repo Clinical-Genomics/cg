@@ -192,6 +192,14 @@ class FastqSample(OrderInSample):
         return OptionalIntValidator.str_to_int(v=v)
 
 
+class PacBioSample(OrderInSample):
+    _suitable_project = OrderType.PACBIO_LONG_READ
+
+    capture_kit: str | None = None
+    sex: SexEnum = SexEnum.unknown
+    tumour: bool
+
+
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
 

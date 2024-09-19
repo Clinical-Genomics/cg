@@ -27,7 +27,6 @@ from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.validate import validate
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
@@ -121,5 +120,4 @@ base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
 base.add_command(post_processing)
-base.add_command(validate)
 base.add_command(sequencing_qc)
