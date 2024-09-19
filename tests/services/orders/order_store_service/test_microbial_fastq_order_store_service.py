@@ -1,14 +1,12 @@
 from datetime import datetime
 
-from cg.constants import Workflow, DataDelivery
-from cg.models.orders.order import OrderIn
-
+from cg.constants import DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
+from cg.models.orders.order import OrderIn
 from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
     StoreMicrobialFastqOrderService,
 )
-from cg.store.models import Sample, Case
-from cg.store.store import Store
+from cg.store.models import Case, Sample
 
 
 def test_microbial_samples_to_status(

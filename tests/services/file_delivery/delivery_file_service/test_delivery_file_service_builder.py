@@ -14,11 +14,11 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case
 from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
     AnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_and_analysis_delivery_file_fetcher import (
-    FastqAndAnalysisDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_and_analysis_delivery_file_fetcher import (
+    RawDataAndAnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_delivery_file_fetcher import (
-    FastqDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+    RawDataDeliveryFileFetcher,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
     SampleFileConcatenationFormatter,
@@ -38,7 +38,7 @@ from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover i
             Workflow.MICROSALT,
             DataDelivery.FASTQ,
             SampleAndCaseDeliveryTagsFetcher,
-            FastqDeliveryFileFetcher,
+            RawDataDeliveryFileFetcher,
             DeliveryFilesMover,
             SampleFileConcatenationFormatter,
         ),
@@ -54,7 +54,7 @@ from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover i
             Workflow.BALSAMIC,
             DataDelivery.FASTQ_ANALYSIS,
             SampleAndCaseDeliveryTagsFetcher,
-            FastqAndAnalysisDeliveryFileFetcher,
+            RawDataAndAnalysisDeliveryFileFetcher,
             DeliveryFilesMover,
             SampleFileFormatter,
         ),

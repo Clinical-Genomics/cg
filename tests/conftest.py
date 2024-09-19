@@ -28,6 +28,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
@@ -84,7 +85,6 @@ from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
-from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
@@ -117,6 +117,10 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
+    "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
@@ -125,8 +129,6 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
@@ -1137,7 +1139,11 @@ def compress_hk_fastq_bundle(
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
         os.utime(fastq_file, (before_timestamp, before_timestamp))
-        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+        fastq_file_info = {
+            "path": str(fastq_file),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ],
+        }
 
         hk_bundle_data["files"].append(fastq_file_info)
     return hk_bundle_data

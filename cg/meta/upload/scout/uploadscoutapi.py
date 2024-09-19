@@ -455,7 +455,7 @@ class UploadScoutAPI:
 
         collaborators: set[Customer] = rna_sample.customer.collaborators
         subject_id_samples: list[Sample] = (
-            self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+            self.status_db.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
                 customer_ids=[customer.id for customer in collaborators],
                 subject_id=rna_sample.subject_id,
                 is_tumour=rna_sample.is_tumour,
