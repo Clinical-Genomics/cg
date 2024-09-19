@@ -1,11 +1,12 @@
 from pathlib import Path
 
 from cg.constants import FileExtensions
-from cg.constants.pacbio import PacBioDirsAndFiles
+from cg.constants.pacbio import PacBioDirsAndFiles, MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN
 from cg.services.run_devices.abstract_classes import RunFileManager
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.validators import validate_files_or_directories_exist
 from cg.utils.files import get_files_matching_pattern
 
@@ -29,10 +30,22 @@ class PacBioRunFileManager(RunFileManager):
         run_path: Path = run_data.full_path
         return self.get_files_to_parse(run_data) + self._get_hifi_read_files(run_path)
 
-    @staticmethod
-    def _get_ccs_report_file(run_path: Path) -> Path:
+    @handle_post_processing_errors(
+        to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
+    )
+    def get_run_validation_files(self, run_data: PacBioRunData) -> PacBioRunValidatorFiles:
+        manifest_file: Path = self._get_manifest_file(run_data.full_path)
+        decompression_target: Path = self._get_zipped_reports_file(run_data.full_path)
+        decompression_destination: Path = self._get_unzipped_reports_dir(run_data.full_path)
+        return PacBioRunValidatorFiles(
+            manifest_file=manifest_file,
+            decompression_target=decompression_target,
+            decompression_destination=decompression_destination,
+        )
+
+    def _get_ccs_report_file(self, run_path: Path) -> Path:
         """Return the path to the CCS report file."""
-        statistics_dir: Path = Path(run_path, PacBioDirsAndFiles.STATISTICS_DIR)
+        statistics_dir: Path = self._get_statistics_dir(run_path)
         files: list[Path] = get_files_matching_pattern(
             directory=statistics_dir, pattern=f"*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}"
         )
@@ -42,9 +55,7 @@ class PacBioRunFileManager(RunFileManager):
 
     def _get_report_files(self, run_path: Path) -> list[Path]:
         """Return the paths to the unzipped report files."""
-        unzipped_dir: Path = Path(
-            run_path, PacBioDirsAndFiles.STATISTICS_DIR, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR
-        )
+        unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
         report_files: list[Path] = [
             Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
@@ -64,3 +75,28 @@ class PacBioRunFileManager(RunFileManager):
         )
         validate_files_or_directories_exist(bam_files)
         return bam_files
+
+    @staticmethod
+    def _get_unzipped_reports_dir(run_path) -> Path:
+        return Path(
+            run_path, PacBioDirsAndFiles.STATISTICS_DIR, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR
+        )
+
+    @staticmethod
+    def _get_statistics_dir(run_path) -> Path:
+        return Path(run_path, PacBioDirsAndFiles.STATISTICS_DIR)
+
+    @staticmethod
+    def _get_manifest_file(run_path) -> Path:
+        file_list: list[Path] = get_files_matching_pattern(
+            directory=Path(run_path, PacBioDirsAndFiles.METADATA_DIR), pattern=MANIFEST_FILE_PATTERN
+        )
+        if not file_list:
+            raise FileNotFoundError(f"No Manifest file found in {run_path}")
+        return file_list[0]
+
+    def _get_zipped_reports_file(self, run_path) -> Path:
+        return get_files_matching_pattern(
+            directory=self._get_statistics_dir(run_path),
+            pattern=ZIPPED_REPORTS_PATTERN,
+        )[0]
