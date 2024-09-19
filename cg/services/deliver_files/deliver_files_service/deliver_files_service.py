@@ -6,6 +6,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.tb import AnalysisTypes
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.deliver_files.deliver_files_service.handle_errors import handle_delivery_errors
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
@@ -55,6 +56,7 @@ class DeliverFilesService:
         self.tb_service = tb_service
         self.analysis_service = analysis_service
 
+    @handle_delivery_errors
     def deliver_files_for_case(
         self, case: Case, delivery_base_path: Path, dry_run: bool = False
     ) -> None:
@@ -104,7 +106,7 @@ class DeliverFilesService:
             LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
         else:
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
-                case_id=case.internal_id,
+                case_id=f"{case.internal_id}_rsync",
                 analysis_type=AnalysisTypes.OTHER,
                 config_path=self.rsync_service.trailblazer_config_path.as_posix(),
                 order_id=case.latest_order.id,

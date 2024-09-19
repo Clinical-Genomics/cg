@@ -1,5 +1,7 @@
 import datetime as dt
+
 import pytest
+
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import PrepCategory
 from cg.exc import OrderError
@@ -16,18 +18,18 @@ def test_samples_to_status(
     order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
 
     # WHEN parsing for status
-    data = store_fastq_order_service.order_to_status(order=order)
+    data: dict = store_fastq_order_service.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
-    first_sample = data["samples"][0]
+    first_sample: dict = data["samples"][0]
     assert first_sample["name"] == "prov1"
     assert first_sample["application"] == "WGSPCFC060"
     assert first_sample["priority"] == "priority"
     assert first_sample["tumour"] is False
     assert first_sample["volume"] == "1"
 
-    # ... and the other sample is a tumour
+    # THEN the other sample is a tumour
     assert data["samples"][1]["tumour"] is True
 
 
@@ -132,8 +134,8 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
         items=fastq_status_data["samples"],
     )
 
-    # THEN the analysis for the case should be FASTQ
-    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
+    # THEN the analysis for the case should be RAW_DATA
+    assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(
@@ -165,8 +167,8 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         items=fastq_status_data["samples"],
     )
 
-    # THEN the analysis for the case should be fastq (none)
-    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
+    # THEN the analysis for the case should be RAW_DATA (none)
+    assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
 
 
 def test_store_samples_bad_apptag(
@@ -179,6 +181,7 @@ def test_store_samples_bad_apptag(
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
 
+    # GIVEN a non-existing application tag
     for sample in fastq_status_data["samples"]:
         sample["application"] = "nonexistingtag"
 

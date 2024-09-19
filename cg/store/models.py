@@ -558,7 +558,7 @@ class Case(Base, PriorityMixin):
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_workflow_map: dict[str, str] = {
-            DataDelivery.FASTQ: Workflow.FASTQ,
+            DataDelivery.FASTQ: Workflow.RAW_DATA,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
         for data_delivery, workflow in delivery_per_workflow_map.items():
@@ -974,7 +974,7 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
-    is_delivered: Mapped[bool] = mapped_column(default=False)
+    is_open: Mapped[bool] = mapped_column(default=True)
 
     def to_dict(self):
         return to_dict(model_instance=self)

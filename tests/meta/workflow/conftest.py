@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import SequencingFileTag
 from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -79,17 +80,17 @@ def spring_fastq_mix(compression_object: CompressionData) -> dict:
             {
                 "path": str(compression_object.spring_path),
                 "archive": False,
-                "tags": ["spring"],
+                "tags": [SequencingFileTag.SPRING],
             },
             {
                 "path": str(compression_object.fastq_first),
                 "archive": False,
-                "tags": ["fastq"],
+                "tags": [SequencingFileTag.FASTQ],
             },
             {
                 "path": str(compression_object.fastq_second),
                 "archive": False,
-                "tags": ["fastq"],
+                "tags": [SequencingFileTag.FASTQ],
             },
         ],
     }

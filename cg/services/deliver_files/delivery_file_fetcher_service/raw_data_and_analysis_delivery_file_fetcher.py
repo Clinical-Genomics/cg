@@ -1,25 +1,28 @@
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
-    FetchDeliveryFileTagsService,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
     AnalysisDeliveryFileFetcher,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.fastq_delivery_file_fetcher import (
-    FastqDeliveryFileFetcher,
+from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
+    handle_validation_errors,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     DeliveryFiles,
     DeliveryMetaData,
 )
+from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+    RawDataDeliveryFileFetcher,
+)
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+    FetchDeliveryFileTagsService,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
 
-class FastqAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
+class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
 
     def __init__(
         self, status_db: Store, hk_api: HousekeeperAPI, tags_fetcher: FetchDeliveryFileTagsService
@@ -28,10 +31,11 @@ class FastqAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
+    @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         fastq_files: DeliveryFiles = self._fetch_files(
-            service_class=FastqDeliveryFileFetcher, case_id=case_id
+            service_class=RawDataDeliveryFileFetcher, case_id=case_id
         )
         analysis_files: DeliveryFiles = self._fetch_files(
             service_class=AnalysisDeliveryFileFetcher, case_id=case_id

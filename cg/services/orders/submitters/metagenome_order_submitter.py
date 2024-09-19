@@ -8,7 +8,7 @@ from cg.services.orders.validate_order_services.validate_metagenome_order import
 
 
 class MetagenomeOrderSubmitter(OrderSubmitter):
-    """Class for submitting metagenome orders."""
+    """Class for submitting metagenome and taxprofiler orders."""
 
     def __init__(
         self,

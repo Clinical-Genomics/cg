@@ -27,11 +27,13 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisTypes
@@ -82,7 +84,6 @@ from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
-from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
@@ -115,6 +116,10 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
+    "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
@@ -123,8 +128,6 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
@@ -1135,7 +1138,11 @@ def compress_hk_fastq_bundle(
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
         os.utime(fastq_file, (before_timestamp, before_timestamp))
-        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+        fastq_file_info = {
+            "path": str(fastq_file),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ],
+        }
 
         hk_bundle_data["files"].append(fastq_file_info)
     return hk_bundle_data
@@ -2539,8 +2546,13 @@ def raredisease_parameters_default(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed=bed_version_file_name,
+        skip_germlinecnvcaller=False,
         analysis_type=AnalysisTypes.WES,
         save_mapped_as_cram=True,
+        vcfanno_extra_resources=str(
+            Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
+        ),
+        local_genomes=Path(raredisease_dir, "references").as_posix(),
     )
 
 
@@ -2552,6 +2564,9 @@ def raredisease_context(
     trailblazer_api: MockTB,
     raredisease_case_id: str,
     sample_id: str,
+    father_sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     wgs_application_tag: str,
@@ -2582,6 +2597,16 @@ def raredisease_context(
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=wgs_application_tag,
+    )
+
+    another_sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        name=another_sample_name,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
@@ -2591,6 +2616,12 @@ def raredisease_context(
         status_db,
         case=case_enough_reads,
         sample=sample_enough_reads,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=another_sample_enough_reads,
     )
 
     # Create case without enough reads

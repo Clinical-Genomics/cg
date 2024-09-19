@@ -5,6 +5,7 @@ from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
 
+from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -109,7 +110,12 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
+        return False
+
+    @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variant export needs to be exported it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -376,6 +382,12 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
+        if self.is_managed_variants_required:
+            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
+            if dry_run:
+                echo_lines(lines=vcf_lines)
+            else:
+                self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -631,11 +643,10 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
         """Return search patterns for MultiQC. Each key is a search pattern and each value
         corresponds to the metric ID to set in the metrics deliverables file.
-        Multiple search patterns can be added. Ideally patterns used should be sample ids, e.g.
+        Multiple search patterns can be added. Ideally, used patterns should be sample ids, e.g.
         {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
-        return search_patterns
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
+        return {sample_id: sample_id for sample_id in sample_ids}
 
     @staticmethod
     def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
@@ -649,11 +660,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 deduplicated_metrics.append(metric)
         return deduplicated_metrics
 
+    def get_multiqc_data_json(self, case_id: str) -> MultiqcDataJson:
+        return MultiqcDataJson(**read_json(file_path=self.get_multiqc_json_path(case_id=case_id)))
+
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
+        multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
         for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
@@ -668,6 +680,14 @@ class NfAnalysisAPI(AnalysisAPI):
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
+    @staticmethod
+    def _is_pattern_found(pattern: str, text: str, exact_match: bool) -> bool:
+        if exact_match:
+            is_pattern_found: bool = pattern == text
+        else:
+            is_pattern_found: bool = pattern in text
+        return is_pattern_found
+
     def get_metrics_from_multiqc_json_with_pattern(
         self,
         search_pattern: str,
@@ -678,13 +698,11 @@ class NfAnalysisAPI(AnalysisAPI):
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
         for section in multiqc_json.report_general_stats_data:
-            for section_name, section_values in section.items():
-                if exact_match:
-                    is_pattern_found: bool = search_pattern == section_name
-                else:
-                    is_pattern_found: bool = search_pattern in section_name
-                if is_pattern_found:
-                    for metric_name, metric_value in section_values.items():
+            for subsection, metrics_dict in section.items():
+                if self._is_pattern_found(
+                    pattern=search_pattern, text=subsection, exact_match=exact_match
+                ):
+                    for metric_name, metric_value in metrics_dict.items():
                         metric: MetricsBase = self.get_multiqc_metric(
                             metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
                         )
