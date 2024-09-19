@@ -66,45 +66,46 @@ class BalsamicConfigPanel(BaseModel):
         capture_kit: string representation of a panel BED filename
         capture_kit_version: capture kit version
         chrom: list of chromosomes in the panel BED file
+        pon_cnn: panel of normal name and version applied to the CNVkit variant calling
     """
 
     capture_kit: str
     capture_kit_version: str | None
     chrom: list[str]
+    pon_cnn: str | None = None
 
     @validator("capture_kit", pre=True)
-    def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
-        """Return the base name of the provided capture kit path."""
-        return Path(capture_kit).name
+    def get_filename_from_path(cls, path: str) -> str:
+        """Return the base name of the provided file path."""
+        return Path(path).name
 
     @validator("capture_kit_version", always=True)
-    def extract_capture_kit_name_from_name(
-        cls, capture_kit_version: str | None, values: dict
+    def get_panel_version_from_filename(
+        cls, capture_kit_version: str | None, values: dict[str, str | None]
     ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
+
+    @validator("pon_cnn", pre=True)
+    def get_pon_cnn_name_version_from_filename(cls, pon_cnn: str | None) -> str:
+        """Return the CNVkit PON name and version from its filename (gmsmyeloid_5.3_hg19_design_CNVkit_PON_reference_v1.cnn)."""
+        pon_cnn_filename_split: list[str] = Path(pon_cnn).stem.split("_")
+        pon_cnn_name: str = f"{pon_cnn_filename_split[0]} v{pon_cnn_filename_split[1]}"
+        pon_cnn_version: str = pon_cnn_filename_split[-1]
+        pon_tool_name: str = pon_cnn_filename_split[4]
+        return f"{pon_tool_name} {pon_cnn_name} ({pon_cnn_version})"
 
 
 class BalsamicConfigQC(BaseModel):
     """Config QC attributes.
 
     Attributes:
-        picard_rmdup: if the duplicates has been removed or not
         adapter: adapter sequence that has been trimmed
-        quality_trim: whether quality trimming has been performed in the workflow
-        adapter_trim: whether adapter trimming has been performed in the workflow
-        umi_trim: whether UMI trimming has been performed in the workflow
         min_seq_length: minimum sequence length cutoff for reads
-        umi_trim_length: UMI trimming length
     """
 
-    picard_rmdup: bool
     adapter: str | None
-    quality_trim: bool
-    adapter_trim: bool
-    umi_trim: bool
     min_seq_length: str | None
-    umi_trim_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):

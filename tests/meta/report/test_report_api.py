@@ -269,7 +269,7 @@ def test_get_samples_data(
     assert samples_data.id == str(expected_sample_data.sample.internal_id)
     assert samples_data.ticket == str(expected_sample_data.sample.original_ticket)
     assert samples_data.status == str(expected_sample_data.status)
-    assert samples_data.gender == REPORT_SEX.get(str(expected_sample_data.sample.sex))
+    assert samples_data.sex == REPORT_SEX.get(str(expected_sample_data.sample.sex))
     assert samples_data.source == str(expected_lims_data.get("source"))
     assert samples_data.tumour == "Nej"
     assert samples_data.application

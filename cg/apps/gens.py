@@ -41,8 +41,11 @@ class GensAPI:
             "--coverage": coverage_path,
             "--case-id": case_id,
         }
-        load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
+        load_call_params: list[str] = ["load", "sample", "--force"]
+        load_call_params += get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
+        if self.process.stderr:
+            LOG.warning(self.process.stderr)
 
     @staticmethod
     def is_suitable_for_upload(case: Case) -> bool:

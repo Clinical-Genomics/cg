@@ -40,7 +40,7 @@ def test_start(
     mock_config,
     caplog,
     helpers,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
@@ -100,7 +100,7 @@ def test_store(
 
 
 def test_start_available(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_flow_cell
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_illumina_run
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
@@ -149,7 +149,7 @@ def test_store_available(
     caplog,
     mocker,
     hermes_deliverables,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""

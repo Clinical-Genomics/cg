@@ -285,12 +285,12 @@ def rnafusion_metrics() -> dict[str, float]:
 
 @pytest.fixture(name="mip_analysis_api")
 def fixture_mip_analysis_api(
-    cg_context: CGConfig, mip_hk_store, analysis_store
+    cg_context: CGConfig, mip_hk_store, store_with_illumina_sequencing_data
 ) -> MipDNAAnalysisAPI:
     """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(cg_context)
     analysis_api.housekeeper_api = mip_hk_store
-    analysis_api.status_db = analysis_store
+    analysis_api.status_db = store_with_illumina_sequencing_data
     return analysis_api
 
 

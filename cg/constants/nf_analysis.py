@@ -48,3 +48,7 @@ MULTIQC_NEXFLOW_CONFIG = """process {
     }
 }
 """
+
+RAREDISEASE_COVERAGE_FILE_TAGS: list[str] = ["coverage", "d4"]
+RAREDISEASE_COVERAGE_INTERVAL_TYPE: str = "genes"
+RAREDISEASE_COVERAGE_THRESHOLD: int = 10

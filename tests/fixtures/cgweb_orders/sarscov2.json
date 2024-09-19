@@ -136,6 +136,32 @@
       "selection_criteria": "1. Allmän övervakning",
       "volume": "5",
       "well_position": ""
+    },
+    {
+      "application": "VWGDPTR001",
+      "collection_date": "2021-05-05",
+      "comment": "optional comment",
+      "concentration_sample": "201",
+      "container": "Tube",
+      "container_name": "optional-fields",
+      "data_analysis": "mutant",
+      "data_delivery": "fastq",
+      "elution_buffer": "Nuclease-free water",
+      "extraction_method": "MagNaPure 96",
+      "lab_code": "SE110 Växjö",
+      "name": "missing-region-code-and-original-lab-address",
+      "organism": "SARS CoV-2",
+      "original_lab": "Karolinska University Hospital Solna",
+      "pre_processing_method": "COVIDSeq",
+      "primer": "Nanopore Midnight V1",
+      "priority": "research",
+      "quantity": "202",
+      "reference_genome": "NC_555",
+      "region": "Stockholm",
+      "require_qc_ok": false,
+      "selection_criteria": "1. Allmän övervakning",
+      "volume": "5",
+      "well_position": ""
     }
   ]
 }

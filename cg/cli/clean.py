@@ -27,9 +27,11 @@ from cg.cli.workflow.commands import (
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError, FlowCellError
+from cg.exc import IlluminaCleanRunError, FlowCellError
 from cg.meta.clean.api import CleanAPI
-from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.services.illumina.cleaning.clean_runs_service import (
+    IlluminaCleanRunsService,
+)
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
@@ -80,7 +82,7 @@ for sub_cmd in [
 @SKIP_CONFIRMATION
 @click.pass_obj
 def hk_alignment_files(
-    context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False
+    context: CGConfig, bundle: str, skip_confirmation: bool = False, dry_run: bool = False
 ) -> None:
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -88,12 +90,12 @@ def hk_alignment_files(
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
-            LOG.warning(
+            LOG.debug(
                 f"Could not find any files ready for cleaning for bundle {bundle} and tag {tag}"
             )
 
         for hk_file in tag_files:
-            if not (yes or click.confirm(_get_confirm_question(bundle, hk_file))):
+            if not (skip_confirmation or click.confirm(_get_confirm_question(bundle, hk_file))):
                 continue
 
             file_path: Path = Path(hk_file.full_path)
@@ -119,7 +121,7 @@ def hk_alignment_files(
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
-    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+    context: click.Context, days_old: int, skip_confirmation: bool = False, dry_run: bool = False
 ) -> None:
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -135,7 +137,9 @@ def scout_finished_cases(
         LOG.info(f"{cases_added} cases marked for alignment files removal")
 
     for bundle in bundles:
-        context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
+        context.invoke(
+            hk_alignment_files, bundle=bundle, skip_confirmation=skip_confirmation, dry_run=dry_run
+        )
 
 
 @clean.command("hk-case-bundle-files")
@@ -253,11 +257,11 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("flow-cells")
+@clean.command("illumina-runs")
 @DRY_RUN
 @click.pass_obj
-def clean_flow_cells(context: CGConfig, dry_run: bool):
-    """Remove flow cells from the flow cells and demultiplexed runs folder."""
+def clean_illumina_runs(context: CGConfig, dry_run: bool):
+    """Remove Illumina sequencing and demultiplexed runs from hasta."""
 
     directories_to_check: list[Path] = []
     for path in [
@@ -269,14 +273,14 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         directories_to_check.extend(get_directories_in_path(path))
     for flow_cell_directory in directories_to_check:
         try:
-            clean_flow_cell_api = CleanFlowCellAPI(
-                flow_cell_path=flow_cell_directory,
+            clean_service = IlluminaCleanRunsService(
+                sequencing_run_path=flow_cell_directory,
                 status_db=context.status_db,
                 housekeeper_api=context.housekeeper_api,
                 dry_run=dry_run,
             )
-            clean_flow_cell_api.delete_flow_cell_directory()
-        except (CleanFlowCellFailedError, FlowCellError) as error:
+            clean_service.delete_run_directory()
+        except (IlluminaCleanRunError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
 
