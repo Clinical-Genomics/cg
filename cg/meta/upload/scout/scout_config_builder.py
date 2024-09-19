@@ -7,10 +7,11 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.models.scout.scout_load_config import ScoutCancerIndividual, ScoutIndividual, ScoutMipIndividual, ScoutRarediseaseIndividual, ScoutLoadConfig
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from pathlib import Path
 
@@ -65,22 +66,23 @@ class ScoutConfigBuilder:
 
     @staticmethod
     def is_multi_sample_case(self) -> bool:
-        return len(self.load_config.samples) > 1
+        return len(self.analysis_obj.case.links) > 1
 
     @staticmethod
-    def is_family_case(load_config: ScoutLoadConfig) -> bool:
+    def is_family_case(self) -> bool:
         """Check if there are any linked individuals in a case."""
-        for sample in load_config.samples:
-            if sample.mother and sample.mother != "0":
+        for case_sample in self.analysis_obj.case.links:
+            if case_sample.mother and case_sample.mother != "0":
                 return True
-            if sample.father and sample.father != "0":
+
+            if case_sample.father and case_sample.father != "0":
                 return True
         return False
 
 
     def include_pedigree_picture(self) -> ScoutLoadConfig:
         if self.is_multi_sample_case(self):
-            if self.is_family_case(self.load_config):
+            if self.is_family_case(self):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
                 self.load_config.madeline = str(svg_path)
             else:
@@ -97,7 +99,32 @@ class ScoutConfigBuilder:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return file_path
-        return re.split("(\d+|X|Y)\.png", file_path)[0]
+        return re.split(r"([0-9]+|X|Y)\.png", file_path)[0]
+
+
+
+    def get_sample_information(self, load_config: ScoutLoadConfig)->list[ScoutIndividual]:
+        LOG.info("Building samples")
+        db_sample: CaseSample
+
+        for db_sample in self.analysis_obj.case.links:
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        return load_config
+
+
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
+        """Build a sample with rnafusion specific information."""
+        if Workflow.BALSAMIC in self.analysis_obj.workflow:
+            config_sample = ScoutCancerIndividual()
+        elif self.analysis_obj.workflow == Workflow.RAREDISEASE:
+            config_sample = ScoutRarediseaseIndividual()
+        elif self.analysis_obj.workflow == Workflow.MIP_DNA:
+            config_sample = ScoutMipIndividual()
+        elif self.analysis_obj.workflow == Workflow.RNAFUSION:
+            config_sample = ScoutIndividual()
+        config_sample = self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        config_sample = self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        return config_sample
 
 
     def add_common_sample_info(
@@ -137,18 +164,16 @@ class ScoutConfigBuilder:
         LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
         self.include_sample_alignment_file(config_sample)
         self.include_sample_files(config_sample)
+        return config_sample
 
-    def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
-        """Build a sample for the Scout load config."""
-        raise NotImplementedError
 
     def build_load_config(self) -> ScoutLoadConfig:
         """Build a load config for uploading a case to Scout."""
         raise NotImplementedError
 
-    def include_sample_files(self, _config_sample: ScoutIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout."""
-        return None
+        raise NotImplementedError
 
     def include_case_files(self) -> None:
         """Include all files that are used on case level in Scout."""

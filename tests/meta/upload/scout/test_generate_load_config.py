@@ -8,6 +8,7 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     BalsamicUmiLoadConfig,
+    MipLoadConfig,
     RarediseaseLoadConfig,
     RnafusionLoadConfig,
     ScoutLoadConfig,
@@ -71,16 +72,32 @@ def test_generate_balsamic_umi_load_config(
     assert isinstance(config, BalsamicUmiLoadConfig)
 
 
-def test_generate_raredisease_load_config(
-    raredisease_analysis: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
+def test_generate_mip_load_config(
+    mip_dna_analysis: Analysis, upload_mip_analysis_scout_api: UploadScoutAPI
 ):
     """Test that a RAREDISEASE config is generated."""
     # GIVEN an analysis object that have been run with RAREDISEASE
-    assert raredisease_analysis.workflow == Workflow.RAREDISEASE
+    assert mip_dna_analysis.workflow == Workflow.MIP_DNA
 
     # GIVEN an upload scout api with some RAREDISEASE information
     # WHEN generating a load config
-    config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis)
+    config = upload_mip_analysis_scout_api.generate_config(analysis=mip_dna_analysis)
+
+    # THEN assert that the config is a balsamic config
+    assert isinstance(config, MipLoadConfig)
+
+
+
+def test_generate_raredisease_load_config(
+    raredisease_analysis_obj: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
+):
+    """Test that a RAREDISEASE config is generated."""
+    # GIVEN an analysis object that have been run with RAREDISEASE
+    assert raredisease_analysis_obj.workflow == Workflow.RAREDISEASE
+
+    # GIVEN an upload scout api with some RAREDISEASE information
+    # WHEN generating a load config
+    config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis_obj)
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, RarediseaseLoadConfig)
@@ -105,7 +122,7 @@ def test_generate_rnafusion_load_config(
 
 
 @pytest.mark.parametrize("result_key", RESULT_KEYS)
-def test_generate_config_adds_meta_result_key(
+def test_generate_config_adds_meta_result_key_mip(
     result_key: str,
     mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
@@ -115,7 +132,7 @@ def test_generate_config_adds_meta_result_key(
     assert mip_dna_analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
+    result_data: MipLoadConfig = upload_mip_analysis_scout_api.generate_config(
         analysis=mip_dna_analysis
     )
 
@@ -123,7 +140,7 @@ def test_generate_config_adds_meta_result_key(
     assert result_data.model_dump()[result_key]
 
 
-def test_generate_config_adds_sample_paths(
+def test_generate_config_adds_sample_paths_mip(
     sample_id: str,
     mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
@@ -132,16 +149,36 @@ def test_generate_config_adds_sample_paths(
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
+    result_data: MipLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual
+    print(result_data)
     for sample in result_data.samples:
         if sample.sample_id == sample_id:
             assert sample.vcf2cytosure
 
 
-def test_generate_config_adds_case_paths(
+def test_generate_config_adds_sample_paths_raredisease(
+    sample_id: str,
+    raredisease_analysis_obj: Analysis,
+    upload_raredisease_analysis_scout_api: UploadScoutAPI,
+):
+    """Test that generate config adds vcf2cytosure file"""
+    # GIVEN a status db and hk with an analysis
+
+    # WHEN generating the scout config for the analysis
+    result_data: MipLoadConfig = upload_raredisease_analysis_scout_api.generate_config(raredisease_analysis_obj)
+
+    # THEN the config should contain the sample file path for each sample
+    sample: ScoutMipIndividual
+    print(result_data)
+    for sample in result_data.samples:
+        if sample.sample_id == sample_id:
+            assert sample.vcf2cytosure
+
+
+def test_generate_config_adds_case_paths_mip(
     sample_id: str,
     mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
@@ -150,7 +187,7 @@ def test_generate_config_adds_case_paths(
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
+    result_data: MipLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
 
     # THEN the config should contain the multiqc file path
     assert result_data.multiqc

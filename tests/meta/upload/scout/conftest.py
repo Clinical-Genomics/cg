@@ -681,30 +681,17 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture
-def raredisease_analysis(
-    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
-) -> Analysis:
-    """Return a RAREDISEASE analysis object."""
-    helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
-    case: Case = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
-    analysis: Analysis = helpers.add_analysis(
-        store=analysis_store_trio,
-        case=case,
-        started_at=timestamp,
-        completed_at=timestamp,
-        workflow=Workflow.RAREDISEASE,
-    )
-    for link in case.links:
-        helpers.add_phenotype_groups_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
+def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
+    """Return a Balsamic analysis object."""
+    analysis_obj.workflow = Workflow.RAREDISEASE
+    for link_object in analysis_obj.case.links:
+        link_object.sample.application_version.application.prep_category = (
+            PrepCategory.WHOLE_GENOME_SEQUENCING
         )
-        helpers.add_phenotype_terms_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
-        )
-        helpers.add_subject_id_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
-        )
-    return analysis
+        link_object.case.data_analysis = Workflow.RAREDISEASE
+    return analysis_obj
+
+
 
 
 @pytest.fixture

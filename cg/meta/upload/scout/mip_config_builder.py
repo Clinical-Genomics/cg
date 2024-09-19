@@ -75,14 +75,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
-
-    def build_config_sample(self, case_sample: CaseSample) -> ScoutMipIndividual:
-        """Build a sample with mip specific information"""
-
-        config_sample = ScoutMipIndividual()
-        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
-        return config_sample
+        return self.load_config
 
     def include_case_files(self):
         """Include case level files for mip case"""
@@ -143,14 +136,3 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
-
-    @staticmethod
-    def is_family_case(load_config: ScoutLoadConfig) -> bool:
-        """Check if there are any linked individuals in a case"""
-        for sample in load_config.samples:
-            if sample.mother and sample.mother != "0":
-                return True
-            if sample.father and sample.father != "0":
-                return True
-        return False
-

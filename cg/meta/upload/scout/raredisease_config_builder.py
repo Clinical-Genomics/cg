@@ -66,30 +66,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
-        print(self.load_config.gene_panels)
-        self.load_config.samples = self._get_sample_information(load_config=self.load_config, case = self.analysis_obj.case)
+        self.load_config = self.get_sample_information(load_config=self.load_config)
         self.load_config = self.include_pedigree_picture()
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
 
 
-    def _get_sample_information(self, load_config: ScoutLoadConfig, case: Case)->ScoutIndividual:
-        LOG.info("Building samples")
-        db_sample: CaseSample
-        for db_sample in self.analysis_obj.case.links:
-            print(db_sample)
-            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        return load_config.samples
 
-
-
-    def build_config_sample(self, case_sample: CaseSample) -> ScoutRarediseaseIndividual:
-        """Build a sample with specific information."""
-        config_sample = ScoutRarediseaseIndividual()
-        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
-        self.include_sample_files(config_sample=config_sample)
-        return config_sample
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
@@ -168,16 +151,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
         return config_sample
-
-    @staticmethod
-    def remove_chromosome_substring(file_path: str | None) -> str | None:
-        """Remove a file's suffix and identifying integer or X/Y
-        Example:
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
-        if file_path is None:
-            return file_path
-        return re.sub(r"(_(?:\d+|X|Y))\.png$", "", file_path)
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the CRAM alignment file for a sample."""
