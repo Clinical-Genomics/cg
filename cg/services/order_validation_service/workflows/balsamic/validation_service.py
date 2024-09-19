@@ -1,21 +1,35 @@
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    CaseSampleError,
+)
 from cg.services.order_validation_service.errors.order_errors import OrderError
-from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
-from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.errors.validation_errors import (
+    ValidationErrors,
+)
+from cg.services.order_validation_service.model_validator.model_validator import (
+    ModelValidator,
+)
+from cg.services.order_validation_service.order_validation_service import (
+    OrderValidationService,
+)
+from cg.services.order_validation_service.response_mapper import (
+    create_order_validation_response,
+)
 from cg.services.order_validation_service.utils import (
     apply_case_sample_validation,
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.order_validation_service.workflows.balsamic.models.order import (
+    BalsamicOrder,
+)
 from cg.services.order_validation_service.workflows.balsamic.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
-from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
+from cg.services.order_validation_service.workflows.order_validation_rules import (
+    ORDER_RULES,
+)
 from cg.store.store import Store
 
 
@@ -31,7 +45,7 @@ class BalsamicValidationService(OrderValidationService):
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
         order, field_errors = ModelValidator.validate(order=raw_order, model=BalsamicOrder)
 
-        if field_errors:
+        if not order:
             return field_errors
 
         order_errors: list[OrderError] = apply_order_validation(

@@ -1,18 +1,48 @@
-from cg.models.orders.sample_base import ContainerEnum
+import pytest
 
+from cg.models.orders.sample_base import ContainerEnum, StatusEnum
+from cg.models.orders.samples import TomteSample
 from cg.services.order_validation_service.errors.case_sample_errors import (
+    ApplicationArchivedError,
+    ApplicationNotCompatibleError,
+    ApplicationNotValidError,
+    ConcentrationRequiredIfSkipRCError,
+    ContainerNameMissingError,
     ContainerNameRepeatedError,
+    InvalidBufferError,
+    InvalidConcentrationIfSkipRCError,
+    InvalidVolumeError,
+    OccupiedWellError,
+    SampleDoesNotExistError,
+    SampleNameRepeatedError,
+    SubjectIdSameAsCaseNameError,
+    SubjectIdSameAsSampleNameError,
     WellFormatError,
+    WellPositionMissingError,
 )
-
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.rules import (
+    validate_application_compatibility,
+    validate_application_exists,
+    validate_application_not_archived,
+    validate_buffers_are_allowed,
+    validate_concentration_interval_if_skip_rc,
+    validate_concentration_required_if_skip_rc,
+    validate_container_name_required,
+    validate_sample_names_not_repeated,
+    validate_samples_exist,
+    validate_subject_ids_different_from_case_names,
+    validate_subject_ids_different_from_sample_names,
     validate_tube_container_name_unique,
+    validate_volume_interval,
     validate_well_position_format,
+    validate_well_positions_required,
+    validate_wells_contain_at_most_one_sample,
 )
-
-from cg.services.order_validation_service.models.order_with_cases import (
-    OrderWithCases,
-)
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 def test_validate_well_position_format(valid_order: OrderWithCases):
@@ -48,3 +78,235 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
     # THEN the error should concern the non-unique tube container name
     assert isinstance(errors[0], ContainerNameRepeatedError)
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
+
+
+def test_applications_exist(valid_order: OrderWithCases, base_store: Store):
+    # GIVEN an order where one of the samples has an invalid application
+    for case in valid_order.cases:
+        case.samples[0].application = "Invalid application"
+
+    # WHEN validating the order
+    errors = validate_application_exists(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the ticket number
+    assert isinstance(errors[0], ApplicationNotValidError)
+
+
+def test_applications_not_archived(
+    valid_order: OrderWithCases, base_store: Store, archived_application: Application
+):
+    # GIVEN an order where one of the samples has an invalid application
+    base_store.session.add(archived_application)
+    base_store.commit_to_store()
+    for case in valid_order.cases:
+        case.samples[0].application = archived_application.tag
+
+    # WHEN validating the order
+    errors = validate_application_not_archived(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the ticket number
+    assert isinstance(errors[0], ApplicationArchivedError)
+
+
+def test_sample_internal_ids_does_not_exist(
+    valid_order: OrderWithCases,
+    base_store: Store,
+    store_with_multiple_cases_and_samples: Store,
+):
+
+    # GIVEN an order with a sample marked as existing but which does not exist in the database
+    existing_sample = ExistingSample(internal_id="Non-existent sample", status=StatusEnum.unknown)
+    valid_order.cases[0].samples.append(existing_sample)
+
+    # WHEN validating that the samples exists
+    errors = validate_samples_exist(order=valid_order, store=store_with_multiple_cases_and_samples)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the non-existent sample
+    assert isinstance(errors[0], SampleDoesNotExistError)
+
+
+def test_application_is_incompatible(
+    valid_order: TomteOrder, sample_with_non_compatible_application: TomteSample, base_store: Store
+):
+
+    # GIVEN an order that has a sample with an application which is incompatible with the workflow
+    valid_order.cases[0].samples.append(sample_with_non_compatible_application)
+
+    # WHEN validating the order
+    errors = validate_application_compatibility(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the application compatability
+    assert isinstance(errors[0], ApplicationNotCompatibleError)
+
+
+def test_subject_ids_same_as_case_names_not_allowed(valid_order: TomteOrder):
+
+    # GIVEN an order with a sample having its subject_id same as the case's name
+    case_name = valid_order.cases[0].name
+    valid_order.cases[0].samples[0].subject_id = case_name
+
+    # WHEN validating that no subject ids are the same as the case name
+    errors = validate_subject_ids_different_from_case_names(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be concerning the subject id being the same as the case name
+    assert isinstance(errors[0], SubjectIdSameAsCaseNameError)
+
+
+def test_well_position_missing(
+    valid_order: TomteOrder, sample_with_missing_well_position: TomteSample
+):
+    # GIVEN an order with a sample with a missing well position
+    valid_order.cases[0].samples.append(sample_with_missing_well_position)
+
+    # WHEN validating that no well positions are missing
+    errors = validate_well_positions_required(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing well position
+    assert isinstance(errors[0], WellPositionMissingError)
+
+
+def test_container_name_missing(
+    valid_order: TomteOrder, sample_with_missing_container_name: TomteSample
+):
+
+    # GIVEN an order with a sample missing its container name
+    valid_order.cases[0].samples.append(sample_with_missing_container_name)
+
+    # WHEN validating that it is not missing any container names
+    errors = validate_container_name_required(order=valid_order)
+
+    # THEN an error should be raised
+    assert errors
+
+    # THEN the error should concern the missing container name
+    assert isinstance(errors[0], ContainerNameMissingError)
+
+
+@pytest.mark.parametrize("sample_volume", [1, 200])
+def test_volume_out_of_bounds(valid_order: TomteOrder, sample_volume: int):
+
+    # GIVEN an order containing a sample with an invalid volume
+    valid_order.cases[0].samples[0].volume = sample_volume
+
+    # WHEN validating that the volume is within bounds
+    errors = validate_volume_interval(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid volume
+    assert isinstance(errors[0], InvalidVolumeError)
+
+
+def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: OrderWithCases):
+
+    # GIVEN an order with multiple samples in the same well
+
+    # WHEN validating the order
+    errors = validate_wells_contain_at_most_one_sample(order_with_samples_in_same_well)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the well
+    assert isinstance(errors[0], OccupiedWellError)
+
+
+def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: OrderWithCases):
+    # Given an order with samples in a case with the same name
+
+    # WHEN validating the order
+    errors = validate_sample_names_not_repeated(order_with_repeated_sample_names)
+
+    # THEN errors are returned
+    assert errors
+
+    # THEN the errors are about the sample names
+    assert isinstance(errors[0], SampleNameRepeatedError)
+
+
+def test_elution_buffer_is_not_allowed(valid_order: TomteOrder):
+
+    # GIVEN an order with 'skip reception control' toggled but no buffers specfied
+    valid_order.skip_reception_control = True
+
+    # WHEN validating that the buffers conform to the 'skip reception control' requirements
+    errors = validate_buffers_are_allowed(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the buffer compatability
+    assert isinstance(errors[0], InvalidBufferError)
+
+
+def test_subject_id_same_as_sample_name_is_not_allowed(valid_order: TomteOrder):
+
+    # GIVEN an order with a sample with same name and subject id
+    sample_name = valid_order.cases[0].samples[0].name
+    valid_order.cases[0].samples[0].subject_id = sample_name
+
+    # WHEN validating that the subject ids are different from the sample names
+    errors = validate_subject_ids_different_from_sample_names(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should be about the subject id being the same as the sample name
+    assert isinstance(errors[0], SubjectIdSameAsSampleNameError)
+
+
+def test_concentration_required_if_skip_rc(valid_order: OrderWithCases):
+    # GIVEN an order with missing concentration trying to skip reception control
+    valid_order.skip_reception_control = True
+
+    # WHEN validating that concentration is provided
+    errors = validate_concentration_required_if_skip_rc(valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing concentration
+    assert isinstance(errors[0], ConcentrationRequiredIfSkipRCError)
+
+
+def test_concentration_not_within_interval_if_skip_rc(
+    order_with_invalid_concentration: TomteOrder,
+    sample_with_invalid_concentration: TomteSample,
+    base_store: Store,
+    application_with_concentration_interval: Application,
+):
+
+    # GIVEN an order skipping reception control
+    # GIVEN that the order has a sample with invalid concentration for its application
+    base_store.session.add(application_with_concentration_interval)
+    base_store.session.commit()
+
+    # WHEN validating that the concentration is within the allowed interval
+    errors = validate_concentration_interval_if_skip_rc(
+        order=order_with_invalid_concentration, store=base_store
+    )
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error should concern the application interval
+    assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
