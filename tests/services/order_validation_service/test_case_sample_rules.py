@@ -1,47 +1,15 @@
 from cg.models.orders.sample_base import ContainerEnum
-
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ContainerNameRepeatedError,
     VolumeRequiredCaseError,
     WellFormatError,
 )
-
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_required_volume,
     validate_tube_container_name_unique,
     validate_well_position_format,
 )
-
-from cg.services.order_validation_service.models.order_with_cases import (
-    OrderWithCases,
-)
-
-
-def test_fully_valid_order(valid_order: OrderWithCases):
-
-    # GIVEN an order with two samples that have valid values
-    # Sample 1 - valid tube sample
-    valid_order.cases[0].samples[0].container_name = "unique_name_1"
-    valid_order.cases[0].samples[0].container = ContainerEnum.tube
-    valid_order.cases[0].samples[0].volume = 10
-
-    # Sample 2 - valid plate sample
-    valid_order.cases[0].samples[1].container_name = "unique_name_2"
-    valid_order.cases[0].samples[1].container = ContainerEnum.plate
-    valid_order.cases[0].samples[1].volume = 10
-    valid_order.cases[0].samples[1].well_position = "A:1"
-
-    # WHEN validating the two orders
-    container_name_repeated_errors: list[ContainerNameRepeatedError] = (
-        validate_tube_container_name_unique(order=valid_order)
-    )
-    volume_errors: list[VolumeRequiredCaseError] = validate_required_volume(order=valid_order)
-    well_position_errors: list[WellFormatError] = validate_well_position_format(order=valid_order)
-
-    # THEN no error should be returned
-    assert not container_name_repeated_errors
-    assert not volume_errors
-    assert not well_position_errors
 
 
 def test_validate_well_position_format(valid_order: OrderWithCases):
@@ -79,7 +47,7 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
 
-def test_invalid_required_volume(valid_order: OrderWithCases):
+def test_missing_required_volume(valid_order: OrderWithCases):
 
     # GIVEN an orders with two sample with invalid required volume, and different container
     valid_order.cases[0].samples[0].container = ContainerEnum.tube

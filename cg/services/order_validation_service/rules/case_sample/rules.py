@@ -29,8 +29,8 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     VolumeRequiredCaseError,
-    WellPositionMissingError,
     WellFormatError,
+    WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
@@ -49,7 +49,6 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
-    is_volume_missing,
     is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
@@ -58,6 +57,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
     is_volume_invalid,
+    is_volume_missing,
 )
 from cg.store.models import Sample
 from cg.store.store import Store

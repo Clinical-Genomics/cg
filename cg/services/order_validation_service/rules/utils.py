@@ -34,3 +34,10 @@ def is_application_not_compatible(
 ) -> bool:
     application: Application = store.get_application_by_tag(application_tag)
     return application and (application.prep_category not in allowed_prep_categories)
+
+
+def is_volume_missing(sample: Sample) -> bool:
+    """Check if a sample is missing its volume."""
+    if is_in_container(sample.container) and not sample.volume:
+        return True
+    return False

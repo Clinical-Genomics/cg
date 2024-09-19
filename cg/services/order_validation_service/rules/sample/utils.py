@@ -1,18 +1,15 @@
+import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
-
-import re
-
 from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.models.order_with_samples import OrderWithNonHumanSamples
-from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.rules.utils import (
-    is_in_container,
+from cg.services.order_validation_service.models.order_with_samples import (
+    OrderWithNonHumanSamples,
 )
+from cg.services.order_validation_service.models.sample import Sample
 
 
 class PlateSamplesValidator:
@@ -87,11 +84,4 @@ def is_invalid_well_format(sample: Sample) -> bool:
     correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
-    return False
-
-
-def is_volume_missing(sample: Sample) -> bool:
-    """Check if a sample has an invalid volume."""
-    if is_in_container(sample.container) and not sample.volume:
-        return True
     return False

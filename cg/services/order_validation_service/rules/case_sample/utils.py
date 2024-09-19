@@ -1,6 +1,5 @@
-from collections import Counter
-
 import re
+from collections import Counter
 
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
@@ -57,13 +56,6 @@ def is_volume_invalid(sample: Sample) -> bool:
     in_container: bool = is_in_container(sample.container)
     allowed_volume: bool = is_volume_within_allowed_interval(sample.volume)
     return in_container and not allowed_volume
-
-
-def is_volume_missing(sample: Sample) -> bool:
-    """Check if a sample is missing its volume."""
-    if is_in_container(sample.container) and not sample.volume:
-        return True
-    return False
 
 
 def get_well_sample_map(

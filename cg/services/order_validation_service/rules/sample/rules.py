@@ -15,14 +15,14 @@ from cg.services.order_validation_service.errors.sample_errors import (
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
-    get_indices_for_tube_repeated_container_name,
     get_indices_for_repeated_sample_names,
+    get_indices_for_tube_repeated_container_name,
     is_invalid_well_format,
-    is_volume_missing,
 )
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
     is_volume_invalid,
+    is_volume_missing,
 )
 from cg.services.order_validation_service.workflows.microsalt.models.order import (
     OrderWithNonHumanSamples,

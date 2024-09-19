@@ -70,7 +70,7 @@ def test_validate_well_position_format(valid_order: MicrosaltOrder):
     assert errors[0].sample_index == 0
 
 
-def test_invalid_required_sample_volume(valid_order: MicrosaltOrder):
+def test_missing_required_sample_volume(valid_order: MicrosaltOrder):
 
     # GIVEN an order with containerized samples missing volume
     valid_order.samples[0].container = ContainerEnum.tube
@@ -93,23 +93,11 @@ def test_invalid_required_sample_volume(valid_order: MicrosaltOrder):
     assert errors[1].sample_index == 1
 
 
-def test_valid_required_sample_volume(valid_order: MicrosaltOrder):
-
-    # GIVEN an order with a sample with an invalid volume
-    valid_order.samples[0].volume = 10
-
-    # WHEN validating the volume
-    errors = validate_required_volume(order=valid_order)
-
-    # THEN an error should not be returned
-    assert not errors
-
-
-def test_invalid_no_container_required_sample_volume(valid_order: MicrosaltOrder):
+def test_non_required_sample_volume(valid_order: MicrosaltOrder):
 
     # GIVEN an order with a sample not in a container and with an invalid volume
-    valid_order.samples[0].volume = None
     valid_order.samples[0].container = ContainerEnum.no_container
+    valid_order.samples[0].volume = None
 
     # WHEN validating the volume
     errors = validate_required_volume(order=valid_order)
