@@ -1,7 +1,7 @@
 import pytest
+
 from cg.models.orders.sample_base import ContainerEnum, StatusEnum
 from cg.models.orders.samples import TomteSample
-from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -31,13 +31,11 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_required_volume,
     validate_sample_names_not_repeated,
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
-from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
-from cg.services.order_validation_service.rules.case_sample.rules import (
-    validate_required_volume,
     validate_tube_container_name_unique,
     validate_volume_interval,
     validate_well_position_format,
@@ -84,7 +82,6 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
 
-
 def test_applications_exist(valid_order: OrderWithCases, base_store: Store):
     # GIVEN an order where one of the samples has an invalid application
     for case in valid_order.cases:
@@ -111,9 +108,10 @@ def test_applications_not_archived(
 
     # WHEN validating the order
     errors = validate_application_not_archived(order=valid_order, store=base_store)
-  
+
     # THEN an error should be returned
     assert errors
+
 
 def test_missing_required_volume(valid_order: OrderWithCases):
 
