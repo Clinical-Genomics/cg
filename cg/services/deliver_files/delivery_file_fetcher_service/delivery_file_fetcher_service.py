@@ -30,10 +30,3 @@ class FetchDeliveryFilesService(ABC):
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Get the files to deliver."""
         pass
-
-    @staticmethod
-    def validate_files_to_deliver(delivery_files: DeliveryFiles, case_id: str) -> DeliveryFiles:
-        """Check if there are files to deliver."""
-        if not delivery_files.sample_files:
-            raise NoDeliveryFilesError(f"No files to deliver for case {case_id}")
-        return delivery_files

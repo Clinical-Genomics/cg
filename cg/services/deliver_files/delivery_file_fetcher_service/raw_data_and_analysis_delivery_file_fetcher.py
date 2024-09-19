@@ -40,12 +40,11 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
 
-        delivery_files = DeliveryFiles(
+        return DeliveryFiles(
             delivery_data=delivery_data,
             case_files=analysis_files.case_files,
             sample_files=analysis_files.sample_files + fastq_files.sample_files,
         )
-        return self.validate_files_to_deliver(delivery_files=delivery_files, case_id=case_id)
 
     def _fetch_files(self, service_class: type, case_id: str) -> DeliveryFiles:
         """Fetch files using the provided service class."""

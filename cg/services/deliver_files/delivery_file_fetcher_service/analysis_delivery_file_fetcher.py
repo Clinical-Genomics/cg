@@ -5,6 +5,7 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_t
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
+    handle_delivery_file_validation_error,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
@@ -34,6 +35,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
+    @handle_delivery_file_validation_error
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -43,17 +45,16 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
 
-        delivery_files = DeliveryFiles(
+        return DeliveryFiles(
             delivery_data=delivery_data,
             case_files=analysis_case_files,
             sample_files=analysis_sample_files,
         )
-        return self.validate_files_to_deliver(delivery_files=delivery_files, case_id=case_id)
 
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile] | None:
+    ) -> list[SampleFile]:
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
@@ -69,6 +70,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
                 file_path=sample_file.full_path,
             )
             for sample_file in sample_files
+            if sample_file
         ]
 
     def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile]:
@@ -100,4 +102,5 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
                 file_path=case_file.full_path,
             )
             for case_file in case_files
+            if case_file
         ]

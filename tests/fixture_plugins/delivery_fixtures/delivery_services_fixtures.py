@@ -46,6 +46,20 @@ def raw_data_delivery_service(
 
 
 @pytest.fixture
+def raw_data_delivery_service_no_housekeeper_bundle(
+    real_housekeeper_api: HousekeeperAPI,
+    delivery_store_microsalt: Store,
+) -> RawDataDeliveryFileFetcher:
+    """Fixture to get an instance of FetchFastqDeliveryFilesService."""
+    tag_service = SampleAndCaseDeliveryTagsFetcher()
+    return RawDataDeliveryFileFetcher(
+        hk_api=real_housekeeper_api,
+        status_db=delivery_store_microsalt,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
 def bam_data_delivery_service(
     delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_microsalt: Store,
