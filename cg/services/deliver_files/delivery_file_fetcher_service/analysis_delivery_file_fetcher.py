@@ -5,7 +5,6 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_t
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
-    handle_delivery_file_validation_error,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
@@ -35,7 +34,6 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    @handle_delivery_file_validation_error
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -54,7 +52,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile]:
+    ) -> list[SampleFile] | None:
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
@@ -81,7 +79,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             sample_delivery_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
                 case_id=case.internal_id, sample_id=sample_id, workflow=case.data_analysis
             )
-            delivery_files.extend(sample_delivery_files)
+            delivery_files.extend(sample_delivery_files) if sample_delivery_files else None
         return delivery_files
 
     @handle_missing_bundle_errors

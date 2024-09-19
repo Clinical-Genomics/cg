@@ -24,19 +24,3 @@ def handle_missing_bundle_errors(func):
             return None
 
     return wrapper
-
-
-def handle_delivery_file_validation_error(func):
-    """
-    Log an error when a delivery file is invalid.
-
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ValidationError:
-            raise NoDeliveryFilesError("No files to deliver found.")
-
-    return wrapper
