@@ -1,9 +1,11 @@
+from cg.apps.lims import order
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    ContainerNameMissingError,
     ContainerNameRepeatedError,
     InvalidVolumeError,
     OccupiedWellError,
@@ -14,8 +16,9 @@ from cg.services.order_validation_service.errors.sample_errors import (
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
-    get_indices_for_tube_repeated_container_name,
     get_indices_for_repeated_sample_names,
+    get_indices_for_tube_repeated_container_name,
+    is_container_name_missing,
     is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
@@ -146,5 +149,16 @@ def validate_well_position_format(
     for sample_index, sample in order.enumerated_samples:
         if is_invalid_well_format(sample=sample):
             error = WellFormatError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_container_name_required(
+    order: OrderWithNonHumanSamples, **kwargs
+) -> list[ContainerNameMissingError]:
+    errors: list[ContainerNameMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_container_name_missing(sample=sample):
+            error = ContainerNameMissingError(sample_index=sample_index)
             errors.append(error)
     return errors
