@@ -950,7 +950,7 @@ def test_get_pools_by_customer_id(store_with_multiple_pools_for_customer: Store)
     # GIVEN a database with two pools
 
     # WHEN getting pools by customer id
-    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_by_customer_id(
+    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_by_customers(
         customers=store_with_multiple_pools_for_customer.get_customers()
     )
 
