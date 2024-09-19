@@ -66,7 +66,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
         print(self.load_config)
-        self.load_config.samples = self._get_sample_information(load_config=self.load_config, case = self.analysis_obj.case)
+        # self.load_config.samples = self._get_sample_information(load_config=self.load_config, case = self.analysis_obj.case)
         self.load_config = self.include_pedigree_picture(load_config=self.load_config)
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
