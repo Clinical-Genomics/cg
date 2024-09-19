@@ -10,6 +10,7 @@ class OrderType(StrEnum):
     FASTQ: str = "fastq"
     FLUFFY: str = Workflow.FLUFFY
     METAGENOME: str = "metagenome"
+    MICROBIAL_FASTQ: str = "microbial-fastq"
     MICROSALT: str = Workflow.MICROSALT
     MIP_DNA: str = Workflow.MIP_DNA
     MIP_RNA: str = Workflow.MIP_RNA
@@ -17,8 +18,8 @@ class OrderType(StrEnum):
     RML: str = "rml"
     RNAFUSION: str = Workflow.RNAFUSION
     SARS_COV_2: str = "sars-cov-2"
+    TAXPROFILER: str = Workflow.TAXPROFILER
     TOMTE: str = Workflow.TOMTE
-    MICROBIAL_FASTQ: str = "microbial-fastq"
 
 
 class ExcelSampleAliases(StrEnum):

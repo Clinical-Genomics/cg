@@ -51,7 +51,7 @@ def test_validate_pacbio_order_reused_sample_name(
     # GIVEN a PacBio order with a reused sample name
     status_db: Store = validate_pacbio_order_service.status_db
     customer = status_db.get_customer_by_internal_id(pacbio_order.customer)
-    old_sample_name: str = status_db.get_samples_by_customer_id_and_pattern(customers=[customer])[
+    old_sample_name: str = status_db.get_samples_by_customers_and_pattern(customers=[customer])[
         0
     ].name
     pacbio_order.samples[0].name = old_sample_name
