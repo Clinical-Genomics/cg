@@ -64,8 +64,8 @@ class ScoutConfigBuilder:
         return svg_path
 
     @staticmethod
-    def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
-        return len(load_config.samples) > 1
+    def is_multi_sample_case(self) -> bool:
+        return len(self.load_config.samples) > 1
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:
@@ -78,16 +78,16 @@ class ScoutConfigBuilder:
         return False
 
 
-    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> None:
-        if self.is_multi_sample_case(self.load_config):
+    def include_pedigree_picture(self) -> ScoutLoadConfig:
+        if self.is_multi_sample_case(self):
             if self.is_family_case(self.load_config):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                load_config.madeline = str(svg_path)
+                self.load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
-        return load_config
+        return self.load_config
 
     @staticmethod
     def remove_chromosome_substring(file_path: str | None) -> str | None:

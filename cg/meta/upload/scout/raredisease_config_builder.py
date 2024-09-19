@@ -57,6 +57,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def build_load_config(self) -> RarediseaseLoadConfig:
         """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for RAREDISEASE case")
+        self.load_config = RarediseaseLoadConfig()
         self.load_config = self.add_common_info_to_load_config()
         self.load_config.gene_panels = (
             self.raredisease_analysis_api.get_aggregated_panels(
@@ -65,16 +66,17 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
-        print(self.load_config)
-        # self.load_config.samples = self._get_sample_information(load_config=self.load_config, case = self.analysis_obj.case)
-        self.load_config = self.include_pedigree_picture(load_config=self.load_config)
+        print(self.load_config.gene_panels)
+        self.load_config.samples = self._get_sample_information(load_config=self.load_config, case = self.analysis_obj.case)
+        self.load_config = self.include_pedigree_picture()
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
 
 
     def _get_sample_information(self, load_config: ScoutLoadConfig, case: Case):
         LOG.info("Building samples")
-        for db_sample in case.samples:
+        db_sample: CaseSample
+        for db_sample in self.analysis_obj.case.links:
             print(db_sample)
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         return load_config
@@ -108,11 +110,12 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_custom_images = CustomImages(case_images=case_images)
         return config_custom_images
 
-    def include_case_files(self, load_config: ScoutLoadConfig) -> None:
+    def include_case_files(self, load_config: ScoutLoadConfig) -> ScoutLoadConfig:
         """Include case level files for mip case."""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
             self._include_case_file(load_config, scout_key)
+        return load_config
 
     def _include_case_file(self, load_config: ScoutLoadConfig, scout_key: str) -> ScoutLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags

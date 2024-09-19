@@ -74,7 +74,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        self.include_pedigree_picture(load_config=self.load_config)
+        self.include_pedigree_picture()
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
