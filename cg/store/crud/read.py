@@ -1574,8 +1574,8 @@ class ReadHandler(BaseHandler):
 
         return sample_application_version_query.all()
 
-    def _get_dna_cases_from_sample_within_collaborators(
-        self, sample_internal_id: str, collaborators: set[Customer]
+    def get_cases_from_sample_by_workflows_within_collaborators(
+        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
     ) -> list[Case]:
         """Return a list of DNA cases linked to DNA sample with a list of customers in a collaboration."""
 
@@ -1585,12 +1585,6 @@ class ReadHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
         )
-
-        workflows = [
-            Workflow.MIP_DNA,
-            Workflow.BALSAMIC,
-            Workflow.BALSAMIC_UMI,
-        ]
 
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]
 
