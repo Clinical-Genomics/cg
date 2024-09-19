@@ -73,13 +73,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return self.load_config
 
 
-    def _get_sample_information(self, load_config: ScoutLoadConfig, case: Case):
+    def _get_sample_information(self, load_config: ScoutLoadConfig, case: Case)->ScoutIndividual:
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             print(db_sample)
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        return load_config
+        return load_config.samples
 
 
 
