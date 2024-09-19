@@ -24,3 +24,19 @@ def handle_missing_bundle_errors(func):
             return None
 
     return wrapper
+
+
+def handle_validation_errors(func):
+    """
+    Log an error when a validation error occurs.
+
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValidationError as error:
+            raise NoDeliveryFilesError(str(error))
+
+    return wrapper
