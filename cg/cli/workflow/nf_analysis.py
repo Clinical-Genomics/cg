@@ -6,11 +6,13 @@ import click
 from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
+from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -281,10 +283,13 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool, force: boo
 
 @click.command("store")
 @ARGUMENT_CASE_ID
+@COMMENT
 @DRY_RUN
 @FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool, force: bool) -> None:
+def store(
+    context: click.Context, case_id: str, comment: str | None, dry_run: bool, force: bool
+) -> None:
     """
     Store deliverable files in Housekeeper after meeting QC metrics criteria.
 
@@ -292,9 +297,10 @@ def store(context: click.Context, case_id: str, dry_run: bool, force: bool) -> N
         click.Abort: If an error occurs during the deliverables file generation, metrics
         validation, or storage processes.
     """
+    validate_force_store_option(force=force, comment=comment)
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.store(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.store(case_id=case_id, comment=comment, dry_run=dry_run, force=force)
     except Exception as error:
         LOG.error(repr(error))
         raise click.Abort()

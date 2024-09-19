@@ -5,6 +5,7 @@ from pathlib import Path
 from click.testing import CliRunner, Result
 
 from cg.cli.downsample import store_downsampled_samples
+from cg.constants import SequencingFileTag
 from cg.models.cg_config import CGConfig
 
 
@@ -41,5 +42,5 @@ def test_store_downsampled_fastq_files(
     ]:
         assert downsample_context.housekeeper_api.get_latest_bundle_version(sample_id)
         assert downsample_context.housekeeper_api.get_file_from_latest_version(
-            bundle_name=sample_id, tags=["fastq"]
+            bundle_name=sample_id, tags=[SequencingFileTag.FASTQ]
         )

@@ -7,10 +7,11 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants.constants import FileFormat, SampleType, GenomeVersion
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
+from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
@@ -460,7 +461,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
             config_case.update(self.get_verified_gens_file_paths(sex=verified_sex))
-            if not verified_panel_bed
+            if not verified_panel_bed and genome_version == GenomeVersion.HG19
             else None
         )
 
@@ -648,6 +649,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
         return analysis_var_callers
 
+    def get_pons(self, case_id: str) -> list[str]:
+        """Return list of panel of normals used for analysis."""
+        pons: list[str] = []
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        if analysis_metadata.config.panel:
+            if pon_cnn := analysis_metadata.config.panel.pon_cnn:
+                pons.append(pon_cnn)
+        return pons
+
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
         return self.get_bundle_deliverables_type(case_id)
@@ -658,3 +668,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if case.non_tumour_samples and not case.tumour_samples:
             return True
         return False
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return Balsamic Scout upload case tags."""
+        return BALSAMIC_CASE_TAGS

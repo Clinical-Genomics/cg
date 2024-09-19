@@ -1,23 +1,20 @@
 """Constants for delivery."""
 
+from enum import StrEnum
+
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    AlignmentFileTag,
-    AnalysisTag,
-    HermesFileTag,
-)
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HermesFileTag
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
-    Workflow.FASTQ,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 SKIP_MISSING: list[Workflow] = [
-    Workflow.FASTQ,
     Workflow.MICROSALT,
     Workflow.MUTANT,
+    Workflow.RAW_DATA,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -75,6 +72,13 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
+CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
+
+RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
+
+RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"fastq"},
+]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
@@ -134,12 +138,6 @@ MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
-]
-
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
     {"ks-delivery"},
@@ -150,29 +148,6 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
-RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
-    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
-    {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
-    {AnalysisTag.FUSIONCATCHER_SUMMARY},
-    {AnalysisTag.FUSIONINSPECTOR},
-    {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
-    {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
-    {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
-    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
-    {HK_DELIVERY_REPORT_TAG},
-    {AnalysisTag.VCF_FUSION},
-    {AnalysisTag.GENE_COUNTS},
-]
-
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {AlignmentFileTag.CRAM},
-    {AlignmentFileTag.CRAM_INDEX},
-]
-
-NF_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
-
-NF_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
@@ -199,25 +174,29 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.FASTQ: {
-        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
-        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
-    },
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
+    Workflow.RAREDISEASE: {
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
+    },
+    Workflow.RAW_DATA: {
+        "case_tags": RAW_DATA_ANALYSIS_CASE_TAGS,
+        "sample_tags": RAW_DATA_ANALYSIS_SAMPLE_TAGS,
+    },
     Workflow.RNAFUSION: {
-        "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
-        "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
     Workflow.TAXPROFILER: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_CASE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
     Workflow.TOMTE: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_CASE_TAGS,
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
 }
 
@@ -225,3 +204,10 @@ PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
 
 INBOX_NAME: str = "inbox"
 OUTBOX_NAME: str = "outbox"
+
+
+class FileDeliveryOption(StrEnum):
+    ANALYSIS: str = "analysis"
+    BAM: str = "bam"
+    FASTQ: str = "fastq"
+    FASTQ_ANALYSIS: str = "fastq-analysis"

@@ -12,7 +12,6 @@ from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 @pytest.mark.parametrize(
@@ -23,8 +22,9 @@ def test_start(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     request: FixtureRequest,
+    scout_export_manged_variants_output: str,
     mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
@@ -34,7 +34,12 @@ def test_start(
     # GIVEN a case id
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
-    # GIVEN a mocked config
+    # GIVEN a mocked scout export of the managed variants
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
@@ -62,9 +67,10 @@ def test_start_available(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     mocker,
-    mock_analysis_flow_cell,
+    mock_analysis_illumina_run,
     request: FixtureRequest,
     case_id_not_enough_reads: str,
+    scout_export_manged_variants_output: str,
 ):
     """
     Test to ensure all parts of compound start-available command are executed given ideal conditions.
@@ -83,6 +89,13 @@ def test_start_available(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
+
+    # GIVEN a mocked scout export of the managed variants
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(

@@ -137,9 +137,7 @@ class InvoiceAPI:
         priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
         discount_factor = 1 - discount / 100
-        if not full_price:
-            return None
-        return round(full_price * discount_factor)
+        return round(full_price * discount_factor) if full_price else 0
 
     def _cost_center_split_factor(
         self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
@@ -162,7 +160,7 @@ class InvoiceAPI:
             self.log.append(
                 f"Could not get price for samples with application tag/version: {tag}/{version}."
             )
-            return None
+            return 0
         return split_price
 
     def get_invoice_entity_record(
@@ -170,7 +168,6 @@ class InvoiceAPI:
     ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
-
         split_discounted_price = self._cost_center_split_factor(
             price=application.discounted_price,
             cost_center=cost_center,

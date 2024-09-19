@@ -39,3 +39,39 @@ class Orderform(StrEnum):
             Orderform.SARS_COV_2: "9",
         }
         return current_order_form_versions[order_form]
+
+
+REGION_CODES: dict[str, str] = {
+    "Stockholm": "01",
+    "Uppsala": "03",
+    "Sörmland": "04",
+    "Östergötland": "05",
+    "Jönköpings län": "06",
+    "Kronoberg": "07",
+    "Kalmar län": "08",
+    "Gotland": "09",
+    "Blekinge": "10",
+    "Skåne": "12",
+    "Halland": "13",
+    "Västra Götalandsregionen": "14",
+    "Värmland": "17",
+    "Örebro län": "18",
+    "Västmanland": "19",
+    "Dalarna": "20",
+    "Gävleborg": "21",
+    "Västernorrland": "22",
+    "Jämtland Härjedalen": "23",
+    "Västerbotten": "24",
+    "Norrbotten": "25",
+}
+
+ORIGINAL_LAB_ADDRESSES: dict[str, str] = {
+    "Unilabs Stockholm": "171 54 Solna",
+    "Synlab Medilab": "183 53 Täby",
+    "A05 Diagnostics": "171 65 Solna",
+    "Karolinska University Hospital Solna": "171 76 Stockholm",
+    "Karolinska University Hospital Huddinge": "141 86 Stockholm",
+    "LaboratorieMedicinskt Centrum Gotland": "621 84 Visby",
+    "Unilabs Eskilstuna Laboratorium": "631 88 Eskilstuna",
+    "Norrland University Hospital": "901 85 Umeå",
+}

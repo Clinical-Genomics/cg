@@ -3,9 +3,37 @@ from datetime import datetime
 import pytest
 
 from cg.constants.devices import DeviceType
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.services.illumina.data_transfer.models import (
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
+
+
+@pytest.fixture(scope="session")
+def empty_illumina_sequencing_dto() -> IlluminaSequencingRunDTO:
+    """Return an empty IlluminaSequencingRunDTO."""
+    return IlluminaSequencingRunDTO(
+        type=DeviceType.ILLUMINA,
+        sequencer_type=None,
+        sequencer_name=None,
+        data_availability=None,
+        archived_at=None,
+        has_backup=None,
+        total_reads=None,
+        total_undetermined_reads=None,
+        percent_undetermined_reads=None,
+        percent_q30=None,
+        mean_quality_score=None,
+        total_yield=None,
+        yield_q30=None,
+        cycles=None,
+        demultiplexing_software=None,
+        demultiplexing_software_version=None,
+        sequencing_started_at=None,
+        sequencing_completed_at=None,
+        demultiplexing_started_at=None,
+        demultiplexing_completed_at=None,
+    )
 
 
 @pytest.fixture

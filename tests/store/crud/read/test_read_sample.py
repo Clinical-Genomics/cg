@@ -3,6 +3,7 @@
 from typing import Any
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
 from cg.store.models import Customer, Invoice, Sample
@@ -129,7 +130,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
         )
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
-    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         customer_ids=customer_ids, subject_id=subject_id, is_tumour=is_tumour
     )
 
@@ -169,7 +170,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     non_existing_customer_id = [3]
-    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         customer_ids=non_existing_customer_id, subject_id="test_subject", is_tumour=True
     )
 
@@ -320,24 +321,6 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert filtered_query.count() == 0
 
 
-def test_get_number_of_reads_for_sample_passing_q30_from_metrics(
-    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
-):
-    """Test if get_number_of_reads_for_sample_from_metrics function returns correct total reads."""
-
-    # GIVEN a store with multiple samples with sequencing metrics
-
-    # WHEN getting number of reads for a specific sample
-    actual_total_reads = (
-        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id, q30_threshold=0
-        )
-    )
-
-    # THEN it should return correct total reads for the sample
-    assert actual_total_reads == expected_total_reads
-
-
 def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers):
     """Test fetching external sample."""
     # GIVEN a store with a mixture of samples
@@ -468,6 +451,36 @@ def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id")
     assert sample.internal_id == internal_id
 
 
+@pytest.mark.parametrize(
+    "object_type, identifier_fixture",
+    [
+        ("sample", "sample_id_sequenced_on_multiple_flow_cells"),
+        ("flow_cell", "novaseq_x_flow_cell_id"),
+        ("case", "case_id_for_sample_on_multiple_flow_cells"),
+    ],
+    ids=["sample", "flow_cell", "case"],
+)
+def test_get_samples_by_identifier(
+    re_sequenced_sample_illumina_data_store: Store,
+    object_type: str,
+    identifier_fixture: str,
+    request: FixtureRequest,
+):
+    """Test that samples are returned for any instance of an identifier."""
+    # GIVEN a store with samples, an identifier and an object type
+    store: Store = re_sequenced_sample_illumina_data_store
+    identifier: str = request.getfixturevalue(identifier_fixture)
+
+    # WHEN fetching the samples by identifier
+    samples: list[Sample] = store.get_samples_by_identifier(
+        object_type=object_type, identifier=identifier
+    )
+
+    # THEN a list of samples should be returned
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+
 def test_get_samples_to_deliver(sample_store):
     """Test fetching samples to deliver."""
     # GIVEN a store with a sample
@@ -577,7 +590,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
 
     # WHEN getting the samples for a customer
     samples: list[Sample] = (
-        store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
+        store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
             customers=customer,
             pattern="sample",
         )
