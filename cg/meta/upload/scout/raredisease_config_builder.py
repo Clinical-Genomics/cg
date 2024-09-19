@@ -65,19 +65,18 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             )
         )
         self.load_config = self.include_case_files(load_config=self.load_config)
-        self.load_config.samples = self._get_sample_information()
+        self.load_config.samples = self._get_sample_information(load_config=self.load_config)
         self.load_config = self.include_pedigree_picture(load_config=self.load_config)
         self.load_config.custom_images = self.load_custom_image_sample()
         return self.load_config
 
 
-    def _get_sample_information(self):
+    def _get_sample_information(self, load_config: RarediseaseLoadConfig):
         LOG.info("Building samples")
-        self.load_config = ScoutLoadConfig()
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        return self.load_config
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        return load_config
 
 
 
