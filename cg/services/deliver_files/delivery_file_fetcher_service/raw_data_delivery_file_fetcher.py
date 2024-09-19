@@ -52,11 +52,13 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
-        return DeliveryFiles(
+
+        delivery_files = DeliveryFiles(
             delivery_data=delivery_data,
             case_files=None,
             sample_files=raw_data_files,
         )
+        return self.validate_files_to_deliver(delivery_files=delivery_files, case_id=case_id)
 
     @handle_missing_bundle_errors
     def _get_raw_data_files_for_sample(
