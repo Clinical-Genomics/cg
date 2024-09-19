@@ -130,7 +130,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
         )
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
-    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         customer_ids=customer_ids, subject_id=subject_id, is_tumour=is_tumour
     )
 
@@ -170,7 +170,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     non_existing_customer_id = [3]
-    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         customer_ids=non_existing_customer_id, subject_id="test_subject", is_tumour=True
     )
 
@@ -590,7 +590,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
 
     # WHEN getting the samples for a customer
     samples: list[Sample] = (
-        store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
+        store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
             customers=customer,
             pattern="sample",
         )

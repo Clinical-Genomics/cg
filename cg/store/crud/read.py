@@ -560,13 +560,12 @@ class ReadHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_by_customer_id(self, *, customers: list[Customer] | None = None) -> list[Pool]:
-        """Return all the pools for a customer."""
-        customer_ids = [customer.id for customer in customers]
+    def get_pools_by_customers(self, *, customers: list[Customer] | None = None) -> list[Pool]:
+        """Return all the pools for a list of customers."""
         return apply_pool_filter(
             pools=self._get_query(table=Pool),
-            customer_ids=customer_ids,
-            filter_functions=[PoolFilter.BY_CUSTOMER_ID],
+            customers=customers,
+            filter_functions=[PoolFilter.BY_CUSTOMERS],
         ).all()
 
     def get_pools_by_name_enquiry(self, *, name_enquiry: str = None) -> list[Pool]:
@@ -600,7 +599,7 @@ class ReadHandler(BaseHandler):
         self, customers: list[Customer] | None = None, enquiry: str = None
     ) -> list[Pool]:
         pools: list[Pool] = (
-            self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
+            self.get_pools_by_customers(customers=customers) if customers else self.get_pools()
         )
         if enquiry:
             pools: list[Pool] = list(
@@ -623,24 +622,22 @@ class ReadHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_samples_by_customer_id_and_pattern(
+    def get_samples_by_customers_and_pattern(
         self, *, customers: list[Customer] | None = None, pattern: str = None
     ) -> list[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
-        customer_entry_ids: list[int] = []
         filter_functions: list[SampleFilter] = []
         if customers:
             if not isinstance(customers, list):
                 customers = list(customers)
-            customer_entry_ids = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.BY_CUSTOMER_ENTRY_IDS)
+            filter_functions.append(SampleFilter.BY_CUSTOMERS)
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
-            customer_entry_ids=customer_entry_ids,
+            customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
@@ -687,7 +684,7 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    def get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         self, customer_ids: list[int], subject_id: str, is_tumour: bool
     ) -> list[Sample]:
         """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
