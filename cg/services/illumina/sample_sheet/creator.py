@@ -35,12 +35,16 @@ class SampleSheetCreator:
         self.validator = validator
         self.updater = updater
 
-    def create(self, run_dir: IlluminaRunDirectoryData) -> SampleSheet:
+    def create(
+        self,
+        run_dir: IlluminaRunDirectoryData,
+        samples: list[IlluminaSampleIndexSetting] | None = None,
+    ) -> SampleSheet:
         """Get a sample sheet from Housekeeper, flow cell dir or create a new one."""
         header: SampleSheetHeader = self._create_header_section(run_dir)
         reads: SampleSheetReads = self._create_reads_section(run_dir)
         settings: SampleSheetSettings = self._create_settings_section()
-        data: SampleSheetData = self._create_data_section(run_dir)
+        data: SampleSheetData = self._create_data_section(run_dir=run_dir, samples=samples)
         return SampleSheet(header=header, reads=reads, settings=settings, data=data)
 
     @staticmethod
@@ -94,22 +98,27 @@ class SampleSheetCreator:
             compression_format=SampleSheetBCLConvertSections.Settings.fastq_compression_format(),
         )
 
-    def _create_data_section(self, run_dir: IlluminaRunDirectoryData) -> SampleSheetData:
+    def _create_data_section(
+        self,
+        run_dir: IlluminaRunDirectoryData,
+        samples: list[IlluminaSampleIndexSetting] | None = None,
+    ) -> SampleSheetData:
         """Create the data section of the sample sheet."""
-        lims_samples: list[IlluminaSampleIndexSetting] = list(
-            get_flow_cell_samples(
-                lims=self.lims_api,
-                flow_cell_id=run_dir.id,
+        if not samples:
+            samples: list[IlluminaSampleIndexSetting] = list(
+                get_flow_cell_samples(
+                    lims=self.lims_api,
+                    flow_cell_id=run_dir.id,
+                )
             )
-        )
-        self.updater.update_all_samples(samples=lims_samples, run_parameters=run_dir.run_parameters)
+        self.updater.update_all_samples(samples=samples, run_parameters=run_dir.run_parameters)
         column_names: list[str] = self._get_sample_column_names(
             is_run_single_index=run_dir.run_parameters.is_single_index,
-            samples=lims_samples,
+            samples=samples,
         )
         return SampleSheetData(
             columns=column_names,
-            samples=lims_samples,
+            samples=samples,
         )
 
     @staticmethod
