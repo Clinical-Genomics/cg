@@ -85,3 +85,10 @@ def is_invalid_well_format(sample: Sample) -> bool:
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
+
+
+def is_container_name_missing(sample: Sample) -> bool:
+    """Checks if a sample is missing its container name."""
+    if sample.is_on_plate and not sample.container_name:
+        return True
+    return False
