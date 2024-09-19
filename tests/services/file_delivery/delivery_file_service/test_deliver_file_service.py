@@ -1,5 +1,7 @@
 from unittest import mock
 from unittest.mock import Mock
+
+from cg.exc import ValidationError
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
@@ -22,7 +24,7 @@ def test_file_delivery_service_no_files():
 
     # THEN the service should return immediately without any errors
     with mock.patch.object(
-        file_delivery_service.file_manager, "get_files_to_deliver", side_effect=NoDeliveryFilesError
+        file_delivery_service.file_manager, "get_files_to_deliver", side_effect=ValidationError
     ):
         file_delivery_service.deliver_files_for_case(case=Mock(), delivery_base_path=Mock())
 
