@@ -26,15 +26,44 @@ from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+    DeliveryServiceFactory,
+)
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
+from cg.services.deliver_files.delivery_rsync_service.models import RsyncDeliveryConfig
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
+    PacBioStoreService,
+)
+from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
+    PacBioDataTransferService,
+)
+from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
+    PacBioHousekeeperService,
+)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
+    PacBioRunDataGenerator,
+)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
+from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
+    ValidateFileTransferService,
+)
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -266,12 +295,11 @@ class GisaidConfig(CommonAppConfig):
 
 
 class DataDeliveryConfig(BaseModel):
-    destination_path: str
-    covid_destination_path: str
-    covid_source_path = str
-    covid_report_path: str
     account: str
     base_path: str
+    covid_destination_path: str
+    covid_report_path: str
+    destination_path: str
     mail_user: str
 
 
@@ -326,6 +354,13 @@ class RunInstruments(BaseModel):
     illumina: IlluminaConfig
 
 
+class PostProcessingServices(BaseModel):
+    pacbio: PacBioPostProcessingService
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -358,6 +393,8 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
     delivery_api_: DeliveryAPI | None = None
+    delivery_rsync_service_: DeliveryRsyncService | None = None
+    delivery_service_factory_: DeliveryServiceFactory | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -382,6 +419,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None
+    post_processing_services_: PostProcessingServices | None = None
     pigz: CommonAppConfig | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
@@ -425,6 +463,7 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "pdc_service_": "pdc_service",
+            "post_processing_services_": "post_processing_services",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -564,6 +603,44 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def post_processing_services(self) -> PostProcessingServices:
+        services = self.__dict__.get("post_processing_services_")
+        if services is None:
+            LOG.debug("Instantiating post-processing services")
+            services = PostProcessingServices(
+                pacbio=self.get_pacbio_post_processing_service(),
+            )
+            self.post_processing_services_ = services
+        return services
+
+    def get_pacbio_post_processing_service(self) -> PacBioPostProcessingService:
+        LOG.debug("Instantiating PacBio post-processing service")
+        run_data_generator = PacBioRunDataGenerator()
+        file_manager = PacBioRunFileManager()
+        run_validator = PacBioRunValidator(
+            file_manager=file_manager,
+            decompressor=Decompressor(),
+            file_transfer_validator=ValidateFileTransferService(),
+        )
+        metrics_parser = PacBioMetricsParser(file_manager=file_manager)
+        transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
+        store_service = PacBioStoreService(
+            store=self.status_db, data_transfer_service=transfer_service
+        )
+        hk_service = PacBioHousekeeperService(
+            hk_api=self.housekeeper_api,
+            file_manager=file_manager,
+            metrics_parser=metrics_parser,
+        )
+        return PacBioPostProcessingService(
+            run_validator=run_validator,
+            run_data_generator=run_data_generator,
+            hk_service=hk_service,
+            store_service=store_service,
+            sequencing_dir=self.run_instruments.pacbio.data_dir,
+        )
+
+    @property
     def pdc_service(self) -> PdcService:
         service = self.__dict__.get("pdc_service_")
         if service is None:
@@ -604,7 +681,7 @@ class CGConfig(BaseModel):
 
     @property
     def analysis_service(self) -> AnalysisService:
-        return AnalysisService(analysis_client=self.trailblazer_api)
+        return AnalysisService(analysis_client=self.trailblazer_api, status_db=self.status_db)
 
     @property
     def scout_api(self) -> ScoutAPI:
@@ -655,3 +732,32 @@ class CGConfig(BaseModel):
     @property
     def sequencing_qc_service(self) -> SequencingQCService:
         return SequencingQCService(self.status_db)
+
+    @property
+    def delivery_rsync_service(self) -> DeliveryRsyncService:
+        service = self.delivery_rsync_service_
+        if service is None:
+            LOG.debug("Instantiating delivery rsync service")
+            rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
+            service = DeliveryRsyncService(
+                delivery_path=self.delivery_path,
+                rsync_config=rsync_config,
+                status_db=self.status_db,
+            )
+            self.delivery_rsync_service_ = service
+        return service
+
+    @property
+    def delivery_service_factory(self) -> DeliveryServiceFactory:
+        factory = self.delivery_service_factory_
+        if not factory:
+            LOG.debug("Instantiating delivery service factory")
+            factory = DeliveryServiceFactory(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                tb_service=self.trailblazer_api,
+                rsync_service=self.delivery_rsync_service,
+                analysis_service=self.analysis_service,
+            )
+            self.delivery_service_factory_ = factory
+        return factory

@@ -32,6 +32,7 @@ def _should_fastq_path_be_stored_in_housekeeper(
     Check if a sample fastq file should be tracked in Housekeeper.
     Only fastq files that pass the q30 threshold should be tracked.
     """
+
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
@@ -78,10 +79,10 @@ def add_sample_fastq_files_to_housekeeper(
                 device_internal_id=run_directory_data.id,
                 store=store,
             ):
-                hk_api.store_fastq_path_in_housekeeper(
-                    sample_internal_id=sample_internal_id,
-                    sample_fastq_path=sample_fastq_path,
-                    flow_cell_id=run_directory_data.id,
+                hk_api.create_bundle_and_add_file_with_tags(
+                    bundle_name=sample_internal_id,
+                    file_path=sample_fastq_path,
+                    tags=[run_directory_data.id, sample_internal_id, SequencingFileTag.FASTQ],
                 )
 
 
@@ -106,10 +107,10 @@ def store_undetermined_fastq_files(
                 device_internal_id=run_directory_data.id,
                 store=store,
             ):
-                hk_api.store_fastq_path_in_housekeeper(
-                    sample_internal_id=sample_id,
-                    sample_fastq_path=fastq_path,
-                    flow_cell_id=run_directory_data.id,
+                hk_api.create_bundle_and_add_file_with_tags(
+                    bundle_name=sample_id,
+                    file_path=fastq_path,
+                    tags=[run_directory_data.id, SequencingFileTag.FASTQ, sample_id],
                 )
 
 

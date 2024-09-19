@@ -33,6 +33,7 @@ from cg.services.illumina.backup.encrypt_service import (
     IlluminaRunEncryptionService,
 )
 from cg.services.pdc_service.pdc_service import PdcService
+from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
@@ -70,10 +71,10 @@ def backup_illumina_runs(context: CGConfig, dry_run: bool):
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
     for run_dir_data in runs_dir_data:
-        sequencing_run: IlluminaSequencingRun | None = (
-            status_db.get_illumina_sequencing_run_by_device_internal_id(run_dir_data.id)
-        )
         try:
+            sequencing_run: IlluminaSequencingRun = (
+                status_db.get_illumina_sequencing_run_by_device_internal_id(run_dir_data.id)
+            )
             backup_service.start_run_backup(
                 run_dir_data=run_dir_data,
                 sequencing_run=sequencing_run,
@@ -83,6 +84,9 @@ def backup_illumina_runs(context: CGConfig, dry_run: bool):
                 pigz_binary_path=context.pigz.binary_path,
                 sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             )
+        except EntryNotFoundError as error:
+            logging.error(f"{error}")
+            continue
         except (
             DsmcAlreadyRunningError,
             IlluminaRunAlreadyBackedUpError,
@@ -102,10 +106,14 @@ def encrypt_illumina_runs(context: CGConfig, dry_run: bool):
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
     for run in runs:
-        sequencing_run: IlluminaSequencingRun | None = (
-            status_db.get_illumina_sequencing_run_by_device_internal_id(run.id)
-        )
-        if sequencing_run and sequencing_run.has_backup:
+        try:
+            sequencing_run: IlluminaSequencingRun = (
+                status_db.get_illumina_sequencing_run_by_device_internal_id(run.id)
+            )
+        except EntryNotFoundError as error:
+            LOG.error(f"{error}")
+            continue
+        if sequencing_run.has_backup:
             LOG.debug(f"Run: {run.id} is already backed-up")
             continue
         illumina_run_encryption_service = IlluminaRunEncryptionService(
@@ -147,18 +155,17 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
     backup_api: IlluminaBackupService = context.meta_apis["backup_api"]
 
     status_db: Store = context.status_db
-    sequencing_run: IlluminaSequencingRun | None = (
-        status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
-        if flow_cell_id
-        else None
-    )
-
-    if not sequencing_run and flow_cell_id:
-        LOG.error(f"{flow_cell_id}: not found in database")
-        raise click.Abort
-
+    sequencing_run: IlluminaSequencingRun | None = None
     if not flow_cell_id:
         LOG.info("Fetching first sequencing run in queue")
+    try:
+        if flow_cell_id:
+            sequencing_run: IlluminaSequencingRun = (
+                status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+            )
+    except EntryNotFoundError as error:
+        LOG.error(f"{error}")
+        raise click.Abort
 
     retrieval_time: float | None = backup_api.fetch_sequencing_run(sequencing_run)
 
@@ -169,7 +176,7 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
 
     if not dry_run and sequencing_run:
         LOG.info(
-            f"{sequencing_run}: updating sequencing run data avaliability to {SequencingRunDataAvailability.REQUESTED}"
+            f"{sequencing_run}: updating sequencing run data availability to {SequencingRunDataAvailability.REQUESTED}"
         )
         status_db.update_illumina_sequencing_run_data_availability(
             sequencing_run=sequencing_run, data_availability=SequencingRunDataAvailability.REQUESTED

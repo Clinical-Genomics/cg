@@ -13,6 +13,7 @@ from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoun
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
+from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
@@ -47,6 +48,10 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_pacbio_smrt_cell_filters import (
+    apply_pac_bio_smrt_cell_filters,
+    PacBioSMRTCellFilter,
+)
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
@@ -73,6 +78,7 @@ from cg.store.models import (
     Sample,
     SampleRunMetrics,
     User,
+    PacBioSMRTCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -161,6 +167,14 @@ class ReadHandler(BaseHandler):
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,
             started_at_date=started_at_date,
+        ).first()
+
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+        """Return an analysis."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.BY_ENTRY_ID],
+            analyses=self._get_query(table=Analysis),
+            entry_id=entry_id,
         ).first()
 
     def get_cases_by_customer_and_case_name_search(
@@ -382,11 +396,14 @@ class ReadHandler(BaseHandler):
         self, device_internal_id: str
     ) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
-        return apply_illumina_sequencing_run_filter(
+        sequencing_run: IlluminaSequencingRun | None = apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
         ).first()
+        if not sequencing_run:
+            raise EntryNotFoundError(f"No sequencing run found for device {device_internal_id}")
+        return sequencing_run
 
     def get_latest_illumina_sequencing_run_for_nipt_case(
         self, case_internal_id: str
@@ -1353,10 +1370,10 @@ class ReadHandler(BaseHandler):
         """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
+            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             workflow=orders_request.workflow,
             search=orders_request.search,
-            delivered=orders_request.delivered,
+            is_open=orders_request.is_open,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
@@ -1466,11 +1483,16 @@ class ReadHandler(BaseHandler):
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
         """Return a flow cell by internal id."""
-        return apply_illumina_flow_cell_filters(
+        flow_cell: IlluminaFlowCell | None = apply_illumina_flow_cell_filters(
             filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+        if not flow_cell:
+            raise EntryNotFoundError(
+                f"Could not find Illumina flow cell with internal id {internal_id}"
+            )
+        return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """Return all cases that are ready for sequencing QC."""
@@ -1488,6 +1510,13 @@ class ReadHandler(BaseHandler):
                 CaseFilter.HAS_SEQUENCE,
             ],
         ).all()
+
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+        return apply_pac_bio_smrt_cell_filters(
+            filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
+            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            internal_id=internal_id,
+        ).first()
 
     def get_case_ids_with_sample(self, sample_id: int) -> list[str]:
         """Return all case ids with a sample."""

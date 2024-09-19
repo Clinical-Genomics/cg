@@ -192,6 +192,14 @@ class FastqSample(OrderInSample):
         return OptionalIntValidator.str_to_int(v=v)
 
 
+class PacBioSample(OrderInSample):
+    _suitable_project = OrderType.PACBIO_LONG_READ
+
+    capture_kit: str | None = None
+    sex: SexEnum = SexEnum.unknown
+    tumour: bool
+
+
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
 
@@ -266,6 +274,18 @@ class MicrobialSample(OrderInSample):
     @validator("concentration_sample", pre=True)
     def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
+
+
+class MicrobialFastqSample(OrderInSample):
+    _suitable_project = OrderType.MICROBIAL_FASTQ
+
+    elution_buffer: str
+    container: ContainerEnum
+    # "Required if Plate"
+    container_name: str | None
+    well_position: str | None
+    # "These fields are not required"
+    control: str | None
 
 
 class MicrosaltSample(MicrobialSample):

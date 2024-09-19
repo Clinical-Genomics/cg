@@ -9,8 +9,6 @@ import coloredlogs
 from sqlalchemy.orm import scoped_session
 
 import cg
-from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
-from cg.cli.validate import validate
 from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
 from cg.cli.backup import backup
@@ -22,12 +20,13 @@ from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.downsample import downsample
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
+from cg.cli.post_process.post_process import post_process_group as post_processing
+from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
 from cg.cli.set.base import set_cmd
 from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.validate import validate
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
@@ -120,5 +119,5 @@ base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
-base.add_command(validate)
+base.add_command(post_processing)
 base.add_command(sequencing_qc)

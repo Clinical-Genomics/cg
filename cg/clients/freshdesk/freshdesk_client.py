@@ -1,19 +1,13 @@
-import logging
 from http import HTTPStatus
+from pathlib import Path
 
-from pydantic import ValidationError
-from requests import RequestException, Response, Session
+from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.exceptions import (
-    FreshdeskAPIException,
-    FreshdeskModelException,
-)
-from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-
-LOG = logging.getLogger(__name__)
+from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
+from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
 
 
 class FreshdeskClient:
@@ -24,33 +18,23 @@ class FreshdeskClient:
         self.api_key = api_key
         self.session = self._get_session()
 
-    def create_ticket(self, ticket: TicketCreate) -> TicketResponse:
-        """Create a ticket."""
-        LOG.debug(ticket.model_dump_json())
-        try:
-            response: Response = self.session.post(
-                url=self._url(EndPoints.TICKETS),
-                json=ticket.model_dump(exclude_none=True),
-            )
-            response.raise_for_status()
-            return TicketResponse.model_validate(response.json())
-        except RequestException as error:
-            LOG.error(f"Could not create ticket: {error}")
-            raise FreshdeskAPIException(error) from error
-        except ValidationError as error:
-            LOG.error(f"Response from Freshdesk does not fit model: {TicketResponse}.\n{error}")
-            raise FreshdeskModelException(error) from error
+    @handle_client_errors
+    def create_ticket(self, ticket: TicketCreate, attachments: list[Path] = None) -> TicketResponse:
+        """Create a ticket with multipart form data."""
+        multipart_data = ticket.to_multipart_data()
+        files = prepare_attachments(attachments) if attachments else None
 
-    def _url(self, endpoint: str) -> str:
-        """Get the full URL for the endpoint."""
-        return f"{self.base_url}{endpoint}"
+        response = self.session.post(
+            url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
+        )
+        response.raise_for_status()
+        return TicketResponse.model_validate(response.json())
 
+    @handle_client_errors
     def _get_session(self) -> Session:
-        """Configures and sets a session to be used for requests."""
         session = Session()
-        self._configure_retries(session)
         session.auth = (self.api_key, "X")
-        session.headers.update({"Content-Type": "application/json"})
+        self._configure_retries(session)
         return session
 
     @staticmethod
@@ -69,3 +53,14 @@ class FreshdeskClient:
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
+
+    @handle_client_errors
+    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
+        """Send a reply to an existing ticket in Freshdesk."""
+        url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
+
+        files = prepare_attachments(attachments) if attachments else None
+        multipart_data = reply.to_multipart_data()
+
+        response = self.session.post(url=url, data=multipart_data, files=files)
+        response.raise_for_status()
