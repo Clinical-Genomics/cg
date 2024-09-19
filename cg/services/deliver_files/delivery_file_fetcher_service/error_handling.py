@@ -36,7 +36,7 @@ def handle_validation_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except ValidationError as error:
-            raise NoDeliveryFilesError(str(error))
+        except ValidationError:
+            raise NoDeliveryFilesError("Could not find any files in Housekeeper for the case.")
 
     return wrapper
