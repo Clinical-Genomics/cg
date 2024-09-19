@@ -116,6 +116,10 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
+    "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
@@ -124,8 +128,6 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
 ]
 
 
