@@ -112,6 +112,9 @@ def test_applications_not_archived(
     # THEN an error should be returned
     assert errors
 
+    # THEN the error should concern the archived application
+    assert isinstance(errors[0], ApplicationArchivedError)
+
 
 def test_missing_required_volume(valid_order: OrderWithCases):
 
@@ -128,8 +131,12 @@ def test_missing_required_volume(valid_order: OrderWithCases):
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should be about the ticket number
-    assert isinstance(errors[0], ApplicationArchivedError)
+    # THEN the errors should concern the missing volumes
+    assert isinstance(errors[0], VolumeRequiredError)
+    assert errors[0].sample_index == 0 and errors[0].case_index == 0
+
+    assert isinstance(errors[1], VolumeRequiredError)
+    assert errors[1].sample_index == 1 and errors[1].case_index == 0
 
 
 def test_sample_internal_ids_does_not_exist(
@@ -328,12 +335,6 @@ def test_concentration_not_within_interval_if_skip_rc(
 
     # THEN the error should concern the application interval
     assert isinstance(errors[0], InvalidConcentrationIfSkipRCError)
-    # THEN the error should concern the missing volumes
-    assert isinstance(errors[0], VolumeRequiredError)
-    assert errors[0].sample_index == 0 and errors[0].case_index == 0
-
-    assert isinstance(errors[1], VolumeRequiredError)
-    assert errors[1].sample_index == 1 and errors[1].case_index == 0
 
 
 def test_missing_volume_no_container(valid_order: OrderWithCases):
