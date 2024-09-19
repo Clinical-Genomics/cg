@@ -1546,16 +1546,22 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def _get_related_dna_samples_from_sample_within_collaborators(
+    def get_related_dna_samples_from_sample_within_collaborators(
         self, sample_internal_id: str, collaborators: set[Customer]
     ) -> list[Sample]:
         """Returns a DNA sample with the same subject_id, tumour status and within the collaborators of an RNA sample."""
         sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
+        dna_prep_categories: list[PrepCategory] = [
+            PrepCategory.WHOLE_GENOME_SEQUENCING,
+            PrepCategory.TARGETED_GENOME_SEQUENCING,
+            PrepCategory.WHOLE_EXOME_SEQUENCING,
+        ]
         sample_application_version_query: Query = apply_application_filter(
             applications=sample_application_version_query,
-            filter_functions=[ApplicationFilter.IS_DNA],
+            prep_categories=dna_prep_categories,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
         )
 
         customer_entry_ids: list[str] = [customer.id for customer in collaborators]

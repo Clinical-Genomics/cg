@@ -614,7 +614,7 @@ def test_get_related_dna_samples_from_sample_within_collaborators(
     # GIVEN that all customers are in a collaboration
 
     # WHEN getting the related DNA samples to the given sample
-    fetched_related_dna_samples = store_with_rna_and_dna_samples_and_cases._get_related_dna_samples_from_sample_within_collaborators(
+    fetched_related_dna_samples = store_with_rna_and_dna_samples_and_cases.get_related_dna_samples_from_sample_within_collaborators(
         sample_internal_id=rna_sample.internal_id, collaborators=rna_sample_collaborators
     )
 
