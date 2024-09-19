@@ -1,7 +1,7 @@
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ContainerNameRepeatedError,
-    VolumeRequiredCaseError,
+    VolumeRequiredError,
     WellFormatError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
@@ -57,16 +57,16 @@ def test_missing_required_volume(valid_order: OrderWithCases):
     valid_order.cases[0].samples[1].volume = None
 
     # WHEN validating that required volumes are set
-    errors: list[VolumeRequiredCaseError] = validate_required_volume(order=valid_order)
+    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
 
     # THEN an error should be returned
     assert errors
 
     # THEN the error should concern the missing volumes
-    assert isinstance(errors[0], VolumeRequiredCaseError)
+    assert isinstance(errors[0], VolumeRequiredError)
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
-    assert isinstance(errors[1], VolumeRequiredCaseError)
+    assert isinstance(errors[1], VolumeRequiredError)
     assert errors[1].sample_index == 1 and errors[1].case_index == 0
 
 
@@ -77,7 +77,7 @@ def test_missing_volume_no_container(valid_order: OrderWithCases):
     valid_order.cases[0].samples[0].volume = None
 
     # WHEN validating that the order has required volumes set
-    errors: list[VolumeRequiredCaseError] = validate_required_volume(order=valid_order)
+    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
 
     # THEN no error should be returned
     assert not errors
