@@ -99,5 +99,4 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
                 file_path=case_file.full_path,
             )
             for case_file in case_files
-            if case_file
         ]

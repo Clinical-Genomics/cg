@@ -77,5 +77,4 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
                 file_path=raw_data_file.full_path,
             )
             for raw_data_file in raw_data_files
-            if raw_data_file
         ]
