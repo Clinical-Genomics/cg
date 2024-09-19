@@ -133,7 +133,7 @@ def test_missing_required_sample_volume(valid_order: MicrosaltOrder):
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should concern the invalid sample index
+    # THEN the error should concern the missing volume
     assert isinstance(errors[0], VolumeRequiredError)
     assert errors[0].sample_index == 0
 
@@ -143,12 +143,12 @@ def test_missing_required_sample_volume(valid_order: MicrosaltOrder):
 
 def test_non_required_sample_volume(valid_order: MicrosaltOrder):
 
-    # GIVEN an order with a sample not in a container and with an invalid volume
+    # GIVEN an order with a sample not in a container and no volume set
     valid_order.samples[0].container = ContainerEnum.no_container
     valid_order.samples[0].volume = None
 
     # WHEN validating the volume
     errors = validate_required_volume(order=valid_order)
 
-    # THEN an error should not be returned
+    # THEN no error should be returned
     assert not errors

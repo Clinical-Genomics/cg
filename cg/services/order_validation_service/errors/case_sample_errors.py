@@ -125,7 +125,7 @@ class InvalidVolumeError(CaseSampleError):
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
 
 
-class VolumeRequiredCaseError(CaseSampleError):
+class VolumeRequiredError(CaseSampleError):
     field: str = "volume"
     message: str = "Volume is required"
 

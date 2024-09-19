@@ -49,14 +49,14 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
 
 def test_missing_required_volume(valid_order: OrderWithCases):
 
-    # GIVEN an orders with two sample with invalid required volume, and different container
+    # GIVEN an orders with two samples with missing volumes
     valid_order.cases[0].samples[0].container = ContainerEnum.tube
     valid_order.cases[0].samples[0].volume = None
 
     valid_order.cases[0].samples[1].container = ContainerEnum.plate
     valid_order.cases[0].samples[1].volume = None
 
-    # WHEN validating the two orders
+    # WHEN validating that required volumes are set
     errors: list[VolumeRequiredCaseError] = validate_required_volume(order=valid_order)
 
     # THEN an error should be returned
