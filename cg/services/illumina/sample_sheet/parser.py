@@ -1,6 +1,7 @@
 """Class to parse the content of a sample sheet file into a SampleSheet model."""
 
 from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.services.illumina.sample_sheet.error_handlers import handle_value_and_validation_errors
 from cg.services.illumina.sample_sheet.models import (
     IlluminaSampleIndexSetting,
     SampleSheet,
@@ -12,8 +13,13 @@ from cg.services.illumina.sample_sheet.models import (
 
 
 class SampleSheetParser:
+
+    @handle_value_and_validation_errors
     def parse(self, content: list[list[str]]) -> SampleSheet:
-        """Parse a sample sheet file content into a SampleSheet model."""
+        """Parse a sample sheet file content into a SampleSheet model.
+        Raises:
+            SampleSheetValidationError: if the content does not have the correct structure or values
+        """
         header_section, reads_section, settings_section, data_section = (
             self._separate_content_into_sections(content)
         )
@@ -25,7 +31,10 @@ class SampleSheetParser:
 
     @staticmethod
     def _separate_content_into_sections(content: list[list[str]]) -> tuple:
-        """Separate the content of a sample sheet file into its sections."""
+        """Separate the content of a sample sheet file into its sections.
+        Raises:
+            ValueError: If any of the sections is not found in the content.
+        """
         header_starts_line: int = content.index([SampleSheetBCLConvertSections.Header.HEADER])
         reads_starts_line: int = content.index([SampleSheetBCLConvertSections.Reads.HEADER])
         settings_starts_line: int = content.index([SampleSheetBCLConvertSections.Settings.HEADER])
@@ -39,7 +48,11 @@ class SampleSheetParser:
 
     @staticmethod
     def _get_sample_sheet_header(content: list[list[str]]) -> SampleSheetHeader:
-        """Return the parsed Header section of the sample sheet given its header content."""
+        """
+        Return the parsed Header section of the sample sheet given its header content.
+        Raises:
+            ValidationError: if the content does not have the correct structure and values.
+        """
         return SampleSheetHeader(
             version=content[1],
             run_name=content[2],
@@ -50,7 +63,10 @@ class SampleSheetParser:
 
     @staticmethod
     def _get_sample_sheet_reads(content: list[list[str]]) -> SampleSheetReads:
-        """Return the parsed Reads section of the sample sheet given its reads content."""
+        """Return the parsed Reads section of the sample sheet given its reads content.
+        Raises:
+            ValidationError: if the content does not have the correct structure and values.
+        """
         reads_section: dict = {
             "read_1": content[1],
             "read_2": content[2],
@@ -62,7 +78,10 @@ class SampleSheetParser:
 
     @staticmethod
     def _get_sample_sheet_settings(content: list[list[str]]) -> SampleSheetSettings:
-        """Return the parsed Settings section of the sample sheet given its settings content."""
+        """Return the parsed Settings section of the sample sheet given its settings content.
+        Raises:
+            ValidationError: if the content does not have the correct structure and values.
+        """
         return SampleSheetSettings(
             software_version=content[1],
             compression_format=content[2],
@@ -85,6 +104,9 @@ class SampleSheetParser:
         return samples
 
     def _get_sample_sheet_data(self, content: list[list[str]]) -> SampleSheetData:
-        """Return the parsed Data section of the sample sheet given its data content."""
+        """Return the parsed Data section of the sample sheet given its data content.
+        Raises:
+            ValidationError: if the content does not have the correct structure and values.
+        """
         samples: list[IlluminaSampleIndexSetting] = self.get_samples_from_data_content(content)
         return SampleSheetData(columns=content[1], samples=samples)

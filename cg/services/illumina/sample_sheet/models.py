@@ -6,7 +6,6 @@ from cg.constants.symbols import EMPTY_STRING
 from cg.services.illumina.sample_sheet.utils import (
     field_default_value_validation,
     field_list_elements_validation,
-    is_dual_index,
 )
 
 
@@ -33,7 +32,7 @@ class IlluminaSampleIndexSetting(BaseModel):
     def separate_indexes(cls, data: any):
         if isinstance(data, dict):
             index = data.get("index")
-            if is_dual_index(index):
+            if "-" in index:
                 index1, index2 = index.split("-")
                 data["index"] = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
                 data["index2"] = index2.strip() if index2 else None

@@ -16,7 +16,6 @@ from cg.services.illumina.sample_sheet.models import (
     SampleSheetSettings,
 )
 from cg.services.illumina.sample_sheet.sample_updater import SamplesUpdater
-from cg.services.illumina.sample_sheet.validator import SampleSheetValidator
 
 LOG = logging.getLogger(__name__)
 
@@ -27,12 +26,10 @@ class SampleSheetCreator:
         self,
         sequencing_dir: str,
         lims_api: LimsAPI,
-        validator: SampleSheetValidator,
         updater: SamplesUpdater,
     ):
         self.sequencing_dir = Path(sequencing_dir)
         self.lims_api = lims_api
-        self.validator = validator
         self.updater = updater
 
     def create(

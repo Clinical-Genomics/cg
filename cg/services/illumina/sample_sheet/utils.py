@@ -1,15 +1,11 @@
 import logging
 
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 MINIMUM_HAMMING_DISTANCE: int = 3
-
-
-def is_dual_index(index: str) -> bool:
-    """Determines if an index in the raw sample sheet is dual index or not."""
-    return "-" in index
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
@@ -50,6 +46,15 @@ def get_hamming_distance_index_2(
             str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )
+
+
+def is_sample_sheet_bcl2fastq(content: list[list[str]]) -> bool:
+    """Check if the sample sheet content corresponds to a Bcl2fastq sample sheet."""
+    try:
+        content.index([SampleSheetBcl2FastqSections.Data.HEADER])
+        return True
+    except ValueError:
+        return False
 
 
 def field_list_elements_validation(attribute: str, value: list[str], name: str) -> list[str]:
