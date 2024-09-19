@@ -14,6 +14,7 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
+from cg.services.deliver_files.deliver_files_service.exc import DeliveryTypeNotSupported
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
     FetchDeliveryFileTagsService,
 )

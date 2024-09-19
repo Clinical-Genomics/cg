@@ -25,7 +25,5 @@ class DeliveryFiles(BaseModel):
     delivery_data: DeliveryMetaData
     case_files: list[CaseFile] | None
     sample_files: list[SampleFile] = Field(
-        ...,
-        min_length=1,
-        description="No files found for delivery, at least one sample file is required for delivery.",
+        ..., min_length=1, description="At least one sample file is required for delivery."
     )
