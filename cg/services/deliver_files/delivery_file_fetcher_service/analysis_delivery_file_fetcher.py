@@ -72,7 +72,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             for sample_file in sample_files
         ]
 
-    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile]:
+    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile] | None:
         """Return a all sample files to deliver for a case."""
         sample_ids: list[str] = case.sample_ids
         delivery_files: list[SampleFile] = []
