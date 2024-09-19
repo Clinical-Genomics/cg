@@ -3,9 +3,11 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ContainerNameMissingError,
     ContainerNameRepeatedError,
     SampleNameNotAvailableError,
+    VolumeRequiredError,
     WellFormatError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
+    validate_required_volume,
     validate_container_name_required,
     validate_sample_names_available,
     validate_tube_container_name_unique,
@@ -111,6 +113,42 @@ def test_validate_non_plate_container(valid_order: MicrosaltOrder):
 
     # WHEN validating the container name
     errors = validate_container_name_required(order=valid_order)
+
+    # THEN no error should be returned
+    assert not errors
+
+
+def test_missing_required_sample_volume(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with containerized samples missing volume
+    valid_order.samples[0].container = ContainerEnum.tube
+    valid_order.samples[0].volume = None
+
+    valid_order.samples[1].container = ContainerEnum.plate
+    valid_order.samples[1].volume = None
+
+    # WHEN validating the volume
+    errors = validate_required_volume(order=valid_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing volume
+    assert isinstance(errors[0], VolumeRequiredError)
+    assert errors[0].sample_index == 0
+
+    assert isinstance(errors[1], VolumeRequiredError)
+    assert errors[1].sample_index == 1
+
+
+def test_non_required_sample_volume(valid_order: MicrosaltOrder):
+
+    # GIVEN an order with a sample not in a container and no volume set
+    valid_order.samples[0].container = ContainerEnum.no_container
+    valid_order.samples[0].volume = None
+
+    # WHEN validating the volume
+    errors = validate_required_volume(order=valid_order)
 
     # THEN no error should be returned
     assert not errors

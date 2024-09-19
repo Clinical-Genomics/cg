@@ -28,8 +28,9 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
-    WellPositionMissingError,
+    VolumeRequiredError,
     WellFormatError,
+    WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
@@ -56,6 +57,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
 from cg.services.order_validation_service.rules.utils import (
     is_application_not_compatible,
     is_volume_invalid,
+    is_volume_missing,
 )
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -207,6 +209,16 @@ def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVol
         for sample_index, sample in case.enumerated_new_samples:
             if is_volume_invalid(sample):
                 error = InvalidVolumeError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_required_volume(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
+    errors: list[VolumeRequiredError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_volume_missing(sample):
+                error = VolumeRequiredError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
 

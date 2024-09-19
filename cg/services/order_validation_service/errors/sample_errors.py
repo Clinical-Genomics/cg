@@ -3,6 +3,7 @@ from cg.services.order_validation_service.constants import (
     MINIMUM_VOLUME,
 )
 from cg.services.order_validation_service.errors.order_errors import OrderError
+from cg.models.orders.sample_base import ContainerEnum
 
 
 class SampleError(OrderError):
@@ -42,6 +43,11 @@ class SampleNameRepeatedError(SampleError):
 class InvalidVolumeError(SampleError):
     field: str = "volume"
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
+
+
+class VolumeRequiredError(SampleError):
+    field: str = "volume"
+    message: str = "Volume is required"
 
 
 class OrganismDoesNotExistError(SampleError):
