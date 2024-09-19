@@ -88,7 +88,7 @@ def is_invalid_well_format(sample: Sample) -> bool:
 
 
 def is_container_name_missing(sample: Sample) -> bool:
-    """Checks if a sample has an invalid container name."""
+    """Checks if a sample is missing its container name."""
     if sample.is_on_plate and not sample.container_name:
         return True
     return False
