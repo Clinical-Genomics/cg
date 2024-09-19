@@ -68,7 +68,6 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
                 file_path=sample_file.full_path,
             )
             for sample_file in sample_files
-            if sample_file
         ]
 
     def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile]:
