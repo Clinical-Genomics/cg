@@ -110,6 +110,12 @@ order_service_mapping = {
         StoreMetagenomeOrderService,
         MetagenomeOrderSubmitter,
     ),
+    OrderType.MICROBIAL_FASTQ: (
+        OrderLimsService,
+        ValidateMicrobialOrderService,
+        StoreMicrobialFastqOrderService,
+        MicrobialOrderSubmitter,
+    ),
     OrderType.MICROSALT: (
         OrderLimsService,
         ValidateMicrobialOrderService,
@@ -152,17 +158,17 @@ order_service_mapping = {
         StoreMicrobialOrderService,
         MicrobialOrderSubmitter,
     ),
+    OrderType.TAXPROFILER: (
+        OrderLimsService,
+        ValidateMetagenomeOrderService,
+        StoreMetagenomeOrderService,
+        MetagenomeOrderSubmitter,
+    ),
     OrderType.TOMTE: (
         OrderLimsService,
         ValidateCaseOrderService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
-    ),
-    OrderType.MICROBIAL_FASTQ: (
-        OrderLimsService,
-        ValidateMicrobialOrderService,
-        StoreMicrobialFastqOrderService,
-        MicrobialOrderSubmitter,
     ),
 }
 
