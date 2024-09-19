@@ -7,18 +7,6 @@ DNA_COMPLEMENTS: dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 MINIMUM_HAMMING_DISTANCE: int = 3
 
 
-def find_line_containing_pattern(content: list[list[str]], pattern: str) -> int:
-    """
-    Find the line in the content that contains a pattern.
-    Raises:
-        ValueError: if the pattern is not found in the content.
-    """
-    for index, line in enumerate(content):
-        if pattern in line:
-            return index
-    raise ValueError(f"Pattern {pattern} not found in content")
-
-
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
@@ -62,3 +50,21 @@ def get_hamming_distance_index_2(
             str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )
+
+
+def field_list_elements_validation(attribute: str, value: list[str], name: str) -> list[str]:
+    """Validate that the list has two elements and the first element is the expected name."""
+    if len(value) != 2:
+        raise ValueError(f"{attribute} must have two entries.")
+    elif value[0] != name:
+        raise ValueError(f"The first entry of {attribute} must be '{name}'.")
+    return value
+
+
+def field_default_value_validation(
+    attribute: str, value: list[str], default: list[str]
+) -> list[str]:
+    """Validate that the value is the default value."""
+    if value != default:
+        raise ValueError(f"{attribute} must be set to the default value: {default}")
+    return value
