@@ -7,7 +7,7 @@ import click
 
 
 from cg.cli.upload.scout import upload_tomte_to_scout
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, Workflow
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
@@ -19,7 +19,7 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
     """MIP-RNA upload API."""
 
     def __init__(self, config: CGConfig):
-        super().__init__(config=config)
+        super().__init__(config=config, workflow=Workflow.TOMTE)
 
     def upload(self, ctx: click.Context, case: Case) -> None:
         """Uploads Tomte analysis data and files."""
