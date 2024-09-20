@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat, PrepCategory, Workflow
-from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
+from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
@@ -49,7 +49,7 @@ class UploadGenotypesAPI(object):
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version: Version = self.hk.last_version(bundle=case_id)
 
-        hk_bcf = self.get_bcf_file(hk_version_obj=hk_version)
+        hk_bcf = self.get_bcf_file(case_id=case_id)
 
         gt_data: dict = {"bcf": hk_bcf.full_path}
         if case.data_analysis in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
@@ -78,24 +78,25 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
-    def get_genotype_files(self, version_id: int) -> list:
-        return self.hk.files(version=version_id, tags={"genotype"}).all()
+    def get_genotype_files(self, case_id: str) -> list:
+        tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
+        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def get_bcf_file(
         self,
-        hk_version_obj: Version,
+        case_id: str,
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         LOG.debug("Get genotype files from Housekeeper")
-        genotype_files: list = self.get_genotype_files(version_id=hk_version_obj)
+        genotype_files: list = self.get_genotype_files(case_id=case_id)
         for genotype_file in genotype_files:
             if self.is_variant_file(genotype_file=genotype_file):
                 LOG.debug(f"Found BCF file {genotype_file.full_path}")
                 return genotype_file
-        raise FileNotFoundError(f"No VCF or BCF file found for bundle {hk_version_obj.bundle_id}")
+        raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
 
     def get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""

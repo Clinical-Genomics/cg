@@ -97,6 +97,8 @@ class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
 
+class GenotypeAnalysisTag:
+    GENOTYPE: str = "genotype"
 
 class BalsamicProtectedTags:
     """Balsamic workflow protected tags by type."""
