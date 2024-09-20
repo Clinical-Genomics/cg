@@ -55,7 +55,7 @@ class UploadScoutAPI:
         self.housekeeper = hk_api
         self.scout_api = scout_api
         self.madeline_api = madeline_api
-        self.analysis_api = analysis_api
+        self.mip_analysis_api = analysis_api
         self.lims = lims_api
         self.status_db = status_db
 
