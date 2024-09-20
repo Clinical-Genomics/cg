@@ -33,7 +33,7 @@ class MipRNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             try:
-                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id, analysis=Workflow.MIP_RNA)
+                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
             except CalledProcessError as error:
                 LOG.error(error)
                 return

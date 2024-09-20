@@ -178,7 +178,7 @@ def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
 @click.argument("case_id")
 @click.pass_context
 def upload_rna_to_scout(
-    context, case_id: str, dry_run: bool, research: bool, analysis: str, re_upload: bool
+    context, case_id: str, dry_run: bool, research: bool
 ) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connected via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
