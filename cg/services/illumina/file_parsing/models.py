@@ -34,8 +34,7 @@ class DemuxMetrics(BaseModel):
 class DsmcEncryptionKey(BaseModel):
     """Model representing the response from a PDC query."""
 
-    size: str
-    date: datetime
+    date: str
     key_path: str
 
     @field_validator("date")
@@ -44,9 +43,9 @@ class DsmcEncryptionKey(BaseModel):
 
     @field_validator("key_path")
     def validate_sequencing_path(cls, value: str) -> str:
-        if not value.endswith(f"{FileExtensions.KEY}{FileExtensions.GPG}{FileExtensions.GZIP}"):
+        if not value.endswith(f"{FileExtensions.KEY}{FileExtensions.GPG}"):
             raise ValueError(f'"{value}" - is not the path to the Encryption key')
-        if not Path(value).exists():
+        if not Path(value):
             raise ValueError(f'"{value}" - is not a valid file path.')
         return value
 
@@ -54,8 +53,7 @@ class DsmcEncryptionKey(BaseModel):
 class DsmcSequencingFile(BaseModel):
     """Model representing the response from a PDC query."""
 
-    size: str
-    date: datetime
+    date: str
     sequencing_path: str
 
     @field_validator("date")
@@ -66,6 +64,6 @@ class DsmcSequencingFile(BaseModel):
     def validate_sequencing_path(cls, value: str) -> str:
         if not value.endswith(f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"):
             raise ValueError(f'"{value}" - is not the path to the archived sequencing file')
-        if not Path(value).exists():
+        if not Path(value):
             raise ValueError(f'"{value}" - is not a valid file path.')
         return value
