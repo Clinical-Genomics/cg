@@ -7,6 +7,7 @@ from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetch
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
+    handle_validation_errors,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     DeliveryFiles,
@@ -38,6 +39,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
+    @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of raw data files to be delivered for a case and its samples."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -52,6 +54,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
+
         return DeliveryFiles(
             delivery_data=delivery_data,
             case_files=None,

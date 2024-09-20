@@ -5,6 +5,7 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_t
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
+    handle_validation_errors,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
@@ -34,6 +35,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
+    @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -42,6 +44,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
+
         return DeliveryFiles(
             delivery_data=delivery_data,
             case_files=analysis_case_files,
@@ -69,7 +72,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             for sample_file in sample_files
         ]
 
-    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile]:
+    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile] | None:
         """Return a all sample files to deliver for a case."""
         sample_ids: list[str] = case.sample_ids
         delivery_files: list[SampleFile] = []
@@ -77,7 +80,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             sample_delivery_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
                 case_id=case.internal_id, sample_id=sample_id, workflow=case.data_analysis
             )
-            delivery_files.extend(sample_delivery_files)
+            delivery_files.extend(sample_delivery_files) if sample_delivery_files else None
         return delivery_files
 
     @handle_missing_bundle_errors
