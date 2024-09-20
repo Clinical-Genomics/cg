@@ -83,7 +83,7 @@ class UploadGenotypesAPI(object):
         hk_genotype = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
-        LOG.debug(f"Found genotype file {hk_genotype.full_path}")
+        LOG.info(f"Found genotype file {hk_genotype.full_path}")
 
 
     def is_variant_file(self, genotype_file: File):
