@@ -86,7 +86,7 @@ class UploadGenotypesAPI(object):
         LOG.info(f"Found genotype file {hk_genotype.full_path}")
 
 
-    def is_variant_file(self, genotype_file: File):
+    def is_variant_file(self, genotype_file: File) -> bool:
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def get_bcf_file(
@@ -95,7 +95,7 @@ class UploadGenotypesAPI(object):
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         LOG.debug("Get genotype files from Housekeeper")
-        genotype_file=self.get_genotype_file(case_id=case_id)
+        genotype_file: File = self.get_genotype_file(case_id=case_id)
         if self.is_variant_file(genotype_file=genotype_file):
             LOG.debug(f"Found BCF file {genotype_file.full_path}")
             return genotype_file
