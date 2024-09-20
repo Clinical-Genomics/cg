@@ -211,7 +211,6 @@ def upload_tomte_to_scout(
     scout_upload_api.upload_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
-
 @click.command(name="rna-alignment-file-to-scout")
 @DRY_RUN
 @click.argument("case_id")
