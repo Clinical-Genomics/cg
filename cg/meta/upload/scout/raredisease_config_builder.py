@@ -63,7 +63,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             customer_id=self.analysis_obj.case.customer.internal_id,
             default_panels=set(self.analysis_obj.case.panels),
         )
-        self.include_case_files(load_config=self.load_config)
+        self.include_case_files()
         self.load_config = self.get_sample_information(load_config=self.load_config)
         self.load_config = self.include_pedigree_picture()
         self.load_config.custom_images = self.load_custom_image_sample()

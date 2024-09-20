@@ -71,23 +71,23 @@ class ScoutConfigBuilder:
         return svg_path
 
     @staticmethod
-    def is_multi_sample_case(self) -> bool:
-        return len(self.analysis_obj.case.links) > 1
+    def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
+        return len(load_config.samples) > 1
 
     @staticmethod
-    def is_family_case(self) -> bool:
+    def is_family_case(load_config: ScoutLoadConfig) -> bool:
         """Check if there are any linked individuals in a case."""
-        for case_sample in self.analysis_obj.case.links:
-            if case_sample.mother and case_sample.mother != "0":
+        for sample in load_config.samples:
+            if sample.mother and sample.mother != "0":
                 return True
 
-            if case_sample.father and case_sample.father != "0":
+            if sample.father and sample.father != "0":
                 return True
         return False
 
     def include_pedigree_picture(self) -> ScoutLoadConfig:
-        if self.is_multi_sample_case(self):
-            if self.is_family_case(self):
+        if self.is_multi_sample_case(load_config=self.load_config):
+            if self.is_family_case(load_config=self.load_config):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
                 self.load_config.madeline = str(svg_path)
             else:

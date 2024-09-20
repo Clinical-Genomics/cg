@@ -57,7 +57,7 @@ def test_balsamic_config_builder(
 
 def test_raredisease_config_builder(
     hk_version: Version,
-    raredisease_analysis: Analysis,
+    raredisease_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
@@ -68,7 +68,7 @@ def test_raredisease_config_builder(
     # WHEN instantiating
     file_handler = RarediseaseConfigBuilder(
         hk_version_obj=hk_version,
-        analysis_obj=raredisease_analysis,
+        analysis_obj=raredisease_analysis_obj,
         lims_api=lims_api,
         raredisease_analysis_api=raredisease_analysis_api,
         madeline_api=madeline_api,
