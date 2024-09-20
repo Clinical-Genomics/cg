@@ -80,7 +80,7 @@ class UploadGenotypesAPI(object):
 
     def get_genotype_files(self, case_id: str) -> list:
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        return self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
