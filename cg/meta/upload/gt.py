@@ -78,7 +78,7 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
-    def get_genotype_files(self, case_id: str) -> list:
+    def get_genotype_file(self, case_id: str) -> File | None:
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
         return self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
@@ -91,11 +91,10 @@ class UploadGenotypesAPI(object):
     ) -> File:
         """Return a BCF file object. Raises error if nothing is found in the bundle"""
         LOG.debug("Get genotype files from Housekeeper")
-        genotype_files: list = self.get_genotype_files(case_id=case_id)
-        for genotype_file in genotype_files:
-            if self.is_variant_file(genotype_file=genotype_file):
-                LOG.debug(f"Found BCF file {genotype_file.full_path}")
-                return genotype_file
+        genotype_file=self.get_genotype_file(case_id=case_id)
+        if self.is_variant_file(genotype_file=genotype_file):
+            LOG.debug(f"Found BCF file {genotype_file.full_path}")
+            return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
 
     def get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
