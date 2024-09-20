@@ -353,35 +353,26 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
 
-    def upload_omics_sample_id_to_scout(self, dry_run: bool, case_id: str) -> None:
-        status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+    def upload_omics_sample_id_to_scout(self, dry_run: bool, rna_dna_collections: list[RNADNACollection]) -> None:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading omics sample id for sample {dna_sample_name} "
                     f"in case {dna_case_id} in Scout."
                 )
-
                 if dry_run:
                     continue
-
                 self.scout_api.upload_omics_sample_id(
                     dna_case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
                     rna_sample_internal_id=rna_sample_internal_id,
                 )
 
-    def upload_rna_fraser_outrider_to_scout(self, dry_run: bool, case_id: str) -> None:
+    def upload_rna_fraser_outrider_to_scout(self, dry_run: bool, case_id: str, rna_dna_collections: list[RNADNACollection], cust_id: str) -> None:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(case_id)
-        cust_id = rna_case.customer.internal_id
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
@@ -395,20 +386,16 @@ class UploadScoutAPI:
                 raise FileNotFoundError(
                     f"No RNA outrider file was found in housekeeper for {rna_sample_internal_id}."
                 )
-
             LOG.debug(f"RNA fraser file {rna_fraser.path} found.")
             LOG.debug(f"RNA outrider file {rna_outrider.path} found.")
-
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA fraser and outrider files for sample {dna_sample_name} "
                     f"in case {dna_case_id} in Scout."
                 )
                 customer_case = status_db.get_case_by_internal_id(dna_case_id)
-
                 if dry_run:
                     continue
-
                 self.scout_api.upload_rna_fraser_outrider(
                     fraser_file_path=rna_fraser.full_path,
                     outrider_file_path=rna_outrider.full_path,
@@ -416,17 +403,13 @@ class UploadScoutAPI:
                     customer_case_name=customer_case.name,
                     cust_id=cust_id,
                 )
-
         for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload RNA fraser and outrider file finished!")
 
-    def upload_rna_genome_build_to_scout(self, dry_run: bool, case_id: str) -> None:
+    def upload_rna_genome_build_to_scout(self, dry_run: bool, rna_case: str, rna_dna_collections: list[RNADNACollection], cust_id: str) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(case_id)
-        cust_id = rna_case.customer.internal_id
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_genome_build = self.genome_to_scout_format(
@@ -453,11 +436,8 @@ class UploadScoutAPI:
             LOG.info(upload_statement)
         LOG.info("Upload RNA fraser and outrider file finished!")
 
-    def load_rna_variant_outlier_to_scout(self, dry_run: bool, case_id: str) -> None:
+    def load_rna_variant_outlier_to_scout(self, dry_run: bool, rna_dna_collections: list[RNADNACollection]) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
-        status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             for dna_case_id in rna_dna_collection.dna_case_ids:
@@ -594,10 +574,14 @@ class UploadScoutAPI:
 
     def upload_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA omics files to Scout."""
-        self.upload_omics_sample_id_to_scout(dry_run=dry_run, case_id=case_id)
-        self.upload_rna_fraser_outrider_to_scout(dry_run=dry_run, case_id=case_id)
-        self.upload_rna_genome_build_to_scout(dry_run=dry_run, case_id=case_id)
-        self.load_rna_variant_outlier_to_scout(dry_run=dry_run, case_id=case_id)
+        status_db: Store = self.status_db
+        rna_case = status_db.get_case_by_internal_id(case_id)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        cust_id: str = rna_case.customer.internal_id
+        self.upload_omics_sample_id_to_scout(dry_run=dry_run, rna_dna_collections=rna_dna_collections)
+        self.upload_rna_fraser_outrider_to_scout(dry_run=dry_run, case_id=case_id, rna_dna_collections=rna_dna_collections, cust_id=cust_id)
+        self.upload_rna_genome_build_to_scout(dry_run=dry_run, rna_case=rna_case, rna_dna_collections=rna_dna_collections, cust_id=cust_id)
+        self.load_rna_variant_outlier_to_scout(dry_run=dry_run, rna_dna_collections=rna_dna_collections)
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
