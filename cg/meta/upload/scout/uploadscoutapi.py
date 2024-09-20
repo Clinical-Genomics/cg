@@ -22,10 +22,10 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.utils.get_genome_build import get_genome_build
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
-from cg.utils.get_genome_build import get_genome_build
 
 LOG = logging.getLogger(__name__)
 

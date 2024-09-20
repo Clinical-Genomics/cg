@@ -27,6 +27,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.utils.get_genome_build import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -43,7 +44,6 @@ from cg.models.nf_analysis import (
 )
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
-from cg.utils.get_genome_build import get_genome_build
 
 LOG = logging.getLogger(__name__)
 
