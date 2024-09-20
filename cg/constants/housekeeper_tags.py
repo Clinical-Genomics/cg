@@ -90,7 +90,7 @@ class BalsamicAnalysisTag:
 
 
 class HkAnalysisMetricsTag:
-    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+    QC_METRICS: set[str] = {"qc-metrics", "deliverable"}
 
 
 class GensAnalysisTag:

@@ -21,7 +21,6 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.housekeeper_tags import HkAnalysisMetricsTag
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError

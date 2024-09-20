@@ -176,7 +176,7 @@ class UploadGenotypesAPI(object):
 
     def get_qcmetrics_file(self, case_id:str) -> Path:
         """Return a QC metrics file path."""
-        tags: set[str] = {HkAnalysisMetricsTag.QC_METRICS}
+        tags: set[str] = HkAnalysisMetricsTag.QC_METRICS
         hk_qcmetrics: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_qcmetrics:
             raise FileNotFoundError("QC metrics file not found for the given Housekeeper version.")

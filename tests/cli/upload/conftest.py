@@ -16,9 +16,7 @@ from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkAnalysisMetricsTag,
-)
+    GensAnalysisTag)
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
