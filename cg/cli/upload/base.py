@@ -22,7 +22,6 @@ from cg.cli.upload.scout import (
     create_scout_load_config,
     upload_case_to_scout,
     upload_multiqc_to_scout,
-    upload_omics_to_scout,
     upload_rna_alignment_file_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_junctions_to_scout,
@@ -142,7 +141,6 @@ upload.add_command(upload_case_to_scout)
 upload.add_command(upload_coverage)
 upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_genotypes)
-upload.add_command(upload_omics_to_scout)
 upload.add_command(upload_multiqc_to_scout)
 upload.add_command(upload_observations_to_loqusdb)
 upload.add_command(upload_rna_alignment_file_to_scout)
