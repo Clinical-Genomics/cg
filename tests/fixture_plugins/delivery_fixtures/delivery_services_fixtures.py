@@ -46,6 +46,20 @@ def raw_data_delivery_service(
 
 
 @pytest.fixture
+def raw_data_delivery_service_no_housekeeper_bundle(
+    real_housekeeper_api: HousekeeperAPI,
+    delivery_store_microsalt: Store,
+) -> RawDataDeliveryFileFetcher:
+    """Fixture to get an instance of FetchFastqDeliveryFilesService."""
+    tag_service = SampleAndCaseDeliveryTagsFetcher()
+    return RawDataDeliveryFileFetcher(
+        hk_api=real_housekeeper_api,
+        status_db=delivery_store_microsalt,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
 def bam_data_delivery_service(
     delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_microsalt: Store,
@@ -60,6 +74,20 @@ def bam_data_delivery_service(
 
 
 @pytest.fixture
+def bam_data_delivery_service_no_housekeeper_bundle(
+    real_housekeeper_api: HousekeeperAPI,
+    delivery_store_microsalt: Store,
+) -> RawDataDeliveryFileFetcher:
+    """Fixture to get an instance of FetchFastqDeliveryFilesService."""
+    tag_service = BamDeliveryTagsFetcher()
+    return RawDataDeliveryFileFetcher(
+        hk_api=real_housekeeper_api,
+        status_db=delivery_store_microsalt,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
 def analysis_delivery_service(
     delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_balsamic: Store,
@@ -68,6 +96,20 @@ def analysis_delivery_service(
     tag_service = SampleAndCaseDeliveryTagsFetcher()
     return AnalysisDeliveryFileFetcher(
         hk_api=delivery_housekeeper_api,
+        status_db=delivery_store_balsamic,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
+def analysis_delivery_service_no_housekeeper_bundle(
+    real_housekeeper_api: HousekeeperAPI,
+    delivery_store_balsamic: Store,
+) -> AnalysisDeliveryFileFetcher:
+    """Fixture to get an instance of FetchAnalysisDeliveryFilesService."""
+    tag_service = SampleAndCaseDeliveryTagsFetcher()
+    return AnalysisDeliveryFileFetcher(
+        hk_api=real_housekeeper_api,
         status_db=delivery_store_balsamic,
         tags_fetcher=tag_service,
     )
