@@ -205,7 +205,7 @@ def upload_tomte_to_scout(
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
-    context.invoke(upload_rna_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_rna_omics_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
