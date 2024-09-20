@@ -9,29 +9,29 @@ from cg.services.illumina.sample_sheet.exc import SampleSheetValidationError
 LOG = logging.getLogger(__name__)
 
 
-def handle_missing_or_invalid_file(func):
-    """Log an error when a Housekeeper file is missing or is not valid."""
+def handle_missing_or_invalid_sample_sheet_in_hk(func):
+    """Log an error and return False when a sample sheet is missing from Housekeeper."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except HousekeeperFileMissingError as error:
-            LOG.error(error)
+            LOG.error(f"Sample sheet not found in Housekeeper: {error}")
             return False
 
     return wrapper
 
 
 def handle_sample_sheet_errors(func):
-    """Log an error when a SampleSheetValidationError occurs."""
+    """Log an error and return False when a SampleSheetValidationError occurs."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except SampleSheetValidationError as error:
-            LOG.error(error)
+            LOG.error(f"Sample sheet failed validation: {error}")
             return False
 
     return wrapper

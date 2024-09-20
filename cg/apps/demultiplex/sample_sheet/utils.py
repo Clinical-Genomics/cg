@@ -2,7 +2,9 @@
 
 import logging
 from pathlib import Path
+
 from housekeeper.store.models import File
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -34,6 +36,7 @@ def add_and_include_sample_sheet_path_to_housekeeper(
         )
 
 
+# TODO add an error handler here to catch HousekeeperFileMissingError
 def delete_sample_sheet_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
     """Delete a sample sheet from Housekeeper database and disk given its path."""
     sample_sheet_file_path: Path = hk_api.get_sample_sheet_path(flow_cell_id)

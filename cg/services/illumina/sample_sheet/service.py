@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+import click
+
 from cg.apps.demultiplex.sample_sheet.utils import (
     add_and_include_sample_sheet_path_to_housekeeper,
     delete_sample_sheet_from_housekeeper,
@@ -8,11 +10,11 @@ from cg.apps.demultiplex.sample_sheet.utils import (
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat
 from cg.exc import FlowCellError, HousekeeperFileMissingError
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.sample_sheet.creator import SampleSheetCreator
 from cg.services.illumina.sample_sheet.error_handlers import (
-    handle_missing_or_invalid_file,
+    handle_missing_or_invalid_sample_sheet_in_hk,
     handle_sample_sheet_errors,
 )
 from cg.services.illumina.sample_sheet.exc import SampleSheetWrongFormatError
@@ -39,7 +41,6 @@ class IlluminaSampleSheetService:
         self.parser = parser
         self.translator = translator
 
-    # TODO: Add fetching from HK and FC dir
     def get_or_create(self, sequencing_run_name: str, dry_run: bool = False) -> None:
         """
         Ensure that a valid sample sheet is present in the sequencing directory by fetching it from
@@ -52,6 +53,13 @@ class IlluminaSampleSheetService:
             return
         LOG.debug(f"Creating a new sample sheet for sequencing run {sequencing_run_name}")
         sample_sheet_content: list[list[str]] = self.creator.create(run_dir).get_content()
+        if dry_run:
+            click.echo(
+                WriteStream.write_stream_from_content(
+                    file_format=FileFormat.CSV, content=sample_sheet_content
+                )
+            )
+            return
         WriteFile.write_file_from_content(
             content=sample_sheet_content,
             file_format=FileFormat.CSV,
@@ -62,7 +70,7 @@ class IlluminaSampleSheetService:
         for run_dir_path in get_directories_in_path(self.sequencing_dir):
             LOG.info(f"Getting a valid sample sheet for run {run_dir_path.name}")
             try:
-                self.get_or_create(run_dir_path.name)
+                self.get_or_create(sequencing_run_name=run_dir_path.name, dry_run=False)
                 LOG.info(f"Got a valid sample sheet for run {run_dir_path.name}")
             except Exception as error:
                 LOG.error(
@@ -79,7 +87,7 @@ class IlluminaSampleSheetService:
         content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=run_dir_data.sample_sheet_path
         )
-        if not self.validator.is_sample_sheet_bcl2fastq():
+        if not is_sample_sheet_bcl2fastq():
             LOG.error("Sample sheet is already in version 2")
             return
         self.translator.translate_content()
@@ -117,14 +125,18 @@ class IlluminaSampleSheetService:
         return run_directory_data
 
     @handle_sample_sheet_errors
-    @handle_missing_or_invalid_file
+    @handle_missing_or_invalid_sample_sheet_in_hk
     def _use_sample_sheet_from_hk(
         self, run_dir_data: IlluminaRunDirectoryData, dry_run: bool = False
     ) -> bool:
-        """Get the sample sheet content from Housekeeper."""
+        """
+        Try to use the sample sheet in Housekeeper. If valid, copy it to the sequencing directory
+        and return True, otherwise return False.
+        """
+        LOG.debug("Trying to use sample sheet from Housekeeper")
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_dir_data.id)
-        run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
         self.validate_from_file(sample_sheet_path)
+        run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
         if dry_run:
             LOG.info(
                 "[DRY-RUN]: Sample sheet from Housekeeper is valid, "
@@ -139,7 +151,11 @@ class IlluminaSampleSheetService:
     def _use_sample_sheet_from_sequencing_dir(
         self, run_dir_data: IlluminaRunDirectoryData, dry_run: bool = False
     ) -> bool:
-        """Get the sample sheet content from the flow cell directory."""
+        """
+        Try to use the sample sheet in the sequencing dir. If valid, update any existing sample
+        sheet in Housekeeper for the same run directory and return True, otherwise return False.
+        """
+        LOG.debug("Trying to use sample sheet from sequencing run directory")
         self.validate_from_file(run_dir_data.sample_sheet_path)
         if dry_run:
             LOG.info(

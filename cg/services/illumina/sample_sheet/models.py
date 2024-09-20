@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
-from cg.services.illumina.sample_sheet.utils import (
+from cg.services.illumina.sample_sheet.validation import (
     field_default_value_validation,
     field_list_elements_validation,
 )

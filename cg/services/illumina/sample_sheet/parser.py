@@ -1,4 +1,4 @@
-"""Class to parse the content of a sample sheet file into a SampleSheet model."""
+"""Class to parse the content of a sample sheet file."""
 
 from cg.constants.demultiplexing import SampleSheetBCLConvertSections
 from cg.services.illumina.sample_sheet.error_handlers import handle_value_and_validation_errors
@@ -13,6 +13,14 @@ from cg.services.illumina.sample_sheet.models import (
 
 
 class SampleSheetParser:
+    """
+    Class to parse the content of a sample sheet file into a SampleSheet model or
+    IlluminaSampleIndexSetting.
+    Exposed functions:
+        - parse: Parse a sample sheet content into a SampleSheet model.
+        - get_samples_from_data_content: Return a list of IlluminaSampleIndexSetting from the sample
+        sheet data content.
+    """
 
     @handle_value_and_validation_errors
     def parse(self, content: list[list[str]]) -> SampleSheet:
@@ -28,6 +36,22 @@ class SampleSheetParser:
         settings: SampleSheetSettings = self._get_sample_sheet_settings(settings_section)
         data: SampleSheetData = self._get_sample_sheet_data(data_section)
         return SampleSheet(header=header, reads=reads, settings=settings, data=data)
+
+    @staticmethod
+    def get_samples_from_data_content(
+        data_content: list[list[str]],
+    ) -> list[IlluminaSampleIndexSetting]:
+        """
+        Return parsed samples from the sample sheet data content.
+        Raises:
+            ValidationError: if the samples do not have the correct model attributes.
+        """
+        samples: list[IlluminaSampleIndexSetting] = []
+        column_names: list[str] = data_content[1]
+        for line in data_content[2:]:
+            raw_sample = dict(zip(column_names, line))
+            samples.append(IlluminaSampleIndexSetting.model_validate(raw_sample))
+        return samples
 
     @staticmethod
     def _separate_content_into_sections(content: list[list[str]]) -> tuple:
@@ -86,22 +110,6 @@ class SampleSheetParser:
             software_version=content[1],
             compression_format=content[2],
         )
-
-    @staticmethod
-    def get_samples_from_data_content(
-        data_content: list[list[str]],
-    ) -> list[IlluminaSampleIndexSetting]:
-        """
-        Return parsed samples from the sample sheet data content.
-        Raises:
-            ValidationError: if the samples do not have the correct model attributes.
-        """
-        samples: list[IlluminaSampleIndexSetting] = []
-        column_names: list[str] = data_content[1]
-        for line in data_content[2:]:
-            raw_sample = dict(zip(column_names, line))
-            samples.append(IlluminaSampleIndexSetting.model_validate(raw_sample))
-        return samples
 
     def _get_sample_sheet_data(self, content: list[list[str]]) -> SampleSheetData:
         """Return the parsed Data section of the sample sheet given its data content.
