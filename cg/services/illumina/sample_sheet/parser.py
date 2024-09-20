@@ -10,6 +10,7 @@ from cg.services.illumina.sample_sheet.models import (
     SampleSheetReads,
     SampleSheetSettings,
 )
+from cg.services.illumina.sample_sheet.validation import validate_samples_unique_per_lane
 
 
 class SampleSheetParser:
@@ -117,4 +118,5 @@ class SampleSheetParser:
             ValidationError: if the content does not have the correct structure and values.
         """
         samples: list[IlluminaSampleIndexSetting] = self.get_samples_from_data_content(content)
+        validate_samples_unique_per_lane(samples=samples)
         return SampleSheetData(columns=content[1], samples=samples)

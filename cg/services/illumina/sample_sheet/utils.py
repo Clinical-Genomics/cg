@@ -1,6 +1,7 @@
 import logging
 
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
+from cg.services.illumina.sample_sheet.models import IlluminaSampleIndexSetting
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
@@ -46,6 +47,19 @@ def get_reverse_complement_dna_seq(dna: str) -> str:
     LOG.debug(f"Reverse complement string {dna}")
 
     return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
+
+
+def get_samples_by_lane(
+    samples: list[IlluminaSampleIndexSetting],
+) -> dict[int, list[IlluminaSampleIndexSetting]]:
+    """Group and return samples by lane."""
+    LOG.debug("Order samples by lane")
+    sample_by_lane: dict[int, list[IlluminaSampleIndexSetting]] = {}
+    for sample in samples:
+        if sample.lane not in sample_by_lane:
+            sample_by_lane[sample.lane] = []
+        sample_by_lane[sample.lane].append(sample)
+    return sample_by_lane
 
 
 def is_sample_sheet_bcl2fastq(content: list[list[str]]) -> bool:
