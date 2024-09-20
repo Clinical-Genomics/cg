@@ -80,7 +80,6 @@ class UploadScoutAPI:
         """Get the Housekeeper tag for a Scout load config."""
         return "scout-load-config"
 
-
     @staticmethod
     def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
         """Save a Scout load config file to the supplied file path."""
@@ -430,7 +429,9 @@ class UploadScoutAPI:
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = self.genome_to_scout_format(GenomeVersion(get_genome_build(case=rna_case)))
+            rna_genome_build = self.genome_to_scout_format(
+                GenomeVersion(get_genome_build(case=rna_case))
+            )
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
