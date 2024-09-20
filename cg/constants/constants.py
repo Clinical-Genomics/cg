@@ -169,19 +169,6 @@ class GenomeVersion(StrEnum):
     HG19: str = "hg19"
     HG38: str = "hg38"
 
-    def to_scout_format(self) -> str:
-        # Mapping dictionary to translate genome builds to scout format
-        mapping = {
-            GenomeVersion.GRCh37: "38",
-            GenomeVersion.GRCh38: "38",
-            GenomeVersion.HG19: "38",
-            GenomeVersion.HG38: "38",
-        }
-        # Check if the current instance is in the mapping, raise an error if not
-        if self not in mapping:
-            raise ValueError(f"Unknown genome build: {self.value}")
-        return mapping[self]
-
 
 class SampleType(StrEnum):
     TUMOR: str = "tumor"

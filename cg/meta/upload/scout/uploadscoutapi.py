@@ -80,6 +80,7 @@ class UploadScoutAPI:
         """Get the Housekeeper tag for a Scout load config."""
         return "scout-load-config"
 
+
     @staticmethod
     def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
         """Save a Scout load config file to the supplied file path."""
@@ -90,6 +91,18 @@ class UploadScoutAPI:
             file_format=FileFormat.YAML,
             file_path=file_path,
         )
+
+    def genome_to_scout_format(genome: GenomeVersion) -> str:
+        mapping = {
+            GenomeVersion.GRCh37: "38",
+            GenomeVersion.GRCh38: "38",
+            GenomeVersion.HG19: "38",
+            GenomeVersion.HG38: "38",
+        }
+        # Check if the current instance is in the mapping, raise an error if not
+        if genome not in mapping:
+            raise ValueError(f"Genome build incompatible with scout: {genome.value}")
+        return mapping[genome]
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
@@ -417,7 +430,7 @@ class UploadScoutAPI:
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = (GenomeVersion(get_genome_build(case=rna_case))).to_scout_format()
+            rna_genome_build = self.genome_to_scout_format(GenomeVersion(get_genome_build(case=rna_case)))
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
