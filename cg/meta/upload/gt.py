@@ -78,9 +78,13 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
-    def get_genotype_file(self, case_id: str) -> File | None:
+    def get_genotype_file(self, case_id: str) -> File:
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        return self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        hk_genotype = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        if not hk_genotype:
+            raise FileNotFoundError(f"Genotype file not found for {case_id}")
+        LOG.debug(f"Found genotype file {hk_genotype.full_path}")
+
 
     def is_variant_file(self, genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
@@ -112,7 +116,7 @@ class UploadGenotypesAPI(object):
 
     def get_samples_sex_mip_dna(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
+        qc_metrics_file: Path = self.get_qcmetrics_file(case_id=case.internal_id)
         analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
@@ -143,7 +147,7 @@ class UploadGenotypesAPI(object):
         self, case: Case, hk_version: Version
     ) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = self.get_qcmetrics_file(hk_version)
+        qc_metrics_file: Path = self.get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
@@ -169,12 +173,15 @@ class UploadGenotypesAPI(object):
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
 
-    def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
+    def get_qcmetrics_file(self, case_id:str) -> Path:
         """Return a QC metrics file path."""
-        hk_qcmetrics: File = self.hk.get_latest_file(
-            version=hk_version_obj, tags=HkAnalysisMetricsTag.QC_METRICS
-        )
+        tags: set[str] = {HkAnalysisMetricsTag.QC_METRICS}
+        hk_qcmetrics: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_qcmetrics:
             raise FileNotFoundError("QC metrics file not found for the given Housekeeper version.")
         LOG.debug(f"Found QC metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
+
+        tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
+        return self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+
