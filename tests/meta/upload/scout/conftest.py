@@ -18,6 +18,7 @@ from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -584,6 +585,14 @@ def mip_dna_analysis_hk_version(
 
 
 @pytest.fixture
+def raredisease_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return Housekeeper version for a MIP DNA bundle."""
+    return helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
+
+
+@pytest.fixture
 def mip_dna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -723,21 +732,22 @@ def mip_config_builder(
     )
 
 
+
 @pytest.fixture
 def raredisease_config_builder(
     raredisease_analysis_hk_version: Version,
-    raredisease_analysis: Analysis,
+    raredisease_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
-    analysis_api: RarediseaseAnalysisAPI,
+    raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
     """Return a MIP config builder."""
-    return MipConfigBuilder(
+    return RarediseaseConfigBuilder(
         hk_version_obj=raredisease_analysis_hk_version,
-        analysis_obj=raredisease_analysis,
+        analysis_obj=raredisease_analysis_obj,
         lims_api=lims_api,
-        analysis_api=analysis_api,
         madeline_api=madeline_api,
+        raredisease_analysis_api=raredisease_analysis_api
     )
 
 
@@ -783,6 +793,13 @@ def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """Return a MIP analysis API."""
     return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+
+
+
+@pytest.fixture
+def raredisease_analysis_api(cg_context: CGConfig) -> NextflowAnalysis:
+    """Return a MIP analysis API."""
+    return NextflowAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE)
 
 
 @pytest.fixture
