@@ -584,7 +584,7 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    def upload_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
+    def upload_rna_omics_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA omics files to Scout."""
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)

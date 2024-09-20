@@ -193,9 +193,9 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
 @click.command(name="tomte-to-scout")
 @DRY_RUN
 @click.argument("case_id")
-@click.pass_obj
+@click.pass_context
 def upload_tomte_to_scout(
-    context: CGConfig,
+    context,
     case_id: str,
     dry_run: bool,
 ) -> None:
@@ -205,10 +205,8 @@ def upload_tomte_to_scout(
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_rna_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
-    LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    scout_upload_api.upload_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
 @click.command(name="rna-alignment-file-to-scout")
@@ -251,6 +249,18 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
 
     scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+
+
+@click.command(name="rna-omics-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_omics_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA omics files to Scout."""
+    LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
 @click.command(name="multiqc-to-scout")
