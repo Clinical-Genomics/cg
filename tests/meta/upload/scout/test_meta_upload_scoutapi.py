@@ -9,6 +9,7 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 
+
 def test_unlinked_family_is_linked(
     raredisease_config_builder: ScoutConfigBuilder, delivery_report_html: Path
 ):
@@ -29,8 +30,9 @@ def test_unlinked_family_is_linked(
     assert res is False
 
 
-def test_family_is_linked(raredisease_config_builder: ScoutConfigBuilder, delivery_report_html: Path):
-
+def test_family_is_linked(
+    raredisease_config_builder: ScoutConfigBuilder, delivery_report_html: Path
+):
     """Test that is_family returns true when samples are linked"""
     # GIVEN a upload scout api and case data for a linked case
 
@@ -48,8 +50,6 @@ def test_family_is_linked(raredisease_config_builder: ScoutConfigBuilder, delive
     res = raredisease_config_builder.is_family_case(family_data)
     # THEN assert that the test returns True
     assert res is True
-
-
 
 
 def test_save_config_creates_file(

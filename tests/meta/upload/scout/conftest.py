@@ -732,7 +732,6 @@ def mip_config_builder(
     )
 
 
-
 @pytest.fixture
 def raredisease_config_builder(
     raredisease_analysis_hk_version: Version,
@@ -747,7 +746,7 @@ def raredisease_config_builder(
         analysis_obj=raredisease_analysis_obj,
         lims_api=lims_api,
         madeline_api=madeline_api,
-        raredisease_analysis_api=raredisease_analysis_api
+        raredisease_analysis_api=raredisease_analysis_api,
     )
 
 
@@ -793,7 +792,6 @@ def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """Return a MIP analysis API."""
     return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
-
 
 
 @pytest.fixture
