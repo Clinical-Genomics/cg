@@ -24,7 +24,8 @@ from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.time import get_elapsed_time, get_start_time
-
+from cg.services.illumina.backup.utils import DsmcOutput
+from cg.services.illumina.file_parsing.models import DsmcSequencingFile, DsmcEncryptionKey
 
 class IlluminaBackupService:
     """Class for retrieving FCs from backup."""
@@ -97,7 +98,7 @@ class IlluminaBackupService:
         )
 
         archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
-        archived_run: Path = self.get_archived_sequencing_run_path(dsmc_output=dsmc_output)
+        archived_run: Path = self.get_latest_archived_sequencing_run_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_run(
@@ -279,9 +280,10 @@ class IlluminaBackupService:
         )
 
     @classmethod
-    def get_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
+    def get_latest_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the path of the archived sequencing run from a PDC query."""
-        run_line: str = [
+
+        run_line_list: str = [
             row
             for row in dsmc_output
             if FileExtensions.TAR in row
@@ -289,7 +291,7 @@ class IlluminaBackupService:
             and FileExtensions.GPG in row
         ][0]
 
-        archived_run = Path(run_line.split()[4])
+        archived_run = Path(run_line_list.split()[DsmcOutput.PATH_COLUMN_INDEX])
         if archived_run:
             LOG.info(f"Sequencing run found: {archived_run}")
             return archived_run
@@ -305,7 +307,7 @@ class IlluminaBackupService:
             and FileExtensions.GZIP not in row
         ][0]
 
-        archived_encryption_key = Path(encryption_key_line.split()[4])
+        archived_encryption_key = Path(encryption_key_line.split()[DsmcOutput.PATH_COLUMN_INDEX])
         if archived_encryption_key:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
