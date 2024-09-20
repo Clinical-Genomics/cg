@@ -21,7 +21,7 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
     def __init__(self, config: CGConfig):
         super().__init__(config=config, workflow=Workflow.TOMTE)
 
-    def upload(self, ctx: click.Context, case: Case) -> None:
+    def upload(self, ctx: click.Context, case: Case,  restart: bool) -> None:
         """Uploads Tomte analysis data and files."""
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
