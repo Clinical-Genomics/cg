@@ -38,8 +38,6 @@ from tests.store_helpers import StoreHelpers
 LOG = logging.getLogger(__name__)
 
 
-
-
 @pytest.fixture
 def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
@@ -299,11 +297,14 @@ def upload_context_mip(cg_context: CGConfig) -> CGConfig:
 
     return cg_context
 
+
 @pytest.fixture
 def upload_context_raredisease(raredisease_context: CGConfig) -> CGConfig:
     analysis_api = RarediseaseAnalysisAPI(config=raredisease_context)
     raredisease_context.meta_apis["analysis_api"] = analysis_api
-    raredisease_context.meta_apis["report_api"] = MockRarediseaseReportAPI(raredisease_context, analysis_api)
+    raredisease_context.meta_apis["report_api"] = MockRarediseaseReportAPI(
+        raredisease_context, analysis_api
+    )
     raredisease_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=raredisease_context.housekeeper_api,
         scout_api=raredisease_context.scout_api,

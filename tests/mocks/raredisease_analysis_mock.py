@@ -13,9 +13,8 @@ def create_raredisease_metrics_deliverables():
     metrics_deliverables: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
         file_path=Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml"),
-        )
+    )
     return [MetricsBase(**metric) for metric in metrics_deliverables["metrics"]]
-
 
 
 class MockNextflowAnalysis(AnalysisAPI):

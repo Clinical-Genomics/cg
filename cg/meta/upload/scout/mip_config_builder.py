@@ -173,7 +173,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return file_path
-        return re.split("(\d+|X|Y)\.png", file_path)[0]
+        return re.split(r"(?:\d+|[XY])\.png", file_path)[0]
 
     @staticmethod
     def is_family_case(load_config: ScoutLoadConfig) -> bool:

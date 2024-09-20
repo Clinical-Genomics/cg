@@ -166,11 +166,11 @@ def case_id() -> str:
     """Return a case id."""
     return "yellowhog"
 
+
 @pytest.fixture(scope="session")
 def mip_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
-
 
 
 @pytest.fixture(scope="session")
@@ -4166,6 +4166,7 @@ def analysis_summary(
         failed=failed_status_summary,
     )
 
+
 @pytest.fixture
 def upload_genotypes_hk_bundle_mip(
     mip_case_id: str, timestamp, case_qc_metrics_deliverables_mip: Path, bcf_file: Path
@@ -4186,9 +4187,13 @@ def upload_genotypes_hk_bundle_mip(
     }
     return data
 
+
 @pytest.fixture
 def upload_genotypes_hk_bundle_raredisease(
-    raredisease_case_id: str, timestamp, case_qc_metrics_deliverables_raredisease: Path, bcf_file: Path
+    raredisease_case_id: str,
+    timestamp,
+    case_qc_metrics_deliverables_raredisease: Path,
+    bcf_file: Path,
 ) -> dict:
     """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
     data = {
@@ -4205,4 +4210,3 @@ def upload_genotypes_hk_bundle_raredisease(
         ],
     }
     return data
-

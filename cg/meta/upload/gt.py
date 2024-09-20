@@ -55,9 +55,7 @@ class UploadGenotypesAPI(object):
         if case.data_analysis in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             gt_data["samples_sex"] = self.get_samples_sex_balsamic(case=case)
         elif case.data_analysis == Workflow.MIP_DNA:
-            gt_data["samples_sex"] = self.get_samples_sex_mip_dna(
-                case=case, hk_version=hk_version
-            )
+            gt_data["samples_sex"] = self.get_samples_sex_mip_dna(case=case, hk_version=hk_version)
         elif case.data_analysis == Workflow.RAREDISEASE:
             gt_data["samples_sex"] = self.get_samples_sex_raredisease(
                 case=case, hk_version=hk_version
@@ -151,7 +149,9 @@ class UploadGenotypesAPI(object):
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": self.get_analysis_sex_raredisease(qc_metrics_file=qc_metrics_file, sample_id=sample_id),
+                "analysis": self.get_analysis_sex_raredisease(
+                    qc_metrics_file=qc_metrics_file, sample_id=sample_id
+                ),
             }
         return samples_sex
 

@@ -183,7 +183,7 @@ class HousekeeperAPI:
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
     def get_latest_file(
-        self, bundle: str| None = None, tags: list | None = None, version: int | None = None
+        self, bundle: str | None = None, tags: list | None = None, version: int | None = None
     ) -> File | None:
         """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)

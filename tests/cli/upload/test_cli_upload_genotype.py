@@ -12,6 +12,7 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
+
 def test_upload_genotype_mip(
     upload_context_mip: CGConfig,
     mip_case_id: str,
@@ -51,12 +52,16 @@ def test_upload_genotype_raredisease(
     # GIVEN a context with a case that is ready for upload sequence genotypes
     upload_context_raredisease.status_db_ = analysis_store_trio
     upload_context_raredisease.housekeeper_api_ = upload_genotypes_hk_api_raredisease
-    case = upload_context_raredisease.status_db.get_case_by_internal_id(internal_id=raredisease_case_id)
+    case = upload_context_raredisease.status_db.get_case_by_internal_id(
+        internal_id=raredisease_case_id
+    )
     LOG.info("been there")
     assert case
 
     # WHEN uploading the genotypes
-    result = cli_runner.invoke(upload_genotypes, [raredisease_case_id], obj=upload_context_raredisease)
+    result = cli_runner.invoke(
+        upload_genotypes, [raredisease_case_id], obj=upload_context_raredisease
+    )
 
     # THEN check that the command exits with success
     assert result.exit_code == 0
