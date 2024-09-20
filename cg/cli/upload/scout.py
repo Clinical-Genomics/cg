@@ -194,6 +194,7 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
 @DRY_RUN
 @click.argument("case_id")
 @click.pass_context
+@click.pass_obj
 def upload_tomte_to_scout(
     context: CGConfig,
     case_id: str,
