@@ -39,6 +39,7 @@ from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
+from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
@@ -85,10 +86,11 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = MicrosaltUploadAPI(config_object)
         elif case.data_analysis == Workflow.RAREDISEASE:
             upload_api = RarediseaseUploadAPI(config_object)
+        elif case.data_analysis == Workflow.TOMTE:
+            upload_api = TomteUploadAPI(config_object)
         elif case.data_analysis in {
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
-            Workflow.TOMTE,
         }:
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
 
