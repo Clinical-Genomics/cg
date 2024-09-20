@@ -92,11 +92,11 @@ class UploadScoutAPI:
             file_path=file_path,
         )
 
-    def genome_to_scout_format(genome: GenomeVersion) -> str:
+    def genome_to_scout_format(self, genome: GenomeVersion) -> str:
         mapping = {
-            GenomeVersion.GRCh37: "38",
+            GenomeVersion.GRCh37: "37",
             GenomeVersion.GRCh38: "38",
-            GenomeVersion.HG19: "38",
+            GenomeVersion.HG19: "37",
             GenomeVersion.HG38: "38",
         }
         # Check if the current instance is in the mapping, raise an error if not

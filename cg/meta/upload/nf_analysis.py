@@ -6,7 +6,8 @@ import logging
 import click
 
 from cg.cli.generate.report.base import generate_delivery_report
-from cg.cli.upload.scout import upload_rna_to_scout, upload_to_scout
+
+from cg.cli.upload.scout import upload_to_scout
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
     REPORT_SUPPORTED_WORKFLOW,
