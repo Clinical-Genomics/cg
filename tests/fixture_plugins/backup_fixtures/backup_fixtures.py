@@ -5,12 +5,11 @@ from typing import Callable
 import pytest
 
 from cg.constants import FileExtensions
-from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import PDCArchivingDirectory
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 

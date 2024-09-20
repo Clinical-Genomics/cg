@@ -17,9 +17,7 @@ from cg.exc import (
 )
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
@@ -84,7 +82,7 @@ def test_get_latest_cryption_key_path(dsmc_q_archive_output: list[str], flow_cel
     assert (
         key_path.name
         == f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
-    ), f"TEST FAILED: \"{key_path.name}\" is not the latest cryption key path"
+    ), f'TEST FAILED: "{key_path.name}" is not the latest cryption key path'
 
 
 def test_get_latest_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
@@ -102,7 +100,9 @@ def test_get_latest_archived_run_path(dsmc_q_archive_output: list[str], flow_cel
     )
 
     # WHEN getting the run path
-    runs_path: Path = backup_api.get_latest_archived_sequencing_run_path(dsmc_output=dsmc_q_archive_output)
+    runs_path: Path = backup_api.get_latest_archived_sequencing_run_path(
+        dsmc_output=dsmc_q_archive_output
+    )
 
     # THEN this method should return a path object
     assert isinstance(runs_path, Path)
@@ -111,7 +111,7 @@ def test_get_latest_archived_run_path(dsmc_q_archive_output: list[str], flow_cel
     assert (
         runs_path.name
         == f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
-    ), f"TEST FAILED: \"{runs_path.name}\" is not the latest archived run path"
+    ), f'TEST FAILED: "{runs_path.name}" is not the latest archived run path'
 
 
 def test_maximum_processing_queue_full(store_with_illumina_sequencing_data: Store):

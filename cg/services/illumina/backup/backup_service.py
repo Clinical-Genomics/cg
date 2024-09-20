@@ -17,15 +17,17 @@ from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.backup.utils import DsmcOutput
+from cg.services.illumina.file_parsing.models import (
+    DsmcEncryptionKey,
+    DsmcSequencingFile,
 )
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.time import get_elapsed_time, get_start_time
-from cg.services.illumina.backup.utils import DsmcOutput
-from cg.services.illumina.file_parsing.models import DsmcSequencingFile, DsmcEncryptionKey
+
 
 class IlluminaBackupService:
     """Class for retrieving FCs from backup."""
