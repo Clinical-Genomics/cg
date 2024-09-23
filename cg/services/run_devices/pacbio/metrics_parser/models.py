@@ -11,6 +11,7 @@ from cg.constants.pacbio import (
     ControlAttributeIDs,
     LoadingAttributesIDs,
     PolymeraseDataAttributeIDs,
+    SampleMetricsAliases,
     SmrtLinkDatabasesIDs,
 )
 from cg.services.run_devices.abstract_models import RunMetrics
@@ -146,15 +147,13 @@ class BarcodeMetrics(RunMetrics):
 class SampleMetrics(RunMetrics):
     """Model that holds run data for a specific sample."""
 
-    barcode_name: str = Field(..., alias="barcode.barcode_table.barcode")
-    hifi_mean_read_length: int = Field(..., alias="barcode.barcode_table.mean_read_length")
-    hifi_read_quality: str = Field(..., alias="barcode.barcode_table.median_read_quality")
-    hifi_reads: int = Field(..., alias="barcode.barcode_table.number_of_reads")
-    hifi_yield: int = Field(..., alias="barcode.barcode_table.number_of_bases")
-    polymerase_read_length: int = Field(
-        ..., alias="barcode.barcode_table.mean_polymerase_read_length"
-    )
-    sample_name: str = Field(..., alias="barcode.barcode_table.biosample")
+    barcode_name: str = Field(..., alias=SampleMetricsAliases.BARCODE_NAME)
+    hifi_mean_read_length: int = Field(..., alias=SampleMetricsAliases.HIFI_MEAN_READ_LENGTH)
+    hifi_read_quality: str = Field(..., alias=SampleMetricsAliases.HIFI_READ_QUALITY)
+    hifi_reads: int = Field(..., alias=SampleMetricsAliases.HIFI_READS)
+    hifi_yield: int = Field(..., alias=SampleMetricsAliases.HIFI_YIELD)
+    polymerase_read_length: int = Field(..., alias=SampleMetricsAliases.PLOYMERASE_READ_LENGTH)
+    sample_name: str = Field(..., alias=SampleMetricsAliases.SAMPLE_NAME)
 
 
 class PacBioMetrics(RunMetrics):
