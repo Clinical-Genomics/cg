@@ -1086,7 +1086,7 @@ class IlluminaSequencingRun(InstrumentRun):
         data = to_dict(model_instance=IlluminaSequencingRun)
         return data
 
-
+# TODO IO: Update model according to issue # 110
 class PacBioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
@@ -1153,6 +1153,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
+# TODO SD: Update model according to issue # 111
 class PacBioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
