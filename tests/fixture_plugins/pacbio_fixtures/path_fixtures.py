@@ -34,6 +34,12 @@ def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_name: str) -> 
 
 
 @pytest.fixture
+def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, barcoded_pac_bio_run_name: str) -> Path:
+    """Return the path to a PacBio run directory."""
+    return Path(pac_bio_runs_dir, barcoded_pac_bio_run_name)
+
+
+@pytest.fixture
 def pac_bio_smrt_cell_dir_1_a01(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_name: str) -> Path:
     """Return the path to a PacBio SMRT cell directory."""
     return Path(pac_bio_test_run_dir, pac_bio_smrt_cell_name)
@@ -45,6 +51,14 @@ def pac_bio_smrt_cell_dir_1_b01(
 ) -> Path:
     """Return the path to a PacBio SMRT cell directory."""
     return Path(pac_bio_test_run_dir, pac_bio_another_smrt_cell_name)
+
+
+@pytest.fixture
+def pacbio_barcoded_smrt_cell_dir_1_c01(
+    pacbio_barcoded_run_dir: Path, barcoded_pac_bio_smrt_cell_name: str
+) -> Path:
+    """Return the path to a barcoded PacBio SMRT cell directory."""
+    return Path(pacbio_barcoded_run_dir, barcoded_pac_bio_smrt_cell_name)
 
 
 @pytest.fixture
@@ -66,6 +80,12 @@ def pac_bio_run_statistics_dir_1_b01(pac_bio_smrt_cell_dir_1_b01: Path) -> Path:
 
 
 @pytest.fixture
+def pacbio_barcoded_run_statistics_dir(pacbio_barcoded_smrt_cell_dir_1_c01: Path) -> Path:
+    """Return the path to the statistics directory of the PacBio barcoded SMRT cell."""
+    return Path(pacbio_barcoded_smrt_cell_dir_1_c01, PacBioDirsAndFiles.STATISTICS_DIR)
+
+
+@pytest.fixture
 def pac_bio_run_reports_dir(pac_bio_run_statistics_dir: Path) -> Path:
     """Return the path to the PacBio SMRT cell unzipped_reports directory"""
     return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR)
@@ -81,12 +101,6 @@ def pac_bio_run_reports_dir_1_b01(pac_bio_run_statistics_dir_1_b01: Path) -> Pat
 def pac_bio_run_metadata_dir_1_b01(pac_bio_smrt_cell_dir_1_b01: Path) -> Path:
     """Return the path to the PacBio SMRT cell metadata directory"""
     return Path(pac_bio_smrt_cell_dir_1_b01, PacBioDirsAndFiles.METADATA_DIR)
-
-
-@pytest.fixture
-def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
-    """Return the path to a temporary PacBio statistics directory."""
-    return Path(pac_bio_wrong_metrics_dir, "metrics.json")
 
 
 # File fixtures
@@ -175,3 +189,12 @@ def expected_1_b01_run_validation_files(
         decompression_target=pac_bio_zipped_reports_file_1_b01,
         decompression_destination=pac_bio_run_reports_dir_1_b01,
     )
+
+
+# Wrong files
+
+
+@pytest.fixture
+def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
+    """Return the path to a temporary PacBio statistics directory."""
+    return Path(pac_bio_wrong_metrics_dir, "metrics.json")

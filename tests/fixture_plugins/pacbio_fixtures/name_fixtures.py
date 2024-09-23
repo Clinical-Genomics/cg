@@ -14,9 +14,19 @@ def pac_bio_another_smrt_cell_name() -> str:
 
 
 @pytest.fixture
+def barcoded_pac_bio_smrt_cell_name() -> str:
+    return "1_C01"
+
+
+@pytest.fixture
 def pac_bio_test_run_name() -> str:
     """Return the name of a PacBio SMRT cell."""
     return "r84202_20240522_133539"
+
+
+@pytest.fixture
+def barcoded_pac_bio_run_name() -> str:
+    return "r84202_20240913_121403"
 
 
 @pytest.fixture

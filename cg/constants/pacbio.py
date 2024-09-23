@@ -4,6 +4,7 @@ from cg.constants import FileExtensions
 
 
 class PacBioDirsAndFiles:
+    BARCODES_REPORT: str = "barcodes.report.json"
     CCS_REPORT_SUFFIX: str = "ccs_report.json"
     CONTROL_REPORT: str = "control.report.json"
     LOADING_REPORT: str = "loading.report.json"
