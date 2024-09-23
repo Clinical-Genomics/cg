@@ -1087,7 +1087,6 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-# TODO IO: Update model according to issue # 110
 class PacBioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
@@ -1117,6 +1116,16 @@ class PacBioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads: Mapped[BigInt]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    barcoded_hifi_yield: Mapped[BigInt]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    unbarcoded_hifi_reads: Mapped[BigInt]
+    unbarcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    unbarcoded_hifi_yield: Mapped[BigInt]
+    unbarcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
