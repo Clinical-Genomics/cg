@@ -86,6 +86,16 @@ class BarcodeMetricsAliases:
     UNBARCODED_HIFI_MEAN_READ_LENGTH: str = "barcode.mean_unbarcoded_read_length"
 
 
+class SampleMetricsAliases:
+    BARCODE_NAME: str = "barcode.barcode_table.barcode"
+    HIFI_MEAN_READ_LENGTH: str = "barcode.barcode_table.mean_read_length"
+    HIFI_READ_QUALITY: str = "barcode.barcode_table.median_read_quality"
+    HIFI_READS: str = "barcode.barcode_table.number_of_reads"
+    HIFI_YIELD: str = "barcode.barcode_table.number_of_bases"
+    PLOYMERASE_READ_LENGTH: str = "barcode.barcode_table.mean_polymerase_read_length"
+    SAMPLE_NAME: str = "barcode.barcode_table.biosample"
+
+
 file_pattern_to_bundle_type: dict[str, str] = {
     PacBioDirsAndFiles.CONTROL_REPORT: PacBioBundleTypes.SMRT_CELL,
     f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": PacBioBundleTypes.SMRT_CELL,
