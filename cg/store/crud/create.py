@@ -532,10 +532,6 @@ class CreateHandler(BaseHandler):
             hifi_yield=sample_run_metrics_dto.hifi_yield,
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
-            percent_reads_passing_q30=sample_run_metrics_dto.percent_reads_passing_q30,
-            failed_reads=sample_run_metrics_dto.failed_reads,
-            failed_yield=sample_run_metrics_dto.failed_yield,
-            failed_mean_read_length=sample_run_metrics_dto.failed_mean_read_length,
             instrument_run=sequencing_run,
         )
         self.session.add(new_sample_sequencing_run)

@@ -1154,7 +1154,6 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-# TODO SD: Update model according to issue # 111
 class PacBioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
@@ -1165,9 +1164,7 @@ class PacBioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
+    barcode: Mapped[Str32 | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
