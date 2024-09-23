@@ -1086,6 +1086,7 @@ class IlluminaSequencingRun(InstrumentRun):
         data = to_dict(model_instance=IlluminaSequencingRun)
         return data
 
+
 # TODO IO: Update model according to issue # 110
 class PacBioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
