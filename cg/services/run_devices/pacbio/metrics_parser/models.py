@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from cg.constants.pacbio import (
+    BarcodeMetricsAliases,
     CCSAttributeIDs,
     ControlAttributeIDs,
     LoadingAttributesIDs,
@@ -126,6 +127,27 @@ class SmrtlinkDatasetsMetrics(BaseModel):
                 date: str = movie_name.split("_")[1] + movie_name.split("_")[2]
                 data["run_started_at"] = datetime.strptime(date, "%y%m%d%H%M%S")
         return data
+
+
+class BarcodeMetrics(RunMetrics):
+    """Model that holds barcode data."""
+
+    barcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS)
+    barcoded_hifi_reads_percentage: float = Field(
+        ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS_PERCENTAGE
+    )
+    barcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD)
+    barcoded_hifi_yield_percentage: float = Field(
+        ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD_PERCENTAGE
+    )
+    barcoded_hifi_mean_read_length: int = Field(
+        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+    )
+    unbarcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_READS)
+    unbarcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_YIELD)
+    unbarcoded_hifi_mean_read_length: int = Field(
+        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+    )
 
 
 class PacBioMetrics(RunMetrics):
