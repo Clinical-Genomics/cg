@@ -1124,7 +1124,6 @@ class PacBioSequencingRun(InstrumentRun):
     unbarcoded_hifi_reads: Mapped[BigInt]
     unbarcoded_hifi_reads_percentage: Mapped[Num_6_2]
     unbarcoded_hifi_yield: Mapped[BigInt]
-    unbarcoded_hifi_yield_percentage: Mapped[Num_6_2]
     unbarcoded_hifi_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
