@@ -466,7 +466,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
             config_case.update(self.get_verified_gens_file_paths(sex=verified_sex, panel_bed=verified_panel_bed))
-            if not genome_version == GenomeVersion.HG19
+            if genome_version == GenomeVersion.HG19
             else None
         )
 
