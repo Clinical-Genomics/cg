@@ -19,7 +19,13 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.backup.utils import DsmcOutput
+from cg.services.illumina.backup.utils import (
+    DsmcOutput,
+    get_latest_dsmc_archived_sequencing_run,
+    get_latest_dsmc_encryption_key,
+    contains_dsmc_key,
+    contains_dsmc_sequencing_path,
+)
 from cg.services.illumina.file_parsing.models import (
     DsmcEncryptionKey,
     DsmcSequencingFile,
@@ -28,7 +34,6 @@ from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.time import get_elapsed_time, get_start_time
-from cg.services.illumina.backup.utils import get_latest_file, get_latest_key
 
 
 class IlluminaBackupService:
@@ -285,60 +290,48 @@ class IlluminaBackupService:
 
     @staticmethod
     def parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[DsmcSequencingFile]:
+        """Parses the DSMC command output to extract validated sequencing paths."""
         validated_responses = []
-        filtered_rows = [
-            row
-            for row in dsmc_output
-            if FileExtensions.TAR in row
-            and FileExtensions.GZIP in row
-            and FileExtensions.GPG in row
-        ]  # THIS IS STRANGE THIS DOES THE SAME STUFF AS THE VALIDATION
-        for line in filtered_rows:
-            parts = line.split()
-            try:
-                query_response = DsmcSequencingFile(
-                    date=f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}",
-                    sequencing_path=parts[DsmcOutput.PATH_COLUMN_INDEX],
-                )
-                validated_responses.append(query_response)
-            except ValidationError as e:
-                LOG.error(f"Validation error for line: {line}\nError: {e}")
+        for line in dsmc_output:
+            if contains_dsmc_sequencing_path(line):
+                parts = line.split()
+                try:
+                    query_response = DsmcSequencingFile(
+                        date=f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}",
+                        sequencing_path=parts[DsmcOutput.PATH_COLUMN_INDEX],
+                    )
+                    validated_responses.append(query_response)
+                except ValidationError as e:
+                    LOG.error(f"Validation error for line: {line}\nError: {e}")
 
         return validated_responses
 
     @classmethod
     def get_latest_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the path of the archived sequencing run from a PDC query."""
+        validated_sequencing_paths = cls.parse_dsmc_output_sequencing_path(dsmc_output)
 
-        validated_run_paths = cls.parse_dsmc_output_sequencing_path(dsmc_output)
+        archived_run = get_latest_dsmc_archived_sequencing_run(validated_sequencing_paths)
 
-        archived_run = get_latest_file(validated_run_paths)
         if archived_run:
             LOG.info(f"Sequencing run found: {archived_run}")
             return archived_run
 
     @staticmethod
     def parse_dsmc_output_key_path(dsmc_output: list[str]) -> list[DsmcEncryptionKey]:
-        print(f"\n#############\n\n dsmc_output: {dsmc_output}\n#############\n\n")
+        """Parses the DSMC command output to extract validated encryption keys."""
         validated_responses = []
-        filtered_rows = [
-            row
-            for row in dsmc_output
-            if FileExtensions.KEY in row
-            and FileExtensions.GPG in row
-            and FileExtensions.GZIP not in row
-        ]  # THIS IS STRANGE THIS DOES THE SAME STUFF AS THE VALIDATION
-        print(f"\n#############\n\n filtered_rows: {filtered_rows}\n#############\n\n")
-        for line in filtered_rows:
-            parts = line.split()
-            try:
-                query_response = DsmcEncryptionKey(
-                    date=f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}",
-                    key_path=parts[DsmcOutput.PATH_COLUMN_INDEX],
-                )
-                validated_responses.append(query_response)
-            except ValidationError as e:
-                LOG.error(f"Validation error for line: {line}\nError: {e}")
+        for line in dsmc_output:
+            if contains_dsmc_key(line):
+                parts = line.split()
+                try:
+                    query_response = DsmcEncryptionKey(
+                        date=f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}",
+                        key_path=parts[DsmcOutput.PATH_COLUMN_INDEX],
+                    )
+                    validated_responses.append(query_response)
+                except ValidationError as e:
+                    LOG.error(f"Validation error for line: {line}\nError: {e}")
 
         return validated_responses
 
@@ -347,13 +340,8 @@ class IlluminaBackupService:
         """Get the encryption key for the archived sequencing run from a PDC query."""
         validated_encryption_keys = cls.parse_dsmc_output_key_path(dsmc_output)
 
-        print(
-            f"\n#############\n\n validated_encryption_keys: {validated_encryption_keys}\n#############\n\n"
-        )
+        archived_encryption_key = get_latest_dsmc_encryption_key(validated_encryption_keys)
 
-        archived_encryption_key = get_latest_key(validated_encryption_keys)
-
-        # archived_encryption_key = Path(encryption_key_line.split()[DsmcOutput.PATH_COLUMN_INDEX])
         if archived_encryption_key:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
