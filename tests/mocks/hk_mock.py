@@ -12,6 +12,7 @@ from housekeeper.store.models import Bundle, File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
+from sqlalchemy.orm import Query
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -179,6 +180,13 @@ class MockHousekeeperAPI:
         return self._files[0]
 
     def get_latest_file_from_version(self, version: Version, tags: Set[str]):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[-1]
+
+
+    def get_latest_file(self, bundle: str | None = None, tags: list | None = None, version: int | None = None
+    ) -> File | None:
         if tags.intersection(self._missing_tags):
             return None
         return self._files[-1]

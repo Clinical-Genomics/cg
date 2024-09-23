@@ -9,8 +9,13 @@ from housekeeper.store.models import Version
 from cg.apps.coverage import ChanjoAPI
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.scout import ScoutUploadKey
+from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.raredisease import RarediseaseReportAPI
+from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.report.taxprofiler import TaxprofilerReportAPI
+from cg.meta.report.tomte import TomteReportAPI
+
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -75,19 +80,15 @@ class MockNextflowAnalysisAPI(NfAnalysisAPI):
         """Return data analysis type carried out."""
         return AnalysisType.WHOLE_GENOME_SEQUENCING
 
-
-class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
-    """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
-
-    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
-        super().__init__(config, analysis_api)
+class MockHousekeeperReportAPI:
+    """Base class for mocking Housekeeper methods for report APIs."""
 
     def add_delivery_report_to_hk(
         self, case_id: str, delivery_report_file: Path, version: Version
     ) -> None:
         """Mocked add_delivery_report_to_hk method."""
         LOG.info(
-            f"add_delivery_report_to_hk called with the following args:  case={case_id}, delivery_report_file="
+            f"add_delivery_report_to_hk called with the following args: case={case_id}, delivery_report_file="
             f"{delivery_report_file}, version={version}"
         )
 
@@ -106,41 +107,44 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
         return f"path/to/{scout_key}"
 
 
-class MockHousekeeperRarediseaseReportAPI(RarediseaseReportAPI):
-    """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
-
+class MockHousekeeperBalsamicReportAPI(BalsamicReportAPI, MockHousekeeperReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests overwriting Housekeeper methods."""
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def add_delivery_report_to_hk(
-        self, case_id: str, delivery_report_file: Path, version: Version
-    ) -> None:
-        """Mocked add_delivery_report_to_hk method."""
-        LOG.info(
-            f"add_delivery_report_to_hk called with the following args:  case={case_id}, delivery_report_file="
-            f"{delivery_report_file}, version={version}"
-        )
-
-    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> None:
-        """Return mocked delivery report path stored in Housekeeper."""
-        LOG.info(
-            f"get_delivery_report_from_hk called with the following args: case={case_id}, version={version}"
-        )
-        return None
-
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_key: ScoutUploadKey) -> str:
-        """Return mocked uploaded to Scout file."""
-        LOG.info(
-            f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_key={scout_key}"
-        )
-        return f"path/to/{scout_key}"
-
-
-class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
-    """Mock ReportAPI for CLI tests."""
-
+class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI, MockHousekeeperReportAPI):
+    """Mock MIP-DNA ReportAPI for CLI tests overwriting Housekeeper methods."""
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
+
+class MockHousekeeperRarediseaseReportAPI(RarediseaseReportAPI, MockHousekeeperReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests overwriting Housekeeper methods."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockHousekeeperRnafusionReportAPI(RnafusionReportAPI, MockHousekeeperReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests overwriting Housekeeper methods."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockHousekeeperTaxprofilerReportAPI(TaxprofilerReportAPI, MockHousekeeperReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests overwriting Housekeeper methods."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockHousekeeperTomteReportAPI(TomteReportAPI, MockHousekeeperReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests overwriting Housekeeper methods."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+
+
+class MockReportAPI:
+    """Base Mock ReportAPI for CLI tests."""
+
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        self.config = config
+        self.analysis_api = analysis_api
 
     def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> None:
         """Mocked create_delivery_report method."""
@@ -160,28 +164,36 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
         return directory
 
 
-class MockRarediseaseReportAPI(MockHousekeeperRarediseaseReportAPI):
-    """Mock ReportAPI for CLI tests."""
-
+class MockBalsamicReportAPI(MockHousekeeperBalsamicReportAPI, MockReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests."""
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> None:
-        """Mocked create_delivery_report method."""
-        LOG.info(
-            f"create_delivery_report called with the following args: case={case_id}, analysis_date={analysis_date}, "
-            f"force={force}",
-        )
+class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI, MockReportAPI):
+    """Mock MIP-DNA ReportAPI for CLI tests."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
 
-    def create_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
-    ) -> Path:
-        """Return mocked delivery report file path."""
-        LOG.info(
-            f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
-            f"analysis_date={analysis_date}, force={force}"
-        )
-        return directory
+class MockRarediseaseReportAPI(MockHousekeeperRarediseaseReportAPI, MockReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockRnafusionReportAPI(MockHousekeeperRnafusionReportAPI, MockReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockTaxprofilerReportAPI(MockHousekeeperTaxprofilerReportAPI, MockReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+class MockTomteReportAPI(MockHousekeeperTomteReportAPI, MockReportAPI):
+    """Mock Rare Disease ReportAPI for CLI tests."""
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
 
 
 class MockChanjo(ChanjoAPI):

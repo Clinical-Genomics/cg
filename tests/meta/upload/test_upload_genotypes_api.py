@@ -8,6 +8,8 @@ from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
+
+
 def test_get_analysis_sex_mip(
     case_qc_metrics_deliverables_mip: Path,
     genotype_analysis_sex: dict,
@@ -17,7 +19,6 @@ def test_get_analysis_sex_mip(
 
     # WHEN fetching the predicted sex by the analysis
     sex: dict = UploadGenotypesAPI.get_analysis_sex_mip_dna(
-        self=UploadGenotypesAPI,
         qc_metrics_file=case_qc_metrics_deliverables_mip,
     )
 

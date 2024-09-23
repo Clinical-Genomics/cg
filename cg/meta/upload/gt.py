@@ -118,7 +118,7 @@ class UploadGenotypesAPI(object):
     def get_samples_sex_mip_dna(self, case: Case, hk_version: Version) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self.get_qcmetrics_file(case_id=case.internal_id)
-        analysis_sexes: dict = self.get_analysis_sex_mip_dna(self, qc_metrics_file)
+        analysis_sexes: dict = self.get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id

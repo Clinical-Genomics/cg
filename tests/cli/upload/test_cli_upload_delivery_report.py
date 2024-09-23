@@ -1,19 +1,19 @@
 """Tests the cli for uploading delivery reports."""
 
+import pytest
 from click.testing import CliRunner, Result
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
 
 
+@pytest.mark.parametrize(
+    "upload_context", ["balsamic", "mip", "raredisease", "rnafusion", "taxprofiler", "tomte"], indirect=True
+)
 def test_delivery_report_to_scout_no_params(upload_context: CGConfig, cli_runner: CliRunner):
     """Tests the upload to Scout without specifying the case."""
-
-    # GIVEN a MIP-DNA report api
-    assert isinstance(upload_context.meta_apis.get("report_api"), MipDNAReportAPI)
 
     # WHEN invoking the delivery report upload without parameters
     result: Result = cli_runner.invoke(upload_delivery_report_to_scout, obj=upload_context)
@@ -22,14 +22,19 @@ def test_delivery_report_to_scout_no_params(upload_context: CGConfig, cli_runner
     assert "There are no valid cases to perform delivery report actions" in result.output
     assert result.exit_code == EXIT_FAIL
 
-
+# @pytest.mark.parametrize(
+#     "upload_context", ["balsamic", "mip", "raredisease", "rnafusion", "taxprofiler", "tomte"], indirect=True
+# )
+@pytest.mark.parametrize(
+    "upload_context", ["mip"], indirect=True
+)
 def test_delivery_report_to_scout(
     upload_context: CGConfig,
     cli_runner: CliRunner,
     upload_report_hk_api: HousekeeperAPI,
     case_id: str,
 ):
-    """Tests the upload to Scout of a MIP DNA delivery report."""
+    """Tests the upload to Scout of a delivery report."""
 
     # GIVEN a Housekeeper context with a delivery report file that is ready for upload
     upload_context.housekeeper_api_ = upload_report_hk_api

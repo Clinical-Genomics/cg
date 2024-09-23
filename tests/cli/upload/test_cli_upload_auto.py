@@ -11,21 +11,21 @@ from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
-WORKFLOWS_TO_TEST: list = [
-    Workflow.BALSAMIC,
-    Workflow.MICROSALT,
-    Workflow.MIP_DNA,
-    Workflow.MIP_RNA,
-    Workflow.RAREDISEASE,
-    Workflow.RNAFUSION,
-    Workflow.TAXPROFILER,
-    Workflow.TOMTE,
-]
+UPLOAD_CONTEXT_AND_WORKFLOWS = [
+    ("balsamic", Workflow.BALSAMIC),
+    ("microsalt", Workflow.MICROSALT),
+    ("mip", Workflow.MIP_DNA),
+    ("mip-rna", Workflow.MIP_RNA),
+    ("raredisease", Workflow.RAREDISEASE),
+    ("rnafusion", Workflow.RNAFUSION),
+    ("taxprofiler", Workflow.TAXPROFILER),
+    ("tomte", Workflow.TOMTE)]
 
 
 @pytest.mark.parametrize(
-    "workflow",
-    WORKFLOWS_TO_TEST,
+    "upload_context, workflow",
+    UPLOAD_CONTEXT_AND_WORKFLOWS,
+    indirect=["upload_context"]
 )
 def test_upload_auto_with_workflow(
     cli_runner: CliRunner,

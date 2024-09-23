@@ -12,25 +12,29 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
-from cg.constants.constants import FileFormat, Workflow
+from cg.constants.constants import FileFormat
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     GensAnalysisTag)
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis
 from cg.store.store import Store
-from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.report import MockMipDNAReportAPI
-from tests.mocks.report import MockRarediseaseReportAPI
+from tests.mocks.report import MockBalsamicReportAPI, MockMipDNAReportAPI, MockRarediseaseReportAPI, MockRnafusionReportAPI, MockTaxprofilerReportAPI, MockTomteReportAPI
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
@@ -280,10 +284,40 @@ class MockLims:
 
 
 @pytest.fixture
-def upload_context_mip(cg_context: CGConfig) -> CGConfig:
-    analysis_api = MipDNAAnalysisAPI(config=cg_context)
-    cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
+def upload_context(request, cg_context: CGConfig) -> CGConfig:
+    if request.param == "mip":
+        analysis_api = MipDNAAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
+    elif request.param == "mip-rna":
+        analysis_api = MipRNAAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+    elif request.param == "balsamic":
+        analysis_api = BalsamicAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockBalsamicReportAPI(cg_context, analysis_api)
+    elif request.param == "microsalt":
+        analysis_api = MicrosaltAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+    elif request.param == "raredisease":
+        analysis_api = RarediseaseAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockRarediseaseReportAPI(cg_context, analysis_api)
+    elif request.param == "rnafusion":
+        analysis_api = RnafusionAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockRnafusionReportAPI(cg_context, analysis_api)
+    elif request.param == "taxprofiler":
+        analysis_api = TaxprofilerAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockTaxprofilerReportAPI(cg_context, analysis_api)
+    elif request.param == "tomte":
+        analysis_api = TomteAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
+        cg_context.meta_apis["report_api"] = MockTomteReportAPI(cg_context, analysis_api)
+    else:
+        raise ValueError(f"Unknown context: {request.param}")
+
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,
@@ -294,22 +328,3 @@ def upload_context_mip(cg_context: CGConfig) -> CGConfig:
     )
 
     return cg_context
-
-
-@pytest.fixture
-def upload_context_raredisease(raredisease_context: CGConfig) -> CGConfig:
-    analysis_api = RarediseaseAnalysisAPI(config=raredisease_context)
-    raredisease_context.meta_apis["analysis_api"] = analysis_api
-    raredisease_context.meta_apis["report_api"] = MockRarediseaseReportAPI(
-        raredisease_context, analysis_api
-    )
-    raredisease_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
-        hk_api=raredisease_context.housekeeper_api,
-        scout_api=raredisease_context.scout_api,
-        madeline_api=raredisease_context.madeline_api,
-        analysis_api=analysis_api,
-        lims_api=raredisease_context.lims_api,
-        status_db=raredisease_context.status_db,
-    )
-
-    return raredisease_context
