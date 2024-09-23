@@ -195,6 +195,6 @@ def expected_1_b01_run_validation_files(
 
 
 @pytest.fixture
-def pacbio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
+def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
     """Return the path to a temporary PacBio statistics directory."""
     return Path(pac_bio_wrong_metrics_dir, "metrics.json")
