@@ -34,9 +34,9 @@ def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_name: str) -> 
 
 
 @pytest.fixture
-def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, barcoded_pac_bio_run_name: str) -> Path:
+def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_name: str) -> Path:
     """Return the path to a PacBio run directory."""
-    return Path(pac_bio_runs_dir, barcoded_pac_bio_run_name)
+    return Path(pac_bio_runs_dir, pacbio_barcoded_run_name)
 
 
 @pytest.fixture
@@ -55,10 +55,10 @@ def pac_bio_smrt_cell_dir_1_b01(
 
 @pytest.fixture
 def pacbio_barcoded_smrt_cell_dir_1_c01(
-    pacbio_barcoded_run_dir: Path, barcoded_pac_bio_smrt_cell_name: str
+    pacbio_barcoded_run_dir: Path, pacbio_barcoded_smrt_cell_name: str
 ) -> Path:
     """Return the path to a barcoded PacBio SMRT cell directory."""
-    return Path(pacbio_barcoded_run_dir, barcoded_pac_bio_smrt_cell_name)
+    return Path(pacbio_barcoded_run_dir, pacbio_barcoded_smrt_cell_name)
 
 
 @pytest.fixture
@@ -195,6 +195,6 @@ def expected_1_b01_run_validation_files(
 
 
 @pytest.fixture
-def pac_bio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
+def pacbio_wrong_metrics_file(pac_bio_wrong_metrics_dir: Path) -> Path:
     """Return the path to a temporary PacBio statistics directory."""
     return Path(pac_bio_wrong_metrics_dir, "metrics.json")
