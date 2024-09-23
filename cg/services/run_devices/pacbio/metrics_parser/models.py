@@ -143,6 +143,16 @@ class BarcodeMetrics(RunMetrics):
     )
 
 
+class SampleMetrics(RunMetrics):
+    """Model that holds run data for a specific sample."""
+
+    barcode_name: str = Field(..., alias="barcode.barcode_table.barcode")
+    polymerase_read_length: int = Field(
+        ..., alias="barcode.barcode_table.mean_polymerase_read_length"
+    )
+    sample_name: str = Field(..., alias="barcode.barcode_table.biosample")
+
+
 class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 
