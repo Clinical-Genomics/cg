@@ -2,7 +2,8 @@ import re
 from datetime import datetime
 from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from typing_extensions import Annotated
 
 from cg.constants.pacbio import (
     BarcodeMetricsAliases,
@@ -38,20 +39,12 @@ class ControlMetrics(BaseModel):
 
     reads: int = Field(..., alias=ControlAttributeIDs.NUMBER_OF_READS)
     mean_read_length: int = Field(..., alias=ControlAttributeIDs.MEAN_READ_LENGTH)
-    percent_mean_concordance_reads: float = Field(
+    percent_mean_concordance_reads: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE
     )
-    percent_mode_concordance_reads: float = Field(
+    percent_mode_concordance_reads: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE
     )
-
-    _validate_percent_mean_concordance_reads = field_validator(
-        "percent_mean_concordance_reads", mode="before"
-    )(fraction_to_percent)
-
-    _validate_percent_mode_concordance_reads = field_validator(
-        "percent_mode_concordance_reads", mode="before"
-    )(fraction_to_percent)
 
 
 class ProductivityMetrics(BaseModel):
@@ -133,11 +126,11 @@ class BarcodeMetrics(RunMetrics):
     """Model that holds barcode data."""
 
     barcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS)
-    barcoded_hifi_reads_percentage: float = Field(
+    barcoded_hifi_reads_percentage: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS_PERCENTAGE
     )
     barcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD)
-    barcoded_hifi_yield_percentage: float = Field(
+    barcoded_hifi_yield_percentage: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD_PERCENTAGE
     )
     barcoded_hifi_mean_read_length: int = Field(
