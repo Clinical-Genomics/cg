@@ -2,9 +2,11 @@ import re
 from datetime import datetime
 from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from typing_extensions import Annotated
 
 from cg.constants.pacbio import (
+    BarcodeMetricsAliases,
     CCSAttributeIDs,
     ControlAttributeIDs,
     LoadingAttributesIDs,
@@ -37,20 +39,12 @@ class ControlMetrics(BaseModel):
 
     reads: int = Field(..., alias=ControlAttributeIDs.NUMBER_OF_READS)
     mean_read_length: int = Field(..., alias=ControlAttributeIDs.MEAN_READ_LENGTH)
-    percent_mean_concordance_reads: float = Field(
+    percent_mean_concordance_reads: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE
     )
-    percent_mode_concordance_reads: float = Field(
+    percent_mode_concordance_reads: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
         ..., alias=ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE
     )
-
-    _validate_percent_mean_concordance_reads = field_validator(
-        "percent_mean_concordance_reads", mode="before"
-    )(fraction_to_percent)
-
-    _validate_percent_mode_concordance_reads = field_validator(
-        "percent_mode_concordance_reads", mode="before"
-    )(fraction_to_percent)
 
 
 class ProductivityMetrics(BaseModel):
@@ -126,6 +120,27 @@ class SmrtlinkDatasetsMetrics(BaseModel):
                 date: str = movie_name.split("_")[1] + movie_name.split("_")[2]
                 data["run_started_at"] = datetime.strptime(date, "%y%m%d%H%M%S")
         return data
+
+
+class BarcodeMetrics(RunMetrics):
+    """Model that holds barcode data."""
+
+    barcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS)
+    barcoded_hifi_reads_percentage: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
+        ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_READS_PERCENTAGE
+    )
+    barcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD)
+    barcoded_hifi_yield_percentage: Annotated[float, BeforeValidator(fraction_to_percent)] = Field(
+        ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD_PERCENTAGE
+    )
+    barcoded_hifi_mean_read_length: int = Field(
+        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+    )
+    unbarcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_READS)
+    unbarcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_YIELD)
+    unbarcoded_hifi_mean_read_length: int = Field(
+        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+    )
 
 
 class PacBioMetrics(RunMetrics):

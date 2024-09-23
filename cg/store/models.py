@@ -1122,7 +1122,6 @@ class PacBioSequencingRun(InstrumentRun):
     barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
     barcoded_hifi_mean_read_length: Mapped[BigInt | None]
     unbarcoded_hifi_reads: Mapped[BigInt | None]
-    unbarcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
     unbarcoded_hifi_yield: Mapped[BigInt | None]
     unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
 
