@@ -27,6 +27,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.utils.get_genome_build import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -875,17 +876,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        reference_genome: set[str] = {
-            sample.reference_genome
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
-        if len(reference_genome) == 1:
-            return reference_genome.pop()
-        if len(reference_genome) > 1:
-            raise CgError(
-                f"Samples linked to case {case_id} have different reference genome versions set"
-            )
-        raise CgError(f"No reference genome specified for case {case_id}")
+        case = self.status_db.get_case_by_internal_id(case_id)
+        return get_genome_build(case)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
