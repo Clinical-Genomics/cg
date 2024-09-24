@@ -1,2 +1,2 @@
-class NoDeliveryFilesError(Exception):
+class NoDeliveryFilesError(BaseException):
     pass
