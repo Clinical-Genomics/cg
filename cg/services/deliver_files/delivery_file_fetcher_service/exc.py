@@ -1,5 +1,2 @@
-from cg.exc import CgError
-
-
-class NoDeliveryFilesError(CgError):
+class NoDeliveryFilesError(Exception):
     pass
