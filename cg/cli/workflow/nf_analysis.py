@@ -122,7 +122,6 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def run(
     context: CGConfig,
     case_id: str,
-    log: str,
     work_dir: str,
     from_start: bool,
     profile: str,
@@ -141,7 +140,6 @@ def run(
         analysis_api.run_nextflow_analysis(
             case_id=case_id,
             dry_run=dry_run,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
@@ -173,7 +171,6 @@ def run(
 def start(
     context: CGConfig,
     case_id: str,
-    log: str,
     work_dir: str,
     profile: str,
     config: str,
