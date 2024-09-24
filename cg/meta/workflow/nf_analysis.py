@@ -207,10 +207,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str) -> Path:
         """Path to NF log."""
-        if log:
-            return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
@@ -465,7 +463,7 @@ class NfAnalysisAPI(AnalysisAPI):
     ) -> NfCommandArgs:
         command_args: NfCommandArgs = NfCommandArgs(
             **{
-                "log": self.get_log_path(case_id=case_id, workflow=self.workflow, log=log),
+                "log": self.get_log_path(case_id=case_id, workflow=self.workflow),
                 "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
                 "resume": not from_start,
                 "profile": self.get_profile(profile=profile),

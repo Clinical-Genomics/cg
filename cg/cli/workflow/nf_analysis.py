@@ -188,7 +188,6 @@ def start(
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
-        LOG.info(f"stub_run: {stub_run}")
         analysis_api.run_nextflow_analysis(
             case_id=case_id,
             dry_run=dry_run,
