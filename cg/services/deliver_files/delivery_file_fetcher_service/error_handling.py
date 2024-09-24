@@ -4,7 +4,9 @@ from functools import wraps
 from pydantic_core import ValidationError
 
 from cg.exc import HousekeeperBundleVersionMissingError
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import (
+    NoDeliveryFilesError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ def handle_validation_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except ValidationError:
-            raise NoDeliveryFilesError
+        except ValidationError as e:
+            raise NoDeliveryFilesError from e
 
     return wrapper

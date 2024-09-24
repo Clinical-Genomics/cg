@@ -1,8 +1,9 @@
 import logging
 from functools import wraps
 
-
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import (
+    NoDeliveryFilesError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def handle_delivery_errors(func):
         try:
             return func(*args, **kwargs)
         except NoDeliveryFilesError as error:
-            LOG.warning(error)
+            LOG.warning(f"No delivery files were found: {error}")
             return
 
     return wrapper
