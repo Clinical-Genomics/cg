@@ -1,4 +1,4 @@
-"""Fixtures for the PacBio post processing services."""
+"""PacBio run data object fixtures."""
 
 from pathlib import Path
 
