@@ -88,6 +88,13 @@ OPTION_FROM_START = click.option(
     show_default=True,
     help="Start workflow from start without resuming execution",
 )
+OPTION_STUB = click.option(
+    "--stub",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Start a stub workflow",
+)
 
 
 @click.command("config-case")
@@ -116,6 +123,7 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @OPTION_TOWER_RUN_ID
+@OPTION_STUB
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -131,6 +139,7 @@ def run(
     compute_env: str,
     use_nextflow: bool,
     nf_tower_id: str | None,
+    stub: bool,
     dry_run: bool,
 ) -> None:
     """Run analysis for a case."""
@@ -149,6 +158,7 @@ def run(
             compute_env=compute_env,
             use_nextflow=use_nextflow,
             nf_tower_id=nf_tower_id,
+            stub=stub,
         )
     except Exception as error:
         LOG.error(f"Unspecified error occurred: {error}")
@@ -165,6 +175,7 @@ def run(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_STUB
 @DRY_RUN
 @click.pass_obj
 def start(
@@ -178,6 +189,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    stub: bool,
     dry_run: bool,
 ) -> None:
     """Start workflow for a case."""
@@ -199,6 +211,7 @@ def start(
             revision=revision,
             compute_env=compute_env,
             use_nextflow=use_nextflow,
+            stub=stub,
         )
     except Exception as error:
         LOG.error(f"Unexpected error occurred: {error}")

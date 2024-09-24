@@ -461,6 +461,7 @@ class NfAnalysisAPI(AnalysisAPI):
         revision: str,
         compute_env: str,
         nf_tower_id: str | None,
+        stub: bool,
     ) -> NfCommandArgs:
         command_args: NfCommandArgs = NfCommandArgs(
             **{
@@ -475,6 +476,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 "revision": revision or self.revision,
                 "wait": NfTowerStatus.SUBMITTED,
                 "id": nf_tower_id,
+                "stub": stub
             }
         )
         return command_args
@@ -491,6 +493,7 @@ class NfAnalysisAPI(AnalysisAPI):
         params_file: str | None,
         revision: str,
         compute_env: str,
+        stub: bool,
         nf_tower_id: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -508,6 +511,7 @@ class NfAnalysisAPI(AnalysisAPI):
             revision=revision,
             compute_env=compute_env,
             nf_tower_id=nf_tower_id,
+            stub=stub,
         )
 
         try:
