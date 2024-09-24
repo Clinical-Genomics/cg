@@ -381,6 +381,7 @@ class StoreHelpers:
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Utility function to add a sample to use in tests."""
@@ -407,6 +408,7 @@ class StoreHelpers:
             tumour=is_tumour,
             reads=reads,
             internal_id=internal_id,
+            subject_id=subject_id,
         )
 
         sample.application_version_id = application_version_id
