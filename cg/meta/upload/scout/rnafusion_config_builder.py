@@ -32,32 +32,36 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 
-    def build_load_config(self) -> None:
+    def build_load_config(self) -> RnafusionLoadConfig:
         """Build a rnafusion-specific load config for uploading a case to scout."""
         LOG.info("Build load config for rnafusion case")
-        self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = GenomeBuild.hg38
-        self.include_case_files()
+        load_config = RnafusionLoadConfig()
+        load_config = self.add_common_info_to_load_config(load_config)
+        load_config.human_genome_build = GenomeBuild.hg38
+        load_config = self.include_case_files(load_config)
 
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
-    def include_case_files(self) -> None:
+    def include_case_files(self, load_config: RnafusionLoadConfig) -> RnafusionLoadConfig:
         """Include case level files for rnafusion case."""
         LOG.info("Including RNAFUSION specific case level files")
         for scout_key in RNAFUSION_CASE_TAGS.keys():
-            self._include_file(scout_key)
+            self._include_file(load_config, scout_key)
+        return load_config
 
-    def _include_file(self, scout_key) -> None:
+
+    def _include_file(self, load_config: RnafusionLoadConfig, scout_key: str) -> RnafusionLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         setattr(
-            self.load_config,
+            load_config,
             scout_key,
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
+        return load_config
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the RNA sample alignment file."""

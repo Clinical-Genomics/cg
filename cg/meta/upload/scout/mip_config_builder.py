@@ -8,17 +8,15 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
-from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import (
     MipLoadConfig,
-    ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store.models import Analysis, Case, CaseSample
+from cg.store.models import Analysis,CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -48,19 +46,19 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def build_load_config(self, rank_score_threshold: int = 5) -> MipLoadConfig:
         """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
-        self.load_config = MipLoadConfig()
-        self.load_config = self.add_common_info_to_load_config()
+        load_config = MipLoadConfig()
+        load_config = self.add_common_info_to_load_config(load_config)
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.case.internal_id
         )
-        self.load_config.human_genome_build = (
+        load_config.human_genome_build = (
             "38" if "38" in mip_analysis_data.genome_build else "37"
         )
-        self.load_config.rank_score_threshold = rank_score_threshold
-        self.load_config.rank_model_version = mip_analysis_data.rank_model_version
-        self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
+        load_config.rank_score_threshold = rank_score_threshold
+        load_config.rank_model_version = mip_analysis_data.rank_model_version
+        load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
-        self.load_config.gene_panels = (
+        load_config.gene_panels = (
             self.mip_analysis_api.get_aggregated_panels(
                 customer_id=self.analysis_obj.case.customer.internal_id,
                 default_panels=set(self.analysis_obj.case.panels),
@@ -68,30 +66,31 @@ class MipConfigBuilder(ScoutConfigBuilder):
             or None
         )
 
-        self.include_case_files()
+        load_config = self.include_case_files(load_config)
 
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
-        self.include_pedigree_picture()
-        return self.load_config
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        self.include_pedigree_picture(load_config)
+        return load_config
 
-    def include_case_files(self):
+    def include_case_files(self, load_config: MipLoadConfig):
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
-        self.load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
-        self.load_config.peddy_ped = self.get_file_from_hk(self.case_tags.peddy_ped)
-        self.load_config.peddy_sex = self.get_file_from_hk(self.case_tags.peddy_sex)
-        self.load_config.smn_tsv = self.get_file_from_hk(self.case_tags.smn_tsv)
-        self.load_config.vcf_mei = self.get_file_from_hk(self.case_tags.vcf_mei)
-        self.load_config.vcf_mei_research = self.get_file_from_hk(self.case_tags.vcf_mei_research)
-        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
-        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
-        self.load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
-        self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
-        self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
+        load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
+        load_config.peddy_ped = self.get_file_from_hk(self.case_tags.peddy_ped)
+        load_config.peddy_sex = self.get_file_from_hk(self.case_tags.peddy_sex)
+        load_config.smn_tsv = self.get_file_from_hk(self.case_tags.smn_tsv)
+        load_config.vcf_mei = self.get_file_from_hk(self.case_tags.vcf_mei)
+        load_config.vcf_mei_research = self.get_file_from_hk(self.case_tags.vcf_mei_research)
+        load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
+        load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
+        load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
+        load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
+        load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
         self.include_multiqc_report()
+        return load_config
 
     def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:
         """Include sample level files that are optional for mip samples"""

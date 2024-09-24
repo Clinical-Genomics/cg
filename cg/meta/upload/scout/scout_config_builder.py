@@ -37,23 +37,23 @@ class ScoutConfigBuilder:
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
         )
 
-    def add_common_info_to_load_config(self) -> ScoutLoadConfig:
+    def add_common_info_to_load_config(self, load_config: ScoutLoadConfig) -> ScoutLoadConfig:
         """Add the mandatory common information to a Scout load config object."""
-        self.load_config.analysis_date = (
+        load_config.analysis_date = (
             self.analysis_obj.completed_at or self.analysis_obj.started_at
         )
-        self.load_config.default_gene_panels = self.analysis_obj.case.panels
-        self.load_config.family = self.analysis_obj.case.internal_id
-        self.load_config.family_name = self.analysis_obj.case.name
-        self.load_config.owner = self.analysis_obj.case.customer.internal_id
-        self.load_config.synopsis = self.analysis_obj.case.synopsis  ########TO DO
+        load_config.default_gene_panels = self.analysis_obj.case.panels
+        load_config.family = self.analysis_obj.case.internal_id
+        load_config.family_name = self.analysis_obj.case.name
+        load_config.owner = self.analysis_obj.case.customer.internal_id
+        load_config.synopsis = self.analysis_obj.case.synopsis  ########TO DO
         # self.load_config.human_genome_build = self.analysis_api.get_genome_build(
         #         case_id=self.analysis_obj.case.internal_id
         #     )
-        self.include_cohorts(load_config=self.load_config)
-        self.include_phenotype_groups(load_config=self.load_config)
-        self.include_phenotype_terms(load_config=self.load_config)
-        return self.load_config
+        self.include_cohorts(load_config=load_config)
+        self.include_phenotype_groups(load_config=load_config)
+        self.include_phenotype_terms(load_config=load_config)
+        return load_config
 
     def run_madeline(self, family_obj: Case) -> Path:
         """Generate a madeline file for an analysis. Use customer sample names."""
@@ -85,16 +85,16 @@ class ScoutConfigBuilder:
                 return True
         return False
 
-    def include_pedigree_picture(self) -> ScoutLoadConfig:
-        if self.is_multi_sample_case(load_config=self.load_config):
-            if self.is_family_case(load_config=self.load_config):
+    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> ScoutLoadConfig:
+        if self.is_multi_sample_case(load_config=load_config):
+            if self.is_family_case(load_config=load_config):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
-                self.load_config.madeline = str(svg_path)
+                load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
-        return self.load_config
+        return load_config
 
     @staticmethod
     def remove_chromosome_substring(file_path: str | None) -> str | None:

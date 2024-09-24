@@ -28,16 +28,17 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 
-    def include_case_files(self):
+    def include_case_files(self, load_config: BalsamicLoadConfig):
         LOG.info("Including BALSAMIC specific case level files")
         self.load_config.vcf_cancer = self.get_file_from_hk(
             hk_tags=self.case_tags.snv_vcf, latest=True
         )
-        self.load_config.vcf_cancer_sv = self.get_file_from_hk(
+        load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, latest=True
         )
-        self.include_cnv_report(load_config=self.load_config)
+        self.include_cnv_report(load_config)
         self.include_multiqc_report()
+        return load_config
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
@@ -52,6 +53,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
+        return config_sample
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
@@ -78,16 +80,19 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         return analysis_type
 
-    def build_load_config(self) -> None:
+    def build_load_config(self) -> BalsamicLoadConfig:
         LOG.info("Build load config for balsamic case")
-        self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = "37"
-        self.load_config.rank_score_threshold = -100
+        load_config = BalsamicLoadConfig()
+        load_config = self.add_common_info_to_load_config(load_config)
+        load_config.human_genome_build = "37"
+        load_config.rank_score_threshold = -100
 
-        self.include_case_files()
+        load_config = self.include_case_files(load_config)
 
         LOG.info("Building samples")
         db_sample: CaseSample
 
         for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+
+        return load_config

@@ -36,7 +36,7 @@ def test_add_mandatory_info_to_mip_config(
     # GIVEN a file handler with some housekeeper version data
 
     # WHEN adding the mandatory information
-    mip_config_builder.add_common_info_to_load_config()
+    mip_config_builder.add_common_info_to_load_config(mip_config_builder.load_config)
 
     # THEN assert mandatory field owner was set
     assert mip_config_builder.load_config.owner

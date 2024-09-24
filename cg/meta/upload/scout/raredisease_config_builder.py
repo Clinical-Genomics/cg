@@ -12,7 +12,6 @@ from cg.constants.scout import (
     RAREDISEASE_SAMPLE_TAGS,
     UploadTrack,
 )
-from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -22,10 +21,9 @@ from cg.models.scout.scout_load_config import (
     Eklipse,
     RarediseaseLoadConfig,
     ScoutIndividual,
-    ScoutLoadConfig,
     ScoutRarediseaseIndividual,
 )
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -57,17 +55,17 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def build_load_config(self) -> RarediseaseLoadConfig:
         """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for RAREDISEASE case")
-        self.load_config = RarediseaseLoadConfig()
-        self.load_config = self.add_common_info_to_load_config()
-        self.load_config.gene_panels = self.raredisease_analysis_api.get_aggregated_panels(
+        load_config = RarediseaseLoadConfig()
+        load_config = self.add_common_info_to_load_config(load_config)
+        load_config.gene_panels = self.raredisease_analysis_api.get_aggregated_panels(
             customer_id=self.analysis_obj.case.customer.internal_id,
             default_panels=set(self.analysis_obj.case.panels),
         )
-        self.include_case_files()
-        self.load_config = self.get_sample_information(load_config=self.load_config)
-        self.load_config = self.include_pedigree_picture()
-        self.load_config.custom_images = self.load_custom_image_sample()
-        return self.load_config
+        load_config = self.include_case_files(load_config)
+        load_config = self.get_sample_information(load_config)
+        load_config = self.include_pedigree_picture(load_config)
+        load_config.custom_images = self.load_custom_image_sample()
+        return load_config
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
@@ -88,13 +86,14 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_custom_images = CustomImages(case_images=case_images)
         return config_custom_images
 
-    def include_case_files(self) -> ScoutLoadConfig:
+    def include_case_files(self, load_config: RarediseaseLoadConfig) -> RarediseaseLoadConfig:
         """Include case level files for mip case."""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
-            self._include_case_file(self.load_config, scout_key)
+            self._include_case_file(load_config, scout_key)
+        return load_config
 
-    def _include_case_file(self, load_config: ScoutLoadConfig, scout_key: str) -> ScoutLoadConfig:
+    def _include_case_file(self, load_config: RarediseaseLoadConfig, scout_key: str) -> RarediseaseLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key))
