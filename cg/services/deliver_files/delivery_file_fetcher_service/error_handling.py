@@ -39,6 +39,6 @@ def handle_validation_errors(func):
         try:
             return func(*args, **kwargs)
         except ValidationError as e:
-            raise NoDeliveryFilesError from e
+            raise NoDeliveryFilesError("No delivery files were found") from e
 
     return wrapper

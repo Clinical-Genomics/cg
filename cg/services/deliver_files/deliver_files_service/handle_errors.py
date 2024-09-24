@@ -18,7 +18,7 @@ def handle_delivery_errors(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except NoDeliveryFilesError("No delivery files were found") as error:
+        except NoDeliveryFilesError as error:
             LOG.warning(error)
             return
 
