@@ -476,7 +476,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 "revision": revision or self.revision,
                 "wait": NfTowerStatus.SUBMITTED,
                 "id": nf_tower_id,
-                "stub_run": stub_run
+                "stub_run": stub_run,
             }
         )
         return command_args
