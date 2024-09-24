@@ -1,9 +1,8 @@
 from datetime import datetime
 from unittest.mock import Mock
 
-from cg.services.analysis_service.analysis_service import AnalysisService
-
 from cg.constants import Workflow
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -17,7 +16,7 @@ def test_get_analyses_to_upload_for_workflow(
         store=base_store,
         uploaded_at=None,
         upload_started=None,
-        workflow=Workflow.FASTQ,
+        workflow=Workflow.RAW_DATA,
         completed_at=timestamp_now,
     )
     new_case = helpers.add_case(store=base_store, name="no_upload_case")
@@ -26,14 +25,14 @@ def test_get_analyses_to_upload_for_workflow(
         case=new_case,
         uploaded_at=timestamp_now,
         upload_started=None,
-        workflow=Workflow.FASTQ,
+        workflow=Workflow.RAW_DATA,
         completed_at=timestamp_now,
     )
     analysis_service = AnalysisService(analysis_client=Mock(), status_db=base_store)
 
     # WHEN getting analyses to upload
     analyses: list[Analysis] = analysis_service.get_analyses_to_upload_for_workflow(
-        workflow=Workflow.FASTQ
+        workflow=Workflow.RAW_DATA
     )
 
     # THEN only the analyses to upload should be returned

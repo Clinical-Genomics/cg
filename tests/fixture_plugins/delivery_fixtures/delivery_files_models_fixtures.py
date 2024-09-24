@@ -55,6 +55,41 @@ def expected_fastq_delivery_files(
 
 
 @pytest.fixture
+def expected_bam_delivery_files(
+    delivery_housekeeper_api: HousekeeperAPI,
+    case_id: str,
+    sample_id: str,
+    sample_name: str,
+    another_sample_id: str,
+    another_sample_name: str,
+    delivery_store_microsalt: Store,
+) -> DeliveryFiles:
+    """Return the expected fastq delivery files."""
+    sample_info: list[tuple[str, str]] = [
+        (sample_id, sample_name),
+        (another_sample_id, another_sample_name),
+    ]
+    sample_files: list[SampleFile] = [
+        SampleFile(
+            case_id=case_id,
+            sample_id=sample[0],
+            sample_name=sample[1],
+            file_path=delivery_housekeeper_api.get_files_from_latest_version(
+                bundle_name=sample[0], tags=[AlignmentFileTag.BAM]
+            )[0].full_path,
+        )
+        for sample in sample_info
+    ]
+    case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
+    delivery_meta_data = DeliveryMetaData(
+        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+    )
+    return DeliveryFiles(
+        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
+    )
+
+
+@pytest.fixture
 def expected_analysis_delivery_files(
     delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
