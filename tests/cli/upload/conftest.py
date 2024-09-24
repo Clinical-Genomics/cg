@@ -24,6 +24,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -161,23 +162,23 @@ def upload_report_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture
-def base_context(
-    analysis_store: Store,
-    housekeeper_api: HousekeeperAPI,
-    upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
-    cg_context: CGConfig,
-) -> CGConfig:
-    """context to use in cli"""
-    cg_context.status_db_ = analysis_store
-    cg_context.housekeeper_api_ = housekeeper_api
-    cg_context.trailblazer_api_ = trailblazer_api
-    cg_context.scout_api_ = MockScoutApi()
-    cg_context.meta_apis["scout_upload_api"] = upload_scout_api
-    cg_context.mip_rd_dna.root = tempdir
+# @pytest.fixture
+# def base_context(
+#     analysis_store: Store,
+#     housekeeper_api: HousekeeperAPI,
+#     upload_scout_api: UploadScoutAPI,
+#     trailblazer_api: TrailblazerAPI,
+#     cg_context: CGConfig,
+# ) -> CGConfig:
+#     """context to use in cli"""
+#     cg_context.status_db_ = analysis_store
+#     cg_context.housekeeper_api_ = housekeeper_api
+#     cg_context.trailblazer_api_ = trailblazer_api
+#     cg_context.scout_api_ = MockScoutApi()
+#     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
+#     cg_context.mip_rd_dna.root = tempdir
 
-    return cg_context
+#     return cg_context
 
 
 @pytest.fixture
@@ -315,6 +316,9 @@ def upload_context(request, cg_context: CGConfig) -> CGConfig:
         analysis_api = TomteAnalysisAPI(config=cg_context)
         cg_context.meta_apis["analysis_api"] = analysis_api
         cg_context.meta_apis["report_api"] = MockTomteReportAPI(cg_context, analysis_api)
+    elif request.param == "nipt":
+        analysis_api = FluffyAnalysisAPI(config=cg_context)
+        cg_context.meta_apis["analysis_api"] = analysis_api
     else:
         raise ValueError(f"Unknown context: {request.param}")
 

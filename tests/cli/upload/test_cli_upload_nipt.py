@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import pytest
 
 from click.testing import CliRunner
 
@@ -22,7 +23,9 @@ class MockStatinaUploadFiles:
     def json(self, *args, **kwargs):
         return ""
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_case(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -62,7 +65,9 @@ def test_nipt_statina_upload_case(
     # THEN exit without errors
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_case_dry_run(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -101,7 +106,9 @@ def test_nipt_statina_upload_case_dry_run(
     # THEN exit without errors
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_auto(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -143,7 +150,9 @@ def test_nipt_statina_upload_auto(
     # THEN exit without errors
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_auto_without_analyses(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -161,7 +170,9 @@ def test_nipt_statina_upload_auto_without_analyses(
     assert result.exit_code == 0
     assert "No analyses found to upload" in caplog.text
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_auto_analysis_without_case(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -183,7 +194,9 @@ def test_nipt_statina_upload_auto_analysis_without_case(
     # THEN the command should abort without raising an error
     assert result.exit_code != 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_auto_dry_run(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
@@ -223,7 +236,9 @@ def test_nipt_statina_upload_auto_dry_run(
     # THEN exit without errors
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_force_failed_case(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):

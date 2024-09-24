@@ -1,6 +1,7 @@
 """Test module cg.cli.upload.nipt.ftp"""
 
 import logging
+import pytest
 
 from click.testing import CliRunner
 
@@ -8,7 +9,9 @@ from cg.cli.upload.nipt.ftp import nipt_upload_all, nipt_upload_case
 from cg.meta.upload.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
@@ -27,7 +30,9 @@ def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplo
     assert "*** NIPT FTP UPLOAD START ***" in caplog.text
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
@@ -46,7 +51,9 @@ def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, c
     assert "*** NIPT FTP UPLOAD START ***" in caplog.text
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
@@ -64,7 +71,9 @@ def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog
     assert "*** UPLOAD ALL AVAILABLE NIPT RESULTS ***" in caplog.text
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
@@ -82,7 +91,9 @@ def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, ca
     assert "*** UPLOAD ALL AVAILABLE NIPT RESULTS ***" in caplog.text
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_upload_case_not_changing_uploaded_at(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):

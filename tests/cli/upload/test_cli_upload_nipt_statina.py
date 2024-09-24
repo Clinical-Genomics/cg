@@ -1,6 +1,7 @@
 """Test module cg.cli.upload.nipt.statina"""
 
 import logging
+import pytest
 
 from click.testing import CliRunner
 
@@ -13,7 +14,9 @@ class MockStatinaUploadFiles:
     def json(self, *args, **kwargs):
         return ""
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
@@ -31,7 +34,9 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     assert "*** Statina UPLOAD START ***" in caplog.text
     assert result.exit_code == 0
 
-
+@pytest.mark.parametrize(
+    "upload_context", ["nipt"], indirect=True
+)
 def test_nipt_statina_upload_case_dry(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker
 ):

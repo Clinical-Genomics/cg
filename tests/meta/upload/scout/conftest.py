@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Generator
+from unittest.mock import Mock
 
 import pytest
 from housekeeper.store.models import Version
@@ -15,6 +16,7 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
+from cg.cli.workflow.rnafusion.base import RnafusionAnalysisAPI
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -25,6 +27,8 @@ from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
 # Mocks
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
+from tests.mocks.balsamic_umi_analysis_mock import MockBalsamicUMIAnalysis
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -662,42 +666,40 @@ def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
 
 @pytest.fixture
 def upload_scout_api(
+    request,
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
-    housekeeper_api: MockHousekeeperAPI,
-    store: Store,
-) -> UploadScoutAPI:
-    """Return upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
-    lims_api = MockLimsAPI(samples=lims_samples)
-
-    return UploadScoutAPI(
-        hk_api=housekeeper_api,
-        scout_api=scout_api,
-        madeline_api=madeline_api,
-        analysis_api=analysis_mock,
-        lims_api=lims_api,
-        status_db=store,
-    )
-
-
-@pytest.fixture
-def upload_mip_analysis_scout_api(
-    cg_context: CGConfig,
-    scout_api: MockScoutAPI,
-    madeline_api: MockMadelineAPI,
-    lims_samples: list[dict],
-    mip_dna_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
-    """Return MIP upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    """Return a general upload Scout API depending on the workflow."""
+
+    workflow = request.param  # Fetch the workflow from the test parameter
+    analysis_mock = None
+    hk_api = None
+
+    # Set up the appropriate analysis and housekeeper API depending on the workflow
+    if workflow == Workflow.MIP_DNA:
+        analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+        hk_api = mip_dna_analysis_hk_api
+    elif workflow == Workflow.BALSAMIC:
+        analysis_mock = MockBalsamicAnalysis(config=cg_context, workflow=Workflow.BALSAMIC)
+        hk_api = balsamic_analysis_hk_api
+    elif workflow == Workflow.BALSAMIC_UMI:
+        analysis_mock = MockBalsamicUMIAnalysis(config=cg_context, workflow=Workflow.BALSAMIC_UMI)
+        hk_api = balsamic_analysis_hk_api
+    elif  workflow == Workflow.RNAFUSION:
+        analysis_mock = Mock(spec=RnafusionAnalysisAPI)
+        hk_api = rnafusion_analysis_hk_api
+    else:
+        raise ValueError(f"Unsupported workflow: {workflow}")
+
     lims_api = MockLimsAPI(samples=lims_samples)
 
+    # Yield the configured UploadScoutAPI based on the workflow
     yield UploadScoutAPI(
-        hk_api=mip_dna_analysis_hk_api,
+        hk_api=hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
@@ -706,27 +708,104 @@ def upload_mip_analysis_scout_api(
     )
 
 
-@pytest.fixture
-def upload_balsamic_analysis_scout_api(
-    cg_context: CGConfig,
-    scout_api: MockScoutAPI,
-    madeline_api: MockMadelineAPI,
-    lims_samples: list[dict],
-    balsamic_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
-) -> Generator[UploadScoutAPI, None, None]:
-    """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
-    lims_api = MockLimsAPI(samples=lims_samples)
 
-    yield UploadScoutAPI(
-        hk_api=balsamic_analysis_hk_api,
-        scout_api=scout_api,
-        madeline_api=madeline_api,
-        analysis_api=analysis_mock,
-        lims_api=lims_api,
-        status_db=store,
-    )
+
+
+
+
+# @pytest.fixture
+# def upload_scout_api(
+#     cg_context: CGConfig,
+#     scout_api: MockScoutAPI,
+#     madeline_api: MockMadelineAPI,
+#     lims_samples: list[dict],
+#     housekeeper_api: MockHousekeeperAPI,
+#     store: Store,
+# ) -> UploadScoutAPI:
+#     """Return upload Scout API."""
+#     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+#     lims_api = MockLimsAPI(samples=lims_samples)
+
+#     return UploadScoutAPI(
+#         hk_api=housekeeper_api,
+#         scout_api=scout_api,
+#         madeline_api=madeline_api,
+#         analysis_api=analysis_mock,
+#         lims_api=lims_api,
+#         status_db=store,
+#     )
+
+
+# @pytest.fixture
+# def upload_mip_analysis_scout_api(
+#     cg_context: CGConfig,
+#     scout_api: MockScoutAPI,
+#     madeline_api: MockMadelineAPI,
+#     lims_samples: list[dict],
+#     mip_dna_analysis_hk_api: MockHousekeeperAPI,
+#     store: Store,
+# ) -> Generator[UploadScoutAPI, None, None]:
+#     """Return MIP upload Scout API."""
+#     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+#     lims_api = MockLimsAPI(samples=lims_samples)
+
+#     yield UploadScoutAPI(
+#         hk_api=mip_dna_analysis_hk_api,
+#         scout_api=scout_api,
+#         madeline_api=madeline_api,
+#         analysis_api=analysis_mock,
+#         lims_api=lims_api,
+#         status_db=store,
+#     )
+
+
+# @pytest.fixture
+# def upload_balsamic_analysis_scout_api(
+#     cg_context: CGConfig,
+#     scout_api: MockScoutAPI,
+#     madeline_api: MockMadelineAPI,
+#     lims_samples: list[dict],
+#     balsamic_analysis_hk_api: MockHousekeeperAPI,
+#     store: Store,
+# ) -> Generator[UploadScoutAPI, None, None]:
+#     """Return Balsamic upload Scout API."""
+#     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+#     lims_api = MockLimsAPI(samples=lims_samples)
+
+#     yield UploadScoutAPI(
+#         hk_api=balsamic_analysis_hk_api,
+#         scout_api=scout_api,
+#         madeline_api=madeline_api,
+#         analysis_api=analysis_mock,
+#         lims_api=lims_api,
+#         status_db=store,
+#     )
+
+
+
+# @pytest.fixture
+# def upload_rnafusion_analysis_scout_api(
+#     cg_context: CGConfig,
+#     scout_api: MockScoutAPI,
+#     madeline_api: MockMadelineAPI,
+#     lims_samples: list[dict],
+#     rnafusion_analysis_hk_api: MockHousekeeperAPI,
+#     store: Store,
+# ) -> UploadScoutAPI:
+#     """Fixture for upload_scout_api."""
+#     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+#     lims_api = MockLimsAPI(samples=lims_samples)
+
+#     _api = UploadScoutAPI(
+#         hk_api=rnafusion_analysis_hk_api,
+#         scout_api=scout_api,
+#         madeline_api=madeline_api,
+#         analysis_api=analysis_mock,
+#         lims_api=lims_api,
+#         status_db=store,
+#     )
+
+#     return _api
 
 
 @pytest.fixture
@@ -747,26 +826,3 @@ def rna_dna_sample_case_map(
     return rna_dna_sample_case_map
 
 
-@pytest.fixture
-def upload_rnafusion_analysis_scout_api(
-    cg_context: CGConfig,
-    scout_api: MockScoutAPI,
-    madeline_api: MockMadelineAPI,
-    lims_samples: list[dict],
-    rnafusion_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
-) -> UploadScoutAPI:
-    """Fixture for upload_scout_api."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
-    lims_api = MockLimsAPI(samples=lims_samples)
-
-    _api = UploadScoutAPI(
-        hk_api=rnafusion_analysis_hk_api,
-        scout_api=scout_api,
-        madeline_api=madeline_api,
-        analysis_api=analysis_mock,
-        lims_api=lims_api,
-        status_db=store,
-    )
-
-    return _api
