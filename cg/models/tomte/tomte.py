@@ -51,7 +51,7 @@ class TomteParameters(WorkflowParameters):
 
     gene_panel_clinical_filter: Path
     tissue: str
-    genome: str
+    genome: str = GenomeVersion.HG38
 
     @validator("tissue", pre=True)
     def restrict_tissue_values(cls, tissue: str | None) -> str:

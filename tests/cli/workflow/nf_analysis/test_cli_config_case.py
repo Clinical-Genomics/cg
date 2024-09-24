@@ -129,7 +129,7 @@ def test_config_case_default_parameters(
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
-    # GIVEN a mocked scout export of the managed variants
+    # GIVEN a mocked scout export of the managed variants for RAREDISEASE
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_managed_variants",

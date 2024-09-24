@@ -1,4 +1,4 @@
-"""MIP-RNA upload API."""
+"""TOMTE upload API."""
 
 import logging
 from subprocess import CalledProcessError
@@ -6,25 +6,23 @@ from subprocess import CalledProcessError
 import click
 
 
-from cg.cli.upload.scout import upload_rna_to_scout
+from cg.cli.upload.scout import upload_tomte_to_scout
 from cg.constants import DataDelivery, Workflow
-from cg.meta.upload.upload_api import UploadAPI
-from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
 
-class MipRNAUploadAPI(UploadAPI):
+class TomteUploadAPI(NfAnalysisUploadAPI):
     """MIP-RNA upload API."""
 
     def __init__(self, config: CGConfig):
-        self.analysis_api: MipRNAAnalysisAPI = MipRNAAnalysisAPI(config)
-        super().__init__(config=config, analysis_api=self.analysis_api)
+        super().__init__(config=config, workflow=Workflow.TOMTE)
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
-        """Uploads MIP-RNA analysis data and files."""
+        """Uploads Tomte analysis data and files."""
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
 
@@ -33,7 +31,7 @@ class MipRNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             try:
-                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
+                ctx.invoke(upload_tomte_to_scout, case_id=case.internal_id)
             except CalledProcessError as error:
                 LOG.error(error)
                 return
