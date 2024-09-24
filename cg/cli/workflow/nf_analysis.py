@@ -37,12 +37,6 @@ OPTION_PROFILE = click.option(
     help="Choose a configuration profile",
 )
 
-OPTION_LOG = click.option(
-    "--log",
-    type=click.Path(),
-    help="Set nextflow log file path",
-)
-
 OPTION_CONFIG = click.option(
     "--config",
     type=click.Path(),
@@ -113,7 +107,6 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @click.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_FROM_START
 @OPTION_PROFILE
@@ -167,7 +160,6 @@ def run(
 
 @click.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_PROFILE
 @OPTION_CONFIG
@@ -203,7 +195,6 @@ def start(
         analysis_api.run_nextflow_analysis(
             case_id=case_id,
             dry_run=dry_run,
-            log=log,
             work_dir=work_dir,
             from_start=True,
             profile=profile,

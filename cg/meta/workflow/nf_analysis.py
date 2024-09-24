@@ -452,7 +452,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_command_args(
         self,
         case_id: str,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -485,7 +484,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         use_nextflow: bool,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -502,7 +500,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
         command_args = self.get_command_args(
             case_id=case_id,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
