@@ -54,7 +54,7 @@ class PacBioRunFileManager(RunFileManager):
         return files[0]
 
     def _get_report_files(self, run_path: Path) -> list[Path]:
-        """Return the paths to the unzipped report files."""
+        """Return the paths to the report files."""
         unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
         report_files: list[Path] = [
             Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
