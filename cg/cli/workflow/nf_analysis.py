@@ -89,7 +89,7 @@ OPTION_FROM_START = click.option(
     help="Start workflow from start without resuming execution",
 )
 OPTION_STUB = click.option(
-    "--stub",
+    "--stub-run",
     is_flag=True,
     default=False,
     show_default=True,
@@ -139,7 +139,7 @@ def run(
     compute_env: str,
     use_nextflow: bool,
     nf_tower_id: str | None,
-    stub: bool,
+    stub_run: bool,
     dry_run: bool,
 ) -> None:
     """Run analysis for a case."""
@@ -158,7 +158,7 @@ def run(
             compute_env=compute_env,
             use_nextflow=use_nextflow,
             nf_tower_id=nf_tower_id,
-            stub=stub,
+            stub_run=stub_run,
         )
     except Exception as error:
         LOG.error(f"Unspecified error occurred: {error}")
@@ -189,7 +189,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    stub: bool,
+    stub_run: bool,
     dry_run: bool,
 ) -> None:
     """Start workflow for a case."""
@@ -211,7 +211,7 @@ def start(
             revision=revision,
             compute_env=compute_env,
             use_nextflow=use_nextflow,
-            stub=stub,
+            stub_run=stub_run,
         )
     except Exception as error:
         LOG.error(f"Unexpected error occurred: {error}")

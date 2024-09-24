@@ -511,7 +511,7 @@ class NfAnalysisAPI(AnalysisAPI):
             revision=revision,
             compute_env=compute_env,
             nf_tower_id=nf_tower_id,
-            stub=stub,
+            stub_run=stub_run,
         )
 
         try:
