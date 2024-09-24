@@ -70,12 +70,13 @@ class PacBioHousekeeperService(PostProcessingHKService):
     @staticmethod
     def _get_tags_for_file(file_path: Path) -> list[str]:
         file_pattern_to_tag: dict[str, list[str]] = {
+            PacBioDirsAndFiles.BARCODES_REPORT: [PacBioHousekeeperTags.BARCODES_REPORT],
             PacBioDirsAndFiles.CONTROL_REPORT: [PacBioHousekeeperTags.CONTROL_REPORT],
             f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": [PacBioHousekeeperTags.CCS_REPORT],
             PacBioDirsAndFiles.LOADING_REPORT: [PacBioHousekeeperTags.LOADING_REPORT],
             PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
             PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
-            f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
+            f"{PacBioDirsAndFiles.HIFI_READS}.*{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
         }
         return get_item_by_pattern_in_source(source=file_path.name, pattern_map=file_pattern_to_tag)
 

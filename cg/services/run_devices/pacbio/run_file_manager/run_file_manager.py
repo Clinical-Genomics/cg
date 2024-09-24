@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants import FileExtensions
-from cg.constants.pacbio import PacBioDirsAndFiles, MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN
+from cg.constants.pacbio import MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN, PacBioDirsAndFiles
 from cg.services.run_devices.abstract_classes import RunFileManager
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
@@ -57,6 +57,7 @@ class PacBioRunFileManager(RunFileManager):
         """Return the paths to the unzipped report files."""
         unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
         report_files: list[Path] = [
+            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
