@@ -102,7 +102,7 @@ class ScoutConfigBuilder:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return file_path
-        return re.split(r"(?:\d+|[XY])\.png$", file_path)[0]
+        return re.split(r"(?:[1-9]|1[0-9]|2[0-2]|[XY])\.png$", file_path)[0]
 
     def get_sample_information(self, load_config: ScoutLoadConfig) -> list[ScoutIndividual]:
         LOG.info("Building samples")
