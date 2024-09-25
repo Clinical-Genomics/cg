@@ -23,32 +23,36 @@ from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import Pac
 
 def test_store_files_in_housekeeper(
     pac_bio_housekeeper_service: PacBioHousekeeperService,
-    expected_pac_bio_run_data: PacBioRunData,
-    pac_bio_sample_internal_id: str,
-    smrt_cell_internal_id: str,
+    pacbio_barcoded_run_data: PacBioRunData,
+    pacbio_barcoded_sample_internal_id: str,
+    barcoded_smrt_cell_internal_id: str,
 ):
     # GIVEN a PacBioRunData object and a PacBioHousekeeperService
 
     # WHEN storing files in Housekeeper
-    pac_bio_housekeeper_service.store_files_in_housekeeper(expected_pac_bio_run_data)
+    pac_bio_housekeeper_service.store_files_in_housekeeper(pacbio_barcoded_run_data)
 
     # THEN a SMRT cell bundle is created
-    assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(smrt_cell_internal_id)
+    assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
+        barcoded_smrt_cell_internal_id
+    )
 
     # THEN a sample bundle is created
-    assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(pac_bio_sample_internal_id)
+    assert pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
+        pacbio_barcoded_sample_internal_id
+    )
 
     # THEN all expected files are listed under the smrt cell bundle
     smrt_bundle_files: list[File] = (
         pac_bio_housekeeper_service.hk_api.get_files_from_latest_version(
-            bundle_name=smrt_cell_internal_id
+            bundle_name=barcoded_smrt_cell_internal_id
         )
     )
     assert smrt_bundle_files
 
     # THEN all expected files are listed under the sample bundle
     sample_bundle_files: list[File] = pac_bio_housekeeper_service.hk_api.get_latest_bundle_version(
-        bundle_name=pac_bio_sample_internal_id
+        bundle_name=pacbio_barcoded_sample_internal_id
     ).files
     assert sample_bundle_files
 

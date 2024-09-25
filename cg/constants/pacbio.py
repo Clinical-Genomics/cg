@@ -63,6 +63,7 @@ class SmrtLinkDatabasesIDs:
 
 
 class PacBioHousekeeperTags:
+    BARCODES_REPORT: str = "barcodes-report"
     CCS_REPORT: str = "ccs-report"
     CONTROL_REPORT: str = "control-report"
     LOADING_REPORT: str = "loading-report"
@@ -97,12 +98,13 @@ class SampleMetricsAliases:
 
 
 file_pattern_to_bundle_type: dict[str, str] = {
+    PacBioDirsAndFiles.BARCODES_REPORT: PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.CONTROL_REPORT: PacBioBundleTypes.SMRT_CELL,
     f".*{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}$": PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.LOADING_REPORT: PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.RAW_DATA_REPORT: PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
-    f"{PacBioDirsAndFiles.HIFI_READS}{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
+    f"{PacBioDirsAndFiles.HIFI_READS}.*{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
 }
 
 ZIPPED_REPORTS_PATTERN: str = "*reports.zip"

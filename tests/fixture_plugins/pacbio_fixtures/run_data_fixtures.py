@@ -1,4 +1,4 @@
-"""Fixtures for the PacBio post processing services."""
+"""PacBio run data object fixtures."""
 
 from pathlib import Path
 
@@ -27,5 +27,17 @@ def expected_pac_bio_run_data_1_b01(
         full_path=pac_bio_smrt_cell_dir_1_b01,
         sequencing_run_name=pac_bio_test_run_name,
         well_name="B01",
+        plate=1,
+    )
+
+
+@pytest.fixture
+def pacbio_barcoded_run_data(
+    pacbio_barcoded_run_name: str, pacbio_barcoded_smrt_cell_dir_1_c01: Path
+) -> PacBioRunData:
+    return PacBioRunData(
+        full_path=pacbio_barcoded_smrt_cell_dir_1_c01,
+        sequencing_run_name=pacbio_barcoded_run_name,
+        well_name="C01",
         plate=1,
     )
