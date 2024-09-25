@@ -1,26 +1,29 @@
+import logging
+
+from housekeeper.store.models import File
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
-    FetchDeliveryFileTagsService,
+from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
+    FetchDeliveryFilesService,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
     handle_validation_errors,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
-    FetchDeliveryFilesService,
-)
-from housekeeper.store.models import File
-
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    SampleFile,
     CaseFile,
     DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
+)
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+    FetchDeliveryFileTagsService,
 )
 from cg.store.models import Case
-
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
@@ -61,6 +64,9 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         sample_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case_id, tags=sample_tags_with_sample_id
         )
+        if not sample_files:
+            LOG.debug(f"No files found for sample {sample_id} in case {case_id}")
+            return None
         sample_name: str = self.status_db.get_sample_by_internal_id(sample_id).name
         return [
             SampleFile(
@@ -77,10 +83,10 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         sample_ids: list[str] = case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
-            sample_delivery_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
+            sample_files: list[SampleFile] | None = self._get_sample_files_from_case_bundle(
                 case_id=case.internal_id, sample_id=sample_id, workflow=case.data_analysis
             )
-            delivery_files.extend(sample_delivery_files) if sample_delivery_files else None
+            delivery_files.extend(sample_files) if sample_files else None
         return delivery_files
 
     @handle_missing_bundle_errors
