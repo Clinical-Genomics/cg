@@ -46,7 +46,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
 
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
-        LOG.debug(f"[FORMAT SERVICE] Formatting files for delivery")
+        LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
         ticket_dir_path: Path = self.get_folder_under_inbox(
             delivery_files.sample_files[0].file_path
         )
