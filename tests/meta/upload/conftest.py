@@ -19,6 +19,7 @@ from cg.store.store import Store
 from tests.cli.workflow.mip.conftest import (
     mip_case_id,
     mip_case_ids,
+    mip_dna_context,
     mip_rna_context,
 )
 from tests.store_helpers import StoreHelpers
@@ -26,10 +27,6 @@ from tests.store_helpers import StoreHelpers
 
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api."""
-
-
-class MockStore:
-    """Mock store"""
 
 
 @pytest.fixture
