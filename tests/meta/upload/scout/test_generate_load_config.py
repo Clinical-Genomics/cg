@@ -150,7 +150,7 @@ def test_generate_config_adds_sample_paths_mip(
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: MipLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
+    result_data: MipLoadConfig = upload_mip_analysis_scout_api.generate_config(analysis=mip_dna_analysis)
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual

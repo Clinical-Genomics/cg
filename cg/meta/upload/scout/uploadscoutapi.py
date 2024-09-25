@@ -64,7 +64,6 @@ class UploadScoutAPI:
     def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
-
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
         hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
@@ -72,9 +71,8 @@ class UploadScoutAPI:
 
         LOG.info(f"Found workflow {analysis.workflow}")
         config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
-
-        config_builder.build_load_config()
-        return config_builder.load_config
+        load_config = config_builder.build_load_config()
+        return load_config
 
     @staticmethod
     def get_load_config_tag() -> str:
