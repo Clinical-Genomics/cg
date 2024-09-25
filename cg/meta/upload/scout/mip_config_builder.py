@@ -17,6 +17,7 @@ from cg.models.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.store.models import Analysis, CaseSample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -29,9 +30,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
+        status_db: Store
     ):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api, status_db=status_db
         )
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
@@ -42,6 +44,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
+        self.status_db: Store = status_db
 
     def build_load_config(self, rank_score_threshold: int = 5) -> MipLoadConfig:
         """Create a MIP specific load config for uploading analysis to Scout"""

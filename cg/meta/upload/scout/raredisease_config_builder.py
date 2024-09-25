@@ -6,6 +6,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.constants import GenomeVersion
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     RAREDISEASE_CASE_TAGS,
@@ -15,6 +16,7 @@ from cg.constants.scout import (
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.utils.get_genome_build import get_genome_build
 from cg.models.scout.scout_load_config import (
     CaseImages,
     CustomImages,
@@ -24,6 +26,7 @@ from cg.models.scout.scout_load_config import (
     ScoutRarediseaseIndividual,
 )
 from cg.store.models import Analysis
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -36,11 +39,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         raredisease_analysis_api: RarediseaseAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
+        status_db: Store
     ):
         super().__init__(
             hk_version_obj=hk_version_obj,
             analysis_obj=analysis_obj,
             lims_api=lims_api,
+            status_db=status_db
         )
         self.case_tags: CaseTags = CaseTags(**RAREDISEASE_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RAREDISEASE_SAMPLE_TAGS)
@@ -51,6 +56,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.raredisease_analysis_api: RarediseaseAnalysisAPI = raredisease_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
+        self.status_db: Store = status_db
 
     def build_load_config(self) -> RarediseaseLoadConfig:
         """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
@@ -65,6 +71,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config = self.get_sample_information(load_config)
         load_config = self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
+        case = self.status_db.get_case_by_internal_id(self.analysis_obj.case)
+        # load_config.human_genome_build = self.genome_to_scout_format(GenomeVersion(get_genome_build(case=case)))
+        load_config.human_genome_build = "37"
         return load_config
 
     def load_custom_image_sample(self) -> CustomImages:

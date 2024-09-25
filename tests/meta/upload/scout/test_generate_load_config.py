@@ -23,6 +23,11 @@ RESULT_KEYS = [
     "sv_rank_model_version",
 ]
 
+RESULT_KEYS_RD = [
+    "family",
+    "human_genome_build",
+]
+
 SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
@@ -139,6 +144,26 @@ def test_generate_config_adds_meta_result_key_mip(
 
     # THEN the config should contain the rank model version used
     assert getattr(result_data, result_key) is not None
+
+
+@pytest.mark.parametrize("result_key", RESULT_KEYS_RD)
+def test_generate_config_adds_meta_result_key_raredisease(
+    result_key: str,
+    raredisease_analysis_obj: Analysis,
+    upload_raredisease_analysis_scout_api: UploadScoutAPI,
+):
+    """Test that generate config adds the expected result keys"""
+    # GIVEN a status db and hk with an analysis
+    assert raredisease_analysis_obj
+
+    # WHEN generating the scout config for the analysis
+    result_data: RarediseaseLoadConfig = upload_raredisease_analysis_scout_api.generate_config(
+        analysis=raredisease_analysis_obj
+    )
+
+    # THEN the config should contain the rank model version used
+    assert getattr(result_data, result_key) is not None
+
 
 
 def test_generate_config_adds_sample_paths_mip(

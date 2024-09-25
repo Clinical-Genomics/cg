@@ -12,14 +12,15 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutCancerIndividual
 from cg.store.models import Analysis, CaseSample, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
 class BalsamicConfigBuilder(ScoutConfigBuilder):
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api, status_db=status_db
         )
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)
@@ -27,6 +28,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
+        self.status_db: Store = status_db
 
     def include_case_files(self, load_config: BalsamicLoadConfig):
         LOG.info("Including BALSAMIC specific case level files")

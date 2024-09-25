@@ -10,10 +10,10 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.models.scout.scout_load_config import (
     RnafusionLoadConfig,
-    ScoutCancerIndividual,
     ScoutIndividual,
 )
 from cg.store.models import Analysis, CaseSample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -21,9 +21,9 @@ LOG = logging.getLogger(__name__)
 class RnafusionConfigBuilder(ScoutConfigBuilder):
     """Class for handling rnafusion information and files to be included in Scout upload."""
 
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api, status_db=status_db
         )
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
@@ -31,6 +31,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
+        self.status_db: Store = status_db
 
     def build_load_config(self) -> RnafusionLoadConfig:
         """Build a rnafusion-specific load config for uploading a case to scout."""

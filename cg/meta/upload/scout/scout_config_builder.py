@@ -19,6 +19,8 @@ from cg.models.scout.scout_load_config import (
     ScoutLoadConfig,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.store import Store
+
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +29,7 @@ LOG = logging.getLogger(__name__)
 class ScoutConfigBuilder:
     """Base class for handling files that should be included in Scout upload."""
 
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store):
         self.hk_version_obj: Version = hk_version_obj
         self.analysis_obj: Analysis = analysis_obj
         self.lims_api: LimsAPI = lims_api
@@ -36,6 +38,7 @@ class ScoutConfigBuilder:
         self.load_config: ScoutLoadConfig = ScoutLoadConfig(
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
         )
+        self.status_db = status_db
 
     def add_common_info_to_load_config(self, load_config: ScoutLoadConfig) -> ScoutLoadConfig:
         """Add the mandatory common information to a Scout load config object."""
@@ -44,10 +47,7 @@ class ScoutConfigBuilder:
         load_config.family = self.analysis_obj.case.internal_id
         load_config.family_name = self.analysis_obj.case.name
         load_config.owner = self.analysis_obj.case.customer.internal_id
-        load_config.synopsis = self.analysis_obj.case.synopsis  ########TO DO
-        # self.load_config.human_genome_build = self.analysis_api.get_genome_build(
-        #         case_id=self.analysis_obj.case.internal_id
-        #     )
+        load_config.synopsis = self.analysis_obj.case.synopsis
         self.include_cohorts(load_config=load_config)
         self.include_phenotype_groups(load_config=load_config)
         self.include_phenotype_terms(load_config=load_config)
