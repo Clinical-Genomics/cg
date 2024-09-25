@@ -230,11 +230,12 @@ class ScoutConfigBuilder:
         )
         return load_config
 
-    def include_multiqc_report(self) -> None:
+    def include_multiqc_report(self, load_config: ScoutLoadConfig) -> ScoutLoadConfig:
         LOG.info("Include MultiQC report to case")
-        self.load_config.multiqc = self.get_file_from_hk(
+        load_config.multiqc = self.get_file_from_hk(
             hk_tags=self.case_tags.multiqc_report, latest=True
         )
+        return load_config
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the alignment file for a sample

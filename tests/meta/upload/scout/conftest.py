@@ -801,12 +801,6 @@ def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
 
 
 @pytest.fixture
-def raredisease_analysis_api(cg_context: CGConfig) -> NextflowAnalysis:
-    """Return a MIP analysis API."""
-    return NextflowAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE)
-
-
-@pytest.fixture
 def upload_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
@@ -836,7 +830,7 @@ def upload_mip_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     mip_dna_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return MIP upload Scout API."""
     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
@@ -848,7 +842,7 @@ def upload_mip_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
 
@@ -859,7 +853,7 @@ def upload_balsamic_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
     analysis_mock = MockBalsamicAnalysis(config=cg_context, workflow=Workflow.BALSAMIC)
@@ -871,7 +865,7 @@ def upload_balsamic_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
 
@@ -882,7 +876,7 @@ def upload_raredisease_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     raredisease_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return RAREDISEASE upload Scout API."""
     lims_api = MockLimsAPI(samples=lims_samples)
@@ -893,7 +887,7 @@ def upload_raredisease_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=raredisease_context.meta_apis["analysis_api"],
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
 
@@ -928,7 +922,7 @@ def upload_rnafusion_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
@@ -940,7 +934,7 @@ def upload_rnafusion_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
     return _api

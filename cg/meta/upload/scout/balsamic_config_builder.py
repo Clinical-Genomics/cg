@@ -43,8 +43,8 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, latest=True
         )
-        self.include_cnv_report(load_config)
-        self.include_multiqc_report()
+        load_config = self.include_cnv_report(load_config)
+        load_config = self.include_multiqc_report(load_config)
         return load_config
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
@@ -89,7 +89,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def build_load_config(self) -> BalsamicLoadConfig:
         LOG.info("Build load config for balsamic case")
-        load_config = BalsamicLoadConfig()
+        load_config = self.load_config
         load_config = self.add_common_info_to_load_config(load_config)
         load_config.human_genome_build = "37"
         load_config.rank_score_threshold = -100

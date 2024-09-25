@@ -93,7 +93,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
         load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
         load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
-        self.include_multiqc_report()
+        load_config = self.include_multiqc_report(load_config)
         return load_config
 
     def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:

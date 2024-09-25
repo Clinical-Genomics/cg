@@ -71,7 +71,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config = self.get_sample_information(load_config)
         load_config = self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
-        case = self.status_db.get_case_by_internal_id(self.analysis_obj.case)
+        case = self.status_db.get_case_by_internal_id(self.analysis_obj.case.internal_id)
         load_config.human_genome_build = genome_to_scout_format(
             GenomeVersion(get_genome_build(case=case))
         )
