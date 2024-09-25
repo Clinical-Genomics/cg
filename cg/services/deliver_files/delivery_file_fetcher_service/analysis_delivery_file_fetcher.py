@@ -43,18 +43,16 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         """Return a list of analysis files to be delivered for a case."""
         LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_case_files: list[CaseFile] | None = self._get_analysis_case_delivery_files(case)
-        analysis_sample_files: list[SampleFile] | None = self._get_analysis_sample_delivery_files(
-            case
-        )
+        case_files: list[CaseFile] | None = self._get_analysis_case_delivery_files(case)
+        sample_files: list[SampleFile] | None = self._get_analysis_sample_delivery_files(case)
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
 
         return DeliveryFiles(
             delivery_data=delivery_data,
-            case_files=analysis_case_files,
-            sample_files=analysis_sample_files,
+            case_files=case_files,
+            sample_files=sample_files,
         )
 
     @handle_missing_bundle_errors
