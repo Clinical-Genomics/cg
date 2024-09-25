@@ -4,12 +4,14 @@ import logging
 
 from housekeeper.store.models import Version
 
+from cg.models.cg_config import CGConfig
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
+from cg.store.store import Store
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -22,6 +24,8 @@ def test_mip_config_builder(
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
+    mip_dna_context: CGConfig,
+    status_db: Store
 ):
     """Test MIP config builder class."""
     # GIVEN a MIP analysis
@@ -33,6 +37,7 @@ def test_mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
+        status_db=mip_dna_context.status_db
     )
 
     # THEN assert that the correct case tags was used

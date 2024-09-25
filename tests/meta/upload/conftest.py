@@ -9,15 +9,16 @@ from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.subject import Sex
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.cli.workflow.mip.conftest import (
     mip_case_id,
     mip_case_ids,
-    mip_dna_context,
     mip_rna_context,
 )
 from tests.store_helpers import StoreHelpers
