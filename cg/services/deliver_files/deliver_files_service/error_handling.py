@@ -1,9 +1,7 @@
 import logging
 from functools import wraps
 
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import (
-    NoDeliveryFilesError,
-)
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
 
 LOG = logging.getLogger(__name__)
 

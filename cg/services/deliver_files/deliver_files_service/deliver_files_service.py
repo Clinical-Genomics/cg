@@ -6,7 +6,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.tb import AnalysisTypes
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.deliver_files.deliver_files_service.handle_errors import handle_delivery_errors
+from cg.services.deliver_files.deliver_files_service.error_handling import handle_delivery_errors
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
