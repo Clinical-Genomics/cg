@@ -63,7 +63,7 @@ class DeliverFilesService:
             case_id=case.internal_id
         )
         if not self._are_files_to_deliver(delivery_files):
-            LOG.error(f"No files to deliver for case {case.internal_id}")
+            LOG.warning(f"No files to deliver for case {case.internal_id}")
             return
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
