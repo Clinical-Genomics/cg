@@ -16,7 +16,7 @@ from cg.constants.scout import (
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.meta.workflow.utils.get_genome_build import get_genome_build
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build, genome_to_scout_format
 from cg.models.scout.scout_load_config import (
     CaseImages,
     CustomImages,
@@ -72,8 +72,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config = self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
         case = self.status_db.get_case_by_internal_id(self.analysis_obj.case)
-        # load_config.human_genome_build = self.genome_to_scout_format(GenomeVersion(get_genome_build(case=case)))
-        load_config.human_genome_build = "37"
+        load_config.human_genome_build = genome_to_scout_format(GenomeVersion(get_genome_build(case=case)))
         return load_config
 
     def load_custom_image_sample(self) -> CustomImages:

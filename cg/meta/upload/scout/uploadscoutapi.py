@@ -23,7 +23,7 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.get_genome_build import get_genome_build
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -90,17 +90,7 @@ class UploadScoutAPI:
             file_path=file_path,
         )
 
-    def genome_to_scout_format(self, genome: GenomeVersion) -> str:
-        mapping = {
-            GenomeVersion.GRCh37: "37",
-            GenomeVersion.GRCh38: "38",
-            GenomeVersion.HG19: "37",
-            GenomeVersion.HG38: "38",
-        }
-        # Check if the current instance is in the mapping, raise an error if not
-        if genome not in mapping:
-            raise ValueError(f"Genome build incompatible with scout: {genome.value}")
-        return mapping[genome]
+
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
