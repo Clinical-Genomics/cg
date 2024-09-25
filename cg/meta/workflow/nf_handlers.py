@@ -44,6 +44,7 @@ class NfTowerHandler(NfBaseHandler):
                     "name",
                     "revision",
                     "compute_env",
+                    "stub_run",
                 )
             },
             exclude_true=True,
@@ -62,6 +63,7 @@ class NfTowerHandler(NfBaseHandler):
                     "params_file",
                     "config",
                     "compute_env",
+                    "stub_run",
                 )
             },
             exclude_true=True,
