@@ -16,7 +16,7 @@ from cg.models.scout.scout_load_config import (
     MipLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store.models import Analysis,CaseSample
+from cg.store.models import Analysis, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -51,9 +51,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.case.internal_id
         )
-        load_config.human_genome_build = (
-            "38" if "38" in mip_analysis_data.genome_build else "37"
-        )
+        load_config.human_genome_build = "38" if "38" in mip_analysis_data.genome_build else "37"
         load_config.rank_score_threshold = rank_score_threshold
         load_config.rank_model_version = mip_analysis_data.rank_model_version
         load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version

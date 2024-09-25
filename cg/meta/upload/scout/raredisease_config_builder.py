@@ -93,7 +93,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             self._include_case_file(load_config, scout_key)
         return load_config
 
-    def _include_case_file(self, load_config: RarediseaseLoadConfig, scout_key: str) -> RarediseaseLoadConfig:
+    def _include_case_file(
+        self, load_config: RarediseaseLoadConfig, scout_key: str
+    ) -> RarediseaseLoadConfig:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key))
