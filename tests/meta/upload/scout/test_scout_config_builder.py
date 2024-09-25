@@ -4,7 +4,6 @@ import logging
 
 from housekeeper.store.models import Version
 
-from cg.models.cg_config import CGConfig
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -24,8 +23,7 @@ def test_mip_config_builder(
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
-    mip_dna_context: CGConfig,
-    status_db: Store
+    analysis_store: Store
 ):
     """Test MIP config builder class."""
     # GIVEN a MIP analysis
@@ -37,7 +35,7 @@ def test_mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
-        status_db=mip_dna_context.status_db
+        status_db=analysis_store
     )
 
     # THEN assert that the correct case tags was used
@@ -45,14 +43,14 @@ def test_mip_config_builder(
 
 
 def test_balsamic_config_builder(
-    hk_version: Version, balsamic_analysis_obj: Analysis, lims_api: MockLimsAPI
+    hk_version: Version, balsamic_analysis_obj: Analysis, lims_api: MockLimsAPI, analysis_store: Store
 ):
     """Test Balsamic config builder class."""
     # GIVEN a balsamic file handler
 
     # WHEN instantiating
     file_handler = BalsamicConfigBuilder(
-        hk_version_obj=hk_version, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
+        hk_version_obj=hk_version, analysis_obj=balsamic_analysis_obj, lims_api=lims_api, status_db=analysis_store
     )
 
     # THEN assert that the correct case tags was used
@@ -65,6 +63,7 @@ def test_raredisease_config_builder(
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
+    analysis_store: Store
 ):
     """Test RAREDISEASE config builder class."""
     # GIVEN a RAREDISEASE file handler
@@ -76,6 +75,7 @@ def test_raredisease_config_builder(
         lims_api=lims_api,
         raredisease_analysis_api=raredisease_analysis_api,
         madeline_api=madeline_api,
+        status_db=analysis_store
     )
 
     # THEN assert that the correct case tags was used
@@ -86,13 +86,14 @@ def test_rnafusion_config_builder(
     hk_version: Version,
     rnafusion_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
+    analysis_store: Store
 ):
     """Test RNAfusion config builder class."""
     # GIVEN a rnafusion file handler
 
     # WHEN instantiating
     file_handler = RnafusionConfigBuilder(
-        hk_version_obj=hk_version, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api
+        hk_version_obj=hk_version, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api, status_db=analysis_store
     )
 
     # THEN assert that the correct case tags was used
@@ -107,10 +108,10 @@ def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.load_config.synopsis is None
 
     # WHEN including the synopsis
-    mip_config_builder.build_load_config()
+    load_config =mip_config_builder.build_load_config()
 
     # THEN assert that the synopsis was added
-    assert mip_config_builder.load_config.synopsis
+    assert load_config.synopsis
 
 
 def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
@@ -146,11 +147,11 @@ def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder,
     # GIVEN a mip config builder with some information
 
     # WHEN building the scout load config
-    mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config()
 
     # THEN assert that the alignment file was added to sample id
     file_found = False
-    for sample in mip_config_builder.load_config.samples:
+    for sample in load_config.samples:
         if sample.sample_id == sample_id:
             assert sample.alignment_path is not None
             file_found = True
@@ -179,11 +180,11 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
     # GIVEN a MIP file handler
 
     # WHEN including the case level files
-    mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config()
 
     # THEN assert that the mandatory SNV VCF was added
     file_found = False
-    for sample in mip_config_builder.load_config.samples:
+    for sample in load_config.samples:
         if sample.sample_id == sample_id:
             assert sample.mt_bam is not None
             file_found = True
@@ -198,11 +199,11 @@ def test_include_mip_sample_subject_id(
     caplog.set_level(level=logging.DEBUG)
 
     # WHEN building the config
-    mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config()
 
     # THEN the subject_id was added to the scout sample
     subject_id_found = False
-    for sample in mip_config_builder.load_config.samples:
+    for sample in load_config.samples:
         if sample.sample_id == sample_id:
             subject_id_found = True
             assert sample.subject_id is not None

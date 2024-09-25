@@ -27,6 +27,10 @@ from tests.store_helpers import StoreHelpers
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api."""
 
+class MockStore():
+    """Mock store"""
+
+
 
 @pytest.fixture
 def upload_genotypes_hk_bundle(
