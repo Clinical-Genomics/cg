@@ -60,7 +60,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
 
         return DeliveryFiles(
             delivery_data=delivery_data,
-            case_files=None,
+            case_files=[],
             sample_files=raw_data_files,
         )
 
