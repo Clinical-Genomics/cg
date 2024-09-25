@@ -10,10 +10,10 @@ from cg.constants.housekeeper_tags import (
     SequencingFileTag,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    DeliveryFiles,
-    SampleFile,
     CaseFile,
+    DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
 )
 from cg.store.models import Case
 from cg.store.store import Store
@@ -183,6 +183,13 @@ def expected_moved_analysis_delivery_files(
         case_files=new_case_files,
         sample_files=new_sample_files,
     )
+
+
+@pytest.fixture
+def empty_delivery_files() -> DeliveryFiles:
+    """Return an empty delivery files object."""
+    delivery_data = DeliveryMetaData(customer_internal_id="cust_id", ticket_id="ticket_id")
+    return DeliveryFiles(delivery_data=delivery_data, case_files=None, sample_files=None)
 
 
 @pytest.fixture

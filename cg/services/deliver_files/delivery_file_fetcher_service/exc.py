@@ -1,2 +1,0 @@
-class NoDeliveryFilesError(Exception):
-    pass
