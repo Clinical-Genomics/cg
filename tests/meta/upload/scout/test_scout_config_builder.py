@@ -7,7 +7,6 @@ from housekeeper.store.models import Version
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
@@ -160,10 +159,10 @@ def test_include_mip_case_files(mip_config_builder: MipConfigBuilder):
     # GIVEN a MIP file handler
 
     # WHEN including the case level files
-    mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config()
 
     # THEN assert that the mandatory SNV VCF was added
-    assert mip_config_builder.load_config.vcf_snv
+    assert load_config.vcf_snv
 
 
 def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_id: str):
