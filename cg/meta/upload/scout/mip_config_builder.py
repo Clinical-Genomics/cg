@@ -30,10 +30,13 @@ class MipConfigBuilder(ScoutConfigBuilder):
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
-        status_db: Store
+        status_db: Store,
     ):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api, status_db=status_db
+            hk_version_obj=hk_version_obj,
+            analysis_obj=analysis_obj,
+            lims_api=lims_api,
+            status_db=status_db,
         )
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)

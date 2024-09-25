@@ -29,7 +29,9 @@ LOG = logging.getLogger(__name__)
 class ScoutConfigBuilder:
     """Base class for handling files that should be included in Scout upload."""
 
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store):
+    def __init__(
+        self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store
+    ):
         self.hk_version_obj: Version = hk_version_obj
         self.analysis_obj: Analysis = analysis_obj
         self.lims_api: LimsAPI = lims_api

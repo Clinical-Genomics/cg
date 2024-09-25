@@ -19,7 +19,6 @@ def get_genome_build(case: Case) -> GenomeVersion:
     raise CgError(f"No reference genome specified for case {case.internal_id}")
 
 
-
 def genome_to_scout_format(genome: GenomeVersion) -> str:
     mapping = {
         GenomeVersion.GRCh37: "37",

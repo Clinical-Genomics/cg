@@ -18,9 +18,14 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicConfigBuilder(ScoutConfigBuilder):
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store):
+    def __init__(
+        self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI, status_db: Store
+    ):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api, status_db=status_db
+            hk_version_obj=hk_version_obj,
+            analysis_obj=analysis_obj,
+            lims_api=lims_api,
+            status_db=status_db,
         )
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)

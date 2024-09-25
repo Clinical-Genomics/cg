@@ -39,13 +39,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         raredisease_analysis_api: RarediseaseAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
-        status_db: Store
+        status_db: Store,
     ):
         super().__init__(
             hk_version_obj=hk_version_obj,
             analysis_obj=analysis_obj,
             lims_api=lims_api,
-            status_db=status_db
+            status_db=status_db,
         )
         self.case_tags: CaseTags = CaseTags(**RAREDISEASE_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RAREDISEASE_SAMPLE_TAGS)
@@ -72,7 +72,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config = self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
         case = self.status_db.get_case_by_internal_id(self.analysis_obj.case)
-        load_config.human_genome_build = genome_to_scout_format(GenomeVersion(get_genome_build(case=case)))
+        load_config.human_genome_build = genome_to_scout_format(
+            GenomeVersion(get_genome_build(case=case))
+        )
         return load_config
 
     def load_custom_image_sample(self) -> CustomImages:

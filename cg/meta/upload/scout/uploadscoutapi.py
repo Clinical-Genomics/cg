@@ -23,7 +23,7 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build, genome_to_scout_format
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -89,8 +89,6 @@ class UploadScoutAPI:
             file_format=FileFormat.YAML,
             file_path=file_path,
         )
-
-
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
@@ -411,7 +409,7 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = self.genome_to_scout_format(
+            rna_genome_build = genome_to_scout_format(
                 GenomeVersion(get_genome_build(case=rna_case))
             )
             for dna_case_id in rna_dna_collection.dna_case_ids:
@@ -601,10 +599,16 @@ class UploadScoutAPI:
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims, status_db=self.status_db
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
+                status_db=self.status_db,
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims, status_db=self.status_db
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
+                status_db=self.status_db,
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
@@ -612,7 +616,7 @@ class UploadScoutAPI:
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db
+                status_db=self.status_db,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
@@ -620,7 +624,7 @@ class UploadScoutAPI:
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db
+                status_db=self.status_db,
             ),
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
                 hk_version_obj=hk_version,
@@ -628,10 +632,13 @@ class UploadScoutAPI:
                 raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db
+                status_db=self.status_db,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims, status_db=self.status_db
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
+                status_db=self.status_db,
             ),
         }
 
