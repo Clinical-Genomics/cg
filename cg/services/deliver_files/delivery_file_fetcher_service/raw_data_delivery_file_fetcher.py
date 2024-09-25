@@ -67,7 +67,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_raw_data_files_for_sample(
         self, case_id: str, sample_id: str
-    ) -> list[SampleFile] | None:
+    ) -> list[SampleFile]:
         """Get the RawData files for a sample."""
         file_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.RAW_DATA).sample_tags
         raw_data_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
