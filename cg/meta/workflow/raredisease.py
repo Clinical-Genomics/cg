@@ -235,7 +235,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
         """Return sample coverage metrics from Chanjo2."""
-        genome_version: GenomeVersion = self.get_genome_build()
+        genome_version: GenomeVersion = self.get_genome_build(case_id)
         coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
         )

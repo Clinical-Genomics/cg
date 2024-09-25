@@ -27,6 +27,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.utils.get_genome_build import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -206,10 +207,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str) -> Path:
         """Path to NF log."""
-        if log:
-            return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
@@ -452,7 +451,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_command_args(
         self,
         case_id: str,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -461,10 +459,11 @@ class NfAnalysisAPI(AnalysisAPI):
         revision: str,
         compute_env: str,
         nf_tower_id: str | None,
+        stub_run: bool,
     ) -> NfCommandArgs:
         command_args: NfCommandArgs = NfCommandArgs(
             **{
-                "log": self.get_log_path(case_id=case_id, workflow=self.workflow, log=log),
+                "log": self.get_log_path(case_id=case_id, workflow=self.workflow),
                 "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
                 "resume": not from_start,
                 "profile": self.get_profile(profile=profile),
@@ -475,6 +474,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 "revision": revision or self.revision,
                 "wait": NfTowerStatus.SUBMITTED,
                 "id": nf_tower_id,
+                "stub_run": stub_run,
             }
         )
         return command_args
@@ -483,7 +483,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         use_nextflow: bool,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -491,6 +490,7 @@ class NfAnalysisAPI(AnalysisAPI):
         params_file: str | None,
         revision: str,
         compute_env: str,
+        stub_run: bool,
         nf_tower_id: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -499,7 +499,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
         command_args = self.get_command_args(
             case_id=case_id,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
@@ -508,6 +507,7 @@ class NfAnalysisAPI(AnalysisAPI):
             revision=revision,
             compute_env=compute_env,
             nf_tower_id=nf_tower_id,
+            stub_run=stub_run,
         )
 
         try:
@@ -871,17 +871,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        reference_genome: set[str] = {
-            sample.reference_genome
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
-        if len(reference_genome) == 1:
-            return reference_genome.pop()
-        if len(reference_genome) > 1:
-            raise CgError(
-                f"Samples linked to case {case_id} have different reference genome versions set"
-            )
-        raise CgError(f"No reference genome specified for case {case_id}")
+        case = self.status_db.get_case_by_internal_id(case_id)
+        return get_genome_build(case)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
