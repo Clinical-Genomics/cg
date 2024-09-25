@@ -49,15 +49,12 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         sample_ids: list[str] = case.sample_ids
         raw_data_files: list[SampleFile] = []
         for sample_id in sample_ids:
-            if sample_files := self._get_raw_data_files_for_sample(
-                case_id=case_id, sample_id=sample_id
-            ):
-                raw_data_files.extend(sample_files)
-
+            raw_data_files.extend(
+                self._get_raw_data_files_for_sample(case_id=case_id, sample_id=sample_id)
+            )
         delivery_data = DeliveryMetaData(
             customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
         )
-
         return DeliveryFiles(
             delivery_data=delivery_data,
             case_files=[],
@@ -65,9 +62,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         )
 
     @handle_missing_bundle_errors
-    def _get_raw_data_files_for_sample(
-        self, case_id: str, sample_id: str
-    ) -> list[SampleFile]:
+    def _get_raw_data_files_for_sample(self, case_id: str, sample_id: str) -> list[SampleFile]:
         """Get the RawData files for a sample."""
         file_tags: list[set[str]] = self.tags_fetcher.fetch_tags(Workflow.RAW_DATA).sample_tags
         raw_data_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(

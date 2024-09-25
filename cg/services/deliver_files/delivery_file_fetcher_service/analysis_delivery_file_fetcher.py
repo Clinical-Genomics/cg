@@ -79,7 +79,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         sample_ids: list[str] = case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
-            sample_files: list[SampleFile] | None = self._get_sample_files_from_case_bundle(
+            sample_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
                 case_id=case.internal_id, sample_id=sample_id, workflow=case.data_analysis
             )
             delivery_files.extend(sample_files) if sample_files else None
