@@ -105,24 +105,24 @@ class ScoutCancerIndividual(ScoutIndividual):
 class ScoutLoadConfig(BaseModel):
     owner: Annotated[str, BeforeValidator(field_not_none)] = None
     family: Annotated[str, BeforeValidator(field_not_none)] = None
-    family_name: Optional[str] = None
-    synopsis: Optional[str] = None
-    phenotype_terms: Optional[list[str]] = None
-    phenotype_groups: Optional[list[str]] = None
-    gene_panels: Optional[list[str]] = None
+    family_name: str | None = None
+    synopsis: str | None = None
+    phenotype_terms: list[str] | None = None
+    phenotype_groups: list[str] | None = None
+    gene_panels: list[str] | None = None
     default_gene_panels: list[str] = []
-    cohorts: Optional[list[str]] = None
-    human_genome_build: Optional[str] = None
-    rank_model_version: Optional[str] = None
-    rank_score_threshold: Optional[int] = None
-    sv_rank_model_version: Optional[str] = None
-    analysis_date: Optional[datetime] = None
+    cohorts: list[str] | None = None
+    human_genome_build: str = None
+    rank_model_version: str | None = None
+    rank_score_threshold: int = None
+    sv_rank_model_version: str | None = None
+    analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
     custom_images: CustomImages = CustomImages()
-    delivery_report: Optional[str] = None
-    coverage_qc_report: Optional[str] = None
-    cnv_report: Optional[str] = None
-    multiqc: Optional[str] = None
+    delivery_report: str | None = None
+    coverage_qc_report: str | None = None
+    cnv_report: str | None = None
+    multiqc: str | None = None
     track: Literal[UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value] = (
         UploadTrack.RARE_DISEASE.value
     )

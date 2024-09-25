@@ -138,8 +138,7 @@ def test_generate_config_adds_meta_result_key_mip(
     )
 
     # THEN the config should contain the rank model version used
-    assert result_data.model_dump()[result_key]
-
+    assert getattr(result_data, result_key) is not None
 
 def test_generate_config_adds_sample_paths_mip(
     sample_id: str,
