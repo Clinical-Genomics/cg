@@ -89,6 +89,7 @@ class DeliverFilesService:
             )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
+        LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
         job_id: int = self.rsync_service.run_rsync_for_case(
             case=case,
             dry_run=dry_run,
@@ -105,6 +106,7 @@ class DeliverFilesService:
         if dry_run:
             LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
         else:
+            LOG.debug(f"[TB SERVICE] Adding analysis for case {case.internal_id} to Trailblazer")
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
                 case_id=f"{case.internal_id}_rsync",
                 analysis_type=AnalysisTypes.OTHER,

@@ -1,13 +1,16 @@
-import shutil
+import logging
 from pathlib import Path
+
 from cg.constants.delivery import INBOX_NAME
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+    CaseFile,
     DeliveryFiles,
     DeliveryMetaData,
-    CaseFile,
     SampleFile,
 )
 from cg.utils.files import link_or_overwrite_file
+
+LOG = logging.getLogger(__name__)
 
 
 class DeliveryFilesMover:
@@ -33,6 +36,7 @@ class DeliveryFilesMover:
         inbox_dir_path: Path,
     ) -> Path:
         """Create a ticket inbox folder in the customer folder, overwrites if already present."""
+        LOG.debug(f"[MOVE SERVICE] Creating ticket inbox folder: {inbox_dir_path}")
         inbox_dir_path.mkdir(parents=True, exist_ok=True)
         return inbox_dir_path
 
@@ -67,6 +71,7 @@ class DeliveryFilesMover:
         self, delivery_files: DeliveryFiles, inbox_dir_path: Path
     ) -> None:
         """Create hard links to the files in the customer folder."""
+        LOG.debug(f"[MOVE SERVICE] Creating hard links for delivery files in: {inbox_dir_path}")
         if delivery_files.case_files:
             self._create_hard_link_file_paths(
                 file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
@@ -94,6 +99,7 @@ class DeliveryFilesMover:
         """
         Replace to original file paths in the delivery files with the customer inbox file paths.
         """
+        LOG.debug(f"[MOVE SERVICE] Replacing file paths with inbox dir path: {inbox_dir_path}")
         if delivery_files.case_files:
             delivery_files.case_files = self._replace_file_path_with_inbox_dir_path(
                 file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path

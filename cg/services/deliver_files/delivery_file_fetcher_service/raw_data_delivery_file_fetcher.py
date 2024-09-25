@@ -1,3 +1,5 @@
+import logging
+
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -23,6 +25,8 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case
 from cg.store.models import Case
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
     """
@@ -42,6 +46,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of raw data files to be delivered for a case and its samples."""
+        LOG.debug(f"[FETCH SERVICE] Fetching raw data files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_ids: list[str] = case.sample_ids
         raw_data_files: list[SampleFile] = []
