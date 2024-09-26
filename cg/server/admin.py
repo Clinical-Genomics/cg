@@ -508,7 +508,7 @@ class OrderView(BaseView):
     """Admin view for Model.Order"""
 
     column_default_sort = ("order_date", True)
-    column_editable_list = ["is_delivered"]
+    column_editable_list = ["is_open"]
     column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
@@ -551,7 +551,13 @@ class SampleView(BaseView):
         "last_sequenced_at",
         "sex",
     ]
-    column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
+    column_filters = [
+        "customer.internal_id",
+        "priority",
+        "sex",
+        "application_version.application",
+        "capture_kit",
+    ]
     column_formatters = {
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,

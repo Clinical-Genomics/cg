@@ -7,7 +7,6 @@ import click
 
 from cg.apps.gens import GensAPI
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
@@ -39,8 +38,7 @@ class BalsamicUploadAPI(UploadAPI):
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case)
 
         if GensAPI.is_suitable_for_upload(case):
             ctx.invoke(upload_to_gens, case_id=case.internal_id)

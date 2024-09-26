@@ -472,3 +472,19 @@ def test_get_analyses_before(
     # THEN assert that the analyses before the given date are returned
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
+
+
+def test_get_analysis_by_entry_id(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+):
+    """Test to get an analysis by entry id."""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting an analysis by entry id
+    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy.get_analysis_by_entry_id(
+        entry_id=1
+    )
+
+    # THEN assert that the analysis is returned
+    assert analysis.id == 1

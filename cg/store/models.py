@@ -558,7 +558,7 @@ class Case(Base, PriorityMixin):
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_workflow_map: dict[str, str] = {
-            DataDelivery.FASTQ: Workflow.FASTQ,
+            DataDelivery.FASTQ: Workflow.RAW_DATA,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
         for data_delivery, workflow in delivery_per_workflow_map.items():
@@ -815,6 +815,10 @@ class Sample(Base, PriorityMixin):
         return bool(self.reads)
 
     @property
+    def is_negative_control(self) -> bool:
+        return self.control == ControlOptions.NEGATIVE
+
+    @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flowcell for metric in self.sequencing_metrics})
@@ -967,10 +971,10 @@ class Order(Base):
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
-    order_date: Mapped[datetime] = mapped_column(default=datetime.now())
+    order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
-    is_delivered: Mapped[bool] = mapped_column(default=False)
+    is_open: Mapped[bool] = mapped_column(default=True)
 
     def to_dict(self):
         return to_dict(model_instance=self)

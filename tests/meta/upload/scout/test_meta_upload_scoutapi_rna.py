@@ -9,13 +9,13 @@ from housekeeper.store.models import File
 
 import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Case, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.hk_mock import MockHousekeeperAPI, MockFile
 from tests.store_helpers import StoreHelpers
 
 
@@ -654,7 +654,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different workflow than the expected workflow
-    dna_case.data_analysis = Workflow.FASTQ
+    dna_case.data_analysis = Workflow.RAW_DATA
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
     related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
@@ -702,11 +702,11 @@ def test_get_multiqc_html_report(
 ):
     """Test that the multiqc html report is returned."""
 
-    # GIVEN a DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-html report
     case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
-    multiqc_file: File = mip_dna_analysis_hk_api.files(
-        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
-    )[0]
+    multiqc_file: MockFile = mip_dna_analysis_hk_api.get_file_from_latest_version(
+        bundle_name=dna_case_id, tags={HK_MULTIQC_HTML_TAG, case}
+    )
 
     # WHEN getting the multiqc html report
     report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(

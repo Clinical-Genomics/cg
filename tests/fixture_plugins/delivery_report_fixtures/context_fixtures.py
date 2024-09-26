@@ -10,7 +10,7 @@ from pytest_mock import MockFixture
 from cg.apps.lims import LimsAPI
 from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants import Workflow, DataDelivery
+from cg.constants import DataDelivery, Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
@@ -73,6 +73,7 @@ def raredisease_delivery_report_store_context(
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
         original_ticket=ticket_id,
+        reference_genome="hg19",
     )
     helpers.add_relationship(store=base_store, case=case, sample=sample)
     helpers.add_analysis(

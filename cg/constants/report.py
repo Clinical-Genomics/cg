@@ -1,15 +1,17 @@
 """Delivery report constants."""
 
-from importlib.resources import files
 from pathlib import Path
 
 from cg.constants import DataDelivery
 from cg.constants.constants import CancerAnalysisType, FileExtensions, Workflow
 from cg.constants.subject import Sex
+from cg.utils.files import get_project_root_dir
+
+project_root_dir: Path = get_project_root_dir()
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
-    files("cg"), "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
+    project_root_dir, "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
