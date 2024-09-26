@@ -72,7 +72,9 @@ def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
     valid_order.cases[0].samples[1].container_name = "tube_name"
 
     # WHEN validating the tube container name uniqueness
-    errors = validate_tube_container_name_unique(order=valid_order)
+    errors: list[ContainerNameRepeatedError] = validate_tube_container_name_unique(
+        order=valid_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -88,7 +90,9 @@ def test_applications_exist(valid_order: OrderWithCases, base_store: Store):
         case.samples[0].application = "Invalid application"
 
     # WHEN validating the order
-    errors = validate_application_exists(order=valid_order, store=base_store)
+    errors: list[ApplicationNotValidError] = validate_application_exists(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -107,7 +111,9 @@ def test_applications_not_archived(
         case.samples[0].application = archived_application.tag
 
     # WHEN validating the order
-    errors = validate_application_not_archived(order=valid_order, store=base_store)
+    errors: list[ApplicationArchivedError] = validate_application_not_archived(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -150,7 +156,9 @@ def test_sample_internal_ids_does_not_exist(
     valid_order.cases[0].samples.append(existing_sample)
 
     # WHEN validating that the samples exists
-    errors = validate_samples_exist(order=valid_order, store=store_with_multiple_cases_and_samples)
+    errors: list[SampleDoesNotExistError] = validate_samples_exist(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
 
     # THEN an error should be returned
     assert errors
