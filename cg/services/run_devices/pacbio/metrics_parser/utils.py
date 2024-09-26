@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Type
 
 from cg.constants.constants import FileFormat
-from cg.constants.pacbio import PacBioDirsAndFiles
+from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
 from cg.io.controller import ReadFile
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
@@ -35,8 +35,10 @@ def _parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> 
     parsed_json: dict = ReadFile.read_file[FileFormat.JSON](report_file)
     if data_model == SmrtlinkDatasetsMetrics:
         return data_model.model_validate(parsed_json[0], from_attributes=True)
-    metrics: list[dict[str, Any]] = parsed_json.get("attributes")
-    data: dict = {report_field["id"]: report_field["value"] for report_field in metrics}
+    metrics: list[dict[str, Any]] = parsed_json.get(MetricsFileFields.ATTRIBUTES)
+    data: dict = {
+        report_field["id"]: report_field[MetricsFileFields.VALUE_ONE] for report_field in metrics
+    }
     return data_model.model_validate(data, from_attributes=True)
 
 
@@ -49,12 +51,12 @@ def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str)
 def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]:
     """Parse all samples data into SampleMetrics given the sample section of the barcodes report."""
     sample_metrics: list[SampleMetrics] = []
-    number_of_samples: int = len(sample_data[0].get("value"))
+    number_of_samples: int = len(sample_data[0].get(MetricsFileFields.VALUES_MANY))
     for sample_idx in range(number_of_samples):
         sample: dict = {}
         for data_field in sample_data:
-            field_id: str = data_field.get("id")
-            sample[field_id] = data_field.get("value")[sample_idx]
+            field_id: str = data_field.get(MetricsFileFields.ID)
+            sample[field_id] = data_field.get(MetricsFileFields.VALUES_MANY)[sample_idx]
         sample_metrics.append(SampleMetrics.model_validate(sample, from_attributes=True))
     return sample_metrics
 
@@ -65,5 +67,7 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
         files=metrics_files, pattern=PacBioDirsAndFiles.BARCODES_REPORT
     )
     parsed_json: dict = ReadFile.read_file[FileFormat.JSON](report_file)
-    sample_data: list[dict[str, Any]] = parsed_json.get("tables")[0].get("columns")
+    sample_data: list[dict[str, Any]] = parsed_json.get(MetricsFileFields.TABLES)[0].get(
+        MetricsFileFields.COLUMNS
+    )
     return _parse_sample_data(sample_data)

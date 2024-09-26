@@ -17,6 +17,15 @@ class PacBioDirsAndFiles:
     RUN_IS_VALID: str = "is_valid"
 
 
+class MetricsFileFields:
+    ATTRIBUTES: str = "attributes"
+    COLUMNS: str = "columns"
+    ID: str = "id"
+    TABLES: str = "tables"
+    VALUE_ONE: str = "value"
+    VALUES_MANY: str = "values"
+
+
 class CCSAttributeIDs:
     HIFI_READS: str = "ccs_processing.number_of_ccs_reads_q20"
     HIFI_YIELD: str = "ccs_processing.total_number_of_ccs_bases_q20"
