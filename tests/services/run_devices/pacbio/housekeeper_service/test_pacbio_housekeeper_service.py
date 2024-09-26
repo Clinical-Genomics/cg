@@ -88,9 +88,22 @@ def test_create_bundle_info(
     assert file_data == expected_file_data
 
 
-def test_create_bundle_info_unassigned_file():
+def test_create_bundle_info_unassigned_file(
+    pac_bio_housekeeper_service: PacBioHousekeeperService,
+    pac_bio_metrics: PacBioMetrics,
+    pacbio_unassigned_hifi_read_file: Path,
+):
     """Test that getting the bundle of an unassigned file fails."""
-    pass
+    # GIVEN a PacBioMetrics and a Housekeeper PacBioHousekeeperService objects
+
+    # GIVEN an unassigned reads file
+
+    # WHEN creating the file data object for the file
+    with pytest.raises(PostProcessingStoreFileError):
+        # THEN the method should raise an error
+        pac_bio_housekeeper_service._create_bundle_info(
+            file_path=pacbio_unassigned_hifi_read_file, parsed_metrics=pac_bio_metrics
+        )
 
 
 def test_store_housekeeper_file_not_found(
