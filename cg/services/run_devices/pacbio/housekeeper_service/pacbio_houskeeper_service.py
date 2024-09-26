@@ -68,6 +68,14 @@ class PacBioHousekeeperService(PostProcessingHKService):
         )
 
     @staticmethod
+    def _get_sample_id_from_barcode(barcode: str, metrics: PacBioMetrics) -> str:
+        full_barcode: str = f"{barcode}--{barcode}"
+        for sample in metrics.samples:
+            if sample.barcode_name == full_barcode:
+                return sample.sample_name
+        raise PostProcessingStoreFileError(f"Sample not found for barcode: {barcode}")
+
+    @staticmethod
     def _get_tags_for_file(file_path: Path) -> list[str]:
         file_pattern_to_tag: dict[str, list[str]] = {
             PacBioDirsAndFiles.BARCODES_REPORT: [PacBioHousekeeperTags.BARCODES_REPORT],
@@ -86,7 +94,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         if self._is_file_type_smrt_cell(file_path):
             bundle_name: str = parsed_metrics.dataset_metrics.cell_id
         else:
-            sample_internal_id: str = self._get_sample_internal_id_for_file(
+            sample_internal_id: str = self._get_sample_internal_id_from_file(
                 file_path=file_path, parsed_metrics=parsed_metrics
             )
             tags.append(sample_internal_id)
@@ -97,19 +105,11 @@ class PacBioHousekeeperService(PostProcessingHKService):
             tags=tags,
         )
 
-    def _is_file_type_smrt_cell(self, file_path: Path) -> bool:
-        return self._get_bundle_type_for_file(file_path) == PacBioBundleTypes.SMRT_CELL
-
-    @staticmethod
-    def _get_sample_id_from_barcode(barcode: str, metrics: PacBioMetrics) -> str:
-        full_barcode: str = f"{barcode}--{barcode}"
-        for sample in metrics.samples:
-            if sample.barcode_name == full_barcode:
-                return sample.sample_name
-        raise PostProcessingStoreFileError(f"Sample not found for barcode: {barcode}")
-
-    def _get_sample_internal_id_for_file(
+    def _get_sample_internal_id_from_file(
         self, file_path: Path, parsed_metrics: PacBioMetrics
     ) -> str:
         barcode: str = file_path.name.split(".")[-2]
         return self._get_sample_id_from_barcode(barcode=barcode, metrics=parsed_metrics)
+
+    def _is_file_type_smrt_cell(self, file_path: Path) -> bool:
+        return self._get_bundle_type_for_file(file_path) == PacBioBundleTypes.SMRT_CELL

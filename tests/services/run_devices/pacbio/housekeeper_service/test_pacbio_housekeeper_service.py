@@ -136,3 +136,21 @@ def test_store_housekeeper_parsing_error(
     ):
         with pytest.raises(PostProcessingStoreFileError):
             pac_bio_housekeeper_service.store_files_in_housekeeper(expected_pac_bio_run_data)
+
+
+def test_get_sample_internal_id_from_file(
+    pac_bio_housekeeper_service: PacBioHousekeeperService,
+    pacbio_barcoded_hifi_read_file: Path,
+    pac_bio_metrics: PacBioMetrics,
+    pacbio_barcoded_sample_internal_id: str,
+):
+    """Test that the sample internal ID can be extracted from a file."""
+    # GIVEN a PacBio HiFi read file and a PacBioMetrics object
+
+    # WHEN getting the sample internal ID from the file
+    sample_internal_id: str = pac_bio_housekeeper_service._get_sample_internal_id_from_file(
+        file_path=pacbio_barcoded_hifi_read_file, parsed_metrics=pac_bio_metrics
+    )
+
+    # THEN the sample internal ID should be returned
+    assert sample_internal_id == pacbio_barcoded_sample_internal_id
