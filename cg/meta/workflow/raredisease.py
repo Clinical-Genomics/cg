@@ -87,6 +87,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        return True
+
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
         Return the target bed file from LIMS and use default capture kit for WGS.
