@@ -183,6 +183,13 @@ class MockHousekeeperAPI:
             return None
         return self._files[-1]
 
+    def get_latest_file(
+        self, bundle: str, tags: list | None = None, version: int | None = None
+    ) -> File | None:
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[0]
+
     def get_file_from_latest_version(self, bundle_name: str, tags: list[str]) -> File | None:
         """Find a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
