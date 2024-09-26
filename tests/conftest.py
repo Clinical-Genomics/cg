@@ -325,6 +325,8 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37
+
             },
             {
                 "name": "father",
@@ -334,6 +336,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37
             },
             {
                 "name": "mother",
@@ -343,6 +346,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37
             },
         ],
     }

@@ -45,11 +45,11 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         load_config = self.add_common_info_to_load_config(load_config)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config = self.include_case_files(load_config)
-
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        return load_config
 
     def include_case_files(self, load_config: RnafusionLoadConfig) -> RnafusionLoadConfig:
         """Include case level files for rnafusion case."""

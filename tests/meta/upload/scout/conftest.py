@@ -9,7 +9,7 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
 from cg.constants.housekeeper_tags import AnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
@@ -697,6 +697,7 @@ def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_GENOME_SEQUENCING
         )
+        link_object.sample.reference_genome = GenomeVersion.GRCh37
         link_object.case.data_analysis = Workflow.RAREDISEASE
     return analysis_obj
 
