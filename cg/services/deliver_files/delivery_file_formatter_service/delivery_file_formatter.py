@@ -1,20 +1,22 @@
+import logging
 import os
 from pathlib import Path
+
 from cg.constants.delivery import INBOX_NAME
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+    CaseFile,
     DeliveryFiles,
     SampleFile,
-    CaseFile,
-)
-from cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter import (
-    CaseFileFormatter,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.models import (
-    FormattedFiles,
     FormattedFile,
+    FormattedFiles,
+)
+from cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter import (
+    CaseFileFormatter,
 )
 from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
     SampleFileConcatenationFormatter,
@@ -22,6 +24,8 @@ from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file
 from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class DeliveryFileFormatter(DeliveryFileFormattingService):
@@ -42,6 +46,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
 
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
+        LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
         ticket_dir_path: Path = self.get_folder_under_inbox(
             delivery_files.sample_files[0].file_path
         )
@@ -80,4 +85,5 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
 
     @staticmethod
     def _create_ticket_dir(ticket_dir_path: Path) -> None:
+        """Create the ticket directory if it does not exist."""
         os.makedirs(ticket_dir_path, exist_ok=True)
