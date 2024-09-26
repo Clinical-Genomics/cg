@@ -7,7 +7,6 @@ import pytest
 import requests
 
 from cg.clients.chanjo2.client import Chanjo2APIClient
-from cg.clients.chanjo2.models import CoverageMetrics
 
 
 @pytest.fixture
@@ -80,10 +79,3 @@ def coverage_post_response_empty() -> Mock:
     post_response = Mock()
     post_response.json.return_value = {}
     return post_response
-
-
-@pytest.fixture
-def coverage_metrics(
-    sample_id: str, coverage_post_response_json: dict[str, dict]
-) -> CoverageMetrics:
-    return CoverageMetrics.model_validate(coverage_post_response_json[sample_id])
