@@ -29,7 +29,13 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -37,7 +43,7 @@ from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisTypes
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.tar.tar import TarAPI
@@ -50,16 +56,24 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
+from cg.models.raredisease.raredisease import (
+    RarediseaseParameters,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
     DeliveryRsyncService,
 )
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
+from cg.services.illumina.data_transfer.data_transfer_service import (
+    IlluminaDataTransferService,
+)
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -96,6 +110,8 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
+    "tests.fixture_plugins.delivery_report_fixtures.api_fixtures",
+    "tests.fixture_plugins.delivery_report_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_files_models_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_services_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_formatted_files_fixtures",
@@ -1392,6 +1408,12 @@ def external_wes_application_tag() -> str:
 def wgs_application_tag() -> str:
     """Return the WGS application tag."""
     return "WGSPCFC030"
+
+
+@pytest.fixture
+def wts_application_tag() -> str:
+    """Return a WTS application tag."""
+    return "RNAPOAR100"
 
 
 @pytest.fixture
@@ -2841,10 +2863,16 @@ def raredisease_deliverables_response_data(
     )
 
 
-@pytest.fixture(scope="function")
-def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+@pytest.fixture
+def raredisease_multiqc_json_metrics_path(raredisease_analysis_dir: Path) -> Path:
+    """Return Multiqc JSON file path for Raredisease."""
+    return Path(raredisease_analysis_dir, multiqc_json_file)
+
+
+@pytest.fixture
+def raredisease_multiqc_json_metrics(raredisease_multiqc_json_metrics_path: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=raredisease_multiqc_json_metrics_path)
 
 
 # Rnafusion fixtures
@@ -2915,10 +2943,16 @@ def rnafusion_malformed_hermes_deliverables(rnafusion_hermes_deliverables: dict)
     return malformed_deliverable
 
 
-@pytest.fixture(scope="function")
-def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+@pytest.fixture
+def rnafusion_multiqc_json_metrics_path(rnafusion_analysis_dir: Path) -> Path:
+    """Return Multiqc JSON file path for Raredisease."""
+    return Path(rnafusion_analysis_dir, multiqc_json_file)
+
+
+@pytest.fixture
+def rnafusion_multiqc_json_metrics(rnafusion_multiqc_json_metrics_path: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(rnafusion_analysis_dir, multiqc_json_file))
+    return read_json(file_path=rnafusion_multiqc_json_metrics_path)
 
 
 @pytest.fixture(scope="function")
@@ -4164,3 +4198,32 @@ def analysis_summary(
         delivered=delivered_status_summary,
         failed=failed_status_summary,
     )
+
+
+@pytest.fixture
+def lims_case(fixtures_dir: Path) -> dict:
+    """Returns a LIMS case dict of samples."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
+
+
+@pytest.fixture
+def lims_samples(lims_case: dict) -> list[dict]:
+    """Returns the samples of a LIMS case."""
+    return lims_case["samples"]
+
+
+@pytest.fixture
+def library_prep_method() -> str:
+    return "Manual TruSeq DNA PCR-free library preparation (9.33.15)"
+
+
+@pytest.fixture
+def libary_sequencing_method() -> str:
+    return "NovaSeq X sequencing method (9.33.15)"
+
+
+@pytest.fixture
+def capture_kit() -> str:
+    return "panel.bed"
