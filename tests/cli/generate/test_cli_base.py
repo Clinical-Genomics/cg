@@ -1,11 +1,14 @@
-"""Tests enabled commands for the generate command"""
+"""Tests enabled commands for the generate command."""
+
+from click.testing import CliRunner
 
 from cg.cli.generate.base import generate
 from cg.constants import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
 
 
-def test_generate_no_options(base_context, cli_runner):
-    """Tests generate command with no options"""
+def test_generate_no_options(base_context: CGConfig, cli_runner: CliRunner):
+    """Tests generate command with no options."""
 
     # GIVEN a base context
 
