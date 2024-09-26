@@ -135,4 +135,3 @@ def get_sample_id_metric(
     for sample_id_metric in sample_id_metrics:
         if sample_id == sample_id_metric.sample_id:
             return sample_id_metric
-    raise ValueError(f"Could not find metric for: {sample_id}")

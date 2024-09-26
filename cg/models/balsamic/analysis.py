@@ -1,6 +1,6 @@
 from cg.models.analysis import AnalysisModel
 from cg.models.balsamic.config import BalsamicConfigJSON
-from cg.models.balsamic.metrics import BalsamicWGSQCMetrics, BalsamicTargetedQCMetrics
+from cg.models.balsamic.metrics import BalsamicQCMetrics
 
 
 class BalsamicAnalysis(AnalysisModel):
@@ -12,4 +12,4 @@ class BalsamicAnalysis(AnalysisModel):
     """
 
     config: BalsamicConfigJSON
-    sample_metrics: dict[str, BalsamicTargetedQCMetrics | BalsamicWGSQCMetrics]
+    sample_metrics: dict[str, BalsamicQCMetrics]
