@@ -15,6 +15,7 @@ from cg.services.illumina.post_processing.utils import (
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
 )
+from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils.files import get_files_matching_pattern
 
@@ -32,6 +33,10 @@ def _should_fastq_path_be_stored_in_housekeeper(
     Check if a sample fastq file should be tracked in Housekeeper.
     Only fastq files that pass the q30 threshold should be tracked.
     """
+    sample: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
+
+    if sample.is_negative_control:
+        return True
 
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
