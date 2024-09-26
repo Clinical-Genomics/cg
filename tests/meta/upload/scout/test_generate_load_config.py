@@ -180,7 +180,6 @@ def test_generate_config_adds_sample_paths_mip(
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual
-    print(result_data)
     for sample in result_data.samples:
         if sample.sample_id == sample_id:
             assert sample.vcf2cytosure
@@ -201,7 +200,6 @@ def test_generate_config_adds_sample_paths_raredisease(
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual
-    print(result_data)
     for sample in result_data.samples:
         if sample.sample_id == sample_id:
             assert sample.vcf2cytosure

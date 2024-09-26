@@ -831,7 +831,7 @@ def upload_mip_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     mip_dna_analysis_hk_api: MockHousekeeperAPI,
-    analysis_store: Store,
+    store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return MIP upload Scout API."""
     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
@@ -843,7 +843,7 @@ def upload_mip_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=analysis_store,
+        status_db=store,
     )
 
 
