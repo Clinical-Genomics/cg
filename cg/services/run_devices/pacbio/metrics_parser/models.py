@@ -91,8 +91,6 @@ class SmrtlinkDatasetsMetrics(BaseModel):
 
     cell_id: str = Field(..., alias=SmrtLinkDatabasesIDs.CELL_ID)
     well: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_NAME)
-    well_sample_name: str = Field(..., alias=SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME)
-    sample_internal_id: str = Field(..., alias=SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME)
     run_started_at: datetime
     run_completed_at: datetime = Field(..., alias=SmrtLinkDatabasesIDs.RUN_COMPLETED_AT)
     movie_name: str = Field(..., alias=SmrtLinkDatabasesIDs.MOVIE_NAME)

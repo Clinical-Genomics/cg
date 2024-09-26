@@ -61,14 +61,12 @@ class PolymeraseDataAttributeIDs:
 
 
 class SmrtLinkDatabasesIDs:
-    BIO_SAMPLE_NAME: str = "bioSampleName"
     CELL_ID: str = "cellId"
     CELL_INDEX: str = "cellIndex"
     MOVIE_NAME: str = "metadataContextId"
     PATH: str = "path"
     RUN_COMPLETED_AT = "createdAt"
     WELL_NAME: str = "wellName"
-    WELL_SAMPLE_NAME: str = "wellSampleName"
 
 
 class PacBioHousekeeperTags:

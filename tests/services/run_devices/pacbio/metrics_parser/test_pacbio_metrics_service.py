@@ -17,13 +17,14 @@ from cg.services.run_devices.pacbio.metrics_parser.utils import get_parsed_metri
         (PacBioDirsAndFiles.CCS_REPORT_SUFFIX, "pac_bio_read_metrics"),
         (PacBioDirsAndFiles.LOADING_REPORT, "pac_bio_productivity_metrics"),
         (PacBioDirsAndFiles.RAW_DATA_REPORT, "pac_bio_polymerase_metrics"),
+        (PacBioDirsAndFiles.BARCODES_REPORT, "pac_bio_barcode_metrics"),
     ],
-    ids=["Control", "Smrtlink-Dataset", "Read", "Productivity", "Polymerase"],
+    ids=["Control", "Smrtlink-Dataset", "Read", "Productivity", "Polymerase", "Barcodes"],
 )
 def test_get_parsed_metrics_from_file_name(
     file_name: str,
     expected_metrics_fixture: str,
-    pac_bio_report_files_to_parse: list[Path],
+    pacbio_barcoded_report_files_to_parse: list[Path],
     request: FixtureRequest,
 ):
     """Test the parsing of all PacBio metric files."""
@@ -31,7 +32,7 @@ def test_get_parsed_metrics_from_file_name(
 
     # WHEN parsing the SMRTlink datasets metrics
     parsed_metrics: BaseMetrics = get_parsed_metrics_from_file_name(
-        metrics_files=pac_bio_report_files_to_parse, file_name=file_name
+        metrics_files=pacbio_barcoded_report_files_to_parse, file_name=file_name
     )
 
     # THEN the parsed metrics are the expected ones

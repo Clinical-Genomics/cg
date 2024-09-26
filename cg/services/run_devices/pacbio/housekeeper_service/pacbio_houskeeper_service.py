@@ -86,8 +86,9 @@ class PacBioHousekeeperService(PostProcessingHKService):
         if self._is_file_type_smrt_cell(file_path):
             bundle_name: str = parsed_metrics.dataset_metrics.cell_id
         else:
-            tags.append(parsed_metrics.dataset_metrics.sample_internal_id)
-            bundle_name: str = parsed_metrics.dataset_metrics.sample_internal_id
+            sample_internal_id: str = self._get_sample_internal_id_from_file_name(file_path.name)
+            tags.append(sample_internal_id)
+            bundle_name: str = sample_internal_id
         return PacBioFileData(
             bundle_name=bundle_name,
             file_path=file_path,
@@ -96,3 +97,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
 
     def _is_file_type_smrt_cell(self, file_path: Path) -> bool:
         return self._get_bundle_type_for_file(file_path) == PacBioBundleTypes.SMRT_CELL
+
+    def _get_sample_internal_id_from_file_name(self, file_name: str) -> str:
+        """Return the sample internal id from the file name."""
+        return ""
