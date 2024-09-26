@@ -78,7 +78,6 @@ def pac_bio_smrtlink_databases_metrics(
     smrt_cell_internal_id: str, pac_bio_sample_internal_id: str, pac_bio_1_a01_cell_full_name: str
 ) -> SmrtlinkDatasetsMetrics:
     data: dict[str, any] = {
-        SmrtLinkDatabasesIDs.BIO_SAMPLE_NAME: pac_bio_sample_internal_id,
         SmrtLinkDatabasesIDs.CELL_ID: smrt_cell_internal_id,
         SmrtLinkDatabasesIDs.CELL_INDEX: 0,
         SmrtLinkDatabasesIDs.MOVIE_NAME: pac_bio_1_a01_cell_full_name,

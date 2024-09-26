@@ -61,7 +61,7 @@ def test_store_files_in_housekeeper(
     "file_fixture, file_data_fixture",
     [
         ("pac_bio_ccs_report_file", "ccs_report_pac_bio_file_data"),
-        ("pac_bio_hifi_read_file", "pac_bio_hifi_reads_file_data"),
+        ("pacbio_barcoded_hifi_read_file", "pac_bio_hifi_reads_file_data"),
     ],
     ids=["ccs_report", "hifi_reads"],
 )
@@ -86,6 +86,11 @@ def test_create_bundle_info(
     # THEN the method should return the correct PacBioFileData object
     expected_file_data: PacBioFileData = request.getfixturevalue(file_data_fixture)
     assert file_data == expected_file_data
+
+
+def test_create_bundle_info_unassigned_file():
+    """Test that getting the bundle of an unassigned file fails."""
+    pass
 
 
 def test_store_housekeeper_file_not_found(

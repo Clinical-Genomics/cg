@@ -68,14 +68,19 @@ class PacBioRunFileManager(RunFileManager):
         return report_files
 
     @staticmethod
-    def _get_hifi_read_files(run_path: Path) -> list[Path]:
+    def _remove_unassigned_bam_file(bam_files: list[Path]) -> list[Path]:
+        """Remove the unassigned bam file from the file list."""
+        return [file for file in bam_files if "unassigned" not in file.name]
+
+    def _get_hifi_read_files(self, run_path: Path) -> list[Path]:
         """Return the path to the HiFi read file."""
         hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS)
         bam_files: list[Path] = get_files_matching_pattern(
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}"
         )
-        validate_files_or_directories_exist(bam_files)
-        return bam_files
+        barcoded_files: list[Path] = self._remove_unassigned_bam_file(bam_files)
+        validate_files_or_directories_exist(barcoded_files)
+        return barcoded_files
 
     @staticmethod
     def _get_unzipped_reports_dir(run_path) -> Path:

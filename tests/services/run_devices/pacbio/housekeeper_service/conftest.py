@@ -21,11 +21,17 @@ def ccs_report_pac_bio_file_data(
 
 @pytest.fixture
 def pac_bio_hifi_reads_file_data(
-    pac_bio_hifi_read_file: Path, smrt_cell_internal_id: str, pac_bio_sample_internal_id: str
+    pacbio_barcoded_hifi_read_file: Path,
+    smrt_cell_internal_id: str,
+    pacbio_barcoded_sample_internal_id: str,
 ) -> PacBioFileData:
     """Return a PacBioFileData object for a HiFi reads file."""
     return PacBioFileData(
-        file_path=pac_bio_hifi_read_file,
-        bundle_name=pac_bio_sample_internal_id,
-        tags=[AlignmentFileTag.BAM, smrt_cell_internal_id, pac_bio_sample_internal_id],
+        file_path=pacbio_barcoded_hifi_read_file,
+        bundle_name=pacbio_barcoded_sample_internal_id,
+        tags=[
+            AlignmentFileTag.BAM,
+            smrt_cell_internal_id,
+            pacbio_barcoded_sample_internal_id,
+        ],
     )
