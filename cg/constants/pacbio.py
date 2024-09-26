@@ -22,8 +22,8 @@ class MetricsFileFields:
     COLUMNS: str = "columns"
     ID: str = "id"
     TABLES: str = "tables"
-    VALUE_ONE: str = "value"
-    VALUES_MANY: str = "values"
+    VALUE: str = "value"
+    VALUES: str = "values"
 
 
 class CCSAttributeIDs:

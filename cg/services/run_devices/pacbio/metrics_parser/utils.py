@@ -37,7 +37,8 @@ def _parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> 
         return data_model.model_validate(parsed_json[0], from_attributes=True)
     metrics: list[dict[str, Any]] = parsed_json.get(MetricsFileFields.ATTRIBUTES)
     data: dict = {
-        report_field["id"]: report_field[MetricsFileFields.VALUE_ONE] for report_field in metrics
+        report_field[MetricsFileFields.ID]: report_field[MetricsFileFields.VALUE]
+        for report_field in metrics
     }
     return data_model.model_validate(data, from_attributes=True)
 
@@ -51,12 +52,12 @@ def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str)
 def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]:
     """Parse all samples data into SampleMetrics given the sample section of the barcodes report."""
     sample_metrics: list[SampleMetrics] = []
-    number_of_samples: int = len(sample_data[0].get(MetricsFileFields.VALUES_MANY))
+    number_of_samples: int = len(sample_data[0].get(MetricsFileFields.VALUES))
     for sample_idx in range(number_of_samples):
         sample: dict = {}
         for data_field in sample_data:
             field_id: str = data_field.get(MetricsFileFields.ID)
-            sample[field_id] = data_field.get(MetricsFileFields.VALUES_MANY)[sample_idx]
+            sample[field_id] = data_field.get(MetricsFileFields.VALUES)[sample_idx]
         sample_metrics.append(SampleMetrics.model_validate(sample, from_attributes=True))
     return sample_metrics
 
