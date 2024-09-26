@@ -87,6 +87,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        return True
+
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
         Return the target bed file from LIMS and use default capture kit for WGS.
@@ -160,7 +165,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=self.get_genome_build(case_id=case_id))
+        return self._get_managed_variants(
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id)
+        )
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""

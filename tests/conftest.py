@@ -2522,6 +2522,12 @@ def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def raredisease_gene_panel_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to gene panel file."""
+    return Path(raredisease_dir, raredisease_case_id, "gene_panels").with_suffix(FileExtensions.BED)
+
+
+@pytest.fixture(scope="function")
 def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to config file."""
     return Path(
@@ -2623,6 +2629,7 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
+        reference_genome=GenomeVersion.HG19,
     )
 
     another_sample_enough_reads: Sample = helpers.add_sample(
@@ -2632,6 +2639,7 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
+        reference_genome=GenomeVersion.HG19,
     )
 
     helpers.add_relationship(
@@ -2660,6 +2668,7 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_not_pass,
         application_tag=wgs_application_tag,
+        reference_genome=GenomeVersion.HG19,
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
