@@ -165,7 +165,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=self.get_gene_panel_genome_build(case_id=case_id))
+        return self._get_managed_variants(
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id)
+        )
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
