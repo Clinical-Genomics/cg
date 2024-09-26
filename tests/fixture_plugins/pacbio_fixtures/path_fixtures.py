@@ -68,12 +68,6 @@ def pacbio_barcoded_hifi_reads_dir(pacbio_barcoded_smrt_cell_dir_1_c01: Path) ->
 
 
 @pytest.fixture
-def pac_bio_run_statistics_dir(pac_bio_smrt_cell_dir_1_a01: Path) -> Path:
-    """Return the path to the PacBio SMRT cell statistics directory."""
-    return Path(pac_bio_smrt_cell_dir_1_a01, PacBioDirsAndFiles.STATISTICS_DIR)
-
-
-@pytest.fixture
 def pac_bio_run_statistics_dir_1_b01(pac_bio_smrt_cell_dir_1_b01: Path) -> Path:
     """Return the path to the PacBio SMRT cell statistics directory."""
     return Path(pac_bio_smrt_cell_dir_1_b01, PacBioDirsAndFiles.STATISTICS_DIR)
@@ -83,12 +77,6 @@ def pac_bio_run_statistics_dir_1_b01(pac_bio_smrt_cell_dir_1_b01: Path) -> Path:
 def pacbio_barcoded_run_statistics_dir(pacbio_barcoded_smrt_cell_dir_1_c01: Path) -> Path:
     """Return the path to the statistics directory of the PacBio barcoded SMRT cell."""
     return Path(pacbio_barcoded_smrt_cell_dir_1_c01, PacBioDirsAndFiles.STATISTICS_DIR)
-
-
-@pytest.fixture
-def pac_bio_run_reports_dir(pac_bio_run_statistics_dir: Path) -> Path:
-    """Return the path to the PacBio SMRT cell unzipped_reports directory"""
-    return Path(pac_bio_run_statistics_dir, PacBioDirsAndFiles.UNZIPPED_REPORTS_DIR)
 
 
 @pytest.fixture
@@ -122,11 +110,11 @@ def pacbio_barcodes_report_file(
 
 @pytest.fixture
 def pac_bio_ccs_report_file(
-    pac_bio_run_statistics_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
+    pacbio_barcoded_run_statistics_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
 ) -> Path:
     """Return the path to the PacBio CCS report file."""
     return Path(
-        pac_bio_run_statistics_dir,
+        pacbio_barcoded_run_statistics_dir,
         f"{pacbio_barcoded_1_c01_cell_full_name}.{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}",
     )
 
@@ -143,21 +131,9 @@ def pacbio_barcoded_ccs_report_file(
 
 
 @pytest.fixture
-def pac_bio_control_report_file(pac_bio_run_reports_dir: Path) -> Path:
-    """Return the path to the PacBio control report file."""
-    return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.CONTROL_REPORT)
-
-
-@pytest.fixture
 def pacbio_barcoded_control_report_file(pacbio_barcoded_run_reports_dir: Path) -> Path:
     """Return the path to the PacBio loading report file."""
     return Path(pacbio_barcoded_run_reports_dir, PacBioDirsAndFiles.CONTROL_REPORT)
-
-
-@pytest.fixture
-def pac_bio_loading_report_file(pac_bio_run_reports_dir: Path) -> Path:
-    """Return the path to the PacBio loading report file."""
-    return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.LOADING_REPORT)
 
 
 @pytest.fixture
@@ -167,21 +143,9 @@ def pacbio_barcoded_loading_report_file(pacbio_barcoded_run_reports_dir: Path) -
 
 
 @pytest.fixture
-def pac_bio_raw_data_report_file(pac_bio_run_reports_dir: Path) -> Path:
-    """Return the path to the PacBio raw data report file."""
-    return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.RAW_DATA_REPORT)
-
-
-@pytest.fixture
 def pacbio_barcoded_raw_data_report_file(pacbio_barcoded_run_reports_dir: Path) -> Path:
     """Return the path to the PacBio loading report file."""
     return Path(pacbio_barcoded_run_reports_dir, PacBioDirsAndFiles.RAW_DATA_REPORT)
-
-
-@pytest.fixture
-def pac_bio_smrtlink_datasets_report_file(pac_bio_run_reports_dir: Path) -> Path:
-    """Return the path to the PacBio SMRTLink datasets report file."""
-    return Path(pac_bio_run_reports_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT)
 
 
 @pytest.fixture

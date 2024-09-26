@@ -76,7 +76,6 @@ def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
 @pytest.fixture
 def pac_bio_smrtlink_databases_metrics(
     barcoded_smrt_cell_internal_id: str,
-    pac_bio_sample_internal_id: str,
     pacbio_barcoded_1_c01_cell_full_name: str,
 ) -> SmrtlinkDatasetsMetrics:
     data: dict[str, any] = {
