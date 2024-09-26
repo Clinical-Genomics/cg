@@ -37,7 +37,7 @@ def pac_bio_read_metrics() -> ReadMetrics:
         CCSAttributeIDs.FAILED_YIELD: 4862922407,
         CCSAttributeIDs.FAILED_MEAN_READ_LENGTH: 17288,
     }
-    return ReadMetrics.model_validate(data, from_attributes=True)
+    return ReadMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def pac_bio_control_metrics() -> ControlMetrics:
         ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE: 0.906334,
         ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE: 0.91,
     }
-    return ControlMetrics.model_validate(data, from_attributes=True)
+    return ControlMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def pac_bio_productivity_metrics() -> ProductivityMetrics:
         LoadingAttributesIDs.P_1: 15048838,
         LoadingAttributesIDs.P_2: 104429,
     }
-    return ProductivityMetrics.model_validate(data, from_attributes=True)
+    return ProductivityMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
         PolymeraseDataAttributeIDs.MEAN_LONGEST_SUBREAD_LENGTH: 18466,
         PolymeraseDataAttributeIDs.LONGEST_SUBREAD_LENGTH_N50: 22250,
     }
-    return PolymeraseMetrics.model_validate(data, from_attributes=True)
+    return PolymeraseMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ def pac_bio_smrtlink_databases_metrics(
         SmrtLinkDatabasesIDs.WELL_NAME: "A01",
         SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME: pac_bio_sample_internal_id,
     }
-    return SmrtlinkDatasetsMetrics.model_validate(data, from_attributes=True)
+    return SmrtlinkDatasetsMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -106,7 +106,7 @@ def pacbio_barcodes_metrics(
         BarcodeMetricsAliases.UNBARCODED_HIFI_YIELD: 424465869,
         BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH: 14477,
     }
-    return BarcodeMetrics.model_validate(data, from_attributes=True)
+    return BarcodeMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -124,7 +124,7 @@ def pacbio_barcoded_sample_metrics(
         SampleMetricsAliases.PLOYMERASE_READ_LENGTH: 163451,
         SampleMetricsAliases.SAMPLE_NAME: pacbio_barcoded_sample_internal_id,
     }
-    return SampleMetrics.model_validate(data, from_attributes=True)
+    return SampleMetrics.model_validate(data)
 
 
 @pytest.fixture
@@ -142,7 +142,7 @@ def pacbio_unassigned_sample_metrics(
         SampleMetricsAliases.PLOYMERASE_READ_LENGTH: 142228,
         SampleMetricsAliases.SAMPLE_NAME: pacbio_unassigned_sample_internal_id,
     }
-    return SampleMetrics.model_validate(data, from_attributes=True)
+    return SampleMetrics.model_validate(data)
 
 
 @pytest.fixture

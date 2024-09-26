@@ -34,13 +34,13 @@ def _parse_report_to_model(report_file: Path, data_model: Type[BaseMetrics]) -> 
     """Parse the metrics report to a data model."""
     parsed_json: dict = ReadFile.read_file[FileFormat.JSON](report_file)
     if data_model == SmrtlinkDatasetsMetrics:
-        return data_model.model_validate(parsed_json[0], from_attributes=True)
+        return data_model.model_validate(parsed_json[0])
     metrics: list[dict[str, Any]] = parsed_json.get(MetricsFileFields.ATTRIBUTES)
     data: dict = {
         report_field[MetricsFileFields.ID]: report_field[MetricsFileFields.VALUE]
         for report_field in metrics
     }
-    return data_model.model_validate(data, from_attributes=True)
+    return data_model.model_validate(data)
 
 
 def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str) -> BaseMetrics:
@@ -58,7 +58,7 @@ def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]
         for data_field in sample_data:
             field_id: str = data_field.get(MetricsFileFields.ID)
             sample[field_id] = data_field.get(MetricsFileFields.VALUES)[sample_idx]
-        sample_metrics.append(SampleMetrics.model_validate(sample, from_attributes=True))
+        sample_metrics.append(SampleMetrics.model_validate(sample))
     return sample_metrics
 
 
