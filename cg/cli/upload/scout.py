@@ -203,6 +203,7 @@ def upload_tomte_to_scout(
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
+    context.invoke(upload_rna_delivery_report_to_scout, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_omics_to_scout, case_id=case_id, dry_run=dry_run)
@@ -235,6 +236,22 @@ def upload_rna_fusion_report_to_scout(
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     scout_upload_api.upload_fusion_report_to_scout(
         dry_run=dry_run, research=research, case_id=case_id
+    )
+
+@click.command(name="rna-delivery-report-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_delivery_report_to_scout(
+    context: CGConfig, dry_run: bool, case_id: str
+) -> None:
+    """Upload rna delivery report file for a case to Scout."""
+
+    LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_delivery_report_to_scout(
+        dry_run=dry_run,case_id=case_id
     )
 
 
