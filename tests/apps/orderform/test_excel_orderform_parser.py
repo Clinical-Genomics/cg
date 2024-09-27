@@ -249,3 +249,17 @@ def test_get_data_delivery(microbial_order_parser):
     data_delivery = microbial_order_parser.get_data_delivery()
     # THEN no errors should be raised and a data_delivery string should be returned
     assert data_delivery
+
+
+def test_parse_microbial_sequencing_orderform(microbial_sequencing_orderform: str):
+    """Test the parsing of a microbial sequencing orderform."""
+    # GIVEN a microbial sequencing orderform in excel format
+
+    # WHEN parsing the orderform
+    order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
+    order_form_parser.parse_orderform(excel_path=microbial_sequencing_orderform)
+
+    # THEN assert that the project type is correct
+    assert order_form_parser.project_type == OrderType.MICROBIAL_FASTQ
+    # THEN assert that samples are parsed
+    assert order_form_parser.samples

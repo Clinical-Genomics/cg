@@ -153,6 +153,15 @@ def microbial_orderform(orderforms: Path) -> str:
     ).as_posix()
 
 
+@pytest.fixture(scope="session")
+def microbial_sequencing_orderform(orderforms: Path) -> str:
+    """Orderform fixture for microbial samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.MICROBIAL_FASTQ}.{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}.xlsx",
+    ).as_posix()
+
+
 @pytest.fixture
 def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples."""
