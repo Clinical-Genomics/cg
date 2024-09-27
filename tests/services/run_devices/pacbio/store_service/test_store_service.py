@@ -3,7 +3,6 @@
 from unittest import mock
 
 import pytest
-from store_helpers import StoreHelpers
 
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
@@ -19,6 +18,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_store_post_processing_data(
