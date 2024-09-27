@@ -37,6 +37,14 @@ class PacBioSequencingRunDTO(BaseModel):
     failed_reads: int
     failed_yield: int
     failed_mean_read_length: int
+    barcoded_hifi_reads: int
+    barcoded_hifi_reads_percentage: float
+    barcoded_hifi_yield: int
+    barcoded_hifi_yield_percentage: float
+    barcoded_hifi_mean_read_length: int
+    unbarcoded_hifi_reads: int
+    unbarcoded_hifi_yield: int
+    unbarcoded_hifi_mean_read_length: int
 
 
 class PacBioSMRTCellDTO(BaseModel):
@@ -49,12 +57,9 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     hifi_reads: int
     hifi_yield: int
     hifi_mean_read_length: int
-    hifi_median_read_length: int
     hifi_median_read_quality: str
-    percent_reads_passing_q30: float
-    failed_reads: int
-    failed_yield: int
-    failed_mean_read_length: int
+    polymerase_mean_read_length: int
+    barcode: str
 
 
 class PacBioDTOs(PostProcessingDTOs):

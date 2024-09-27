@@ -148,7 +148,7 @@ class SampleMetrics(RunMetrics):
 
     barcode_name: str = Field(..., alias=SampleMetricsAliases.BARCODE_NAME)
     hifi_mean_read_length: int = Field(..., alias=SampleMetricsAliases.HIFI_MEAN_READ_LENGTH)
-    hifi_read_quality: str = Field(..., alias=SampleMetricsAliases.HIFI_READ_QUALITY)
+    hifi_median_read_quality: str = Field(..., alias=SampleMetricsAliases.HIFI_READ_QUALITY)
     hifi_reads: int = Field(..., alias=SampleMetricsAliases.HIFI_READS)
     hifi_yield: int = Field(..., alias=SampleMetricsAliases.HIFI_YIELD)
     polymerase_read_length: int = Field(..., alias=SampleMetricsAliases.PLOYMERASE_READ_LENGTH)

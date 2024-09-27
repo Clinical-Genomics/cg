@@ -1,23 +1,14 @@
 from datetime import datetime
-from unittest.mock import Mock
 
 import pytest
 
 from cg.constants.devices import DeviceType
-from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
-    PacBioStoreService,
-)
-from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
-    PacBioDataTransferService,
-)
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
-from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
@@ -56,24 +47,31 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
         "failed_reads": 1000,
         "failed_yield": 500000000,
         "failed_mean_read_length": 3000,
+        "barcoded_hifi_reads": 450000,
+        "barcoded_hifi_reads_percentage": 95.6,
+        "barcoded_hifi_yield": 1025000000,
+        "barcoded_hifi_yield_percentage": 96.7,
+        "barcoded_hifi_mean_read_length": 6100,
+        "unbarcoded_hifi_reads": 50000,
+        "unbarcoded_hifi_yield": 1975000000,
+        "unbarcoded_hifi_mean_read_length": 6200,
         "movie_name": "movie123",
     }
     return PacBioSequencingRunDTO(**sample_data)
 
 
 @pytest.fixture
-def pac_bio_sample_sequencing_metrics_dto() -> list[PacBioSampleSequencingMetricsDTO]:
+def pac_bio_sample_sequencing_metrics_dto(
+    pacbio_barcoded_sample_internal_id: str,
+) -> list[PacBioSampleSequencingMetricsDTO]:
     sample_metrics_data = {
-        "sample_internal_id": "sample_123",
+        "sample_internal_id": pacbio_barcoded_sample_internal_id,
         "hifi_reads": 450000,
         "hifi_yield": 2750000000,
         "hifi_mean_read_length": 6100,
-        "hifi_median_read_length": 6000,
         "hifi_median_read_quality": "Q30",
-        "percent_reads_passing_q30": 98.6,
-        "failed_reads": 1500,
-        "failed_yield": 500000000,
-        "failed_mean_read_length": 3200,
+        "polymerase_mean_read_length": 70000,
+        "barcode": "barcode",
     }
     return [PacBioSampleSequencingMetricsDTO(**sample_metrics_data)]
 
@@ -88,14 +86,4 @@ def pac_bio_dtos(
         run_device=pac_bio_smrt_cell_dto,
         sequencing_run=pac_bio_sequencing_run_dto,
         sample_sequencing_metrics=pac_bio_sample_sequencing_metrics_dto,
-    )
-
-
-@pytest.fixture
-def pac_bio_store_service(store: Store, helpers: StoreHelpers, pac_bio_dtos: PacBioDTOs):
-    helpers.add_sample(
-        store=store, internal_id=pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id
-    )
-    return PacBioStoreService(
-        store=store, data_transfer_service=PacBioDataTransferService(metrics_service=Mock())
     )
