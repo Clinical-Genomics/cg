@@ -357,7 +357,7 @@ class ScoutAPI:
         report_type: str = (
             ScoutCustomCaseReportTags.DELIVERY
         )
-        self.upload_report(case_id=case_id, report_path=report_path, report_type=report_type)
+        self.upload_report(case_id=case_id, report_path=report_path, report_type="rna-delivery-report")
 
 
 

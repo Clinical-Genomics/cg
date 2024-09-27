@@ -247,7 +247,7 @@ def upload_rna_delivery_report_to_scout(
 ) -> None:
     """Upload rna delivery report file for a case to Scout."""
 
-    LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
+    LOG.info("----------------- UPLOAD RNA DELIVERY REPORT TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     scout_upload_api.upload_rna_delivery_report_to_scout(
