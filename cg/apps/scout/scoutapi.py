@@ -354,10 +354,7 @@ class ScoutAPI:
     def upload_rna_delivery_report(self, case_id: str, report_path: str) -> None:
         """Load a fusion report into a case in the database."""
 
-        report_type: str = (
-            ScoutCustomCaseReportTags.DELIVERY
-        )
-        self.upload_report(case_id=case_id, report_path=report_path, report_type="rna-delivery-report")
+        self.upload_report(case_id=case_id, report_path=report_path, report_type="rna_delivery_report")
 
 
 
