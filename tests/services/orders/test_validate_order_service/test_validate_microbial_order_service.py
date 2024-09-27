@@ -52,3 +52,13 @@ def test_validate_submitted_control_order(
     # WHEN validating the order
     # THEN it should be regarded as valid
     ValidateMicrobialOrderService(base_store).validate_order(order=order)
+
+
+def test_validate_microbial_fast_order(microbial_fastq_order_to_submit: dict, base_store: Store):
+    # GIVEN a microbial order with three samples, none in the database
+
+    # WHEN validating the order
+    order = OrderIn.parse_obj(microbial_fastq_order_to_submit, OrderType.MICROBIAL_FASTQ)
+
+    # THEN it should be regarded as valid
+    ValidateMicrobialOrderService(base_store).validate_order(order=order)

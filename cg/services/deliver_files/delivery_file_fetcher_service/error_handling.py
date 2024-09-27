@@ -18,6 +18,6 @@ def handle_missing_bundle_errors(func):
             return func(*args, **kwargs)
         except HousekeeperBundleVersionMissingError as error:
             LOG.error(error)
-            return None
+            return []
 
     return wrapper

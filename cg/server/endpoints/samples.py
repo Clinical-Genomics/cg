@@ -1,13 +1,14 @@
 from http import HTTPStatus
+
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import sample_service
+from cg.server.ext import db, sample_service
 from cg.store.models import Customer, Sample
-from cg.server.ext import db
 
 SAMPLES_BLUEPRINT = Blueprint("samples", __name__, url_prefix="/api/v1")
 SAMPLES_BLUEPRINT.before_request(before_request)
@@ -57,7 +58,7 @@ def get_samples():
         customers: list[Customer] | None = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
+        samples: list[Sample] = db.get_samples_by_customers_and_pattern(
             pattern=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))

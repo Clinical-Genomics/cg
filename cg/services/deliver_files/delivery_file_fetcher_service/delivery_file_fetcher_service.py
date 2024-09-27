@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
+from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
     FetchDeliveryFileTagsService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
 from cg.store.store import Store
 
 

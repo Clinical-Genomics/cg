@@ -20,8 +20,8 @@ def test_get_files_to_deliver(
     case_id: str,
     request,
 ):
-    """Test to get the files to deliver from the FetchFastqDeliverFilesService."""
-    # GIVEN a case id, samples that are present in housekeeper and a delivery service
+    """Test to get the files to deliver from the FetchDeliveryFilesService."""
+    # GIVEN a case id, samples that are present in Housekeeper and a delivery service
     delivery_file_service = request.getfixturevalue(delivery_file_service)
     expected_delivery_files = request.getfixturevalue(expected_delivery_files)
 
