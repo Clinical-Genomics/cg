@@ -61,7 +61,7 @@ def test_store_files_in_housekeeper(
     "file_fixture, file_data_fixture",
     [
         ("pac_bio_ccs_report_file", "ccs_report_pac_bio_file_data"),
-        ("pac_bio_hifi_read_file", "pac_bio_hifi_reads_file_data"),
+        ("pacbio_barcoded_hifi_read_file", "pac_bio_hifi_reads_file_data"),
     ],
     ids=["ccs_report", "hifi_reads"],
 )
@@ -86,6 +86,24 @@ def test_create_bundle_info(
     # THEN the method should return the correct PacBioFileData object
     expected_file_data: PacBioFileData = request.getfixturevalue(file_data_fixture)
     assert file_data == expected_file_data
+
+
+def test_create_bundle_info_unassigned_file(
+    pac_bio_housekeeper_service: PacBioHousekeeperService,
+    pac_bio_metrics: PacBioMetrics,
+    pacbio_unassigned_hifi_read_file: Path,
+):
+    """Test that getting the bundle of an unassigned file fails."""
+    # GIVEN a PacBioMetrics and a Housekeeper PacBioHousekeeperService objects
+
+    # GIVEN an unassigned reads file
+
+    # WHEN creating the file data object for the file
+    with pytest.raises(PostProcessingStoreFileError):
+        # THEN the method should raise an error
+        pac_bio_housekeeper_service._create_bundle_info(
+            file_path=pacbio_unassigned_hifi_read_file, parsed_metrics=pac_bio_metrics
+        )
 
 
 def test_store_housekeeper_file_not_found(
@@ -118,3 +136,21 @@ def test_store_housekeeper_parsing_error(
     ):
         with pytest.raises(PostProcessingStoreFileError):
             pac_bio_housekeeper_service.store_files_in_housekeeper(expected_pac_bio_run_data)
+
+
+def test_get_sample_internal_id_from_file(
+    pac_bio_housekeeper_service: PacBioHousekeeperService,
+    pacbio_barcoded_hifi_read_file: Path,
+    pac_bio_metrics: PacBioMetrics,
+    pacbio_barcoded_sample_internal_id: str,
+):
+    """Test that the sample internal ID can be extracted from a file."""
+    # GIVEN a PacBio HiFi read file and a PacBioMetrics object
+
+    # WHEN getting the sample internal ID from the file
+    sample_internal_id: str = pac_bio_housekeeper_service._get_sample_internal_id_from_file(
+        file_path=pacbio_barcoded_hifi_read_file, parsed_metrics=pac_bio_metrics
+    )
+
+    # THEN the sample internal ID should be returned
+    assert sample_internal_id == pacbio_barcoded_sample_internal_id
