@@ -214,9 +214,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 )
             )
             metrics.extend(metrics_for_pattern)
-        for sample_pair in self._get_sample_pair_patterns(case_id):
+        for search_pattern in self.get_multiqc_search_patterns(case_id):
             if parent_error_metric := self.get_parent_error_ped_check_metric(
-                pair_sample_ids=sample_pair, multiqc_raw_data=multiqc_json.report_saved_raw_data
+                pair_sample_ids=search_pattern, multiqc_raw_data=multiqc_json.report_saved_raw_data
             ):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
