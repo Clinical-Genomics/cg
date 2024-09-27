@@ -76,10 +76,14 @@ def downgrade():
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_mean_read_length")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_reads")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_yield")
-    op.drop_column(table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_mean_read_length")
+    op.drop_column(
+        table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_mean_read_length"
+    )
 
     # PacBioSampleSequencingMetrics
-    op.drop_column(table_name="pacbio_sample_run_metrics", column_name="polymerase_mean_read_length")
+    op.drop_column(
+        table_name="pacbio_sample_run_metrics", column_name="polymerase_mean_read_length"
+    )
     op.drop_column(table_name="pacbio_sample_run_metrics", column_name="barcode")
     op.add_column(
         table_name="pacbio_sample_run_metrics",
