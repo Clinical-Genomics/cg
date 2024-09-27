@@ -1,10 +1,10 @@
-from pydantic_core._pydantic_core import ValidationError
+from pydantic import ValidationError
 
 from cg.services.run_devices.abstract_classes import PostProcessingDataTransferService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
-    PostProcessingRunFileManagerError,
     PostProcessingDataTransferError,
+    PostProcessingRunFileManagerError,
 )
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
