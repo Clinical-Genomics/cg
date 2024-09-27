@@ -124,6 +124,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
+            vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
         )
 
     @staticmethod

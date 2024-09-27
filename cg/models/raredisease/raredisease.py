@@ -70,3 +70,4 @@ class RarediseaseParameters(WorkflowParameters):
     skip_germlinecnvcaller: bool
     vcfanno_extra_resources: str
     local_genomes: str
+    vep_filters_scout_fmt: str
