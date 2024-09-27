@@ -286,7 +286,7 @@ class UploadScoutAPI:
     ) -> None:
         """Upload rna delivery report file for a case to Scout."""
 
-        rna_delivery_report: File | None = self.get_rna_delivery_report(case_id, research)
+        rna_delivery_report: File | None = self.get_rna_delivery_report(case_id)
         if not rna_delivery_report:
             raise FileNotFoundError(
                 f"Rna delivery report was not found in Housekeeper for {case_id}."
