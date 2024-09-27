@@ -839,6 +839,11 @@ def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
 
+@pytest.fixture
+def case_qc_metrics_deliverables_raredisease(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data."""
+    return Path(apps_dir, "raredisease", "case_metrics_deliverables.yaml")
+
 
 @pytest.fixture
 def mip_analysis_dir(analysis_dir: Path) -> Path:

@@ -146,30 +146,37 @@ class UploadGenotypesAPI(object):
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
 
-    def _get_samples_sex_raredisease(self, case: Case) -> dict[str, dict[str, str]]:
+    @staticmethod
+    def _get_samples_sex_raredisease(case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
-        qc_metrics_file: Path = self._get_qcmetrics_file(case_id=case.internal_id)
+        qc_metrics_file: Path = UploadGenotypesAPI._get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             sample_id: str = case_sample.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": case_sample.sample.sex,
-                "analysis": self._get_analysis_sex_raredisease(
+                "analysis": UploadGenotypesAPI._get_analysis_sex_raredisease(
                     qc_metrics_file=qc_metrics_file, sample_id=sample_id
                 ),
             }
         return samples_sex
 
-    def _get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: str) -> str:
+    @staticmethod
+    def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_data_raredisease(
+        print(sample_id)
+        qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
             qc_metrics_file
         )
+        print("all good")
         for metric in qc_metrics:
+            print(metric)
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
+                print(metric.name)
                 return str(metric.value)
 
-    def _get_parsed_qc_metrics_data_raredisease(self, qc_metrics: Path) -> list[MetricsBase]:
+    @staticmethod
+    def _get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> list[MetricsBase]:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
