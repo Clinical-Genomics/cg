@@ -105,6 +105,11 @@ class OverrideCyclesValidator:
         """
         index1_cycle: str = self.sample_cycles[1]
         if (
+            len(self.sample[SampleSheetBCLConvertSections.Data.INDEX_1]) == 0
+            and index1_cycle == f"N{self.run_index1_cycles}"
+        ):
+            return
+        if (
             self.run_index1_cycles == len(self.sample[SampleSheetBCLConvertSections.Data.INDEX_1])
             and index1_cycle == f"I{self.run_index1_cycles}"
         ):

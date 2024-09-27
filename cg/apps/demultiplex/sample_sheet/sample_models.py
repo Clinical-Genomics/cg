@@ -44,6 +44,8 @@ class IlluminaSampleIndexSetting(BaseModel):
 
     def _get_index1_override_cycles(self, len_index1_cycles: int) -> str:
         """Create the index 1 sub-string for the override cycles attribute."""
+        if not self.index:
+            return f"N{len_index1_cycles};"
         len_index_1_sample: int = len(self.index)
         cycles_format: str = f"I{len_index1_cycles};"
         if len_index_1_sample < len_index1_cycles:
