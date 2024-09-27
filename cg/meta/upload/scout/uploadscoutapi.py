@@ -263,7 +263,7 @@ class UploadScoutAPI:
 
         related_dna_cases: set[str] = self.get_related_uploaded_dna_cases(case_id)
         if not related_dna_cases:
-            raise CgDataError("No connected DNA case has been uploaded.")
+            raise CgDataError("No connected DNA case found.")
 
         for dna_case_id in related_dna_cases:
             LOG.info(f"Uploading {report_type} fusion report to Scout for case {dna_case_id}.")
