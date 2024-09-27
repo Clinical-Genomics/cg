@@ -166,7 +166,6 @@ class UploadScoutAPI:
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> File | None:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
@@ -279,7 +278,6 @@ class UploadScoutAPI:
             LOG.info(f"Uploaded {report_type} fusion report.")
 
         LOG.info(f"Upload {report_type} fusion report finished!")
-
 
     def upload_rna_delivery_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False

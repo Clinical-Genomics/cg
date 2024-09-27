@@ -38,7 +38,6 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
         ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-
         self.upload_files_to_customer_inbox(case=case)
 
         # Scout specific upload
