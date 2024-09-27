@@ -904,5 +904,5 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return analysis output of a Nextflow case."""
-        qc_metrics: list[MetricsBase] = NfAnalysisAPI.get_multiqc_json_metrics(case_id)
+        qc_metrics: list[MetricsBase] = NfAnalysisAPI.get_multiqc_json_metrics(self, case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
