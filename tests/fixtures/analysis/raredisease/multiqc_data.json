@@ -102,6 +102,14 @@
         },
         {
             "ADM1": {
+                "gender": "female",
+                "reads_chry": 103876,
+                "reads_chrx": 37077016,
+                "ratio_chry_chrx": 0.0028
+            }
+        },
+        {
+            "ADM1": {
                 "GENOME_TERRITORY": 2858674663.0,
                 "MEAN_COVERAGE": 25.002304,
                 "SD_COVERAGE": 7.564118,
@@ -299,6 +307,14 @@
                 "total_pairs": 272728731.0,
                 "summed_mean": 330.957577,
                 "summed_median": 327
+            }
+        },
+        {
+            "ADM2": {
+                "gender": "female",
+                "reads_chry": 103876,
+                "reads_chrx": 37077016,
+                "ratio_chry_chrx": 0.0028
             }
         },
         {

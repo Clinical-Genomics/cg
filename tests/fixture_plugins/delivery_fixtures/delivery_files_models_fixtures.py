@@ -10,10 +10,10 @@ from cg.constants.housekeeper_tags import (
     SequencingFileTag,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    DeliveryFiles,
-    SampleFile,
     CaseFile,
+    DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
 )
 from cg.store.models import Case
 from cg.store.store import Store
@@ -49,9 +49,7 @@ def expected_fastq_delivery_files(
     delivery_meta_data = DeliveryMetaData(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
-    return DeliveryFiles(
-        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
-    )
+    return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
 
 @pytest.fixture
@@ -84,9 +82,7 @@ def expected_bam_delivery_files(
     delivery_meta_data = DeliveryMetaData(
         customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
     )
-    return DeliveryFiles(
-        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
-    )
+    return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
 
 @pytest.fixture
@@ -155,7 +151,7 @@ def expected_moved_fastq_delivery_files(
     )
     return DeliveryFiles(
         delivery_data=expected_fastq_delivery_files.delivery_data,
-        case_files=None,
+        case_files=[],
         sample_files=new_sample_files,
     )
 
@@ -183,6 +179,13 @@ def expected_moved_analysis_delivery_files(
         case_files=new_case_files,
         sample_files=new_sample_files,
     )
+
+
+@pytest.fixture
+def empty_delivery_files() -> DeliveryFiles:
+    """Return an empty delivery files object."""
+    delivery_data = DeliveryMetaData(customer_internal_id="cust_id", ticket_id="ticket_id")
+    return DeliveryFiles(delivery_data=delivery_data, case_files=[], sample_files=[])
 
 
 @pytest.fixture
