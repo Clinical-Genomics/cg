@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from store_helpers import StoreHelpers
 
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
@@ -24,8 +25,15 @@ def test_store_post_processing_data(
     pac_bio_store_service: PacBioStoreService,
     pac_bio_dtos: PacBioDTOs,
     expected_pac_bio_run_data: PacBioRunData,
+    helpers: StoreHelpers,
 ):
-    # GIVEN a PacBioStoreService
+    # GIVEN a PacBioStoreService and a data transfer service
+
+    # GIVEN that the store has a sample
+    helpers.add_sample(
+        store=pac_bio_store_service.store,
+        internal_id=pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id,
+    )
 
     # GIVEN a data transfer service that returns the correct DTOs
 

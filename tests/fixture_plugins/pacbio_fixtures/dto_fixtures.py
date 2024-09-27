@@ -61,9 +61,11 @@ def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
 
 
 @pytest.fixture
-def pac_bio_sample_sequencing_metrics_dto() -> list[PacBioSampleSequencingMetricsDTO]:
+def pac_bio_sample_sequencing_metrics_dto(
+    pacbio_barcoded_sample_internal_id: str,
+) -> list[PacBioSampleSequencingMetricsDTO]:
     sample_metrics_data = {
-        "sample_internal_id": "sample_123",
+        "sample_internal_id": pacbio_barcoded_sample_internal_id,
         "hifi_reads": 450000,
         "hifi_yield": 2750000000,
         "hifi_mean_read_length": 6100,
