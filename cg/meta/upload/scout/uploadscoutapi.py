@@ -279,9 +279,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Upload {report_type} fusion report finished!")
 
-    def upload_rna_delivery_report_to_scout(
-        self, dry_run: bool, case_id: str
-    ) -> None:
+    def upload_rna_delivery_report_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload rna delivery report file for a case to Scout."""
 
         rna_delivery_report: File | None = self.get_rna_delivery_report(case_id)
