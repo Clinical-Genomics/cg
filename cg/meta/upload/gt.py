@@ -19,6 +19,7 @@ LOG = logging.getLogger(__name__)
 
 class UploadGenotypesAPI(object):
     """Genotype upload API."""
+
     def __init__(
         self,
         hk_api: HousekeeperAPI,
@@ -51,13 +52,9 @@ class UploadGenotypesAPI(object):
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             gt_data["samples_sex"] = self._get_samples_sex_balsamic(case=analysis.case)
         elif analysis.workflow == Workflow.MIP_DNA:
-            gt_data["samples_sex"] = self._get_samples_sex_mip_dna(
-                case=analysis.case
-            )
+            gt_data["samples_sex"] = self._get_samples_sex_mip_dna(case=analysis.case)
         elif analysis.workflow == Workflow.RAREDISEASE:
-            gt_data["samples_sex"] = self._get_samples_sex_raredisease(
-                case=analysis.case
-            )
+            gt_data["samples_sex"] = self._get_samples_sex_raredisease(case=analysis.case)
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return gt_data
@@ -132,7 +129,7 @@ class UploadGenotypesAPI(object):
             return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
 
-    def _get_qcmetrics_file(self, case_id:str) -> Path:
+    def _get_qcmetrics_file(self, case_id: str) -> Path:
         """Return a QC metrics file path."""
         tags: set[str] = HkAnalysisMetricsTag.QC_METRICS
         hk_qcmetrics: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
@@ -149,9 +146,7 @@ class UploadGenotypesAPI(object):
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
 
-    def _get_samples_sex_raredisease(
-        self, case: Case
-    ) -> dict[str, dict[str, str]]:
+    def _get_samples_sex_raredisease(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
         qc_metrics_file: Path = self._get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
@@ -165,14 +160,14 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-
     def _get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
+        qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_data_raredisease(
+            qc_metrics_file
+        )
         for metric in qc_metrics:
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
                 return str(metric.value)
-
 
     def _get_parsed_qc_metrics_data_raredisease(self, qc_metrics: Path) -> list[MetricsBase]:
         """Parse and return a QC metrics file."""
@@ -181,9 +176,6 @@ class UploadGenotypesAPI(object):
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
 
-
-
     @staticmethod
     def _is_variant_file(genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
-

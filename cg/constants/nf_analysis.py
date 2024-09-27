@@ -14,6 +14,7 @@ class NfTowerStatus(StrEnum):
     CANCELLED: str = "CANCELLED"
     UNKNOWN: str = "UNKNOWN"
 
+
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
