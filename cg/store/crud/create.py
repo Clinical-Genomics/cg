@@ -515,6 +515,14 @@ class CreateHandler(BaseHandler):
             failed_reads=sequencing_run_dto.failed_reads,
             failed_yield=sequencing_run_dto.failed_yield,
             failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
+            barcoded_hifi_reads=sequencing_run_dto.barcoded_hifi_reads,
+            barcoded_hifi_reads_percentage=sequencing_run_dto.barcoded_hifi_reads_percentage,
+            barcoded_hifi_yield=sequencing_run_dto.barcoded_hifi_yield,
+            barcoded_hifi_yield_percentage=sequencing_run_dto.barcoded_hifi_yield_percentage,
+            barcoded_hifi_mean_read_length=sequencing_run_dto.barcoded_hifi_mean_read_length,
+            unbarcoded_hifi_reads=sequencing_run_dto.unbarcoded_hifi_reads,
+            unbarcoded_hifi_yield=sequencing_run_dto.unbarcoded_hifi_yield,
+            unbarcoded_hifi_mean_read_length=sequencing_run_dto.unbarcoded_hifi_mean_read_length,
             device=smrt_cell,
         )
         self.session.add(new_sequencing_run)
@@ -533,6 +541,8 @@ class CreateHandler(BaseHandler):
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
             instrument_run=sequencing_run,
+            barcode=sample_run_metrics_dto.barcode,
+            polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
         self.session.add(new_sample_sequencing_run)
         return new_sample_sequencing_run
