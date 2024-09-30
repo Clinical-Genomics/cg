@@ -135,7 +135,6 @@ class Workflow(StrEnum):
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
-    FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
     JASEN: str = "jasen"
     MICROSALT: str = "microsalt"
@@ -143,6 +142,7 @@ class Workflow(StrEnum):
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
+    RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
     SPRING: str = "spring"
@@ -166,8 +166,8 @@ class GenomeVersion(StrEnum):
     GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19 = auto()
-    HG38 = auto()
+    HG19: str = "hg19"
+    HG38: str = "hg38"
 
 
 class SampleType(StrEnum):
@@ -178,6 +178,7 @@ class SampleType(StrEnum):
 class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
+    BAM: str = "bam"
     FASTQ: str = "fastq"
     FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"

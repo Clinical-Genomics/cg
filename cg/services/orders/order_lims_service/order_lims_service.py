@@ -30,7 +30,7 @@ class OrderLimsService:
         samples_lims: list[LimsSample] = self._build_lims_sample(
             lims_order.customer, samples=new_samples
         )
-        project_name = lims_order.ticket or lims_order.name
+        project_name: str = lims_order.ticket or lims_order.name
         # Create new lims project
         project_data = self.lims_api.submit_project(
             project_name, [lims_sample.dict() for lims_sample in samples_lims]

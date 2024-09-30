@@ -31,10 +31,10 @@ class UpdateHandler(BaseHandler):
         sample.comment = f"{sample.comment} {comment}" if sample.comment else comment
         self.session.commit()
 
-    def update_order_delivery(self, order_id: int, delivered: bool) -> Order:
-        """Update the delivery status of an order."""
+    def update_order_status(self, order_id: int, open: bool) -> Order:
+        """Update the status of an order."""
         order: Order = self.get_order_by_id(order_id)
-        order.is_delivered = delivered
+        order.is_open = open
         self.session.commit()
         return order
 
@@ -68,7 +68,10 @@ class UpdateHandler(BaseHandler):
         q30_threshold: int = get_q30_threshold(sequencer_type)
 
         for sample_metric in sample_metrics:
-            if sample_metric.base_passing_q30_percent >= q30_threshold:
+            if (
+                sample_metric.base_passing_q30_percent >= q30_threshold
+                or sample.is_negative_control
+            ):
                 total_reads_for_sample += sample_metric.total_reads_in_lane
 
         sample.reads = total_reads_for_sample

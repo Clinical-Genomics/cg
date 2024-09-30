@@ -10,12 +10,12 @@ def get_balsamic_raw_data() -> tuple[dict, dict]:
 
     config: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
-        file_path=Path("tests", "fixtures", "apps", "balsamic", "case", "config.json"),
+        file_path=Path("tests", "fixtures", "apps", "balsamic", "tga_case", "config.json"),
     )
     metrics: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
         file_path=Path(
-            "tests", "fixtures", "apps", "balsamic", "case", "metrics_deliverables.yaml"
+            "tests", "fixtures", "apps", "balsamic", "tga_case", "metrics_deliverables.yaml"
         ),
     )
     return config, metrics

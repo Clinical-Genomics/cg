@@ -16,7 +16,7 @@ class NfCommandArgs(BaseModel):
     log: str | Path | None
     resume: bool | None
     profile: str | None
-    stub: bool | None
+    stub_run: bool | None
     config: str | Path | None
     name: str | None
     revision: str | None

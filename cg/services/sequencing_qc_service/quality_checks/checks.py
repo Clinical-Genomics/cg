@@ -1,13 +1,13 @@
-from typing import Callable
 from enum import Enum
+from typing import Callable
 
 from cg.constants import Workflow
-from cg.store.models import Case
 from cg.services.sequencing_qc_service.quality_checks.utils import (
+    any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
     sample_pass_sequencing_qc,
-    any_sample_in_case_has_reads,
 )
+from cg.store.models import Case
 
 
 class QualityCheck(Enum):
@@ -40,7 +40,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
 
     any_sample_in_case_has_reads_workflows = [
         Workflow.FLUFFY,
-        Workflow.FASTQ,
+        Workflow.RAW_DATA,
         Workflow.MICROSALT,
         Workflow.MUTANT,
         Workflow.TAXPROFILER,

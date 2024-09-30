@@ -198,6 +198,7 @@ class CreateHandler(BaseHandler):
         received: datetime = None,
         original_ticket: str = None,
         tumour: bool = False,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Build a new Sample record."""
@@ -219,6 +220,7 @@ class CreateHandler(BaseHandler):
             priority=priority,
             received_at=received,
             sex=sex,
+            subject_id=subject_id,
             **kwargs,
         )
 
