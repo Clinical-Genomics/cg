@@ -256,7 +256,7 @@ def test_parse_microbial_sequencing_orderform(microbial_sequencing_orderform: st
     # GIVEN a microbial sequencing orderform in excel format
 
     # WHEN parsing the orderform
-    order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
+    order_form_parser = ExcelOrderformParser()
     order_form_parser.parse_orderform(excel_path=microbial_sequencing_orderform)
 
     # THEN assert that the project type is correct
