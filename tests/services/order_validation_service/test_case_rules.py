@@ -11,6 +11,7 @@ from cg.services.order_validation_service.rules.case.rules import (
     validate_case_names_available,
     validate_case_names_not_repeated,
 )
+from cg.store.models import Case
 from cg.store.store import Store
 
 
@@ -20,7 +21,7 @@ def test_case_name_not_available(
     store = store_with_multiple_cases_and_samples
 
     # GIVEN an order with a new case that has the same name as an existing case
-    case = store.get_cases()[0]
+    case: Case = store.get_cases()[0]
     valid_order.cases[0].name = case.name
     valid_order.customer = case.customer.internal_id
 
