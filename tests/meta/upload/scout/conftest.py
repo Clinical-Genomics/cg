@@ -404,6 +404,72 @@ def mip_rna_analysis_hk_bundle_data(
 
 
 @pytest.fixture(scope="function")
+def tomte_analysis_hk_bundle_data(
+    rna_case_id: str,
+    timestamp: datetime,
+    tomte_analysis_dir: Path,
+    rna_sample_son_id: str,
+    rna_sample_daughter_id: str,
+    rna_sample_mother_id: str,
+    rna_sample_father_id: str,
+) -> dict:
+    """Return MIP RNA bundle data for Housekeeper."""
+
+    files: list[dict] = [
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}.cram").as_posix(),
+            "archive": False,
+            "tags": ["cram", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
+            "archive": False,
+            "tags": ["fusion", "pdf", "clinical", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.pdf").as_posix(),
+            "archive": False,
+            "tags": ["fusion", "pdf", "research", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.pdf").as_posix(),
+            "archive": False,
+            "tags": ["delivery-report", "rna", rna_case_id],
+        },
+    ]
+    for sample_id in [
+        rna_sample_son_id,
+        rna_sample_daughter_id,
+        rna_sample_mother_id,
+        rna_sample_father_id,
+    ]:
+        files.extend(
+            [
+                {
+                    "path": Path(
+                        tomte_analysis_dir, f"{sample_id}_lanes_1_star_sorted_sj.bigWig"
+                    ).as_posix(),
+                    "archive": False,
+                    "tags": ["coverage", "bigwig", "scout", sample_id],
+                },
+                {
+                    "path": Path(
+                        tomte_analysis_dir, f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
+                    ).as_posix(),
+                    "archive": False,
+                    "tags": ["bed", "scout", "junction", sample_id],
+                },
+            ]
+        )
+
+    return {
+        "name": rna_case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": files,
+    }
+
+@pytest.fixture(scope="function")
 def balsamic_analysis_hk_bundle_data(
     case_id: str,
     timestamp: datetime,
@@ -512,6 +578,15 @@ def mip_rna_analysis_hk_api(
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with MIP RNA analysis files."""
     helpers.ensure_hk_version(housekeeper_api, mip_rna_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
+def tomte_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, tomte_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with MIP RNA analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, tomte_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -698,6 +773,30 @@ def upload_mip_analysis_scout_api(
 
     yield UploadScoutAPI(
         hk_api=mip_dna_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+        status_db=store,
+    )
+
+
+
+@pytest.fixture
+def upload_tomte_analysis_scout_api(
+    cg_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> Generator[UploadScoutAPI, None, None]:
+    """Return MIP upload Scout API."""
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.TOMTE)
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    yield UploadScoutAPI(
+        hk_api=tomte_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,

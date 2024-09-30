@@ -748,7 +748,7 @@ def test_upload_report_to_scout(
     )
 
 
-def test_upload_rna_report_to_successful_dna_case_in_scout(
+def test_upload_rna_multiqc_report_to_successful_dna_case_in_scout(
     caplog,
     rna_case_id: str,
     rna_store: Store,
@@ -790,6 +790,146 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
             in caplog.text
         )
 
+def test_upload_tomte_rna_multiqc_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    multiqc_file: File = tomte_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to Scout for case {case_id}"
+            in caplog.text
+        )
+
+
+def test_upload_rna_delivery_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    rna_delivery_report: File = mip_rna_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.RNA_DELIVERY]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        report_file=rna_delivery_report,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.RNA_DELIVERY} report to Scout for case {case_id}"
+            in caplog.text
+        )
+
+def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_tomte_analysis_scout_api: UploadScoutAPI,
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_tomte_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a rna delivery report
+    rna_delivery_report: File = tomte_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.RNA_DELIVERY]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_tomte_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        report_file=rna_delivery_report,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+
+    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+    # THEN the dna case id should have been mentioned in the logging (and used in the upload)
+
+    # Assert that each string in 'expected_strings' is in 'caplog.text'
+    for dna_case_id in dna_case_ids:
+        assert dna_case_id in caplog.text, f"Expected '{dna_case_id}' to be in log output, but it wasn't."
+
+
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+
+
+    # assert f"Running upload of report to DNA case {dna_case_ids[0]}" in caplog.text
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.RNA_DELIVERY} report to Scout for case {case_id}"
+            in caplog.text
+        )
 
 def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     caplog,

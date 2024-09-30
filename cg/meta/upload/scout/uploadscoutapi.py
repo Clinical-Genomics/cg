@@ -304,7 +304,7 @@ class UploadScoutAPI:
                 case_id=dna_case_id,
                 report_path=rna_delivery_report.full_path,
             )
-            LOG.debug(f"Uploaded rna delivery report fusion report for {dna_case_id}.")
+            LOG.debug(f"Uploaded rna delivery report for {dna_case_id}.")
 
         LOG.info(f"Upload rna delivery report finished for case {case_id}!")
 
