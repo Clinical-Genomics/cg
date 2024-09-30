@@ -237,7 +237,7 @@ def test_container_name_missing(
     assert isinstance(errors[0], ContainerNameMissingError)
 
 
-@pytest.mark.parametrize("sample_volume", [1, 200])
+@pytest.mark.parametrize("sample_volume", [1, 200], ids=["Too low", "Too high"])
 def test_volume_out_of_bounds(valid_order: TomteOrder, sample_volume: int):
 
     # GIVEN an order containing a sample with an invalid volume
