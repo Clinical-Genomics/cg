@@ -270,7 +270,7 @@ def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: O
 
 
 def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: OrderWithCases):
-    # Given an order with samples in a case with the same name
+    # GIVEN an order with samples in a case with the same name
 
     # WHEN validating the order
     errors: list[SampleNameRepeatedError] = validate_sample_names_not_repeated(
