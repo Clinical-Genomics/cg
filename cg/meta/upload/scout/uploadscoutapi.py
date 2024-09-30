@@ -160,7 +160,7 @@ class UploadScoutAPI:
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_rna_delivery_report(self, case_id: str) -> File | None:
-        """Return a fusion report for a case in housekeeper."""
+        """Return a RNA report for a case in housekeeper."""
 
         tags = {HK_DELIVERY_REPORT_TAG}
 
@@ -295,17 +295,18 @@ class UploadScoutAPI:
             raise CgDataError("No connected DNA case has been uploaded.")
 
         for dna_case_id in related_dna_cases:
-            LOG.info(f"Uploading rna delivery report to Scout for case {dna_case_id}.")
+            LOG.debug(f"Uploading rna delivery report to Scout for case {dna_case_id}.")
 
             if dry_run:
+                LOG.debug(f"Dry run - Would have uploaded rna delivery report to Scout for case {dna_case_id}.")
                 continue
             self.scout_api.upload_rna_delivery_report(
                 case_id=dna_case_id,
                 report_path=rna_delivery_report.full_path,
             )
-            LOG.info("Uploaded rna delivery report fusion report.")
+            LOG.debug(f"Uploaded rna delivery report fusion report for {dna_case_id}.")
 
-        LOG.info("Upload rna delivery report  finished!")
+        LOG.info(f"Upload rna delivery report finished for case {case_id}!")
 
     def upload_rna_report_to_dna_case_in_scout(
         self,

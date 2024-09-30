@@ -351,7 +351,7 @@ class ScoutAPI:
             raise ScoutUploadError("Something went wrong when updating rna genome build") from error
 
     def upload_rna_delivery_report(self, case_id: str, report_path: str) -> None:
-        """Load a fusion report into a case in the database."""
+        """Load a RNA report into a case in the database."""
 
         self.upload_report(
             case_id=case_id, report_path=report_path, report_type=ScoutCustomCaseReportTags.RNA_DELIVERY
