@@ -10,23 +10,26 @@ from cg.store.models import Analysis
 
 
 @pytest.mark.parametrize(
-    "before_date, should_be_cleaned", [("2024-12-31", False), ("2024-01-01", True)]
+    "before_date, should_be_cleaned", [("2024-12-31", True), ("2024-01-01", False)]
 )
 def test_clean_case_directories(
-    tmp_path: Path, before_date: str, should_be_cleaned: bool, rnafusion_context: CGConfig
+    before_date: str, should_be_cleaned: bool, rnafusion_context: CGConfig
 ):
     """Tests cleaning of case directories."""
 
     # GIVEN a file which was modified days_since_modification ago
     analysis_to_clean: Analysis = rnafusion_context.status_db.add_analysis(
-        workflow=Workflow.RNAFUSION, started_at=parse(before_date)
+        workflow=Workflow.RNAFUSION, started_at=parse("2024-06-06"), uploaded=parse("2024-06-06")
     )
     analysis_to_clean.case = rnafusion_context.status_db.get_cases()[0]
+    rnafusion_context.status_db.session.add(analysis_to_clean)
+    rnafusion_context.status_db.commit_to_store()
 
     # GIVEN an NF Tower analysis API
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
 
     case_path = analysis_api.get_case_path(analysis_to_clean.case.internal_id)
+    case_path.mkdir()
     file_path = Path(case_path, "test_file")
     file_path.touch()
 
