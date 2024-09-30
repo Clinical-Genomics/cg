@@ -1,28 +1,37 @@
-from datetime import datetime, timedelta
-from os import utime
 from pathlib import Path
 
 import pytest
+from dateutil.parser import parse
 
-from cg.meta.clean.clean_case_directories import clean_directory
+from cg.constants import Workflow
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store.models import Analysis
 
 
-@pytest.mark.parametrize("days_since_modification, should_be_cleaned", [(1, False), (100, True)])
+@pytest.mark.parametrize(
+    "before_date, should_be_cleaned", [("2024-12-31", False), ("2024-01-01", True)]
+)
 def test_clean_case_directories(
-    tmp_path: Path,
-    days_since_modification: int,
-    should_be_cleaned: bool,
+    tmp_path: Path, before_date: str, should_be_cleaned: bool, rnafusion_context: CGConfig
 ):
     """Tests cleaning of case directories."""
 
     # GIVEN a file which was modified days_since_modification ago
-    file_path = Path(tmp_path, "test_file")
+    analysis_to_clean: Analysis = rnafusion_context.status_db.add_analysis(
+        workflow=Workflow.RNAFUSION, started_at=parse(before_date)
+    )
+    analysis_to_clean.case = rnafusion_context.status_db.get_cases()[0]
+
+    # GIVEN an NF Tower analysis API
+    analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
+
+    case_path = analysis_api.get_case_path(analysis_to_clean.case.internal_id)
+    file_path = Path(case_path, "test_file")
     file_path.touch()
-    modified_date = datetime.now() - timedelta(days=days_since_modification)
-    utime(path=file_path, times=(datetime.now().timestamp(), modified_date.timestamp()))
 
     # WHEN cleaning the tmp_path/cases directory of old files
-    clean_directory(directory_to_clean=tmp_path, days_old=60, dry_run=False)
+    analysis_api.clean_past_run_dirs(before_date=before_date, skip_confirmation=True)
 
     # THEN the file should be deleted if it was old.
     assert file_path.exists() != should_be_cleaned
