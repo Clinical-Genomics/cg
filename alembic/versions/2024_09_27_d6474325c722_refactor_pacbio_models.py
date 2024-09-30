@@ -21,7 +21,7 @@ def upgrade():
     # PacBioSequencingRun
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("barcoded_hifi_reads", sa.INTEGER, nullable=True),
+        column=sa.Column("barcoded_hifi_reads", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
@@ -29,7 +29,7 @@ def upgrade():
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("barcoded_hifi_yield", sa.INTEGER, nullable=True),
+        column=sa.Column("barcoded_hifi_yield", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
@@ -37,25 +37,25 @@ def upgrade():
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("barcoded_hifi_mean_read_length", sa.INTEGER, nullable=True),
+        column=sa.Column("barcoded_hifi_mean_read_length", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("unbarcoded_hifi_reads", sa.INTEGER, nullable=True),
+        column=sa.Column("unbarcoded_hifi_reads", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("unbarcoded_hifi_yield", sa.INTEGER, nullable=True),
+        column=sa.Column("unbarcoded_hifi_yield", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("unbarcoded_hifi_mean_read_length", sa.INTEGER, nullable=True),
+        column=sa.Column("unbarcoded_hifi_mean_read_length", sa.BIGINT, nullable=True),
     )
 
     # PacBioSampleSequencingMetrics
     op.add_column(
         table_name="pacbio_sample_run_metrics",
-        column=sa.Column("polymerase_mean_read_length", sa.INTEGER, nullable=True),
+        column=sa.Column("polymerase_mean_read_length", sa.BIGINT, nullable=True),
     )
     op.add_column(
         table_name="pacbio_sample_run_metrics",
@@ -91,13 +91,13 @@ def downgrade():
     )
     op.add_column(
         table_name="pacbio_sample_run_metrics",
-        column=sa.Column("failed_reads", sa.INTEGER, nullable=False),
+        column=sa.Column("failed_reads", sa.BIGINT, nullable=False),
     )
     op.add_column(
         table_name="pacbio_sample_run_metrics",
-        column=sa.Column("failed_yield", sa.INTEGER, nullable=False),
+        column=sa.Column("failed_yield", sa.BIGINT, nullable=False),
     )
     op.add_column(
         table_name="pacbio_sample_run_metrics",
-        column=sa.Column("failed_mean_read_length", sa.INTEGER, nullable=False),
+        column=sa.Column("failed_mean_read_length", sa.BIGINT, nullable=False),
     )
