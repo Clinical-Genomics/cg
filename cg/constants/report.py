@@ -11,7 +11,7 @@ project_root_dir: Path = get_project_root_dir()
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
-    project_root_dir, "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
+    project_root_dir, "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
