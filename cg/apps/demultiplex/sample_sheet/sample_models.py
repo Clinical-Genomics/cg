@@ -27,7 +27,7 @@ class IlluminaSampleIndexSetting(BaseModel):
     override_cycles: str = Field(
         EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES
     )
-    barcode_mismatches_1: int = Field(
+    barcode_mismatches_1: int | str = Field(
         1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
     )
     barcode_mismatches_2: int | str = Field(
@@ -87,6 +87,9 @@ class IlluminaSampleIndexSetting(BaseModel):
     ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
+        if not self.index:
+            self.barcode_mismatches_1 = "na"
+            return
         for sample in samples_to_compare:
             if self.sample_id == sample.sample_id:
                 continue
