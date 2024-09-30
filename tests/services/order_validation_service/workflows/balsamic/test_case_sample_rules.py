@@ -28,7 +28,7 @@ def test_validate_sex_subject_id_clash(valid_order: BalsamicOrder, sample_store:
     sample.sex = SexEnum.male
 
     # WHEN validating the order
-    errors = validate_subject_sex_consistency(
+    errors: list[SexSubjectIdError] = validate_subject_sex_consistency(
         order=valid_order,
         store=sample_store,
     )
@@ -47,7 +47,9 @@ def test_validate_capture_kit_required(
     valid_order.cases[0].samples[0].capture_kit = None
 
     # WHEN validating that the order has required capture kits set
-    errors = validate_capture_kit_panel_requirement(order=valid_order, store=base_store)
+    errors: list[CaptureKitMissingError] = validate_capture_kit_panel_requirement(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
