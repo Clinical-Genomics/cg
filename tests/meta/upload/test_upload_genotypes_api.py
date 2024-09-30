@@ -7,6 +7,7 @@ from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Analysis
 
+
 def test_get_analysis_sex(case_qc_metrics_deliverables: Path, genotype_analysis_sex: dict):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI some qcmetrics data
@@ -20,7 +21,9 @@ def test_get_analysis_sex(case_qc_metrics_deliverables: Path, genotype_analysis_
     assert sex == genotype_analysis_sex
 
 
-def test_get_analysis_sex_raredisease(case_qc_metrics_deliverables_raredisease: Path, genotype_analysis_sex: dict):
+def test_get_analysis_sex_raredisease(
+    case_qc_metrics_deliverables_raredisease: Path, genotype_analysis_sex: dict
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI some qcmetrics data
 
@@ -31,7 +34,6 @@ def test_get_analysis_sex_raredisease(case_qc_metrics_deliverables_raredisease: 
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex_ADM1 == "male"
-
 
 
 def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
