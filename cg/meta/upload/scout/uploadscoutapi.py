@@ -298,7 +298,9 @@ class UploadScoutAPI:
             LOG.debug(f"Uploading rna delivery report to Scout for case {dna_case_id}.")
 
             if dry_run:
-                LOG.debug(f"Dry run - Would have uploaded rna delivery report to Scout for case {dna_case_id}.")
+                LOG.debug(
+                    f"Dry run - Would have uploaded rna delivery report to Scout for case {dna_case_id}."
+                )
                 continue
             self.scout_api.upload_rna_delivery_report(
                 case_id=dna_case_id,

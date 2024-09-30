@@ -469,6 +469,7 @@ def tomte_analysis_hk_bundle_data(
         "files": files,
     }
 
+
 @pytest.fixture(scope="function")
 def balsamic_analysis_hk_bundle_data(
     case_id: str,
@@ -779,7 +780,6 @@ def upload_mip_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
-
 
 
 @pytest.fixture

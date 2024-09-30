@@ -790,6 +790,7 @@ def test_upload_rna_multiqc_report_to_successful_dna_case_in_scout(
             in caplog.text
         )
 
+
 def test_upload_tomte_rna_multiqc_report_to_successful_dna_case_in_scout(
     caplog,
     rna_case_id: str,
@@ -875,6 +876,7 @@ def test_upload_rna_delivery_report_to_successful_dna_case_in_scout(
             in caplog.text
         )
 
+
 def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
     caplog,
     rna_case_id: str,
@@ -903,25 +905,27 @@ def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = (
+        upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+            case_id=rna_case_id
+        )
     )
 
-    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = (
+        upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+            case_id=rna_case_id
+        )
     )
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
 
     # Assert that each string in 'expected_strings' is in 'caplog.text'
     for dna_case_id in dna_case_ids:
-        assert dna_case_id in caplog.text, f"Expected '{dna_case_id}' to be in log output, but it wasn't."
-
-
+        assert (
+            dna_case_id in caplog.text
+        ), f"Expected '{dna_case_id}' to be in log output, but it wasn't."
 
     # THEN the api should know that it should find related DNA cases
     assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
-
-
 
     # assert f"Running upload of report to DNA case {dna_case_ids[0]}" in caplog.text
     # THEN the report should be uploaded to Scout
@@ -930,6 +934,7 @@ def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
             f"Uploading {ScoutCustomCaseReportTags.RNA_DELIVERY} report to Scout for case {case_id}"
             in caplog.text
         )
+
 
 def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     caplog,
