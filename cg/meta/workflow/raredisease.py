@@ -25,6 +25,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
@@ -264,3 +265,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS
+
+    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
+        """Return analysis output of a Raredisease case."""
+        qc_metrics: list[MetricsBase] = NfAnalysisAPI.get_multiqc_json_metrics(self, case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)
