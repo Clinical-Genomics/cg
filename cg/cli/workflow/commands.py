@@ -8,8 +8,8 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE, COMMENT
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, SKIP_CONFIRMATION
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import IlluminaRunsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -22,6 +22,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
@@ -383,3 +384,22 @@ def microsalt_past_run_dirs(
     context.invoke(
         past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
     )
+
+
+@click.command("tower-past-run-dirs")
+@SKIP_CONFIRMATION
+@ARGUMENT_BEFORE_STR
+@click.option(
+    "-w",
+    "--workflow",
+    "workflow",
+    help="Only cleans analyses from the specified workflow, if provided.",
+)
+@click.pass_context
+def tower_past_run_dirs(
+    context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
+):
+    """Clean up of "old" tower case run dirs."""
+
+    analysis_api = NfAnalysisAPI(config=context.obj, workflow=workflow)
+    analysis_api.clean_past_run_dirs(before_date=before_str, skip_confirmation=skip_confirmation)

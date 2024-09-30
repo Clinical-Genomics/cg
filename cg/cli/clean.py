@@ -23,17 +23,16 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
+    tower_past_run_dirs,
 )
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import IlluminaCleanRunError, FlowCellError
+from cg.exc import FlowCellError, IlluminaCleanRunError
 from cg.meta.clean.api import CleanAPI
-from cg.services.illumina.cleaning.clean_runs_service import (
-    IlluminaCleanRunsService,
-)
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
+from cg.services.illumina.cleaning.clean_runs_service import IlluminaCleanRunsService
 from cg.store.models import Analysis
 from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
@@ -72,6 +71,7 @@ for sub_cmd in [
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
     microsalt_past_run_dirs,
+    tower_past_run_dirs,
 ]:
     clean.add_command(sub_cmd)
 
@@ -310,19 +310,3 @@ def _get_confirm_question(bundle, file_obj) -> str:
         if file_obj.is_included
         else f"{bundle}: remove file from database: {file_obj.full_path}"
     )
-
-
-@clean.command("analysis-cases")
-@click.option(
-    "--days-old",
-    type=int,
-    default=60,
-    help="Clean the <environment-dir>/analysis/cases directory of old files.",
-    show_default=True,
-)
-@DRY_RUN
-@click.pass_obj
-def clean_analysis_cases(context: CGConfig, days_old: int, dry_run: bool):
-    """Clean the ~/analysis/cases directory of old files"""
-    directory_to_clean = Path(context.tomte.root)
-    clean_directory(directory_to_clean=directory_to_clean, days_old=days_old, dry_run=dry_run)
