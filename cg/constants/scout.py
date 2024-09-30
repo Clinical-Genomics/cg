@@ -23,6 +23,7 @@ class UploadTrack(StrEnum):
 
 class ScoutCustomCaseReportTags(StrEnum):
     DELIVERY: str = "delivery_report"
+    RNA_DELIVERY: str = "rna_delivery_report"
     CNV: str = "cnv_report"
     COV_QC: str = "coverage_qc_report"
     MULTIQC: str = "multiqc"

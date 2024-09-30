@@ -12,7 +12,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
-from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
@@ -146,6 +146,13 @@ class UploadScoutAPI:
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
+    def get_rna_delivery_report(self, case_id: str) -> File | None:
+        """Return a RNA report for a case in housekeeper."""
+
+        tags = {HK_DELIVERY_REPORT_TAG}
+
+        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> File | None:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
@@ -243,7 +250,7 @@ class UploadScoutAPI:
 
         related_dna_cases: set[str] = self.get_related_uploaded_dna_cases(case_id)
         if not related_dna_cases:
-            raise CgDataError("No connected DNA case has been uploaded.")
+            raise CgDataError("No connected DNA case found.")
 
         for dna_case_id in related_dna_cases:
             LOG.info(f"Uploading {report_type} fusion report to Scout for case {dna_case_id}.")
@@ -258,6 +265,37 @@ class UploadScoutAPI:
             LOG.info(f"Uploaded {report_type} fusion report.")
 
         LOG.info(f"Upload {report_type} fusion report finished!")
+
+    def upload_rna_delivery_report_to_scout(self, dry_run: bool, case_id: str) -> None:
+        """Upload rna delivery report file for a case to Scout."""
+
+        rna_delivery_report: File | None = self.get_rna_delivery_report(case_id)
+        if not rna_delivery_report:
+            raise FileNotFoundError(
+                f"Rna delivery report was not found in Housekeeper for {case_id}."
+            )
+
+        LOG.info(f"Rna delivery report {rna_delivery_report.path} found")
+
+        related_dna_cases: set[str] = self.get_related_uploaded_dna_cases(case_id)
+        if not related_dna_cases:
+            raise CgDataError("No connected DNA case has been uploaded.")
+
+        for dna_case_id in related_dna_cases:
+            LOG.debug(f"Uploading rna delivery report to Scout for case {dna_case_id}.")
+
+            if dry_run:
+                LOG.debug(
+                    f"Dry run - Would have uploaded rna delivery report to Scout for case {dna_case_id}."
+                )
+                continue
+            self.scout_api.upload_rna_delivery_report(
+                case_id=dna_case_id,
+                report_path=rna_delivery_report.full_path,
+            )
+            LOG.debug(f"Uploaded rna delivery report for {dna_case_id}.")
+
+        LOG.info(f"Upload rna delivery report finished for case {case_id}!")
 
     def upload_rna_report_to_dna_case_in_scout(
         self,
