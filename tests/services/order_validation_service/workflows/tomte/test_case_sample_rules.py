@@ -41,7 +41,7 @@ def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
 
 def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store):
     # GIVEN an order with repeated gene panels specified
-    panel = store_with_panels.get_panels()[0].abbrev
+    panel: str = store_with_panels.get_panels()[0].abbrev
     valid_order.cases[0].panels = [panel, panel]
 
     # WHEN validating that the gene panels are unique
