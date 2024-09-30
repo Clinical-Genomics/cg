@@ -354,7 +354,7 @@ class ScoutAPI:
         """Load a fusion report into a case in the database."""
 
         self.upload_report(
-            case_id=case_id, report_path=report_path, report_type="rna_delivery_report"
+            case_id=case_id, report_path=report_path, report_type=ScoutCustomCaseReportTags.RNA_DELIVERY
         )
 
     def load_variant_outlier(self, case_id: str) -> None:
