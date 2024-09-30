@@ -202,7 +202,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 metric_id=pair_sample_ids,
             )
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+    def get_raredisease_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
@@ -223,6 +223,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
+
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of a Raredisease metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_raredisease_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
@@ -265,8 +271,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS
-
-    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
-        """Return analysis output of a Raredisease case."""
-        qc_metrics: list[MetricsBase] = NfAnalysisAPI.get_multiqc_json_metrics(self, case_id)
-        return self.parse_analysis(qc_metrics_raw=qc_metrics)
