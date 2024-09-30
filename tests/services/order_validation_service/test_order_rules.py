@@ -15,7 +15,9 @@ def test_ticket_is_required(valid_order: Order):
     valid_order.ticket_number = None
 
     # WHEN validating the order
-    errors = validate_ticket_number_required_if_connected(valid_order)
+    errors: list[TicketNumberRequiredError] = validate_ticket_number_required_if_connected(
+        valid_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -31,7 +33,7 @@ def test_order_name_is_required(valid_order: Order):
     valid_order.connect_to_ticket = False
 
     # WHEN validating the order
-    errors = validate_name_required_for_new_order(valid_order)
+    errors: list[OrderNameRequiredError] = validate_name_required_for_new_order(valid_order)
 
     # THEN an error should be returned
     assert errors

@@ -6,6 +6,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidFatherSexError,
+    PedigreeError,
     SampleIsOwnFatherError,
 )
 from cg.services.order_validation_service.rules.case.rules import (
@@ -27,7 +28,9 @@ def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
     valid_order.cases[0].panels = [invalid_panel]
 
     # WHEN validating that the gene panels exist
-    errors = validate_gene_panels_exist(order=valid_order, store=base_store)
+    errors: list[InvalidGenePanelsError] = validate_gene_panels_exist(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -42,7 +45,7 @@ def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store)
     valid_order.cases[0].panels = [panel, panel]
 
     # WHEN validating that the gene panels are unique
-    errors = validate_gene_panels_unique(valid_order)
+    errors: list[RepeatedGenePanelsError] = validate_gene_panels_unique(valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -55,7 +58,7 @@ def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
     # GIVEN an order with an incorrectly specified father
 
     # WHEN validating the order
-    errors = validate_fathers_are_male(order_with_invalid_father_sex)
+    errors: list[InvalidFatherSexError] = validate_fathers_are_male(order_with_invalid_father_sex)
 
     # THEN errors are returned
     assert errors
@@ -69,7 +72,9 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     # GIVEN an order with the father sample in the wrong case
 
     # WHEN validating the order
-    errors = validate_fathers_in_same_case_as_children(order_with_father_in_wrong_case)
+    errors: list[FatherNotInCaseError] = validate_fathers_in_same_case_as_children(
+        order_with_father_in_wrong_case
+    )
 
     # THEN an error is returned
     assert errors
@@ -84,7 +89,7 @@ def test_sample_cannot_be_its_own_father(valid_order: TomteOrder):
     sample.father = sample.name
 
     # WHEN validating the order
-    errors = validate_pedigree(valid_order)
+    errors: list[PedigreeError] = validate_pedigree(valid_order)
 
     # THEN an error is returned
     assert errors
@@ -97,7 +102,7 @@ def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
     # GIVEN an order where a sample is a descendant of itself
 
     # WHEN validating the order
-    errors = validate_pedigree(order_with_sample_cycle)
+    errors: list[PedigreeError] = validate_pedigree(order_with_sample_cycle)
 
     # THEN an error is returned
     assert errors
@@ -110,7 +115,7 @@ def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
     # GIVEN an order where parents are siblings
 
     # WHEN validating the order
-    errors = validate_pedigree(order_with_siblings_as_parents)
+    errors: list[PedigreeError] = validate_pedigree(order_with_siblings_as_parents)
 
     # THEN no error is returned
     assert not errors

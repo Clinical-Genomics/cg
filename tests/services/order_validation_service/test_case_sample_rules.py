@@ -53,7 +53,7 @@ def test_validate_well_position_format(valid_order: OrderWithCases):
     valid_order.cases[0].samples[0].well_position = "D:0"
 
     # WHEN validating the well position format
-    errors = validate_well_position_format(order=valid_order)
+    errors: list[WellFormatError] = validate_well_position_format(order=valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -175,7 +175,9 @@ def test_application_is_incompatible(
     valid_order.cases[0].samples.append(sample_with_non_compatible_application)
 
     # WHEN validating the order
-    errors = validate_application_compatibility(order=valid_order, store=base_store)
+    errors: list[ApplicationNotCompatibleError] = validate_application_compatibility(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -191,7 +193,9 @@ def test_subject_ids_same_as_case_names_not_allowed(valid_order: TomteOrder):
     valid_order.cases[0].samples[0].subject_id = case_name
 
     # WHEN validating that no subject ids are the same as the case name
-    errors = validate_subject_ids_different_from_case_names(valid_order)
+    errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_different_from_case_names(
+        valid_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -207,7 +211,7 @@ def test_well_position_missing(
     valid_order.cases[0].samples.append(sample_with_missing_well_position)
 
     # WHEN validating that no well positions are missing
-    errors = validate_well_positions_required(valid_order)
+    errors: list[WellPositionMissingError] = validate_well_positions_required(valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -224,7 +228,7 @@ def test_container_name_missing(
     valid_order.cases[0].samples.append(sample_with_missing_container_name)
 
     # WHEN validating that it is not missing any container names
-    errors = validate_container_name_required(order=valid_order)
+    errors: list[ContainerNameMissingError] = validate_container_name_required(order=valid_order)
 
     # THEN an error should be raised
     assert errors
@@ -240,7 +244,7 @@ def test_volume_out_of_bounds(valid_order: TomteOrder, sample_volume: int):
     valid_order.cases[0].samples[0].volume = sample_volume
 
     # WHEN validating that the volume is within bounds
-    errors = validate_volume_interval(valid_order)
+    errors: list[InvalidVolumeError] = validate_volume_interval(valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -254,7 +258,9 @@ def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: O
     # GIVEN an order with multiple samples in the same well
 
     # WHEN validating the order
-    errors = validate_wells_contain_at_most_one_sample(order_with_samples_in_same_well)
+    errors: list[OccupiedWellError] = validate_wells_contain_at_most_one_sample(
+        order_with_samples_in_same_well
+    )
 
     # THEN an error should be returned
     assert errors
@@ -267,7 +273,9 @@ def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: Ord
     # Given an order with samples in a case with the same name
 
     # WHEN validating the order
-    errors = validate_sample_names_not_repeated(order_with_repeated_sample_names)
+    errors: list[SampleNameRepeatedError] = validate_sample_names_not_repeated(
+        order_with_repeated_sample_names
+    )
 
     # THEN errors are returned
     assert errors
@@ -282,7 +290,7 @@ def test_elution_buffer_is_not_allowed(valid_order: TomteOrder):
     valid_order.skip_reception_control = True
 
     # WHEN validating that the buffers conform to the 'skip reception control' requirements
-    errors = validate_buffers_are_allowed(valid_order)
+    errors: list[InvalidBufferError] = validate_buffers_are_allowed(valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -298,7 +306,9 @@ def test_subject_id_same_as_sample_name_is_not_allowed(valid_order: TomteOrder):
     valid_order.cases[0].samples[0].subject_id = sample_name
 
     # WHEN validating that the subject ids are different from the sample names
-    errors = validate_subject_ids_different_from_sample_names(valid_order)
+    errors: list[SubjectIdSameAsSampleNameError] = validate_subject_ids_different_from_sample_names(
+        valid_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -312,7 +322,9 @@ def test_concentration_required_if_skip_rc(valid_order: OrderWithCases):
     valid_order.skip_reception_control = True
 
     # WHEN validating that concentration is provided
-    errors = validate_concentration_required_if_skip_rc(valid_order)
+    errors: list[ConcentrationRequiredIfSkipRCError] = validate_concentration_required_if_skip_rc(
+        valid_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -334,7 +346,7 @@ def test_concentration_not_within_interval_if_skip_rc(
     base_store.session.commit()
 
     # WHEN validating that the concentration is within the allowed interval
-    errors = validate_concentration_interval_if_skip_rc(
+    errors: list[InvalidConcentrationIfSkipRCError] = validate_concentration_interval_if_skip_rc(
         order=order_with_invalid_concentration, store=base_store
     )
 

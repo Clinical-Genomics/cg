@@ -25,7 +25,9 @@ def test_case_name_not_available(
     valid_order.customer = case.customer.internal_id
 
     # WHEN validating that the case name is available
-    errors = validate_case_names_available(order=valid_order, store=store)
+    errors: list[CaseNameNotAvailableError] = validate_case_names_available(
+        order=valid_order, store=store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -44,7 +46,7 @@ def test_case_internal_ids_does_not_exist(
     valid_order.cases.append(existing_case)
 
     # WHEN validating that the internal ids match existing cases
-    errors = validate_case_internal_ids_exist(
+    errors: list[CaseDoesNotExistError] = validate_case_internal_ids_exist(
         order=valid_order,
         store=store_with_multiple_cases_and_samples,
     )
@@ -60,7 +62,9 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWi
     # GIVEN an order with cases with the same name
 
     # WHEN validating the order
-    errors = validate_case_names_not_repeated(order_with_repeated_case_names)
+    errors: list[RepeatedCaseNameError] = validate_case_names_not_repeated(
+        order_with_repeated_case_names
+    )
 
     # THEN errors are returned
     assert errors
