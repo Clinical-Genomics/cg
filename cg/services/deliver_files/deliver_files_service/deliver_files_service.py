@@ -13,7 +13,9 @@ from cg.services.deliver_files.delivery_file_fetcher_service.models import Deliv
 from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFiles
+from cg.services.deliver_files.delivery_file_formatter_service.models import (
+    FormattedFiles,
+)
 from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover import (
     DeliveryFilesMover,
 )
@@ -92,7 +94,7 @@ class DeliverFilesService:
     @staticmethod
     def _are_files_to_deliver(delivery_files: DeliveryFiles) -> bool:
         """Check if there is any file to deliver."""
-        return bool(delivery_files.case_files and delivery_files.sample_files)
+        return bool(delivery_files.case_files or delivery_files.sample_files)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
