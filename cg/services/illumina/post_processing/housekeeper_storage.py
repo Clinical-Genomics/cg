@@ -35,9 +35,6 @@ def _should_fastq_path_be_stored_in_housekeeper(
     """
     sample: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
 
-    if sample.is_negative_control:
-        return True
-
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
@@ -46,6 +43,9 @@ def _should_fastq_path_be_stored_in_housekeeper(
         sample_internal_id=sample_id,
         lane=lane,
     )
+
+    if sample.is_negative_control and metric.total_reads_in_lane != 0:
+        return True
 
     if metric:
         return metric.base_passing_q30_percent >= q30_threshold
