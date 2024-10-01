@@ -59,9 +59,9 @@ class UploadGenotypesAPI(object):
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return genotype_load_config
 
-    def upload(self, data: dict, replace: bool = False):
+    def upload(self, genotype_load_config: dict, replace: bool = False):
         """Upload a genotype config for a case."""
-        self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
+        self.gt.upload(str(genotype_load_config["bcf"]), genotype_load_config["samples_sex"], force=replace)
 
     @staticmethod
     def _is_suitable_for_genotype_upload(case: Case) -> bool:
@@ -121,7 +121,7 @@ class UploadGenotypesAPI(object):
         self,
         case_id: str,
     ) -> File:
-        """Return a Housekeeper file object. 
+        """Return a Housekeeper file object.
         Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
         LOG.debug("Get Genotype files from Housekeeper")
         genotype_file: File = self._get_genotype_file(case_id)
@@ -131,7 +131,8 @@ class UploadGenotypesAPI(object):
         raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
 
     def _get_qcmetrics_file(self, case_id: str) -> Path:
-        """Return a QC metrics file path."""
+        """Return a QC metrics file path.
+        Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
         tags: set[str] = HkAnalysisMetricsTag.QC_METRICS
         hk_qcmetrics: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_qcmetrics:
