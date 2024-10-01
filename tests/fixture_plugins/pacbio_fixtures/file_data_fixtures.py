@@ -9,11 +9,11 @@ from cg.services.run_devices.pacbio.housekeeper_service.models import PacBioFile
 
 @pytest.fixture
 def ccs_report_pac_bio_file_data(
-    pac_bio_ccs_report_file: Path, barcoded_smrt_cell_internal_id: str
+    pacbio_barcoded_ccs_report_file: Path, barcoded_smrt_cell_internal_id: str
 ) -> PacBioFileData:
     """Return a PacBioFileData object for a CCS report file."""
     return PacBioFileData(
-        file_path=pac_bio_ccs_report_file,
+        file_path=pacbio_barcoded_ccs_report_file,
         bundle_name=barcoded_smrt_cell_internal_id,
         tags=[PacBioHousekeeperTags.CCS_REPORT, barcoded_smrt_cell_internal_id],
     )

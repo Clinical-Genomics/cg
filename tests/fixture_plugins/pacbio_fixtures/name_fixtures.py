@@ -5,11 +5,6 @@ import pytest
 
 @pytest.fixture
 def pac_bio_smrt_cell_name() -> str:
-    return "1_A01"
-
-
-@pytest.fixture
-def pac_bio_another_smrt_cell_name() -> str:
     return "1_B01"
 
 
@@ -30,9 +25,11 @@ def pacbio_barcoded_run_name() -> str:
 
 
 @pytest.fixture
-def pac_bio_sequencing_run_name(pac_bio_test_run_name: str, pac_bio_smrt_cell_name: str) -> str:
+def pacbio_barcoded_sequencing_run_name(
+    pacbio_barcoded_run_name: str, pacbio_barcoded_smrt_cell_name: str
+) -> str:
     """Return the name of a PacBio SMRT cell."""
-    return f"{pac_bio_test_run_name}/{pac_bio_smrt_cell_name})"
+    return f"{pacbio_barcoded_run_name}/{pacbio_barcoded_smrt_cell_name}"
 
 
 @pytest.fixture

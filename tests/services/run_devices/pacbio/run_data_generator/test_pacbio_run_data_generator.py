@@ -14,15 +14,14 @@ from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRun
 @pytest.mark.parametrize(
     "run_name_fixture, smrt_cell_name_fixture, run_data_fixture",
     [
-        ("pac_bio_test_run_name", "pac_bio_smrt_cell_name", "expected_pac_bio_run_data"),
         (
             "pac_bio_test_run_name",
-            "pac_bio_another_smrt_cell_name",
+            "pac_bio_smrt_cell_name",
             "expected_pac_bio_run_data_1_b01",
         ),
         ("pacbio_barcoded_run_name", "pacbio_barcoded_smrt_cell_name", "pacbio_barcoded_run_data"),
     ],
-    ids=["1_A01", "1_B01", "1_C01"],
+    ids=["1_B01", "1_C01"],
 )
 def test_get_run_data(
     pac_bio_run_data_generator: PacBioRunDataGenerator,

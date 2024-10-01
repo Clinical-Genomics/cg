@@ -24,7 +24,7 @@ from tests.store_helpers import StoreHelpers
 def test_store_post_processing_data(
     pac_bio_store_service: PacBioStoreService,
     pac_bio_dtos: PacBioDTOs,
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
     helpers: StoreHelpers,
 ):
     # GIVEN a PacBioStoreService and a data transfer service
@@ -42,7 +42,7 @@ def test_store_post_processing_data(
         "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
     ):
-        pac_bio_store_service.store_post_processing_data(expected_pac_bio_run_data)
+        pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
 
     # THEN the SMRT cell data is stored
     smrt_cell: PacBioSMRTCell = pac_bio_store_service.store._get_query(PacBioSMRTCell).first()
@@ -70,31 +70,28 @@ def test_store_post_processing_data(
 def test_store_post_processing_data_error_database(
     pac_bio_store_service: PacBioStoreService,
     pac_bio_dtos: PacBioDTOs,
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
 ):
-    # GIVEN a PacBioStoreService
+    # GIVEN a PacbioStoreService and a Pacbio run data object
 
-    # GIVEN a data transfer service that returns the correct DTOs
-
-    # WHEN storing data for a PacBio instrument run
+    # WHEN storing an incorrect set of DTOs for a Pacbio instrument run
     with mock.patch(
         "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
     ), mock.patch.object(Store, "create_pac_bio_smrt_cell", side_effect=ValueError):
+        # THEN a PostProcessingStoreDataError is raised
         with pytest.raises(PostProcessingStoreDataError):
-            pac_bio_store_service.store_post_processing_data(expected_pac_bio_run_data)
+            pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
 
 
 def test_store_post_processing_data_error_parser(
     pac_bio_store_service: PacBioStoreService,
     pac_bio_dtos: PacBioDTOs,
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
 ):
-    # GIVEN a PacBioStoreService
+    # GIVEN a PacbioStoreService and a Pacbio run data object
 
-    # GIVEN a data transfer service that returns the correct DTOs
-
-    # WHEN storing data for a PacBio instrument run
+    # WHEN storing data for a PacBio instrument run and the transfer service fails
     with mock.patch(
         "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
@@ -103,5 +100,6 @@ def test_store_post_processing_data_error_parser(
         "get_post_processing_dtos",
         side_effect=PostProcessingDataTransferError,
     ):
+        # THEN a PostProcessingStoreDataError is raised
         with pytest.raises(PostProcessingStoreDataError):
-            pac_bio_store_service.store_post_processing_data(expected_pac_bio_run_data)
+            pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)

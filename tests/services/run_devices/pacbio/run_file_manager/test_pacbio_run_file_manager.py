@@ -59,7 +59,7 @@ def test_get_files_to_store_error(
 
 
 def test_get_files_to_parse_error(
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
     pac_bio_run_file_manager: PacBioRunFileManager,
 ):
     # GIVEN a run data object
@@ -74,7 +74,7 @@ def test_get_files_to_parse_error(
 
         # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
-            pac_bio_run_file_manager.get_files_to_parse(expected_pac_bio_run_data)
+            pac_bio_run_file_manager.get_files_to_parse(pacbio_barcoded_run_data)
 
 
 def test_get_run_validator_files(
