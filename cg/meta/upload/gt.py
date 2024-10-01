@@ -166,7 +166,6 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        print(sample_id)
         qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
             qc_metrics_file
         )
