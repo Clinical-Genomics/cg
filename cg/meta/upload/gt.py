@@ -54,14 +54,18 @@ class UploadGenotypesAPI(object):
         elif analysis.workflow == Workflow.MIP_DNA:
             genotype_load_config["samples_sex"] = self._get_samples_sex_mip_dna(case=analysis.case)
         elif analysis.workflow == Workflow.RAREDISEASE:
-            genotype_load_config["samples_sex"] = self._get_samples_sex_raredisease(case=analysis.case)
+            genotype_load_config["samples_sex"] = self._get_samples_sex_raredisease(
+                case=analysis.case
+            )
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return genotype_load_config
 
     def upload(self, genotype_load_config: dict, replace: bool = False):
         """Upload a genotype config for a case."""
-        self.gt.upload(str(genotype_load_config["bcf"]), genotype_load_config["samples_sex"], force=replace)
+        self.gt.upload(
+            str(genotype_load_config["bcf"]), genotype_load_config["samples_sex"], force=replace
+        )
 
     @staticmethod
     def _is_suitable_for_genotype_upload(case: Case) -> bool:
@@ -141,7 +145,9 @@ class UploadGenotypesAPI(object):
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
-    def _get_parsed_qc_metrics_deliverables_mip_dna(qc_metrics_file: Path) -> MIPMetricsDeliverables:
+    def _get_parsed_qc_metrics_deliverables_mip_dna(
+        qc_metrics_file: Path,
+    ) -> MIPMetricsDeliverables:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics_file
@@ -166,8 +172,8 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(
-            qc_metrics_file
+        qc_metrics: list[MetricsBase] = (
+            UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(qc_metrics_file)
         )
         for metric in qc_metrics:
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
@@ -183,4 +189,6 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def _is_variant_file(genotype_file: File):
-        return genotype_file.full_path.endswith(FileExtensions.VCF_GZ) or genotype_file.full_path.endswith(FileExtensions.BCF)
+        return genotype_file.full_path.endswith(
+            FileExtensions.VCF_GZ
+        ) or genotype_file.full_path.endswith(FileExtensions.BCF)
