@@ -60,7 +60,7 @@ def test_store_files_in_housekeeper(
 @pytest.mark.parametrize(
     "file_fixture, file_data_fixture",
     [
-        ("pac_bio_ccs_report_file", "ccs_report_pac_bio_file_data"),
+        ("pacbio_barcoded_ccs_report_file", "ccs_report_pac_bio_file_data"),
         ("pacbio_barcoded_hifi_read_file", "pac_bio_hifi_reads_file_data"),
     ],
     ids=["ccs_report", "hifi_reads"],
