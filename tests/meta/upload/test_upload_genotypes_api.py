@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from cg.constants.constants import SexOptions
+from cg.constants.observations import MipDNAObservationsAnalysisTag
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
@@ -74,7 +75,7 @@ def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str):
     gbcf = upload_genotypes_api._get_bcf_file(case_id)
 
     # THEN assert that the file has the correct tag
-    assert "snv-gbcf" in (tag.name for tag in gbcf.tags)
+    assert MipDNAObservationsAnalysisTag.PROFILE_GBCF in (tag.name for tag in gbcf.tags)
 
 
 def test_get_data_mip(
