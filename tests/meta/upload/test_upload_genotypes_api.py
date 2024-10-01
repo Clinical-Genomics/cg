@@ -51,7 +51,7 @@ def test_get_parsed_qc_metrics_deliverables_mip(case_qc_metrics_deliverables: Pa
 
 def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_deliverables: Path):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
-    # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
+    # GIVEN a UploadGenotypesAPI and the path to a QC metrics file with case data
 
     # WHEN fetching the predicted sex
     metrics_object = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(
