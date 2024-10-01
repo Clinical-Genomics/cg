@@ -169,7 +169,6 @@ class UploadGenotypesAPI(object):
         qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
             qc_metrics_file
         )
-        print("all good")
         for metric in qc_metrics:
             print(metric)
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
