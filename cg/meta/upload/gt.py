@@ -170,9 +170,7 @@ class UploadGenotypesAPI(object):
             qc_metrics_file
         )
         for metric in qc_metrics:
-            print(metric)
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
-                print(metric.name)
                 return str(metric.value)
 
     @staticmethod
