@@ -68,7 +68,6 @@ def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_delivera
 def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
-    # hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
     # WHEN fetching the gbcf file with the api
     gbcf = upload_genotypes_api._get_bcf_file(case_id)
