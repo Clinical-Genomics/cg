@@ -150,7 +150,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def _get_samples_sex_raredisease(case: Case) -> dict[str, dict[str, str]]:
-        """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
+        """Return sex information from StatusDB and from analysis prediction."""
         qc_metrics_file: Path = UploadGenotypesAPI._get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
@@ -166,15 +166,11 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        print(sample_id)
         qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
             qc_metrics_file
         )
-        print("all good")
         for metric in qc_metrics:
-            print(metric)
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
-                print(metric.name)
                 return str(metric.value)
 
     @staticmethod
