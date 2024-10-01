@@ -82,7 +82,7 @@ class UploadGenotypesAPI(object):
         return hk_genotype
 
     def _get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
-        """Return sex information from StatusDB and from analysis prediction (UNKNOWN for BALSAMIC)."""
+        """Return sex information from StatusDB and for analysis."""
         samples_sex: dict[str, dict[str, str]] = {}
         for case_sample in case.links:
             if case_sample.sample.is_tumour:
@@ -95,7 +95,7 @@ class UploadGenotypesAPI(object):
         return samples_sex
 
     def _get_samples_sex_mip_dna(self, case: Case) -> dict[str, dict[str, str]]:
-        """Return sex information from StatusDB and from analysis prediction (stored Housekeeper QC metrics file)."""
+        """Return sex information from StatusDB and from analysis prediction"""
         qc_metrics_file: Path = self._get_qcmetrics_file(case_id=case.internal_id)
         analysis_sex: dict = self._get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
