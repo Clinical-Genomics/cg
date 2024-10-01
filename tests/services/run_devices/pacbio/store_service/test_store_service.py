@@ -74,7 +74,9 @@ def test_store_post_processing_data_error_database(
 ):
     # GIVEN a PacbioStoreService and a Pacbio run data object
 
-    # WHEN storing an incorrect set of DTOs for a Pacbio instrument run
+    # GIVEN a store that raises an error when creating a PacBio SMRT cell
+
+    # WHEN trying to store data for a Pacbio instrument run
     with mock.patch(
         "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
@@ -91,7 +93,9 @@ def test_store_post_processing_data_error_parser(
 ):
     # GIVEN a PacbioStoreService and a Pacbio run data object
 
-    # WHEN storing data for a PacBio instrument run and the transfer service fails
+    # GIVEN a data transfer service that raises an error when parsing data
+
+    # WHEN trying to store data for a PacBio instrument ru
     with mock.patch(
         "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
         return_value=pac_bio_dtos,
