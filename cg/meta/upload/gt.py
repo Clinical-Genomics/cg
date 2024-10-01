@@ -47,20 +47,20 @@ class UploadGenotypesAPI(object):
         """
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
-        hk_bcf = self._get_bcf_file(case_id=case_id)
-        gt_data: dict = {"bcf": hk_bcf.full_path}
+        hk_bcf: File = self._get_bcf_file(case_id=case_id)
+        genotype_load_config: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            gt_data["samples_sex"] = self._get_samples_sex_balsamic(case=analysis.case)
+            genotype_load_config["samples_sex"] = self._get_samples_sex_balsamic(case=analysis.case)
         elif analysis.workflow == Workflow.MIP_DNA:
-            gt_data["samples_sex"] = self._get_samples_sex_mip_dna(case=analysis.case)
+            genotype_load_config["samples_sex"] = self._get_samples_sex_mip_dna(case=analysis.case)
         elif analysis.workflow == Workflow.RAREDISEASE:
-            gt_data["samples_sex"] = self._get_samples_sex_raredisease(case=analysis.case)
+            genotype_load_config["samples_sex"] = self._get_samples_sex_raredisease(case=analysis.case)
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
-        return gt_data
+        return genotype_load_config
 
     def upload(self, data: dict, replace: bool = False):
-        """Upload data about genotypes for a family of samples."""
+        """Upload a genotype config for a case."""
         self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
 
     @staticmethod
