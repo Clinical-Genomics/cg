@@ -52,7 +52,7 @@ def test_get_parsed_qc_metrics_deliverables_mip(case_qc_metrics_deliverables: Pa
 
 def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_deliverables: Path):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
-    # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
+    # GIVEN a UploadGenotypesAPI and the path to a QC metrics file with case data
 
     # WHEN fetching the predicted sex
     metrics_object = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(
@@ -69,7 +69,6 @@ def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_delivera
 def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
-    # hk_version = upload_genotypes_api.hk.version(case_id, timestamp)
 
     # WHEN fetching the gbcf file with the api
     gbcf = upload_genotypes_api._get_bcf_file(case_id)
@@ -95,7 +94,7 @@ def test_get_data_mip(
     # WHEN parsing the data
     result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)
 
-    # THEN assert that the result looks like expected
+    # THEN assert that the the number of samples sex is set
     assert len(result["samples_sex"]) == 3
 
 
