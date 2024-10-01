@@ -72,7 +72,6 @@ def pac_bio_sample_sequencing_metrics_dto(
         "hifi_mean_read_length": 6100,
         "hifi_median_read_quality": "Q30",
         "polymerase_mean_read_length": 70000,
-        "barcode": "barcode",
     }
     return [PacBioSampleSequencingMetricsDTO(**sample_metrics_data)]
 

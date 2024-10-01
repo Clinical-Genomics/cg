@@ -542,7 +542,6 @@ class CreateHandler(BaseHandler):
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
             instrument_run=sequencing_run,
-            barcode=sample_run_metrics_dto.barcode,
             polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
         self.session.add(new_sample_sequencing_run)

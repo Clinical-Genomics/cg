@@ -70,7 +70,6 @@ def get_sample_sequencing_metrics_dtos(
             hifi_mean_read_length=sample.hifi_mean_read_length,
             hifi_median_read_quality=sample.hifi_median_read_quality,
             polymerase_mean_read_length=sample.polymerase_read_length,
-            barcode=sample.barcode_name,
         )
         sample_metrics_dtos.append(sample_sequencing_metrics_dto)
     return sample_metrics_dtos

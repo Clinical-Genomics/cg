@@ -1173,6 +1173,5 @@ class PacBioSampleSequencingMetrics(SampleRunMetrics):
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
     polymerase_mean_read_length: Mapped[BigInt | None]
-    barcode: Mapped[Str32 | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
