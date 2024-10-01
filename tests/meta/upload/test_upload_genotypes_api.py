@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from cg.constants.constants import SexOptions
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
@@ -33,7 +34,7 @@ def test_get_analysis_sex_raredisease(
     )
 
     # THEN assert that the the predicted sex per sample_id is returned
-    assert sex == "male"
+    assert sex ==SexOptions.MALE
 
 
 def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
