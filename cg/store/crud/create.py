@@ -492,6 +492,7 @@ class CreateHandler(BaseHandler):
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
             plate=sequencing_run_dto.plate,
+            run_name=sequencing_run_dto.run_name,
             movie_name=sequencing_run_dto.movie_name,
             started_at=sequencing_run_dto.started_at,
             completed_at=sequencing_run_dto.completed_at,

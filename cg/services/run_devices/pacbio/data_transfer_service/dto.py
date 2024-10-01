@@ -12,6 +12,7 @@ class PacBioSequencingRunDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
+    run_name: str
     movie_name: str
     started_at: datetime
     completed_at: datetime

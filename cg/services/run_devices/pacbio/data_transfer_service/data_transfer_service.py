@@ -34,7 +34,9 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
     def get_post_processing_dtos(self, run_data: PacBioRunData) -> PacBioDTOs:
         metrics: PacBioMetrics = self.metrics_service.parse_metrics(run_data)
         smrt_cell_dto: PacBioSMRTCellDTO = get_smrt_cell_dto(metrics)
-        sequencing_run_dto: PacBioSequencingRunDTO = get_sequencing_run_dto(metrics)
+        sequencing_run_dto: PacBioSequencingRunDTO = get_sequencing_run_dto(
+            metrics=metrics, run_data=run_data
+        )
         sample_sequencing_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = (
             get_sample_sequencing_metrics_dtos(metrics.samples)
         )

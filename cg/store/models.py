@@ -1093,6 +1093,7 @@ class PacBioSequencingRun(InstrumentRun):
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
+    run_name: Mapped[Str32 | None]
     movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
