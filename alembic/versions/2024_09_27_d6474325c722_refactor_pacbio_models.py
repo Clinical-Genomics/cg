@@ -7,6 +7,7 @@ Create Date: 2024-09-27 15:40:49.040271
 """
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 from alembic import op
 
@@ -38,6 +39,9 @@ def upgrade():
     op.add_column(
         table_name="pacbio_sequencing_run",
         column=sa.Column("barcoded_hifi_mean_read_length", sa.BIGINT, nullable=True),
+    )
+    op.add_column(
+        "pacbio_sequencing_run", sa.Column("run_name", type_=mysql.VARCHAR(64), nullable=True)
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
@@ -74,6 +78,7 @@ def downgrade():
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_yield")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_yield_percentage")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_mean_read_length")
+    op.drop_column(table_name="pacbio_sequencing_run", column_name="run_name")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_reads")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_yield")
     op.drop_column(

@@ -17,11 +17,12 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 
 
 @pytest.fixture
-def pac_bio_sequencing_run_dto() -> PacBioSequencingRunDTO:
+def pac_bio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
     sample_data = {
         "type": DeviceType.PACBIO,
         "well": "A1",
         "plate": 1,
+        "run_name": pac_bio_test_run_name,
         "started_at": datetime.now(),
         "completed_at": datetime.now(),
         "movie_time_hours": 10,
