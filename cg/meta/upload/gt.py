@@ -65,7 +65,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def _is_suitable_for_genotype_upload(case: Case) -> bool:
-        """Check if a cancer case is contains WGS and normal sample."""
+        """Check if a cancer case contains normal (non-tumor) or WGS samples."""
 
         samples: list[Sample] = case.samples
         return any(
@@ -75,7 +75,7 @@ class UploadGenotypesAPI(object):
 
     def _get_genotype_file(self, case_id: str) -> File:
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        hk_genotype = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        hk_genotype: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
         LOG.debug(f"Found genotype file {hk_genotype.full_path}")
