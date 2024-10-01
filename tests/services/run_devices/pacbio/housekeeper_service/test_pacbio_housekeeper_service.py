@@ -60,7 +60,7 @@ def test_store_files_in_housekeeper(
 @pytest.mark.parametrize(
     "file_fixture, file_data_fixture",
     [
-        ("pac_bio_ccs_report_file", "ccs_report_pac_bio_file_data"),
+        ("pacbio_barcoded_ccs_report_file", "ccs_report_pac_bio_file_data"),
         ("pacbio_barcoded_hifi_read_file", "pac_bio_hifi_reads_file_data"),
     ],
     ids=["ccs_report", "hifi_reads"],
@@ -100,7 +100,7 @@ def test_create_bundle_info_unassigned_file(
 
     # WHEN creating the file data object for the file
     with pytest.raises(PostProcessingStoreFileError):
-        # THEN the method should raise an error
+        # THEN the method raises a PostProcessingStoreFileError
         pac_bio_housekeeper_service._create_bundle_info(
             file_path=pacbio_unassigned_hifi_read_file, parsed_metrics=pac_bio_metrics
         )
@@ -108,34 +108,36 @@ def test_create_bundle_info_unassigned_file(
 
 def test_store_housekeeper_file_not_found(
     pac_bio_housekeeper_service: PacBioHousekeeperService,
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
 ):
     # GIVEN a PacBioRunData object and a PacBioHousekeeperService
 
-    # WHEN storing files in Housekeeper
+    # GIVEN a PacBioRunFileManager that raises an error when trying to get files to store
 
-    # THEN an error is raised
+    # WHEN trying to store files in Housekeeper
     with mock.patch.object(
         PacBioRunFileManager, "get_files_to_store", side_effect=PostProcessingRunFileManagerError
     ):
+        # THEN a PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingStoreFileError):
-            pac_bio_housekeeper_service.store_files_in_housekeeper(expected_pac_bio_run_data)
+            pac_bio_housekeeper_service.store_files_in_housekeeper(pacbio_barcoded_run_data)
 
 
 def test_store_housekeeper_parsing_error(
     pac_bio_housekeeper_service: PacBioHousekeeperService,
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
 ):
     # GIVEN a PacBioRunData object and a PacBioHousekeeperService
 
-    # WHEN storing files in Housekeeper
+    # GIVEN a Pacbio metrics parser that raises an error when parsing metrics
 
-    # THEN an error is raised
+    # WHEN storing files in Housekeeper
     with mock.patch.object(
         PacBioMetricsParser, "parse_metrics", side_effect=PostProcessingParsingError
     ):
+        # THEN an error is raised
         with pytest.raises(PostProcessingStoreFileError):
-            pac_bio_housekeeper_service.store_files_in_housekeeper(expected_pac_bio_run_data)
+            pac_bio_housekeeper_service.store_files_in_housekeeper(pacbio_barcoded_run_data)
 
 
 def test_get_sample_internal_id_from_file(

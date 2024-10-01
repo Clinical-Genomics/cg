@@ -40,17 +40,9 @@ def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_name: st
 
 
 @pytest.fixture
-def pac_bio_smrt_cell_dir_1_a01(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_name: str) -> Path:
+def pac_bio_smrt_cell_dir_1_b01(pac_bio_test_run_dir: Path, pac_bio_smrt_cell_name: str) -> Path:
     """Return the path to a PacBio SMRT cell directory."""
     return Path(pac_bio_test_run_dir, pac_bio_smrt_cell_name)
-
-
-@pytest.fixture
-def pac_bio_smrt_cell_dir_1_b01(
-    pac_bio_test_run_dir: Path, pac_bio_another_smrt_cell_name: str
-) -> Path:
-    """Return the path to a PacBio SMRT cell directory."""
-    return Path(pac_bio_test_run_dir, pac_bio_another_smrt_cell_name)
 
 
 @pytest.fixture
@@ -106,17 +98,6 @@ def pacbio_barcodes_report_file(
 ) -> Path:
     """Return the path to the PacBio barcodes report file."""
     return Path(pacbio_barcoded_run_reports_dir, PacBioDirsAndFiles.BARCODES_REPORT)
-
-
-@pytest.fixture
-def pac_bio_ccs_report_file(
-    pacbio_barcoded_run_statistics_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
-) -> Path:
-    """Return the path to the PacBio CCS report file."""
-    return Path(
-        pacbio_barcoded_run_statistics_dir,
-        f"{pacbio_barcoded_1_c01_cell_full_name}.{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}",
-    )
 
 
 @pytest.fixture
