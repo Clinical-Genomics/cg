@@ -5,7 +5,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import FileFormat, PrepCategory, Workflow
+from cg.constants.constants import FileExtensions, FileFormat, PrepCategory, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
@@ -187,4 +187,4 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def _is_variant_file(genotype_file: File):
-        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
+        return genotype_file.full_path.endswith(FileExtensions.VCF_GZ) or genotype_file.full_path.endswith(FileExtensions.BCF)
