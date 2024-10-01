@@ -30,7 +30,7 @@ class UploadGenotypesAPI(object):
         self.gt = gt_api
 
     def get_genotype_data(self, analysis: Analysis) -> dict[dict[str, dict[str, str]]]:
-        """Fetch data about an analysis to load genotypes.
+        """Return data about an analysis to load genotypes.
 
         Returns: dict on form
 
