@@ -93,7 +93,7 @@ def test_get_data_mip(
     # WHEN parsing the data
     result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)
 
-    # THEN assert that the result looks like expected
+    # THEN assert that the the number of samples sex is set
     assert len(result["samples_sex"]) == 3
 
 
