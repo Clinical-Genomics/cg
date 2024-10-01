@@ -121,10 +121,11 @@ class UploadGenotypesAPI(object):
         self,
         case_id: str,
     ) -> File:
-        """Return a BCF file object. Raises error if nothing is found in the bundle"""
-        LOG.debug("Get genotype files from Housekeeper")
-        genotype_file: File = self._get_genotype_file(case_id=case_id)
-        if self._is_variant_file(genotype_file=genotype_file):
+        """Return a Housekeeper file object. 
+        Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
+        LOG.debug("Get Genotype files from Housekeeper")
+        genotype_file: File = self._get_genotype_file(case_id)
+        if self._is_variant_file(genotype_file):
             LOG.debug(f"Found BCF file {genotype_file.full_path}")
             return genotype_file
         raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
