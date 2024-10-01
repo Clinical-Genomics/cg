@@ -37,24 +37,24 @@ def test_get_analysis_sex_raredisease(
     assert sex ==SexOptions.MALE
 
 
-def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
+def test_get_parsed_qc_metrics_deliverables_mip(case_qc_metrics_deliverables: Path):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
 
     # WHEN fetching the predicted sex
-    metrics_object: MIPMetricsDeliverables = UploadGenotypesAPI._get_parsed_qc_metrics_data_mip_dna(
+    metrics_object: MIPMetricsDeliverables = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_mip_dna(
         case_qc_metrics_deliverables
     )
     # THEN assert that it was successfully created
     assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
-def test_get_parsed_qc_metrics_data_raredisease(case_qc_metrics_deliverables: Path):
+def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_deliverables: Path):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
 
     # WHEN fetching the predicted sex
-    metrics_object = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
+    metrics_object = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(
         case_qc_metrics_deliverables
     )
 

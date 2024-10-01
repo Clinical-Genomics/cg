@@ -111,7 +111,7 @@ class UploadGenotypesAPI(object):
     def _get_analysis_sex_mip_dna(qc_metrics_file: Path) -> dict:
         """Return analysis sex for each sample of an analysis."""
         LOG.info("qc_metrics stuff")
-        qc_metrics = UploadGenotypesAPI._get_parsed_qc_metrics_data_mip_dna(qc_metrics_file)
+        qc_metrics = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_mip_dna(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
             for sample_id_metric in qc_metrics.sample_id_metrics
@@ -141,7 +141,7 @@ class UploadGenotypesAPI(object):
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
-    def _get_parsed_qc_metrics_data_mip_dna(qc_metrics_file: Path) -> MIPMetricsDeliverables:
+    def _get_parsed_qc_metrics_deliverables_mip_dna(qc_metrics_file: Path) -> MIPMetricsDeliverables:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics_file
@@ -166,7 +166,7 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_data_raredisease(
+        qc_metrics: list[MetricsBase] = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(
             qc_metrics_file
         )
         for metric in qc_metrics:
@@ -174,7 +174,7 @@ class UploadGenotypesAPI(object):
                 return str(metric.value)
 
     @staticmethod
-    def _get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> list[MetricsBase]:
+    def _get_parsed_qc_metrics_deliverables_raredisease(qc_metrics: Path) -> list[MetricsBase]:
         """Parse and return a QC metrics file."""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
