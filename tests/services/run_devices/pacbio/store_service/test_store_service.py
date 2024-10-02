@@ -16,7 +16,12 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 )
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacBioSampleSequencingMetrics, PacBioSequencingRun, PacBioSMRTCell
+from cg.store.models import (
+    PacBioSampleSequencingMetrics,
+    PacBioSequencingRun,
+    PacBioSMRTCell,
+    Sample,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -35,6 +40,11 @@ def test_store_post_processing_data(
         internal_id=pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id,
     )
 
+    # GIVEN that the store has no sequencing data
+    assert not pac_bio_store_service.store._get_query(PacBioSampleSequencingMetrics).first()
+    assert not pac_bio_store_service.store._get_query(PacBioSequencingRun).first()
+    assert not pac_bio_store_service.store._get_query(PacBioSMRTCell).first()
+
     # GIVEN a data transfer service that returns the correct DTOs
 
     # WHEN storing data for a PacBio instrument run
@@ -44,27 +54,37 @@ def test_store_post_processing_data(
     ):
         pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
 
-    # THEN the SMRT cell data is stored
+    # THEN the SMRT cell data is stored with the correct data
     smrt_cell: PacBioSMRTCell = pac_bio_store_service.store._get_query(PacBioSMRTCell).first()
     assert smrt_cell
     assert smrt_cell.internal_id == pac_bio_dtos.run_device.internal_id
 
-    # THEN the sequencing run is stored
+    # THEN the sequencing run is stored with the correct data
     sequencing_run: PacBioSequencingRun = pac_bio_store_service.store._get_query(
         PacBioSequencingRun
     ).first()
     assert sequencing_run
     assert sequencing_run.well == pac_bio_dtos.sequencing_run.well
 
-    # THEN the sample sequencing metrics are stored
-    sample_sequencing_run_metrics: PacBioSampleSequencingMetrics = (
-        pac_bio_store_service.store._get_query(PacBioSampleSequencingMetrics).first()
+    # THEN the sample sequencing metrics are stored with the correct data
+    sample_sequencing_run_metrics: list[PacBioSampleSequencingMetrics] = (
+        pac_bio_store_service.store._get_query(PacBioSampleSequencingMetrics).all()
     )
     assert sample_sequencing_run_metrics
-    assert (
-        sample_sequencing_run_metrics.sample.internal_id
-        == pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id
-    )
+    for sample_metrics in sample_sequencing_run_metrics:
+        assert (
+            sample_metrics.sample.internal_id
+            == pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id
+        )
+
+    # THEN the sample reads and sequenced date are updated
+    for sample_metrics_dto in pac_bio_dtos.sample_sequencing_metrics:
+        sample: Sample = pac_bio_store_service.store.get_sample_by_internal_id(
+            sample_metrics_dto.sample_internal_id
+        )
+        assert sample
+        assert sample.reads == sample_metrics_dto.hifi_reads
+        assert sample.last_sequenced_at == pac_bio_dtos.sequencing_run.completed_at
 
 
 def test_store_post_processing_data_error_database(
