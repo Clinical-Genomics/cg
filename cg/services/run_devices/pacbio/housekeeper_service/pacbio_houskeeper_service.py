@@ -20,10 +20,14 @@ from cg.services.run_devices.exc import (
     PostProcessingStoreFileError,
 )
 from cg.services.run_devices.pacbio.housekeeper_service.models import PacBioFileData
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
+    PacBioMetricsParser,
+)
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
 from cg.utils.mapping import get_item_by_pattern_in_source
 
 LOG = logging.getLogger(__name__)
@@ -72,7 +76,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
         full_barcode: str = f"{barcode}--{barcode}"
         for sample in metrics.samples:
             if sample.barcode_name == full_barcode:
-                return sample.sample_name
+                return sample.sample_internal_id
         raise PostProcessingStoreFileError(f"Sample not found for barcode: {barcode}")
 
     @staticmethod

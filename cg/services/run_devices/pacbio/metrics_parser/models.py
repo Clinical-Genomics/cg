@@ -152,7 +152,7 @@ class SampleMetrics(RunMetrics):
     hifi_reads: int = Field(..., alias=SampleMetricsAliases.HIFI_READS)
     hifi_yield: int = Field(..., alias=SampleMetricsAliases.HIFI_YIELD)
     polymerase_read_length: int = Field(..., alias=SampleMetricsAliases.POLYMERASE_READ_LENGTH)
-    sample_name: str = Field(..., alias=SampleMetricsAliases.SAMPLE_NAME)
+    sample_internal_id: str = Field(..., alias=SampleMetricsAliases.SAMPLE_INTERNAL_ID)
 
 
 class PacBioMetrics(RunMetrics):

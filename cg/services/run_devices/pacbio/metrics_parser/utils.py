@@ -50,7 +50,7 @@ def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str)
 
 
 def _is_unassigned_reads_entry(sample_metric: SampleMetrics) -> bool:
-    return sample_metric.sample_name == "No Name"
+    return sample_metric.sample_internal_id == "No Name"
 
 
 def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]:
