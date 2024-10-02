@@ -1,9 +1,11 @@
 from datetime import datetime
 
+from store_helpers import StoreHelpers
+
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import ControlOptions
 from cg.constants.sequencing import Sequencers
-from cg.store.models import IlluminaSequencingRun, Sample, IlluminaSampleSequencingMetrics, Analysis
+from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 
@@ -105,6 +107,26 @@ def test_update_sample_reads_illumina_negative_control(
     for sample_metric in sample_metrics:
         total_reads_for_sample += sample_metric.total_reads_in_lane
     assert sample.reads == total_reads_for_sample
+
+
+def test_update_sample_reads_pacbio(
+    pacbio_barcoded_sample_internal_id: str,
+    store: Store,
+    helpers: StoreHelpers,
+):
+    """Test updating the reads for a PacBio sample."""
+    # GIVEN a store with a PacBio sample
+    sample: Sample = helpers.add_sample(store=store, internal_id=pacbio_barcoded_sample_internal_id)
+    assert sample
+    assert sample.reads == 0
+    reads: int = 10000
+
+    # WHEN updating the reads for the sample
+    store.update_sample_reads(internal_id=pacbio_barcoded_sample_internal_id, reads=reads)
+
+    # THEN the reads for the sample is updated
+    sample: Sample = store.get_sample_by_internal_id(pacbio_barcoded_sample_internal_id)
+    assert sample.reads == reads
 
 
 def test_update_sample_last_sequenced_at(
