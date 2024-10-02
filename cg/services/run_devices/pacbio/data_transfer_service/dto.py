@@ -60,7 +60,6 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     hifi_mean_read_length: int
     hifi_median_read_quality: str
     polymerase_mean_read_length: int
-    barcode: str
 
 
 class PacBioDTOs(PostProcessingDTOs):
