@@ -41,7 +41,8 @@ def upgrade():
         column=sa.Column("barcoded_hifi_mean_read_length", sa.BIGINT, nullable=True),
     )
     op.add_column(
-        "pacbio_sequencing_run", sa.Column("run_name", type_=mysql.VARCHAR(64), nullable=True)
+        table_name="pacbio_sequencing_run",
+        column=sa.Column("run_name", type_=mysql.VARCHAR(64), nullable=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
