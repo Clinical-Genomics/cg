@@ -61,10 +61,6 @@ def upgrade():
         table_name="pacbio_sample_run_metrics",
         column=sa.Column("polymerase_mean_read_length", sa.BIGINT, nullable=True),
     )
-    op.add_column(
-        table_name="pacbio_sample_run_metrics",
-        column=sa.Column("barcode", sa.VARCHAR(length=32), nullable=True),
-    )
     op.drop_column(table_name="pacbio_sample_run_metrics", column_name="percent_reads_passing_q30")
     op.drop_column(table_name="pacbio_sample_run_metrics", column_name="failed_reads")
     op.drop_column(table_name="pacbio_sample_run_metrics", column_name="failed_yield")
@@ -89,7 +85,6 @@ def downgrade():
     op.drop_column(
         table_name="pacbio_sample_run_metrics", column_name="polymerase_mean_read_length"
     )
-    op.drop_column(table_name="pacbio_sample_run_metrics", column_name="barcode")
     op.add_column(
         table_name="pacbio_sample_run_metrics",
         column=sa.Column("percent_reads_passing_q30", sa.FLOAT, nullable=False),
