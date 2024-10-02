@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import ControlOptions
 from cg.constants.sequencing import Sequencers
@@ -128,23 +130,29 @@ def test_update_sample_reads_pacbio(
     assert sample.reads == reads
 
 
+@pytest.mark.parametrize(
+    "sample_id_fixture",
+    ["sample_id_sequenced_on_multiple_flow_cells", "pacbio_barcoded_sample_internal_id"],
+    ids=["Illumina", "Pacbio"],
+)
 def test_update_sample_last_sequenced_at(
-    store_with_illumina_sequencing_data: Store,
-    selected_novaseq_x_sample_ids: list[str],
+    store: Store,
+    helpers: StoreHelpers,
+    sample_id_fixture: str,
     timestamp_now: datetime,
+    request: pytest.FixtureRequest,
 ):
-    # GIVEN a store with Illumina Sequencing Runs and a sample id
-    sample: Sample = store_with_illumina_sequencing_data.get_sample_by_internal_id(
-        selected_novaseq_x_sample_ids[0]
-    )
+    """Test updating the last sequenced at date for a sample."""
+    # GIVEN a store with a sample
+    sample_id: str = request.getfixturevalue(sample_id_fixture)
+    sample: Sample = helpers.add_sample(store=store, internal_id=sample_id)
     assert sample.last_sequenced_at is None
 
     # WHEN updating the last sequenced at date for a sample
-    store_with_illumina_sequencing_data.update_sample_sequenced_at(
-        internal_id=selected_novaseq_x_sample_ids[0], date=timestamp_now
-    )
+    store.update_sample_sequenced_at(internal_id=sample_id, date=timestamp_now)
 
     # THEN the last sequenced at date for the sample is updated
+    sample: Sample = store.get_sample_by_internal_id(sample_id)
     assert sample.last_sequenced_at == timestamp_now
 
 
