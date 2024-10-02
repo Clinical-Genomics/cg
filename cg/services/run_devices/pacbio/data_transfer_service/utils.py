@@ -4,7 +4,10 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
-from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics, SampleMetrics
+from cg.services.run_devices.pacbio.metrics_parser.models import (
+    PacBioMetrics,
+    SampleMetrics,
+)
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 
@@ -64,7 +67,7 @@ def get_sample_sequencing_metrics_dtos(
     sample_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = []
     for sample in sample_metrics:
         sample_sequencing_metrics_dto = PacBioSampleSequencingMetricsDTO(
-            sample_internal_id=sample.sample_name,
+            sample_internal_id=sample.sample_internal_id,
             hifi_reads=sample.hifi_reads,
             hifi_yield=sample.hifi_yield,
             hifi_mean_read_length=sample.hifi_mean_read_length,

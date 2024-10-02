@@ -103,7 +103,7 @@ class SampleMetricsAliases:
     HIFI_READS: str = "barcode.barcode_table.number_of_reads"
     HIFI_YIELD: str = "barcode.barcode_table.number_of_bases"
     POLYMERASE_READ_LENGTH: str = "barcode.barcode_table.mean_polymerase_read_length"
-    SAMPLE_NAME: str = "barcode.barcode_table.biosample"
+    SAMPLE_INTERNAL_ID: str = "barcode.barcode_table.biosample"
 
 
 file_pattern_to_bundle_type: dict[str, str] = {

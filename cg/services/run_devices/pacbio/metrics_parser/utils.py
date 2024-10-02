@@ -49,6 +49,10 @@ def get_parsed_metrics_from_file_name(metrics_files: list[Path], file_name: str)
     return _parse_report_to_model(report_file=report_file, data_model=data_model)
 
 
+def _is_unassigned_reads_entry(sample_metric: SampleMetrics) -> bool:
+    return sample_metric.sample_internal_id == "No Name"
+
+
 def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]:
     """Parse all samples data into SampleMetrics given the sample section of the barcodes report."""
     sample_metrics: list[SampleMetrics] = []
@@ -58,7 +62,9 @@ def _parse_sample_data(sample_data: list[dict[str, Any]]) -> list[SampleMetrics]
         for data_field in sample_data:
             field_id: str = data_field.get(MetricsFileFields.ID)
             sample[field_id] = data_field.get(MetricsFileFields.VALUES)[sample_idx]
-        sample_metrics.append(SampleMetrics.model_validate(sample))
+        sample_metric = SampleMetrics.model_validate(sample)
+        if not _is_unassigned_reads_entry(sample_metric):
+            sample_metrics.append(sample_metric)
     return sample_metrics
 
 
