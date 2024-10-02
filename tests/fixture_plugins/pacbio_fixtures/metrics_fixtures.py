@@ -4,12 +4,12 @@ import pytest
 
 from cg.constants.pacbio import (
     BarcodeMetricsAliases,
-    CCSAttributeIDs,
-    ControlAttributeIDs,
-    LoadingAttributesIDs,
-    PolymeraseDataAttributeIDs,
+    CCSAttributeAliases,
+    ControlAttributeAliases,
+    LoadingAttributesAliases,
+    PolymeraseDataAttributeAliases,
     SampleMetricsAliases,
-    SmrtLinkDatabasesIDs,
+    SmrtLinkDatabasesAliases,
 )
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
@@ -26,16 +26,16 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
 @pytest.fixture
 def pac_bio_read_metrics() -> ReadMetrics:
     data: dict[str, any] = {
-        CCSAttributeIDs.HIFI_READS: 7815301,
-        CCSAttributeIDs.HIFI_YIELD: 115338856495,
-        CCSAttributeIDs.HIFI_MEAN_READ_LENGTH: 14758,
-        CCSAttributeIDs.HIFI_MEDIAN_READ_LENGTH: 14679,
-        CCSAttributeIDs.HIFI_READ_LENGTH_N50: 14679,
-        CCSAttributeIDs.HIFI_MEDIAN_READ_QUALITY: 35,
-        CCSAttributeIDs.PERCENT_Q30: 93.10000000000001,
-        CCSAttributeIDs.FAILED_READS: 469053,
-        CCSAttributeIDs.FAILED_YIELD: 7404831038,
-        CCSAttributeIDs.FAILED_MEAN_READ_LENGTH: 15786,
+        CCSAttributeAliases.HIFI_READS: 7815301,
+        CCSAttributeAliases.HIFI_YIELD: 115338856495,
+        CCSAttributeAliases.HIFI_MEAN_READ_LENGTH: 14758,
+        CCSAttributeAliases.HIFI_MEDIAN_READ_LENGTH: 14679,
+        CCSAttributeAliases.HIFI_READ_LENGTH_N50: 14679,
+        CCSAttributeAliases.HIFI_MEDIAN_READ_QUALITY: 35,
+        CCSAttributeAliases.PERCENT_Q30: 93.10000000000001,
+        CCSAttributeAliases.FAILED_READS: 469053,
+        CCSAttributeAliases.FAILED_YIELD: 7404831038,
+        CCSAttributeAliases.FAILED_MEAN_READ_LENGTH: 15786,
     }
     return ReadMetrics.model_validate(data)
 
@@ -43,10 +43,10 @@ def pac_bio_read_metrics() -> ReadMetrics:
 @pytest.fixture
 def pac_bio_control_metrics() -> ControlMetrics:
     data: dict[str, any] = {
-        ControlAttributeIDs.NUMBER_OF_READS: 2368,
-        ControlAttributeIDs.MEAN_READ_LENGTH: 69936,
-        ControlAttributeIDs.PERCENT_MEAN_READ_CONCORDANCE: 0.90038,
-        ControlAttributeIDs.PERCENT_MODE_READ_CONCORDANCE: 0.91,
+        ControlAttributeAliases.NUMBER_OF_READS: 2368,
+        ControlAttributeAliases.MEAN_READ_LENGTH: 69936,
+        ControlAttributeAliases.PERCENT_MEAN_READ_CONCORDANCE: 0.90038,
+        ControlAttributeAliases.PERCENT_MODE_READ_CONCORDANCE: 0.91,
     }
     return ControlMetrics.model_validate(data)
 
@@ -54,10 +54,10 @@ def pac_bio_control_metrics() -> ControlMetrics:
 @pytest.fixture
 def pac_bio_productivity_metrics() -> ProductivityMetrics:
     data: dict[str, any] = {
-        LoadingAttributesIDs.PRODUCTIVE_ZMWS: 25165824,
-        LoadingAttributesIDs.P_0: 6257733,
-        LoadingAttributesIDs.P_1: 18766925,
-        LoadingAttributesIDs.P_2: 141166,
+        LoadingAttributesAliases.PRODUCTIVE_ZMWS: 25165824,
+        LoadingAttributesAliases.P_0: 6257733,
+        LoadingAttributesAliases.P_1: 18766925,
+        LoadingAttributesAliases.P_2: 141166,
     }
     return ProductivityMetrics.model_validate(data)
 
@@ -65,10 +65,10 @@ def pac_bio_productivity_metrics() -> ProductivityMetrics:
 @pytest.fixture
 def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
     data: dict[str, any] = {
-        PolymeraseDataAttributeIDs.MEAN_READ_LENGTH: 85641,
-        PolymeraseDataAttributeIDs.READ_LENGTH_N50: 168750,
-        PolymeraseDataAttributeIDs.MEAN_LONGEST_SUBREAD_LENGTH: 18042,
-        PolymeraseDataAttributeIDs.LONGEST_SUBREAD_LENGTH_N50: 21750,
+        PolymeraseDataAttributeAliases.MEAN_READ_LENGTH: 85641,
+        PolymeraseDataAttributeAliases.READ_LENGTH_N50: 168750,
+        PolymeraseDataAttributeAliases.MEAN_LONGEST_SUBREAD_LENGTH: 18042,
+        PolymeraseDataAttributeAliases.LONGEST_SUBREAD_LENGTH_N50: 21750,
     }
     return PolymeraseMetrics.model_validate(data)
 
@@ -79,13 +79,13 @@ def pac_bio_smrtlink_databases_metrics(
     pacbio_barcoded_1_c01_cell_full_name: str,
 ) -> SmrtlinkDatasetsMetrics:
     data: dict[str, any] = {
-        SmrtLinkDatabasesIDs.CELL_ID: barcoded_smrt_cell_internal_id,
-        SmrtLinkDatabasesIDs.CELL_INDEX: 2,
-        SmrtLinkDatabasesIDs.MOVIE_NAME: pacbio_barcoded_1_c01_cell_full_name,
-        SmrtLinkDatabasesIDs.PATH: "/srv/cg_data/pacbio/r84202_20240913_121403/1_C01/pb_formats/m84202_240913_162115_s3.hifi_reads.consensusreadset.xml",
-        SmrtLinkDatabasesIDs.RUN_COMPLETED_AT: "2024-09-15T14:11:32.418Z",
-        SmrtLinkDatabasesIDs.WELL_NAME: "C01",
-        SmrtLinkDatabasesIDs.WELL_SAMPLE_NAME: "2023-17834-05",
+        SmrtLinkDatabasesAliases.CELL_ID: barcoded_smrt_cell_internal_id,
+        SmrtLinkDatabasesAliases.CELL_INDEX: 2,
+        SmrtLinkDatabasesAliases.MOVIE_NAME: pacbio_barcoded_1_c01_cell_full_name,
+        SmrtLinkDatabasesAliases.PATH: "/srv/cg_data/pacbio/r84202_20240913_121403/1_C01/pb_formats/m84202_240913_162115_s3.hifi_reads.consensusreadset.xml",
+        SmrtLinkDatabasesAliases.RUN_COMPLETED_AT: "2024-09-15T14:11:32.418Z",
+        SmrtLinkDatabasesAliases.WELL_NAME: "C01",
+        SmrtLinkDatabasesAliases.WELL_SAMPLE_NAME: "2023-17834-05",
     }
     return SmrtlinkDatasetsMetrics.model_validate(data)
 

@@ -26,7 +26,7 @@ class MetricsFileFields:
     VALUES: str = "values"
 
 
-class CCSAttributeIDs:
+class CCSAttributeAliases:
     HIFI_READS: str = "ccs_processing.number_of_ccs_reads_q20"
     HIFI_YIELD: str = "ccs_processing.total_number_of_ccs_bases_q20"
     HIFI_MEAN_READ_LENGTH: str = "ccs_processing.mean_ccs_readlength_q20"
@@ -39,28 +39,28 @@ class CCSAttributeIDs:
     FAILED_MEAN_READ_LENGTH: str = "ccs_processing.mean_ccs_readlength_lq"
 
 
-class ControlAttributeIDs:
+class ControlAttributeAliases:
     NUMBER_OF_READS: str = "control.reads_n"
     MEAN_READ_LENGTH: str = "control.readlength_mean"
     PERCENT_MEAN_READ_CONCORDANCE: str = "control.concordance_mean"
     PERCENT_MODE_READ_CONCORDANCE: str = "control.concordance_mode"
 
 
-class LoadingAttributesIDs:
+class LoadingAttributesAliases:
     PRODUCTIVE_ZMWS: str = "loading_xml_report.productive_zmws"
     P_0: str = "loading_xml_report.productivity_0_n"
     P_1: str = "loading_xml_report.productivity_1_n"
     P_2: str = "loading_xml_report.productivity_2_n"
 
 
-class PolymeraseDataAttributeIDs:
+class PolymeraseDataAttributeAliases:
     MEAN_READ_LENGTH: str = "raw_data_report.read_length"
     READ_LENGTH_N50: str = "raw_data_report.read_n50"
     MEAN_LONGEST_SUBREAD_LENGTH: str = "raw_data_report.insert_length"
     LONGEST_SUBREAD_LENGTH_N50: str = "raw_data_report.insert_n50"
 
 
-class SmrtLinkDatabasesIDs:
+class SmrtLinkDatabasesAliases:
     BIO_SAMPLE_NAME: str = "bioSampleName"
     CELL_ID: str = "cellId"
     CELL_INDEX: str = "cellIndex"
@@ -69,20 +69,6 @@ class SmrtLinkDatabasesIDs:
     RUN_COMPLETED_AT = "createdAt"
     WELL_NAME: str = "wellName"
     WELL_SAMPLE_NAME: str = "wellSampleName"
-
-
-class PacBioHousekeeperTags:
-    BARCODES_REPORT: str = "barcodes-report"
-    CCS_REPORT: str = "ccs-report"
-    CONTROL_REPORT: str = "control-report"
-    LOADING_REPORT: str = "loading-report"
-    RAWDATA_REPORT: str = "raw-data-report"
-    DATASETS_REPORT: str = "datasets-report"
-
-
-class PacBioBundleTypes:
-    SAMPLE: str = "sample"
-    SMRT_CELL: str = "smrt_cell"
 
 
 class BarcodeMetricsAliases:
@@ -104,6 +90,20 @@ class SampleMetricsAliases:
     HIFI_YIELD: str = "barcode.barcode_table.number_of_bases"
     POLYMERASE_READ_LENGTH: str = "barcode.barcode_table.mean_polymerase_read_length"
     SAMPLE_INTERNAL_ID: str = "barcode.barcode_table.biosample"
+
+
+class PacBioHousekeeperTags:
+    BARCODES_REPORT: str = "barcodes-report"
+    CCS_REPORT: str = "ccs-report"
+    CONTROL_REPORT: str = "control-report"
+    LOADING_REPORT: str = "loading-report"
+    RAWDATA_REPORT: str = "raw-data-report"
+    DATASETS_REPORT: str = "datasets-report"
+
+
+class PacBioBundleTypes:
+    SAMPLE: str = "sample"
+    SMRT_CELL: str = "smrt_cell"
 
 
 file_pattern_to_bundle_type: dict[str, str] = {
