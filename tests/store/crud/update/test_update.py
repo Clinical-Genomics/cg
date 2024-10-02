@@ -1,12 +1,11 @@
 from datetime import datetime
 
-from store_helpers import StoreHelpers
-
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import ControlOptions
 from cg.constants.sequencing import Sequencers
 from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_update_illumina_sequencing_run_availability(store_with_illumina_sequencing_data: Store):
