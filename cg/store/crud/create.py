@@ -534,7 +534,9 @@ class CreateHandler(BaseHandler):
         sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
         sequencing_run: PacBioSequencingRun,
     ) -> PacBioSampleSequencingMetrics:
-        sample: Sample = self.get_sample_by_internal_id(sample_run_metrics_dto.sample_internal_id)
+        sample_id: str = sample_run_metrics_dto.sample_internal_id
+        LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
+        sample: Sample = self.get_sample_by_internal_id(sample_id)
         new_sample_sequencing_run = PacBioSampleSequencingMetrics(
             sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,
