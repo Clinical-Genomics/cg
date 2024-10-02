@@ -17,9 +17,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.utils import (
     get_sequencing_run_dto,
     get_smrt_cell_dto,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
-    PacBioMetricsParser,
-)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
