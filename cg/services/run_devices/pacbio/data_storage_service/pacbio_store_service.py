@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from cg.services.run_devices.abstract_classes import PostProcessingStoreService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
@@ -47,6 +48,20 @@ class PacBioStoreService(PostProcessingStoreService):
                 sample_run_metrics_dto=sample_run_metric, sequencing_run=sequencing_run
             )
 
+    def _update_sample(
+        self,
+        sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
+        sequencing_date: datetime,
+    ) -> None:
+        """Update the sample reads and last sequenced date for the SMRT cell samples."""
+        for sample_run_metric in sample_run_metrics_dtos:
+            self.store.update_sample_reads(
+                sample_run_metric.sample_internal_id, sample_run_metric.hifi_reads
+            )
+            self.store.update_sample_sequenced_at(
+                internal_id=sample_run_metric.sample_internal_id, date=sequencing_date
+            )
+
     @handle_post_processing_errors(
         to_except=(PostProcessingDataTransferError, ValueError),
         to_raise=PostProcessingStoreDataError,
@@ -59,6 +74,10 @@ class PacBioStoreService(PostProcessingStoreService):
         )
         self._create_sample_run_metrics(
             sample_run_metrics_dtos=dtos.sample_sequencing_metrics, sequencing_run=sequencing_run
+        )
+        self._update_sample(
+            sample_run_metrics_dtos=dtos.sample_sequencing_metrics,
+            sequencing_date=sequencing_run.completed_at,
         )
         if dry_run:
             self.store.rollback()
