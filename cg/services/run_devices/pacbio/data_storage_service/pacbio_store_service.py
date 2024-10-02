@@ -53,13 +53,13 @@ class PacBioStoreService(PostProcessingStoreService):
         sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
         sequencing_date: datetime,
     ) -> None:
-        """Update the sample reads and last sequenced date for the SMRT cell samples."""
-        for sample_run_metric in sample_run_metrics_dtos:
+        """Update the reads and last sequenced date for the SMRT cell samples."""
+        for sample_dto in sample_run_metrics_dtos:
             self.store.update_sample_reads(
-                sample_run_metric.sample_internal_id, sample_run_metric.hifi_reads
+                internal_id=sample_dto.sample_internal_id, reads=sample_dto.hifi_reads
             )
             self.store.update_sample_sequenced_at(
-                internal_id=sample_run_metric.sample_internal_id, date=sequencing_date
+                internal_id=sample_dto.sample_internal_id, date=sequencing_date
             )
 
     @handle_post_processing_errors(
