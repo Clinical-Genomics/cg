@@ -17,7 +17,9 @@ from cg.services.run_devices.pacbio.data_transfer_service.utils import (
     get_sequencing_run_dto,
     get_smrt_cell_dto,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
+    PacBioMetricsParser,
+)
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
@@ -36,9 +38,9 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
         sequencing_run_dto: PacBioSequencingRunDTO = get_sequencing_run_dto(
             metrics=metrics, run_data=run_data
         )
-        sample_sequencing_metrics_dtos: list[
-            PacBioSampleSequencingMetricsDTO
-        ] = get_sample_sequencing_metrics_dtos(metrics.samples)
+        sample_sequencing_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = (
+            get_sample_sequencing_metrics_dtos(metrics.samples)
+        )
         return PacBioDTOs(
             run_device=smrt_cell_dto,
             sequencing_run=sequencing_run_dto,
