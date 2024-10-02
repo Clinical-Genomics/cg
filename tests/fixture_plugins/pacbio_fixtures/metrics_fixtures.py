@@ -121,7 +121,7 @@ def pacbio_barcoded_sample_metrics(
         SampleMetricsAliases.HIFI_READ_QUALITY: "Q35",
         SampleMetricsAliases.HIFI_READS: 7785983,
         SampleMetricsAliases.HIFI_YIELD: 114676808325,
-        SampleMetricsAliases.PLOYMERASE_READ_LENGTH: 163451,
+        SampleMetricsAliases.POLYMERASE_READ_LENGTH: 163451,
         SampleMetricsAliases.SAMPLE_NAME: pacbio_barcoded_sample_internal_id,
     }
     return SampleMetrics.model_validate(data)
@@ -139,7 +139,7 @@ def pacbio_unassigned_sample_metrics(
         SampleMetricsAliases.HIFI_READ_QUALITY: "Q28",
         SampleMetricsAliases.HIFI_READS: 29318,
         SampleMetricsAliases.HIFI_YIELD: 424465869,
-        SampleMetricsAliases.PLOYMERASE_READ_LENGTH: 142228,
+        SampleMetricsAliases.POLYMERASE_READ_LENGTH: 142228,
         SampleMetricsAliases.SAMPLE_NAME: pacbio_unassigned_sample_internal_id,
     }
     return SampleMetrics.model_validate(data)
