@@ -102,7 +102,7 @@ class SampleMetricsAliases:
     HIFI_READ_QUALITY: str = "barcode.barcode_table.median_read_quality"
     HIFI_READS: str = "barcode.barcode_table.number_of_reads"
     HIFI_YIELD: str = "barcode.barcode_table.number_of_bases"
-    PLOYMERASE_READ_LENGTH: str = "barcode.barcode_table.mean_polymerase_read_length"
+    POLYMERASE_READ_LENGTH: str = "barcode.barcode_table.mean_polymerase_read_length"
     SAMPLE_NAME: str = "barcode.barcode_table.biosample"
 
 
