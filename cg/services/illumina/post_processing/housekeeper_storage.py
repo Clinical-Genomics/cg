@@ -47,7 +47,9 @@ def _should_fastq_path_be_stored_in_housekeeper(
 
     if metric:
 
-        if sample_is_negative_control_with_reads_in_lane(sample.is_negative_control, metric):
+        if sample_is_negative_control_with_reads_in_lane(
+            is_negative_control=sample.is_negative_control, metric=metric
+        ):
             return True
 
         return metric.base_passing_q30_percent >= q30_threshold
