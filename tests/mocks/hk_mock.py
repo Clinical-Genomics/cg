@@ -66,6 +66,10 @@ class MockFile:
         """Check if the file is included in Housekeeper."""
         return str(self.app_root) in self.full_path
 
+    @property
+    def is_archived(self):
+        return False
+
     def delete(self):
         """Mock delete functions"""
         return True

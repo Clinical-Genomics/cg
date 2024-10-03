@@ -195,9 +195,7 @@ class CompressAPI:
             )
         return all_cleaned
 
-    def _can_fastqs_be_removed(
-        self, compression_data: CompressionData, fastq_first: File, fastq_second: File
-    ) -> bool:
+    def _can_fastqs_be_removed(self, compression_data: CompressionData) -> bool:
         is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_done(
             compression_data
         )
