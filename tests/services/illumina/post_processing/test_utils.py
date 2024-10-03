@@ -37,10 +37,10 @@ from cg.services.illumina.post_processing.utils import (
         (1, False, False),
     ],
     ids=[
-            "no_reads_no_negative_control",
-            "no_reads_negative_control",
-            "reads_negative_control",
-            "reads_no_negative_control",
+        "no_reads_no_negative_control",
+        "no_reads_negative_control",
+        "reads_negative_control",
+        "reads_no_negative_control",
     ],
 )
 def test_sample_is_negative_control_with_reads_in_lane(
@@ -359,4 +359,3 @@ def test_get_q30_threshold():
 
     # THEN the correct Q30 threshold should be returned
     assert q30_threshold == FLOWCELL_Q30_THRESHOLD[sequencer_type]
-
