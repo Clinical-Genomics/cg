@@ -9,7 +9,7 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.post_processing.utils import (
-    sample_is_negative_control_with_reads_in_lane,
+    is_sample_negative_control_with_reads_in_lane,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
@@ -47,7 +47,7 @@ def _should_fastq_path_be_stored_in_housekeeper(
 
     if metric:
 
-        if sample_is_negative_control_with_reads_in_lane(
+        if is_sample_negative_control_with_reads_in_lane(
             is_negative_control=sample.is_negative_control, metric=metric
         ):
             return True

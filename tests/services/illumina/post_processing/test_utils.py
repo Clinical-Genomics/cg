@@ -24,7 +24,7 @@ from cg.services.illumina.post_processing.utils import (
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
     get_undetermined_fastqs,
-    sample_is_negative_control_with_reads_in_lane,
+    is_sample_negative_control_with_reads_in_lane,
 )
 
 
@@ -43,17 +43,17 @@ from cg.services.illumina.post_processing.utils import (
         "reads_no_negative_control",
     ],
 )
-def test_sample_is_negative_control_with_reads_in_lane(
+def test_is_sample_negative_control_with_reads_in_lane(
     mapped_metric: IlluminaSampleSequencingMetricsDTO,
     reads: int,
     is_negative_control: bool,
-    is_negative_control_with_reads: bool,
+    expected_negative_control_with_reads: bool,
 ):
     # GIVEN a metric with a specific amount of reads for a sample
     mapped_metric.total_reads_in_lane = reads
 
     # WHEN checking if the sample is a negative control with reads in the lane
-    result: bool = sample_is_negative_control_with_reads_in_lane(
+    result: bool = is_sample_negative_control_with_reads_in_lane(
         is_negative_control=is_negative_control, metric=mapped_metric
     )
 
