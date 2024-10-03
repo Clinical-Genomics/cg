@@ -166,8 +166,12 @@ class CompressAPI:
         all_cleaned: bool = True
         for run_name in sample_fastq:
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
+            fastq_first: File = sample_fastq[run_name]["hk_first"]
+            fastq_second: File = sample_fastq[run_name]["hk_second"]
 
-            if not self.crunchy_api.is_fastq_compression_done(compression=compression):
+            if not self._can_fastqs_be_removed(
+                compression_data=compression, fastq_first=fastq_first, fastq_second=fastq_second
+            ):
                 LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
                 all_cleaned = False
                 continue
@@ -177,8 +181,8 @@ class CompressAPI:
             self.update_fastq_hk(
                 sample_id=sample_id,
                 compression_obj=compression,
-                hk_fastq_first=sample_fastq[run_name]["hk_first"],
-                hk_fastq_second=sample_fastq[run_name]["hk_second"],
+                hk_fastq_first=fastq_first,
+                hk_fastq_second=fastq_second,
                 archive_location=archive_location,
             )
 
@@ -192,6 +196,15 @@ class CompressAPI:
                 f"All FASTQ files cleaned for {sample_id}!",
             )
         return all_cleaned
+
+    def _can_fastqs_be_removed(
+        self, compression_data: CompressionData, fastq_first: File, fastq_second: File
+    ) -> bool:
+        is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_possible(
+            compression_data
+        )
+        is_archived = fastq_first.archive.archived_at and fastq_second.archive.archived_at
+        return is_fastq_compression_done or is_archived
 
     def add_decompressed_fastq(self, sample: Sample) -> bool:
         """Adds unpacked FASTQ files to Housekeeper."""
