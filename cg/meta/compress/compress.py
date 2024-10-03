@@ -202,7 +202,9 @@ class CompressAPI:
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
             compression_data.spring_path
         )
-        return (is_fastq_compression_done) or (spring_file and spring_file.is_archived)
+        return (is_fastq_compression_done) or (
+            spring_file and spring_file.archive and spring_file.archive.archived_at
+        )
 
     def add_decompressed_fastq(self, sample: Sample) -> bool:
         """Adds unpacked FASTQ files to Housekeeper."""
