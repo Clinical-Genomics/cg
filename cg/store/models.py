@@ -1093,6 +1093,7 @@ class PacBioSequencingRun(InstrumentRun):
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
+    run_name: Mapped[Str32 | None]
     movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
@@ -1116,6 +1117,14 @@ class PacBioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads: Mapped[BigInt | None]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_yield: Mapped[BigInt | None]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_mean_read_length: Mapped[BigInt | None]
+    unbarcoded_hifi_reads: Mapped[BigInt | None]
+    unbarcoded_hifi_yield: Mapped[BigInt | None]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1163,9 +1172,6 @@ class PacBioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
