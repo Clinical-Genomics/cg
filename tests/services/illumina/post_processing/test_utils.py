@@ -29,7 +29,7 @@ from cg.services.illumina.post_processing.utils import (
 
 
 @pytest.mark.parametrize(
-    "reads, is_negative_control, is_negative_control_with_reads",
+    "reads, is_negative_control, expected_negative_control_with_reads",
     [
         (0, False, False),
         (0, True, False),
@@ -58,7 +58,7 @@ def test_sample_is_negative_control_with_reads_in_lane(
     )
 
     # THEN the result should be return according to the expected outcome
-    assert result == is_negative_control_with_reads
+    assert result == expected_negative_control_with_reads
 
 
 @pytest.mark.parametrize(
