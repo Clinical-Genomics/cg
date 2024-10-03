@@ -67,7 +67,7 @@ class MockFile:
         return str(self.app_root) in self.full_path
 
     @property
-    def is_archived(self):
+    def archive(self):
         return False
 
     def delete(self):
