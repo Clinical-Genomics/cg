@@ -207,9 +207,6 @@ class CompressAPI:
         is_spring_archived: bool = (
             spring_file and spring_file.archive and spring_file.archive.archived_at
         )
-        LOG.info(
-            f"SPRING file {compression_data.spring_path} has been archived? {is_spring_archived}"
-        )
         return is_fastq_compression_done or is_spring_archived
 
     def add_decompressed_fastq(self, sample: Sample) -> bool:
