@@ -169,9 +169,7 @@ class CompressAPI:
             fastq_first: File = sample_fastq[run_name]["hk_first"]
             fastq_second: File = sample_fastq[run_name]["hk_second"]
 
-            if not self._can_fastqs_be_removed(
-                compression_data=compression, fastq_first=fastq_first, fastq_second=fastq_second
-            ):
+            if not self._can_fastqs_be_removed(compression_data=compression):
                 LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
                 all_cleaned = False
                 continue
@@ -203,8 +201,10 @@ class CompressAPI:
         is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_possible(
             compression_data
         )
-        is_archived = fastq_first.archive.archived_at and fastq_second.archive.archived_at
-        return is_fastq_compression_done or is_archived
+        spring_file: File | None = self.hk_api.get_file_insensitive_path(
+            compression_data.spring_path
+        )
+        return (is_fastq_compression_done) or (spring_file and spring_file.is_archived)
 
     def add_decompressed_fastq(self, sample: Sample) -> bool:
         """Adds unpacked FASTQ files to Housekeeper."""
