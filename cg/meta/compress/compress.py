@@ -198,7 +198,7 @@ class CompressAPI:
     def _can_fastqs_be_removed(
         self, compression_data: CompressionData, fastq_first: File, fastq_second: File
     ) -> bool:
-        is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_possible(
+        is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_done(
             compression_data
         )
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
