@@ -1,20 +1,20 @@
 {
-    "_comment": "Created by pbcopper v2.4.0",
+    "_comment": "Created by pbcopper v2.5.0",
     "attributes": [
         {
             "id": "ccs_processing.zmw_input",
             "name": "ZMWs input",
-            "value": 15887546
+            "value": 19587148
         },
         {
             "id": "ccs_processing.zmw_passed_yield",
             "name": "ZMWs pass filters",
-            "value": 6862261
+            "value": 8284354
         },
         {
             "id": "ccs_processing.zmw_filtered_yield",
             "name": "ZMWs fail filters",
-            "value": 9025285
+            "value": 11302794
         },
         {
             "id": "ccs_processing.zmw_2_pass_shortcut",
@@ -24,22 +24,22 @@
         {
             "id": "ccs_processing.zmw_tandem_repeat",
             "name": "ZMWs with tandem repeats",
-            "value": 155962
+            "value": 153609
         },
         {
             "id": "ccs_processing.zmw_filtered_poor_snr",
             "name": "Below SNR threshold",
-            "value": 184889
+            "value": 402629
         },
         {
             "id": "ccs_processing.zmw_filtered_median_length_filter",
             "name": "Median length filter",
-            "value": 878981
+            "value": 876358
         },
         {
             "id": "ccs_processing.zmw_filtered_too_few_passes",
             "name": "Lacking full passes",
-            "value": 5560104
+            "value": 6998695
         },
         {
             "id": "ccs_processing.zmw_filtered_heteroduplexes",
@@ -64,7 +64,7 @@
         {
             "id": "ccs_processing.zmw_filtered_draft_failure",
             "name": "Draft generation error",
-            "value": 0
+            "value": 1
         },
         {
             "id": "ccs_processing.zmw_filtered_draft_too_long",
@@ -79,12 +79,12 @@
         {
             "id": "ccs_processing.zmw_filtered_read_failed_polish",
             "name": "Reads failed polishing",
-            "value": 5004
+            "value": 6155
         },
         {
             "id": "ccs_processing.zmw_filtered_empty_window_during_polishing",
             "name": "Empty coverage windows",
-            "value": 14658
+            "value": 13685
         },
         {
             "id": "ccs_processing.zmw_filtered_non_convergent",
@@ -99,27 +99,27 @@
         {
             "id": "ccs_processing.zmw_filtered_adapter_palindrom",
             "name": "CCS adapter palindrome",
-            "value": 6
+            "value": 16
         },
         {
             "id": "ccs_processing.zmw_filtered_adapter_residue",
             "name": "CCS adapter residue",
-            "value": 29
+            "value": 83
         },
         {
             "id": "ccs_processing.zmw_filtered_fl_subread",
             "name": "ZMW with full-length subread",
-            "value": 2378864
+            "value": 3002803
         },
         {
             "id": "ccs_processing.zmw_filtered_control_failure",
             "name": "ZMW with control failure",
-            "value": 2369
+            "value": 2093
         },
         {
             "id": "ccs_processing.zmw_filtered_control_success",
             "name": "ZMW with control success",
-            "value": 381
+            "value": 275
         },
         {
             "id": "ccs_processing.zmw_filtered_below_rq",
@@ -134,62 +134,62 @@
         {
             "id": "ccs_processing.zmw_missing_adapters",
             "name": "ZMWs missing adapters",
-            "value": 248425
+            "value": 345322
         },
         {
             "id": "ccs_processing.number_of_ccs_reads_q20",
             "name": "HiFi Reads",
-            "value": 6580977
+            "value": 7815301
         },
         {
             "id": "ccs_processing.total_number_of_ccs_bases_q20",
             "name": "HiFi Yield (bp)",
-            "value": 106275091861
+            "value": 115338856495
         },
         {
             "id": "ccs_processing.mean_ccs_readlength_q20",
             "name": "HiFi Read Length (mean, bp)",
-            "value": 16148
+            "value": 14758
         },
         {
             "id": "ccs_processing.median_ccs_readlength_q20",
             "name": "HiFi Read Length (median, bp)",
-            "value": 16218
+            "value": 14679
         },
         {
             "id": "ccs_processing.ccs_readlength_n50_q20",
             "name": "HiFi Read Length N50 (bp)",
-            "value": 16218
+            "value": 14679
         },
         {
             "id": "ccs_processing.median_qv_q20",
             "name": "HiFi Read Quality (median)",
-            "value": 34
+            "value": 35
         },
         {
             "id": "ccs_processing.mean_npasses_q20",
             "name": "HiFi Number of Passes (mean)",
-            "value": 9
+            "value": 11
         },
         {
             "id": "ccs_processing.number_of_ccs_reads_lq",
             "name": "<Q20 Reads",
-            "value": 281284
+            "value": 469053
         },
         {
             "id": "ccs_processing.total_number_of_ccs_bases_lq",
             "name": "<Q20 Yield (bp)",
-            "value": 4862922407
+            "value": 7404831038
         },
         {
             "id": "ccs_processing.mean_ccs_readlength_lq",
             "name": "<Q20 Read Length (mean, bp)",
-            "value": 17288
+            "value": 15786
         },
         {
             "id": "ccs_processing.median_ccs_readlength_lq",
             "name": "<Q20 Read Length (median, bp)",
-            "value": 17193
+            "value": 15572
         },
         {
             "id": "ccs_processing.median_qv_lq",
@@ -199,46 +199,46 @@
         {
             "id": "ccs_processing.number_of_ccs_reads_q30",
             "name": ">=Q30 Reads",
-            "value": 4621199
+            "value": 5492702
         },
         {
             "id": "ccs_processing.total_number_of_ccs_bases_q30",
             "name": ">=Q30 Yield (bp)",
-            "value": 69723788744
+            "value": 77403968252
         },
         {
             "id": "ccs_processing.mean_ccs_readlength_q30",
             "name": ">=Q30 Read Length (mean, bp)",
-            "value": 15087
+            "value": 14092
         },
         {
             "id": "ccs_processing.median_ccs_readlength_q30",
             "name": ">=Q30 Read Length (median, bp)",
-            "value": 15318
+            "value": 14081
         },
         {
             "id": "ccs_processing.median_qv_q30",
             "name": ">=Q30 Read Quality (median)",
-            "value": 37
+            "value": 38
         },
         {
             "id": "ccs_processing.base_count_q30",
             "name": "Base quality >=Q30 (bp)",
-            "value": 99035536385
+            "value": 107370510039
         },
         {
             "id": "ccs_processing.base_percentage_q30",
             "name": "Base quality >=Q30 (%)",
-            "value": 93.2
+            "value": 93.10000000000001
         }
     ],
     "dataset_uuids": [
-        "a662e714-45f2-4cf3-b8d2-c138e1deebd0"
+        "ef1e02ce-7264-476d-8cf9-b9fd01e18f4c"
     ],
     "id": "ccs_processing",
     "plotGroups": [],
     "tables": [],
     "title": "CCS Processing Report",
-    "uuid": "c3b377e8-3721-473b-a838-10eb0adb44bc",
+    "uuid": "264cbc32-7739-4000-8640-68de502c3889",
     "version": "1.0.1"
 }

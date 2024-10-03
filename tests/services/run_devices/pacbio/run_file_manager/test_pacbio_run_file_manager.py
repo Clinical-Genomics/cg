@@ -10,37 +10,37 @@ from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import Pac
 
 
 def test_get_files_to_parse(
-    expected_pac_bio_run_data: PacBioRunData,
-    pac_bio_report_files_to_parse: list[Path],
+    pacbio_barcoded_run_data: PacBioRunData,
+    pacbio_barcoded_report_files_to_parse: list[Path],
     pac_bio_run_file_manager: PacBioRunFileManager,
 ):
     # GIVEN a run data object and a PacBio run file manager
 
     # WHEN getting the files to parse
-    files: list[Path] = pac_bio_run_file_manager.get_files_to_parse(expected_pac_bio_run_data)
+    files: list[Path] = pac_bio_run_file_manager.get_files_to_parse(pacbio_barcoded_run_data)
 
     # THEN the correct files are returned
-    assert files == pac_bio_report_files_to_parse
+    assert files == pacbio_barcoded_report_files_to_parse
 
 
 def test_get_files_to_store(
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
     pac_bio_run_file_manager: PacBioRunFileManager,
-    pac_bio_report_files_to_parse: list[Path],
-    pac_bio_hifi_read_file: Path,
+    pacbio_barcoded_report_files_to_parse: list[Path],
+    pacbio_barcoded_hifi_read_files: list[Path],
 ):
     # GIVEN a run data object and a PacBio file manager
 
     # WHEN getting the files to store
-    files: list[Path] = pac_bio_run_file_manager.get_files_to_store(expected_pac_bio_run_data)
+    files: list[Path] = pac_bio_run_file_manager.get_files_to_store(pacbio_barcoded_run_data)
 
     # THEN the correct files are returned
-    full_list: list[Path] = pac_bio_report_files_to_parse + [pac_bio_hifi_read_file]
+    full_list: list[Path] = pacbio_barcoded_report_files_to_parse + pacbio_barcoded_hifi_read_files
     assert set(files) == set(full_list)
 
 
 def test_get_files_to_store_error(
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
     pac_bio_run_file_manager: PacBioRunFileManager,
 ):
     # GIVEN a run data object
@@ -55,11 +55,11 @@ def test_get_files_to_store_error(
 
         # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
-            pac_bio_run_file_manager.get_files_to_store(expected_pac_bio_run_data)
+            pac_bio_run_file_manager.get_files_to_store(pacbio_barcoded_run_data)
 
 
 def test_get_files_to_parse_error(
-    expected_pac_bio_run_data: PacBioRunData,
+    pacbio_barcoded_run_data: PacBioRunData,
     pac_bio_run_file_manager: PacBioRunFileManager,
 ):
     # GIVEN a run data object
@@ -74,7 +74,7 @@ def test_get_files_to_parse_error(
 
         # THEN an PostProcessingRunFileManagerError is raised
         with pytest.raises(PostProcessingRunFileManagerError):
-            pac_bio_run_file_manager.get_files_to_parse(expected_pac_bio_run_data)
+            pac_bio_run_file_manager.get_files_to_parse(pacbio_barcoded_run_data)
 
 
 def test_get_run_validator_files(
