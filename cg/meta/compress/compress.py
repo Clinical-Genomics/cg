@@ -170,11 +170,13 @@ class CompressAPI:
             fastq_second: File = sample_fastq[run_name]["hk_second"]
 
             if not self._can_fastqs_be_removed(compression):
-                LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
+                LOG.info(
+                    f"FASTQ compression not done for sample {sample_id}, run {run_name}, and spring files are not archived."
+                )
                 all_cleaned = False
                 continue
 
-            LOG.info(f"FASTQ compression done for sample {sample_id}, run {run_name}!")
+            LOG.info(f"FASTQs are ready to be removed for sample {sample_id}, run {run_name}!")
 
             self.update_fastq_hk(
                 sample_id=sample_id,
@@ -205,6 +207,7 @@ class CompressAPI:
         is_spring_archived: bool = (
             spring_file and spring_file.archive and spring_file.archive.archived_at
         )
+        LOG.info(f"SPRING file {compression_data.spring_path} has been archived")
         return is_fastq_compression_done or is_spring_archived
 
     def add_decompressed_fastq(self, sample: Sample) -> bool:
