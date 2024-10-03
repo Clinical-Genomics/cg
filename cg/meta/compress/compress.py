@@ -169,7 +169,7 @@ class CompressAPI:
             fastq_first: File = sample_fastq[run_name]["hk_first"]
             fastq_second: File = sample_fastq[run_name]["hk_second"]
 
-            if not self._can_fastqs_be_removed(compression_data=compression):
+            if not self._can_fastqs_be_removed(compression):
                 LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
                 all_cleaned = False
                 continue
