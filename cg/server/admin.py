@@ -684,6 +684,7 @@ class PacbioSmrtCellView(BaseView):
     column_list = (
         "internal_id",
         "run_name",
+        "movie_name",
         "well",
         "plate",
         "hifi_reads",
@@ -702,7 +703,6 @@ class PacbioSmrtCellView(BaseView):
         "control_mean_read_length",
         "control_mean_read_concordance",
         "control_mode_read_concordance",
-        "movie_name",
         "productive_zmvs",
         "started_at",
         "completed_at",
