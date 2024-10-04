@@ -713,7 +713,7 @@ class PacbioSmrtCellView(BaseView):
         "barcoded_hifi_mean_read_length",
     )
     column_formatters = {"internal_id": view_smrt_cell_internal_id, "model": view_smrt_cell_model}
-    column_default_sort = ("sequencing_completed_at", True)
+    column_default_sort = ("completed_at", True)
     column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
