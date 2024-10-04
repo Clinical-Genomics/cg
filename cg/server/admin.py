@@ -678,7 +678,7 @@ class IlluminaSampleSequencingMetricsView(BaseView):
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
 
 
-class PacbioSmrtCell(BaseView):
+class PacbioSmrtCellView(BaseView):
     """Admin view for Model.PacbioSMRTCell"""
 
     column_list = (

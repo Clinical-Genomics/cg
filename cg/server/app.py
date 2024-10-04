@@ -33,6 +33,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
+    PacBioSequencingRun,
     Panel,
     Pool,
     Sample,
@@ -148,7 +149,7 @@ def _register_admin_views():
     ext.admin.add_view(
         admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
     )
-    ext.admin.add_view(admin.PacbioSmrtCell, ext.db.session)
+    ext.admin.add_view(admin.PacbioSmrtCellView(PacBioSequencingRun, ext.db.session))
 
 
 def _register_teardowns(app: Flask):
