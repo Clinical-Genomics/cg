@@ -739,3 +739,22 @@ class PacbioSmrtCellView(BaseView):
             if model.instrument_run.device
             else ""
         )
+
+
+class PacbioSampleRunMetricsView(BaseView):
+    column_list = [
+        "smrt_cell",
+        "sample",
+        "well",
+        "total_reads_in_lane",
+        "base_passing_q30_percent",
+        "base_mean_quality_score",
+        "yield_",
+        "yield_q30",
+        "created_at",
+    ]
+    column_formatters = {
+        "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
