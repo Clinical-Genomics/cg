@@ -492,6 +492,7 @@ class CreateHandler(BaseHandler):
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
             plate=sequencing_run_dto.plate,
+            run_name=sequencing_run_dto.run_name,
             movie_name=sequencing_run_dto.movie_name,
             started_at=sequencing_run_dto.started_at,
             completed_at=sequencing_run_dto.completed_at,
@@ -515,6 +516,14 @@ class CreateHandler(BaseHandler):
             failed_reads=sequencing_run_dto.failed_reads,
             failed_yield=sequencing_run_dto.failed_yield,
             failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
+            barcoded_hifi_reads=sequencing_run_dto.barcoded_hifi_reads,
+            barcoded_hifi_reads_percentage=sequencing_run_dto.barcoded_hifi_reads_percentage,
+            barcoded_hifi_yield=sequencing_run_dto.barcoded_hifi_yield,
+            barcoded_hifi_yield_percentage=sequencing_run_dto.barcoded_hifi_yield_percentage,
+            barcoded_hifi_mean_read_length=sequencing_run_dto.barcoded_hifi_mean_read_length,
+            unbarcoded_hifi_reads=sequencing_run_dto.unbarcoded_hifi_reads,
+            unbarcoded_hifi_yield=sequencing_run_dto.unbarcoded_hifi_yield,
+            unbarcoded_hifi_mean_read_length=sequencing_run_dto.unbarcoded_hifi_mean_read_length,
             device=smrt_cell,
         )
         self.session.add(new_sequencing_run)
@@ -525,18 +534,17 @@ class CreateHandler(BaseHandler):
         sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
         sequencing_run: PacBioSequencingRun,
     ) -> PacBioSampleSequencingMetrics:
-        sample: Sample = self.get_sample_by_internal_id(sample_run_metrics_dto.sample_internal_id)
+        sample_id: str = sample_run_metrics_dto.sample_internal_id
+        LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
+        sample: Sample = self.get_sample_by_internal_id(sample_id)
         new_sample_sequencing_run = PacBioSampleSequencingMetrics(
             sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,
             hifi_yield=sample_run_metrics_dto.hifi_yield,
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
-            percent_reads_passing_q30=sample_run_metrics_dto.percent_reads_passing_q30,
-            failed_reads=sample_run_metrics_dto.failed_reads,
-            failed_yield=sample_run_metrics_dto.failed_yield,
-            failed_mean_read_length=sample_run_metrics_dto.failed_mean_read_length,
             instrument_run=sequencing_run,
+            polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
         self.session.add(new_sample_sequencing_run)
         return new_sample_sequencing_run

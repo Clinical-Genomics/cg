@@ -1,20 +1,20 @@
 {
-    "_comment": "Generated with pbcommand version  at 2024-05-24T03:07:30.660053",
+    "_comment": "Generated with pbcommand version  at 2024-09-15T14:17:57.361466",
     "attributes": [
         {
             "id": "control.reads_n",
             "name": "Number of Control Reads",
-            "value": 2750
+            "value": 2368
         },
         {
             "id": "control.readlength_mean",
             "name": "Control Read Length Mean",
-            "value": 57730
+            "value": 69936
         },
         {
             "id": "control.concordance_mean",
             "name": "Control Read Concordance Mean",
-            "value": 0.906334
+            "value": 0.90038
         },
         {
             "id": "control.concordance_mode",
@@ -23,7 +23,7 @@
         }
     ],
     "dataset_uuids": [
-        "a662e714-45f2-4cf3-b8d2-c138e1deebd0"
+        "ef1e02ce-7264-476d-8cf9-b9fd01e18f4c"
     ],
     "id": "control",
     "plotGroups": [
@@ -63,6 +63,6 @@
     "tables": [],
     "tags": [],
     "title": "Control Report",
-    "uuid": "196ef918-424d-4f11-9a34-9d850fbf84bf",
+    "uuid": "f18f885a-b958-458f-82a7-d0a176138e77",
     "version": "1.0.1"
 }
