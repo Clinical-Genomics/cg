@@ -1,7 +1,9 @@
 """Module for PacBio fixtures returning service objects."""
 
 from unittest.mock import Mock
+
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
@@ -56,14 +58,14 @@ def pac_bio_post_processing_service(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_housekeeper_service: PacBioHousekeeperService,
     pac_bio_store_service: PacBioStoreService,
-    pac_bio_sequencing_run_name: str,
+    pacbio_barcoded_sequencing_run_name: str,
 ) -> PacBioPostProcessingService:
     return PacBioPostProcessingService(
         run_validator=Mock(),
         run_data_generator=pac_bio_run_data_generator,
         hk_service=pac_bio_housekeeper_service,
         store_service=pac_bio_store_service,
-        sequencing_dir=pac_bio_sequencing_run_name,
+        sequencing_dir=pacbio_barcoded_sequencing_run_name,
     )
 
 
