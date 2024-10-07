@@ -26,9 +26,17 @@ from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+    DeliveryServiceFactory,
+)
+from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+    DeliveryRsyncService,
+)
+from cg.services.deliver_files.delivery_rsync_service.models import RsyncDeliveryConfig
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
@@ -47,11 +55,15 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
+from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
+    ValidateFileTransferService,
+)
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -283,12 +295,11 @@ class GisaidConfig(CommonAppConfig):
 
 
 class DataDeliveryConfig(BaseModel):
-    destination_path: str
-    covid_destination_path: str
-    covid_source_path = str
-    covid_report_path: str
     account: str
     base_path: str
+    covid_destination_path: str
+    covid_report_path: str
+    destination_path: str
     mail_user: str
 
 
@@ -382,6 +393,8 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow: DataFlowConfig | None = None
     delivery_api_: DeliveryAPI | None = None
+    delivery_rsync_service_: DeliveryRsyncService | None = None
+    delivery_service_factory_: DeliveryServiceFactory | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -604,6 +617,11 @@ class CGConfig(BaseModel):
         LOG.debug("Instantiating PacBio post-processing service")
         run_data_generator = PacBioRunDataGenerator()
         file_manager = PacBioRunFileManager()
+        run_validator = PacBioRunValidator(
+            file_manager=file_manager,
+            decompressor=Decompressor(),
+            file_transfer_validator=ValidateFileTransferService(),
+        )
         metrics_parser = PacBioMetricsParser(file_manager=file_manager)
         transfer_service = PacBioDataTransferService(metrics_service=metrics_parser)
         store_service = PacBioStoreService(
@@ -615,6 +633,7 @@ class CGConfig(BaseModel):
             metrics_parser=metrics_parser,
         )
         return PacBioPostProcessingService(
+            run_validator=run_validator,
             run_data_generator=run_data_generator,
             hk_service=hk_service,
             store_service=store_service,
@@ -662,7 +681,7 @@ class CGConfig(BaseModel):
 
     @property
     def analysis_service(self) -> AnalysisService:
-        return AnalysisService(analysis_client=self.trailblazer_api)
+        return AnalysisService(analysis_client=self.trailblazer_api, status_db=self.status_db)
 
     @property
     def scout_api(self) -> ScoutAPI:
@@ -713,3 +732,32 @@ class CGConfig(BaseModel):
     @property
     def sequencing_qc_service(self) -> SequencingQCService:
         return SequencingQCService(self.status_db)
+
+    @property
+    def delivery_rsync_service(self) -> DeliveryRsyncService:
+        service = self.delivery_rsync_service_
+        if service is None:
+            LOG.debug("Instantiating delivery rsync service")
+            rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
+            service = DeliveryRsyncService(
+                delivery_path=self.delivery_path,
+                rsync_config=rsync_config,
+                status_db=self.status_db,
+            )
+            self.delivery_rsync_service_ = service
+        return service
+
+    @property
+    def delivery_service_factory(self) -> DeliveryServiceFactory:
+        factory = self.delivery_service_factory_
+        if not factory:
+            LOG.debug("Instantiating delivery service factory")
+            factory = DeliveryServiceFactory(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                tb_service=self.trailblazer_api,
+                rsync_service=self.delivery_rsync_service,
+                analysis_service=self.analysis_service,
+            )
+            self.delivery_service_factory_ = factory
+        return factory

@@ -558,7 +558,7 @@ class Case(Base, PriorityMixin):
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_workflow_map: dict[str, str] = {
-            DataDelivery.FASTQ: Workflow.FASTQ,
+            DataDelivery.FASTQ: Workflow.RAW_DATA,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
         for data_delivery, workflow in delivery_per_workflow_map.items():
@@ -815,6 +815,10 @@ class Sample(Base, PriorityMixin):
         return bool(self.reads)
 
     @property
+    def is_negative_control(self) -> bool:
+        return self.control == ControlOptions.NEGATIVE
+
+    @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flowcell for metric in self.sequencing_metrics})
@@ -967,10 +971,10 @@ class Order(Base):
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
-    order_date: Mapped[datetime] = mapped_column(default=datetime.now())
+    order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
-    is_delivered: Mapped[bool] = mapped_column(default=False)
+    is_open: Mapped[bool] = mapped_column(default=True)
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -1018,7 +1022,7 @@ class IlluminaFlowCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSMRTCell(RunDevice):
+class PacbioSMRTCell(RunDevice):
     """Model for storing PacBio SMRT cells."""
 
     __tablename__ = "pacbio_smrt_cell"
@@ -1083,12 +1087,13 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacBioSequencingRun(InstrumentRun):
+class PacbioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     well: Mapped[Str32]
     plate: Mapped[int]
+    run_name: Mapped[Str32 | None]
     movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
@@ -1112,6 +1117,14 @@ class PacBioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads: Mapped[BigInt | None]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_yield: Mapped[BigInt | None]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_mean_read_length: Mapped[BigInt | None]
+    unbarcoded_hifi_reads: Mapped[BigInt | None]
+    unbarcoded_hifi_yield: Mapped[BigInt | None]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1149,7 +1162,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSampleSequencingMetrics(SampleRunMetrics):
+class PacbioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
     __tablename__ = "pacbio_sample_run_metrics"
@@ -1159,9 +1172,6 @@ class PacBioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}

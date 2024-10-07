@@ -94,7 +94,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -188,6 +188,14 @@ class ReadHandler(BaseHandler):
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,
             started_at_date=started_at_date,
+        ).first()
+
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+        """Return an analysis."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.BY_ENTRY_ID],
+            analyses=self._get_query(table=Analysis),
+            entry_id=entry_id,
         ).first()
 
     def get_cases_by_customer_and_case_name_search(
@@ -553,13 +561,12 @@ class ReadHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_by_customer_id(self, *, customers: list[Customer] | None = None) -> list[Pool]:
-        """Return all the pools for a customer."""
-        customer_ids = [customer.id for customer in customers]
+    def get_pools_by_customers(self, *, customers: list[Customer] | None = None) -> list[Pool]:
+        """Return all the pools for a list of customers."""
         return apply_pool_filter(
             pools=self._get_query(table=Pool),
-            customer_ids=customer_ids,
-            filter_functions=[PoolFilter.BY_CUSTOMER_ID],
+            customers=customers,
+            filter_functions=[PoolFilter.BY_CUSTOMERS],
         ).all()
 
     def get_pools_by_name_enquiry(self, *, name_enquiry: str = None) -> list[Pool]:
@@ -593,7 +600,7 @@ class ReadHandler(BaseHandler):
         self, customers: list[Customer] | None = None, enquiry: str = None
     ) -> list[Pool]:
         pools: list[Pool] = (
-            self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
+            self.get_pools_by_customers(customers=customers) if customers else self.get_pools()
         )
         if enquiry:
             pools: list[Pool] = list(
@@ -616,24 +623,22 @@ class ReadHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_samples_by_customer_id_and_pattern(
+    def get_samples_by_customers_and_pattern(
         self, *, customers: list[Customer] | None = None, pattern: str = None
     ) -> list[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
-        customer_entry_ids: list[int] = []
         filter_functions: list[SampleFilter] = []
         if customers:
             if not isinstance(customers, list):
                 customers = list(customers)
-            customer_entry_ids = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.BY_CUSTOMER_ENTRY_IDS)
+            filter_functions.append(SampleFilter.BY_CUSTOMERS)
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
-            customer_entry_ids=customer_entry_ids,
+            customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
@@ -680,7 +685,7 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+    def get_samples_by_customer_ids_and_subject_id_and_is_tumour(
         self, customer_ids: list[int], subject_id: str, is_tumour: bool
     ) -> list[Sample]:
         """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
@@ -688,16 +693,13 @@ class ReadHandler(BaseHandler):
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SUBJECT_ID,
+            SampleFilter.BY_TUMOUR,
         ]
-        (
-            filter_functions.append(SampleFilter.IS_TUMOUR)
-            if is_tumour
-            else filter_functions.append(SampleFilter.IS_NOT_TUMOUR)
-        )
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
+            is_tumour=is_tumour,
             filter_functions=filter_functions,
         ).all()
 
@@ -1400,10 +1402,10 @@ class ReadHandler(BaseHandler):
         """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
+            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             workflow=orders_request.workflow,
             search=orders_request.search,
-            delivered=orders_request.delivered,
+            is_open=orders_request.is_open,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
@@ -1548,10 +1550,10 @@ class ReadHandler(BaseHandler):
     def does_gene_panel_exist(self, abbreviation: str) -> bool:
         return bool(self.get_panel_by_abbreviation(abbreviation))
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
-            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            smrt_cells=self._get_query(table=PacbioSMRTCell),
             internal_id=internal_id,
         ).first()
 
@@ -1582,3 +1584,56 @@ class ReadHandler(BaseHandler):
             if sample.sex != sex:
                 return True
         return False
+
+    def get_related_samples(
+        self,
+        sample_internal_id: str,
+        prep_categories: list[PrepCategory],
+        collaborators: set[Customer],
+    ) -> list[Sample]:
+        """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
+        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            prep_categories=prep_categories,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
+        )
+
+        sample_application_version_query: Query = apply_sample_filter(
+            samples=sample_application_version_query,
+            subject_id=sample.subject_id,
+            is_tumour=sample.is_tumour,
+            customer_entry_ids=[customer.id for customer in collaborators],
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+
+        return sample_application_version_query.all()
+
+    def get_related_cases(
+        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
+    ) -> list[Case]:
+        """Return a list of cases linked to the given sample within the given list of workflows and customers in a collaboration."""
+
+        cases_with_samples: Query = self._join_sample_and_case()
+        cases_with_samples: Query = apply_case_sample_filter(
+            case_samples=cases_with_samples,
+            sample_internal_id=sample_internal_id,
+            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
+        )
+
+        return apply_case_filter(
+            cases=cases_with_samples,
+            workflows=workflows,
+            customer_entry_ids=[customer.id for customer in collaborators],
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        ).all()

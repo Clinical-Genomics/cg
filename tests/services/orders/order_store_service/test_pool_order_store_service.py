@@ -1,4 +1,5 @@
 import datetime as dt
+
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
@@ -25,7 +26,7 @@ def test_pools_to_status(
     pool = data["pools"][0]
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLP05R800"
-    assert pool["data_analysis"] == Workflow.FASTQ
+    assert pool["data_analysis"] == Workflow.RAW_DATA
     assert pool["data_delivery"] == str(DataDelivery.FASTQ)
     assert len(pool["samples"]) == 2
     sample = pool["samples"][0]
@@ -76,7 +77,7 @@ def test_store_rml(
     assert not hasattr(new_pool, "data_analysis")
 
     new_case = base_store.get_cases()[0]
-    assert new_case.data_analysis == Workflow.FASTQ
+    assert new_case.data_analysis == Workflow.RAW_DATA
     assert new_case.data_delivery == str(DataDelivery.FASTQ)
 
     # and that the pool is set for invoicing but not the samples of the pool

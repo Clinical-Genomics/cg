@@ -15,6 +15,12 @@ from cg.utils.files import get_files_matching_pattern, is_pattern_in_file_path_n
 LOG = logging.getLogger(__name__)
 
 
+def is_sample_negative_control_with_reads_in_lane(
+    is_negative_control: bool, metric: IlluminaSampleSequencingMetricsDTO
+) -> bool:
+    return is_negative_control and metric.total_reads_in_lane != 0
+
+
 def _is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) -> bool:
     """Validate that directory name is formatted as Sample_<sample_id> or Sample_<sample_id>_."""
     sample_pattern: str = f"Sample_{sample_internal_id}"

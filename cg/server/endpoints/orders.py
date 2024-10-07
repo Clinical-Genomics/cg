@@ -25,16 +25,13 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
-from cg.server.dto.orders.order_delivery_update_request import (
-    OrderDeliveredUpdateRequest,
-)
-from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
+from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
+from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
@@ -46,8 +43,8 @@ from cg.server.ext import (
     mip_dna_validation_service,
     order_service,
     order_submitter_registry,
-    osticket,
     tomte_validation_service,
+    ticket_handler,
 )
 from cg.store.models import Application, Customer
 
@@ -76,24 +73,24 @@ def get_order(order_id: int):
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
-@ORDERS_BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
-def set_order_delivered(order_id: int):
+@ORDERS_BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
+def set_order_open(order_id: int):
     try:
-        request_data = OrderDeliveredPatch.model_validate(request.json)
-        delivered: bool = request_data.delivered
-        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        request_data = OrderOpenPatch.model_validate(request.json)
+        is_open: bool = request_data.open
+        response_data: Order = order_service.set_open(order_id=order_id, open=is_open)
         return jsonify(response_data.model_dump()), HTTPStatus.OK
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
 
-@ORDERS_BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
-def update_order_delivered(order_id: int):
-    """Update the delivery status of an order based on the number of delivered analyses."""
+@ORDERS_BLUEPRINT.route("/orders/<order_id>/update-open-status", methods=["POST"])
+def update_order_open(order_id: int):
+    """Update the is_open parameter of an order based on the number of delivered analyses."""
     try:
-        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        request_data = OrderOpenUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
-        order_service.update_delivered(order_id=order_id, delivered_analyses=delivered_analyses)
+        order_service.update_is_open(order_id=order_id, delivered_analyses=delivered_analyses)
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
@@ -160,7 +157,10 @@ def create_order_from_form():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(
-        lims=lims, status=db, osticket=osticket, submitter_registry=order_submitter_registry
+        lims=lims,
+        status=db,
+        ticket_handler=ticket_handler,
+        submitter_registry=order_submitter_registry,
     )
     error_message: str
     try:
@@ -173,7 +173,7 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 

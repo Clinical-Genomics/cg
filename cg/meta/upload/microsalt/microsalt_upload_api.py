@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.microsalt.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -21,5 +21,5 @@ class MicrosaltUploadAPI(UploadAPI):
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis)
 
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case)
         self.update_uploaded_at(analysis=analysis)

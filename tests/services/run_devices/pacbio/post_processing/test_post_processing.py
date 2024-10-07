@@ -35,9 +35,9 @@ def test_pac_bio_post_processing_run_name_error(pac_bio_context):
 
 
 def test_pac_bio_post_processing_store_data_error(
-    pac_bio_context: CGConfig, pac_bio_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
 ):
-    # GIVEN a PacBioPostProcessingService and a wrong run name
+    # GIVEN a PacBioPostProcessingService that raises an error when storing data in StatusDB
 
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
@@ -49,13 +49,13 @@ def test_pac_bio_post_processing_store_data_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pac_bio_sequencing_run_name)
+            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
 
 
 def test_pac_bio_post_processing_store_files_error(
-    pac_bio_context: CGConfig, pac_bio_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
 ):
-    # GIVEN a PacBioPostProcessingService
+    # GIVEN a PacBioPostProcessingService that raises an error when storing files in Housekeeper
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
@@ -69,4 +69,4 @@ def test_pac_bio_post_processing_store_files_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pac_bio_sequencing_run_name)
+            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
