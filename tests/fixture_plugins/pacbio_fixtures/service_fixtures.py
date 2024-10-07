@@ -1,5 +1,6 @@
 """Module for PacBio fixtures returning service objects."""
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -58,14 +59,14 @@ def pac_bio_post_processing_service(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_housekeeper_service: PacBioHousekeeperService,
     pac_bio_store_service: PacBioStoreService,
-    pacbio_barcoded_sequencing_run_name: str,
+    pac_bio_runs_dir: Path,
 ) -> PacBioPostProcessingService:
     return PacBioPostProcessingService(
         run_validator=Mock(),
         run_data_generator=pac_bio_run_data_generator,
         hk_service=pac_bio_housekeeper_service,
         store_service=pac_bio_store_service,
-        sequencing_dir=pacbio_barcoded_sequencing_run_name,
+        sequencing_dir=pac_bio_runs_dir.as_posix(),
     )
 
 

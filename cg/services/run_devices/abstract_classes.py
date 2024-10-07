@@ -1,10 +1,13 @@
 """Post-processing service abstract classes."""
 
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
+
+LOG = logging.getLogger(__name__)
 
 
 class RunDataGenerator(ABC):
@@ -81,6 +84,23 @@ class PostProcessingService(ABC):
     @abstractmethod
     def post_process(self, run_name: str, dry_run: bool = False):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
+        pass
+
+    def post_process_all(self, dry_run: bool = False) -> bool:
+        """Post-process all PacBio runs in the sequencing directory."""
+        LOG.info("Starting PacBio post-processing for all runs")
+        is_post_processing_successful = True
+        for run_name in self._get_all_run_names():
+            try:
+                self.post_process(run_name=run_name, dry_run=dry_run)
+            except Exception as error:
+                LOG.error(f"Could not post-process {run_name}: {error}")
+                is_post_processing_successful = False
+        return is_post_processing_successful
+
+    @abstractmethod
+    def _get_all_run_names(self) -> list[str]:
+        """Get all run names in the sequencing directory."""
         pass
 
     @staticmethod
