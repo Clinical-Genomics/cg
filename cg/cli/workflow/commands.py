@@ -389,8 +389,8 @@ def microsalt_past_run_dirs(
 
 @click.command("tower-past-run-dirs")
 @SKIP_CONFIRMATION
-@ARGUMENT_BEFORE_STR
 @ARGUMENT_WORKFLOW
+@ARGUMENT_BEFORE_STR
 @click.pass_context
 def tower_past_run_dirs(
     context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
