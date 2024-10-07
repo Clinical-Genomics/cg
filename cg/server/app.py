@@ -8,11 +8,11 @@ from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, ext, invoices
 from cg.server.app_config import app_config
-from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
-from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
@@ -33,6 +33,8 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     Panel,
     Pool,
     Sample,
@@ -147,6 +149,10 @@ def _register_admin_views():
     )
     ext.admin.add_view(
         admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
+    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSequencingRun, ext.db.session))
+    ext.admin.add_view(
+        admin.PacbioSampleRunMetricsView(PacbioSampleSequencingMetrics, ext.db.session)
     )
 
 

@@ -1,5 +1,5 @@
 {
-    "_comment": "Generated with pbcommand version  at 2024-05-24T03:07:11.971933",
+    "_comment": "Generated with pbcommand version  at 2024-09-15T14:17:35.016349",
     "attributes": [
         {
             "id": "loading_xml_report.productive_zmws",
@@ -9,21 +9,21 @@
         {
             "id": "loading_xml_report.productivity_0_n",
             "name": "Productivity 0",
-            "value": 10012557
+            "value": 6257733
         },
         {
             "id": "loading_xml_report.productivity_1_n",
             "name": "Productivity 1",
-            "value": 15048838
+            "value": 18766925
         },
         {
             "id": "loading_xml_report.productivity_2_n",
             "name": "Productivity 2",
-            "value": 104429
+            "value": 141166
         }
     ],
     "dataset_uuids": [
-        "a662e714-45f2-4cf3-b8d2-c138e1deebd0"
+        "ef1e02ce-7264-476d-8cf9-b9fd01e18f4c"
     ],
     "id": "loading_xml_report",
     "plotGroups": [
@@ -51,7 +51,7 @@
                     "header": "Collection Context",
                     "id": "loading_xml_report.loading_xml_table.collection_context",
                     "values": [
-                        "m84202_240522_135641_s1"
+                        "m84202_240913_162115_s3"
                     ]
                 },
                 {
@@ -65,42 +65,42 @@
                     "header": "Productivity 0",
                     "id": "loading_xml_report.loading_xml_table.productivity_0_n",
                     "values": [
-                        10012557
+                        6257733
                     ]
                 },
                 {
                     "header": "P0 (%)",
                     "id": "loading_xml_report.loading_xml_table.productivity_0_pct",
                     "values": [
-                        39.786
+                        24.866
                     ]
                 },
                 {
                     "header": "Productivity 1",
                     "id": "loading_xml_report.loading_xml_table.productivity_1_n",
                     "values": [
-                        15048838
+                        18766925
                     ]
                 },
                 {
                     "header": "P1 (%)",
                     "id": "loading_xml_report.loading_xml_table.productivity_1_pct",
                     "values": [
-                        59.799
+                        74.573
                     ]
                 },
                 {
                     "header": "Productivity 2",
                     "id": "loading_xml_report.loading_xml_table.productivity_2_n",
                     "values": [
-                        104429
+                        141166
                     ]
                 },
                 {
                     "header": "P2 (%)",
                     "id": "loading_xml_report.loading_xml_table.productivity_2_pct",
                     "values": [
-                        0.415
+                        0.561
                     ]
                 },
                 {
@@ -117,6 +117,6 @@
     ],
     "tags": [],
     "title": "Loading Report",
-    "uuid": "f939d4a7-044a-4bee-a30e-b87a3f6af918",
+    "uuid": "d08b3681-39fc-48ce-944a-85247ad634dd",
     "version": "1.0.1"
 }
