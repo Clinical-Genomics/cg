@@ -1022,7 +1022,7 @@ class IlluminaFlowCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSMRTCell(RunDevice):
+class PacbioSMRTCell(RunDevice):
     """Model for storing PacBio SMRT cells."""
 
     __tablename__ = "pacbio_smrt_cell"

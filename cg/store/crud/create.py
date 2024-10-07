@@ -40,7 +40,7 @@ from cg.store.models import (
     Organism,
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -476,17 +476,17 @@ class CreateHandler(BaseHandler):
         self.session.add(new_metric)
         return new_metric
 
-    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacBioSMRTCell:
+    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
         if self.get_pac_bio_smrt_cell_by_internal_id(run_device_dto.internal_id):
             raise ValueError(f"SMRT cell with {run_device_dto.internal_id} already exists.")
-        new_smrt_cell = PacBioSMRTCell(
+        new_smrt_cell = PacbioSMRTCell(
             type=run_device_dto.type, internal_id=run_device_dto.internal_id
         )
         self.session.add(new_smrt_cell)
         return new_smrt_cell
 
     def create_pac_bio_sequencing_run(
-        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacBioSMRTCell
+        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSequencingRun:
         new_sequencing_run = PacbioSequencingRun(
             type=sequencing_run_dto.type,
