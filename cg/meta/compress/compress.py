@@ -58,7 +58,7 @@ class CompressAPI:
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""
-        LOG.info(f"Check if FASTQ compression is possible for {sample_id}")
+        LOG.debug(f"Check if FASTQ compression is possible for {sample_id}")
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
             return False
@@ -152,7 +152,7 @@ class CompressAPI:
         This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
         file and its metadata file.
         """
-        LOG.info(f"Clean FASTQ files for {sample_id}")
+        LOG.debug(f"Clean FASTQ files for {sample_id}")
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
             return False
