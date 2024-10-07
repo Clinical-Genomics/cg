@@ -32,6 +32,7 @@ from cg.store.store import Store
 
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+ARGUMENT_WORKFLOW = click.argument("workflow", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
@@ -389,12 +390,7 @@ def microsalt_past_run_dirs(
 @click.command("tower-past-run-dirs")
 @SKIP_CONFIRMATION
 @ARGUMENT_BEFORE_STR
-@click.argument(
-    "-w",
-    "--workflow",
-    "workflow",
-    help="Specify the workflow for which to clean case directories.",
-)
+@ARGUMENT_WORKFLOW
 @click.pass_context
 def tower_past_run_dirs(
     context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
