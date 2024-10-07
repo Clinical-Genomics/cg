@@ -739,7 +739,6 @@ class PacbioSampleRunMetricsView(BaseView):
         "hifi_reads",
         "hifi_mean_read_length",
         "hifi_median_read_quality",
-        "polymerase_mean_read_length",
     ]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
