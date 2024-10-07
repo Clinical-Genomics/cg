@@ -25,7 +25,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Suppress annotations during build
-        run: echo "::stop-commands::suppress-annotations"
+        run: echo "::stop-commands::no-annotations"
 
       - name: Build and push
         id: docker_build
@@ -37,4 +37,4 @@ jobs:
           tags: "clinicalgenomics/cg-stage:${{steps.get_branch_name.outputs.branch}}, clinicalgenomics/cg-stage:latest"
 
       - name: Resume annotations
-        run: echo "::suppress-annotations::"
+        run: echo "::no-annotations::"
