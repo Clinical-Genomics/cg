@@ -97,7 +97,7 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
                 sample_id=sample_id, archive_location=archive_location
             )
             if not was_cleaned:
-                LOG.info(f"Skipping individual {sample_id}")
+                LOG.debug(f"Skipping individual {sample_id}")
                 continue
             cleaned_inds += 1
 
