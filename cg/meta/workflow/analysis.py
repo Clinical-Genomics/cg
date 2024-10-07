@@ -136,7 +136,8 @@ class AnalysisAPI(MetaAPI):
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
-        if are_all_samples_control(case_id=case_id):
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if are_all_samples_control(case=case):
             priority = Priority.express
         return Priority.priority_to_slurm_qos().get(priority)
 
