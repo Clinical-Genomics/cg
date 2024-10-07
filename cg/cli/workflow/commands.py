@@ -389,11 +389,11 @@ def microsalt_past_run_dirs(
 @click.command("tower-past-run-dirs")
 @SKIP_CONFIRMATION
 @ARGUMENT_BEFORE_STR
-@click.option(
+@click.argument(
     "-w",
     "--workflow",
     "workflow",
-    help="Only cleans analyses from the specified workflow, if provided.",
+    help="Specify the workflow for which to clean case directories.",
 )
 @click.pass_context
 def tower_past_run_dirs(
