@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic.v1 import Field
+from pydantic import Field
 
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
@@ -36,7 +36,7 @@ class RnafusionParameters(WorkflowParameters):
     fusioncatcher: bool = True
     starfusion: bool = True
     trim_tail: int = 50
-    clusterOptions: str = Field(..., alias="cluster_options")
+    clusterOptions: str = Field(None, alias="cluster_options")
     priority: str
 
 
