@@ -17,6 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.meta.workflow.utils.are_all_samples_control import are_all_samples_control
 from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.store.store import Store
@@ -579,4 +580,4 @@ def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
 
     # WHEN checking if all samples are controls
     # THEN the result should be True
-    assert AnalysisAPI.are_all_samples_control(case) == True
+    assert are_all_samples_control(case) == True
