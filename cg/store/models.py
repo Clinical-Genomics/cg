@@ -1087,7 +1087,7 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacBioSequencingRun(InstrumentRun):
+class PacbioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
@@ -1162,7 +1162,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSampleSequencingMetrics(SampleRunMetrics):
+class PacbioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
     __tablename__ = "pacbio_sample_run_metrics"
