@@ -34,7 +34,7 @@ from tests.store_helpers import StoreHelpers
     ],
 )
 def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_qos):
-    """Test qet Quality of service (SLURM QOS) from the case priority"""
+    """Test get Quality of service (SLURM QOS) from the case priority"""
 
     # GIVEN a case that has a priority
     mocker.patch.object(AnalysisAPI, "get_priority_for_case")
@@ -569,9 +569,7 @@ def test_link_fastq_files_for_sample(
         assert "Linking: " in caplog.text
 
 
-def test_are_all_samples_control(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
-) -> None:
+def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
     """Tests that are_all_samples_control returns True if all samples in a case are controls."""
 
     # GIVEN a case with all samples being positive controls
@@ -581,4 +579,4 @@ def test_are_all_samples_control(
 
     # WHEN checking if all samples are controls
     # THEN the result should be True
-    assert mip_analysis_api.are_all_samples_control(case) == True
+    assert AnalysisAPI.are_all_samples_control(case) == True
