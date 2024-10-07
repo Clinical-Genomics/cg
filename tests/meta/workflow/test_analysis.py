@@ -8,6 +8,7 @@ import pytest
 
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
+from cg.constants.constants import ControlOptions
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
@@ -566,3 +567,18 @@ def test_link_fastq_files_for_sample(
 
         # THEN broadcast linking of files
         assert "Linking: " in caplog.text
+
+
+def test_are_all_samples_control(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
+) -> None:
+    """Tests that are_all_samples_control returns True if all samples in a case are controls."""
+
+    # GIVEN a case with all samples being positive controls
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    for sample in case.samples:
+        sample.control = ControlOptions.POSITIVE
+
+    # WHEN checking if all samples are controls
+    # THEN the result should be True
+    assert mip_analysis_api.are_all_samples_control(case) == True
