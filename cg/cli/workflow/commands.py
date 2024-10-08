@@ -397,8 +397,8 @@ def tower_past_run_dirs(
     context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
 ):
     """Clean up of "old" tower case run dirs."""
-    analysis_api: NfAnalysisAPI = TOWER_WORKFLOW_TO_ANALYSIS_API_MAP.get(workflow)(context.obj)
-    if not analysis_api:
+    if workflow not in TOWER_WORKFLOW_TO_ANALYSIS_API_MAP:
         LOG.error(f"Please ensure that the provided workflow {workflow} is using Tower")
         raise click.Abort()
+    analysis_api: NfAnalysisAPI = TOWER_WORKFLOW_TO_ANALYSIS_API_MAP.get(workflow)(context.obj)
     analysis_api.clean_past_run_dirs(before_date=before_str, skip_confirmation=skip_confirmation)
