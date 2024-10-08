@@ -5,7 +5,6 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.run_devices.abstract_classes import RunValidator
-from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 from cg.services.run_devices.exc import PostProcessingError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
@@ -45,7 +44,7 @@ class PacBioRunValidator(RunValidator):
         Raises:
             PostProcessingError: If the run has already been post-processed
         """
-        if Path(run_data.full_path, POST_PROCESSING_COMPLETED).exists():
+        if self._is_post_processed(run_data.full_path):
             message: str = f"Run {run_data.full_path} is already post-processed, skipping"
             LOG.warning(message)
             raise PostProcessingError(message)
@@ -69,9 +68,13 @@ class PacBioRunValidator(RunValidator):
         LOG.debug(f"Run for {run_data.full_path} is validated.")
 
     @staticmethod
-    def _touch_is_validated(run_path: Path):
-        Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
+    def _is_post_processed(run_path: Path) -> bool:
+        return Path(run_path, PacBioDirsAndFiles.POST_PROCESSING_COMPLETED).exists()
 
     @staticmethod
     def _is_validated(run_path: Path) -> bool:
         return Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()
+
+    @staticmethod
+    def _touch_is_validated(run_path: Path):
+        Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
