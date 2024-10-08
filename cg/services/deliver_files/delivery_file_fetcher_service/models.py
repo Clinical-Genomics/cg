@@ -1,11 +1,12 @@
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class DeliveryMetaData(BaseModel):
     customer_internal_id: str
     ticket_id: str
+    customer_inbox: Path | None = None
 
 
 class CaseFile(BaseModel):
@@ -21,17 +22,17 @@ class SampleFile(BaseModel):
     file_path: Path
 
 
-class DeliveryFiles(BaseModel):
-    delivery_data: DeliveryMetaData
-    case_files: list[CaseFile]
-    sample_files: list[SampleFile]
-
-
 class MissingFile(BaseModel):
-    case_id: str
-    sample_id: str
+    bundle_name: str
     tags: list[str]
 
 
 class MissingFiles(BaseModel):
     files: list[MissingFile]
+
+
+class DeliveryFiles(BaseModel):
+    delivery_data: DeliveryMetaData
+    case_files: list[CaseFile]
+    sample_files: list[SampleFile]
+    missing_files: list[MissingFile]

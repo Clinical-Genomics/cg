@@ -23,6 +23,7 @@ class DeliveryFilesMover:
         inbox_dir_path: Path = self._create_ticket_inbox_dir_path(
             delivery_base_path=delivery_base_path, delivery_data=delivery_files.delivery_data
         )
+        delivery_files.delivery_data.customer_inbox = inbox_dir_path
         self._create_ticket_inbox_folder(inbox_dir_path)
         self._create_hard_links_for_delivery_files(
             delivery_files=delivery_files, inbox_dir_path=inbox_dir_path
