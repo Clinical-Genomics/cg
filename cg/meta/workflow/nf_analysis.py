@@ -385,7 +385,7 @@ class NfAnalysisAPI(AnalysisAPI):
             vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
             if dry_run:
                 for line in vcf_lines:
-                    LOG.info(line)
+                    LOG.debug(line)
             else:
                 self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
