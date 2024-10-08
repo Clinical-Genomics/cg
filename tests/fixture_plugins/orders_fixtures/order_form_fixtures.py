@@ -81,10 +81,10 @@ def fastq_order_parser(fastq_orderform: str) -> ExcelOrderformParser:
 
 
 @pytest.fixture(scope="session")
-def microbial_order_parser(microbial_orderform: str) -> ExcelOrderformParser:
+def microsalt_order_parser(microsalt_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed an orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
-    order_form_parser.parse_orderform(excel_path=microbial_orderform)
+    order_form_parser.parse_orderform(excel_path=microsalt_orderform)
     return order_form_parser
 
 
@@ -145,7 +145,7 @@ def mip_rna_orderform_sample() -> dict:
 
 
 @pytest.fixture(scope="session")
-def microbial_orderform(orderforms: Path) -> str:
+def microsalt_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples."""
     return Path(
         orderforms,

@@ -86,15 +86,15 @@ def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
     assert orderform_parser.project_type == OrderType.BALSAMIC_UMI
 
 
-def test_parse_microbial_orderform(microbial_orderform: str):
+def test_parse_microbial_orderform(microsalt_orderform: str):
     """Test to parse a microbial orderform in excel format"""
     # GIVEN a order form in excel format
-    assert is_excel(Path(microbial_orderform))
+    assert is_excel(Path(microsalt_orderform))
     # GIVEN a orderform API
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
 
     # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=microbial_orderform)
+    orderform_parser.parse_orderform(excel_path=microsalt_orderform)
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.MICROSALT
@@ -241,12 +241,12 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, c
     assert not order.cases
 
 
-def test_get_data_delivery(microbial_order_parser):
+def test_get_data_delivery(microsalt_order_parser):
     """Tests that the data_delivery field is correctly parsed and translated to a value in the
     data_delivery enum"""
     # GIVEN an excel order form
     # WHEN the function is called
-    data_delivery = microbial_order_parser.get_data_delivery()
+    data_delivery = microsalt_order_parser.get_data_delivery()
     # THEN no errors should be raised and a data_delivery string should be returned
     assert data_delivery
 
