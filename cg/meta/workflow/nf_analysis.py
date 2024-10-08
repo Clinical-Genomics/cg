@@ -6,7 +6,6 @@ from typing import Any, Iterator
 from dateutil.parser import parse
 from pydantic.v1 import ValidationError
 
-from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -385,7 +384,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if self.is_managed_variants_required:
             vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
             if dry_run:
-                echo_lines(lines=vcf_lines)
+                for line in vcf_lines:
+                    LOG.info(line)
             else:
                 self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
