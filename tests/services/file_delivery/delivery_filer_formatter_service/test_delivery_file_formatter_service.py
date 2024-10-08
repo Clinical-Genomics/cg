@@ -55,6 +55,7 @@ def test_reformat_files(
     sample_files = request.getfixturevalue(sample_files)
 
     delivery_data = DeliveryMetaData(
+        case_id="some_case",
         customer_internal_id="cust_id",
         ticket_id="ticket_id",
         customer_inbox=Path(tmp_path, "cust_id", "inbox"),

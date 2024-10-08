@@ -47,6 +47,7 @@ def expected_fastq_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
+        case_id=case.internal_id,
         customer_internal_id=case.customer.internal_id,
         ticket_id=case.latest_ticket,
     )
@@ -81,6 +82,7 @@ def expected_bam_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
+        case_id=case.internal_id,
         customer_internal_id=case.customer.internal_id,
         ticket_id=case.latest_ticket,
     )
@@ -129,6 +131,7 @@ def expected_analysis_delivery_files(
     ]
     case: Case = delivery_store_balsamic.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
+        case_id=case.internal_id,
         customer_internal_id=case.customer.internal_id,
         ticket_id=case.latest_ticket,
     )
@@ -190,7 +193,9 @@ def expected_moved_analysis_delivery_files(
 @pytest.fixture
 def empty_delivery_files() -> DeliveryFiles:
     """Return an empty delivery files object."""
-    delivery_data = DeliveryMetaData(customer_internal_id="cust_id", ticket_id="ticket_id")
+    delivery_data = DeliveryMetaData(
+        case_id="some_case", customer_internal_id="cust_id", ticket_id="ticket_id"
+    )
     return DeliveryFiles(delivery_data=delivery_data, case_files=[], sample_files=[])
 
 

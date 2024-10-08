@@ -53,7 +53,9 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
                 self._get_raw_data_files_for_sample(case_id=case_id, sample_id=sample_id)
             )
         delivery_data = DeliveryMetaData(
-            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+            case_id=case.internal_id,
+            customer_internal_id=case.customer.internal_id,
+            ticket_id=case.latest_ticket,
         )
         return self._validate_delivery_has_content(
             DeliveryFiles(

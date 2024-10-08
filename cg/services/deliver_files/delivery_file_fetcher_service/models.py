@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class DeliveryMetaData(BaseModel):
+    case_id: str
     customer_internal_id: str
     ticket_id: str
     customer_inbox: Path | None = None
@@ -22,17 +23,7 @@ class SampleFile(BaseModel):
     file_path: Path
 
 
-class MissingFile(BaseModel):
-    bundle_name: str
-    tags: list[str]
-
-
-class MissingFiles(BaseModel):
-    files: list[MissingFile]
-
-
 class DeliveryFiles(BaseModel):
     delivery_data: DeliveryMetaData
     case_files: list[CaseFile]
     sample_files: list[SampleFile]
-    missing_files: list[MissingFile] = []

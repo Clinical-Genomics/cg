@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -7,6 +8,8 @@ from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_t
     FetchDeliveryFileTagsService,
 )
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class FetchDeliveryFilesService(ABC):
@@ -35,6 +38,7 @@ class FetchDeliveryFilesService(ABC):
         """Check if the delivery files has files to deliver."""
         if delivery_files.case_files or delivery_files.sample_files:
             return delivery_files
-        raise NoDeliveryFilesError(
-            f"No files to deliver for case in ticket: {delivery_files.delivery_data.ticket_id}"
+        LOG.info(
+            f"No files to deliver for case {delivery_files.delivery_data.case_id} in ticket: {delivery_files.delivery_data.ticket_id}"
         )
+        raise NoDeliveryFilesError
