@@ -10,6 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, SKIP_CONFIRMATION
+from cg.constants.nf_analysis import TOWER_WORKFLOW_TO_ANALYSIS_API_MAP
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import IlluminaRunsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -396,6 +397,8 @@ def tower_past_run_dirs(
     context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
 ):
     """Clean up of "old" tower case run dirs."""
-
-    analysis_api = NfAnalysisAPI(config=context.obj, workflow=workflow)
+    analysis_api: NfAnalysisAPI = TOWER_WORKFLOW_TO_ANALYSIS_API_MAP.get(workflow)(context.obj)
+    if not analysis_api:
+        LOG.error(f"Please ensure that the provided workflow {workflow} is using Tower")
+        raise click.Abort()
     analysis_api.clean_past_run_dirs(before_date=before_str, skip_confirmation=skip_confirmation)

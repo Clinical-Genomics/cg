@@ -3,6 +3,12 @@
 from enum import StrEnum
 from typing import Any
 
+from cg.constants import Workflow
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
+
 
 class NfTowerStatus(StrEnum):
     """NF-Tower job submission status."""
@@ -57,3 +63,11 @@ MULTIQC_NEXFLOW_CONFIG = """process {
 RAREDISEASE_COVERAGE_FILE_TAGS: list[str] = ["coverage", "d4"]
 RAREDISEASE_COVERAGE_INTERVAL_TYPE: str = "genes"
 RAREDISEASE_COVERAGE_THRESHOLD: int = 10
+
+
+TOWER_WORKFLOW_TO_ANALYSIS_API_MAP: dict = {
+    Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
+    Workflow.RNAFUSION: RnafusionAnalysisAPI,
+    Workflow.TAXPROFILER: TaxprofilerAnalysisAPI,
+    Workflow.TOMTE: TomteAnalysisAPI,
+}
