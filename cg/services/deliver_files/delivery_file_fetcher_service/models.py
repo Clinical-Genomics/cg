@@ -25,3 +25,13 @@ class DeliveryFiles(BaseModel):
     delivery_data: DeliveryMetaData
     case_files: list[CaseFile]
     sample_files: list[SampleFile]
+
+
+class MissingFile(BaseModel):
+    case_id: str
+    sample_id: str
+    tags: list[str]
+
+
+class MissingFiles(BaseModel):
+    files: list[MissingFile]

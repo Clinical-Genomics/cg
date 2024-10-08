@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
 from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
 from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
     FetchDeliveryFileTagsService,
@@ -28,3 +29,12 @@ class FetchDeliveryFilesService(ABC):
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Get the files to deliver."""
         pass
+
+    @staticmethod
+    def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
+        """Check if the delivery has files to deliver."""
+        if delivery_files.case_files or delivery_files.sample_files:
+            return delivery_files
+        raise NoDeliveryFilesError(
+            f"No files to deliver for cases in ticket: {delivery_files.delivery_data.ticket_id}"
+        )
