@@ -35,4 +35,4 @@ class DeliveryFiles(BaseModel):
     delivery_data: DeliveryMetaData
     case_files: list[CaseFile]
     sample_files: list[SampleFile]
-    missing_files: list[MissingFile]
+    missing_files: list[MissingFile] = []

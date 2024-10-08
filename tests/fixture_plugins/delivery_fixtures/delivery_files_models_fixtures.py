@@ -47,7 +47,8 @@ def expected_fastq_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
     return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
@@ -80,7 +81,8 @@ def expected_bam_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
     return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
@@ -127,7 +129,8 @@ def expected_analysis_delivery_files(
     ]
     case: Case = delivery_store_balsamic.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
     return DeliveryFiles(
         delivery_data=delivery_meta_data, case_files=case_files, sample_files=sample_files
@@ -146,6 +149,7 @@ def expected_moved_fastq_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
+    delivery_files.delivery_data.customer_inbox = inbox_dir_path
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
@@ -168,12 +172,14 @@ def expected_moved_analysis_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
+    delivery_files.delivery_data.customer_inbox = inbox_dir_path
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
     )
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
+
     return DeliveryFiles(
         delivery_data=delivery_files.delivery_data,
         case_files=new_case_files,
