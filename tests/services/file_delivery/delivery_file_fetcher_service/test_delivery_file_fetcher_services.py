@@ -47,8 +47,12 @@ def test_get_files_to_deliver_no_files_present(
     request,
 ):
     """Test to get the files to deliver from the FetchDeliveryFilesService when no files are present."""
+
     # GIVEN a case id, samples that are not present in housekeeper and a delivery service
     delivery_file_service = request.getfixturevalue(delivery_file_service)
+
     # WHEN getting the files to deliver that raises an NoDeliveryFilesError
+
+    # THEN assert that the NoDeliveryFilesError is raised
     with pytest.raises(NoDeliveryFilesError):
         delivery_file_service.get_files_to_deliver(case_id)
