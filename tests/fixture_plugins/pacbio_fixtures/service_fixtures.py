@@ -21,7 +21,22 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
     PacBioRunDataGenerator,
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.store.store import Store
+
+# Mocked services
+
+
+@pytest.fixture
+def mock_pacbio_run_validator() -> PacBioRunValidator:
+    return PacBioRunValidator(
+        decompressor=Mock(),
+        file_transfer_validator=Mock(),
+        file_manager=Mock(),
+    )
+
+
+# Real services
 
 
 @pytest.fixture
@@ -59,10 +74,11 @@ def pac_bio_post_processing_service(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_housekeeper_service: PacBioHousekeeperService,
     pac_bio_store_service: PacBioStoreService,
+    mock_pacbio_run_validator: PacBioRunValidator,
     pac_bio_runs_dir: Path,
 ) -> PacBioPostProcessingService:
     return PacBioPostProcessingService(
-        run_validator=Mock(),
+        run_validator=mock_pacbio_run_validator,
         run_data_generator=pac_bio_run_data_generator,
         hk_service=pac_bio_housekeeper_service,
         store_service=pac_bio_store_service,
