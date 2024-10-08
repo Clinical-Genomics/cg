@@ -38,9 +38,9 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSampleSequencingMetrics,
-    PacBioSequencingRun,
-    PacBioSMRTCell,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -476,19 +476,19 @@ class CreateHandler(BaseHandler):
         self.session.add(new_metric)
         return new_metric
 
-    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacBioSMRTCell:
+    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
         if self.get_pac_bio_smrt_cell_by_internal_id(run_device_dto.internal_id):
             raise ValueError(f"SMRT cell with {run_device_dto.internal_id} already exists.")
-        new_smrt_cell = PacBioSMRTCell(
+        new_smrt_cell = PacbioSMRTCell(
             type=run_device_dto.type, internal_id=run_device_dto.internal_id
         )
         self.session.add(new_smrt_cell)
         return new_smrt_cell
 
     def create_pac_bio_sequencing_run(
-        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacBioSMRTCell
-    ) -> PacBioSequencingRun:
-        new_sequencing_run = PacBioSequencingRun(
+        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
+    ) -> PacbioSequencingRun:
+        new_sequencing_run = PacbioSequencingRun(
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
             plate=sequencing_run_dto.plate,
@@ -532,12 +532,12 @@ class CreateHandler(BaseHandler):
     def create_pac_bio_sample_sequencing_run(
         self,
         sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
-        sequencing_run: PacBioSequencingRun,
-    ) -> PacBioSampleSequencingMetrics:
+        sequencing_run: PacbioSequencingRun,
+    ) -> PacbioSampleSequencingMetrics:
         sample_id: str = sample_run_metrics_dto.sample_internal_id
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
         sample: Sample = self.get_sample_by_internal_id(sample_id)
-        new_sample_sequencing_run = PacBioSampleSequencingMetrics(
+        new_sample_sequencing_run = PacbioSampleSequencingMetrics(
             sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,
             hifi_yield=sample_run_metrics_dto.hifi_yield,
