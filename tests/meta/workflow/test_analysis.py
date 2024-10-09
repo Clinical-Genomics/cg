@@ -35,16 +35,16 @@ from tests.store_helpers import StoreHelpers
     ],
 )
 def test_get_slurm_qos_for_case(
-    store_with_non_control_samples: Store,
     case_id: str,
     priority,
     expected_slurm_qos,
     mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
 ):
     """Test get Quality of service (SLURM QOS) from the case priority"""
 
     # GIVEN a store with a case with a specific priority
-    case: Case = store_with_non_control_samples.get_case_by_internal_id(case_id)
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
     case.priority = priority
 
     with mock.patch.object(

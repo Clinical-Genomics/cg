@@ -9,7 +9,6 @@ import pytest
 from cg.constants import SequencingFileTag
 from cg.constants.constants import (
     CaseActions,
-    ControlOptions,
     MicrosaltAppTags,
     MicrosaltQC,
     Workflow,
@@ -21,7 +20,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
-from cg.store.store import Store
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
@@ -311,12 +309,3 @@ def taxprofiler_metrics() -> dict[str, float]:
         "total_reads": 12400055,
         "paired_aligned_none": 1409340,
     }
-
-
-@pytest.fixture
-def store_with_non_control_samples(base_store: Store, case_id: str, helpers: StoreHelpers) -> Store:
-    """Return a store with a case and samples."""
-    case: Case = helpers.add_case_with_samples(base_store=base_store, case_id=case_id, nr_samples=2)
-    for sample in case.samples:
-        sample.control = ControlOptions.EMPTY
-    return base_store
