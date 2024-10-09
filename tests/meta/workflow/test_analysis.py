@@ -593,13 +593,36 @@ def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
     assert are_all_samples_control(case) == True
 
 
-def test_case_with_only_control_get_correct_slurmqos(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
+@pytest.mark.parametrize(
+    "sample_controls, expected_qos",
+    [
+        # Test case 1: All samples are positive controls
+        pytest.param(
+            [ControlOptions.POSITIVE, ControlOptions.POSITIVE, ControlOptions.POSITIVE],
+            SlurmQos.EXPRESS,
+            id="all_controls",
+        ),
+        # Test case 2: Mixed controls (positive, negative, empty)
+        pytest.param(
+            [ControlOptions.POSITIVE, ControlOptions.NEGATIVE, ControlOptions.EMPTY],
+            SlurmQos.NORMAL,
+            id="not_all_controls",
+        ),
+    ],
+)
+def test_case_with_controls_get_correct_slurmqos(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    case_id: str,
+    sample_controls,
+    expected_qos,
 ) -> None:
-    # GIVEN a case with all samples being positive controls
+    """Tests that get_slurm_qos_for_case returns the correct SLURM QOS for a case with control samples."""
+
+    # GIVEN a case with the specified sample control types
     case: Case = analysis_store.get_case_by_internal_id(case_id)
-    for sample in case.samples:
-        sample.control = ControlOptions.POSITIVE
+    for index, control in enumerate(sample_controls):
+        case.samples[index].control = control
 
     # WHEN getting the SLURM QOS for the case
     with mock.patch.object(
@@ -607,25 +630,5 @@ def test_case_with_only_control_get_correct_slurmqos(
     ):
         qos = mip_analysis_api.get_slurm_qos_for_case(case_id)
 
-    # THEN the result should be SLURM QOS NORMAL
-    assert qos == SlurmQos.EXPRESS
-
-
-def test_case_with_mixed_control_get_correct_slurmqos(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
-) -> None:
-
-    # GIVEN a case with some samples being controls some not
-    case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.samples[0].control = ControlOptions.POSITIVE
-    case.samples[1].control = ControlOptions.NEGATIVE
-    case.samples[2].control = ControlOptions.EMPTY
-
-    # WHEN getting the SLURM QOS for the case
-    with mock.patch.object(
-        mip_analysis_api.status_db, "get_case_by_internal_id", return_value=case
-    ):
-        qos = mip_analysis_api.get_slurm_qos_for_case(case_id)
-
-    # THEN the result should be SLURM QOS NORMAL
-    assert qos == SlurmQos.NORMAL
+    # THEN the result should match the expected QOS
+    assert qos == expected_qos
