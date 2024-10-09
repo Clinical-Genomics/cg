@@ -7,12 +7,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants import SequencingFileTag
-from cg.constants.constants import (
-    CaseActions,
-    MicrosaltAppTags,
-    MicrosaltQC,
-    Workflow,
-)
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
