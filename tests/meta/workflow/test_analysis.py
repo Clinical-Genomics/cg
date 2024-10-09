@@ -36,7 +36,6 @@ from tests.store_helpers import StoreHelpers
 )
 def test_get_slurm_qos_for_case(
     store_with_non_control_samples: Store,
-    base_store: Store,
     case_id: str,
     priority,
     expected_slurm_qos,
@@ -45,7 +44,7 @@ def test_get_slurm_qos_for_case(
     """Test get Quality of service (SLURM QOS) from the case priority"""
 
     # GIVEN a store with a case with a specific priority
-    case: Case = base_store.get_case_by_internal_id(case_id)
+    case: Case = store_with_non_control_samples.get_case_by_internal_id(case_id)
     case.priority = priority
 
     with mock.patch.object(
@@ -592,3 +591,41 @@ def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
     # WHEN checking if all samples are controls
     # THEN the result should be True
     assert are_all_samples_control(case) == True
+
+
+def test_case_with_only_control_get_correct_slurmqos(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
+) -> None:
+    # GIVEN a case with all samples being positive controls
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    for sample in case.samples:
+        sample.control = ControlOptions.POSITIVE
+
+    # WHEN getting the SLURM QOS for the case
+    with mock.patch.object(
+        mip_analysis_api.status_db, "get_case_by_internal_id", return_value=case
+    ):
+        qos = mip_analysis_api.get_slurm_qos_for_case(case_id)
+
+    # THEN the result should be SLURM QOS NORMAL
+    assert qos == SlurmQos.EXPRESS
+
+
+def test_case_with_mixed_control_get_correct_slurmqos(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, case_id: str
+) -> None:
+
+    # GIVEN a case with some samples being controls some not
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.samples[0].control = ControlOptions.POSITIVE
+    case.samples[1].control = ControlOptions.NEGATIVE
+    case.samples[2].control = ControlOptions.EMPTY
+
+    # WHEN getting the SLURM QOS for the case
+    with mock.patch.object(
+        mip_analysis_api.status_db, "get_case_by_internal_id", return_value=case
+    ):
+        qos = mip_analysis_api.get_slurm_qos_for_case(case_id)
+
+    # THEN the result should be SLURM QOS NORMAL
+    assert qos == SlurmQos.NORMAL
