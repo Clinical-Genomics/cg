@@ -81,7 +81,9 @@ class UploadGenotypesAPI(object):
         Take a list of files and removes all items ending with ".tbi".
         Returns a single remaining file or raises ValueError if more than one file remains.
         """
-        filtered_files = [file for file in hk_genotypes if not str(file).endswith(FileExtensions.TBI)]
+        filtered_files = [
+            file for file in hk_genotypes if not str(file).endswith(FileExtensions.TBI)
+        ]
         if len(filtered_files) > 1:
             raise ValueError("Error: More than one file is present after filtering.")
         return filtered_files[0] if filtered_files else None
