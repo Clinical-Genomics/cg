@@ -43,6 +43,16 @@ def view_flow_cell_model(unused1, unused2, model, unused3):
     return Markup("%s" % model.device.model)
 
 
+def view_smrt_cell_model(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.model)
+
+
+def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.internal_id)
+
+
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -663,6 +673,75 @@ class IlluminaSampleSequencingMetricsView(BaseView):
     ]
     column_formatters = {
         "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
+
+
+class PacbioSmrtCellView(BaseView):
+    """Admin view for Model.PacbioSMRTCell"""
+
+    column_list = (
+        "internal_id",
+        "run_name",
+        "movie_name",
+        "well",
+        "plate",
+        "hifi_reads",
+        "hifi_yield",
+        "hifi_mean_read_length",
+        "hifi_median_read_quality",
+        "percent_reads_passing_q30",
+        "p0_percent",
+        "p1_percent",
+        "p2_percent",
+        "started_at",
+        "completed_at",
+        "barcoded_hifi_reads",
+        "barcoded_hifi_reads_percentage",
+        "barcoded_hifi_yield",
+        "barcoded_hifi_yield_percentage",
+        "barcoded_hifi_mean_read_length",
+    )
+    column_formatters = {"internal_id": view_smrt_cell_internal_id, "model": view_smrt_cell_model}
+    column_default_sort = ("completed_at", True)
+    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_sortable_list = [
+        ("internal_id", "device.internal_id"),
+        "started_at",
+        "completed_at",
+    ]
+
+    @staticmethod
+    def view_smrt_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                "<a href='%s'>%s</a>"
+                % (
+                    url_for(
+                        "pacbiosequencingrun.index_view",
+                        search=model.instrument_run.device.internal_id,
+                    ),
+                    model.instrument_run.device.internal_id,
+                )
+            )
+            if model.instrument_run.device
+            else ""
+        )
+
+
+class PacbioSampleRunMetricsView(BaseView):
+    column_list = [
+        "smrt_cell",
+        "sample",
+        "hifi_reads",
+        "hifi_mean_read_length",
+        "hifi_median_read_quality",
+    ]
+    column_formatters = {
+        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]

@@ -73,13 +73,13 @@ def update_compress_api(
 
     compress_api.set_dry_run(dry_run=dry_run)
     if mem:
-        LOG.info(f"Set Crunchy API SLURM mem to {mem}")
+        LOG.debug(f"Set Crunchy API SLURM mem to {mem}")
         compress_api.crunchy_api.slurm_memory = mem
     if hours:
-        LOG.info(f"Set Crunchy API SLURM hours to {hours}")
+        LOG.debug(f"Set Crunchy API SLURM hours to {hours}")
         compress_api.crunchy_api.slurm_hours = hours
     if ntasks:
-        LOG.info(f"Set Crunchy API SLURM number of tasks to {ntasks}")
+        LOG.debug(f"Set Crunchy API SLURM number of tasks to {ntasks}")
         compress_api.crunchy_api.slurm_number_tasks = ntasks
 
 
@@ -139,7 +139,7 @@ def compress_sample_fastqs_in_cases(
         if case_conversion_count >= number_of_conversions:
             break
 
-        LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
+        LOG.debug(f"Searching for FASTQ files in case {case.internal_id}")
         if not case.links:
             continue
         for case_link in case.links:
@@ -159,7 +159,7 @@ def compress_sample_fastqs_in_cases(
                 sample_id=case_link.sample.internal_id
             )
             if not case_converted:
-                LOG.info(f"skipping individual {case_link.sample.internal_id}")
+                LOG.debug(f"skipping individual {case_link.sample.internal_id}")
                 continue
             individuals_conversion_count += 1
         if case_converted:
