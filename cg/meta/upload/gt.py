@@ -114,7 +114,7 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def _get_analysis_sex_mip_dna(qc_metrics_file: Path) -> dict:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_mip_dna(qc_metrics_file)
+        qc_metrics: MIPMetricsDeliverables = UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_mip_dna(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
             for sample_id_metric in qc_metrics.sample_id_metrics
