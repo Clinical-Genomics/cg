@@ -593,26 +593,23 @@ def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
 @pytest.mark.parametrize(
     "sample_controls, expected_qos",
     [
-        # Test case 1: All samples are positive controls
-        pytest.param(
+        (
             [ControlOptions.POSITIVE, ControlOptions.POSITIVE, ControlOptions.POSITIVE],
             SlurmQos.EXPRESS,
-            id="all_controls",
         ),
-        # Test case 2: Mixed controls (positive, negative, empty)
-        pytest.param(
+        (
             [ControlOptions.POSITIVE, ControlOptions.NEGATIVE, ControlOptions.EMPTY],
             SlurmQos.NORMAL,
-            id="not_all_controls",
         ),
     ],
+    ids=["all_controls", "not_all_controls"],
 )
 def test_case_with_controls_get_correct_slurmqos(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
     case_id: str,
-    sample_controls,
-    expected_qos,
+    sample_controls: list[str],
+    expected_qos: str,
 ) -> None:
     """Tests that get_slurm_qos_for_case returns the correct SLURM QOS for a case with control samples."""
 
