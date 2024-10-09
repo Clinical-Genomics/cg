@@ -21,6 +21,9 @@ def pacbio_sample() -> PacBioSample:
         sex=SexEnum.unknown,
         tumour=False,
         volume="50",
+        buffer="buffer",
+        source="source",
+        subject_id="subject_id",
     )
 
 
