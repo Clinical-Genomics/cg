@@ -195,9 +195,16 @@ class FastqSample(OrderInSample):
 class PacBioSample(OrderInSample):
     _suitable_project = OrderType.PACBIO_LONG_READ
 
+    buffer: str
     capture_kit: str | None = None
+    container: ContainerEnum | None
+    container_name: str | None
+    name: str
     sex: SexEnum = SexEnum.unknown
+    source: str
+    subject_id: str
     tumour: bool
+    volume: str
 
 
 class RmlSample(OrderInSample):
