@@ -7,7 +7,11 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
+from housekeeper.store.database import (
+    create_all_tables,
+    drop_all_tables,
+    initialize_database,
+)
 from housekeeper.store.models import Archive, Bundle, File, Tag, Version
 from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
@@ -273,7 +277,7 @@ class HousekeeperAPI:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
-            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
+            LOG.debug(f"No bundle found for {bundle_name} in Housekeeper")
             return None
         LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version

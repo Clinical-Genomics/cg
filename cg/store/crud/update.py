@@ -77,6 +77,12 @@ class UpdateHandler(BaseHandler):
         sample.reads = total_reads_for_sample
         self.session.commit()
 
+    def update_sample_reads(self, internal_id: str, reads: int):
+        """Add reads to the current reads for a sample."""
+        sample: Sample = self.get_sample_by_internal_id(internal_id)
+        sample.reads += reads
+        self.session.commit()
+
     def update_sample_sequenced_at(self, internal_id: str, date: datetime):
         sample: Sample = self.get_sample_by_internal_id(internal_id)
         sample.last_sequenced_at = date
