@@ -76,10 +76,21 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
+    def remove_index(hk_genotypes: list[File]) -> File | None:
+        """
+        Take a list of files and removes all items ending with ".tbi".
+        Returns a single remaining file or raises ValueError if more than one file remains.
+        """
+        filtered_files = [file for file in hk_genotypes if not file.endswith(FileExtensions.TBI)]
+        if len(filtered_files) > 1:
+            raise ValueError("Error: More than one file is present after filtering.")
+        return filtered_files[0] if filtered_files else None
+
     def _get_genotype_file(self, case_id: str) -> File:
         "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        hk_genotype: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        hk_genotypes: list[File] = self.hk.get_files_from_latest_version(bundle_name=case_id, tags=tags)
+        hk_genotype: File = self.remove_index(hk_genotypes)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
         LOG.debug(f"Found genotype file {hk_genotype.full_path}")
