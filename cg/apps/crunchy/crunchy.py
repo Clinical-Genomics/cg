@@ -45,8 +45,6 @@ class CrunchyAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
-        LOG.info("Updating compress api")
-        LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
         self.slurm_api.set_dry_run(dry_run=dry_run)
 

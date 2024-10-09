@@ -9,6 +9,7 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.post_processing.utils import (
+    is_sample_negative_control_with_reads_in_lane,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
@@ -35,9 +36,6 @@ def _should_fastq_path_be_stored_in_housekeeper(
     """
     sample: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
 
-    if sample.is_negative_control:
-        return True
-
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
@@ -48,6 +46,12 @@ def _should_fastq_path_be_stored_in_housekeeper(
     )
 
     if metric:
+
+        if is_sample_negative_control_with_reads_in_lane(
+            is_negative_control=sample.is_negative_control, metric=metric
+        ):
+            return True
+
         return metric.base_passing_q30_percent >= q30_threshold
 
     LOG.warning(

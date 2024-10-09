@@ -93,7 +93,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -1525,10 +1525,10 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
-            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            smrt_cells=self._get_query(table=PacbioSMRTCell),
             internal_id=internal_id,
         ).first()
 
