@@ -5,7 +5,6 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.run_devices.abstract_classes import RunValidator
-from cg.services.run_devices.exc import PostProcessingError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
@@ -35,19 +34,11 @@ class PacBioRunValidator(RunValidator):
     def ensure_post_processing_can_start(self, run_data: PacBioRunData) -> None:
         """
         Ensure that a post-processing run can start.
-        1. Checks that the post-processing has not been done yet.
-        2. Check if all files are present listed in a manifest file.
-        3. Decompresses the zipped reports.
-        4. Touches a file to indicate that the run is validated
-        5. Skips validation if the run is already validated
-
-        Raises:
-            PostProcessingError: If the run has already been post-processed
+        1. Check if all files are present listed in a manifest file.
+        2. Decompresses the zipped reports.
+        3. Touches a file to indicate that the run is validated
+        4. Skips validation if the run is already validated
         """
-        if self._is_post_processed(run_data.full_path):
-            message: str = f"Run {run_data.full_path} is already post-processed, skipping"
-            LOG.warning(message)
-            raise PostProcessingError(message)
         if self._is_validated(run_data.full_path):
             LOG.debug(f"Run for {run_data.full_path} is validated.")
             return
@@ -68,13 +59,9 @@ class PacBioRunValidator(RunValidator):
         LOG.debug(f"Run for {run_data.full_path} is validated.")
 
     @staticmethod
-    def _is_post_processed(run_path: Path) -> bool:
-        return Path(run_path, PacBioDirsAndFiles.POST_PROCESSING_COMPLETED).exists()
-
-    @staticmethod
     def _is_validated(run_path: Path) -> bool:
         return Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()
 
     @staticmethod
-    def _touch_is_validated(run_path: Path):
+    def _touch_is_validated(run_path: Path) -> None:
         Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()

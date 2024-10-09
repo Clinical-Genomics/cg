@@ -4,8 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
+from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 
 LOG = logging.getLogger(__name__)
 
@@ -91,12 +91,20 @@ class PostProcessingService(ABC):
         LOG.info("Starting PacBio post-processing for all runs")
         is_post_processing_successful = True
         for run_name in self._get_all_run_names():
+            if self._is_run_post_processed(run_name):
+                LOG.debug(f"Run {run_name} has already been post-processed")
+                continue
             try:
                 self.post_process(run_name=run_name, dry_run=dry_run)
             except Exception as error:
                 LOG.error(f"Could not post-process {run_name}: {error}")
                 is_post_processing_successful = False
         return is_post_processing_successful
+
+    def _is_run_post_processed(self, run_name: str) -> bool:
+        """Check if a run has been post-processed."""
+        processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
+        return processing_complete_file.exists()
 
     @abstractmethod
     def _get_all_run_names(self) -> list[str]:
@@ -106,7 +114,5 @@ class PostProcessingService(ABC):
     @staticmethod
     def _touch_post_processing_complete(run_data: RunData) -> None:
         """Touch the post-processing complete file."""
-        processing_complete_file = Path(
-            run_data.full_path, PacBioDirsAndFiles.POST_PROCESSING_COMPLETED
-        )
+        processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
         processing_complete_file.touch()

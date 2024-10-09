@@ -15,7 +15,6 @@ class PacBioDirsAndFiles:
     UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
     METADATA_DIR: str = "metadata"
     RUN_IS_VALID: str = "is_valid"
-    POST_PROCESSING_COMPLETED: str = "post_processing_completed"
 
 
 class MetricsFileFields:

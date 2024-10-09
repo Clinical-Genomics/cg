@@ -74,7 +74,6 @@ def pac_bio_post_processing_service(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_housekeeper_service: PacBioHousekeeperService,
     pac_bio_store_service: PacBioStoreService,
-    mock_pacbio_run_validator: PacBioRunValidator,
     pac_bio_runs_dir: Path,
 ) -> PacBioPostProcessingService:
     return PacBioPostProcessingService(

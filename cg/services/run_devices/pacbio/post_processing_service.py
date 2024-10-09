@@ -65,5 +65,7 @@ class PacBioPostProcessingService(PostProcessingService):
         for run_folder in Path(self.sequencing_dir).iterdir():
             if run_folder.is_dir():
                 for cell_folder in run_folder.iterdir():
+                    if self._is_run_post_processed(f"{run_folder.name}/{cell_folder.name}"):
+                        continue
                     run_names.append(f"{run_folder.name}/{cell_folder.name}")
         return run_names
