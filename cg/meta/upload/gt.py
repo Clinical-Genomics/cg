@@ -89,7 +89,9 @@ class UploadGenotypesAPI(object):
     def _get_genotype_file(self, case_id: str) -> File:
         "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        hk_genotypes: list[File] = self.hk.get_files_from_latest_version(bundle_name=case_id, tags=tags)
+        hk_genotypes: list[File] = self.hk.get_files_from_latest_version(
+            bundle_name=case_id, tags=tags
+        )
         hk_genotype: File = self.remove_index(hk_genotypes)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
