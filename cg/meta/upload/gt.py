@@ -76,7 +76,7 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
-    def remove_index(hk_genotypes: list[File]) -> File | None:
+    def remove_index(self, hk_genotypes: list[File]) -> File | None:
         """
         Take a list of files and removes all items ending with ".tbi".
         Returns a single remaining file or raises ValueError if more than one file remains.
