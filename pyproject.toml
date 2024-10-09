@@ -72,6 +72,7 @@ urllib3 = "*"
 genologics = "*"
 housekeeper = ">=4.11.3"
 pydantic-settings = "^2.3.3"
+email-validator = "^2.2.0"
 
 
 [tool.poetry.dev-dependencies]
