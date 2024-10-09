@@ -590,7 +590,7 @@ def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
 
     # WHEN checking if all samples are controls
     # THEN the result should be True
-    assert are_all_samples_control(case) == True
+    assert are_all_samples_control(case)
 
 
 @pytest.mark.parametrize(
