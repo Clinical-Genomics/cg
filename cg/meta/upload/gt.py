@@ -69,8 +69,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def _is_suitable_for_genotype_upload(case: Case) -> bool:
-        """Check if a cancer case contains normal (non-tumor) or WGS samples."""
-
+        """Returns True if there are any non-tumor WGS samples in the case."""
         samples: list[Sample] = case.samples
         return any(
             (not sample.is_tumour and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category)
