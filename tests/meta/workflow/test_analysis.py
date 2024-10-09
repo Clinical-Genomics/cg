@@ -17,7 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.meta.workflow.utils.are_all_samples_control import are_all_samples_control
+from cg.meta.workflow.utils.utils import are_all_samples_control
 from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.store.store import Store
@@ -44,15 +44,12 @@ def test_get_slurm_qos_for_case(
     """Test get Quality of service (SLURM QOS) from the case priority"""
 
     # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
     case: Case = analysis_store.get_case_by_internal_id(case_id)
     case.priority = priority
 
-    with mock.patch.object(
-        mip_analysis_api.status_db, "get_case_by_internal_id", return_value=case
-    ):
-
-        # WHEN getting the SLURM QOS for the priority
-        slurm_qos = mip_analysis_api.get_slurm_qos_for_case(case_id=case_id)
+    # WHEN getting the SLURM QOS for the priority
+    slurm_qos: SlurmQos = mip_analysis_api.get_slurm_qos_for_case(case_id=case_id)
 
     # THEN the expected slurm QOS should be returned
     assert slurm_qos is expected_slurm_qos
@@ -620,15 +617,13 @@ def test_case_with_controls_get_correct_slurmqos(
     """Tests that get_slurm_qos_for_case returns the correct SLURM QOS for a case with control samples."""
 
     # GIVEN a case with the specified sample control types
+    mip_analysis_api.status_db = analysis_store
     case: Case = analysis_store.get_case_by_internal_id(case_id)
     for index, control in enumerate(sample_controls):
         case.samples[index].control = control
 
     # WHEN getting the SLURM QOS for the case
-    with mock.patch.object(
-        mip_analysis_api.status_db, "get_case_by_internal_id", return_value=case
-    ):
-        qos = mip_analysis_api.get_slurm_qos_for_case(case_id)
+    qos: SlurmQos = mip_analysis_api.get_slurm_qos_for_case(case_id)
 
     # THEN the result should match the expected QOS
     assert qos == expected_qos
