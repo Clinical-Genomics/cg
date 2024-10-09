@@ -29,6 +29,7 @@ class ExcelOrderformParser(OrderformParser):
         f"{Orderform.RML}:{Orderform.get_current_orderform_version(Orderform.RML)}",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:{Orderform.get_current_orderform_version(Orderform.METAGENOME)}",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}",  # Orderform SARS-CoV-2
+        f"{Orderform.MICROBIAL_FASTQ}:{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}",  # Microbial FASTQ
     ]
     samples: list[ExcelSample] = []
 
@@ -143,6 +144,7 @@ class ExcelOrderformParser(OrderformParser):
         document_number_to_project_type = {
             Orderform.MICROSALT: OrderType.MICROSALT,
             Orderform.SARS_COV_2: OrderType.SARS_COV_2,
+            Orderform.MICROBIAL_FASTQ: OrderType.MICROBIAL_FASTQ,
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
