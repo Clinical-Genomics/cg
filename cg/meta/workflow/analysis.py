@@ -28,7 +28,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.utils.are_all_samples_control import are_all_samples_control
+from cg.meta.workflow.utils.utils import are_all_samples_control
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
