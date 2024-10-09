@@ -23,7 +23,7 @@ def pacbio_sample() -> PacBioSample:
         buffer="buffer",
         source="source",
         subject_id="subject_id",
-        container="container",
+        container="Tube",
     )
 
 
