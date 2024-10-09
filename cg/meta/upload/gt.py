@@ -77,6 +77,7 @@ class UploadGenotypesAPI(object):
         )
 
     def _get_genotype_file(self, case_id: str) -> File:
+        "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
         hk_genotype: File = self.hk.get_file_from_latest_version(bundle_name=case_id, tags=tags)
         if not hk_genotype:
@@ -87,12 +88,12 @@ class UploadGenotypesAPI(object):
     def _get_samples_sex_balsamic(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and for analysis."""
         samples_sex: dict[str, dict[str, str]] = {}
-        for case_sample in case.links:
-            if case_sample.sample.is_tumour:
+        for sample in case.samples:
+            if sample.sample.is_tumour:
                 continue
-            sample_id: str = case_sample.sample.internal_id
+            sample_id: str = sample.sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": case_sample.sample.sex,
+                "pedigree": sample.sample.sex,
                 "analysis": Sex.UNKNOWN,
             }
         return samples_sex
@@ -102,10 +103,10 @@ class UploadGenotypesAPI(object):
         qc_metrics_file: Path = self._get_qcmetrics_file(case_id=case.internal_id)
         analysis_sex: dict = self._get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
-        for case_sample in case.links:
-            sample_id: str = case_sample.sample.internal_id
+        for sample in case.samples:
+            sample_id: str = sample.sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": case_sample.sample.sex,
+                "pedigree": sample.sample.sex,
                 "analysis": analysis_sex[sample_id],
             }
         return samples_sex
@@ -158,10 +159,10 @@ class UploadGenotypesAPI(object):
         """Return sex information from StatusDB and from analysis prediction."""
         qc_metrics_file: Path = UploadGenotypesAPI._get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
-        for case_sample in case.links:
-            sample_id: str = case_sample.sample.internal_id
+        for sample in case.samples:
+            sample_id: str = sample.sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": case_sample.sample.sex,
+                "pedigree": sample.sample.sex,
                 "analysis": UploadGenotypesAPI._get_analysis_sex_raredisease(
                     qc_metrics_file=qc_metrics_file, sample_id=sample_id
                 ),
