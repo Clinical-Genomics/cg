@@ -31,7 +31,6 @@ def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     genotype_api: GenotypeAPI = context.genotype_api
-
     click.echo(click.style("----------------- GENOTYPES -------------------"))
 
     if not family_id:

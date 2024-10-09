@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from cg.constants import Workflow
 from cg.constants.constants import SexOptions
 from cg.constants.observations import MipDNAObservationsAnalysisTag
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -91,6 +92,8 @@ def test_get_data_mip(
     mocker.patch.object(UploadGenotypesAPI, "_get_analysis_sex_mip_dna")
     UploadGenotypesAPI._get_analysis_sex_mip_dna.return_value = genotype_analysis_sex
 
+    analysis_obj.workflow = Workflow.MIP_DNA
+
     # WHEN parsing the data
     result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)
 
@@ -111,6 +114,8 @@ def test_get_data_raredisease(
     # GIVEN analysis sex were generated and could be found
     mocker.patch.object(UploadGenotypesAPI, "_get_analysis_sex_raredisease")
     UploadGenotypesAPI._get_analysis_sex_raredisease.return_value = genotype_analysis_sex
+
+    analysis_obj.workflow = Workflow.RAREDISEASE
 
     # WHEN parsing the data
     result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)

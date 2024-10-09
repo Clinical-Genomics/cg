@@ -89,11 +89,11 @@ class UploadGenotypesAPI(object):
         """Return sex information from StatusDB and for analysis."""
         samples_sex: dict[str, dict[str, str]] = {}
         for sample in case.samples:
-            if sample.sample.is_tumour:
+            if sample.is_tumour:
                 continue
-            sample_id: str = sample.sample.internal_id
+            sample_id: str = sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": sample.sample.sex,
+                "pedigree": sample.sex,
                 "analysis": Sex.UNKNOWN,
             }
         return samples_sex
@@ -104,9 +104,9 @@ class UploadGenotypesAPI(object):
         analysis_sex: dict = self._get_analysis_sex_mip_dna(qc_metrics_file)
         samples_sex: dict[str, dict[str, str]] = {}
         for sample in case.samples:
-            sample_id: str = sample.sample.internal_id
+            sample_id: str = sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": sample.sample.sex,
+                "pedigree": sample.sex,
                 "analysis": analysis_sex[sample_id],
             }
         return samples_sex
@@ -155,15 +155,14 @@ class UploadGenotypesAPI(object):
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
 
-    @staticmethod
-    def _get_samples_sex_raredisease(case: Case) -> dict[str, dict[str, str]]:
+    def _get_samples_sex_raredisease(self, case: Case) -> dict[str, dict[str, str]]:
         """Return sex information from StatusDB and from analysis prediction."""
-        qc_metrics_file: Path = UploadGenotypesAPI._get_qcmetrics_file(case_id=case.internal_id)
+        qc_metrics_file: Path = self._get_qcmetrics_file(case_id=case.internal_id)
         samples_sex: dict[str, dict[str, str]] = {}
         for sample in case.samples:
-            sample_id: str = sample.sample.internal_id
+            sample_id: str = sample.internal_id
             samples_sex[sample_id] = {
-                "pedigree": sample.sample.sex,
+                "pedigree": sample.sex,
                 "analysis": UploadGenotypesAPI._get_analysis_sex_raredisease(
                     qc_metrics_file=qc_metrics_file, sample_id=sample_id
                 ),
