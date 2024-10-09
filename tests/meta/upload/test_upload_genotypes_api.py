@@ -1,4 +1,4 @@
-"""Tests for the upload genotypes api"""
+"""Tests for the upload Genotypes API."""
 
 from pathlib import Path
 
