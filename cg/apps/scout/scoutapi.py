@@ -350,6 +350,15 @@ class ScoutAPI:
         except CalledProcessError as error:
             raise ScoutUploadError("Something went wrong when updating rna genome build") from error
 
+    def upload_rna_delivery_report(self, case_id: str, report_path: str) -> None:
+        """Load a RNA report into a case in the database."""
+
+        self.upload_report(
+            case_id=case_id,
+            report_path=report_path,
+            report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        )
+
     def load_variant_outlier(self, case_id: str) -> None:
         """Load a rna fraser file into a case in the database."""
 

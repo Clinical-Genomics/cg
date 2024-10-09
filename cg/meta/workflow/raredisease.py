@@ -25,6 +25,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
@@ -124,6 +125,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
+            vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
         )
 
     @staticmethod
@@ -200,7 +202,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 metric_id=pair_sample_ids,
             )
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+    def get_raredisease_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
@@ -221,6 +223,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
+
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of a Raredisease metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_raredisease_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

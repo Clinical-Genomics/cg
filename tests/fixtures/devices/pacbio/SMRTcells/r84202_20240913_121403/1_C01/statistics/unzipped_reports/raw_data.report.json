@@ -1,44 +1,44 @@
 {
-    "_comment": "Generated with pbcommand version  at 2024-05-24T03:07:29.775725",
+    "_comment": "Generated with pbcommand version  at 2024-09-15T14:17:56.479049",
     "attributes": [
         {
             "id": "raw_data_report.nbases",
             "name": "Polymerase Read Bases",
-            "value": 1236516099407
+            "value": 1607021055404
         },
         {
             "id": "raw_data_report.nreads",
             "name": "Polymerase Reads",
-            "value": 15046088
+            "value": 18764557
         },
         {
             "id": "raw_data_report.read_length",
             "name": "Polymerase Read Length (mean)",
-            "value": 82182
+            "value": 85641
         },
         {
             "id": "raw_data_report.read_n50",
             "name": "Polymerase read length (N50)",
-            "value": 153250
+            "value": 168750
         },
         {
             "id": "raw_data_report.insert_length",
             "name": "Polymerase read length longest subread length (mean)",
-            "value": 18466
+            "value": 18042
         },
         {
             "id": "raw_data_report.insert_n50",
             "name": "Polymerase read length longest subread length (N50)",
-            "value": 22250
+            "value": 21750
         },
         {
             "id": "raw_data_report.unique_molecular_yield",
             "name": "Unique Molecular Yield",
-            "value": 263095042048
+            "value": 308524711936
         }
     ],
     "dataset_uuids": [
-        "a662e714-45f2-4cf3-b8d2-c138e1deebd0"
+        "ef1e02ce-7264-476d-8cf9-b9fd01e18f4c"
     ],
     "id": "raw_data_report",
     "plotGroups": [
@@ -94,6 +94,6 @@
     "tables": [],
     "tags": [],
     "title": "Raw Data Report",
-    "uuid": "f6a5e759-245e-4d7c-9581-4547692f716f",
+    "uuid": "15cf83e6-2e46-4949-ac5b-840e5f9e0e60",
     "version": "1.0.1"
 }
