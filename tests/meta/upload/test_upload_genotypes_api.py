@@ -30,7 +30,7 @@ def test_get_analysis_sex_raredisease(
     # GIVEN a UploadGenotypesAPI some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex = UploadGenotypesAPI._get_analysis_sex_raredisease(
+    sex: str = UploadGenotypesAPI._get_analysis_sex_raredisease(
         qc_metrics_file=case_qc_metrics_deliverables_raredisease, sample_id=sample_id
     )
 
