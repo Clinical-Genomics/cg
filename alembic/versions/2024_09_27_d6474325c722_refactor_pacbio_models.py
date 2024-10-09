@@ -19,7 +19,7 @@ depends_on = None
 
 
 def upgrade():
-    # PacBioSequencingRun
+    # PacbioSequencingRun
     op.add_column(
         table_name="pacbio_sequencing_run",
         column=sa.Column("barcoded_hifi_reads", sa.BIGINT, nullable=True),
@@ -57,7 +57,7 @@ def upgrade():
         column=sa.Column("unbarcoded_hifi_mean_read_length", sa.BIGINT, nullable=True),
     )
 
-    # PacBioSampleSequencingMetrics
+    # PacbioSampleSequencingMetrics
     op.add_column(
         table_name="pacbio_sample_run_metrics",
         column=sa.Column("polymerase_mean_read_length", sa.BIGINT, nullable=True),
@@ -69,7 +69,7 @@ def upgrade():
 
 
 def downgrade():
-    # PacBioSequencingRun
+    # PacbioSequencingRun
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_reads")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_reads_percentage")
     op.drop_column(table_name="pacbio_sequencing_run", column_name="barcoded_hifi_yield")
@@ -82,7 +82,7 @@ def downgrade():
         table_name="pacbio_sequencing_run", column_name="unbarcoded_hifi_mean_read_length"
     )
 
-    # PacBioSampleSequencingMetrics
+    # PacbioSampleSequencingMetrics
     op.drop_column(
         table_name="pacbio_sample_run_metrics", column_name="polymerase_mean_read_length"
     )
