@@ -58,9 +58,7 @@ def set_case(
         data_analysis,
         data_delivery,
     ]
-    abort_on_empty_options(
-        options=options, bypass_check=check_priority_is_research, priority=priority
-    )
+    abort_on_empty_options(options=options, priority=priority)
 
     status_db: Store = context.status_db
     case: Case = get_case(case_id=case_id, status_db=status_db)
@@ -86,17 +84,11 @@ def set_case(
     status_db.session.commit()
 
 
-def abort_on_empty_options(
-    options: list[str], bypass_check: Callable[[any], bool], priority: Priority | None
-) -> None:
+def abort_on_empty_options(options: list[str], priority: Priority | None) -> None:
     # Abort if options are empty and bypass_check for priority returns False
-    if not any(options) and not bypass_check(priority):
+    if not any(options) and not priority == Priority.research:
         LOG.error("Nothing to change")
         raise click.Abort
-
-
-def check_priority_is_research(prio: Priority) -> bool:
-    return prio == Priority.research
 
 
 def get_case(case_id: str, status_db: Store) -> Case:
