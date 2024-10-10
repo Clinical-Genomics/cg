@@ -330,7 +330,7 @@ class ReadHandler(BaseHandler):
     def get_samples_from_ticket(self, ticket: str) -> list[Sample]:
         """Returns the samples related to given ticket."""
         return apply_order_filters(
-            orders=self._get_join_sample_family_query().join(Case.orders),
+            orders=self._get_join_sample_case_order_query(),
             filters=[OrderFilter.BY_TICKET_ID],
             ticket_id=int(ticket),
         ).all()
