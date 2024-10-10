@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
 from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
 
 
@@ -25,7 +26,7 @@ def test_file_delivery_service_no_files(empty_delivery_files: DeliveryFiles):
     with mock.patch.object(
         file_delivery_service.file_manager,
         "get_files_to_deliver",
-        return_value=empty_delivery_files,
+        side_effect=NoDeliveryFilesError,
     ):
         file_delivery_service.deliver_files_for_case(case=Mock(), delivery_base_path=Mock())
 
