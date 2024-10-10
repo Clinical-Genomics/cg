@@ -27,7 +27,7 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
 
     # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
+    passed_check = UploadGenotypesAPI._is_suitable_for_genotype_upload(case)
 
     # THEN it should return True
     assert passed_check
@@ -40,7 +40,7 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
 
     # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
+    passed_check = UploadGenotypesAPI._is_suitable_for_genotype_upload(case)
 
     # THEN it should return False
     assert not passed_check
@@ -53,7 +53,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
 
     # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
+    passed_check = UploadGenotypesAPI._is_suitable_for_genotype_upload(case)
 
     # THEN it should return False
     assert not passed_check
