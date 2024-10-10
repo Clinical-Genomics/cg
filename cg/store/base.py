@@ -6,12 +6,7 @@ from typing import Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    ApplicationVersion,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
     Case,
