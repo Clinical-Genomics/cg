@@ -17,7 +17,9 @@
             "source": "blood",
             "tumour": false,
             "volume": "25",
-            "well_position": ""
+            "well_position": "",
+            "buffer": "Nuclease-free water",
+            "subject_id": "subject2"
         },
         {
             "application": "WGSPCFC060",
@@ -33,7 +35,9 @@
             "source": "cell line",
             "tumour": true,
             "volume": "35",
-            "well_position": ""
+            "well_position": "",
+            "buffer": "Nuclease-free water",
+            "subject_id": "subject1"
         }
     ]
 }
