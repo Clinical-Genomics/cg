@@ -74,6 +74,12 @@ class BaseHandler:
         """Return a join sample case relationship query."""
         return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)
 
+    def _get_join_sample_case_order_query(self) -> Query:
+        """Return a join sample case relationship query."""
+        return (
+            self._get_query(table=Sample).join(Case.links).join(CaseSample.sample).join(Case.orders)
+        )
+
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
         return (
