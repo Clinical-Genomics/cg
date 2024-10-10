@@ -1,5 +1,6 @@
 """Module for PacBio fixtures returning service objects."""
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -20,6 +21,7 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
     PacBioRunDataGenerator,
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.store.store import Store
 
 
@@ -31,6 +33,11 @@ def pac_bio_run_data_generator() -> PacBioRunDataGenerator:
 @pytest.fixture
 def pac_bio_run_file_manager() -> PacBioRunFileManager:
     return PacBioRunFileManager()
+
+
+@pytest.fixture
+def pacbio_run_names_service(pac_bio_runs_dir: Path) -> PacbioRunNamesService:
+    return PacbioRunNamesService(run_directory=pac_bio_runs_dir.as_posix())
 
 
 @pytest.fixture

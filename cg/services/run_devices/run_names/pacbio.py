@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.services.run_names.service import RunNamesService
+from cg.services.run_devices.run_names.service import RunNamesService
 
 
 class PacbioRunNamesService(RunNamesService):
