@@ -12,6 +12,7 @@ from subprocess import CompletedProcess
 from typing import Any, Generator
 
 import pytest
+from pytest_mock import MockFixture
 from housekeeper.store.models import File, Version
 from requests import Response
 
@@ -329,6 +330,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
             {
                 "name": "father",
@@ -338,6 +340,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
             {
                 "name": "mother",
@@ -347,6 +350,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
         ],
     }
@@ -2593,7 +2597,7 @@ def raredisease_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
-    mocker,
+    mocker: MockFixture,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2665,9 +2669,13 @@ def raredisease_context(
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
+    # GIVEN a genome build
+    mocker.patch.object(RarediseaseAnalysisAPI, "get_genome_build", return_value=GenomeVersion.HG38)
+
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
     RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
+    samples = [sample_enough_reads, another_sample_enough_reads]
     return cg_context
 
 
