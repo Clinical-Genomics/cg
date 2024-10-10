@@ -12,7 +12,6 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_entry_id,
     filter_cases_by_name,
     filter_cases_by_priority,
-    filter_cases_by_ticket_id,
     filter_cases_by_workflow_search,
     filter_cases_for_analysis,
     filter_cases_has_sequence,
@@ -702,36 +701,6 @@ def test_filter_running_cases_only_running_cases(store_with_multiple_cases_and_s
 
     # THEN the query should return the same number of cases as the original query
     assert active_cases.count() == cases_query.count()
-
-
-def test_filter_cases_by_ticket_no_matching_ticket(
-    store_with_multiple_cases_and_samples: Store, non_existent_id: str
-):
-    """Test that no cases are returned when filtering by a non-existent ticket."""
-    # GIVEN a store containing cases with no matching ticket id
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-
-    # WHEN filtering cases by a non-existent ticket
-    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=non_existent_id)
-
-    # THEN the query should return no cases
-    assert filtered_cases.count() == 0
-
-
-def test_filter_cases_by_ticket_matching_ticket(
-    store_with_multiple_cases_and_samples: Store, ticket_id: str
-):
-    """Test that cases are returned when filtering by an existing ticket id."""
-    # GIVEN a store containing cases with a matching ticket id
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-
-    # WHEN filtering cases by an existing ticket id
-    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=ticket_id)
-
-    # THEN the query should return cases with the matching ticket
-    assert filtered_cases.count() > 0
-    for case in filtered_cases:
-        assert ticket_id in case.tickets
 
 
 def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
