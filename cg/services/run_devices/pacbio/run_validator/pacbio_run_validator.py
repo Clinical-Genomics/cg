@@ -1,5 +1,6 @@
-from pathlib import Path
 import logging
+from pathlib import Path
+
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
@@ -58,9 +59,9 @@ class PacBioRunValidator(RunValidator):
         LOG.debug(f"Run for {run_data.full_path} is validated.")
 
     @staticmethod
-    def _touch_is_validated(run_path: Path):
-        Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
-
-    @staticmethod
     def _is_validated(run_path: Path) -> bool:
         return Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()
+
+    @staticmethod
+    def _touch_is_validated(run_path: Path) -> None:
+        Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
