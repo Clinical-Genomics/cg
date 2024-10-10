@@ -294,7 +294,7 @@ class CrunchyAPI:
             log_dir=log_dir.as_posix(),
             memory=self.slurm_memory,
             number_tasks=self.slurm_number_tasks,
-            quality_of_service=SlurmQos.LOW,
+            quality_of_service=SlurmQos.HIGH,
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = files.get_spring_to_fastq_sbatch_path(
