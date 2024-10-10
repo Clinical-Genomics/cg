@@ -319,7 +319,7 @@ class ReadHandler(BaseHandler):
             ticket_id=int(ticket_id),
         ).first():
             return order.cases
-        raise ValueError(f"Unknown ticket: {ticket_id}")
+        return []
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket."""
