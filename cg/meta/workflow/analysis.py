@@ -129,16 +129,12 @@ class AnalysisAPI(MetaAPI):
         ]
         return cases_passing_quality_check
 
-    def get_priority_for_case(self, case: Case) -> int:
-        """Get the case priority"""
-        return case.priority or Priority.research
-
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if are_all_samples_control(case=case):
             return SlurmQos.EXPRESS
-        priority: int = self.get_priority_for_case(case)
+        priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
