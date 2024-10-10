@@ -84,7 +84,7 @@ def set_case(
 
 
 def abort_on_empty_options(options: list[str]) -> None:
-    if not any(options):
+    if len(options) > 1:
         LOG.error("Nothing to change")
         raise click.Abort
 
