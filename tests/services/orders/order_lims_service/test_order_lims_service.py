@@ -32,7 +32,7 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.udfs.priority == "standard"
     assert first_sample.udfs.application == "WGSPCFC030"
     assert first_sample.udfs.source == "tissue (fresh frozen)"
-    assert first_sample.udfs.quantity == "220"
+    assert first_sample.udfs.quantity == 220
     assert first_sample.udfs.customer == "cust003"
     assert first_sample.udfs.volume == "1.0"
 
@@ -74,7 +74,7 @@ def test_to_lims_rml(rml_order_to_submit):
     first_sample = samples[0]
     assert first_sample.udfs.pool == "pool-1"
     assert first_sample.udfs.volume == "30"
-    assert first_sample.udfs.concentration == "5.0"
+    assert first_sample.udfs.concentration == 5.0
     assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
     assert first_sample.udfs.index_number == "1"
 
@@ -151,7 +151,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     # ... and pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["name"] == "s1"
-    assert {sample.container for sample in samples} == set(["96 well plate"])
+    assert {sample.container for sample in samples} == {"96 well plate"}
     assert first_sample["udfs"]["data_analysis"] in [
         Workflow.BALSAMIC,
         Workflow.BALSAMIC_QC,
@@ -165,15 +165,15 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     assert first_sample["udfs"]["volume"] == "1.0"
     assert first_sample["udfs"]["priority"] == "standard"
 
-    assert container_names == set(["p1"])
+    assert container_names == {"p1"}
     assert first_sample["well_position"] == "A:1"
     assert first_sample["udfs"]["tumour"] is True
     assert first_sample["udfs"]["capture_kit"] == "other"
-    assert first_sample["udfs"]["tumour_purity"] == "75"
+    assert first_sample["udfs"]["tumour_purity"] == 75
 
-    assert first_sample["udfs"]["formalin_fixation_time"] == "1"
-    assert first_sample["udfs"]["post_formalin_fixation_time"] == "2"
+    assert first_sample["udfs"]["formalin_fixation_time"] == 1
+    assert first_sample["udfs"]["post_formalin_fixation_time"] == 2
     assert first_sample["udfs"]["tissue_block_size"] == "small"
 
-    assert first_sample["udfs"]["quantity"] == "2"
+    assert first_sample["udfs"]["quantity"] == 2
     assert first_sample["udfs"]["comment"] == "other Elution buffer"
