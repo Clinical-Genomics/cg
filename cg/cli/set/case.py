@@ -89,7 +89,7 @@ def set_case(
 def abort_on_empty_options(
     options: list[str], bypass_check: Callable[[any], bool], priority: Priority | None
 ) -> None:
-    # Abort if options are empty and bypass_check for priority returns False
+    """Abort if options are empty and bypass_check for priority returns False"""
     if not any(options) and not bypass_check(priority):
         LOG.error("Nothing to change")
         raise click.Abort
