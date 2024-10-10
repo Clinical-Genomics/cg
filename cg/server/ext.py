@@ -1,6 +1,15 @@
 from decimal import Decimal
 from json import JSONEncoder
 
+from cg.services.order_validation_service.workflows.microsalt.validation_service import (
+    MicroSaltValidationService,
+)
+from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
+    MipDnaValidationService,
+)
+from cg.services.order_validation_service.workflows.tomte.validation_service import (
+    TomteValidationService,
+)
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
@@ -96,6 +105,10 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
     lims=lims,
     status_db=db,
 )
+
+tomte_validation_service = TomteValidationService(store=db)
+microsalt_validation_service = MicroSaltValidationService(store=db)
+mip_dna_validation_service = MipDnaValidationService(store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
