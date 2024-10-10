@@ -19,15 +19,16 @@ def test_filter_orders_by_ticket_no_matching_ticket(
     assert filtered_orders.count() == 0
 
 
-def test_filter_cases_by_ticket_matching_ticket(
+def test_filter_orders_by_ticket_id_matching_ticket(
     store_with_multiple_cases_and_samples: Store, ticket_id: str
 ):
-    """Test that cases are returned when filtering by an existing ticket id."""
-    # GIVEN a store containing cases with a matching ticket id
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
+    """Test that the order is returned when filtering by an existing ticket id."""
 
-    # WHEN filtering cases by an existing ticket id
-    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=ticket_id)
+    # GIVEN a store containing an order with a matching ticket id
+    order_query: Query = store_with_multiple_cases_and_samples._get_query(table=Order)
+
+    # WHEN filtering orders by an existing ticket id
+    filtered_cases: Query = filter_orders_by_ticket_id(orders=order_query, ticket=ticket_id)
 
     # THEN the query should return cases with the matching ticket
     assert filtered_cases.count() > 0
