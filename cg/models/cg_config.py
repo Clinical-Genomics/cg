@@ -632,7 +632,7 @@ class CGConfig(BaseModel):
 
     @property
     def run_directory_names_services(self) -> RunDirectoryNamesServices:
-        services = self.__dict__.get("run_directory_names_services_")
+        services = self.run_directory_names_services_
         if services is None:
             LOG.debug("Instantiating run directory names services")
             services = RunDirectoryNamesServices(
