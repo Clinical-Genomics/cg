@@ -92,6 +92,9 @@ class PostProcessingService(ABC):
         LOG.info("Starting post-processing for all runs")
         is_post_processing_successful = True
         for run_name in run_directory_names:
+            if self._is_run_post_processed(run_name):
+                LOG.info(f"Run {run_name} has already been post-processed")
+                continue
             try:
                 self.post_process(run_name=run_name, dry_run=dry_run)
             except Exception as error:

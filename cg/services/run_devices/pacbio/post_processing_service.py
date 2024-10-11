@@ -50,9 +50,6 @@ class PacBioPostProcessingService(PostProcessingService):
         to_raise=PostProcessingError,
     )
     def post_process(self, run_name: str, dry_run: bool = False) -> None:
-        if self._is_run_post_processed(run_name):
-            LOG.info(f"Run {run_name} has already been post-processed")
-            return
         LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
