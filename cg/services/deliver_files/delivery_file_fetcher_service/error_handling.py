@@ -21,7 +21,7 @@ def handle_missing_bundle_errors(func):
         try:
             return func(*args, **kwargs)
         except HousekeeperBundleVersionMissingError:
-            msg: str = f"Missing bundles detected for:"
+            msg: str = "Missing bundles detected for:"
             if case_id:
                 msg += f" case {case_id}"
             if sample_id:
