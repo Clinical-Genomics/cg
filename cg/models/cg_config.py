@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from pydantic.v1 import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing_extensions import Literal
 
 from cg.apps.coverage import ChanjoAPI
@@ -27,9 +27,6 @@ from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.decompression_service.decompressor import Decompressor
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
@@ -37,6 +34,9 @@ from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service imp
     DeliveryRsyncService,
 )
 from cg.services.deliver_files.delivery_rsync_service.models import RsyncDeliveryConfig
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.services.run_devices.pacbio.data_storage_service.pacbio_store_service import (
     PacBioStoreService,
@@ -47,15 +47,21 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
+    PacBioMetricsParser,
+)
+from cg.services.run_devices.pacbio.post_processing_service import (
+    PacBioPostProcessingService,
+)
 from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
     PacBioRunFileManager,
 )
-from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import (
+    PacBioRunValidator,
+)
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -82,11 +88,11 @@ class ArnoldConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: int | None
+    hours: int | None = None
     mail_user: EmailStr
-    memory: int | None
-    number_tasks: int | None
-    conda_env: str | None
+    memory: int | None = None
+    number_tasks: int | None = None
+    conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
 
 
@@ -136,7 +142,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: str | None
+    host: str | None = None
     user: str
     key: str
     api_url: str
@@ -145,8 +151,8 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str | None
-    config_path: str | None
+    binary_path: str | None = None
+    config_path: str | None = None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -369,7 +375,7 @@ class CGConfig(BaseModel):
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    max_flowcells: int | None
+    max_flowcells: int | None = None
     nanopore_data_directory: str
     run_instruments: RunInstruments
     sentieon_licence_server: str
@@ -418,7 +424,7 @@ class CGConfig(BaseModel):
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
-    pdc_service_: PdcService | None
+    pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
     pigz: CommonAppConfig | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
@@ -446,29 +452,7 @@ class CGConfig(BaseModel):
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
 
-    class Config:
-        arbitrary_types_allowed = True
-        fields = {
-            "arnold_api_": "arnold_api",
-            "chanjo_api_": "chanjo_api",
-            "chanjo2_api_": "chanjo2_api",
-            "crunchy_api_": "crunchy_api",
-            "demultiplex_api_": "demultiplex_api",
-            "genotype_api_": "genotype_api",
-            "gens_api_": "gens_api",
-            "hermes_api_": "hermes_api",
-            "housekeeper_api_": "housekeeper_api",
-            "lims_api_": "lims_api",
-            "loqusdb_api_": "loqusdb_api",
-            "madeline_api_": "madeline_api",
-            "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_service_": "pdc_service",
-            "post_processing_services_": "post_processing_services",
-            "scout_api_": "scout_api",
-            "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_api",
-            "janus_api_": "janus_api",
-        }
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @property
     def arnold_api(self) -> ArnoldAPIClient:
