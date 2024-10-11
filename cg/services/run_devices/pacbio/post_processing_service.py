@@ -39,6 +39,7 @@ class PacBioPostProcessingService(PostProcessingService):
         self.hk_service: PacBioHousekeeperService = hk_service
         self.store_service: PacBioStoreService = store_service
         self.sequencing_dir: str = sequencing_dir
+        self.instrument: str = "PacBio"
 
     @handle_post_processing_errors(
         to_except=(
@@ -49,7 +50,7 @@ class PacBioPostProcessingService(PostProcessingService):
         to_raise=PostProcessingError,
     )
     def post_process(self, run_name: str, dry_run: bool = False) -> None:
-        LOG.info(f"Starting PacBio post-processing for run: {run_name}")
+        LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )
