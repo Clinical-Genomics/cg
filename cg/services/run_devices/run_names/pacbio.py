@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from cg.services.run_devices.run_names.service import RunNamesService
+from cg.services.run_devices.run_names.service import RunDirectoryNamesService
 
 
-class PacbioRunNamesService(RunNamesService):
+class PacbioRunDirectoryNamesService(RunDirectoryNamesService):
 
     def get_run_names(self) -> list[str]:
         """

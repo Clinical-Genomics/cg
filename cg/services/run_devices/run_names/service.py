@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class RunNamesService(ABC):
+class RunDirectoryNamesService(ABC):
 
     def __init__(self, run_directory: str):
         self.run_directory = run_directory
