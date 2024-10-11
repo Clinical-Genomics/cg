@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from cg.services.run_devices.abstract_classes import PostProcessingService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
@@ -50,6 +49,9 @@ class PacBioPostProcessingService(PostProcessingService):
         to_raise=PostProcessingError,
     )
     def post_process(self, run_name: str, dry_run: bool = False) -> None:
+        if self._is_run_post_processed(run_name):
+            LOG.info(f"Run {run_name} has already been post-processed")
+            return
         LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             run_name=run_name, sequencing_dir=self.sequencing_dir
@@ -58,14 +60,3 @@ class PacBioPostProcessingService(PostProcessingService):
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
         self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
         self._touch_post_processing_complete(run_data)
-
-    def _get_all_run_names(self) -> list[str]:
-        """Get all run names in the Pacbio sequencing directory."""
-        run_names = []
-        for run_folder in Path(self.sequencing_dir).iterdir():
-            if run_folder.is_dir():
-                for cell_folder in run_folder.iterdir():
-                    if self._is_run_post_processed(f"{run_folder.name}/{cell_folder.name}"):
-                        continue
-                    run_names.append(f"{run_folder.name}/{cell_folder.name}")
-        return run_names

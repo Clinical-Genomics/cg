@@ -70,14 +70,3 @@ def test_pac_bio_post_processing_store_files_error(
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
             post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
-
-
-def test_pacbio_get_all_run_names(
-    pac_bio_post_processing_service: PacBioPostProcessingService, pacbio_run_names: set[str]
-):
-    # GIVEN a PacBioPostProcessingService
-    # WHEN getting all run names
-    all_run_names: list[str] = pac_bio_post_processing_service._get_all_run_names()
-
-    # THEN the expected run names are returned
-    assert set(all_run_names) == pacbio_run_names
