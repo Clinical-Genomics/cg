@@ -6,6 +6,7 @@ from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
+from cg.services.run_devices.exc import PostProcessingError
 
 LOG = logging.getLogger(__name__)
 
@@ -88,15 +89,16 @@ class PostProcessingService(ABC):
 
     def post_process_all(self, run_directory_names: list[str], dry_run: bool = False) -> bool:
         """Post-process all PacBio runs in the sequencing directory."""
-        LOG.info("Starting PacBio post-processing for all runs")
+        LOG.info("Starting post-processing for all runs")
         is_post_processing_successful = True
         for run_name in run_directory_names:
             try:
                 self.post_process(run_name=run_name, dry_run=dry_run)
             except Exception as error:
-                LOG.error(f"Could not post-process {run_name}: {error}")
+                LOG.error(f"Could not post-process {self.instrument} run {run_name}: {error}")
                 is_post_processing_successful = False
-        return is_post_processing_successful
+        if not is_post_processing_successful:
+            raise PostProcessingError(f"Could not post-process all {self.instrument} runs")
 
     def _is_run_post_processed(self, run_name: str) -> bool:
         """Check if a run has been post-processed."""

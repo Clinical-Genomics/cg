@@ -43,8 +43,11 @@ def post_process_all_runs(context: CGConfig, dry_run: bool) -> None:
     services: PostProcessingServices = context.post_processing_services
     are_all_services_successful: bool = True
     for service in [services.pacbio]:
-        is_service_successful: bool = service.post_process_all(dry_run=dry_run)
-        are_all_services_successful = are_all_services_successful and is_service_successful
+        try:
+            service.post_process_all(dry_run=dry_run)
+        except Exception as error:
+            LOG.error(f"{error}")
+            are_all_services_successful = False
     if not are_all_services_successful:
         raise click.Abort
 
