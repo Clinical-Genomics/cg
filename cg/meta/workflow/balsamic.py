@@ -349,7 +349,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 qc_metrics[sample_metric.id] = {sample_metric.name.lower(): sample_metric.value}
 
         return BalsamicAnalysis(
-            config=config_raw,
+            balsamic_config=config_raw,
             sample_metrics=self.cast_metrics_type(sequencing_type, qc_metrics),
         )
 
@@ -615,7 +615,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_genome_build(self, case_id: str) -> str:
         """Returns the reference genome build version of a Balsamic analysis."""
         analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
-        return analysis_metadata.config.reference.reference_genome_version
+        return analysis_metadata.balsamic_config.reference.reference_genome_version
 
     @staticmethod
     def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
@@ -631,10 +631,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config.json file.
         """
         analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
-        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
-        analysis_type: str = analysis_metadata.config.analysis.analysis_type
-        var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
-        tool_versions: dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        sequencing_type: str = analysis_metadata.balsamic_config.analysis.sequencing_type
+        analysis_type: str = analysis_metadata.balsamic_config.analysis.analysis_type
+        var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.balsamic_config.vcf
+        tool_versions: dict[str, list] = analysis_metadata.balsamic_config.bioinfo_tools_version
         analysis_var_callers = []
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
@@ -653,8 +653,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Return list of panel of normals used for analysis."""
         pons: list[str] = []
         analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
-        if analysis_metadata.config.panel:
-            if pon_cnn := analysis_metadata.config.panel.pon_cnn:
+        if analysis_metadata.balsamic_config.panel:
+            if pon_cnn := analysis_metadata.balsamic_config.panel.pon_cnn:
                 pons.append(pon_cnn)
         return pons
 
