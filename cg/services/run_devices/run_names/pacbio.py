@@ -7,9 +7,8 @@ class PacbioRunDirectoryNamesService(RunDirectoryNamesService):
 
     def get_run_names(self) -> list[str]:
         """
-        Get all the run names from a run directory, assuming the run directory has only sequencing
-        folders with SMRTcells inside. The run names are in the form <sequencing_run>/<SMRTcell>:
-        Example:
+        Get all the run names from the PacBio sequencing directory in the form
+        <sequencing_run>/<SMRTcell>, for example:
             r84202_20240913_121403/1_C01
         """
         run_names = []

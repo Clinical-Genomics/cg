@@ -355,16 +355,12 @@ class RunInstruments(BaseModel):
 
 class RunDirectoryNamesServices(BaseModel):
     pacbio: PacbioRunDirectoryNamesService
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class PostProcessingServices(BaseModel):
     pacbio: PacBioPostProcessingService
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class CGConfig(BaseModel):
@@ -636,7 +632,7 @@ class CGConfig(BaseModel):
 
     @property
     def run_directory_names_services(self) -> RunDirectoryNamesServices:
-        services = self.__dict__.get("run_directory_names_services_")
+        services = self.run_directory_names_services_
         if services is None:
             LOG.debug("Instantiating run directory names services")
             services = RunDirectoryNamesServices(
