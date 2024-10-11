@@ -355,16 +355,12 @@ class RunInstruments(BaseModel):
 
 class RunDirectoryNamesServices(BaseModel):
     pacbio: PacbioRunDirectoryNamesService
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class PostProcessingServices(BaseModel):
     pacbio: PacBioPostProcessingService
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class CGConfig(BaseModel):
