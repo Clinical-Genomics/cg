@@ -106,7 +106,7 @@ def test_mip_metrics_set_meadian_target_coverage(mip_metrics_deliverables_raw: d
     """
     Tests set median target coverage
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
@@ -124,7 +124,7 @@ def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     Tests set predicted sex
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)

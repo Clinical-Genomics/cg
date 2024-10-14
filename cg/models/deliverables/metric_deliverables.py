@@ -16,28 +16,28 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
             return metric
 
 
-def add_metric(name: str, values: dict) -> list[Any]:
-    """Add metric to list of objects"""
-    found_metrics: list = []
-    raw_metrics: list = values.get("metrics_")
-    metrics_validator: dict[str, Any] = values.get("metric_to_get_")
-    for metric in raw_metrics:
-        if name == metric.name and metric.name in metrics_validator:
-            found_metrics.append(
-                metrics_validator[metric.name](
-                    sample_id=metric.id, step=metric.step, value=metric.value
-                )
-            )
+def add_metric(name: str, info: ValidationInfo) -> list[Any]:
+    """Add metric to a list of objects."""
+    raw_metrics: list = info.data.get("metrics_")
+    metrics_validator: dict[str, Any] = info.data.get("metric_to_get_")
+    found_metrics: list = [
+        metrics_validator[metric.name](
+            sample_id=metric.id, step=metric.step, value=metric.value
+        )
+        for metric in raw_metrics
+        if name == metric.name and metric.name in metrics_validator
+    ]
     return found_metrics
 
 
-def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
+def add_sample_id_metrics(parsed_metric: Any, info: ValidationInfo) -> list[Any]:
     """Add parsed sample_id metrics gathered from all metrics to list"""
-    sample_ids: set = values.get("sample_ids")
+    sample_ids: set = info.data.get("sample_ids")
     sample_id_metrics: list = []
-    metric_per_sample_id_map: dict = {}
-    for metric_name in values.get("sample_metric_to_parse"):
-        metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
+    metric_per_sample_id_map: dict = {
+        metric_name: info.data.get(metric_name)
+        for metric_name in info.data.get("sample_metric_to_parse")
+    }
     for sample_id in sample_ids:
         metric_per_sample_id: dict = {"sample_id": sample_id}
         for metric_name, metric_objs in metric_per_sample_id_map.items():
@@ -46,7 +46,7 @@ def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
             )
             if sample_metric.value:
                 metric_per_sample_id[metric_name]: Any = sample_metric.value
-                metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
+                metric_per_sample_id[f"{metric_name}_step"]: str = sample_metric.step
         sample_id_metrics.append(parsed_metric(**metric_per_sample_id))
     return sample_id_metrics
 
@@ -132,10 +132,8 @@ class MetricsDeliverables(BaseModel):
     @classmethod
     def set_sample_ids(cls, _,  info: ValidationInfo) -> set:
         """Set sample_ids gathered from all metrics"""
-        sample_ids: list = []
         raw_metrics: list = info.data.get("metrics_")
-        for metric in raw_metrics:
-            sample_ids.append(metric.id)
+        sample_ids: list = [metric.id for metric in raw_metrics]
         return set(sample_ids)
 
 
