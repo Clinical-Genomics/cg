@@ -32,6 +32,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
+from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
 Blob = Annotated[bytes, None]
@@ -1189,3 +1190,10 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+
+class OrderTypeApplication(Base):
+    __tablename__ = "order_type_application"
+    order_type: OrderType
+    application_id: Mapped[int] = mapped_column(ForeignKey("application.id", ondelete="CASCADE"))
+    application: Mapped[Application] = orm.relationship(foreign_keys=[application_id])
