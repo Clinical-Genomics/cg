@@ -1194,6 +1194,6 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
 
 class OrderTypeApplication(Base):
     __tablename__ = "order_type_application"
-    order_type: OrderType
+    order_type: Mapped[OrderType] = mapped_column(types.Enum(OrderType))
     application_id: Mapped[int] = mapped_column(ForeignKey("application.id", ondelete="CASCADE"))
-    application: Mapped[Application] = orm.relationship(foreign_keys=[application_id])
+    application: Mapped[Application] = orm.relationship("Application")
