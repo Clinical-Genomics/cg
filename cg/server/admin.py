@@ -737,6 +737,7 @@ class PacbioSampleRunMetricsView(BaseView):
         "smrt_cell",
         "sample",
         "hifi_reads",
+        "hifi_yield",
         "hifi_mean_read_length",
         "hifi_median_read_quality",
     ]

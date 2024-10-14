@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing_extensions import Literal
 
 from cg.apps.coverage import ChanjoAPI
@@ -452,29 +452,7 @@ class CGConfig(BaseModel):
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
 
-    class Config:
-        arbitrary_types_allowed = True
-        fields = {
-            "arnold_api_": "arnold_api",
-            "chanjo_api_": "chanjo_api",
-            "chanjo2_api_": "chanjo2_api",
-            "crunchy_api_": "crunchy_api",
-            "demultiplex_api_": "demultiplex_api",
-            "genotype_api_": "genotype_api",
-            "gens_api_": "gens_api",
-            "hermes_api_": "hermes_api",
-            "housekeeper_api_": "housekeeper_api",
-            "lims_api_": "lims_api",
-            "loqusdb_api_": "loqusdb_api",
-            "madeline_api_": "madeline_api",
-            "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_service_": "pdc_service",
-            "post_processing_services_": "post_processing_services",
-            "scout_api_": "scout_api",
-            "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_api",
-            "janus_api_": "janus_api",
-        }
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @property
     def arnold_api(self) -> ArnoldAPIClient:
