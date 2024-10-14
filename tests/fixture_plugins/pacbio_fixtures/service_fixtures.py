@@ -22,7 +22,7 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
-from cg.services.run_devices.run_names.pacbio import PacbioRunDirectoryNamesService
+from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.store.store import Store
 
 # Mocked services
@@ -51,8 +51,8 @@ def pac_bio_run_file_manager() -> PacBioRunFileManager:
 
 
 @pytest.fixture
-def pacbio_run_names_service(pac_bio_runs_dir: Path) -> PacbioRunDirectoryNamesService:
-    return PacbioRunDirectoryNamesService(run_directory=pac_bio_runs_dir.as_posix())
+def pacbio_run_names_service(pac_bio_runs_dir: Path) -> PacbioRunNamesService:
+    return PacbioRunNamesService(run_directory=pac_bio_runs_dir.as_posix())
 
 
 @pytest.fixture

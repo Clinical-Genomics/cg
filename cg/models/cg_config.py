@@ -54,7 +54,7 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
-from cg.services.run_devices.run_names.pacbio import PacbioRunDirectoryNamesService
+from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -353,8 +353,8 @@ class RunInstruments(BaseModel):
     illumina: IlluminaConfig
 
 
-class RunDirectoryNamesServices(BaseModel):
-    pacbio: PacbioRunDirectoryNamesService
+class RunNamesServices(BaseModel):
+    pacbio: PacbioRunNamesService
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
@@ -423,7 +423,7 @@ class CGConfig(BaseModel):
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
     pigz: CommonAppConfig | None = None
-    run_directory_names_services_: RunDirectoryNamesServices | None = None
+    run_names_services_: RunNamesServices | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
@@ -631,14 +631,14 @@ class CGConfig(BaseModel):
         return service
 
     @property
-    def run_directory_names_services(self) -> RunDirectoryNamesServices:
-        services = self.run_directory_names_services_
+    def run_names_services(self) -> RunNamesServices:
+        services = self.run_names_services_
         if services is None:
             LOG.debug("Instantiating run directory names services")
-            services = RunDirectoryNamesServices(
-                pacbio=PacbioRunDirectoryNamesService(self.run_instruments.pacbio.data_dir)
+            services = RunNamesServices(
+                pacbio=PacbioRunNamesService(self.run_instruments.pacbio.data_dir)
             )
-            self.run_directory_names_services_ = services
+            self.run_names_services_ = services
         return services
 
     @property
