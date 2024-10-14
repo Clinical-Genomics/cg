@@ -20,25 +20,26 @@ class DeliveryFilesMover:
 
     def move_files(self, delivery_files: DeliveryFiles, delivery_base_path: Path) -> DeliveryFiles:
         """Move the files to the customer folder."""
-        inbox_dir_path: Path = self._create_ticket_inbox_dir_path(
+        inbox_ticket_dir_path: Path = self._create_ticket_inbox_dir_path(
             delivery_base_path=delivery_base_path, delivery_data=delivery_files.delivery_data
         )
-        self._create_ticket_inbox_folder(inbox_dir_path)
+        delivery_files.delivery_data.customer_ticket_inbox = inbox_ticket_dir_path
+        self._create_ticket_inbox_folder(inbox_ticket_dir_path)
         self._create_hard_links_for_delivery_files(
-            delivery_files=delivery_files, inbox_dir_path=inbox_dir_path
+            delivery_files=delivery_files, inbox_dir_path=inbox_ticket_dir_path
         )
         return self._replace_file_paths_with_inbox_dir_paths(
-            delivery_files=delivery_files, inbox_dir_path=inbox_dir_path
+            delivery_files=delivery_files, inbox_dir_path=inbox_ticket_dir_path
         )
 
     @staticmethod
     def _create_ticket_inbox_folder(
-        inbox_dir_path: Path,
+        inbox_ticket_dir_path: Path,
     ) -> Path:
         """Create a ticket inbox folder in the customer folder, overwrites if already present."""
-        LOG.debug(f"[MOVE SERVICE] Creating ticket inbox folder: {inbox_dir_path}")
-        inbox_dir_path.mkdir(parents=True, exist_ok=True)
-        return inbox_dir_path
+        LOG.debug(f"[MOVE SERVICE] Creating ticket inbox folder: {inbox_ticket_dir_path}")
+        inbox_ticket_dir_path.mkdir(parents=True, exist_ok=True)
+        return inbox_ticket_dir_path
 
     @staticmethod
     def _create_ticket_inbox_dir_path(
