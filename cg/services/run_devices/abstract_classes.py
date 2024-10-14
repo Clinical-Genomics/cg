@@ -1,14 +1,9 @@
 """Post-processing service abstract classes."""
-
-import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
-from cg.services.run_devices.exc import PostProcessingError
-
-LOG = logging.getLogger(__name__)
 
 
 class RunDataGenerator(ABC):
