@@ -136,7 +136,7 @@ def get_father_sex_errors(
 
 
 def is_father_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
-    father: SampleWithRelatives | None = case.get_case_sample(child.father)
+    father: SampleWithRelatives | None = case.get_sample(child.father)
     return father and father.sex != Sex.MALE
 
 
@@ -151,7 +151,7 @@ def get_father_case_errors(
     errors: list[FatherNotInCaseError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
-        father: SampleWithRelatives | None = case.get_case_sample(child.father)
+        father: SampleWithRelatives | None = case.get_sample(child.father)
         if not father:
             error: FatherNotInCaseError = create_father_case_error(
                 case_index=case_index,
@@ -184,7 +184,7 @@ def get_mother_case_errors(
     errors: list[MotherNotInCaseError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
-        mother: SampleWithRelatives | None = case.get_case_sample(child.mother)
+        mother: SampleWithRelatives | None = case.get_sample(child.mother)
         if not mother:
             error: MotherNotInCaseError = create_mother_case_error(
                 case_index=case_index, sample_index=child_index
@@ -202,7 +202,7 @@ def create_mother_case_error(case_index: int, sample_index: int) -> MotherNotInC
 
 
 def is_mother_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
-    mother: SampleWithRelatives | None = case.get_case_sample(child.mother)
+    mother: SampleWithRelatives | None = case.get_sample(child.mother)
     return mother and mother.sex != Sex.FEMALE
 
 
