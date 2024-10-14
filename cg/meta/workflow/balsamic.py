@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import EmailStr, ValidationError
+from pydantic import EmailStr, ValidationError
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, SampleType, GenomeVersion

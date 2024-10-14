@@ -7,7 +7,7 @@ def test_instantiate_mip_analysis(mip_analysis_raw: dict):
     """
     Tests raw mip analysis against a pydantic MipAnalysis
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MipAnalysis object
     mip_dna_analysis = MipAnalysis(**mip_analysis_raw)
