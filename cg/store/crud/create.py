@@ -461,6 +461,8 @@ class CreateHandler(BaseHandler):
         transaction.
         """
         sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
+        if not sample:
+            raise EntryNotFoundError(f"Sample not found: {metrics_dto.sample_id}")
         new_metric = IlluminaSampleSequencingMetrics(
             sample=sample,
             instrument_run=sequencing_run,
