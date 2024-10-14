@@ -40,7 +40,9 @@ class OrderTypes(Enum):
 
 
 order_type_column = sa.Column("order_type", sa.Enum(OrderTypes), index=True)
-application_column = sa.Column("application_id", sa.Integer(), foreign_key="application.id")
+application_column = sa.Column(
+    "application_id", sa.Integer(), foreign_key=sa.ForeignKey("application.id")
+)
 
 
 def upgrade():
