@@ -76,25 +76,13 @@ class UploadGenotypesAPI(object):
             for sample in samples
         )
 
-    def remove_index(self, hk_genotypes: list[File]) -> File | None:
-        """
-        Take a list of files and removes all items ending with ".tbi".
-        Returns a single remaining file or raises ValueError if more than one file remains.
-        """
-        filtered_files = [
-            file for file in hk_genotypes if not str(file).endswith(FileExtensions.TBI)
-        ]
-        if len(filtered_files) > 1:
-            raise ValueError("Error: More than one file is present after filtering.")
-        return filtered_files[0] if filtered_files else None
-
     def _get_genotype_file(self, case_id: str) -> File:
         "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
         hk_genotypes: list[File] = self.hk.get_files_from_latest_version(
             bundle_name=case_id, tags=tags
         )
-        hk_genotype: File = self.remove_index(hk_genotypes)
+        hk_genotype: File = self._sort_genotype_files(hk_genotypes)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
         LOG.debug(f"Found genotype file {hk_genotype.full_path}")
@@ -207,3 +195,22 @@ class UploadGenotypesAPI(object):
         return genotype_file.full_path.endswith(
             FileExtensions.VCF_GZ
         ) or genotype_file.full_path.endswith(FileExtensions.BCF)
+
+    def _sort_genotype_files(hk_genotypes: list[File]) -> File | None:
+        """
+        Take a list of files and only keep files finishing with .bcf or .vcf.gz
+        Returns a single remaining file or raises ValueError if more than one file remains.
+        """
+        filtered_files = [
+            genotype_file
+            for genotype_file in hk_genotypes
+            if (
+                str(genotype_file).endswith(FileExtensions.BCF)
+                or str(genotype_file).endswith(FileExtensions.VCF_GZ)
+            )
+        ]
+        if len(filtered_files) > 1:
+            raise ValueError(
+                "Error: More than one file is present after filtering genotype files from the last bundle version."
+            )
+        return filtered_files[0] if filtered_files else None
