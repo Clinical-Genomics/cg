@@ -103,10 +103,10 @@ class PostProcessingService(ABC):
         if not is_post_processing_successful:
             raise PostProcessingError(f"Could not post-process all {self.instrument} runs")
 
+    @abstractmethod
     def _is_run_post_processed(self, run_name: str) -> bool:
         """Check if a run has been post-processed."""
-        processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
-        return processing_complete_file.exists()
+        pass
 
     @staticmethod
     def _touch_post_processing_complete(run_data: RunData) -> None:
