@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable
+from typing import Any, Callable, Annotated
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -126,7 +126,7 @@ class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics_: list[MetricsBase] = Field(list[MetricsBase], alias="metrics")
-    sample_ids: set | None = None
+    sample_ids: Annotated
 
     @field_validator("sample_ids")
     @classmethod

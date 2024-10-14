@@ -1,7 +1,6 @@
-from typing import Any
+from typing import Any, Annotated
 
-from pydantic import field_validator
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import field_validator, ValidationInfo, Field
 
 from cg.constants.subject import Sex
 from cg.models.deliverables.metric_deliverables import (
@@ -73,13 +72,13 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
         "gender": SexCheck,
     }
-    duplicate_reads: list[DuplicateReads] | None = None
-    mapped_reads: list[MIPMappedReads] | None = None
-    mean_insert_size: list[MeanInsertSize] | None = None
-    median_target_coverage: list[MedianTargetCoverage] | None = None
-    predicted_sex: list[SexCheck] | None = None
+    duplicate_reads: Annotated[list[DuplicateReads] | None, Field(validate_default=True)] = None
+    mapped_reads: Annotated[list[MIPMappedReads] | None, Field(validate_default=True)] = None
+    mean_insert_size: Annotated[list[MeanInsertSize] | None, Field(validate_default=True)] = None
+    median_target_coverage: Annotated[list[MedianTargetCoverage] | None, Field(validate_default=True)] = None
+    predicted_sex: Annotated[list[SexCheck] | None, Field(validate_default=True)] = None
     sample_metric_to_parse: list[str] = SAMPLE_METRICS_TO_PARSE
-    sample_id_metrics: list[MIPParsedMetrics] | None = None
+    sample_id_metrics: Annotated[list[MIPParsedMetrics] | None, Field(validate_default=True)] = None
 
     @field_validator("duplicate_reads")
     @classmethod
