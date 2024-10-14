@@ -39,7 +39,7 @@ class PacBioPostProcessingService(PostProcessingService):
         self.hk_service: PacBioHousekeeperService = hk_service
         self.store_service: PacBioStoreService = store_service
         self.sequencing_dir: str = sequencing_dir
-        self.instrument: str = "PacBio"
+        self.instrument: str = "Pacbio"
 
     @handle_post_processing_errors(
         to_except=(
