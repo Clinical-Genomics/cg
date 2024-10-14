@@ -152,7 +152,7 @@ def expected_moved_fastq_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
-    delivery_files.delivery_data.customer_inbox = inbox_dir_path
+    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
@@ -175,7 +175,7 @@ def expected_moved_analysis_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
-    delivery_files.delivery_data.customer_inbox = inbox_dir_path
+    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
     )

@@ -7,7 +7,7 @@ class DeliveryMetaData(BaseModel):
     case_id: str
     customer_internal_id: str
     ticket_id: str
-    customer_inbox: Path | None = None
+    customer_ticket_inbox: Path | None = None
 
 
 class CaseFile(BaseModel):
