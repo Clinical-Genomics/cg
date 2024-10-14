@@ -51,7 +51,7 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 )
 @click.pass_obj
 def post_process_all_runs(context: CGConfig, instrument: str, dry_run: bool) -> None:
-    """Post-process all runs from the instruments."""
+    """Post-process all available runs."""
     exit_success: bool = True
     unprocessed_runs: list[UnprocessedRunInfo] = get_unprocessed_runs_info(
         context=context, instrument=instrument
