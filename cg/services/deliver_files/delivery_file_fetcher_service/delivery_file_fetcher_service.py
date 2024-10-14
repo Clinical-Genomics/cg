@@ -32,13 +32,3 @@ class FetchDeliveryFilesService(ABC):
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Get the files to deliver."""
         pass
-
-    @staticmethod
-    def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
-        """Check if the delivery files has files to deliver."""
-        if delivery_files.case_files or delivery_files.sample_files:
-            return delivery_files
-        LOG.info(
-            f"No files to deliver for case {delivery_files.delivery_data.case_id} in ticket: {delivery_files.delivery_data.ticket_id}"
-        )
-        raise NoDeliveryFilesError
