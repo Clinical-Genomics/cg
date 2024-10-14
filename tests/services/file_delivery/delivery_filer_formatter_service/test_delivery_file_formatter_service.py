@@ -58,7 +58,7 @@ def test_reformat_files(
         case_id="some_case",
         customer_internal_id="cust_id",
         ticket_id="ticket_id",
-        customer_inbox=Path(tmp_path, "cust_id", "inbox"),
+        customer_ticket_inbox=Path(tmp_path, "cust_id", "inbox"),
     )
     mock_delivery_files = DeliveryFiles(
         delivery_data=delivery_data, case_files=case_files, sample_files=sample_files
