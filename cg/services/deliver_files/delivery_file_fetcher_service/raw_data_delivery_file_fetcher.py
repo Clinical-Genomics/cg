@@ -69,6 +69,10 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
     @staticmethod
     def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
         """Check if the delivery files has files to deliver."""
+        for sample_file in delivery_files.sample_files:
+            LOG.debug(
+                f"Found file to deliver: {sample_file.file_path} for sample: {sample_file.sample_id}"
+            )
         if delivery_files.sample_files:
             return delivery_files
         LOG.info(
