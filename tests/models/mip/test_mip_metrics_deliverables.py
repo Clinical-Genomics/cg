@@ -1,4 +1,4 @@
-"""Test MIP metrics deliverables"""
+"""Test MIP metrics deliverables."""
 
 from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
@@ -16,7 +16,7 @@ def test_instantiate_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict
     """
     Tests raw data deliverable against a pydantic MIPMetricsDeliverables
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
@@ -29,7 +29,7 @@ def test_instantiate_mip_metrics_sample_ids(mip_metrics_deliverables_raw: dict):
     """
     Tests set sample_ids
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
@@ -42,12 +42,12 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     """
     Tests set duplicates read
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
-    # THEN assert that read duplicates was set
+    # THEN assert that read duplicates were set
     assert metrics_object.duplicate_reads
 
     duplicate_read: DuplicateReads = metrics_object.duplicate_reads.pop()
@@ -70,12 +70,12 @@ def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
     """
     Tests set mapped reads
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
-    # THEN assert that mapped reads was set
+    # THEN assert that mapped reads were set
     assert metrics_object.mapped_reads
 
     mapped_reads: MIPMappedReads = metrics_object.mapped_reads.pop()
@@ -88,7 +88,7 @@ def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
     """
     Tests set mean insert size
     """
-    # GIVEN a dictionary with the some metrics
+    # GIVEN a dictionary with some metrics
 
     # WHEN instantiating a MIPMetricsDeliverables object
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)

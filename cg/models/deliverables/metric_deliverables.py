@@ -126,7 +126,7 @@ class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics_: list[MetricsBase] = Field(list[MetricsBase], alias="metrics")
-    sample_ids: Annotated
+    sample_ids: Annotated[set | None, Field(validate_default=True)] = None
 
     @field_validator("sample_ids")
     @classmethod
@@ -146,7 +146,7 @@ class MetricsDeliverablesCondition(BaseModel):
     @classmethod
     def validate_metrics(cls, metrics: list[MetricsBase]) -> list[MetricsBase]:
         """Verify that metrics met QC conditions."""
-        failed_metrics = []
+        failed_metrics = [*]
         for metric in metrics:
             if metric.condition is not None:
                 qc_function: Callable = getattr(operator, metric.condition.norm)
