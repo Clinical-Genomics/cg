@@ -34,22 +34,35 @@ def get_post_processing_service_from_run_name(
 
 
 def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[UnprocessedRunInfo]:
-    """Return a list of un-processed runs for a given instrument or for all instruments."""
+    """Return a list of unprocessed runs for a given instrument or for all instruments."""
     runs: list[UnprocessedRunInfo] = []
-    if instrument == "all":
-        for instrument_name in ["pacbio"]:  # Add more instruments here
-            runs.extend(get_unprocessed_runs_info(context=context, instrument=instrument_name))
-        return runs
-    processing_service: PostProcessingService = getattr(
-        context.post_processing_services, instrument, None
-    )
-    run_names_service: RunNamesService = getattr(context.run_names_services, instrument, None)
-    for run_name in run_names_service.get_run_names():
-        if processing_service.is_run_post_processed(run_name):
-            continue
-        runs.append(
-            UnprocessedRunInfo(
-                name=run_name, post_processing_service=processing_service, instrument=instrument
+    possible_instruments: list[str] = ["pacbio"]  # Add more instruments here
+    instruments_to_process = [instrument] if instrument != "all" else possible_instruments
+    for instrument_name in instruments_to_process:
+        run_names_service: RunNamesService = getattr(
+            context.run_names_services, instrument_name, None
+        )
+        runs.extend(
+            _get_unprocessed_runs_from_run_names(
+                run_names=run_names_service.get_run_names(),
+                post_processing_service=getattr(context.post_processing_services, instrument_name),
+                instrument_name=instrument_name,
             )
         )
+    return runs
+
+
+def _get_unprocessed_runs_from_run_names(
+    run_names: list[str], post_processing_service: PostProcessingService, instrument_name
+) -> list[UnprocessedRunInfo]:
+    runs: list[UnprocessedRunInfo] = []
+    for name in run_names:
+        if not post_processing_service.is_run_post_processed(name):
+            runs.append(
+                UnprocessedRunInfo(
+                    name=name,
+                    post_processing_service=post_processing_service,
+                    instrument=instrument_name,
+                )
+            )
     return runs
