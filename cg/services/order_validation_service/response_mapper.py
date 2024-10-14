@@ -72,7 +72,7 @@ def wrap_fields(raw_order: dict) -> None:
     if raw_order.get("cases"):
         wrap_case_and_sample_fields(raw_order)
     else:
-        wrap_sample_fields(raw_order)
+        wrap_sample_fields(raw_order["samples"])
 
 
 def wrap_order_fields(raw_order: dict) -> None:
@@ -84,7 +84,7 @@ def wrap_order_fields(raw_order: dict) -> None:
 def wrap_case_and_sample_fields(raw_order: dict) -> None:
     for case in raw_order["cases"]:
         wrap_case_fields(case)
-        wrap_sample_fields(case)
+        wrap_sample_fields(case["samples"])
 
 
 def wrap_case_fields(case: dict) -> None:
@@ -93,8 +93,7 @@ def wrap_case_fields(case: dict) -> None:
             set_field(entity=case, field=field, value=value)
 
 
-def wrap_sample_fields(dict_containing_samples: dict) -> None:
-    samples: list[dict] = dict_containing_samples.get("samples", [])
+def wrap_sample_fields(samples: list[dict]) -> None:
     for sample in samples:
         for field, value in sample.items():
             set_field(entity=sample, field=field, value=value)
