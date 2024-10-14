@@ -87,27 +87,6 @@ class PostProcessingService(ABC):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass
 
-    def post_process_all(self, run_names: list[str], dry_run: bool = False) -> bool:
-        """Post-process all PacBio runs in the sequencing directory."""
-        LOG.info("Starting post-processing for all runs")
-        is_post_processing_successful = True
-        for run_name in run_names:
-            if self._is_run_post_processed(run_name):
-                LOG.info(f"Run {run_name} has already been post-processed")
-                continue
-            try:
-                self.post_process(run_name=run_name, dry_run=dry_run)
-            except Exception as error:
-                LOG.error(f"Could not post-process {self.instrument} run {run_name}: {error}")
-                is_post_processing_successful = False
-        if not is_post_processing_successful:
-            raise PostProcessingError(f"Could not post-process all {self.instrument} runs")
-
-    def _is_run_post_processed(self, run_name: str) -> bool:
-        """Check if a run has been post-processed."""
-        processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
-        return processing_complete_file.exists()
-
     @staticmethod
     def _touch_post_processing_complete(run_data: RunData) -> None:
         """Touch the post-processing complete file."""

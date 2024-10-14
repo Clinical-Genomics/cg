@@ -4,10 +4,10 @@ import logging
 
 import click
 
-from cg.cli.post_process.utils import get_post_processing_service_from_run_name
+from cg.cli.post_process.utils import get_all_run_names, get_post_processing_service_from_run_name
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.models.cg_config import CGConfig, PostProcessingServices, RunNamesServices
+from cg.models.cg_config import CGConfig
 from cg.services.run_devices.abstract_classes import PostProcessingService
 
 LOG = logging.getLogger(__name__)
@@ -40,16 +40,18 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 @click.pass_obj
 def post_process_all_runs(context: CGConfig, dry_run: bool) -> None:
     """Post-process all runs from the instruments."""
-    services: PostProcessingServices = context.post_processing_services
-    names_services: RunNamesServices = context.run_names_services
-    are_all_services_successful: bool = True
-    for service, name_service in [(services.pacbio, names_services.pacbio)]:
+    exit_success: bool = True
+    run_names: list[str] = get_all_run_names(context=context)
+    for run_name in run_names:
         try:
-            service.post_process_all(run_names=name_service.get_run_names(), dry_run=dry_run)
+            post_processing_service: PostProcessingService = (
+                get_post_processing_service_from_run_name(context=context, run_name=run_name)
+            )
+            post_processing_service.post_process(run_name=run_name, dry_run=dry_run)
         except Exception as error:
             LOG.error(f"{error}")
-            are_all_services_successful = False
-    if not are_all_services_successful:
+            exit_success = False
+    if not exit_success:
         raise click.Abort
 
 

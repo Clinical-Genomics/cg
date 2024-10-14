@@ -21,3 +21,11 @@ def get_post_processing_service_from_run_name(
             f"Run name {run_name} does not match with any known sequencing run name pattern"
         ) from error
     return getattr(context.post_processing_services, device)
+
+
+def get_all_run_names(context: CGConfig) -> list[str]:
+    """Get all run names from the sequencing directories."""
+    run_names: list[str] = []
+    for run_names_service in context.run_names_services.model_dump().values():
+        run_names.extend(run_names_service.get_run_names())
+    return run_names
