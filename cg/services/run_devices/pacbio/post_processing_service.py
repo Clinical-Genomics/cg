@@ -1,6 +1,8 @@
 import logging
+from pathlib import Path
 
 from cg.services.run_devices.abstract_classes import PostProcessingService
+from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingError,
@@ -58,3 +60,8 @@ class PacBioPostProcessingService(PostProcessingService):
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
         self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
         self._touch_post_processing_complete(run_data)
+
+    def _is_run_post_processed(self, run_name: str) -> bool:
+        """Check if a run has been post-processed."""
+        processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
+        return processing_complete_file.exists()
