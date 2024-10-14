@@ -96,11 +96,6 @@ def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
     return cases.filter(Case.priority == priority)
 
 
-def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
-    """Filter cases with matching ticket id."""
-    return cases.filter(Case.tickets.contains(ticket_id))
-
-
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """Filter cases in need of analysis by:
     1. Action set to analyze or
@@ -289,7 +284,6 @@ class CaseFilter(Enum):
     BY_WORKFLOWS: Callable = filter_cases_by_workflows
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
-    BY_TICKET: Callable = filter_cases_by_ticket_id
     FOR_ANALYSIS: Callable = filter_cases_for_analysis
     HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     HAS_SEQUENCE: Callable = filter_cases_has_sequence

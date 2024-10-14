@@ -47,9 +47,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
-        ticket_dir_path: Path = self.get_folder_under_inbox(
-            delivery_files.sample_files[0].file_path
-        )
+        ticket_dir_path: Path = delivery_files.delivery_data.customer_ticket_inbox
         self._create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
@@ -73,15 +71,6 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
             )
             formatted_files.extend(formatted_case_files)
         return formatted_files
-
-    @staticmethod
-    def get_folder_under_inbox(file_path: Path) -> Path:
-        """Get the ticker folder that is located under the customer inbox folder."""
-        try:
-            inbox_index: int = file_path.parts.index(INBOX_NAME)
-            return Path(*file_path.parts[: inbox_index + 2])
-        except ValueError:
-            raise ValueError(f"Could not find the inbox directory in the path: {file_path}")
 
     @staticmethod
     def _create_ticket_dir(ticket_dir_path: Path) -> None:
