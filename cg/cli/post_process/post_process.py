@@ -45,7 +45,7 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 @DRY_RUN
 @click.option(
     "--instrument",
-    type=EnumChoice(DeviceType),
+    type=click.Choice(["pacbio", "all"]),
     help="The instrument for which the runs will be post-processed. Choose 'all' to post-process runs from all devices.",
     required=True,
 )

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
@@ -16,6 +16,7 @@ class UnprocessedRunInfo(BaseModel):
     name: str
     post_processing_service: PostProcessingService
     instrument: str
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 def get_post_processing_service_from_run_name(
