@@ -1,11 +1,21 @@
+from pydantic import BaseModel
+
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services.run_devices.abstract_classes import PostProcessingService
 from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.run_names.service import RunNamesService
 from cg.utils.mapping import get_item_by_pattern_in_source
 
 PATTERN_TO_DEVICE_MAP: dict[str, str] = {
     r"^r\d+_\d+_\d+/(1|2)_[^/]+$": "pacbio",
 }
+
+
+class UnprocessedRunInfo(BaseModel):
+    name: str
+    post_processing_service: PostProcessingService
+    instrument: str
 
 
 def get_post_processing_service_from_run_name(
@@ -21,3 +31,25 @@ def get_post_processing_service_from_run_name(
             f"Run name {run_name} does not match with any known sequencing run name pattern"
         ) from error
     return getattr(context.post_processing_services, device)
+
+
+def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[UnprocessedRunInfo]:
+    """Return a list of un-processed runs for a given instrument or for all instruments."""
+    runs: list[UnprocessedRunInfo] = []
+    if instrument == "all":
+        for instrument_name in ["pacbio"]:  # Add more instruments here
+            runs.extend(get_unprocessed_runs_info(context=context, instrument=instrument_name))
+        return runs
+    processing_service: PostProcessingService = getattr(
+        context.post_processing_services, instrument, None
+    )
+    run_names_service: RunNamesService = getattr(context.run_names_services, instrument, None)
+    for run_name in run_names_service.get_run_names():
+        if processing_service.is_run_post_processed(run_name):
+            continue
+        runs.append(
+            UnprocessedRunInfo(
+                name=run_name, post_processing_service=processing_service, instrument=instrument
+            )
+        )
+    return runs

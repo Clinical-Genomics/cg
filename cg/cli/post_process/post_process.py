@@ -4,11 +4,17 @@ import logging
 
 import click
 
-from cg.cli.post_process.utils import get_post_processing_service_from_run_name
+from cg.cli.post_process.utils import (
+    UnprocessedRunInfo,
+    get_post_processing_service_from_run_name,
+    get_unprocessed_runs_info,
+)
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.models.cg_config import CGConfig, PostProcessingServices, RunNamesServices
+from cg.constants.devices import DeviceType
+from cg.models.cg_config import CGConfig
 from cg.services.run_devices.abstract_classes import PostProcessingService
+from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
@@ -37,19 +43,26 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 
 @post_process_group.command(name="all")
 @DRY_RUN
+@click.option(
+    "--instrument",
+    type=EnumChoice(DeviceType),
+    help="The run. Choose 'all' to post-process runs from all devices.",
+    required=True,
+)
 @click.pass_obj
-def post_process_all_runs(context: CGConfig, dry_run: bool) -> None:
+def post_process_all_runs(context: CGConfig, instrument: str, dry_run: bool) -> None:
     """Post-process all runs from the instruments."""
-    services: PostProcessingServices = context.post_processing_services
-    names_services: RunNamesServices = context.run_names_services
-    are_all_services_successful: bool = True
-    for service, name_service in [(services.pacbio, names_services.pacbio)]:
+    exit_success: bool = True
+    unprocessed_runs: list[UnprocessedRunInfo] = get_unprocessed_runs_info(
+        context=context, instrument=instrument
+    )
+    for run in unprocessed_runs:
         try:
-            service.post_process_all(run_names=name_service.get_run_names(), dry_run=dry_run)
+            run.post_processing_service.post_process(run_name=run.name, dry_run=dry_run)
         except Exception as error:
-            LOG.error(f"{error}")
-            are_all_services_successful = False
-    if not are_all_services_successful:
+            LOG.error(f"Could not post-process {run.instrument} run {run.name}: {error}")
+            exit_success = False
+    if not exit_success:
         raise click.Abort
 
 

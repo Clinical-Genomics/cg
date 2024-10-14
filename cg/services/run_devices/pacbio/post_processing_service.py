@@ -41,7 +41,6 @@ class PacBioPostProcessingService(PostProcessingService):
         self.hk_service: PacBioHousekeeperService = hk_service
         self.store_service: PacBioStoreService = store_service
         self.sequencing_dir: str = sequencing_dir
-        self.instrument: str = "Pacbio"
 
     @handle_post_processing_errors(
         to_except=(
@@ -61,7 +60,7 @@ class PacBioPostProcessingService(PostProcessingService):
         self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
         self._touch_post_processing_complete(run_data)
 
-    def _is_run_post_processed(self, run_name: str) -> bool:
+    def is_run_post_processed(self, run_name: str) -> bool:
         """Check if a run has been post-processed."""
         processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
         return processing_complete_file.exists()
