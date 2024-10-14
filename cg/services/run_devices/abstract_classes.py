@@ -6,7 +6,6 @@ from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
-from cg.services.run_devices.exc import PostProcessingError
 
 LOG = logging.getLogger(__name__)
 
