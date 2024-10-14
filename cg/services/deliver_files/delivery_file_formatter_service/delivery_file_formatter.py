@@ -47,9 +47,7 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
-        ticket_dir_path: Path = Path(
-            delivery_files.delivery_data.customer_inbox, delivery_files.delivery_data.ticket_id
-        )
+        ticket_dir_path: Path = delivery_files.delivery_data.customer_inbox
         self._create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
