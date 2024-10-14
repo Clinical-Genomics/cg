@@ -9,7 +9,6 @@ class Sample(BaseModel):
     container: ContainerEnum
     container_name: str | None = None
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
-    require_qc_ok: bool
     volume: int | None = None
     well_position: str | None = None
 

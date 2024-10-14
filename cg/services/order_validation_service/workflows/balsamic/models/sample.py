@@ -1,7 +1,11 @@
 from pydantic import Field
+
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.constants import ElutionBuffer, TissueBlockEnum
+from cg.services.order_validation_service.constants import (
+    ElutionBuffer,
+    TissueBlockEnum,
+)
 from cg.services.order_validation_service.models.sample import Sample
 
 
@@ -18,6 +22,7 @@ class BalsamicSample(Sample):
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
     reference_genome: GenomeVersion
+    require_qc_ok: bool
     sex: SexEnum
     source: str
     status: StatusEnum | None = None
