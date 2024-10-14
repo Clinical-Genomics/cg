@@ -14,13 +14,16 @@ from cg.store.store import Store
 def pacbio_sample() -> PacBioSample:
     return PacBioSample(
         application="WGSPCFC060",
-        capture_kit=None,
         data_analysis=Workflow.RAW_DATA,
         data_delivery=DataDelivery.NO_DELIVERY,
         name="PacbioSample",
         sex=SexEnum.unknown,
         tumour=False,
         volume="50",
+        buffer="buffer",
+        source="source",
+        subject_id="subject_id",
+        container="Tube",
     )
 
 

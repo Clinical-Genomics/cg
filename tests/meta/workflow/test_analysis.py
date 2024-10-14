@@ -8,6 +8,7 @@ import pytest
 
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
+from cg.constants.constants import ControlOptions
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
@@ -16,6 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.meta.workflow.utils.utils import are_all_samples_control
 from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.store.store import Store
@@ -32,15 +34,22 @@ from tests.store_helpers import StoreHelpers
         (Priority.express, SlurmQos.EXPRESS),
     ],
 )
-def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_qos):
-    """Test qet Quality of service (SLURM QOS) from the case priority"""
+def test_get_slurm_qos_for_case(
+    case_id: str,
+    priority,
+    expected_slurm_qos,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+):
+    """Test get Quality of service (SLURM QOS) from the case priority"""
 
-    # GIVEN a case that has a priority
-    mocker.patch.object(AnalysisAPI, "get_priority_for_case")
-    AnalysisAPI.get_priority_for_case.return_value = priority
+    # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.priority = priority
 
-    # When getting the SLURM QOS for the priority
-    slurm_qos = AnalysisAPI.get_slurm_qos_for_case(AnalysisAPI, case_id=case_id)
+    # WHEN getting the SLURM QOS for the priority
+    slurm_qos: SlurmQos = mip_analysis_api.get_slurm_qos_for_case(case_id=case_id)
 
     # THEN the expected slurm QOS should be returned
     assert slurm_qos is expected_slurm_qos
@@ -566,3 +575,52 @@ def test_link_fastq_files_for_sample(
 
         # THEN broadcast linking of files
         assert "Linking: " in caplog.text
+
+
+def test_are_all_samples_control(analysis_store: Store, case_id: str) -> None:
+    """Tests that are_all_samples_control returns True if all samples in a case are controls."""
+
+    # GIVEN a case with all samples being positive controls
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    for sample in case.samples:
+        sample.control = ControlOptions.POSITIVE
+
+    # WHEN checking if all samples are controls
+    # THEN the result should be True
+    assert are_all_samples_control(case)
+
+
+@pytest.mark.parametrize(
+    "sample_controls, expected_qos",
+    [
+        (
+            [ControlOptions.POSITIVE, ControlOptions.POSITIVE, ControlOptions.POSITIVE],
+            SlurmQos.EXPRESS,
+        ),
+        (
+            [ControlOptions.POSITIVE, ControlOptions.NEGATIVE, ControlOptions.EMPTY],
+            SlurmQos.NORMAL,
+        ),
+    ],
+    ids=["all_controls", "not_all_controls"],
+)
+def test_case_with_controls_get_correct_slurmqos(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    case_id: str,
+    sample_controls: list[str],
+    expected_qos: str,
+) -> None:
+    """Tests that get_slurm_qos_for_case returns the correct SLURM QOS for a case with control samples."""
+
+    # GIVEN a case with the specified sample control types
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    for index, control in enumerate(sample_controls):
+        case.samples[index].control = control
+
+    # WHEN getting the SLURM QOS for the case
+    qos: SlurmQos = mip_analysis_api.get_slurm_qos_for_case(case_id)
+
+    # THEN the result should match the expected QOS
+    assert qos == expected_qos

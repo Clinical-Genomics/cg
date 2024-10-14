@@ -21,6 +21,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
+from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -28,6 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.meta.workflow.utils.utils import are_all_samples_control
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -127,14 +129,12 @@ class AnalysisAPI(MetaAPI):
         ]
         return cases_passing_quality_check
 
-    def get_priority_for_case(self, case_id: str) -> int:
-        """Get priority from the status db case priority"""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case.priority or Priority.research
-
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
-        priority: int = self.get_priority_for_case(case_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if are_all_samples_control(case=case):
+            return SlurmQos.EXPRESS
+        priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:

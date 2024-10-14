@@ -98,6 +98,28 @@ def test_set_case_priority(
     assert case_query.first().priority_human == priority
 
 
+def test_set_case_priority_research(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+):
+    """Test that the added case gets the priority we send in."""
+    # GIVEN a database with a case
+    case_id: str = helpers.add_case(base_store).internal_id
+    priority: str = "research"
+    case_query = base_store._get_query(table=Case)
+
+    assert case_query.first().priority_human != priority
+
+    # WHEN setting a case
+    result = cli_runner.invoke(
+        set_case, [case_id, "--priority", priority], obj=base_context, catch_exceptions=False
+    )
+
+    # THEN it should have been set
+    assert result.exit_code == EXIT_SUCCESS
+    assert case_query.count() == 1
+    assert case_query.first().priority_human == priority
+
+
 def test_set_case_customer(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
