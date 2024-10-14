@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
+import sqlalchemy
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -1197,6 +1198,8 @@ class OrderTypeApplication(Base):
 
     __tablename__ = "order_type_application"
 
-    order_type: Mapped[OrderType] = mapped_column(types.Enum(OrderType))
-    application_id: Mapped[int] = mapped_column(ForeignKey("application.id", ondelete="CASCADE"))
+    order_type: Mapped[OrderType] = mapped_column(sqlalchemy.Enum(OrderType), primary_key=True)
+    application_id: Mapped[int] = mapped_column(
+        ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
+    )
     application: Mapped[Application] = orm.relationship("Application")
