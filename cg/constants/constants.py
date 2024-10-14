@@ -221,7 +221,6 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     SH: str = ".sh"
     TAR: str = ".tar"
-    TBI: str = ".tbi"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
     TXT: str = ".txt"
