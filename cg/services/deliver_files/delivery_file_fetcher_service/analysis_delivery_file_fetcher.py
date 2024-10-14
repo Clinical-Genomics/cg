@@ -10,6 +10,7 @@ from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetch
 from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
     handle_missing_bundle_errors,
 )
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     CaseFile,
     DeliveryFiles,
@@ -44,14 +45,28 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(case)
         analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
         delivery_data = DeliveryMetaData(
-            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+            case_id=case.internal_id,
+            customer_internal_id=case.customer.internal_id,
+            ticket_id=case.latest_ticket,
         )
 
-        return DeliveryFiles(
-            delivery_data=delivery_data,
-            case_files=analysis_case_files,
-            sample_files=analysis_sample_files,
+        return self._validate_delivery_has_content(
+            DeliveryFiles(
+                delivery_data=delivery_data,
+                case_files=analysis_case_files,
+                sample_files=analysis_sample_files,
+            )
         )
+
+    @staticmethod
+    def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
+        """Check if the delivery files has files to deliver."""
+        if delivery_files.case_files or delivery_files.sample_files:
+            return delivery_files
+        LOG.info(
+            f"No files to deliver for case {delivery_files.delivery_data.case_id} in ticket: {delivery_files.delivery_data.ticket_id}"
+        )
+        raise NoDeliveryFilesError
 
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
