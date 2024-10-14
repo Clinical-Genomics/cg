@@ -46,7 +46,7 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 @click.option(
     "--instrument",
     type=EnumChoice(DeviceType),
-    help="The run. Choose 'all' to post-process runs from all devices.",
+    help="The instrument for which the runs will be post-processed. Choose 'all' to post-process runs from all devices.",
     required=True,
 )
 @click.pass_obj
