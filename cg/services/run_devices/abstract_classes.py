@@ -1,4 +1,5 @@
 """Post-processing service abstract classes."""
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 
