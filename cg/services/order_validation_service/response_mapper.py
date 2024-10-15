@@ -1,9 +1,14 @@
 from typing import Any
 
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
+from cg.services.order_validation_service.errors.case_sample_errors import (
+    CaseSampleError,
+)
 from cg.services.order_validation_service.errors.order_errors import OrderError
-from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
+from cg.services.order_validation_service.errors.sample_errors import SampleError
+from cg.services.order_validation_service.errors.validation_errors import (
+    ValidationErrors,
+)
 
 
 def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
@@ -17,6 +22,7 @@ def map_errors_to_order(order: dict, errors: ValidationErrors) -> None:
     map_order_errors(order=order, errors=errors.order_errors)
     map_case_errors(order=order, errors=errors.case_errors)
     map_case_sample_errors(order=order, errors=errors.case_sample_errors)
+    map_sample_errors(order=order, errors=errors.sample_errors)
 
 
 def map_order_errors(order: dict, errors: list[OrderError]) -> None:
@@ -33,7 +39,13 @@ def map_case_errors(order: dict, errors: list[CaseError]) -> None:
 def map_case_sample_errors(order: dict, errors: list[CaseSampleError]) -> None:
     for error in errors:
         case: dict = get_case(order=order, index=error.case_index)
-        sample: dict = get_sample(case=case, index=error.sample_index)
+        sample: dict = get_case_sample(case=case, index=error.sample_index)
+        add_error(entity=sample, field=error.field, message=error.message)
+
+
+def map_sample_errors(order: dict, errors: list[SampleError]) -> None:
+    for error in errors:
+        sample: dict = get_sample(order=order, index=error.sample_index)
         add_error(entity=sample, field=error.field, message=error.message)
 
 
@@ -47,13 +59,20 @@ def get_case(order: dict, index: int) -> dict:
     return order["cases"][index]
 
 
-def get_sample(case: dict, index: int) -> dict:
+def get_case_sample(case: dict, index: int) -> dict:
     return case["samples"][index]
+
+
+def get_sample(order: dict, index: int) -> dict:
+    return order["samples"][index]
 
 
 def wrap_fields(raw_order: dict) -> None:
     wrap_order_fields(raw_order)
-    wrap_case_and_sample_fields(raw_order)
+    if raw_order.get("cases"):
+        wrap_case_and_sample_fields(raw_order)
+    else:
+        wrap_sample_fields(raw_order["samples"])
 
 
 def wrap_order_fields(raw_order: dict) -> None:
@@ -65,7 +84,7 @@ def wrap_order_fields(raw_order: dict) -> None:
 def wrap_case_and_sample_fields(raw_order: dict) -> None:
     for case in raw_order["cases"]:
         wrap_case_fields(case)
-        wrap_sample_fields(case)
+        wrap_sample_fields(case["samples"])
 
 
 def wrap_case_fields(case: dict) -> None:
@@ -74,8 +93,7 @@ def wrap_case_fields(case: dict) -> None:
             set_field(entity=case, field=field, value=value)
 
 
-def wrap_sample_fields(case: dict) -> None:
-    samples: list[dict] = case.get("samples", [])
+def wrap_sample_fields(samples: list[dict]) -> None:
     for sample in samples:
         for field, value in sample.items():
             set_field(entity=sample, field=field, value=value)
