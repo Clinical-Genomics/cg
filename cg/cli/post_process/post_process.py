@@ -44,8 +44,10 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
 @click.option(
     "--instrument",
     type=click.Choice(["pacbio", "all"]),
+    default="all",
+    show_default=True,
     help="The instrument for which the runs will be post-processed. Choose 'all' to post-process runs from all instruments.",
-    required=True,
+    required=False,
 )
 @click.pass_obj
 def post_process_all_runs(context: CGConfig, instrument: str, dry_run: bool) -> None:
