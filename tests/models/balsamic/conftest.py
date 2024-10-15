@@ -8,7 +8,7 @@ from cg.io.controller import ReadFile
 
 @pytest.fixture
 def balsamic_tga_config_path(fixtures_dir) -> Path:
-    """Returns path to a TGA BALSAMIC case_config.json"""
+    """Returns path to a TGA BALSAMIC case config.json"""
 
     return Path(fixtures_dir, "apps", "balsamic", "tga_case", "config.json")
 
@@ -42,7 +42,7 @@ def balsamic_tga_metrics_raw(balsamic_tga_metrics_path) -> dict:
 
 @pytest.fixture
 def balsamic_wgs_config_path(fixtures_dir) -> Path:
-    """Returns path to a WGS BALSAMIC case_config.json"""
+    """Returns path to a WGS BALSAMIC case config.json"""
 
     return Path(fixtures_dir, "apps", "balsamic", "wgs_case", "config.json")
 

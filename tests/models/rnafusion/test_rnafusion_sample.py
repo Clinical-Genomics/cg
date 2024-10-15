@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg.exc import NfSampleSheetError
 from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
@@ -61,7 +61,7 @@ def test_fastq_empty_list(
     strandedness: str,
 ):
     """
-    Tests Rnafusion sample with a empty list for fastq reverse reads (single end).
+    Tests Rnafusion sample with an empty list for fastq reverse reads (single end).
     """
 
     # GIVEN a sample with fastq files and strandedness
@@ -107,9 +107,9 @@ def test_non_existing_fastq_file(
     strandedness: str,
 ):
     """
-    Tests Rnafusion sample with non existing files
+    Tests Rnafusion sample with non-existing files
     """
-    # GIVEN a sample with a non existing file
+    # GIVEN a sample with a non-existing file
 
     # WHEN instantiating a sample object THEN throws an error
     with pytest.raises(NfSampleSheetError) as error:

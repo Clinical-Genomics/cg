@@ -206,7 +206,7 @@ def test_get_variant_caller_version(analysis_api_balsamic: MockBalsamicAnalysis,
     var_caller_name = "manta"
     var_caller_versions: dict[str, list[str]] = analysis_api_balsamic.get_latest_metadata(
         case_id
-    ).config.bioinfo_tools_version
+    ).balsamic_config.bioinfo_tools_version
 
     # GIVEN the tools mock version
     expected_version = "1.6.0"
