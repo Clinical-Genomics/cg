@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -196,6 +196,7 @@ class UploadGenotypesAPI(object):
             FileExtensions.VCF_GZ
         ) or genotype_file.full_path.endswith(FileExtensions.BCF)
 
+    @staticmethod
     def _sort_genotype_files(hk_genotype_files: list[File]) -> File | None:
         """
         Take a list of files and only keep files finishing with .bcf or .vcf.gz
@@ -203,7 +204,7 @@ class UploadGenotypesAPI(object):
         """
         allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
-            file for file in hk_genotype_files if str(file).endswith(allowed_extensions)
+            file for file in hk_genotype_files if file.full_path.endswith(allowed_extensions)
         ]
         if len(filtered_files) > 1:
             raise ValueError(
