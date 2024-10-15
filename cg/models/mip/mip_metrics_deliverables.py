@@ -1,6 +1,6 @@
-from typing import Any, Annotated
+from typing import Annotated, Any
 
-from pydantic import field_validator, ValidationInfo, Field
+from pydantic import Field, ValidationInfo, field_validator
 
 from cg.constants.subject import Sex
 from cg.models.deliverables.metric_deliverables import (
@@ -75,7 +75,9 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     duplicate_reads: Annotated[list[DuplicateReads] | None, Field(validate_default=True)] = None
     mapped_reads: Annotated[list[MIPMappedReads] | None, Field(validate_default=True)] = None
     mean_insert_size: Annotated[list[MeanInsertSize] | None, Field(validate_default=True)] = None
-    median_target_coverage: Annotated[list[MedianTargetCoverage] | None, Field(validate_default=True)] = None
+    median_target_coverage: Annotated[
+        list[MedianTargetCoverage] | None, Field(validate_default=True)
+    ] = None
     predicted_sex: Annotated[list[SexCheck] | None, Field(validate_default=True)] = None
     sample_metric_to_parse: list[str] = SAMPLE_METRICS_TO_PARSE
     sample_id_metrics: Annotated[list[MIPParsedMetrics] | None, Field(validate_default=True)] = None

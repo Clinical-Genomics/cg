@@ -1,7 +1,8 @@
 """Model MIP config"""
+
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, EmailStr, Field, ValidationInfo, field_validator
 
 from cg.constants.priority import SlurmQos
 
@@ -34,9 +35,11 @@ class MipBaseConfig(BaseModel):
         """Set case id. Family id is used for older versions of MIP analysis"""
         return value or info.data.get("family_id_")
 
-    @field_validator("samples",)
+    @field_validator(
+        "samples",
+    )
     @classmethod
-    def set_samples(cls, _,  info: ValidationInfo) -> list[AnalysisType]:
+    def set_samples(cls, _, info: ValidationInfo) -> list[AnalysisType]:
         """Set samples analysis type"""
         raw_samples: dict = info.data.get("analysis_type_")
         return [

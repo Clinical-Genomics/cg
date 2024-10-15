@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Annotated
+from typing import Annotated, Any, Callable
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -21,9 +21,7 @@ def add_metric(name: str, info: ValidationInfo) -> list[Any]:
     raw_metrics: list = info.data.get("metrics_")
     metrics_validator: dict[str, Any] = info.data.get("metric_to_get_")
     found_metrics: list = [
-        metrics_validator[metric.name](
-            sample_id=metric.id, step=metric.step, value=metric.value
-        )
+        metrics_validator[metric.name](sample_id=metric.id, step=metric.step, value=metric.value)
         for metric in raw_metrics
         if name == metric.name and metric.name in metrics_validator
     ]
@@ -130,7 +128,7 @@ class MetricsDeliverables(BaseModel):
 
     @field_validator("sample_ids")
     @classmethod
-    def set_sample_ids(cls, _,  info: ValidationInfo) -> set:
+    def set_sample_ids(cls, _, info: ValidationInfo) -> set:
         """Set sample_ids gathered from all metrics"""
         raw_metrics: list = info.data.get("metrics_")
         sample_ids: list = [metric.id for metric in raw_metrics]

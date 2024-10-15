@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cg.models.mip.mip_config import MipBaseConfig, AnalysisType
+from cg.models.mip.mip_config import AnalysisType, MipBaseConfig
 
 
 def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
