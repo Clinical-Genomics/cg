@@ -116,9 +116,7 @@ class ScoutConfigBuilder:
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample with rnafusion specific information."""
-        if Workflow.BALSAMIC in self.analysis_obj.workflow:
-            config_sample = ScoutCancerIndividual()
-        elif self.analysis_obj.workflow == Workflow.RAREDISEASE:
+        if self.analysis_obj.workflow == Workflow.RAREDISEASE:
             config_sample = ScoutRarediseaseIndividual()
         elif self.analysis_obj.workflow == Workflow.MIP_DNA:
             config_sample = ScoutMipIndividual()
