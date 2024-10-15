@@ -271,3 +271,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
         return RAREDISEASE_CASE_TAGS
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a raredisease case. Currently fixed for hg19."""
+        return GenomeVersion.HG19
