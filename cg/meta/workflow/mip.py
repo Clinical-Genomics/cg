@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from pydantic import (ValidationError)
+from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import FileExtensions, Workflow
