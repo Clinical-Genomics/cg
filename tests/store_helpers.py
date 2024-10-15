@@ -381,6 +381,7 @@ class StoreHelpers:
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Utility function to add a sample to use in tests."""
@@ -407,6 +408,7 @@ class StoreHelpers:
             tumour=is_tumour,
             reads=reads,
             internal_id=internal_id,
+            subject_id=subject_id,
         )
 
         sample.application_version_id = application_version_id
@@ -550,6 +552,11 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
+        order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
+            ticket_id=int(case_info["tickets"]),
+            customer_id=customer_obj.id,
+            workflow=case_info.get("data_analysis", Workflow.MIP_DNA),
+        )
         case = Case(
             name=case_info["name"],
             panels=case_info["panels"],
@@ -561,7 +568,7 @@ class StoreHelpers:
             action=case_info.get("action"),
             tickets=case_info["tickets"],
         )
-
+        case.orders.append(order)
         case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"

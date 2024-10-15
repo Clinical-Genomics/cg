@@ -5,15 +5,15 @@ from click.testing import CliRunner, Result
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.models.cg_config import CGConfig
 
 
 def test_delivery_report_to_scout_no_params(upload_context: CGConfig, cli_runner: CliRunner):
     """Tests the upload to Scout without specifying the case."""
 
-    # GIVEN a MIP-DNA report api
-    assert isinstance(upload_context.meta_apis.get("report_api"), MipDNAReportAPI)
+    # GIVEN a Raredisease delivery report API
+    assert isinstance(upload_context.meta_apis.get("report_api"), RarediseaseDeliveryReportAPI)
 
     # WHEN invoking the delivery report upload without parameters
     result: Result = cli_runner.invoke(upload_delivery_report_to_scout, obj=upload_context)

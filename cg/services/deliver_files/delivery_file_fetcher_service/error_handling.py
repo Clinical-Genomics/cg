@@ -1,10 +1,8 @@
 import logging
 from functools import wraps
 
-from pydantic_core import ValidationError
-
 from cg.exc import HousekeeperBundleVersionMissingError
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -17,26 +15,20 @@ def handle_missing_bundle_errors(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
+        case_id: str = kwargs.get("case_id")
+        sample_id: str = kwargs.get("sample_id")
+        case: Case = kwargs.get("case")
         try:
             return func(*args, **kwargs)
-        except HousekeeperBundleVersionMissingError as error:
-            LOG.error(error)
-            return None
-
-    return wrapper
-
-
-def handle_validation_errors(func):
-    """
-    Log an error when a validation error occurs.
-
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ValidationError:
-            raise NoDeliveryFilesError
+        except HousekeeperBundleVersionMissingError:
+            msg: str = "Missing bundles detected for:"
+            if case_id:
+                msg += f" case {case_id}"
+            if sample_id:
+                msg += f" sample {sample_id}"
+            if case:
+                msg += f" case {case.internal_id}"
+            LOG.error(msg)
+            return []
 
     return wrapper

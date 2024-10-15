@@ -1,6 +1,7 @@
 """Util functions that provide support in mapping objects."""
 
 import re
+
 from cg.exc import CgError
 
 
