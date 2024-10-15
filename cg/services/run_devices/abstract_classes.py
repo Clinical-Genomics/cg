@@ -1,13 +1,10 @@
 """Post-processing service abstract classes."""
 
-import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
-
-LOG = logging.getLogger(__name__)
 
 
 class RunDataGenerator(ABC):
@@ -87,7 +84,7 @@ class PostProcessingService(ABC):
         pass
 
     @abstractmethod
-    def is_run_post_processed(self, run_name: str) -> bool:
+    def is_run_processed(self, run_name: str) -> bool:
         """Check if a run has been post-processed."""
         pass
 
