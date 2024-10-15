@@ -203,11 +203,11 @@ class UploadGenotypesAPI(object):
         """
         allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
-        file for file in hk_genotype_files if str(file).endswith(allowed_extensions)
+            file for file in hk_genotype_files if str(file).endswith(allowed_extensions)
         ]
         if len(filtered_files) > 1:
             raise ValueError(
-            f"Error: Expected only one genotype file, but found {len(filtered_files)} "
-            f"({', '.join(map(str, filtered_files))})."
-        )
+                f"Error: Expected only one genotype file, but found {len(filtered_files)} "
+                f"({', '.join(map(str, filtered_files))})."
+            )
         return filtered_files[0] if filtered_files else None
