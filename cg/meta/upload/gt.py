@@ -196,21 +196,18 @@ class UploadGenotypesAPI(object):
             FileExtensions.VCF_GZ
         ) or genotype_file.full_path.endswith(FileExtensions.BCF)
 
-    def _sort_genotype_files(hk_genotypes: list[File]) -> File | None:
+    def _sort_genotype_files(genotypes_files: list[File]) -> File | None:
         """
         Take a list of files and only keep files finishing with .bcf or .vcf.gz
         Returns a single remaining file or raises ValueError if more than one file remains.
         """
+        allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
-            genotype_file
-            for genotype_file in hk_genotypes
-            if (
-                str(genotype_file).endswith(FileExtensions.BCF)
-                or str(genotype_file).endswith(FileExtensions.VCF_GZ)
-            )
+        file for file in genotypes_files if str(file).endswith(allowed_extensions)
         ]
         if len(filtered_files) > 1:
             raise ValueError(
-                "Error: More than one file is present after filtering genotype files from the last bundle version."
-            )
+            f"Error: Expected only one genotype file, but found {len(filtered_files)} "
+            f"({', '.join(map(str, filtered_files))})."
+        )
         return filtered_files[0] if filtered_files else None
