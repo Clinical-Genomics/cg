@@ -1,15 +1,14 @@
 """Helper functions."""
 
-from enum import IntEnum
-from pathlib import Path
+from datetime import datetime
+from operator import attrgetter
 
 from cg.constants import FileExtensions
-from cg.exc import ValidationError
-from cg.services.illumina.file_parsing.models import (
-    DsmcEncryptionKey,
-    DsmcSequencingFile,
+from cg.services.illumina.backup.exc import (
+    DsmcMissingEncryptionKeyError,
+    DsmcMissingSequenceFileError,
 )
-from cg.constants import FileExtensions
+from cg.services.illumina.backup.models import DsmcEncryptionKey, DsmcSequencingFile
 
 
 class DsmcOutput:
@@ -18,41 +17,54 @@ class DsmcOutput:
     PATH_COLUMN_INDEX = 4
 
 
-def contains_dsmc_key(line: str) -> bool:
-    if (
+def is_dsmc_encryption_key(line: str) -> bool:
+    return (
         FileExtensions.KEY in line
         and FileExtensions.GPG in line
         and FileExtensions.GZIP not in line
-    ):
-        return True
-    return False
+    )
 
 
-def contains_dsmc_sequencing_path(line: str) -> bool:
-    if FileExtensions.TAR in line and FileExtensions.GZIP in line and FileExtensions.GPG in line:
-        return True
-    return False
+def is_dsmc_sequencing_path(line: str) -> bool:
+    return FileExtensions.TAR in line and FileExtensions.GZIP in line and FileExtensions.GPG in line
 
 
-def get_latest_dsmc_archived_sequencing_run(dsmc_files: list[DsmcSequencingFile]) -> Path:
+def get_latest_dsmc_archived_sequencing_run(
+    dsmc_files: list[DsmcSequencingFile],
+) -> DsmcSequencingFile:
     """Return the latest file path based on the date attribute."""
+
     if not dsmc_files:
-        return None  # Return None if the list is empty
+        raise DsmcMissingSequenceFileError("No archived sequencing in DSMC output.")
 
-    # Get the file with the latest date
-    latest_file = max(dsmc_files, key=lambda file: file.date)
+    latest_file = max(dsmc_files, key=attrgetter("dateTime"))
 
-    # Return the sequencing_path as a Path object
-    return Path(latest_file.sequencing_path)
+    return latest_file
 
 
-def get_latest_dsmc_encryption_key(dsmc_files: list[DsmcEncryptionKey]) -> Path:
+def get_latest_dsmc_encryption_key(dsmc_files: list[DsmcEncryptionKey]) -> DsmcEncryptionKey:
     """Return the latest file path based on the date attribute."""
+
     if not dsmc_files:
-        return None  # Return None if the list is empty
+        raise DsmcMissingEncryptionKeyError("No Encryption Key in DSMC output.")
 
-    # Get the file with the latest date
-    latest_file = max(dsmc_files, key=lambda file: file.date)
+    latest_file = max(dsmc_files, key=attrgetter("dateTime"))
 
-    # Return the sequencing_path as a Path object
-    return Path(latest_file.key_path)
+    return latest_file
+
+
+def convert_string_to_datetime_object(strDateTime: str) -> datetime:
+    date_formats = [
+        "%Y-%m-%d %H:%M:%S",
+        "%Y/%m/%d %H:%M:%S",
+        "%d/%m/%Y %H:%M:%S",
+        "%m/%d/%Y %H:%M:%S",
+    ]
+
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(strDateTime, fmt)
+        except ValueError:
+            continue
+
+    raise ValueError(f"Could not convert '{strDateTime}' to a datetime object.")

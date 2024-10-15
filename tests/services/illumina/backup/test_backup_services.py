@@ -2,6 +2,7 @@
 
 import fnmatch
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
@@ -18,6 +19,7 @@ from cg.exc import (
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.backup.utils import convert_string_to_datetime_object
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
@@ -135,6 +137,40 @@ def test_maximum_processing_queue_full(store_with_illumina_sequencing_data: Stor
 
     # THEN this method should return False
     assert backup_api.has_processing_queue_capacity() is False
+
+
+def test_convert_string_to_datetime_object_valid():
+    # GIVEN a list of valid datetime strings with different formats
+    valid_datetime_strings = [
+        ("2024-10-15 12:45:30", "%Y-%m-%d %H:%M:%S"),
+        ("2024/10/15 12:45:30", "%Y/%m/%d %H:%M:%S"),
+        ("15/10/2024 12:45:30", "%d/%m/%Y %H:%M:%S"),
+        ("10/15/2024 12:45:30", "%m/%d/%Y %H:%M:%S"),
+    ]
+
+    # WHEN the function is called with valid strings
+    for date_str, expected_format in valid_datetime_strings:
+        # THEN it should return the correct datetime object
+        expected_datetime = datetime.strptime(date_str, expected_format)
+        assert convert_string_to_datetime_object(date_str) == expected_datetime
+
+
+def test_convert_string_to_datetime_object_invalid():
+    # GIVEN a list of invalid datetime strings
+    invalid_datetime_strings = [
+        "2024-15-10 12:45:30",  # Invalid day format
+        "15-10-2024 12:45",  # Missing seconds
+        "Invalid string",  # Completely invalid
+    ]
+
+    # WHEN the function is called with invalid strings
+    for date_str in invalid_datetime_strings:
+        # THEN it should raise a ValueError
+        try:
+            convert_string_to_datetime_object(date_str)
+            assert False, f"Expected ValueError for {date_str} but it didn't raise"
+        except ValueError as e:
+            assert str(e) == f"Could not convert '{date_str}' to a datetime object."
 
 
 def test_maximum_processing_queue_not_full(store_with_illumina_sequencing_data: Store):
