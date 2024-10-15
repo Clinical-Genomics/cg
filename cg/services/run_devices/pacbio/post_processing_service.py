@@ -1,8 +1,6 @@
 import logging
-from pathlib import Path
 
 from cg.services.run_devices.abstract_classes import PostProcessingService
-from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingError,

@@ -93,7 +93,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -313,25 +313,26 @@ class ReadHandler(BaseHandler):
 
     def get_cases_by_ticket_id(self, ticket_id: str) -> list[Case]:
         """Return cases associated with a given ticket id."""
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket_id,
-        ).all()
+        if order := apply_order_filters(
+            orders=self._get_query(table=Order),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket_id),
+        ).first():
+            return order.cases
+        return []
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket."""
-        cases: list[Case] = self.get_cases_by_ticket_id(ticket_id=ticket)
-        if not cases:
-            raise ValueError(f"No case found for ticket {ticket}")
-        return cases[0].customer.internal_id
+        if order := self.get_order_by_ticket_id(int(ticket)):
+            return order.customer.internal_id
+        raise ValueError(f"No order found for ticket {ticket}")
 
     def get_samples_from_ticket(self, ticket: str) -> list[Sample]:
         """Returns the samples related to given ticket."""
-        return apply_case_filter(
-            cases=self._get_join_sample_family_query(),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket,
+        return apply_order_filters(
+            orders=self._get_join_sample_case_order_query(),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket),
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
@@ -692,16 +693,13 @@ class ReadHandler(BaseHandler):
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SUBJECT_ID,
+            SampleFilter.BY_TUMOUR,
         ]
-        (
-            filter_functions.append(SampleFilter.IS_TUMOUR)
-            if is_tumour
-            else filter_functions.append(SampleFilter.IS_NOT_TUMOUR)
-        )
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
+            is_tumour=is_tumour,
             filter_functions=filter_functions,
         ).all()
 
@@ -1528,10 +1526,10 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
-            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            smrt_cells=self._get_query(table=PacbioSMRTCell),
             internal_id=internal_id,
         ).first()
 
@@ -1545,3 +1543,56 @@ class ReadHandler(BaseHandler):
         for sample_id in sample_ids:
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
+
+    def get_related_samples(
+        self,
+        sample_internal_id: str,
+        prep_categories: list[PrepCategory],
+        collaborators: set[Customer],
+    ) -> list[Sample]:
+        """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
+        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            prep_categories=prep_categories,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
+        )
+
+        sample_application_version_query: Query = apply_sample_filter(
+            samples=sample_application_version_query,
+            subject_id=sample.subject_id,
+            is_tumour=sample.is_tumour,
+            customer_entry_ids=[customer.id for customer in collaborators],
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+
+        return sample_application_version_query.all()
+
+    def get_related_cases(
+        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
+    ) -> list[Case]:
+        """Return a list of cases linked to the given sample within the given list of workflows and customers in a collaboration."""
+
+        cases_with_samples: Query = self._join_sample_and_case()
+        cases_with_samples: Query = apply_case_sample_filter(
+            case_samples=cases_with_samples,
+            sample_internal_id=sample_internal_id,
+            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
+        )
+
+        return apply_case_filter(
+            cases=cases_with_samples,
+            workflows=workflows,
+            customer_entry_ids=[customer.id for customer in collaborators],
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        ).all()

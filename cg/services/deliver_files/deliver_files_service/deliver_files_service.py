@@ -6,7 +6,9 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.tb import AnalysisTypes
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.deliver_files.deliver_files_service.handle_errors import handle_delivery_errors
+from cg.services.deliver_files.deliver_files_service.error_handling import (
+    handle_no_delivery_files_error,
+)
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
@@ -14,7 +16,9 @@ from cg.services.deliver_files.delivery_file_fetcher_service.models import Deliv
 from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFiles
+from cg.services.deliver_files.delivery_file_formatter_service.models import (
+    FormattedFiles,
+)
 from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover import (
     DeliveryFilesMover,
 )
@@ -56,7 +60,7 @@ class DeliverFilesService:
         self.tb_service = tb_service
         self.analysis_service = analysis_service
 
-    @handle_delivery_errors
+    @handle_no_delivery_files_error
     def deliver_files_for_case(
         self, case: Case, delivery_base_path: Path, dry_run: bool = False
     ) -> None:
@@ -89,6 +93,7 @@ class DeliverFilesService:
             )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
+        LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
         job_id: int = self.rsync_service.run_rsync_for_case(
             case=case,
             dry_run=dry_run,
@@ -105,6 +110,7 @@ class DeliverFilesService:
         if dry_run:
             LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
         else:
+            LOG.debug(f"[TB SERVICE] Adding analysis for case {case.internal_id} to Trailblazer")
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
                 case_id=f"{case.internal_id}_rsync",
                 analysis_type=AnalysisTypes.OTHER,
