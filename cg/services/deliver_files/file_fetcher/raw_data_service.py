@@ -4,22 +4,22 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
+from cg.services.deliver_files.file_fetcher.abstract import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
+from cg.services.deliver_files.file_fetcher.error_handling import (
     handle_missing_bundle_errors,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
-from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
+from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     DeliveryMetaData,
     SampleFile,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.bam_delivery_tags_fetcher import (
     BamDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.sample_and_case_delivery_tags_fetcher import (
     SampleAndCaseDeliveryTagsFetcher,
 )
 from cg.store.models import Case

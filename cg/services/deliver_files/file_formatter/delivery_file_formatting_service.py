@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 
-from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFiles
+from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
+from cg.services.deliver_files.file_formatter.models import FormattedFiles
 
 
 class DeliveryFileFormattingService(ABC):

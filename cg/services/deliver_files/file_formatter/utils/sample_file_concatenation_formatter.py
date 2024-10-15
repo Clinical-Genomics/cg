@@ -6,9 +6,9 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
     FastqConcatenationService,
 )
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
-from cg.services.deliver_files.delivery_file_fetcher_service.models import SampleFile
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFile
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_fetcher.models import SampleFile
+from cg.services.deliver_files.file_formatter.models import FormattedFile
+from cg.services.deliver_files.file_formatter.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
 

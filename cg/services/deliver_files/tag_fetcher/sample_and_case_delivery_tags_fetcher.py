@@ -1,12 +1,12 @@
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.error_handling import (
+from cg.services.deliver_files.tag_fetcher.error_handling import (
     handle_tag_errors,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.delivery_file_tag_fetcher_service import (
     FetchDeliveryFileTagsService,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
+from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags
 
 
 class SampleAndCaseDeliveryTagsFetcher(FetchDeliveryFileTagsService):

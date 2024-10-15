@@ -15,8 +15,8 @@ from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.constants.tb import AnalysisTypes
 from cg.exc import CgError
 from cg.io.controller import WriteFile
-from cg.services.deliver_files.delivery_rsync_service.models import RsyncDeliveryConfig
-from cg.services.deliver_files.delivery_rsync_service.sbatch import (
+from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
+from cg.services.deliver_files.rsync.sbatch import (
     COVID_RSYNC,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,

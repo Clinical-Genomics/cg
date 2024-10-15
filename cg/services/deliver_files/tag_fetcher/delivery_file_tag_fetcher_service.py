@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
+from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags
 
 
 class FetchDeliveryFileTagsService(ABC):

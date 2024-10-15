@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-from cg.services.deliver_files.delivery_file_fetcher_service.models import CaseFile
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFile
+from cg.services.deliver_files.file_fetcher.models import CaseFile
+from cg.services.deliver_files.file_formatter.models import FormattedFile
 
 
 class CaseFileFormatter:

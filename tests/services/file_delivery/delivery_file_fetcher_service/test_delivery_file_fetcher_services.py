@@ -1,10 +1,10 @@
 import pytest
 
-from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
+from cg.services.deliver_files.file_fetcher.abstract import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
-from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
+from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
+from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 
 
 @pytest.mark.parametrize(

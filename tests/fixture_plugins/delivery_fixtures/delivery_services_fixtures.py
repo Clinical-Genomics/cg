@@ -1,31 +1,31 @@
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.bam_delivery_tags_fetcher import (
     BamDeliveryTagsFetcher,
 )
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.sample_and_case_delivery_tags_fetcher import (
     SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
+from cg.services.deliver_files.file_fetcher.analysis_service import (
     AnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatter import (
+from cg.services.deliver_files.file_formatter.delivery_file_formatter import (
     DeliveryFileFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.case_file_formatter import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_file_concatenation_formatter import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
 from cg.store.store import Store

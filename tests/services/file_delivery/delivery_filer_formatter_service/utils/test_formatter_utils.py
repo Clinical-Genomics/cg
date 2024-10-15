@@ -5,19 +5,19 @@ from pathlib import Path
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     CaseFile,
     SampleFile,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFile
-from cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter import (
+from cg.services.deliver_files.file_formatter.models import FormattedFile
+from cg.services.deliver_files.file_formatter.utils.case_file_formatter import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_file_concatenation_formatter import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_file_formatter import (
     SampleFileFormatter,
 )
 

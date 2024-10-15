@@ -55,7 +55,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.delivery_rsync_service import (
     DeliveryRsyncService,
 )
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService

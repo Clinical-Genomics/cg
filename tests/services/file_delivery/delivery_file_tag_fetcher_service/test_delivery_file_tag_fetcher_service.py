@@ -4,14 +4,14 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.bam_delivery_tags_fetcher import (
     BamDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.exc import (
+from cg.services.deliver_files.tag_fetcher.exc import (
     FetchDeliveryFileTagsError,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.models import DeliveryFileTags
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags
+from cg.services.deliver_files.tag_fetcher.sample_and_case_delivery_tags_fetcher import (
     SampleAndCaseDeliveryTagsFetcher,
 )
 

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.constants.delivery import INBOX_NAME
-from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+from cg.services.deliver_files.file_fetcher.models import (
     CaseFile,
     DeliveryFiles,
     DeliveryMetaData,

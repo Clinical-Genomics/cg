@@ -2,18 +2,18 @@ from pathlib import Path
 
 import mock
 
-from cg.services.deliver_files.delivery_file_fetcher_service.models import (
+from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     SampleFile,
     CaseFile,
     DeliveryMetaData,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatting_service import (
+from cg.services.deliver_files.file_formatter.delivery_file_formatting_service import (
     DeliveryFileFormattingService,
 )
 import pytest
 
-from cg.services.deliver_files.delivery_file_formatter_service.models import (
+from cg.services.deliver_files.file_formatter.models import (
     FormattedFiles,
     FormattedFile,
 )
@@ -70,10 +70,10 @@ def test_reformat_files(
 
     expected_formatted_files = FormattedFiles(files=files)
     with mock.patch(
-        "cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter.SampleFileFormatter.format_files",
+        "cg.services.deliver_files.file_formatter.utils.sample_file_formatter.SampleFileFormatter.format_files",
         return_value=formatted_sample_files,
     ), mock.patch(
-        "cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter.CaseFileFormatter.format_files",
+        "cg.services.deliver_files.file_formatter.utils.case_file_formatter.CaseFileFormatter.format_files",
         return_value=formatted_case_files,
     ):
         # WHEN reformatting the delivery files
