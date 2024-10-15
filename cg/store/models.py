@@ -1198,10 +1198,8 @@ class OrderTypeApplication(Base):
 
     __tablename__ = "order_type_application"
 
-    order_type: Mapped[OrderType] = mapped_column(
-        sqlalchemy.Enum(OrderType), primary_key=True, nullable=False
-    )
+    order_type: Mapped[OrderType] = mapped_column(sqlalchemy.Enum(OrderType), primary_key=True)
     application_id: Mapped[int] = mapped_column(
-        ForeignKey("application.id", ondelete="CASCADE"), primary_key=True, nullable=False
+        ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
     )
     application: Mapped[Application] = orm.relationship("Application")
