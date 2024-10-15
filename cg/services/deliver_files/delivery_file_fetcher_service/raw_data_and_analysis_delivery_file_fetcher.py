@@ -5,9 +5,6 @@ from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_f
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
-    handle_validation_errors,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
     DeliveryFiles,
     DeliveryMetaData,
@@ -31,7 +28,6 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         fastq_files: DeliveryFiles = self._fetch_files(
@@ -41,7 +37,9 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             service_class=AnalysisDeliveryFileFetcher, case_id=case_id
         )
         delivery_data = DeliveryMetaData(
-            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+            case_id=case.internal_id,
+            customer_internal_id=case.customer.internal_id,
+            ticket_id=case.latest_ticket,
         )
 
         return DeliveryFiles(

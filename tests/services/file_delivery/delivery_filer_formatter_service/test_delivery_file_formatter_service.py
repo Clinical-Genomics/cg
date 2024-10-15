@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import mock
 
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
@@ -42,6 +44,7 @@ def test_reformat_files(
     formatted_sample_files: list[FormattedFile],
     case_files: list[CaseFile],
     sample_files: list[SampleFile],
+    tmp_path: Path,
     request,
 ):
     # GIVEN a delivery file formatter, mocked delivery files and expected formatted files
@@ -51,7 +54,12 @@ def test_reformat_files(
     case_files = request.getfixturevalue(case_files)
     sample_files = request.getfixturevalue(sample_files)
 
-    delivery_data = DeliveryMetaData(customer_internal_id="cust_id", ticket_id="ticket_id")
+    delivery_data = DeliveryMetaData(
+        case_id="some_case",
+        customer_internal_id="cust_id",
+        ticket_id="ticket_id",
+        customer_ticket_inbox=Path(tmp_path, "cust_id", "inbox"),
+    )
     mock_delivery_files = DeliveryFiles(
         delivery_data=delivery_data, case_files=case_files, sample_files=sample_files
     )

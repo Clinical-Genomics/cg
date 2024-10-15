@@ -1014,7 +1014,9 @@ class IlluminaFlowCell(RunDevice):
 
     __tablename__ = "illumina_flow_cell"
 
-    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("run_device.id", ondelete="CASCADE"), primary_key=True
+    )
     model: Mapped[str | None] = mapped_column(
         types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
     )
@@ -1022,12 +1024,14 @@ class IlluminaFlowCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSMRTCell(RunDevice):
+class PacbioSMRTCell(RunDevice):
     """Model for storing PacBio SMRT cells."""
 
     __tablename__ = "pacbio_smrt_cell"
 
-    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("run_device.id", ondelete="CASCADE"), primary_key=True
+    )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1039,7 +1043,7 @@ class InstrumentRun(Base):
 
     id: Mapped[PrimaryKeyInt]
     type: Mapped[DeviceType]
-    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id", ondelete="CASCADE"))
 
     device: Mapped[RunDevice] = orm.relationship(back_populates="instrument_runs")
     sample_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
@@ -1054,7 +1058,9 @@ class InstrumentRun(Base):
 class IlluminaSequencingRun(InstrumentRun):
     __tablename__ = "illumina_sequencing_run"
 
-    id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
+    )
     sequencer_type: Mapped[str | None] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
@@ -1087,12 +1093,15 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacBioSequencingRun(InstrumentRun):
+class PacbioSequencingRun(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
-    id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
+    )
     well: Mapped[Str32]
     plate: Mapped[int]
+    run_name: Mapped[Str32 | None]
     movie_name: Mapped[Str32]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
@@ -1116,6 +1125,14 @@ class PacBioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads: Mapped[BigInt | None]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_yield: Mapped[BigInt | None]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
+    barcoded_hifi_mean_read_length: Mapped[BigInt | None]
+    unbarcoded_hifi_reads: Mapped[BigInt | None]
+    unbarcoded_hifi_yield: Mapped[BigInt | None]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1126,7 +1143,9 @@ class SampleRunMetrics(Base):
     __tablename__ = "sample_run_metrics"
     id: Mapped[PrimaryKeyInt]
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
-    instrument_run_id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"))
+    instrument_run_id: Mapped[int] = mapped_column(
+        ForeignKey("instrument_run.id", ondelete="CASCADE")
+    )
     type: Mapped[DeviceType]
 
     instrument_run: Mapped[InstrumentRun] = orm.relationship(back_populates="sample_metrics")
@@ -1142,7 +1161,9 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
 
     __tablename__ = "illumina_sample_sequencing_metrics"
 
-    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("sample_run_metrics.id", ondelete="CASCADE"), primary_key=True
+    )
     flow_cell_lane: Mapped[int | None]
     total_reads_in_lane: Mapped[BigInt | None]
     base_passing_q30_percent: Mapped[Num_6_2 | None]
@@ -1153,19 +1174,18 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class PacBioSampleSequencingMetrics(SampleRunMetrics):
+class PacbioSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on a PacBio instrument. The metrics are per sample, per cell."""
 
     __tablename__ = "pacbio_sample_run_metrics"
 
-    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        ForeignKey("sample_run_metrics.id", ondelete="CASCADE"), primary_key=True
+    )
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}

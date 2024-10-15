@@ -68,10 +68,19 @@ class UpdateHandler(BaseHandler):
         q30_threshold: int = get_q30_threshold(sequencer_type)
 
         for sample_metric in sample_metrics:
-            if sample_metric.base_passing_q30_percent >= q30_threshold:
+            if (
+                sample_metric.base_passing_q30_percent >= q30_threshold
+                or sample.is_negative_control
+            ):
                 total_reads_for_sample += sample_metric.total_reads_in_lane
 
         sample.reads = total_reads_for_sample
+        self.session.commit()
+
+    def update_sample_reads(self, internal_id: str, reads: int):
+        """Add reads to the current reads for a sample."""
+        sample: Sample = self.get_sample_by_internal_id(internal_id)
+        sample.reads += reads
         self.session.commit()
 
     def update_sample_sequenced_at(self, internal_id: str, date: datetime):

@@ -83,5 +83,5 @@ def expected_concatenated_fastq_formatted_files(
 
 
 @pytest.fixture
-def empty_case_files() -> None:
-    return None
+def empty_case_files() -> list:
+    return []

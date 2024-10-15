@@ -1,12 +1,14 @@
 from unittest import mock
 from unittest.mock import Mock
+
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
 from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
+from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles
 
 
-def test_file_delivery_service_no_files():
+def test_file_delivery_service_no_files(empty_delivery_files: DeliveryFiles):
     # GIVEN a delivery file service with no files to deliver
     file_delivery_service = DeliverFilesService(
         delivery_file_manager_service=Mock(),
@@ -22,7 +24,9 @@ def test_file_delivery_service_no_files():
 
     # THEN the service should return immediately without any errors
     with mock.patch.object(
-        file_delivery_service.file_manager, "get_files_to_deliver", side_effect=NoDeliveryFilesError
+        file_delivery_service.file_manager,
+        "get_files_to_deliver",
+        side_effect=NoDeliveryFilesError,
     ):
         file_delivery_service.deliver_files_for_case(case=Mock(), delivery_base_path=Mock())
 

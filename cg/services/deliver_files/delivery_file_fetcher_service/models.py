@@ -1,11 +1,13 @@
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class DeliveryMetaData(BaseModel):
+    case_id: str
     customer_internal_id: str
     ticket_id: str
+    customer_ticket_inbox: Path | None = None
 
 
 class CaseFile(BaseModel):
@@ -23,7 +25,5 @@ class SampleFile(BaseModel):
 
 class DeliveryFiles(BaseModel):
     delivery_data: DeliveryMetaData
-    case_files: list[CaseFile] | None = None
-    sample_files: list[SampleFile] = Field(
-        ..., min_length=1, description="At least one sample file is required for delivery."
-    )
+    case_files: list[CaseFile]
+    sample_files: list[SampleFile]

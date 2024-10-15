@@ -25,6 +25,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
@@ -87,6 +88,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        return True
+
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
         Return the target bed file from LIMS and use default capture kit for WGS.
@@ -119,6 +125,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
+            vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
         )
 
     @staticmethod
@@ -160,7 +167,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_managed_variants(self, case_id: str) -> list[str]:
         """Create and return the managed variants."""
-        return self._get_managed_variants(genome_build=self.get_genome_build(case_id=case_id))
+        return self._get_managed_variants(
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id)
+        )
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
@@ -193,7 +202,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 metric_id=pair_sample_ids,
             )
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+    def get_raredisease_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
@@ -215,6 +224,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of a Raredisease metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_raredisease_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
+
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
@@ -235,7 +250,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
         """Return sample coverage metrics from Chanjo2."""
-        genome_version: GenomeVersion = self.get_genome_build()
+        genome_version: GenomeVersion = self.get_genome_build(case_id)
         coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
         )

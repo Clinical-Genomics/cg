@@ -1,26 +1,29 @@
+import logging
+
+from housekeeper.store.models import File
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
-    FetchDeliveryFileTagsService,
-)
-from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
-    handle_missing_bundle_errors,
-    handle_validation_errors,
-)
 from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
     FetchDeliveryFilesService,
 )
-from housekeeper.store.models import File
-
+from cg.services.deliver_files.delivery_file_fetcher_service.error_handling import (
+    handle_missing_bundle_errors,
+)
+from cg.services.deliver_files.delivery_file_fetcher_service.exc import NoDeliveryFilesError
 from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    SampleFile,
     CaseFile,
     DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
+)
+from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+    FetchDeliveryFileTagsService,
 )
 from cg.store.models import Case
-
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
@@ -35,26 +38,40 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    @handle_validation_errors
     def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
+        LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(case)
         analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
         delivery_data = DeliveryMetaData(
-            customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+            case_id=case.internal_id,
+            customer_internal_id=case.customer.internal_id,
+            ticket_id=case.latest_ticket,
         )
 
-        return DeliveryFiles(
-            delivery_data=delivery_data,
-            case_files=analysis_case_files,
-            sample_files=analysis_sample_files,
+        return self._validate_delivery_has_content(
+            DeliveryFiles(
+                delivery_data=delivery_data,
+                case_files=analysis_case_files,
+                sample_files=analysis_sample_files,
+            )
         )
+
+    @staticmethod
+    def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
+        """Check if the delivery files has files to deliver."""
+        if delivery_files.case_files or delivery_files.sample_files:
+            return delivery_files
+        LOG.info(
+            f"No files to deliver for case {delivery_files.delivery_data.case_id} in ticket: {delivery_files.delivery_data.ticket_id}"
+        )
+        raise NoDeliveryFilesError
 
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile] | None:
+    ) -> list[SampleFile]:
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
@@ -77,14 +94,14 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         sample_ids: list[str] = case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
-            sample_delivery_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
+            sample_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
                 case_id=case.internal_id, sample_id=sample_id, workflow=case.data_analysis
             )
-            delivery_files.extend(sample_delivery_files) if sample_delivery_files else None
+            delivery_files.extend(sample_files) if sample_files else None
         return delivery_files
 
     @handle_missing_bundle_errors
-    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile] | None:
+    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
         files.
