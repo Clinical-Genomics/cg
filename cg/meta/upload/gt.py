@@ -79,10 +79,10 @@ class UploadGenotypesAPI(object):
     def _get_genotype_file(self, case_id: str) -> File:
         "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
-        hk_genotypes: list[File] = self.hk.get_files_from_latest_version(
+        hk_genotype_files: list[File] = self.hk.get_files_from_latest_version(
             bundle_name=case_id, tags=tags
         )
-        hk_genotype: File = self._sort_genotype_files(hk_genotypes)
+        hk_genotype: File = self._sort_genotype_files(hk_genotype_files)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
         LOG.debug(f"Found genotype file {hk_genotype.full_path}")
@@ -196,14 +196,14 @@ class UploadGenotypesAPI(object):
             FileExtensions.VCF_GZ
         ) or genotype_file.full_path.endswith(FileExtensions.BCF)
 
-    def _sort_genotype_files(genotypes_files: list[File]) -> File | None:
+    def _sort_genotype_files(hk_genotype_files: list[File]) -> File | None:
         """
         Take a list of files and only keep files finishing with .bcf or .vcf.gz
         Returns a single remaining file or raises ValueError if more than one file remains.
         """
         allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
-        file for file in genotypes_files if str(file).endswith(allowed_extensions)
+        file for file in hk_genotype_files if str(file).endswith(allowed_extensions)
         ]
         if len(filtered_files) > 1:
             raise ValueError(
