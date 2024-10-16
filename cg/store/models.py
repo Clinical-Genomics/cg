@@ -181,6 +181,7 @@ class Application(Base):
     pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
         back_populates="application"
     )
+    order_types = orm.relationship("OrderTypeApplication", back_populates="application")
 
     def __str__(self) -> str:
         return self.tag
@@ -1202,4 +1203,4 @@ class OrderTypeApplication(Base):
     application_id: Mapped[int] = mapped_column(
         ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
     )
-    application: Mapped[Application] = orm.relationship("Application")
+    application: Mapped[Application] = orm.relationship("Application", back_populates="order_types")
