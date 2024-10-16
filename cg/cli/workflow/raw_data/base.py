@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def raw_data(context: click.Context):
-    """Function for storing fastq-cases"""
+    """Function for storing raw-data-cases"""
     AnalysisAPI.get_help(context)
 
 
