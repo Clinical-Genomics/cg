@@ -1,3 +1,7 @@
+"""Utility functions for the post-process command."""
+
+import logging
+
 from pydantic import BaseModel, ConfigDict
 
 from cg.exc import CgError
@@ -6,6 +10,8 @@ from cg.services.run_devices.abstract_classes import PostProcessingService
 from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 from cg.services.run_devices.run_names.service import RunNamesService
 from cg.utils.mapping import get_item_by_pattern_in_source
+
+LOG = logging.getLogger(__name__)
 
 PATTERN_TO_DEVICE_MAP: dict[str, str] = {
     r"^r\d+_\d+_\d+/(1|2)_[^/]+$": "pacbio",
@@ -59,6 +65,7 @@ def _instruments_to_check(instrument: str) -> list[str]:
 def _get_unprocessed_runs_from_run_names(
     run_names: list[str], post_processing_service: PostProcessingService, instrument_name
 ) -> list[UnprocessedRunInfo]:
+    LOG.debug(f"Adding {instrument_name} run names to the post-processing list")
     runs: list[UnprocessedRunInfo] = []
     for name in run_names:
         if not post_processing_service.is_run_processed(name):

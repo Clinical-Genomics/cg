@@ -50,7 +50,6 @@ class PacBioRunValidator(RunValidator):
             source_dir=run_data.full_path,
             manifest_file_format=FileFormat.TXT,
         )
-
         self.decompressor.decompress(
             source_path=paths_information.decompression_target,
             destination_path=paths_information.decompression_destination,
