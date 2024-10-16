@@ -16,10 +16,10 @@ from cg.services.deliver_files.file_fetcher.models import (
     DeliveryMetaData,
     SampleFile,
 )
-from cg.services.deliver_files.tag_fetcher.bam_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.tag_fetcher.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
 from cg.store.models import Case

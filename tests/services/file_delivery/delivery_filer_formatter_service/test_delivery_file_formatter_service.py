@@ -8,7 +8,7 @@ from cg.services.deliver_files.file_fetcher.models import (
     CaseFile,
     DeliveryMetaData,
 )
-from cg.services.deliver_files.file_formatter.delivery_file_formatting_service import (
+from cg.services.deliver_files.file_formatter.abstract import (
     DeliveryFileFormattingService,
 )
 import pytest

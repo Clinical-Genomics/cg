@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.tag_fetcher.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.abstract import (
     FetchDeliveryFileTagsService,
 )
 from cg.store.store import Store

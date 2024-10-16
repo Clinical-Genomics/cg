@@ -30,7 +30,7 @@ from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.rsync.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig

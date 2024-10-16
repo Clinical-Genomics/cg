@@ -9,7 +9,7 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
-from cg.services.deliver_files.rsync.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.models import Case

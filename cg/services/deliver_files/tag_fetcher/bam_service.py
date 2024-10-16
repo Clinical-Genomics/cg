@@ -1,6 +1,6 @@
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag
-from cg.services.deliver_files.tag_fetcher.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.abstract import (
     FetchDeliveryFileTagsService,
 )
 from cg.services.deliver_files.tag_fetcher.error_handling import (

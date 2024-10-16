@@ -3,7 +3,7 @@
 import pytest
 
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.file_mover.delivery_file_mover import (
+from cg.services.deliver_files.file_mover.service import (
     DeliveryFilesMover,
 )
 

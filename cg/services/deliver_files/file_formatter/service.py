@@ -8,20 +8,20 @@ from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     SampleFile,
 )
-from cg.services.deliver_files.file_formatter.delivery_file_formatting_service import (
+from cg.services.deliver_files.file_formatter.abstract import (
     DeliveryFileFormattingService,
 )
 from cg.services.deliver_files.file_formatter.models import (
     FormattedFile,
     FormattedFiles,
 )
-from cg.services.deliver_files.file_formatter.utils.case_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
 )
 

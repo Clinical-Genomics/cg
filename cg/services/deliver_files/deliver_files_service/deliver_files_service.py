@@ -13,16 +13,16 @@ from cg.services.deliver_files.file_fetcher.abstract import (
     FetchDeliveryFilesService,
 )
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.file_formatter.delivery_file_formatting_service import (
+from cg.services.deliver_files.file_formatter.abstract import (
     DeliveryFileFormattingService,
 )
 from cg.services.deliver_files.file_formatter.models import (
     FormattedFiles,
 )
-from cg.services.deliver_files.file_mover.delivery_file_mover import (
+from cg.services.deliver_files.file_mover.service import (
     DeliveryFilesMover,
 )
-from cg.services.deliver_files.rsync.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.exc import EntryNotFoundError

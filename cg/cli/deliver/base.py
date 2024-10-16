@@ -18,7 +18,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.rsync.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.models import Analysis, Case

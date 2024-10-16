@@ -8,7 +8,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.tag_fetcher.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import (
@@ -20,13 +20,13 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
 )
-from cg.services.deliver_files.file_mover.delivery_file_mover import (
+from cg.services.deliver_files.file_mover.service import (
     DeliveryFilesMover,
 )
 

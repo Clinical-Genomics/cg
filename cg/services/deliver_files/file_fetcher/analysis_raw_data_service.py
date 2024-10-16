@@ -12,7 +12,7 @@ from cg.services.deliver_files.file_fetcher.models import (
 from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.tag_fetcher.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.abstract import (
     FetchDeliveryFileTagsService,
 )
 from cg.store.models import Case

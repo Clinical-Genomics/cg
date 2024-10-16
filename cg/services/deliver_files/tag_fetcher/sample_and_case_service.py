@@ -3,7 +3,7 @@ from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.services.deliver_files.tag_fetcher.error_handling import (
     handle_tag_errors,
 )
-from cg.services.deliver_files.tag_fetcher.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.abstract import (
     FetchDeliveryFileTagsService,
 )
 from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags

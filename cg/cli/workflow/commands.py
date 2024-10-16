@@ -26,7 +26,7 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.deliver_files.rsync.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.store import Store
