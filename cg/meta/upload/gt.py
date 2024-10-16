@@ -82,7 +82,7 @@ class UploadGenotypesAPI(object):
         hk_genotype_files: list[File] = self.hk.get_files_from_latest_version(
             bundle_name=case_id, tags=tags
         )
-        hk_genotype: File = self._sort_genotype_files(hk_genotype_files)
+        hk_genotype: File = self._get_single_genotype_file(hk_genotype_files)
         if not hk_genotype:
             raise FileNotFoundError(f"Genotype file not found for {case_id}")
         LOG.debug(f"Found genotype file {hk_genotype.full_path}")
@@ -132,11 +132,7 @@ class UploadGenotypesAPI(object):
         """Return a Housekeeper file object.
         Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
         LOG.debug("Get Genotype files from Housekeeper")
-        genotype_file: File = self._get_genotype_file(case_id)
-        if self._is_variant_file(genotype_file):
-            LOG.debug(f"Found BCF file {genotype_file.full_path}")
-            return genotype_file
-        raise FileNotFoundError(f"No VCF or BCF file found for the last bundle of {case_id}")
+        return self._get_genotype_file(case_id)
 
     def _get_qcmetrics_file(self, case_id: str) -> Path:
         """Return a QC metrics file path.
@@ -189,12 +185,6 @@ class UploadGenotypesAPI(object):
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
-
-    @staticmethod
-    def _is_variant_file(genotype_file: File):
-        return genotype_file.full_path.endswith(
-            FileExtensions.VCF_GZ
-        ) or genotype_file.full_path.endswith(FileExtensions.BCF)
 
     @staticmethod
     def _sort_genotype_files(hk_genotype_files: list[File]) -> File | None:
