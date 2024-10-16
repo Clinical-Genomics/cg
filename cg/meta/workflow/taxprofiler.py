@@ -31,6 +31,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.nfcore_workflow_path: str = config.taxprofiler.workflow_path
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
+        self.conda_binary: str = config.taxprofiler.conda_binary
+        self.config_platform: str = config.taxprofiler.config_platform
+        self.config_params: str = config.taxprofiler.config_params
+        self.config_resources: str = config.taxprofiler.config_resources
         self.profile: str = config.taxprofiler.profile
         self.revision: str = config.taxprofiler.revision
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
