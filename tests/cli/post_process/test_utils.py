@@ -10,7 +10,7 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 
 
 def are_lists_equal(list1: list[any], list2: list[any]) -> bool:
-    """Returns whether two lists holed the same items, regardless of order."""
+    """Returns whether two lists hold the same un-hashable items, regardless of order."""
     if len(list1) != len(list2):
         return False
     return all(any(obj1 == obj2 for obj2 in list2) for obj1 in list1)
