@@ -6,6 +6,6 @@ class FilterSampleFiles(FilterDeliveryFilesService):
 
     def filter_delivery_files(self, delivery_files: DeliveryFiles, sample_id: str) -> DeliveryFiles:
         for index in range(len(delivery_files.sample_files)):
-            if not delivery_files.sample_files[index].sample_id == sample_id:
+            if delivery_files.sample_files[index].sample_id != sample_id:
                 delivery_files.sample_files.pop(index)
                 return delivery_files
