@@ -8,11 +8,12 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 from wtforms.fields.choices import SelectMultipleField
+from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
 from cg.server.ext import db, sample_service
-from cg.store.models import OrderTypeApplication
+from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -176,16 +177,10 @@ class ApplicationView(BaseView):
             else ""
         )
 
-    def on_model_change(self, form, model, is_created):
+    def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table"""
-        super(ApplicationView, self).on_model_change(form, model, is_created)
-        db.session.query(OrderTypeApplication).filter_by(application_id=model.id).delete()
-        selected_order_types: list[OrderType] = form.suitable_order_types.data
-        for order_type in selected_order_types:
-            print(f"Trying to add entry with {model.id} and {order_type}")
-            db.session.add(OrderTypeApplication(application=model, order_type=order_type))
-
-        db.session.commit()
+        super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
+        db.update_order_type_applications(application=model, form=form)
 
 
 class ApplicationVersionView(BaseView):
