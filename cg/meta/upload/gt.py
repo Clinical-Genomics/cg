@@ -162,8 +162,8 @@ class UploadGenotypesAPI(object):
 
     def _get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
-        qc_metrics: list[MetricsBase] = (
-            self._get_parsed_qc_metrics_deliverables_raredisease(qc_metrics_file)
+        qc_metrics: list[MetricsBase] = self._get_parsed_qc_metrics_deliverables_raredisease(
+            qc_metrics_file
         )
         for metric in qc_metrics:
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
@@ -187,9 +187,7 @@ class UploadGenotypesAPI(object):
         """
         Returns the single .bcf or .vcf.gz file expected to be found in the provided list. Raises an error if the amount of such files is different from 1.
         """
-        filtered_files = [
-            file for file in hk_genotype_files if self._is_variant_file(file)
-        ]
+        filtered_files = [file for file in hk_genotype_files if self._is_variant_file(file)]
         if len(filtered_files) != 1:
             raise ValueError(
                 f"Error: Expecte one genotype file, but found {len(filtered_files)} "
