@@ -37,9 +37,8 @@ def get_post_processing_service_from_run_name(
 def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[UnprocessedRunInfo]:
     """Return a list of unprocessed runs for a given instrument or for all instruments."""
     runs: list[UnprocessedRunInfo] = []
-    possible_instruments: list[str] = ["pacbio"]  # Add more instruments here
-    instruments_to_process = [instrument] if instrument != "all" else possible_instruments
-    for instrument_name in instruments_to_process:
+    instruments_to_check: list[str] = _instruments_to_check(instrument)
+    for instrument_name in instruments_to_check:
         run_names_service: RunNamesService = getattr(context.run_names_services, instrument_name)
         runs.extend(
             _get_unprocessed_runs_from_run_names(
@@ -49,6 +48,12 @@ def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[Unproc
             )
         )
     return runs
+
+
+def _instruments_to_check(instrument: str) -> list[str]:
+    """Return a list of instruments to check for unprocessed runs."""
+    possible_instruments: list[str] = ["pacbio"]  # Add more instruments here
+    return [instrument] if instrument != "all" else possible_instruments
 
 
 def _get_unprocessed_runs_from_run_names(
