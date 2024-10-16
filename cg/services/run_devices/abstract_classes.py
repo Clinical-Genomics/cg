@@ -92,8 +92,9 @@ class PostProcessingService(ABC):
         pass
 
     @staticmethod
-    def _touch_post_processing_complete(run_data: RunData) -> None:
+    def _touch_post_processing_complete(run_data: RunData, dry_run: bool = False) -> None:
         """Touch the post-processing complete file."""
         processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
-        processing_complete_file.touch()
+        if not dry_run:
+            processing_complete_file.touch()
         LOG.debug(f"Post-processing complete for {run_data.full_path}")
