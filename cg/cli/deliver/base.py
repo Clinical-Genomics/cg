@@ -135,7 +135,7 @@ def deliver_ticket(
 
 @deliver.command(
     name="sample",
-    help="Deliver all case files based on delivery type to the customer inbox on the HPC "
+    help="Deliver fastq or bam files for a sample to the customer inbox on the HPC "
     "and start an Rsync job to clinical-delivery. "
     "NOTE: the dry-run flag will copy files to the customer inbox on Hasta, "
     "but will not perform the Rsync job.",
