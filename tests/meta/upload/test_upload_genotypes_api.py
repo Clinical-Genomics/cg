@@ -31,8 +31,10 @@ def test_get_analysis_sex_raredisease(
     # GIVEN a UploadGenotypesAPI some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
-    sex: str = UploadGenotypesAPI._get_analysis_sex_raredisease(UploadGenotypesAPI,
-        qc_metrics_file=case_qc_metrics_deliverables_raredisease, sample_id=sample_id
+    sex: str = UploadGenotypesAPI._get_analysis_sex_raredisease(
+        UploadGenotypesAPI,
+        qc_metrics_file=case_qc_metrics_deliverables_raredisease,
+        sample_id=sample_id,
     )
 
     # THEN assert that the the predicted sex per sample_id is returned
