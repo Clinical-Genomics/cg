@@ -30,10 +30,10 @@ from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
-from cg.services.deliver_files.delivery_rsync_service.models import RsyncDeliveryConfig
+from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
