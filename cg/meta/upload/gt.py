@@ -160,11 +160,10 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-    @staticmethod
-    def _get_analysis_sex_raredisease(qc_metrics_file: Path, sample_id: str) -> str:
+    def _get_analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: str) -> str:
         """Return analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = (
-            UploadGenotypesAPI._get_parsed_qc_metrics_deliverables_raredisease(qc_metrics_file)
+            self._get_parsed_qc_metrics_deliverables_raredisease(qc_metrics_file)
         )
         for metric in qc_metrics:
             if metric.name == RAREDISEASE_PREDICTED_SEX_METRIC and metric.id == sample_id:
@@ -179,13 +178,17 @@ class UploadGenotypesAPI(object):
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
 
     @staticmethod
-    def _get_single_genotype_file(hk_genotype_files: list[File]) -> File:
+    def _is_variant_file(genotype_file: File):
+        return genotype_file.full_path.endswith(
+            FileExtensions.VCF_GZ
+        ) or genotype_file.full_path.endswith(FileExtensions.BCF)
+
+    def _get_single_genotype_file(self, hk_genotype_files: list[File]) -> File:
         """
         Returns the single .bcf or .vcf.gz file expected to be found in the provided list. Raises an error if the amount of such files is different from 1.
         """
-        allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
-            file for file in hk_genotype_files if file.full_path.endswith(allowed_extensions)
+            file for file in hk_genotype_files if self._is_variant_file(file)
         ]
         if len(filtered_files) != 1:
             raise ValueError(
