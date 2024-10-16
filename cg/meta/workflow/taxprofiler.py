@@ -56,10 +56,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
 
-    def get_nextflow_config_content(self, case_id: str) -> str:
-        """Return nextflow config content."""
-        return MULTIQC_NEXFLOW_CONFIG
-
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
@@ -84,12 +80,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
         return TaxprofilerParameters(
-            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             databases=self.databases,
             hostremoval_reference=self.hostremoval_reference,
-            priority=self.account,
         )
 
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
