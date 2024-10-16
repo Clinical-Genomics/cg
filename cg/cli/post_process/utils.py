@@ -68,12 +68,14 @@ def _get_unprocessed_runs_from_run_names(
     LOG.debug(f"Adding {instrument_name} run names to the post-processing list")
     runs: list[UnprocessedRunInfo] = []
     for name in run_names:
-        if not post_processing_service.is_run_processed(name):
-            runs.append(
-                UnprocessedRunInfo(
-                    name=name,
-                    post_processing_service=post_processing_service,
-                    instrument=instrument_name,
-                )
+        if post_processing_service.is_run_processed(name):
+            LOG.debug(f"Run {name} has already been post-processed. Skipping")
+            continue
+        runs.append(
+            UnprocessedRunInfo(
+                name=name,
+                post_processing_service=post_processing_service,
+                instrument=instrument_name,
             )
+        )
     return runs
