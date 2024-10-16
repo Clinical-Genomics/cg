@@ -31,20 +31,20 @@ RESULT_KEYS_RD = [
 SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
-def test_add_mandatory_info_to_mip_config(
-    analysis_obj: Analysis, mip_config_builder: MipConfigBuilder
-):
+def test_add_mandatory_info_to_mip_config(mip_config_builder: MipConfigBuilder):
+
+    load_config = MipLoadConfig()
     # GIVEN an cg analysis object
 
     # GIVEN a mip load config object
-    assert mip_config_builder.load_config.owner is None
+    assert load_config.owner is None
     # GIVEN a file handler with some housekeeper version data
 
     # WHEN adding the mandatory information
-    mip_config_builder.add_common_info_to_load_config(mip_config_builder.load_config)
+    mip_config_builder.add_common_info_to_load_config(load_config)
 
     # THEN assert mandatory field owner was set
-    assert mip_config_builder.load_config.owner
+    assert load_config.owner
 
 
 def test_generate_balsamic_load_config(

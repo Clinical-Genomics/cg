@@ -798,7 +798,6 @@ def mip_config_builder(
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
-    analysis_store: Store,
 ) -> MipConfigBuilder:
     """Return a MIP config builder."""
     return MipConfigBuilder(
@@ -807,7 +806,6 @@ def mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
-        status_db=analysis_store,
     )
 
 
@@ -818,7 +816,6 @@ def raredisease_config_builder(
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
-    analysis_store: Store,
 ) -> MipConfigBuilder:
     """Return a MIP config builder."""
     return RarediseaseConfigBuilder(
@@ -827,7 +824,6 @@ def raredisease_config_builder(
         lims_api=lims_api,
         madeline_api=madeline_api,
         raredisease_analysis_api=raredisease_analysis_api,
-        status_db=analysis_store,
     )
 
 
@@ -836,14 +832,12 @@ def balsamic_config_builder(
     balsamic_analysis_hk_version: Version,
     balsamic_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
-    analysis_store: Store,
 ) -> BalsamicConfigBuilder:
     """Return a Balsamic config builder."""
     return BalsamicConfigBuilder(
         hk_version_obj=balsamic_analysis_hk_version,
         analysis_obj=balsamic_analysis_obj,
         lims_api=lims_api,
-        status_db=analysis_store,
     )
 
 

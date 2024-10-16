@@ -23,7 +23,6 @@ def test_mip_config_builder(
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
-    analysis_store: Store,
 ):
     """Test MIP config builder class."""
     # GIVEN a MIP analysis
@@ -35,7 +34,6 @@ def test_mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
-        status_db=analysis_store,
     )
 
     # THEN assert that the correct case tags was used
@@ -46,7 +44,6 @@ def test_balsamic_config_builder(
     hk_version: Version,
     balsamic_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
-    analysis_store: Store,
 ):
     """Test Balsamic config builder class."""
     # GIVEN a balsamic file handler
@@ -56,7 +53,6 @@ def test_balsamic_config_builder(
         hk_version_obj=hk_version,
         analysis_obj=balsamic_analysis_obj,
         lims_api=lims_api,
-        status_db=analysis_store,
     )
 
     # THEN assert that the correct case tags was used
@@ -69,7 +65,6 @@ def test_raredisease_config_builder(
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
-    analysis_store: Store,
 ):
     """Test RAREDISEASE config builder class."""
     # GIVEN a RAREDISEASE file handler
@@ -81,7 +76,6 @@ def test_raredisease_config_builder(
         lims_api=lims_api,
         raredisease_analysis_api=raredisease_analysis_api,
         madeline_api=madeline_api,
-        status_db=analysis_store,
     )
 
     # THEN assert that the correct case tags was used
@@ -92,7 +86,6 @@ def test_rnafusion_config_builder(
     hk_version: Version,
     rnafusion_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
-    analysis_store: Store,
 ):
     """Test RNAfusion config builder class."""
     # GIVEN a rnafusion file handler
@@ -102,7 +95,6 @@ def test_rnafusion_config_builder(
         hk_version_obj=hk_version,
         analysis_obj=rnafusion_analysis_obj,
         lims_api=lims_api,
-        status_db=analysis_store,
     )
 
     # THEN assert that the correct case tags was used
@@ -112,9 +104,6 @@ def test_rnafusion_config_builder(
 def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     """Test include synopsis."""
     # GIVEN a config builder with some data
-
-    # GIVEN a config without synopsis
-    assert mip_config_builder.load_config.synopsis is None
 
     # WHEN including the synopsis
     load_config = mip_config_builder.build_load_config()
@@ -126,29 +115,26 @@ def test_include_synopsis(mip_config_builder: MipConfigBuilder):
 def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
     """Test include phenotype groups."""
     # GIVEN a config builder with some data
-
-    # GIVEN a config without a phenotype groups
-    assert mip_config_builder.load_config.phenotype_groups is None
+    load_config = mip_config_builder.build_load_config()
 
     # WHEN including the phenotype groups
-    mip_config_builder.include_phenotype_groups(load_config=mip_config_builder.load_config)
+    mip_config_builder.include_phenotype_groups(load_config)
 
     # THEN assert that the phenotype groups were added
-    assert mip_config_builder.load_config.phenotype_groups is not None
+    assert load_config.phenotype_groups is not None
 
 
 def test_include_phenotype_terms(mip_config_builder: MipConfigBuilder):
     """Test include phenotype terms."""
     # GIVEN a config builder with some data
 
-    # GIVEN a config without a phenotype terms
-    assert mip_config_builder.load_config.phenotype_terms is None
+    load_config = mip_config_builder.build_load_config()
 
     # WHEN including the phenotype terms
-    mip_config_builder.include_phenotype_terms(load_config=mip_config_builder.load_config)
+    mip_config_builder.include_phenotype_terms(load_config)
 
     # THEN assert that the phenotype terms were added
-    assert mip_config_builder.load_config.phenotype_terms is not None
+    assert load_config.phenotype_terms is not None
 
 
 def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
@@ -225,10 +211,10 @@ def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuil
     # GIVEN a case load object
 
     # WHEN including the case level files
-    balsamic_config_builder.build_load_config()
+    load_config = balsamic_config_builder.build_load_config()
 
     # THEN assert that the mandatory snv vcf was added
-    assert balsamic_config_builder.load_config.vcf_cancer
+    assert load_config.vcf_cancer
 
 
 def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfigBuilder):
@@ -237,10 +223,10 @@ def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfi
     # GIVEN a case load object
 
     # WHEN including the case level files
-    balsamic_config_builder.build_load_config()
+    load_config = balsamic_config_builder.build_load_config()
 
     # THEN assert that the delivery_report exists
-    assert balsamic_config_builder.load_config.delivery_report
+    assert load_config.delivery_report
 
 
 def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):

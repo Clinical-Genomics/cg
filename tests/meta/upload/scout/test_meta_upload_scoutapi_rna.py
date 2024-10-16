@@ -703,9 +703,7 @@ def test_get_multiqc_html_report(
     """Test that the multiqc html report is returned."""
 
     # GIVEN a DNA case with a multiqc-html report
-    # print(dna_)
     case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
-    print(case)
     multiqc_file: MockFile = mip_dna_analysis_hk_api.get_file_from_latest_version(
         bundle_name=dna_case_id, tags={HK_MULTIQC_HTML_TAG, case}
     )

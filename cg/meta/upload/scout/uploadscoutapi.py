@@ -71,8 +71,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Found workflow {analysis.workflow}")
         config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
-        load_config = config_builder.build_load_config()
-        return load_config
+        return config_builder.build_load_config()
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -640,13 +639,11 @@ class UploadScoutAPI:
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 lims_api=self.lims,
-                status_db=self.status_db,
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 lims_api=self.lims,
-                status_db=self.status_db,
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
@@ -654,7 +651,6 @@ class UploadScoutAPI:
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
@@ -662,7 +658,6 @@ class UploadScoutAPI:
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db,
             ),
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
                 hk_version_obj=hk_version,
@@ -670,13 +665,11 @@ class UploadScoutAPI:
                 raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-                status_db=self.status_db,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 lims_api=self.lims,
-                status_db=self.status_db,
             ),
         }
 

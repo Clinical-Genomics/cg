@@ -1,13 +1,11 @@
 import logging
-import re
-from pathlib import Path
 
 from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
+from cg.constants.scout import GenomeBuild, MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -17,7 +15,6 @@ from cg.models.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.store.models import Analysis, CaseSample
-from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -30,34 +27,34 @@ class MipConfigBuilder(ScoutConfigBuilder):
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
-        status_db: Store,
     ):
         super().__init__(
             hk_version_obj=hk_version_obj,
             analysis_obj=analysis_obj,
             lims_api=lims_api,
-            status_db=status_db,
         )
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
-        self.load_config: MipLoadConfig = MipLoadConfig(
-            track=UploadTrack.RARE_DISEASE.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
-        )
         self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
-        self.status_db: Store = status_db
 
     def build_load_config(self, rank_score_threshold: int = 5) -> MipLoadConfig:
         """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
-        load_config = MipLoadConfig()
-        load_config = self.add_common_info_to_load_config(load_config)
+        load_config: MipLoadConfig = MipLoadConfig(
+            track=UploadTrack.RARE_DISEASE.value,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+        )
+        self.add_common_info_to_load_config(load_config)
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.case.internal_id
         )
-        load_config.human_genome_build = "38" if "38" in mip_analysis_data.genome_build else "37"
+        load_config.human_genome_build = (
+            GenomeBuild.hg38
+            if GenomeBuild.hg38 in mip_analysis_data.genome_build
+            else GenomeBuild.hg19
+        )
         load_config.rank_score_threshold = rank_score_threshold
         load_config.rank_model_version = mip_analysis_data.rank_model_version
         load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
@@ -70,7 +67,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
             or None
         )
 
-        load_config = self.include_case_files(load_config)
+        self.include_case_files(load_config)
 
         LOG.info("Building samples")
         db_sample: CaseSample
@@ -93,10 +90,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
         load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
         load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
-        load_config = self.include_multiqc_report(load_config)
-        return load_config
+        self.include_multiqc_report(load_config)
 
-    def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutMipIndividual):
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
         sample_id: str = config_sample.sample_id
