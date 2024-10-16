@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic.v1 import BaseModel, Field, conlist, validator
+from pydantic import BaseModel, conlist, field_validator
 
 from cg.exc import NfSampleSheetError
 
@@ -13,20 +13,20 @@ class WorkflowParameters(BaseModel):
 class NfCommandArgs(BaseModel):
     """Model for arguments and options supported."""
 
-    log: str | Path | None
-    resume: bool | None
-    profile: str | None
-    stub_run: bool | None
-    config: str | Path | None
-    name: str | None
-    revision: str | None
-    wait: str | None
-    id: str | None
-    with_tower: bool | None
-    use_nextflow: bool | None
-    compute_env: str | None
-    work_dir: str | Path | None
-    params_file: str | Path | None
+    log: str | Path | None = None
+    resume: bool | None = None
+    profile: str | None = None
+    stub_run: bool | None = None
+    config: str | Path | None = None
+    name: str | None = None
+    revision: str | None = None
+    wait: str | None = None
+    id: str | None = None
+    with_tower: bool | None = None
+    use_nextflow: bool | None = None
+    compute_env: str | None = None
+    work_dir: str | Path | None = None
+    params_file: str | Path | None = None
 
 
 class NextflowSampleSheetEntry(BaseModel):
@@ -39,10 +39,11 @@ class NextflowSampleSheetEntry(BaseModel):
     """
 
     name: str
-    fastq_forward_read_paths: conlist(Path, min_items=1)
-    fastq_reverse_read_paths: conlist(Path, min_items=1)
+    fastq_forward_read_paths: conlist(Path, min_length=1)
+    fastq_reverse_read_paths: conlist(Path, min_length=1)
 
-    @validator("fastq_reverse_read_paths")
+    @field_validator("fastq_reverse_read_paths")
+    @classmethod
     def validate_complete_fastq_file_pairs(
         cls, fastq_reverse: list[str], values: dict
     ) -> list[str]:
@@ -51,7 +52,8 @@ class NextflowSampleSheetEntry(BaseModel):
             raise NfSampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 
-    @validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
+    @field_validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
+    @classmethod
     def fastq_files_exist(cls, fastq_paths: list[str], values: dict) -> list[str]:
         """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
@@ -66,11 +68,12 @@ class FileDeliverable(BaseModel):
     id: str
     format: str
     path: str
-    path_index: str | None
+    path_index: str | None = None
     step: str
     tag: str
 
-    @validator("path", "path_index", pre=True)
+    @field_validator("path", "path_index", mode="before")
+    @classmethod
     def set_path_as_string(cls, file_path: str | Path) -> str | None:
         if file_path:
             return str(Path(file_path))
