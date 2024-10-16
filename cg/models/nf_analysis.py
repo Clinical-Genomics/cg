@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseModel, conlist, field_validator
+from pydantic import BaseModel, ValidationInfo, conlist, field_validator
 
 from cg.exc import NfSampleSheetError
 
@@ -45,16 +45,16 @@ class NextflowSampleSheetEntry(BaseModel):
     @field_validator("fastq_reverse_read_paths")
     @classmethod
     def validate_complete_fastq_file_pairs(
-        cls, fastq_reverse: list[str], values: dict
+        cls, fastq_reverse: list[str], info: ValidationInfo
     ) -> list[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
-        if len(fastq_reverse) != len(values.get("fastq_forward_read_paths")):
+        if len(fastq_reverse) != len(info.data.get("fastq_forward_read_paths")):
             raise NfSampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 
     @field_validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
     @classmethod
-    def fastq_files_exist(cls, fastq_paths: list[str], values: dict) -> list[str]:
+    def fastq_files_exist(cls, fastq_paths: list[str]) -> list[str]:
         """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
             if not fastq_path.is_file():
@@ -75,9 +75,7 @@ class FileDeliverable(BaseModel):
     @field_validator("path", "path_index", mode="before")
     @classmethod
     def set_path_as_string(cls, file_path: str | Path) -> str | None:
-        if file_path:
-            return str(Path(file_path))
-        return None
+        return str(Path(file_path)) if file_path else None
 
 
 class WorkflowDeliverables(BaseModel):
