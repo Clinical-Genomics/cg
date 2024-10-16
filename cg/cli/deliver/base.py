@@ -164,7 +164,7 @@ def deliver_sample_raw_data(
     dry_run: bool,
 ):
     """
-    Deliver all case files based on delivery type to the customer inbox on the HPC
+    Deliver fastq or bam files for a single sample to the customer inbox on the HPC
     """
     inbox: str = context.delivery_path
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
