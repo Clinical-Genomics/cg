@@ -50,7 +50,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     @property
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
+        return True
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
