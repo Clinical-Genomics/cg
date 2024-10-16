@@ -67,12 +67,12 @@ def test_get_parsed_qc_metrics_deliverables_raredisease(case_qc_metrics_delivera
     assert all(isinstance(item, MetricsBase) for item in metrics_object)
 
 
-def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str):
+def test_get_genotype_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
 
     # WHEN fetching the gbcf file with the api
-    gbcf = upload_genotypes_api._get_bcf_file(case_id)
+    gbcf = upload_genotypes_api._get_genotype_file(case_id)
 
     # THEN assert that the file has the correct tag
     assert MipDNAObservationsAnalysisTag.PROFILE_GBCF in (tag.name for tag in gbcf.tags)

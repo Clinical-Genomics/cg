@@ -47,7 +47,7 @@ class UploadGenotypesAPI(object):
         """
         case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
-        hk_bcf: File = self._get_bcf_file(case_id=case_id)
+        hk_bcf: File = self._get_genotype_file(case_id=case_id)
         genotype_load_config: dict = {"bcf": hk_bcf.full_path}
         if analysis.workflow in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             genotype_load_config["samples_sex"] = self._get_samples_sex_balsamic(case=analysis.case)
@@ -77,7 +77,8 @@ class UploadGenotypesAPI(object):
         )
 
     def _get_genotype_file(self, case_id: str) -> File:
-        "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError is not found."
+        "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError if not found."
+        LOG.debug("Get Genotype files from Housekeeper")
         tags: set[str] = {GenotypeAnalysisTag.GENOTYPE}
         hk_genotype_files: list[File] = self.hk.get_files_from_latest_version(
             bundle_name=case_id, tags=tags
@@ -125,15 +126,6 @@ class UploadGenotypesAPI(object):
             for sample_id_metric in qc_metrics.sample_id_metrics
         }
 
-    def _get_bcf_file(
-        self,
-        case_id: str,
-    ) -> File:
-        """Return a Housekeeper file object.
-        Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
-        LOG.debug("Get Genotype files from Housekeeper")
-        return self._get_genotype_file(case_id)
-
     def _get_qcmetrics_file(self, case_id: str) -> Path:
         """Return a QC metrics file path.
         Raises: FileNotFoundError if nothing is found in the Housekeeper bundle."""
@@ -162,7 +154,7 @@ class UploadGenotypesAPI(object):
             sample_id: str = sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": sample.sex,
-                "analysis": UploadGenotypesAPI._get_analysis_sex_raredisease(
+                "analysis": self._get_analysis_sex_raredisease(
                     qc_metrics_file=qc_metrics_file, sample_id=sample_id
                 ),
             }
@@ -187,18 +179,17 @@ class UploadGenotypesAPI(object):
         return [MetricsBase(**metric) for metric in qcmetrics_raw["metrics"]]
 
     @staticmethod
-    def _sort_genotype_files(hk_genotype_files: list[File]) -> File | None:
+    def _get_single_genotype_file(hk_genotype_files: list[File]) -> File:
         """
-        Take a list of files and only keep files finishing with .bcf or .vcf.gz
-        Returns a single remaining file or raises ValueError if more than one file remains.
+        Returns the single .bcf or .vcf.gz file expected to be found in the provided list. Raises an error if the amount of such files is different from 1.
         """
         allowed_extensions = (FileExtensions.BCF, FileExtensions.VCF_GZ)
         filtered_files = [
             file for file in hk_genotype_files if file.full_path.endswith(allowed_extensions)
         ]
-        if len(filtered_files) > 1:
+        if len(filtered_files) != 1:
             raise ValueError(
-                f"Error: Expected only one genotype file, but found {len(filtered_files)} "
+                f"Error: Expecte one genotype file, but found {len(filtered_files)} "
                 f"({', '.join(map(str, filtered_files))})."
             )
-        return filtered_files[0] if filtered_files else None
+        return filtered_files[0]
