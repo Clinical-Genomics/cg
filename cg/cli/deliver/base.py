@@ -145,7 +145,7 @@ def deliver_ticket(
     "-c",
     "--case-id",
     required=True,
-    help="Deliver the files for a specific case.",
+    help="The case the sample is on.",
 )
 @click.option("-s", "--sample-id", required=True, help="Deliver the files for a specific sample.")
 @click.option(
