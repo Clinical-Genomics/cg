@@ -151,7 +151,7 @@ def deliver_ticket(
 @click.option(
     "-d",
     "--delivery-type",
-    required=False,
+    required=True,
     help="The delivery type to use.",
     type=click.Choice(choices=["fastq", "bam"]),
 )
@@ -173,7 +173,7 @@ def deliver_sample_raw_data(
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=delivery_type if delivery_type else case.data_delivery,
+        delivery_type=delivery_type,
         workflow=case.data_analysis,
     )
     delivery_service.deliver_files_for_sample(
