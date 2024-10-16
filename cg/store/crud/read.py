@@ -93,7 +93,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -313,25 +313,26 @@ class ReadHandler(BaseHandler):
 
     def get_cases_by_ticket_id(self, ticket_id: str) -> list[Case]:
         """Return cases associated with a given ticket id."""
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket_id,
-        ).all()
+        if order := apply_order_filters(
+            orders=self._get_query(table=Order),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket_id),
+        ).first():
+            return order.cases
+        return []
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket."""
-        cases: list[Case] = self.get_cases_by_ticket_id(ticket_id=ticket)
-        if not cases:
-            raise ValueError(f"No case found for ticket {ticket}")
-        return cases[0].customer.internal_id
+        if order := self.get_order_by_ticket_id(int(ticket)):
+            return order.customer.internal_id
+        raise ValueError(f"No order found for ticket {ticket}")
 
     def get_samples_from_ticket(self, ticket: str) -> list[Sample]:
         """Returns the samples related to given ticket."""
-        return apply_case_filter(
-            cases=self._get_join_sample_family_query(),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket,
+        return apply_order_filters(
+            orders=self._get_join_sample_case_order_query(),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket),
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
@@ -1525,10 +1526,10 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
-            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            smrt_cells=self._get_query(table=PacbioSMRTCell),
             internal_id=internal_id,
         ).first()
 

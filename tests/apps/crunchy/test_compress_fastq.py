@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from pydantic import ValidationError
@@ -123,7 +124,6 @@ def test_spring_to_fastq(
     compression_object: CompressionData,
     spring_metadata_file: Path,
     crunchy_config: dict,
-    mocker,
 ):
     """Test SPRING to FASTQ method
 
@@ -132,15 +132,17 @@ def test_spring_to_fastq(
     """
     # GIVEN a crunchy-api given an existing SPRING metadata file
     assert spring_metadata_file.exists()
-    mocker_submit_sbatch = mocker.patch.object(SlurmAPI, "submit_sbatch")
+
     crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the pending path does not exist
-    assert compression_object.pending_exists() is False
+    assert not compression_object.pending_exists()
 
-    # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.spring_to_fastq(compression_obj=compression_object)
+    with mock.patch.object(SlurmAPI, "submit_sbatch", return_value=123456) as submit_sbatch:
+        # WHEN calling bam_to_cram method on bam-path
+        crunchy_api.spring_to_fastq(compression_obj=compression_object)
 
-    # THEN _submit_sbatch method is called
-    mocker_submit_sbatch.assert_called()
+        # THEN _submit_sbatch method is and the qos is high
+        assert "--qos=high" in submit_sbatch.call_args[1]["sbatch_content"]
+
     # THEN assert that the pending path was created
-    assert compression_object.pending_exists() is True
+    assert compression_object.pending_exists()
