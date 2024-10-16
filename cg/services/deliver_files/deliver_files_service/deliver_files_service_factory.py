@@ -5,7 +5,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.bam_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -15,44 +15,44 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
     DeliverFilesService,
 )
 from cg.services.deliver_files.deliver_files_service.exc import DeliveryTypeNotSupported
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.delivery_file_tag_fetcher_service import (
+from cg.services.deliver_files.tag_fetcher.abstract import (
     FetchDeliveryFileTagsService,
 )
-from cg.services.deliver_files.delivery_file_tag_fetcher_service.sample_and_case_delivery_tags_fetcher import (
+from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.analysis_delivery_file_fetcher import (
+from cg.services.deliver_files.file_fetcher.analysis_service import (
     AnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.delivery_file_fetcher_service import (
+from cg.services.deliver_files.file_fetcher.abstract import (
     FetchDeliveryFilesService,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_and_analysis_delivery_file_fetcher import (
+from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
     RawDataAndAnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.raw_data_delivery_file_fetcher import (
+from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatter import (
+from cg.services.deliver_files.file_formatter.service import (
     DeliveryFileFormatter,
 )
 
-from cg.services.deliver_files.delivery_file_formatter_service.delivery_file_formatting_service import (
+from cg.services.deliver_files.file_formatter.abstract import (
     DeliveryFileFormattingService,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.case_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_concatenation_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.delivery_file_formatter_service.utils.sample_file_formatter import (
+from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
 )
-from cg.services.deliver_files.delivery_file_mover_service.delivery_file_mover import (
+from cg.services.deliver_files.file_mover.service import (
     DeliveryFilesMover,
 )
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.store import Store
