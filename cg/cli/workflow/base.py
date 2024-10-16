@@ -7,7 +7,7 @@ from cg.cli.workflow.balsamic.base import balsamic
 from cg.cli.workflow.balsamic.pon import balsamic_pon
 from cg.cli.workflow.balsamic.qc import balsamic_qc
 from cg.cli.workflow.balsamic.umi import balsamic_umi
-from cg.cli.workflow.fastq.base import raw_data
+from cg.cli.workflow.raw_data.base import raw_data
 from cg.cli.workflow.fluffy.base import fluffy
 from cg.cli.workflow.jasen.base import jasen
 from cg.cli.workflow.microsalt.base import microsalt

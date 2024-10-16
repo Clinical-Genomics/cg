@@ -4,7 +4,7 @@ import click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.cli.workflow.fastq.fastq_service import RawDataAnalysisService
+from cg.cli.workflow.raw_data.raw_data_service import RawDataAnalysisService
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
