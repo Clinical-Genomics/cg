@@ -19,14 +19,14 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.backup.models import DsmcEncryptionKey, DsmcSequencingFile
+from cg.services.illumina.backup.models import PdcEncryptionKey, PdcSequencingFile
 from cg.services.illumina.backup.utils import (
     DsmcOutput,
     convert_string_to_datetime_object,
-    get_latest_dsmc_archived_sequencing_run,
-    get_latest_dsmc_encryption_key,
-    is_dsmc_encryption_key,
-    is_dsmc_sequencing_path,
+    get_latest_pdc_archived_sequencing_run,
+    get_latest_pdc_encryption_key,
+    is_pdc_encryption_key,
+    is_pdc_sequencing_path,
 )
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
@@ -104,7 +104,7 @@ class IlluminaBackupService:
             sequencing_run.device.internal_id
         )
 
-        archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
+        archived_key: Path = self.get_latest_archived_encryption_key_path(dsmc_output=dsmc_output)
         archived_run: Path = self.get_latest_archived_sequencing_run_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
@@ -287,18 +287,18 @@ class IlluminaBackupService:
         )
 
     @staticmethod
-    def parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[DsmcSequencingFile]:
+    def parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[PdcSequencingFile]:
         """Parses the DSMC command output to extract validated sequencing paths."""
         validated_responses = []
         for line in dsmc_output:
-            if is_dsmc_sequencing_path(line):
+            if is_pdc_sequencing_path(line):
                 parts = line.split()
 
                 fileDateTime: datetime = convert_string_to_datetime_object(
                     f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}"
                 )
 
-                query_response = DsmcSequencingFile(
+                query_response: PdcSequencingFile = PdcSequencingFile(
                     dateTime=fileDateTime,
                     path=Path(parts[DsmcOutput.PATH_COLUMN_INDEX]),
                 )
@@ -309,11 +309,11 @@ class IlluminaBackupService:
     @classmethod
     def get_latest_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the path of the archived sequencing run from a PDC query."""
-        validated_sequencing_paths: list[DsmcSequencingFile] = (
-            cls.parse_dsmc_output_sequencing_path(dsmc_output)
+        validated_sequencing_paths: list[PdcSequencingFile] = cls.parse_dsmc_output_sequencing_path(
+            dsmc_output
         )
 
-        archived_run: DsmcSequencingFile = get_latest_dsmc_archived_sequencing_run(
+        archived_run: PdcSequencingFile | None = get_latest_pdc_archived_sequencing_run(
             validated_sequencing_paths
         )
 
@@ -322,18 +322,18 @@ class IlluminaBackupService:
             return archived_run.path
 
     @staticmethod
-    def parse_dsmc_output_key_path(dsmc_output: list[str]) -> list[DsmcEncryptionKey]:
+    def parse_dsmc_output_key_path(dsmc_output: list[str]) -> list[PdcEncryptionKey]:
         """Parses the DSMC command output to extract validated encryption keys."""
         validated_responses = []
         for line in dsmc_output:
-            if is_dsmc_encryption_key(line):
+            if is_pdc_encryption_key(line):
                 parts: list[str] = line.split()
 
                 fileDateTime: datetime = convert_string_to_datetime_object(
                     f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}"
                 )
 
-                query_response = DsmcEncryptionKey(
+                query_response: PdcEncryptionKey = PdcEncryptionKey(
                     dateTime=fileDateTime,
                     path=Path(parts[DsmcOutput.PATH_COLUMN_INDEX]),
                 )
@@ -343,13 +343,13 @@ class IlluminaBackupService:
         return validated_responses
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
+    def get_latest_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the encryption key for the archived sequencing run from a PDC query."""
-        validated_encryption_keys: list[DsmcEncryptionKey] = cls.parse_dsmc_output_key_path(
+        validated_encryption_keys: list[PdcEncryptionKey] = cls.parse_dsmc_output_key_path(
             dsmc_output
         )
 
-        archived_encryption_key: DsmcEncryptionKey = get_latest_dsmc_encryption_key(
+        archived_encryption_key: PdcEncryptionKey | None = get_latest_pdc_encryption_key(
             validated_encryption_keys
         )
 
