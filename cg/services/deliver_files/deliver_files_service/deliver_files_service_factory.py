@@ -5,6 +5,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
 from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
@@ -56,6 +57,10 @@ from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.store import Store
+
+
+class FilterSampleFilter:
+    pass
 
 
 class DeliveryServiceFactory:
@@ -140,6 +145,7 @@ class DeliveryServiceFactory:
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
             move_file_service=DeliveryFilesMover(),
+            file_filter=SampleFileFilter(),
             file_formatter_service=file_formatter,
             status_db=self.store,
             rsync_service=self.rsync_service,
