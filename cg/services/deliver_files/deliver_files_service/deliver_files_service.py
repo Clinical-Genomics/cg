@@ -19,9 +19,7 @@ from cg.services.deliver_files.file_formatter.abstract import (
 from cg.services.deliver_files.file_formatter.models import (
     FormattedFiles,
 )
-from cg.services.deliver_files.file_mover.service import (
-    DeliveryFilesMover,
-)
+from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
