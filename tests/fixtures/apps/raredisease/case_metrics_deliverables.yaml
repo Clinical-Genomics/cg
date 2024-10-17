@@ -1,0 +1,128 @@
+---
+metrics:
+  - header: ~
+    id: ADM1
+    input: ADM1_lanes_1_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.040068546369646'
+  - header: ~
+    id: ADM2
+    input: ADM2_lanes_1_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.0406761321866496'
+  - header: ~
+    id: ADM3
+    input: ADM3_lanes_1_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.0379522720687161'
+  - header: ~
+    id: ADM1
+    input: ADM1_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '599990660'
+  - header: ~
+    id: ADM2
+    input: ADM2_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '600049404'
+  - header: ~
+    id: ADM3
+    input: ADM3_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '600006004'
+  - header: ~
+    id: ADM1
+    input: ADM1_lanes_1_sorted_md_sex
+    name: predicted_sex_sex_check
+    step: multiqc
+    value: male
+  - header: ~
+    id: ADM2
+    input: ADM2_lanes_1_sorted_md_sex
+    name: multiqc
+    step: predicted_sex_sex_check
+    value: male
+  - header: ~
+    id: ADM3
+    input: ADM3_lanes_1_sorted_md_sex
+    name: multiqc
+    step: predicted_sex_sex_check
+    value: female
+  - header: ~
+    id: ADM1
+    input: ADM1_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '598626360'
+  - header: ~
+    id: ADM2
+    input: ADM2_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '598568878'
+  - header: ~
+    id: ADM3
+    input: ADM3_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '598456583'
+  - header: ~
+    id: ADM1
+    input: ADM1_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.772613127011'
+  - header: ~
+    id: ADM2
+    input: ADM2_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7532659827456'
+  - header: ~
+    id: ADM3
+    input: ADM3_171015_HHT5NDSXX_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7417657507307'
+  - header: data
+    id: ADM1
+    input: ADM1_lanes_1_sorted_md_collectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '399.191095'
+  - header: data
+    id: ADM2
+    input: ADM2_lanes_1_sorted_md_collectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '421.846775'
+  - header: data
+    id: ADM3
+    input: ADM3_lanes_1_sorted_md_colraw_total_sequenceslectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '415.673545'
+  - header: data
+    id: ADM1
+    input: ADM1_lanes_1_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '29'
+  - header: data
+    id: ADM2
+    input: ADM2_lanes_1_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '28'
+  - header: data
+    id: ADM3
+    input: ADM3_lanes_1_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '28'
