@@ -1,4 +1,4 @@
-"""make all Pacbio model attributes non-nullable
+"""Make all Pacbio model attributes non-nullable
 
 Revision ID: 3503b53a9bc3
 Revises: fd7c9d246255
