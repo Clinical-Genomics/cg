@@ -96,7 +96,7 @@ def upgrade():
     op.alter_column(
         table_name="pacbio_sample_run_metrics",
         column_name="polymerase_mean_read_length",
-        existing_type=sa.BIGINT,
+        existing_type=sa.BIGINT(),
         existing_nullable=True,
         nullable=False,
     )
