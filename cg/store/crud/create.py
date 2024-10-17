@@ -541,6 +541,9 @@ class CreateHandler(BaseHandler):
         sample_id: str = sample_run_metrics_dto.sample_internal_id
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
         sample: Sample = self.get_sample_by_internal_id(sample_id)
+        if not sample:
+            self.session.rollback()
+            raise EntryNotFoundError(f"Sample not found: {sample_id}")
         new_sample_sequencing_run = PacbioSampleSequencingMetrics(
             sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,
