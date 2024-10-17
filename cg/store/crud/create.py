@@ -462,6 +462,7 @@ class CreateHandler(BaseHandler):
         """
         sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
         if not sample:
+            self.session.rollback()
             raise EntryNotFoundError(f"Sample not found: {metrics_dto.sample_id}")
         new_metric = IlluminaSampleSequencingMetrics(
             sample=sample,
