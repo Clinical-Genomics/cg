@@ -1,12 +1,12 @@
 """Tests for the meta PdcAPI"""
 
 from unittest import mock
+
 import pytest
+
 from cg.constants import EXIT_FAIL
 from cg.constants.process import EXIT_WARNING
-from cg.exc import (
-    PdcError,
-)
+from cg.exc import PdcError
 from cg.models.cg_config import CGConfig
 from tests.conftest import create_process_response
 
@@ -70,7 +70,7 @@ def test_retrieve_file_from_pdc(mock_process, cg_context: CGConfig, backup_file_
 
     # THEN a dsmc process should be started with parameters 'retrieve -replace=yes'
     mock_process.run_command.assert_called_once_with(
-        parameters=["retrieve", "-replace=yes", backup_file_path], dry_run=False
+        parameters=["retrieve", "-replace=yes", "-ifnewer", backup_file_path], dry_run=False
     )
 
 
