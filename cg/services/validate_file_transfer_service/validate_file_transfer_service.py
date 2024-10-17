@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 
 from cg.io.controller import ReadFile
 from cg.utils.files import get_file_in_directory, get_files_in_directory_with_pattern
+
+LOG = logging.getLogger(__name__)
 
 
 class ValidateFileTransferService:
@@ -20,6 +23,7 @@ class ValidateFileTransferService:
             raise FileNotFoundError(
                 f"Not all files listed in the manifest file {manifest_file} are present in the directory tree {source_dir}"
             )
+        LOG.debug("File transfer validated")
         return
 
     @staticmethod

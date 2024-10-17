@@ -25,11 +25,38 @@ def pacbio_barcoded_run_name() -> str:
 
 
 @pytest.fixture
+def pacbio_sequencing_run_name(pac_bio_test_run_name: str, pac_bio_smrt_cell_name: str) -> str:
+    """Return the name of a PacBio SMRT cell."""
+    return f"{pac_bio_test_run_name}/{pac_bio_smrt_cell_name}"
+
+
+@pytest.fixture
 def pacbio_barcoded_sequencing_run_name(
     pacbio_barcoded_run_name: str, pacbio_barcoded_smrt_cell_name: str
 ) -> str:
     """Return the name of a PacBio SMRT cell."""
     return f"{pacbio_barcoded_run_name}/{pacbio_barcoded_smrt_cell_name}"
+
+
+@pytest.fixture
+def pacbio_processed_sequencing_run_name(
+    pacbio_barcoded_run_name: str, pac_bio_smrt_cell_name: str
+) -> str:
+    """Return the name of a PacBio SMRT cell."""
+    return f"{pacbio_barcoded_run_name}/{pac_bio_smrt_cell_name}"
+
+
+@pytest.fixture
+def pacbio_run_names(
+    pacbio_sequencing_run_name: str,
+    pacbio_barcoded_sequencing_run_name: str,
+    pacbio_processed_sequencing_run_name: str,
+) -> set[str]:
+    return {
+        pacbio_sequencing_run_name,
+        pacbio_barcoded_sequencing_run_name,
+        pacbio_processed_sequencing_run_name,
+    }
 
 
 @pytest.fixture
