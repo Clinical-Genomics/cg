@@ -1,3 +1,7 @@
+"""Module for the Pacbio data transfer object creation service."""
+
+import logging
+
 from pydantic import ValidationError
 
 from cg.services.run_devices.abstract_classes import PostProcessingDataTransferService
@@ -17,11 +21,11 @@ from cg.services.run_devices.pacbio.data_transfer_service.utils import (
     get_sequencing_run_dto,
     get_smrt_cell_dto,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
-    PacBioMetricsParser,
-)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+
+LOG = logging.getLogger(__name__)
 
 
 class PacBioDataTransferService(PostProcessingDataTransferService):
@@ -41,6 +45,7 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
         sample_sequencing_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = (
             get_sample_sequencing_metrics_dtos(metrics.samples)
         )
+        LOG.debug("DTOs created")
         return PacBioDTOs(
             run_device=smrt_cell_dto,
             sequencing_run=sequencing_run_dto,
