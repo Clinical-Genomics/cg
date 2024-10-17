@@ -8,7 +8,7 @@ from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
-class FastqService:
+class RawDataAnalysisService:
     def __init__(self, store: Store, trailblazer_api: TrailblazerAPI):
         self.store = store
         self.trailblazer_api = trailblazer_api
