@@ -1,3 +1,5 @@
+"""Module for the Pacbio database store service."""
+
 import logging
 from datetime import datetime
 
@@ -85,4 +87,5 @@ class PacBioStoreService(PostProcessingStoreService):
                 f"Dry run, no entries will be added to database for SMRT cell {run_data.full_path}."
             )
             return
+        LOG.debug(f"Data stored in statusDB for run {run_data.sequencing_run_name}")
         self.store.commit_to_store()
