@@ -13,6 +13,7 @@ def test_file_delivery_service_no_files(empty_delivery_files: DeliveryFiles):
     file_delivery_service = DeliverFilesService(
         delivery_file_manager_service=Mock(),
         move_file_service=Mock(),
+        file_filter=Mock(),
         file_formatter_service=Mock(),
         rsync_service=Mock(),
         tb_service=Mock(),
