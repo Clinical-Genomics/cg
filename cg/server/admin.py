@@ -7,12 +7,12 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-from wtforms.fields.choices import SelectMultipleField
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
 from cg.server.ext import db, sample_service
+from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
@@ -156,7 +156,7 @@ class ApplicationView(BaseView):
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions"]
     form_extra_fields = {
-        "suitable_order_types": SelectMultipleField(
+        "suitable_order_types": MultiCheckboxField(
             "Order Types", choices=[(choice, choice.name) for choice in OrderType]
         )
     }
