@@ -1,6 +1,5 @@
 """Helper functions."""
 
-from datetime import datetime
 from operator import attrgetter
 
 from cg.constants import FileExtensions
@@ -47,20 +46,3 @@ def get_latest_pdc_encryption_key(pdc_files: list[PdcEncryptionKey]) -> PdcEncry
     latest_file = max(pdc_files, key=attrgetter("dateTime"))
 
     return latest_file
-
-
-def convert_string_to_datetime_object(strDateTime: str) -> datetime:
-    date_formats = [
-        "%Y-%m-%d %H:%M:%S",
-        "%Y/%m/%d %H:%M:%S",
-        "%d/%m/%Y %H:%M:%S",
-        "%m/%d/%Y %H:%M:%S",
-    ]
-
-    for fmt in date_formats:
-        try:
-            return datetime.strptime(strDateTime, fmt)
-        except ValueError:
-            continue
-
-    raise ValueError(f"Could not convert '{strDateTime}' to a datetime object.")

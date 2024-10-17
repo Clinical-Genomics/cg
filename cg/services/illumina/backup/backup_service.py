@@ -22,7 +22,6 @@ from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionSer
 from cg.services.illumina.backup.models import PdcEncryptionKey, PdcSequencingFile
 from cg.services.illumina.backup.utils import (
     DsmcOutput,
-    convert_string_to_datetime_object,
     get_latest_pdc_archived_sequencing_run,
     get_latest_pdc_encryption_key,
     is_pdc_encryption_key,
@@ -31,6 +30,7 @@ from cg.services.illumina.backup.utils import (
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
+from cg.utils.date import convert_string_to_datetime_object
 from cg.utils.time import get_elapsed_time, get_start_time
 
 
