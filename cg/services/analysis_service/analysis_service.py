@@ -8,6 +8,7 @@ from cg.store.store import Store
 
 
 class AnalysisService:
+
     def __init__(self, analysis_client: TrailblazerAPI, status_db: Store):
         self.status_db = status_db
         self.analysis_client = analysis_client
