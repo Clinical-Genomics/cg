@@ -9,13 +9,6 @@ from cg.models.cg_config import CGConfig
 from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 
 
-def are_lists_equal(list1: list[any], list2: list[any]) -> bool:
-    """Returns whether two lists hold the same un-hashable items, regardless of order."""
-    if len(list1) != len(list2):
-        return False
-    return all(any(obj1 == obj2 for obj2 in list2) for obj1 in list1)
-
-
 def test_get_post_processing_service_from_run_name(
     pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
 ):
@@ -57,16 +50,21 @@ def test_get_post_processing_service_from_wrong_run_name(
 
 
 def test_get_unprocessed_runs_info_pacbio(
-    pac_bio_context: CGConfig, pacbio_unprocessed_runs: list[UnprocessedRunInfo]
+    pac_bio_context: CGConfig,
+    pacbio_barcoded_sequencing_run_name: str,
+    pacbio_sequencing_run_name: str,
 ):
     """Test that a list of unprocessed runs is returned for Pacbio."""
     # GIVEN a context with a post-processing service for Pacbio
     assert pac_bio_context.post_processing_services.pacbio
     instrument: str = "pacbio"
 
+    # GIVEN that there are unprocessed run in the directory
+    expected_run_names: set[str] = {pacbio_sequencing_run_name, pacbio_barcoded_sequencing_run_name}
+
     # GIVEN that there is an already processed run in the directory
     number_of_runs: int = len(pac_bio_context.run_names_services.pacbio.get_run_names())
-    number_unprocessed: int = len(pacbio_unprocessed_runs)
+    number_unprocessed: int = len(expected_run_names)
     assert number_of_runs > number_unprocessed
 
     # WHEN getting the unprocessed runs
@@ -76,4 +74,5 @@ def test_get_unprocessed_runs_info_pacbio(
 
     # THEN the expected unprocessed runs are returned
     assert unprocessed_runs
-    assert are_lists_equal(unprocessed_runs, pacbio_unprocessed_runs)
+    unprocessed_run_names: set[str] = {run.name for run in unprocessed_runs}
+    assert unprocessed_run_names == expected_run_names
