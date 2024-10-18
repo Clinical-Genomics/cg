@@ -24,6 +24,9 @@ def get_applications():
 def get_application_order_types(order_type: str):
     """Return application order types.."""
     applications: list[Application] = db.get_active_applications_by_order_type(order_type)
+    if not applications:
+        message: str = "No applications found for the given order type"
+        return abort(make_response(jsonify(message=message), HTTPStatus.NOT_FOUND))
     app_tags: list[str] = [application.tag for application in applications]
     return jsonify(applications=app_tags)
 
