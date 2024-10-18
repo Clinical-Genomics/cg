@@ -20,7 +20,7 @@ def get_applications():
         message: str = "No applications found for the given order type"
         return abort(make_response(jsonify(message=message), HTTPStatus.NOT_FOUND))
     app_tags: list[str] = [application.tag for application in applications]
-    return jsonify(applications=parsed_applications)
+    return jsonify(applications=app_tags)
 
 
 @APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
