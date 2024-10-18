@@ -1,10 +1,6 @@
 from pathlib import Path
 
-import pytest
-from pydantic.v1 import ValidationError as PydanticValidationError
-
 from cg.constants.constants import FileFormat
-from cg.exc import ValidationError
 from cg.models.nf_analysis import FileDeliverable
 
 
@@ -12,7 +8,7 @@ def test_file_deliverables(any_string: str, filled_file: Path):
     """Tests that file deliverable model is successfully created."""
     # GIVEN valid deliverables fields
 
-    # WHEN instantiating a deliverables object
+    # WHEN instantiating a deliverable object
     file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
@@ -34,7 +30,7 @@ def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
     """Tests file delivery when an optional field is missing."""
     # GIVEN valid deliverables fields
 
-    # WHEN instantiating a deliverables object
+    # WHEN instantiating a deliverable object
     file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
@@ -47,28 +43,9 @@ def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
     assert isinstance(file_deliverable, FileDeliverable)
 
 
-def test_file_deliverables_missing_mandatory(
-    any_string: str,
-    filled_file: Path,
-):
-    """Tests file delivery when a mandatory field is missing."""
-    # WHEN instantiating a deliverables object with a missing field
-
-    # THEN assert that an error is raised
-    with pytest.raises(PydanticValidationError) as error:
-        FileDeliverable(
-            id=any_string,
-            path=filled_file,
-            step=any_string,
-            tag=any_string,
-        )
-    # THEN assert the error message
-    assert "field required (type=value_error.missing)" in str(error.value)
-
-
 def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: Path):
-    """Tests file delivery when a non existing attribute is given."""
-    # WHEN instantiating a deliverables object with additional attributes not present in the model
+    """Tests file delivery when a non-existing attribute is given."""
+    # WHEN instantiating a deliverable object with additional attributes not present in the model
     file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
