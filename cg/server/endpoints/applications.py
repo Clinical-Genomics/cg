@@ -5,10 +5,7 @@ from flask import Blueprint, abort, jsonify, make_response
 
 from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import db
-from cg.store.models import (
-    Application,
-    ApplicationLimitations,
-)
+from cg.store.models import Application, ApplicationLimitations
 
 APPLICATIONS_BLUEPRINT = Blueprint("applications", __name__, url_prefix="/api/v1")
 APPLICATIONS_BLUEPRINT.before_request(before_request)
@@ -21,6 +18,17 @@ def get_applications():
     applications: list[Application] = db.get_applications_is_not_archived()
     parsed_applications: list[dict] = [application.to_dict() for application in applications]
     return jsonify(applications=parsed_applications)
+
+
+@APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
+def get_application_order_types(order_type: str):
+    """Return application order types.."""
+    applications: list[Application] = db.get_active_applications_by_order_type(order_type)
+    if not applications:
+        message: str = "No applications found for the given order type"
+        return abort(make_response(jsonify(message=message), HTTPStatus.NOT_FOUND))
+    app_tags: list[str] = [application.tag for application in applications]
+    return jsonify(applications=app_tags)
 
 
 @APPLICATIONS_BLUEPRINT.route("/applications/<tag>")
