@@ -59,10 +59,6 @@ from cg.services.deliver_files.rsync.service import (
 from cg.store.store import Store
 
 
-class FilterSampleFilter:
-    pass
-
-
 class DeliveryServiceFactory:
     """Class to build the delivery services based on workflow and delivery type."""
 
