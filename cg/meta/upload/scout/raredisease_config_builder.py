@@ -84,19 +84,19 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_custom_images = CustomImages(case_images=case_images)
         return config_custom_images
 
-    def include_case_files(self, load_config: RarediseaseLoadConfig):
+    def include_case_files(self, load_config: RarediseaseLoadConfig) -> None:
         """Include case level files for mip case."""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
             self._include_case_file(load_config, scout_key)
 
-    def _include_case_file(self, load_config: RarediseaseLoadConfig, scout_key: str):
+    def _include_case_file(self, load_config: RarediseaseLoadConfig, scout_key: str) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key))
         setattr(load_config, scout_key, file_path)
 
-    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual):
+    def include_sample_files(self, config_sample: ScoutRarediseaseIndividual) -> None:
         """Include sample level files that are optional for mip samples."""
         LOG.info("Including RAREDISEASE specific sample level files")
         sample_id: str = config_sample.sample_id

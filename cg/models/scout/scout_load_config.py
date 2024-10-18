@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
-from typing_extensions import Annotated, Literal, Optional
+from typing_extensions import Annotated, Literal
 from cg.constants.scout import UploadTrack
 from cg.models.scout.validators import field_not_none
 

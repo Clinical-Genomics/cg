@@ -76,7 +76,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config)
         return load_config
 
-    def include_case_files(self, load_config: MipLoadConfig):
+    def include_case_files(self, load_config: MipLoadConfig) -> None:
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
         load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
@@ -92,7 +92,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
         self.include_multiqc_report(load_config)
 
-    def include_sample_files(self, config_sample: ScoutMipIndividual):
+    def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
         sample_id: str = config_sample.sample_id

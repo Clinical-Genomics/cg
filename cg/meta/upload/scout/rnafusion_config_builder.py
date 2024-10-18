@@ -44,13 +44,13 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         return load_config
 
-    def include_case_files(self, load_config: RnafusionLoadConfig):
+    def include_case_files(self, load_config: RnafusionLoadConfig) -> None:
         """Include case level files for rnafusion case."""
         LOG.info("Including RNAFUSION specific case level files")
         for scout_key in RNAFUSION_CASE_TAGS.keys():
             self._include_file(load_config, scout_key)
 
-    def include_sample_alignment_file(self, config_sample: ScoutCancerIndividual):
+    def include_sample_alignment_file(self, config_sample: ScoutCancerIndividual) -> None:
         """Include the alignment file for a sample
         Try if cram file is found, if not: load bam file
         """
@@ -59,7 +59,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def _include_file(self, load_config: RnafusionLoadConfig, scout_key: str):
+    def _include_file(self, load_config: RnafusionLoadConfig, scout_key: str) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         setattr(

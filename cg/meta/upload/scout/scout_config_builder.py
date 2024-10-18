@@ -33,7 +33,7 @@ class ScoutConfigBuilder:
         self.case_tags: CaseTags
         self.sample_tags: SampleTags
 
-    def add_common_info_to_load_config(self, load_config: ScoutLoadConfig):
+    def add_common_info_to_load_config(self, load_config: ScoutLoadConfig) -> None:
         """Add the mandatory common information to a Scout load config object."""
         load_config.analysis_date = self.analysis_obj.completed_at or self.analysis_obj.started_at
         load_config.default_gene_panels = self.analysis_obj.case.panels
@@ -75,7 +75,7 @@ class ScoutConfigBuilder:
                 return True
         return False
 
-    def include_pedigree_picture(self, load_config: ScoutLoadConfig):
+    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> None:
         if self.is_multi_sample_case(load_config=load_config):
             if self.is_family_case(load_config=load_config):
                 svg_path: Path = self.run_madeline(self.analysis_obj.case)
@@ -95,7 +95,7 @@ class ScoutConfigBuilder:
             return file_path
         return re.split(r"(?:[1-9]|1[0-9]|2[0-2]|[XY])\.png$", file_path)[0]
 
-    def get_sample_information(self, load_config: ScoutLoadConfig):
+    def get_sample_information(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Building samples")
         db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
@@ -113,7 +113,9 @@ class ScoutConfigBuilder:
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         return config_sample
 
-    def add_common_sample_info(self, config_sample: ScoutIndividual, case_sample: CaseSample):
+    def add_common_sample_info(
+        self, config_sample: ScoutIndividual, case_sample: CaseSample
+    ) -> None:
         """Add the information to a sample that is common for different analysis types."""
         sample_id: str = case_sample.sample.internal_id
         LOG.info(f"Building sample {sample_id}")
@@ -142,7 +144,7 @@ class ScoutConfigBuilder:
         self,
         config_sample: ScoutIndividual,
         case_sample: CaseSample,
-    ):
+    ) -> None:
         """Add common sample files for different analysis types."""
         LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
         self.include_sample_alignment_file(config_sample)
@@ -152,7 +154,7 @@ class ScoutConfigBuilder:
         """Build a load config for uploading a case to Scout."""
         raise NotImplementedError
 
-    def include_sample_files(self, config_sample: ScoutIndividual):
+    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout."""
         raise NotImplementedError
 
@@ -160,7 +162,7 @@ class ScoutConfigBuilder:
         """Include all files that are used on case level in Scout."""
         raise NotImplementedError
 
-    def include_phenotype_terms(self, load_config: ScoutLoadConfig):
+    def include_phenotype_terms(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Adding phenotype terms to Scout load config")
         phenotype_terms: set[str] = set()
         link_obj: CaseSample
@@ -175,7 +177,7 @@ class ScoutConfigBuilder:
         if phenotype_terms:
             load_config.phenotype_terms = list(phenotype_terms)
 
-    def include_phenotype_groups(self, load_config: ScoutLoadConfig):
+    def include_phenotype_groups(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Adding phenotype groups to Scout load config")
         phenotype_groups: set[str] = set()
         link_obj: CaseSample
@@ -190,26 +192,26 @@ class ScoutConfigBuilder:
         if phenotype_groups:
             load_config.phenotype_groups = list(phenotype_groups)
 
-    def include_cohorts(self, load_config: ScoutLoadConfig):
+    def include_cohorts(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Including cohorts to Scout load config")
         cohorts: list[str] = self.analysis_obj.case.cohorts
         if cohorts:
             LOG.debug(f"Adding cohorts {', '.join(cohorts)}")
             load_config.cohorts = cohorts
 
-    def include_cnv_report(self, load_config: ScoutLoadConfig):
+    def include_cnv_report(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Include CNV report to case")
         load_config.cnv_report = self.get_file_from_hk(
             hk_tags=self.case_tags.cnv_report, latest=True
         )
 
-    def include_multiqc_report(self, load_config: ScoutLoadConfig):
+    def include_multiqc_report(self, load_config: ScoutLoadConfig) -> None:
         LOG.info("Include MultiQC report to case")
         load_config.multiqc = self.get_file_from_hk(
             hk_tags=self.case_tags.multiqc_report, latest=True
         )
 
-    def include_sample_alignment_file(self, config_sample: ScoutIndividual):
+    def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the alignment file for a sample
         Try if cram file is found, if not: load bam file
         """
@@ -220,7 +222,7 @@ class ScoutConfigBuilder:
         if not config_sample.alignment_path:
             self.include_sample_alignment_bam(config_sample)
 
-    def include_sample_alignment_bam(self, config_sample: ScoutIndividual):
+    def include_sample_alignment_bam(self, config_sample: ScoutIndividual) -> None:
         sample_id: str = config_sample.sample_id
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id
