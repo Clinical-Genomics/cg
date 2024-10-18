@@ -9,7 +9,7 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.models.scout.scout_load_config import (
     RnafusionLoadConfig,
-    ScoutIndividual,
+    ScoutCancerIndividual,
 )
 from cg.store.models import Analysis, CaseSample
 
@@ -50,6 +50,15 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         for scout_key in RNAFUSION_CASE_TAGS.keys():
             self._include_file(load_config, scout_key)
 
+    def include_sample_alignment_file(self, config_sample: ScoutCancerIndividual):
+        """Include the alignment file for a sample
+        Try if cram file is found, if not: load bam file
+        """
+        sample_id: str = config_sample.sample_id
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
+        )
+
     def _include_file(self, load_config: RnafusionLoadConfig, scout_key: str):
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
@@ -59,6 +68,6 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         """Include all files that are used on sample level in Scout."""
         return None
