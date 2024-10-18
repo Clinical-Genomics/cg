@@ -348,7 +348,7 @@ def link_sample_to_case(
             raise click.Abort
 
         if father.sex != Sex.MALE:
-            LOG.error(f"{father}: father is not {Sex.MALE}")
+            LOG.error(f"{father_id}: father is not {Sex.MALE}")
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
