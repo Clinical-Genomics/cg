@@ -728,7 +728,7 @@ def test_upload_report_to_scout(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN a DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-html report
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
