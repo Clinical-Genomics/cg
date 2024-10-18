@@ -13,6 +13,7 @@ from cg.services.deliver_files.file_fetcher.abstract import (
     FetchDeliveryFilesService,
 )
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
+from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.abstract import (
     DeliveryFileFormattingService,
 )
@@ -43,6 +44,7 @@ class DeliverFilesService:
     def __init__(
         self,
         delivery_file_manager_service: FetchDeliveryFilesService,
+        file_filter: FilterDeliveryFilesService,
         move_file_service: DeliveryFilesMover,
         file_formatter_service: DeliveryFileFormattingService,
         rsync_service: DeliveryRsyncService,
@@ -51,6 +53,7 @@ class DeliverFilesService:
         status_db: Store,
     ):
         self.file_manager = delivery_file_manager_service
+        self.file_filter = file_filter
         self.file_mover = move_file_service
         self.file_formatter = file_formatter_service
         self.status_db = status_db
@@ -89,6 +92,28 @@ class DeliverFilesService:
             self.deliver_files_for_case(
                 case=case, delivery_base_path=delivery_base_path, dry_run=dry_run
             )
+
+    def deliver_files_for_sample(
+        self, case: Case, sample_id: str, delivery_base_path: Path, dry_run: bool = False
+    ):
+        """Deliver the files for a sample to the customer folder."""
+        delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
+            case_id=case.internal_id
+        )
+        filtered_files: DeliveryFiles = self.file_filter.filter_delivery_files(
+            delivery_files=delivery_files, sample_id=sample_id
+        )
+        moved_files: DeliveryFiles = self.file_mover.move_files(
+            delivery_files=filtered_files, delivery_base_path=delivery_base_path
+        )
+        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        folders_to_deliver: set[Path] = set(
+            [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
+        )
+        job_id: int = self._start_rsync_job(
+            case=case, dry_run=dry_run, folders_to_deliver=folders_to_deliver
+        )
+        self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
