@@ -49,7 +49,7 @@ from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
-    apply_ordertype_application_filter,
+    apply_order_type_application_filter,
 )
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
@@ -822,13 +822,13 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-    def get_applications_by_ordertype(self, order_type: str) -> list[Application]:
+    def get_active_applications_by_order_type(self, order_type: str) -> list[Application]:
         """Return all possible not archived applications for an order type."""
         non_archived_applications: Query = apply_application_filter(
             applications=self._get_join_application_ordertype_query(),
             filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
         )
-        return apply_ordertype_application_filter(
+        return apply_order_type_application_filter(
             ordertype_applications=non_archived_applications,
             filter_functions=[OrderTypeApplicationFilter.BY_ORDER_TYPE],
             order_type=order_type,

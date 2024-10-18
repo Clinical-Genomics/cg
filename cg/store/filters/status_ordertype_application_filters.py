@@ -2,20 +2,21 @@ from enum import Enum
 
 from sqlalchemy.orm import Query
 
+from cg.models.orders.constants import OrderType
 from cg.store.models import OrderTypeApplication
 
 
 def filter_applications_by_order_type(
-    ordertype_applications: Query, order_type: str, **kwargs
+    ordertype_applications: Query, order_type: OrderType, **kwargs
 ) -> Query:
     """Return application by order type."""
     return ordertype_applications.filter(OrderTypeApplication.order_type.is_(order_type))
 
 
-def apply_ordertype_application_filter(
+def apply_order_type_application_filter(
     filter_functions: list[callable],
     ordertype_applications: Query,
-    order_type: str = None,
+    order_type: OrderType = None,
 ) -> Query:
     """Apply filtering functions to the ordertype_applications query and return filtered results."""
 
@@ -28,6 +29,6 @@ def apply_ordertype_application_filter(
 
 
 class OrderTypeApplicationFilter(Enum):
-    """Define OrdertypeApplication filter functions."""
+    """Define OrderTypeApplication filter functions."""
 
     BY_ORDER_TYPE = filter_applications_by_order_type

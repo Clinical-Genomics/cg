@@ -81,7 +81,7 @@ class BaseHandler:
         )
 
     def _get_join_application_ordertype_query(self) -> Query:
-        """Return join application to ordertype query."""
+        """Return join application to order type query."""
         return self._get_query(table=Application).join(Application.order_types)
 
     def _get_join_sample_application_version_query(self) -> Query:
