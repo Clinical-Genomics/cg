@@ -13,12 +13,12 @@ from cg.services.illumina.backup.validators import (
 class PdcEncryptionKey(BaseModel):
     """Model representing the response from a PDC query."""
 
-    dateTime: datetime
+    date_time: datetime
     path: Annotated[Path, BeforeValidator(validated_pdc_encryption_key_path)]
 
 
 class PdcSequencingFile(BaseModel):
     """Model representing the response from a PDC query."""
 
-    dateTime: datetime
+    date_time: datetime
     path: Annotated[Path, BeforeValidator(validated_pdc_sequencing_file_path)]
