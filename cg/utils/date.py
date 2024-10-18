@@ -65,11 +65,11 @@ def get_date_days_ago(days_ago: int) -> datetime:
     return datetime.now() - timedelta(days=days_ago)
 
 
-def convert_string_to_datetime_object(strDateTime: str) -> datetime:
+def convert_string_to_datetime_object(date_time: str) -> datetime:
     for datetime_format in VALID_DATE_TIME_FORMAT:
         try:
-            return datetime.strptime(strDateTime, datetime_format)
+            return datetime.strptime(date_time, datetime_format)
         except ValueError:
             continue
 
-    raise ValueError(f"Could not convert '{strDateTime}' to a datetime object.")
+    raise ValueError(f"Could not convert '{date_time}' to a datetime object.")

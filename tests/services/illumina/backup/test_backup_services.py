@@ -81,10 +81,10 @@ def test_get_latest_cryption_key_path(dsmc_q_archive_output: list[str], flow_cel
     assert isinstance(key_path, Path)
 
     # THEN the latest key file name should be returned
-    assert (
-        key_path.name
-        == f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
-    ), f'TEST FAILED: "{key_path.name}" is not the latest cryption key path'
+    expected: str = (
+        f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
+    )
+    assert key_path.name == expected
 
 
 def test_get_latest_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
@@ -110,10 +110,10 @@ def test_get_latest_archived_run_path(dsmc_q_archive_output: list[str], flow_cel
     assert isinstance(runs_path, Path)
 
     # THEN the latest Illumina run file name should be returned
-    assert (
-        runs_path.name
-        == f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
-    ), f'TEST FAILED: "{runs_path.name}" is not the latest archived run path'
+    expected: str = (
+        f"161115_ST-E00214_0118_B{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+    )
+    assert runs_path.name == expected
 
 
 def test_maximum_processing_queue_full(store_with_illumina_sequencing_data: Store):

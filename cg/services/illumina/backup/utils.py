@@ -1,4 +1,4 @@
-"""Helper functions."""
+"""Helper functions for the back-up of Illumina flow cells."""
 
 from operator import attrgetter
 
