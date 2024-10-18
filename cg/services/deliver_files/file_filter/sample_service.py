@@ -8,4 +8,4 @@ class SampleFileFilter(FilterDeliveryFilesService):
         for index in range(len(delivery_files.sample_files)):
             if delivery_files.sample_files[index].sample_id != sample_id:
                 delivery_files.sample_files.pop(index)
-                return delivery_files
+        return delivery_files
