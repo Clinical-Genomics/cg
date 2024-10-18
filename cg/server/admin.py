@@ -7,9 +7,13 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
+from cg.models.orders.constants import OrderType
 from cg.server.ext import db, sample_service
+from cg.server.utils import MultiCheckboxField
+from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -151,6 +155,11 @@ class ApplicationView(BaseView):
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions"]
+    form_extra_fields = {
+        "suitable_order_types": MultiCheckboxField(
+            "Order Types", choices=[(choice, choice.name) for choice in OrderType]
+        )
+    }
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
@@ -167,6 +176,11 @@ class ApplicationView(BaseView):
             if model.application
             else ""
         )
+
+    def on_model_change(self, form: Form, model: Application, is_created: bool):
+        """Override to persist entries to the OrderTypeApplication table"""
+        super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
+        db.update_order_type_applications(application=model, form=form)
 
 
 class ApplicationVersionView(BaseView):
