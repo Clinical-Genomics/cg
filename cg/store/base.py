@@ -15,7 +15,6 @@ from cg.store.models import (
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
-    OrderTypeApplication,
     Sample,
 )
 
