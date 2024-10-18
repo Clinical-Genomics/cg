@@ -10,6 +10,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import (
     CollaboratorSamplesRequest,
@@ -940,13 +941,30 @@ class ReadHandler(BaseHandler):
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_user_by_email(self, email: str) -> User | None:
         """Return a user by email from the database."""
         return apply_user_filter(
             users=self._get_query(table=User),
             email=email,
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
+
+    def is_user_associated_with_customer(self, user_id: int, customer_internal_id: str) -> bool:
+        user: User | None = apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=user_id,
+            customer_internal_id=customer_internal_id,
+            filter_functions=[UserFilter.BY_ID, UserFilter.BY_CUSTOMER_INTERNAL_ID],
+        ).first()
+        return bool(user)
+
+    def is_customer_trusted(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer and customer.is_trusted)
+
+    def customer_exists(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer)
 
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
         """Return samples to receive."""
@@ -1526,6 +1544,13 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
+    def is_application_archived(self, application_tag: str) -> bool:
+        application: Application | None = self.get_application_by_tag(application_tag)
+        return application and application.is_archived
+
+    def does_gene_panel_exist(self, abbreviation: str) -> bool:
+        return bool(self.get_panel_by_abbreviation(abbreviation))
+
     def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
@@ -1543,6 +1568,23 @@ class ReadHandler(BaseHandler):
         for sample_id in sample_ids:
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
+
+    def sample_exists_with_different_sex(
+        self,
+        customer_internal_id: str,
+        subject_id: str,
+        sex: SexEnum,
+    ) -> bool:
+        samples: list[Sample] = self.get_samples_by_customer_and_subject_id(
+            customer_internal_id=customer_internal_id,
+            subject_id=subject_id,
+        )
+        for sample in samples:
+            if sample.sex == SexEnum.unknown:
+                continue
+            if sample.sex != sex:
+                return True
+        return False
 
     def get_related_samples(
         self,
