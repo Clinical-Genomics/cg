@@ -69,14 +69,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config.rank_model_version = self.get_rank_model_version()
         return load_config
 
-
-    def get_rank_model_version(self)-> str:
+    def get_rank_model_version(self) -> str:
         hk_manifest_file: File = HousekeeperAPI.get_files_from_latest_version(
             bundle_name=self.analysis_obj.case.internal_id, tags={HkNFAnalysisTags.MANIFEST}
         )
         self.extract_rank_model(hk_manifest_file=hk_manifest_file.full_path)
 
-    def extract_rank_model(hk_manifest_file)-> str:
+    def extract_rank_model(hk_manifest_file) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
