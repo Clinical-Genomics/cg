@@ -125,7 +125,7 @@ class ScoutConfigBuilder:
             case_sample.sample.application_version.application.analysis_type
         )
         config_sample.sample_name = case_sample.sample.name
-        config_sample.tissue_type = lims_sample.get("source")
+        config_sample.tissue_type = lims_sample.get("source", "unknown")
         config_sample.subject_id = case_sample.sample.subject_id
         config_sample.father = (
             case_sample.father.internal_id
