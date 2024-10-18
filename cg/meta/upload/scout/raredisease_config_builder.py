@@ -1,16 +1,19 @@
 import logging
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkNFAnalysisTags
 from cg.constants.scout import (
     GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     UploadTrack,
 )
+from cg.io.controller import ReadFile
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -63,7 +66,21 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
         load_config.human_genome_build = GenomeBuild.hg19
+        load_config.rank_model_version = self.get_rank_model_version()
         return load_config
+
+
+    def get_rank_model_version(self)-> str:
+        hk_manifest_file: File = HousekeeperAPI.get_files_from_latest_version(
+            bundle_name=self.analysis_obj.case.internal_id, tags={HkNFAnalysisTags.MANIFEST}
+        )
+        self.extract_rank_model(hk_manifest_file=hk_manifest_file.full_path)
+
+    def extract_rank_model(hk_manifest_file)-> str:
+        content: list[dict[str, str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON, file_path=hk_manifest_file
+        )
+        print(content)
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
