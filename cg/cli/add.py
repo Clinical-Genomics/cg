@@ -337,10 +337,22 @@ def link_sample_to_case(
             LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
+        if mother.sex != Sex.FEMALE:
+            e_message = f"{mother_id}: mother is not {Sex.FEMALE}"
+            LOG.error(e_message)
+            click.echo(e_message)
+            raise click.Abort
+
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
             LOG.error(f"{father_id}: father not found")
+            raise click.Abort
+
+        if father.sex != Sex.MALE:
+            e_message = f"{father}: father is not {Sex.MALE}"
+            LOG.error(e_message)
+            click.echo(e_message)
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(

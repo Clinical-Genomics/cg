@@ -257,3 +257,77 @@ def test_add_relationship_bad_father(
     # THEN it should not be added
     assert result.exit_code == 1
     assert disk_store._get_query(table=CaseSample).count() == 0
+
+
+def test_add_relationship_mother_not_female(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
+    """Test to add a relationship where the mother is not female"""
+    # GIVEN a database with a sample, a case, and a male sample labeled as mother
+    disk_store: Store = base_context.status_db
+    sample = helpers.add_sample(disk_store)
+    sample_id = sample.internal_id
+
+    male_mother = helpers.add_sample(disk_store, sex=Sex.MALE, name="mother")
+    male_mother_id = male_mother.internal_id
+
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
+    status = "affected"
+
+    # WHEN adding a relationship with a male mother
+    result = cli_runner.invoke(
+        add,
+        [
+            "relationship",
+            case_id,
+            sample_id,
+            "-s",
+            status,
+            "-m",
+            male_mother_id,
+        ],
+        obj=base_context,
+    )
+
+    # THEN it should fail because the mother is not female
+    assert result.exit_code == 1
+    assert f"mother is not {Sex.FEMALE}" in result.output
+    assert disk_store._get_query(table=CaseSample).count() == 0
+
+
+def test_add_relationship_father_not_male(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
+    """Test to add a relationship where the father is not male"""
+    # GIVEN a database with a sample, a case, and a female sample labeled as father
+    disk_store: Store = base_context.status_db
+    sample = helpers.add_sample(disk_store)
+    sample_id = sample.internal_id
+
+    female_father = helpers.add_sample(disk_store, sex=Sex.FEMALE, name="father")
+    female_father_id = female_father.internal_id
+
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
+    status = "affected"
+
+    # WHEN adding a relationship with a female father
+    result = cli_runner.invoke(
+        add,
+        [
+            "relationship",
+            case_id,
+            sample_id,
+            "-s",
+            status,
+            "-f",
+            female_father_id,
+        ],
+        obj=base_context,
+    )
+
+    # THEN it should fail because the father is not male
+    assert result.exit_code == 1
+    assert f"father is not {Sex.MALE}" in result.output
+    assert disk_store._get_query(table=CaseSample).count() == 0
