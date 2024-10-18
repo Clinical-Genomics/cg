@@ -43,7 +43,6 @@ class StorePacBioOrderService(StoreOrderService):
             "samples": [
                 {
                     "application": sample.application,
-                    "capture_kit": sample.capture_kit,
                     "comment": sample.comment,
                     "data_analysis": sample.data_analysis,
                     "data_delivery": sample.data_delivery,
@@ -52,6 +51,7 @@ class StorePacBioOrderService(StoreOrderService):
                     "sex": sample.sex,
                     "tumour": sample.tumour,
                     "volume": sample.volume,
+                    "subject_id": sample.subject_id,
                 }
                 for sample in order.samples
             ],
@@ -79,7 +79,7 @@ class StorePacBioOrderService(StoreOrderService):
                     original_ticket=ticket_id,
                     priority=sample["priority"],
                     tumour=sample["tumour"],
-                    capture_kit=sample["capture_kit"],
+                    subject_id=sample["subject_id"],
                 )
                 new_sample.customer = customer
                 application_tag: str = sample["application"]
