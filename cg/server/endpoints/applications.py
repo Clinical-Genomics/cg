@@ -5,10 +5,7 @@ from flask import Blueprint, abort, jsonify, make_response
 
 from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import db
-from cg.store.models import (
-    Application,
-    ApplicationLimitations,
-)
+from cg.store.models import Application, ApplicationLimitations
 
 APPLICATIONS_BLUEPRINT = Blueprint("applications", __name__, url_prefix="/api/v1")
 APPLICATIONS_BLUEPRINT.before_request(before_request)
@@ -19,6 +16,14 @@ APPLICATIONS_BLUEPRINT.before_request(before_request)
 def get_applications():
     """Return application tags."""
     applications: list[Application] = db.get_applications_is_not_archived()
+    parsed_applications: list[dict] = [application.to_dict() for application in applications]
+    return jsonify(applications=parsed_applications)
+
+
+@APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
+def get_application_order_types(order_type: str):
+    """Return application order types.."""
+    applications: list[Application] = db.get_applications_by_ordertype(order_type)
     parsed_applications: list[dict] = [application.to_dict() for application in applications]
     return jsonify(applications=parsed_applications)
 
