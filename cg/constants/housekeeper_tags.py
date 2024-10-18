@@ -92,7 +92,7 @@ class HkMipAnalysisTag:
 
 
 class HkNFAnalysisTags:
-    MANIFEST: list[str] = ["manifest"]
+    MANIFEST: str = "manifest"
 
 
 class BalsamicAnalysisTag:
