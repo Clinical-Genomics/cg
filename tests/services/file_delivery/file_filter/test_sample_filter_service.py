@@ -5,7 +5,7 @@ from cg.services.deliver_files.file_filter.sample_service import SampleFileFilte
 def test_filter_delivery_files(expected_fastq_delivery_files: DeliveryFiles, sample_id: str):
     """Test to filter delivery files."""
 
-    # GIVEN a delivery files object with multiple sample ids, a sample id and a filter delivery files service
+    # GIVEN a delivery files object with multiple sample ids and a filter delivery files service
     filter_service = SampleFileFilter()
     samples_ids: list[str] = [
         sample.sample_id for sample in expected_fastq_delivery_files.sample_files
