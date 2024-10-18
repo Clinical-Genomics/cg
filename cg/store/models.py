@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated
 
+import sqlalchemy
 from sqlalchemy import (
     BLOB,
     DECIMAL,
@@ -32,6 +33,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
+from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
 Blob = Annotated[bytes, None]
@@ -1101,10 +1103,10 @@ class PacbioSequencingRun(InstrumentRun):
     )
     well: Mapped[Str32]
     plate: Mapped[int]
-    run_name: Mapped[Str32 | None]
+    run_name: Mapped[Str32]
     movie_name: Mapped[Str32]
-    started_at: Mapped[datetime | None]
-    completed_at: Mapped[datetime | None]
+    started_at: Mapped[datetime]
+    completed_at: Mapped[datetime]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1125,14 +1127,14 @@ class PacbioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
-    barcoded_hifi_reads: Mapped[BigInt | None]
-    barcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
-    barcoded_hifi_yield: Mapped[BigInt | None]
-    barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
-    barcoded_hifi_mean_read_length: Mapped[BigInt | None]
-    unbarcoded_hifi_reads: Mapped[BigInt | None]
-    unbarcoded_hifi_yield: Mapped[BigInt | None]
-    unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
+    barcoded_hifi_reads: Mapped[BigInt]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    barcoded_hifi_yield: Mapped[BigInt]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    unbarcoded_hifi_reads: Mapped[BigInt]
+    unbarcoded_hifi_yield: Mapped[BigInt]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1186,6 +1188,18 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    polymerase_mean_read_length: Mapped[BigInt | None]
+    polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+
+class OrderTypeApplication(Base):
+    """Maps an order type to its allowed applications"""
+
+    __tablename__ = "order_type_application"
+
+    order_type: Mapped[OrderType] = mapped_column(sqlalchemy.Enum(OrderType), primary_key=True)
+    application_id: Mapped[int] = mapped_column(
+        ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
+    )
+    application: Mapped[Application] = orm.relationship("Application")
