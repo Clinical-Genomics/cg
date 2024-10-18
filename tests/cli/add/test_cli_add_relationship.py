@@ -3,6 +3,7 @@
 from click.testing import CliRunner
 
 from cg.cli.add import add
+from cg.constants import EXIT_FAIL
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store.models import CaseSample
@@ -291,8 +292,7 @@ def test_add_relationship_mother_not_female(
     )
 
     # THEN it should fail because the mother is not female
-    assert result.exit_code == 1
-    assert f"mother is not {Sex.FEMALE}" in result.output
+    assert result.exit_code == EXIT_FAIL
     assert disk_store._get_query(table=CaseSample).count() == 0
 
 
@@ -328,6 +328,5 @@ def test_add_relationship_father_not_male(
     )
 
     # THEN it should fail because the father is not male
-    assert result.exit_code == 1
-    assert f"father is not {Sex.MALE}" in result.output
+    assert result.exit_code == EXIT_FAIL
     assert disk_store._get_query(table=CaseSample).count() == 0

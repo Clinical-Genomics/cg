@@ -338,9 +338,7 @@ def link_sample_to_case(
             raise click.Abort
 
         if mother.sex != Sex.FEMALE:
-            e_message = f"{mother_id}: mother is not {Sex.FEMALE}"
-            LOG.error(e_message)
-            click.echo(e_message)
+            LOG.error(f"{mother_id}: mother is not {Sex.FEMALE}")
             raise click.Abort
 
     if father_id:
@@ -350,9 +348,7 @@ def link_sample_to_case(
             raise click.Abort
 
         if father.sex != Sex.MALE:
-            e_message = f"{father}: father is not {Sex.MALE}"
-            LOG.error(e_message)
-            click.echo(e_message)
+            LOG.error(f"{father}: father is not {Sex.MALE}")
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
