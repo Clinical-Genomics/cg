@@ -462,6 +462,7 @@ class CreateHandler(BaseHandler):
         """
         sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
         if not sample:
+            self.session.rollback()
             raise EntryNotFoundError(f"Sample not found: {metrics_dto.sample_id}")
         new_metric = IlluminaSampleSequencingMetrics(
             sample=sample,
@@ -479,6 +480,7 @@ class CreateHandler(BaseHandler):
         return new_metric
 
     def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
+        LOG.debug(f"Creating Pacbio SMRT cell for {run_device_dto.internal_id}")
         if self.get_pac_bio_smrt_cell_by_internal_id(run_device_dto.internal_id):
             raise ValueError(f"SMRT cell with {run_device_dto.internal_id} already exists.")
         new_smrt_cell = PacbioSMRTCell(
@@ -490,6 +492,7 @@ class CreateHandler(BaseHandler):
     def create_pac_bio_sequencing_run(
         self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSequencingRun:
+        LOG.debug(f"Creating Pacbio sequencing run for SMRT cell {smrt_cell.internal_id}")
         new_sequencing_run = PacbioSequencingRun(
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
@@ -539,6 +542,9 @@ class CreateHandler(BaseHandler):
         sample_id: str = sample_run_metrics_dto.sample_internal_id
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
         sample: Sample = self.get_sample_by_internal_id(sample_id)
+        if not sample:
+            self.session.rollback()
+            raise EntryNotFoundError(f"Sample not found: {sample_id}")
         new_sample_sequencing_run = PacbioSampleSequencingMetrics(
             sample=sample,
             hifi_reads=sample_run_metrics_dto.hifi_reads,

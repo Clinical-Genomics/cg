@@ -399,7 +399,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_verified_gens_file_paths(self, sex: Sex, panel_bed: str) -> dict[str, str] | None:
+    def get_verified_gens_file_paths(self, sex: Sex, panel_bed: str) -> dict[str, str]:
         """Return a list of file path arguments for Gens."""
         if panel_bed:
             return {
