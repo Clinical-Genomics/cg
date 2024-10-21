@@ -3,17 +3,21 @@
 from datetime import datetime
 
 from sqlalchemy.orm import Session
+from wtforms.form import Form
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import SequencingQCStatus
 from cg.constants.sequencing import Sequencers
+from cg.models.orders.constants import OrderType
 from cg.services.illumina.post_processing.utils import get_q30_threshold
 from cg.store.base import BaseHandler
 from cg.store.models import (
+    Application,
     Case,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Order,
+    OrderTypeApplication,
     Sample,
 )
 
@@ -105,4 +109,12 @@ class UpdateHandler(BaseHandler):
         """Update the upload started at field of an analysis."""
         analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.upload_started_at = upload_started_at
+        self.session.commit()
+
+    def update_order_type_applications(self, application: Application, form: Form):
+        """Updates the order_type_application table based on the updated Application object"""
+        self._get_query(OrderTypeApplication).filter_by(application_id=application.id).delete()
+        selected_order_types: list[OrderType] = form["suitable_order_types"].data
+        for order_type in selected_order_types:
+            self.session.add(OrderTypeApplication(application=application, order_type=order_type))
         self.session.commit()
