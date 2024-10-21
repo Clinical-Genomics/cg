@@ -61,13 +61,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
         self.include_pedigree_picture(load_config)
-        custom_images = self.load_custom_image_sample()
-        if custom_images:
-            load_config.custom_images = custom_images
+        load_config.custom_images = self.load_custom_image_sample()
         load_config.human_genome_build = GenomeBuild.hg19
         return load_config
 
-    def load_custom_image_sample(self) -> CustomImages | None:
+    def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
         LOG.info("Adding custom images")
         eklipse_images: list = []
