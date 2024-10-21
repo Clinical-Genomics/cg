@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
@@ -130,13 +131,11 @@ class CreateHandler(BaseHandler):
         )
 
     def link_order_types_to_application(
-        self, application: Application, order_types: list[str]
+        self, application: Application, order_types: list[OrderType]
     ) -> list[OrderTypeApplication]:
         new_orders: list = []
         for order_type in order_types:
-            new_record = OrderTypeApplication()
-            new_record.order_type = order_type
-            new_record.application = application
+            new_record = OrderTypeApplication(application=application, order_type=order_type)
             new_orders.append(new_record)
         return new_orders
 
