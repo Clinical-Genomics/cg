@@ -6,9 +6,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
-    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
+    GenomeBuild,
     UploadTrack,
 )
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
