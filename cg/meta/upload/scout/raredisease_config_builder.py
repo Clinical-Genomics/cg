@@ -37,7 +37,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         raredisease_analysis_api: RarediseaseAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
-        hk_api: HousekeeperAPI,
     ):
         super().__init__(
             hk_version_obj=hk_version_obj,
@@ -49,7 +48,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.raredisease_analysis_api: RarediseaseAnalysisAPI = raredisease_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
-        self.hk = hk_api
 
     def build_load_config(self) -> RarediseaseLoadConfig:
         """Create a RAREDISEASE specific load config for uploading analysis to Scout."""
@@ -72,9 +70,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return load_config
 
     def get_rank_model_version(self) -> str:
-        hk_manifest_file: File = self.hk.get_files_from_latest_version(
-            bundle_name=self.analysis_obj.case.internal_id, tags={HkNFAnalysisTags.MANIFEST}
+        hk_manifest_file: File = self.get_file_from_hk(
+            {HkNFAnalysisTags.MANIFEST}
         )
+        print(hk_manifest_file)
         self.extract_rank_model(hk_manifest_file=hk_manifest_file.full_path)
 
     def extract_rank_model(hk_manifest_file) -> str:
