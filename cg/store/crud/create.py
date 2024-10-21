@@ -37,6 +37,7 @@ from cg.store.models import (
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
@@ -127,6 +128,17 @@ class CreateHandler(BaseHandler):
             percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
+
+    def link_order_types_to_application(
+        self, application: Application, order_types: list[str]
+    ) -> list[OrderTypeApplication]:
+        new_orders: list = []
+        for order_type in order_types:
+            new_record = OrderTypeApplication()
+            new_record.order_type = order_type
+            new_record.application = application
+            new_orders.append(new_record)
+        return new_orders
 
     def add_application_version(
         self,

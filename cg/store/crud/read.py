@@ -833,7 +833,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
         )
         applications: list[Application] = apply_order_type_application_filter(
-            ordertype_applications=non_archived_applications,
+            order_type_applications=non_archived_applications,
             filter_functions=[OrderTypeApplicationFilter.BY_ORDER_TYPE],
             order_type=order_type,
         ).all()
