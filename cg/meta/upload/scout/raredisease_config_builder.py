@@ -8,11 +8,13 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkNFAnalysisTags
 from cg.constants.scout import (
+    RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     GenomeBuild,
     UploadTrack,
 )
+from cg.constants.sequencing import Variants
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -66,22 +68,30 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config)
         load_config.custom_images = self.load_custom_image_sample()
         load_config.human_genome_build = GenomeBuild.hg19
-        load_config.rank_model_version = self.get_rank_model_version()
+        load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
+        load_config.rank_model_version = self.get_rank_model_version(variant_type=Variants.SNV)
+        load_config.sv_rank_model_version = self.get_rank_model_version(variant_type=Variants.SV)
+
         return load_config
 
-    def get_rank_model_version(self) -> str:
+    def get_rank_model_version(self, variant_type) -> str:
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
-        print(hk_manifest_file)
-        self.extract_rank_model(hk_manifest_file=hk_manifest_file.full_path)
+        return self.extract_rank_model(
+            hk_manifest_file=hk_manifest_file.full_path, variant_type=variant_type
+        )
 
-    def extract_rank_model(self, hk_manifest_file) -> str:
+    def extract_rank_model(self, hk_manifest_file, variant_type) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
-        return self.search_rank_model_in_manifest(self, content)
+        return self.search_rank_model_in_manifest(self, content, variant_type)
 
-    def search_rank_model_in_manifest(content) -> str:
-        pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
+    def search_rank_model_in_manifest(content, variant_type) -> str:
+        if variant_type == Variants.SNV:
+            pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
+        elif variant_type == Variants.SV:
+            pattern = r"score_config svrank_model_-(v\d+\.\d+)-\.ini"
+
         for entry in content:
             script = entry["script"]
             match = re.search(pattern, script)
