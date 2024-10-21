@@ -25,7 +25,7 @@ def get_applications():
 @APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
 @handle_endpoint_errors
 def get_application_order_types(order_type: str):
-    """Return application order types.."""
+    """Return application order types."""
     applications: ApplicationResponse = applications_service.get_applications_by_order_type(
         order_type
     )
