@@ -1,8 +1,10 @@
 """Functions that handle files in the context of Scout uploading."""
 
 import logging
-from typing import Any
 import re
+from pathlib import Path
+from typing import Any
+
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,13 +14,11 @@ from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import (
     ScoutIndividual,
+    ScoutLoadConfig,
     ScoutMipIndividual,
     ScoutRarediseaseIndividual,
-    ScoutLoadConfig,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
-
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -219,6 +219,7 @@ class ScoutConfigBuilder:
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
+
         if not config_sample.alignment_path:
             self.include_sample_alignment_bam(config_sample)
 
@@ -231,8 +232,9 @@ class ScoutConfigBuilder:
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""
         if hk_tags:  # skip if no tag found
-            hk_tags.add(sample_id)
-            return self.get_file_from_hk(hk_tags)
+            tags: set = hk_tags.copy()
+            tags.add(sample_id)
+            return self.get_file_from_hk(hk_tags=tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Return the Housekeeper file path as a string."""
