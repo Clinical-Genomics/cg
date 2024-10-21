@@ -3,9 +3,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
 
+from dateutil.parser import parse
 from pydantic.v1 import ValidationError
 
-from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -27,7 +27,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
-from cg.meta.workflow.utils.get_genome_build import get_genome_build
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -42,7 +42,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -384,7 +384,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if self.is_managed_variants_required:
             vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
             if dry_run:
-                echo_lines(lines=vcf_lines)
+                for line in vcf_lines:
+                    LOG.debug(line)
             else:
                 self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
@@ -906,3 +907,23 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def clean_past_run_dirs(self, before_date: str, skip_confirmation: bool = False) -> None:
+        """Clean past run directories"""
+        before_date: datetime = parse(before_date)
+        analyses_to_clean: list[Analysis] = self.get_analyses_to_clean(before_date)
+        LOG.info(f"Cleaning {len(analyses_to_clean)} analyses created before {before_date}")
+
+        for analysis in analyses_to_clean:
+            case_id = analysis.case.internal_id
+            case_path = self.get_case_path(case_id)
+            try:
+                LOG.info(f"Cleaning output for {case_id}")
+                self.clean_run_dir(
+                    case_id=case_id, skip_confirmation=skip_confirmation, case_path=case_path
+                )
+            except FileNotFoundError:
+                continue
+            except Exception as error:
+                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
+        LOG.info(f"Done cleaning {self.workflow} output")
