@@ -6,9 +6,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
-    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
+    GenomeBuild,
     UploadTrack,
 )
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -61,11 +61,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
         self.include_pedigree_picture(load_config)
-        load_config.custom_images = self.load_custom_image_sample()
+        custom_images = self.load_custom_image_sample()
+        if custom_images:
+            load_config.custom_images = custom_images
         load_config.human_genome_build = GenomeBuild.hg19
         return load_config
 
-    def load_custom_image_sample(self) -> CustomImages:
+    def load_custom_image_sample(self) -> CustomImages | None:
         """Build custom images config."""
         LOG.info("Adding custom images")
         eklipse_images: list = []
