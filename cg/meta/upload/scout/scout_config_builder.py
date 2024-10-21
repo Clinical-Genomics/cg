@@ -218,7 +218,7 @@ class ScoutConfigBuilder:
         """
         sample_id: str = config_sample.sample_id
         print("here A")
-        print(sample_id)
+        print(self.sample_tags.alignment_file)
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
@@ -235,9 +235,10 @@ class ScoutConfigBuilder:
 
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""
+        print(hk_tags)
         if hk_tags:  # skip if no tag found
             hk_tags.add(sample_id)
-            print(sample_id)
+            print(hk_tags)
             return self.get_file_from_hk(hk_tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
