@@ -11,6 +11,7 @@ from cg.apps.scout.validators import (
     set_sex_if_other,
 )
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.scout import RANK_MODEL_THRESHOLD
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus, Sex
 
 
@@ -73,7 +74,7 @@ class ScoutExportCase(BaseModel):
     panels: list[Panel] | None = None
     rank_model_version: str | None = None
     sv_rank_model_version: str | None = None
-    rank_score_threshold: int = 5
+    rank_score_threshold: int = RANK_MODEL_THRESHOLD
     phenotype_terms: list[Phenotype] | None = None
     phenotype_groups: list[Phenotype] | None = None
     diagnosis_phenotypes: list[DiagnosisPhenotypes] | None = None

@@ -149,3 +149,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 RNAFUSION_SAMPLE_TAGS = dict(
     alignment_file={AlignmentFileTag.CRAM},
 )
+
+RANK_MODEL_THRESHOLD = 5
