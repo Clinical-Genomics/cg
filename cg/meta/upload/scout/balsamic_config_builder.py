@@ -97,6 +97,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         db_sample: CaseSample
 
         for db_sample in self.analysis_obj.case.links:
+            print(db_sample)
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
         return load_config
