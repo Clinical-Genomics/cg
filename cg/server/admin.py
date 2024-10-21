@@ -7,6 +7,7 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from sqlalchemy import inspect
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
@@ -74,6 +75,15 @@ def is_external_application(unused1, unused2, model, unused3):
     return model.application_version.application.is_external if model.application_version else ""
 
 
+def view_order_types(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return (
+        "\n".join([order_type.order_type for order_type in model.order_types])
+        if model.order_types
+        else ""
+    )
+
+
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
@@ -117,6 +127,8 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
+    column_list = [column_name for column_name in inspect(Application).columns] + ["order_types"]
+
     column_editable_list = [
         "description",
         "is_accredited",
@@ -147,6 +159,7 @@ class ApplicationView(BaseView):
         "category",
     ]
     column_formatters = {
+        "order_types": view_order_types,
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
@@ -154,7 +167,7 @@ class ApplicationView(BaseView):
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category", "versions"]
+    form_excluded_columns = ["category", "versions", "order_types"]
     form_extra_fields = {
         "suitable_order_types": MultiCheckboxField(
             "Order Types", choices=[(choice, choice.name) for choice in OrderType]
@@ -181,6 +194,17 @@ class ApplicationView(BaseView):
         """Override to persist entries to the OrderTypeApplication table"""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
         db.update_order_type_applications(application=model, form=form)
+
+    def edit_form(self, obj=None):
+        form = super(ApplicationView, self).edit_form(obj)
+
+        # Pre-select the existing order types for the application
+        if obj and obj.order_types:
+            form.suitable_order_types.data = [
+                order_type.order_type for order_type in obj.order_types
+            ]
+
+        return form
 
 
 class ApplicationVersionView(BaseView):
