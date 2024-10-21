@@ -3,8 +3,10 @@ from typing import Any
 
 from flask import Blueprint, abort, jsonify, make_response
 
+from cg.server.endpoints.error_handler import handle_endpoint_errors
 from cg.server.endpoints.utils import before_request, is_public
-from cg.server.ext import db
+from cg.server.ext import applications_service, db
+from cg.services.application.models import ApplicationResponse
 from cg.store.models import Application, ApplicationLimitations
 
 APPLICATIONS_BLUEPRINT = Blueprint("applications", __name__, url_prefix="/api/v1")
@@ -21,14 +23,13 @@ def get_applications():
 
 
 @APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
+@handle_endpoint_errors
 def get_application_order_types(order_type: str):
     """Return application order types.."""
-    applications: list[Application] = db.get_active_applications_by_order_type(order_type)
-    if not applications:
-        message: str = "No applications found for the given order type"
-        return abort(make_response(jsonify(message=message), HTTPStatus.NOT_FOUND))
-    app_tags: list[str] = [application.tag for application in applications]
-    return jsonify(applications=app_tags)
+    applications: ApplicationResponse = applications_service.get_applications_by_order_type(
+        order_type
+    )
+    return jsonify(applications.model_dump())
 
 
 @APPLICATIONS_BLUEPRINT.route("/applications/<tag>")

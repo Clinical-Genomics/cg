@@ -823,16 +823,23 @@ class ReadHandler(BaseHandler):
         )
 
     def get_active_applications_by_order_type(self, order_type: str) -> list[Application]:
-        """Return all possible not archived applications for an order type."""
+        """
+        Return all possible non-archived applications for an order type.
+        Raises:
+            EntryNotFoundError: If no applications are found for the order type.
+        """
         non_archived_applications: Query = apply_application_filter(
             applications=self._get_join_application_ordertype_query(),
             filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
         )
-        return apply_order_type_application_filter(
+        applications: list[Application] = apply_order_type_application_filter(
             ordertype_applications=non_archived_applications,
             filter_functions=[OrderTypeApplicationFilter.BY_ORDER_TYPE],
             order_type=order_type,
         ).all()
+        if not applications:
+            raise EntryNotFoundError(f"No applications found for order type {order_type}")
+        return applications
 
     def get_current_application_version_by_tag(self, tag: str) -> ApplicationVersion | None:
         """Return the current application version for an application tag."""
