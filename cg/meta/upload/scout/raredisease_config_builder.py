@@ -1,15 +1,16 @@
 import logging
+import re
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkNFAnalysisTags
 from cg.constants.scout import (
-    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
+    GenomeBuild,
     UploadTrack,
 )
 from cg.io.controller import ReadFile
@@ -73,11 +74,22 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         print(hk_manifest_file)
         self.extract_rank_model(hk_manifest_file=hk_manifest_file.full_path)
 
-    def extract_rank_model(hk_manifest_file) -> str:
+    def extract_rank_model(self, hk_manifest_file) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
-        print(content)
+        return self.search_rank_model_in_manifest(self, content)
+
+    def search_rank_model_in_manifest(content) -> str:
+        pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
+        for entry in content:
+            script = entry["script"]
+            match = re.search(pattern, script)
+            if match:
+                rank_model_version = match.group(1)
+                break
+        LOG.info(f"Rank Model Version: {rank_model_version}")
+        return rank_model_version
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
