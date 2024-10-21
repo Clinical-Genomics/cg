@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, Strandedness
-from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -61,10 +61,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return reference genome for a case. Currently fixed for hg38."""
         return GenomeVersion.HG38
 
-    def get_nextflow_config_content(self, case_id: str) -> str:
-        """Return nextflow config content."""
-        return MULTIQC_NEXFLOW_CONFIG
-
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return Rnafusion bundle filenames path."""
@@ -88,11 +84,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         return RnafusionParameters(
-            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
-            priority=self.account,
         )
 
     def get_references_path(self, genomes_base: Path | None = None) -> Path:
