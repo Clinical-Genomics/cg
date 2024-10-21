@@ -217,9 +217,13 @@ class ScoutConfigBuilder:
         Try if cram file is found, if not: load bam file
         """
         sample_id: str = config_sample.sample_id
+        print("here A")
+        print(sample_id)
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
+        print(config_sample.alignment_path)
+
         if not config_sample.alignment_path:
             self.include_sample_alignment_bam(config_sample)
 
