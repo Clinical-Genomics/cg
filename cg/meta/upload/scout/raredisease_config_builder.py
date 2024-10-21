@@ -76,9 +76,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def get_rank_model_version(self, variant_type) -> str:
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
-        return self.extract_rank_model(
-            hk_manifest_file=hk_manifest_file.full_path, variant_type=variant_type
-        )
+        return self.extract_rank_model(hk_manifest_file, variant_type)
 
     def extract_rank_model(self, hk_manifest_file, variant_type) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
