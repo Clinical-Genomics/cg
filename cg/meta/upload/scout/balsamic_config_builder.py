@@ -5,7 +5,12 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SampleType
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS, GenomeBuild, UploadTrack
+from cg.constants.scout import (
+    BALSAMIC_CASE_TAGS,
+    BALSAMIC_SAMPLE_TAGS,
+    GenomeBuild,
+    UploadTrack,
+)
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -48,6 +53,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
+
+    def include_sample_alignment_file(self, config_sample: ScoutCancerIndividual) -> None:
+        None
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
