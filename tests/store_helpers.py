@@ -36,6 +36,7 @@ from cg.store.models import (
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     Panel,
     Pool,
@@ -250,6 +251,18 @@ class StoreHelpers:
         store.session.add(application)
         store.session.commit()
         return application
+
+    def add_application_order_type(
+        self, store: Store, application: Application, order_types: list[str]
+    ):
+        """Add an order type to an application."""
+        order_app_links: list[OrderTypeApplication] = store.link_order_types_to_application(
+            application=application, order_types=order_types
+        )
+        for link in order_app_links:
+            store.session.add(link)
+        store.session.commit()
+        return order_app_links
 
     @staticmethod
     def ensure_application_limitation(
