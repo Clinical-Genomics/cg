@@ -197,6 +197,7 @@ class UploadScoutAPI:
         unique_dna_cases_related_to_rna_case: set[str] = set()
         for rna_dna_collection in rna_dna_collections:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
+        print(unique_dna_cases_related_to_rna_case)
         return unique_dna_cases_related_to_rna_case
 
     def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
@@ -778,7 +779,7 @@ class UploadScoutAPI:
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
         unique_dna_case_ids: set[str] = self.get_unique_dna_cases_related_to_rna_case(rna_case_id)
-
+        print(unique_dna_case_ids)
         uploaded_dna_cases: set[str] = set()
         for dna_case_id in unique_dna_case_ids:
             if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:
