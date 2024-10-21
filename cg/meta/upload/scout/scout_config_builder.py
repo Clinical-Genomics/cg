@@ -148,7 +148,6 @@ class ScoutConfigBuilder:
         """Add common sample files for different analysis types."""
         LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
         self.include_sample_alignment_file(config_sample)
-        print("here")
         self.include_sample_files(config_sample)
 
     def build_load_config(self) -> ScoutLoadConfig:
@@ -217,12 +216,9 @@ class ScoutConfigBuilder:
         Try if cram file is found, if not: load bam file
         """
         sample_id: str = config_sample.sample_id
-        print("here A")
-        print(self.sample_tags.alignment_file)
         config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
-        print(config_sample.alignment_path)
 
         if not config_sample.alignment_path:
             self.include_sample_alignment_bam(config_sample)
@@ -235,10 +231,10 @@ class ScoutConfigBuilder:
 
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""
-        print(hk_tags)
         if hk_tags:  # skip if no tag found
-            tmp_tags = {hk_tags, sample_id}
-            return self.get_file_from_hk(tmp_tags)
+            tags: set = hk_tags.copy()
+            tags.add(sample_id)
+            return self.get_file_from_hk(hk_tags=tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Return the Housekeeper file path as a string."""

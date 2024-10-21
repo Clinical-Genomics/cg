@@ -42,17 +42,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
-        print("reached here")
 
         sample_id: str = config_sample.sample_id
-        print(sample_id)
         if config_sample.alignment_path:
-            print("here B")
             if SampleType.TUMOR in config_sample.alignment_path:
-                print("here TUMOR")
                 sample_id = SampleType.TUMOR.value
             elif SampleType.NORMAL in config_sample.alignment_path:
-                print("here NORMAL")
                 sample_id = SampleType.NORMAL.value
 
         config_sample.vcf2cytosure = self.get_sample_file(
@@ -99,7 +94,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         db_sample: CaseSample
 
         for db_sample in self.analysis_obj.case.links:
-            print(db_sample)
             load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
         return load_config
