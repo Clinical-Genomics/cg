@@ -11,6 +11,7 @@ from cg.constants import Workflow
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
+from cg.models.orders.constants import OrderType
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.models import (
@@ -341,7 +342,7 @@ def store_with_application_limitations(
 
 @pytest.fixture(name="applications_store")
 def applications_store(store: Store, helpers: StoreHelpers) -> Store:
-    """Return a store populated with applications from excel file"""
+    """Return a store populated with applications from excel file."""
     app_tags: list[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
     for app_tag in app_tags:
         helpers.ensure_application(store=store, tag=app_tag)
@@ -368,6 +369,24 @@ def store_with_different_application_versions(
             application_tag=application.tag,
             valid_from=dt.datetime(year, 1, 1, 1, 1, 1),
             version=version,
+        )
+    return applications_store
+
+
+@pytest.fixture
+def store_with_applications_with_order_types(
+    applications_store: Store, helpers: StoreHelpers
+) -> Store:
+    """Return a store with applications that have entries in the OrderTypeApplication table."""
+    order_types_per_application: list[list[str]] = [
+        [OrderType.BALSAMIC, OrderType.MIP_DNA, OrderType.MIP_RNA],
+        [OrderType.RNAFUSION, OrderType.TAXPROFILER, OrderType.TOMTE],
+        [OrderType.FASTQ, OrderType.PACBIO_LONG_READ, OrderType.RML],
+    ]
+    applications: list[Application] = applications_store.get_applications()
+    for application, order_types in zip(applications, order_types_per_application):
+        helpers.add_application_order_type(
+            store=applications_store, application=application, order_types=order_types
         )
     return applications_store
 
