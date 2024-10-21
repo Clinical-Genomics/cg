@@ -11,8 +11,12 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
-from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AlignmentFileTag,
+    AnalysisTag,
+)
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
@@ -23,7 +27,10 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.genome_build_helpers import get_genome_build, genome_to_scout_format
+from cg.meta.workflow.utils.genome_build_helpers import (
+    genome_to_scout_format,
+    get_genome_build,
+)
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -184,7 +191,9 @@ class UploadScoutAPI:
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
+        print(case)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(case)
+        print(rna_dna_collections)
         unique_dna_cases_related_to_rna_case: set[str] = set()
         for rna_dna_collection in rna_dna_collections:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)

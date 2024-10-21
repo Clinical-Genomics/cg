@@ -1,8 +1,10 @@
 """Functions that handle files in the context of Scout uploading."""
 
 import logging
-from typing import Any
 import re
+from pathlib import Path
+from typing import Any
+
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,13 +14,11 @@ from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import (
     ScoutIndividual,
+    ScoutLoadConfig,
     ScoutMipIndividual,
     ScoutRarediseaseIndividual,
-    ScoutLoadConfig,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
-
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -148,6 +148,7 @@ class ScoutConfigBuilder:
         """Add common sample files for different analysis types."""
         LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
         self.include_sample_alignment_file(config_sample)
+        print("here")
         self.include_sample_files(config_sample)
 
     def build_load_config(self) -> ScoutLoadConfig:

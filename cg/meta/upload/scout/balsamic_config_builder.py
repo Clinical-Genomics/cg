@@ -42,6 +42,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
+        print("reached here")
 
         sample_id: str = config_sample.sample_id
         if config_sample.alignment_path:
@@ -55,7 +56,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
 
     def include_sample_alignment_file(self, config_sample: ScoutCancerIndividual) -> None:
-        None
+        return None
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
