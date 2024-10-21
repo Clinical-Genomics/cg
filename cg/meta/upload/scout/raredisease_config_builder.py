@@ -1,16 +1,15 @@
 import logging
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import Version
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkNFAnalysisTags
 from cg.constants.scout import (
+    GenomeBuild,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
-    GenomeBuild,
     UploadTrack,
 )
 from cg.io.controller import ReadFile
