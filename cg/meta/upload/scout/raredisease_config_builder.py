@@ -84,9 +84,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
-        return self.search_rank_model_in_manifest(self, content, variant_type)
+        return self.search_rank_model_in_manifest(content, variant_type)
 
-    def search_rank_model_in_manifest(content, variant_type) -> str:
+    def search_rank_model_in_manifest(self, content, variant_type) -> str:
         if variant_type == Variants.SNV:
             pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
         elif variant_type == Variants.SV:
