@@ -237,9 +237,8 @@ class ScoutConfigBuilder:
         """Return a file that is specific for an individual from Housekeeper."""
         print(hk_tags)
         if hk_tags:  # skip if no tag found
-            hk_tags.add(sample_id)
-            print(hk_tags)
-            return self.get_file_from_hk(hk_tags)
+            tmp_tags = {hk_tags, sample_id}
+            return self.get_file_from_hk(tmp_tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Return the Housekeeper file path as a string."""

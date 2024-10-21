@@ -56,7 +56,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
                 sample_id = SampleType.NORMAL.value
 
         config_sample.vcf2cytosure = self.get_sample_file(
-            hk_tags=self.sample_tags.vcf2cytosure, sample_id="sample_id"
+            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
