@@ -17,8 +17,10 @@ from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.backup.utils import (
+    get_latest_archived_encryption_key_path,
+    get_latest_archived_sequencing_run_path,
 )
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
@@ -96,8 +98,8 @@ class IlluminaBackupService:
             sequencing_run.device.internal_id
         )
 
-        archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
-        archived_run: Path = self.get_archived_sequencing_run_path(dsmc_output=dsmc_output)
+        archived_key: Path = get_latest_archived_encryption_key_path(dsmc_output=dsmc_output)
+        archived_run: Path = get_latest_archived_sequencing_run_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_run(
@@ -277,38 +279,6 @@ class IlluminaBackupService:
         self.pdc.retrieve_file_from_pdc(
             file_path=str(archived_file), target_path=str(retrieved_file)
         )
-
-    @classmethod
-    def get_archived_sequencing_run_path(cls, dsmc_output: list[str]) -> Path | None:
-        """Get the path of the archived sequencing run from a PDC query."""
-        run_line: str = [
-            row
-            for row in dsmc_output
-            if FileExtensions.TAR in row
-            and FileExtensions.GZIP in row
-            and FileExtensions.GPG in row
-        ][0]
-
-        archived_run = Path(run_line.split()[4])
-        if archived_run:
-            LOG.info(f"Sequencing run found: {archived_run}")
-            return archived_run
-
-    @classmethod
-    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
-        """Get the encryption key for the archived sequencing run from a PDC query."""
-        encryption_key_line: str = [
-            row
-            for row in dsmc_output
-            if FileExtensions.KEY in row
-            and FileExtensions.GPG in row
-            and FileExtensions.GZIP not in row
-        ][0]
-
-        archived_encryption_key = Path(encryption_key_line.split()[4])
-        if archived_encryption_key:
-            LOG.info(f"Encryption key found: {archived_encryption_key}")
-            return archived_encryption_key
 
     def validate_is_run_backup_possible(
         self,
