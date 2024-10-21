@@ -76,6 +76,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def get_rank_model_version(self, variant_type) -> str:
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
+        if not hk_manifest_file:
+            raise FileNotFoundError("No manifest file found in housekeeper")
         return self.extract_rank_model(hk_manifest_file, variant_type)
 
     def extract_rank_model(self, hk_manifest_file, variant_type) -> str:
@@ -89,13 +91,12 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
         elif variant_type == Variants.SV:
             pattern = r"score_config svrank_model_-(v\d+\.\d+)-\.ini"
-
-        for entry in content:
-            script = entry["script"]
-            match = re.search(pattern, script)
-            if match:
-                rank_model_version = match.group(1)
-                break
+        print(content)
+        # for entry in content:
+        script = content
+        match = re.search(pattern, script)
+        if match:
+            rank_model_version = match.group(1)
         LOG.info(f"Rank Model Version: {rank_model_version}")
         return rank_model_version
 
