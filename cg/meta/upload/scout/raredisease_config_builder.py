@@ -128,7 +128,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
                     print("match found")
                     version = match.group(1)
                     return version
-            ValueError(f"No rank model version found for clinical {variant_type}")
+            raise ValueError(f"No rank model version found for clinical {variant_type}")
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
