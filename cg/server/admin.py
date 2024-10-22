@@ -12,7 +12,7 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
-from cg.server.ext import db, sample_service
+from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
@@ -195,11 +195,9 @@ class ApplicationView(BaseView):
         """Override to persist entries to the OrderTypeApplication table."""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
         order_types: list[OrderType] = form["suitable_order_types"].data
-        db.delete_order_type_applications_by_application_id(model.id)
-        db.session.add_all(
-            db.link_order_types_to_application(application=model, order_types=order_types)
+        applications_service.update_application_order_types(
+            application=model, order_types=order_types
         )
-        db.session.commit()
 
     def edit_form(self, obj=None):
         """Override to prefill the order types according to the current Application entry."""

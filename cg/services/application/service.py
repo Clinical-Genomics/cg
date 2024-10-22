@@ -19,3 +19,14 @@ class ApplicationsWebService:
         )
         app_tags: list[str] = [application.tag for application in applications]
         return create_application_response(app_tags)
+
+    def update_application_order_types(
+        self, application: Application, order_types: list[OrderType]
+    ) -> None:
+        self.store.delete_order_type_applications_by_application_id(application.id)
+        self.store.session.add_all(
+            self.store.link_order_types_to_application(
+                application=application, order_types=order_types
+            )
+        )
+        self.store.commit_to_store()
