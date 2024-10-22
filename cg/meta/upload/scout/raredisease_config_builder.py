@@ -6,7 +6,11 @@ from housekeeper.store.models import File, Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkNFAnalysisTags
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AnalysisTag,
+    HkNFAnalysisTags,
+)
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
@@ -78,27 +82,54 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
         if not hk_manifest_file:
             raise FileNotFoundError("No manifest file found in housekeeper")
-        return self.extract_rank_model(hk_manifest_file, variant_type)
+        return self.extract_rank_model_from_manifest(hk_manifest_file, variant_type)
 
-    def extract_rank_model(self, hk_manifest_file, variant_type) -> str:
+    def extract_rank_model_from_manifest(self, hk_manifest_file, variant_type) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
         return self.search_rank_model_in_manifest(content, variant_type)
 
     def search_rank_model_in_manifest(self, content, variant_type) -> str:
-        if variant_type == Variants.SNV:
-            pattern = r"score_config rank_model_-(v\d+\.\d+)-\.ini"
-        elif variant_type == Variants.SV:
-            pattern = r"score_config svrank_model_-(v\d+\.\d+)-\.ini"
-        print(content)
-        # for entry in content:
-        script = content
-        match = re.search(pattern, script)
-        if match:
-            rank_model_version = match.group(1)
-        LOG.info(f"Rank Model Version: {rank_model_version}")
-        return rank_model_version
+        """
+        Extract the version from manifest.json. Structure is
+        {pipeline, published, tasks}
+        content['tasks']: {{
+        'id': '6',
+        'name': 'NFCORE_RAREDISEASE:RAREDISEASE:PREPARE_REFERENCES:GET_CHROM_SIZES',
+        'cached': True,
+        'process': 'NFCORE_RAREDISEASE:RAREDISEASE:PREPARE_REFERENCES:GET_CHROM_SIZES',
+        'script': 'genmod \
+        score \
+        --rank_results \
+        --family_file cleanshrimp.ped \
+        --score_config rank_model_-v1.38-.ini \
+        --outfile cleanshrimp_snv_genmod_score_clinical_score.vcf \
+        cleanshrimp_snv_genmod_models_clinical_models.vcf
+
+        cat <<-END_VERSIONS > versions.yml
+        "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE":
+            genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )
+        END_VERSIONS"',
+        'inputs': [...],
+        'outputs': [...],
+        },
+        ...
+        }
+        """
+        pattern = "{variant_type}:GENMOD_SCORE"
+        for key, value in content["tasks"].items():
+            process = value.get("process")  # Use get to safely access the 'process' key
+            script = value.get("script")
+            if pattern in process and AnalysisTag.CLINICAL in script:
+                print(f"Process for entry {script}")
+                match = re.search(r"v(\d+\.\d+)", script)  # Extract the version number
+
+                if match:
+                    version = match.group(1)
+                    return version
+                else:
+                    ValueError(f"No rank model version found for clinical {variant_type}")
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
