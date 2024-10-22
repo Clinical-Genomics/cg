@@ -71,12 +71,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
         eklipse_images: list = []
         for db_sample in self.analysis_obj.case.links:
+            sample_id: str = db_sample.sample.internal_id
             eklipse_image_path = self.get_file_from_hk(
-                hk_tags=set(self.sample_tags.eklipse_path).union({db_sample})
+                hk_tags=set(self.sample_tags.eklipse_path).union({sample_id})
             )
-            print(eklipse_image_path)
             if eklipse_image_path:
-                sample_id: str = db_sample.sample.internal_id
                 eklipse_image = Eklipse(
                     title=sample_id,
                     path=eklipse_image_path,
