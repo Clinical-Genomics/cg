@@ -195,7 +195,11 @@ class ApplicationView(BaseView):
         """Override to persist entries to the OrderTypeApplication table"""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
         order_types: list[OrderType] = form["suitable_order_types"].data
-        db.update_order_type_applications(application=model, order_types=order_types)
+        db.delete_order_type_applications_by_application_id(model.id)
+        db.session.add_all(
+            db.link_order_types_to_application(application=model, order_types=order_types)
+        )
+        db.session.commit()
 
     def edit_form(self, obj=None):
         form = super(ApplicationView, self).edit_form(obj)
