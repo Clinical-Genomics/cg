@@ -88,6 +88,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
+        LOG.info("Extracting content from manifest file")
         return self.search_rank_model_in_manifest(content, variant_type)
 
     def search_rank_model_in_manifest(self, content, variant_type) -> str:
@@ -122,10 +123,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             process = value.get("process")  # Use get to safely access the 'process' key
             script = value.get("script")
             if pattern in process and AnalysisTag.CLINICAL in script:
+                print(process)
+                print(script)
                 print(f"Process for entry {script}")
                 match = re.search(r"v(\d+\.\d+)", script)  # Extract the version number
 
                 if match:
+                    print("match found")
                     version = match.group(1)
                     return version
                 else:
