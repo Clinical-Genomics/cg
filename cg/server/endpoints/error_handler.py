@@ -9,7 +9,7 @@ from cg.store.exc import EntryNotFoundError
 LOG = logging.getLogger(__name__)
 
 
-def handle_endpoint_errors(func):
+def handle_missing_entries(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:

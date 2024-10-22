@@ -1,3 +1,4 @@
+from cg.models.orders.constants import OrderType
 from cg.services.application.models import ApplicationResponse
 from cg.store.models import Application
 from cg.store.store import Store
@@ -12,7 +13,7 @@ class ApplicationsService:
     def __init__(self, store: Store):
         self.store = store
 
-    def get_valid_applications(self, order_type: str) -> ApplicationResponse:
+    def get_valid_applications(self, order_type: OrderType) -> ApplicationResponse:
         applications: list[Application] = self.store.get_active_applications_by_order_type(
             order_type
         )

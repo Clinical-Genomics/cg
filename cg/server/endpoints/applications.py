@@ -3,7 +3,8 @@ from typing import Any
 
 from flask import Blueprint, abort, jsonify, make_response
 
-from cg.server.endpoints.error_handler import handle_endpoint_errors
+from cg.models.orders.constants import OrderType
+from cg.server.endpoints.error_handler import handle_missing_entries
 from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import applications_service, db
 from cg.services.application.models import ApplicationResponse
@@ -23,8 +24,8 @@ def get_applications():
 
 
 @APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
-@handle_endpoint_errors
-def get_application_order_types(order_type: str):
+@handle_missing_entries
+def get_application_order_types(order_type: OrderType):
     """Return application order types."""
     applications: ApplicationResponse = applications_service.get_valid_applications(order_type)
     return jsonify(applications.model_dump())
