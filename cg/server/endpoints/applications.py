@@ -26,9 +26,7 @@ def get_applications():
 @handle_endpoint_errors
 def get_application_order_types(order_type: str):
     """Return application order types."""
-    applications: ApplicationResponse = applications_service.get_applications_by_order_type(
-        order_type
-    )
+    applications: ApplicationResponse = applications_service.get_valid_applications(order_type)
     return jsonify(applications.model_dump())
 
 
