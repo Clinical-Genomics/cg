@@ -181,7 +181,9 @@ class Application(Base):
     pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
         back_populates="application"
     )
-    order_types = orm.relationship("OrderTypeApplication", back_populates="application")
+    order_types: Mapped[list["OrderTypeApplication"]] = orm.relationship(
+        "OrderTypeApplication", back_populates="application"
+    )
 
     def __str__(self) -> str:
         return self.tag
