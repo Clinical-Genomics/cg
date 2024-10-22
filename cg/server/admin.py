@@ -202,6 +202,7 @@ class ApplicationView(BaseView):
         db.session.commit()
 
     def edit_form(self, obj=None):
+        """Override to prefill the order types according to the current Application entry."""
         form = super(ApplicationView, self).edit_form(obj)
 
         # Pre-select the existing order types for the application
