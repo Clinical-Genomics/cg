@@ -137,6 +137,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
+        LOG.debug("Getting nextflow config content")
         config_files_list: list[str] = [
             self.config_platform,
             self.config_params,
@@ -288,6 +289,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         if workflow_parameters:
+            LOG.debug(f"Writing parameter {workflow_parameters}")
             write_yaml_nextflow_style(
                 content=workflow_parameters,
                 file_path=self.get_params_file_path(case_id=case_id),
@@ -359,6 +361,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 content=content,
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
+            LOG.debug("Here A")
 
     def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
@@ -379,6 +382,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
         self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        LOG.debug("here")
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
         if self.is_managed_variants_required:

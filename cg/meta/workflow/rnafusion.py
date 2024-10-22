@@ -83,6 +83,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
+        LOG.debug("Getting rnafusion workflow parameters")
         return RnafusionParameters(
             genomes_base=genomes_base or self.get_references_path(),
             input=self.get_sample_sheet_path(case_id=case_id),
