@@ -8,7 +8,7 @@ def create_application_response(app_tags: list[str]) -> ApplicationResponse:
     return ApplicationResponse(applications=app_tags)
 
 
-class ApplicationsService:
+class ApplicationsWebService:
 
     def __init__(self, store: Store):
         self.store = store
