@@ -118,7 +118,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         ...
         }
         """
-        pattern = "{variant_type}:GENMOD_SCORE"
+        pattern = "{variant_type.upper()}:GENMOD_SCORE"
         for key, value in content["tasks"].items():
             process = value.get("process")  # Use get to safely access the 'process' key
             script = value.get("script")
