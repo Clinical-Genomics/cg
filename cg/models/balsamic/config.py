@@ -52,13 +52,13 @@ class BalsamicConfigReference(BaseModel):
 
     @field_validator("reference_genome_version")
     @classmethod
-    def extract_genome_version_from_path(cls, _, values: dict) -> str:
+    def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
         """
         Return the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
-        return str(values["reference_genome"]).split("/")[-3]
+        return str(info.data.get("reference_genome")).split("/")[-3]
 
 
 class BalsamicConfigPanel(BaseModel):
