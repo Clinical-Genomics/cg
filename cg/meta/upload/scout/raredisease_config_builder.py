@@ -75,7 +75,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
         load_config.rank_model_version = self.get_rank_model_version(variant_type=Variants.SNV)
         load_config.sv_rank_model_version = self.get_rank_model_version(variant_type=Variants.SV)
-
         return load_config
 
     def get_rank_model_version(self, variant_type) -> str:
@@ -123,12 +122,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             script = value.get("script")
             if pattern in process and AnalysisTag.CLINICAL in script:
                 match = re.search(r"v(\d+\.\d+)", script)  # Extract the version number
-
                 if match:
-                    print("match found")
                     version = match.group(1)
                     return version
-            raise ValueError(f"No rank model version found for clinical {variant_type}")
+        raise ValueError(f"No rank model version found for clinical {variant_type}")
 
     def load_custom_image_sample(self) -> CustomImages:
         """Build custom images config."""
