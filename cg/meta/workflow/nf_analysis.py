@@ -143,6 +143,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.config_params,
             self.config_resources,
         ]
+        LOG.info(config_files_list)
         extra_parameters_str: list[str] = [
             self.set_cluster_options(case_id=case_id),
         ]
