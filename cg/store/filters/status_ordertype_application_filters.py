@@ -10,7 +10,7 @@ def filter_applications_by_order_type(
     order_type_applications: Query, order_type: OrderType, **kwargs
 ) -> Query:
     """Return application by order type."""
-    return order_type_applications.filter(OrderTypeApplication.order_type.is_(order_type))
+    return order_type_applications.filter(OrderTypeApplication.order_type == order_type)
 
 
 def apply_order_type_application_filter(
