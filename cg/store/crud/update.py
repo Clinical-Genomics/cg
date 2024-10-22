@@ -3,7 +3,6 @@
 from datetime import datetime
 
 from sqlalchemy.orm import Session
-from wtforms.form import Form
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import SequencingQCStatus
@@ -111,10 +110,11 @@ class UpdateHandler(BaseHandler):
         analysis.upload_started_at = upload_started_at
         self.session.commit()
 
-    def update_order_type_applications(self, application: Application, form: Form):
+    def update_order_type_applications(
+        self, application: Application, order_types: list[OrderType]
+    ):
         """Updates the order_type_application table based on the updated Application object"""
         self._get_query(OrderTypeApplication).filter_by(application_id=application.id).delete()
-        selected_order_types: list[OrderType] = form["suitable_order_types"].data
-        for order_type in selected_order_types:
+        for order_type in order_types:
             self.session.add(OrderTypeApplication(application=application, order_type=order_type))
         self.session.commit()

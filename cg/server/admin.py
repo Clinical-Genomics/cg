@@ -77,8 +77,9 @@ def is_external_application(unused1, unused2, model, unused3):
 
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
+    order_type_list = "<br>".join([order_type.order_type for order_type in model.order_types])
     return (
-        "\n".join([order_type.order_type for order_type in model.order_types])
+        Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
         if model.order_types
         else ""
     )
@@ -193,13 +194,14 @@ class ApplicationView(BaseView):
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table"""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
-        db.update_order_type_applications(application=model, form=form)
+        order_types: list[OrderType] = form["suitable_order_types"].data
+        db.update_order_type_applications(application=model, order_types=order_types)
 
     def edit_form(self, obj=None):
         form = super(ApplicationView, self).edit_form(obj)
 
         # Pre-select the existing order types for the application
-        if obj and obj.order_types:
+        if obj and obj.order_types and not form.suitable_order_types.data:
             form.suitable_order_types.data = [
                 order_type.order_type for order_type in obj.order_types
             ]
