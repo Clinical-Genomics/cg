@@ -27,7 +27,7 @@ def get_applications():
 @handle_missing_entries
 def get_application_order_types():
     """Return application order types."""
-    order_type: OrderType = OrderType(request.args.get("order_type"))
+    order_type = OrderType(request.args.get("order_type"))
     applications: ApplicationResponse = applications_service.get_valid_applications(order_type)
     return jsonify(applications.model_dump())
 
