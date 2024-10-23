@@ -70,8 +70,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         LOG.info("Adding custom images")
 
         eklipse_images: list = []
-        for db_sample in self.analysis_obj.case.links:
-            sample_id: str = db_sample.sample.internal_id
+        for sample in self.analysis_obj.case.samples:
+            sample_id: str = sample.internal_id
             eklipse_image_path = self.get_file_from_hk(
                 hk_tags=set(self.sample_tags.eklipse_path).union({sample_id})
             )
