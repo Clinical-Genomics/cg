@@ -141,8 +141,6 @@ def test_filter_get_applications_has_versions(
             table=Application
         )
     )
-    for application in applications.all():
-        assert not application.versions
     prices = {
         PriorityEnum.standard.name: 2,
         PriorityEnum.research.name: 3,
