@@ -41,7 +41,7 @@ class TaxprofilerParameters(WorkflowParameters):
     centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
-    clusterOptions: str | None = Field(str | None, alias="cluster_options")
+    clusterOptions: str = Field(str, alias="cluster_options")
     priority: str
 
 
