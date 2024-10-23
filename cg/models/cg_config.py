@@ -254,21 +254,18 @@ class TomteConfig(CommonAppConfig):
 
 
 class RnafusionConfig(CommonAppConfig):
-    root: str
-    references: str
     binary_path: str
-    workflow_path: str
+    compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
-    workflow_path: str
-    profile: str
     launch_directory: str
+    profile: str
+    references: str
     revision: str
+    root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
