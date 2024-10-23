@@ -10,11 +10,10 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
+from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
-from cg.services.orders.order_summary_service.order_summary_service import (
-    OrderSummaryService,
-)
+from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,
@@ -86,6 +85,7 @@ db = FlaskStore()
 
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
+applications_service = ApplicationsWebService(store=db)
 analysis_client = AnalysisClient()
 delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=analysis_client)
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
