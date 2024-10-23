@@ -65,7 +65,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config.human_genome_build = GenomeBuild.hg19
         return load_config
 
-    def load_custom_image_sample(self, load_config: RarediseaseLoadConfig) -> CustomImages | None:
+    def load_custom_image_sample(self, load_config: RarediseaseLoadConfig) -> None:
         """Build custom images config."""
         LOG.info("Adding custom images")
 
