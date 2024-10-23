@@ -52,7 +52,7 @@ from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
     apply_order_type_application_filter,
 )
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter,
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
