@@ -10,12 +10,21 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -25,14 +34,23 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -51,7 +69,10 @@ from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
     apply_order_type_application_filter,
 )
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
@@ -822,15 +843,19 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-    def get_active_applications_by_order_type(self, order_type: str) -> list[Application]:
+    def get_active_applications_by_order_type(self, order_type: OrderType) -> list[Application]:
         """
         Return all possible non-archived applications for an order type.
         Raises:
             EntryNotFoundError: If no applications are found for the order type.
         """
+        filters: list[ApplicationFilter] = [
+            ApplicationFilter.IS_NOT_ARCHIVED,
+            ApplicationFilter.HAS_VERSIONS,
+        ]
         non_archived_applications: Query = apply_application_filter(
             applications=self._get_join_application_ordertype_query(),
-            filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
+            filter_functions=filters,
         )
         applications: list[Application] = apply_order_type_application_filter(
             order_type_applications=non_archived_applications,
