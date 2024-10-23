@@ -17,5 +17,5 @@ class ApplicationsWebService:
         applications: list[Application] = self.store.get_active_applications_by_order_type(
             order_type
         )
-        app_tags: list[str] = [application.tag for application in applications]
+        app_tags: list[str] = sorted([application.tag for application in applications])
         return create_application_response(app_tags)

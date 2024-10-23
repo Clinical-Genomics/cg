@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Any
 
-from flask import Blueprint, abort, jsonify, make_response
+from flask import Blueprint, abort, jsonify, make_response, request
 
 from cg.models.orders.constants import OrderType
 from cg.server.endpoints.error_handler import handle_missing_entries
@@ -23,10 +23,11 @@ def get_applications():
     return jsonify(applications=parsed_applications)
 
 
-@APPLICATIONS_BLUEPRINT.route("/applications/<order_type>")
+@APPLICATIONS_BLUEPRINT.route("/applications/order_type")
 @handle_missing_entries
-def get_application_order_types(order_type: OrderType):
+def get_application_order_types():
     """Return application order types."""
+    order_type: OrderType = OrderType(request.args.get("order_type"))
     applications: ApplicationResponse = applications_service.get_valid_applications(order_type)
     return jsonify(applications.model_dump())
 
