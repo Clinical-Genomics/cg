@@ -128,7 +128,7 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
-    column_list = [column_name for column_name in inspect(Application).columns] + ["order_types"]
+    column_list = list(inspect(Application).columns) + ["order_types"]
 
     column_editable_list = [
         "description",
@@ -204,7 +204,7 @@ class ApplicationView(BaseView):
         form = super(ApplicationView, self).edit_form(obj)
 
         # Pre-select the existing order types for the application
-        if obj and obj.order_types and not form.suitable_order_types.data:
+        if obj and request.method != "POST":
             form.suitable_order_types.data = [
                 order_type.order_type for order_type in obj.order_types
             ]
