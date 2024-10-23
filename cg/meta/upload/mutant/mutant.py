@@ -13,6 +13,7 @@ class MutantUploadAPI(UploadAPI):
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: Context, case: Case, restart: bool) -> None:
-        self.upload_files_to_customer_inbox(case)
         latest_analysis: Analysis = case.analyses[0]
+        self.update_upload_started_at(latest_analysis)
+        self.upload_files_to_customer_inbox(case)
         self.update_uploaded_at(latest_analysis)
