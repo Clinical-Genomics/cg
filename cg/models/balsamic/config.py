@@ -110,7 +110,6 @@ class BalsamicConfigQC(BaseModel):
     min_seq_length: str | None
 
 
-
 class BalsamicVarCaller(BaseModel):
     """Variant caller attributes model.
 
