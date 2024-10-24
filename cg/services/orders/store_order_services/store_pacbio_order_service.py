@@ -1,12 +1,12 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, Priority, Workflow
+from cg.constants import DataDelivery, Workflow
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
+from cg.store.models import ApplicationVersion, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -65,6 +65,12 @@ class StorePacBioOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+            workflow=Workflow(samples[0]["data_analysis"]),
+        )
         new_samples = []
         with self.status_db.session.no_autoflush:
             for sample in samples:
@@ -99,8 +105,10 @@ class StorePacBioOrderService(StoreOrderService):
                 new_relationship: CaseSample = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
                 )
+                status_db_order.cases.append(case)
                 self.status_db.session.add_all([case, new_relationship])
 
+        self.status_db.session.add(status_db_order)
         self.status_db.session.add_all(new_samples)
         self.status_db.session.commit()
         return new_samples
