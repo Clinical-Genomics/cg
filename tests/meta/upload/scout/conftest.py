@@ -10,7 +10,11 @@ from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
-from cg.constants.housekeeper_tags import AnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AnalysisTag,
+    HkNFAnalysisTags,
+)
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
@@ -21,18 +25,18 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-from cg.models.analysis import NextflowAnalysis
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
 
@@ -601,6 +605,11 @@ def raredisease_analysis_hk_bundle_data(
                 "path": Path(raredisease_analysis_dir, "multiqc.html").as_posix(),
                 "archive": False,
                 "tags": ["multiqc-html", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "manifest.json").as_posix(),
+                "archive": False,
+                "tags": [HkNFAnalysisTags.MANIFEST],
             },
         ],
     }
