@@ -96,7 +96,7 @@ def _get_latest_sequencing_run_in_list(
 
 
 def _get_latest_pdc_encryption_key(pdc_files: list[PdcEncryptionKey]) -> PdcEncryptionKey | None:
-    """Return the most recent encryption key based on the 'dateTime' attribute, or None if no keys are present."""
+    """Return the latest encryption key or None if no keys are present."""
 
     if not pdc_files:
         return None
