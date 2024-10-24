@@ -27,7 +27,7 @@ class BalsamicQCMetrics(QCMetrics):
     mean_insert_size: float | None = None
     percent_duplication: float | None = None
 
-    _percent_duplication = field_validator("percent_duplication")(percent_value_validation)
+    _percent_duplication: float = field_validator("percent_duplication")(percent_value_validation)
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
@@ -43,7 +43,7 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     pct_off_bait: float | None = None
     gc_dropout: float | None = None
 
-    _pct_values = field_validator(
+    _pct_values: float = field_validator(
         "pct_target_bases_50x",
         "pct_target_bases_100x",
         "pct_target_bases_250x",
@@ -63,7 +63,7 @@ class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     pct_100x: float | None = None
     pct_pf_reads_improper_pairs: float | None = None
 
-    _pct_values = field_validator(
+    _pct_values: float = field_validator(
         "pct_15x",
         "pct_30x",
         "pct_60x",
