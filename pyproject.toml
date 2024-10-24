@@ -44,7 +44,6 @@ WTForms = "*"
 google-auth = "*"
 gunicorn = "*"
 requests = "*"
-sendmail-container = "*"
 werkzeug = "*"
 
 # Utils
