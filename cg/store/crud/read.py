@@ -10,6 +10,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
@@ -822,15 +823,19 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-    def get_active_applications_by_order_type(self, order_type: str) -> list[Application]:
+    def get_active_applications_by_order_type(self, order_type: OrderType) -> list[Application]:
         """
-        Return all possible non-archived applications for an order type.
+        Return all possible non-archived applications with versions for an order type.
         Raises:
             EntryNotFoundError: If no applications are found for the order type.
         """
+        filters: list[ApplicationFilter] = [
+            ApplicationFilter.IS_NOT_ARCHIVED,
+            ApplicationFilter.HAS_VERSIONS,
+        ]
         non_archived_applications: Query = apply_application_filter(
             applications=self._get_join_application_ordertype_query(),
-            filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
+            filter_functions=filters,
         )
         applications: list[Application] = apply_order_type_application_filter(
             order_type_applications=non_archived_applications,
