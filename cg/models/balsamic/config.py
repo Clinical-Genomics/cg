@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic.v1 import BaseModel, validator
 
 from cg.constants.constants import SampleType
 
@@ -47,17 +47,16 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: str | None = None
+    reference_genome_version: str | None
 
-    @field_validator("reference_genome_version")
-    @classmethod
-    def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
+    @validator("reference_genome_version", always=True)
+    def extract_genome_version_from_path(cls, value: str | None, values: dict) -> str:
         """
         Return the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
-        return str(info.data.get("reference_genome")).split("/")[-3]
+        return str(values["reference_genome"]).split("/")[-3]
 
 
 class BalsamicConfigPanel(BaseModel):
@@ -71,24 +70,23 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: str | None = None
+    capture_kit_version: str | None
     chrom: list[str]
     pon_cnn: str | None = None
 
-    @field_validator("capture_kit", mode="before")
-    @classmethod
+    @validator("capture_kit", pre=True)
     def get_filename_from_path(cls, path: str) -> str:
         """Return the base name of the provided file path."""
         return Path(path).name
 
-    @field_validator("capture_kit_version")
-    @classmethod
-    def get_panel_version_from_filename(cls, _, info: ValidationInfo) -> str:
+    @validator("capture_kit_version", always=True)
+    def get_panel_version_from_filename(
+        cls, capture_kit_version: str | None, values: dict[str, str | None]
+    ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
-        return info.data.get("capture_kit").split("_")[-3]
+        return values["capture_kit"].split("_")[-3]
 
-    @field_validator("pon_cnn", mode="before")
-    @classmethod
+    @validator("pon_cnn", pre=True)
     def get_pon_cnn_name_version_from_filename(cls, pon_cnn: str | None) -> str:
         """Return the CNVkit PON name and version from its filename (gmsmyeloid_5.3_hg19_design_CNVkit_PON_reference_v1.cnn)."""
         pon_cnn_filename_split: list[str] = Path(pon_cnn).stem.split("_")
@@ -112,12 +110,12 @@ class BalsamicConfigQC(BaseModel):
     """
 
     picard_rmdup: bool
-    adapter: str | None = None
+    adapter: str | None
     quality_trim: bool
     adapter_trim: bool
     umi_trim: bool
-    min_seq_length: str | None = None
-    umi_trim_length: str | None = None
+    min_seq_length: str | None
+    umi_trim_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):
@@ -151,7 +149,7 @@ class BalsamicConfigJSON(BaseModel):
     analysis: BalsamicConfigAnalysis
     samples: list[BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: BalsamicConfigPanel | None = None
+    panel: BalsamicConfigPanel | None
     QC: BalsamicConfigQC
     vcf: dict[str, BalsamicVarCaller]
     bioinfo_tools_version: dict[str, list[str]]
