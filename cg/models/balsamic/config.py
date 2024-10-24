@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel, field_validator
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import BaseModel, field_validator, ValidationInfo
 
 from cg.constants.constants import SampleType
 
@@ -84,7 +83,7 @@ class BalsamicConfigPanel(BaseModel):
 
     @field_validator("capture_kit_version")
     @classmethod
-    def get_panel_version_from_filename(cls, info: ValidationInfo) -> str:
+    def get_panel_version_from_filename(cls, _, info: ValidationInfo) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return info.data.get("capture_kit").split("_")[-3]
 
