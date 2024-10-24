@@ -1,11 +1,6 @@
-from datetime import datetime
+from pydantic import BaseModel, Field
 
-from pydantic import BaseModel, Field, field_validator
-
-from cg.constants import SequencingRunDataAvailability
-from cg.constants.devices import DeviceType
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
-from cg.constants.sequencing import Sequencers
 
 
 class SequencingQualityMetrics(BaseModel):

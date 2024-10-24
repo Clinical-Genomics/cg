@@ -2,13 +2,12 @@
 
 import fnmatch
 import logging
-from pathlib import Path
 from typing import Callable
 
 import mock
 import pytest
 
-from cg.constants import EXIT_FAIL, FileExtensions, SequencingRunDataAvailability
+from cg.constants import EXIT_FAIL, SequencingRunDataAvailability
 from cg.exc import (
     DsmcAlreadyRunningError,
     IlluminaRunAlreadyBackedUpError,
@@ -17,8 +16,10 @@ from cg.exc import (
 )
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
+from cg.services.illumina.backup.utils import (
+    get_latest_archived_encryption_key_path,
+    get_latest_archived_sequencing_run_path,
 )
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
@@ -57,60 +58,6 @@ def test_query_pdc_for_run(
     # THEN the flow cell is logged as found for one of the search patterns
     assert fnmatch.filter(
         names=caplog.messages, pat=f"Found archived files for PDC query:*{flow_cell_name}*.gpg"
-    )
-
-
-def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
-    """Tests returning an encryption key path from DSMC output."""
-    # GIVEN an DSMC output and a flow cell id
-
-    # GIVEN a Backup API
-    backup_api = IlluminaBackupService(
-        encryption_api=mock.Mock(),
-        pdc_archiving_directory=mock.Mock(),
-        status_db=mock.Mock(),
-        tar_api=mock.Mock(),
-        pdc_service=mock.Mock(),
-        sequencing_runs_dir=mock.Mock(),
-    )
-
-    # WHEN getting the encryption key path
-    key_path: Path = backup_api.get_archived_encryption_key_path(dsmc_output=dsmc_q_archive_output)
-
-    # THEN this method should return a path object
-    assert isinstance(key_path, Path)
-
-    # THEN return the key file name
-    assert (
-        key_path.name
-        == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
-    )
-
-
-def test_get_archived_run_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
-    """Tests returning an Illumina run path from DSMC output."""
-    # GIVEN an DSMC output and a flow cell id
-
-    # GIVEN a Backup API
-    backup_api = IlluminaBackupService(
-        encryption_api=mock.Mock(),
-        pdc_archiving_directory=mock.Mock(),
-        status_db=mock.Mock(),
-        tar_api=mock.Mock(),
-        pdc_service=mock.Mock(),
-        sequencing_runs_dir=mock.Mock(),
-    )
-
-    # WHEN getting the run path
-    runs_path: Path = backup_api.get_archived_sequencing_run_path(dsmc_output=dsmc_q_archive_output)
-
-    # THEN this method should return a path object
-    assert isinstance(runs_path, Path)
-
-    # THEN return the Illumina run file name
-    assert (
-        runs_path.name
-        == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
     )
 
 
@@ -279,18 +226,14 @@ def test_fetch_sequencing_run_no_runs_requested(
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.unlink_files")
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.create_rta_complete")
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.create_copy_complete")
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
-)
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
-)
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_sequencing_run_path")
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_encryption_key_path")
 @mock.patch(
     "cg.services.illumina.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
 def test_fetch_sequencing_run_retrieve_next_run(
-    mock_get_archived_encryption_key_path,
-    mock_get_archived_sequencing_run_path,
+    mock_get_latest_archived_encryption_key_path,
+    mock_get_latest_archived_sequencing_run_path,
     mock_create_copy_complete,
     mock_create_rta_complete,
     archived_key,
@@ -322,8 +265,8 @@ def test_fetch_sequencing_run_retrieve_next_run(
     )
     sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
-    backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
+    get_latest_archived_encryption_key_path.return_value = archived_key
+    get_latest_archived_sequencing_run_path.return_value = archived_illumina_run
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_sequencing_run(sequencing_run=None)
 
@@ -340,12 +283,8 @@ def test_fetch_sequencing_run_retrieve_next_run(
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.unlink_files")
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.create_rta_complete")
 @mock.patch("cg.services.illumina.backup.backup_service.IlluminaBackupService.create_copy_complete")
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
-)
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
-)
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_sequencing_run_path")
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_encryption_key_path")
 @mock.patch(
     "cg.services.illumina.backup.backup_service.IlluminaBackupService.has_processing_queue_capacity"
 )
@@ -353,14 +292,15 @@ def test_fetch_sequencing_run_retrieve_next_run(
 def test_fetch_sequencing_run_retrieve_specified_run(
     mock_get_first_run,
     mock_has_processing_queue_capacity,
-    mock_get_archived_key,
-    mock_get_archived_sequencing_run,
+    mock_get_latest_archived_encryption_key_path,
+    mock_get_latest_archived_sequencing_run_path,
     mock_create_copy_complete,
     mock_create_rta_complete,
     mock_unlink_files,
     archived_key,
     archived_illumina_run,
     cg_context,
+    dsmc_q_archive_output,
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
     caplog,
@@ -385,8 +325,8 @@ def test_fetch_sequencing_run_retrieve_specified_run(
     )
     sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
     backup_api.has_processing_queue_capacity.return_value = True
-    backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_sequencing_run_path.return_value = archived_illumina_run
+    get_latest_archived_encryption_key_path.return_value = archived_key
+    get_latest_archived_sequencing_run_path.return_value = archived_illumina_run
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
@@ -409,12 +349,8 @@ def test_fetch_sequencing_run_retrieve_specified_run(
 @mock.patch(
     "cg.services.illumina.backup.backup_service.IlluminaBackupService.query_pdc_for_sequencing_run"
 )
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
-)
-@mock.patch(
-    "cg.services.illumina.backup.backup_service.IlluminaBackupService.get_archived_sequencing_run_path"
-)
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_sequencing_run_path")
+@mock.patch("cg.services.illumina.backup.backup_service.get_latest_archived_encryption_key_path")
 def test_fetch_sequencing_run_integration(
     mock_sequencing_run_path,
     mock_key_path,
