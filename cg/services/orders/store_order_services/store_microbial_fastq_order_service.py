@@ -121,6 +121,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             customer=customer,
             sex=SexOptions.UNKNOWN,
             comment=sample_dict["comment"],
+            internal_id=sample_dict["internal_id"],
             order=order,
             ordered=ordered,
             original_ticket=ticket_id,
