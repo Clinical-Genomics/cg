@@ -12,6 +12,7 @@ from subprocess import CompletedProcess
 from typing import Any, Generator
 
 import pytest
+from pytest_mock import MockFixture
 from housekeeper.store.models import File, Version
 from requests import Response
 
@@ -29,7 +30,13 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -50,16 +57,24 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
+from cg.models.raredisease.raredisease import (
+    RarediseaseParameters,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
+from cg.services.illumina.data_transfer.data_transfer_service import (
+    IlluminaDataTransferService,
+)
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -130,6 +145,7 @@ pytest_plugins = [
     "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.run_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.unprocessed_runs_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
@@ -329,6 +345,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
             {
                 "name": "father",
@@ -338,6 +355,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
             {
                 "name": "mother",
@@ -347,6 +365,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
+                "reference_genome": GenomeVersion.GRCh37,
             },
         ],
     }
@@ -827,6 +846,12 @@ def mip_deliverables_file(mip_dna_store_files: Path) -> Path:
 def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
+
+
+@pytest.fixture
+def case_qc_metrics_deliverables_raredisease(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data."""
+    return Path(apps_dir, "raredisease", "case_metrics_deliverables.yaml")
 
 
 @pytest.fixture
@@ -2593,7 +2618,7 @@ def raredisease_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
-    mocker,
+    mocker: MockFixture,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2665,9 +2690,13 @@ def raredisease_context(
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
+    # GIVEN a genome build
+    mocker.patch.object(RarediseaseAnalysisAPI, "get_genome_build", return_value=GenomeVersion.HG38)
+
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
     RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
+    samples = [sample_enough_reads, another_sample_enough_reads]
     return cg_context
 
 
@@ -3064,7 +3093,7 @@ def rnafusion_parameters_default(
     """Return Rnafusion parameters."""
     return RnafusionParameters(
         cluster_options="--qos=normal",
-        genomes_base=existing_directory,
+        genomes_base=Path(existing_directory),
         input=rnafusion_sample_sheet_path,
         outdir=Path(rnafusion_dir, rnafusion_case_id),
         priority="development",
@@ -3675,8 +3704,8 @@ def taxprofiler_parameters_default(
         cluster_options="--qos=normal",
         input=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
-        databases=existing_directory,
-        hostremoval_reference=existing_directory,
+        databases=Path(existing_directory),
+        hostremoval_reference=Path(existing_directory),
         priority="development",
     )
 

@@ -11,18 +11,26 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, PrepCategory, GenomeVersion
-from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AlignmentFileTag,
+    AnalysisTag,
+)
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.get_genome_build import get_genome_build
+from cg.meta.workflow.utils.genome_build_helpers import (
+    genome_to_scout_format,
+    get_genome_build,
+)
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -55,14 +63,14 @@ class UploadScoutAPI:
         self.housekeeper = hk_api
         self.scout_api = scout_api
         self.madeline_api = madeline_api
-        self.mip_analysis_api = analysis_api
+        self.analysis_api = analysis_api
+        self.raredisease_analysis_api = analysis_api
         self.lims = lims_api
         self.status_db = status_db
 
     def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
-
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
         hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
@@ -70,10 +78,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Found workflow {analysis.workflow}")
         config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
-
-        config_builder.build_load_config()
-
-        return config_builder.load_config
+        return config_builder.build_load_config()
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -90,18 +95,6 @@ class UploadScoutAPI:
             file_format=FileFormat.YAML,
             file_path=file_path,
         )
-
-    def genome_to_scout_format(self, genome: GenomeVersion) -> str:
-        mapping = {
-            GenomeVersion.GRCh37: "37",
-            GenomeVersion.GRCh38: "38",
-            GenomeVersion.HG19: "37",
-            GenomeVersion.HG38: "38",
-        }
-        # Check if the current instance is in the mapping, raise an error if not
-        if genome not in mapping:
-            raise ValueError(f"Genome build incompatible with scout: {genome.value}")
-        return mapping[genome]
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
@@ -460,7 +453,7 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = self.genome_to_scout_format(
+            rna_genome_build = genome_to_scout_format(
                 GenomeVersion(get_genome_build(case=rna_case))
             )
             for dna_case_id in rna_dna_collection.dna_case_ids:
@@ -650,27 +643,40 @@ class UploadScoutAPI:
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                mip_analysis_api=self.mip_analysis_api,
+                mip_analysis_api=self.analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
+            Workflow.RAREDISEASE: RarediseaseConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
-                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                lims_api=self.lims,
             ),
         }
 
@@ -735,9 +741,10 @@ class UploadScoutAPI:
             if (
                 case.data_analysis
                 in [
-                    Workflow.MIP_DNA,
                     Workflow.BALSAMIC,
                     Workflow.BALSAMIC_UMI,
+                    Workflow.MIP_DNA,
+                    Workflow.RAREDISEASE,
                 ]
                 and case.customer in collaborators
             ):
@@ -769,7 +776,6 @@ class UploadScoutAPI:
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
         unique_dna_case_ids: set[str] = self.get_unique_dna_cases_related_to_rna_case(rna_case_id)
-
         uploaded_dna_cases: set[str] = set()
         for dna_case_id in unique_dna_case_ids:
             if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:

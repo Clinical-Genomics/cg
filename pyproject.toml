@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "63.5.14"
+version = "64.4.3"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -44,7 +44,6 @@ WTForms = "*"
 google-auth = "*"
 gunicorn = "*"
 requests = "*"
-sendmail-container = "*"
 werkzeug = "*"
 
 # Utils
