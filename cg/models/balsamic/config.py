@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic import BaseModel, ValidationInfo, field_validator
 
 from cg.constants.constants import SampleType
 
@@ -49,7 +49,7 @@ class BalsamicConfigReference(BaseModel):
     reference_genome: Path
     reference_genome_version: str | None = None
 
-    @field_validator("reference_genome_version")
+    @field_validator("reference_genome_version", mode="before")
     @classmethod
     def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
         """
@@ -81,7 +81,7 @@ class BalsamicConfigPanel(BaseModel):
         """Return the base name of the provided file path."""
         return Path(path).name
 
-    @field_validator("capture_kit_version")
+    @field_validator("capture_kit_version", mode="before")
     @classmethod
     def get_panel_version_from_filename(cls, _, info: ValidationInfo) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""

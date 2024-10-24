@@ -180,7 +180,6 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service.create_order(order_in)
 
     except (  # user misbehaviour
         OrderError,
