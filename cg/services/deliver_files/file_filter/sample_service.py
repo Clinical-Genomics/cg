@@ -5,7 +5,9 @@ from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesSe
 class SampleFileFilter(FilterDeliveryFilesService):
 
     def filter_delivery_files(self, delivery_files: DeliveryFiles, sample_id: str) -> DeliveryFiles:
-        for index in range(len(delivery_files.sample_files)):
-            if delivery_files.sample_files[index].sample_id != sample_id:
-                delivery_files.sample_files.pop(index)
+        delivery_files.sample_files = [
+            sample_file
+            for sample_file in delivery_files.sample_files
+            if sample_file.sample_id == sample_id
+        ]
         return delivery_files
