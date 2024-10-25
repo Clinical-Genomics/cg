@@ -52,7 +52,7 @@ def _parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[PdcSequen
                 f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}"
             )
 
-            query_response: PdcSequencingFile = PdcSequencingFile(
+            query_response: PdcSequencingFile(
                 date_time=file_date_time,
                 path=Path(parts[DsmcOutput.PATH_COLUMN_INDEX]),
             )
