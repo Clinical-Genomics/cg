@@ -90,7 +90,7 @@ def _get_latest_sequencing_run_in_list(
     if not pdc_files:
         return None
 
-    latest_file = max(pdc_files, key=attrgetter("date_time"))
+    latest_file: PdcSequencingFile | None = max(pdc_files, key=attrgetter("date_time"))
 
     return latest_file
 
