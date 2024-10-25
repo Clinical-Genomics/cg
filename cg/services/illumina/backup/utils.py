@@ -63,7 +63,7 @@ def _parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[PdcSequen
 
 def _parse_dsmc_output_key_path(dsmc_output: list[str]) -> list[PdcEncryptionKey]:
     """Parses the DSMC command output to extract validated encryption keys."""
-    validated_responses = []
+    validated_responses: list[PdcEncryptionKey] = []
     for line in dsmc_output:
         if is_pdc_encryption_key(line):
             parts: list[str] = line.split()
