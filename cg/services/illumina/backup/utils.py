@@ -43,7 +43,7 @@ def get_latest_archived_encryption_key_path(dsmc_output: list[str]) -> Path | No
 
 def _parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[PdcSequencingFile]:
     """Parses the DSMC command output to extract validated sequencing paths."""
-    validated_responses = []
+    validated_responses: list[PdcSequencingFile] = []
     for line in dsmc_output:
         if is_pdc_sequencing_path(line):
             parts = line.split()
