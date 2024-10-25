@@ -40,6 +40,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 {
                     "application": sample.application,
                     "comment": sample.comment,
+                    "internal_id": sample.internal_id,
                     "data_analysis": sample.data_analysis,
                     "data_delivery": sample.data_delivery,
                     "name": sample.name,
