@@ -46,7 +46,7 @@ def _parse_dsmc_output_sequencing_path(dsmc_output: list[str]) -> list[PdcSequen
     validated_responses: list[PdcSequencingFile] = []
     for line in dsmc_output:
         if is_pdc_sequencing_path(line):
-            parts = line.split()
+            parts: list[str] = line.split()
 
             file_date_time: datetime = convert_string_to_datetime_object(
                 f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}"
