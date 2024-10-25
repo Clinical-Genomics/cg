@@ -72,7 +72,7 @@ def _parse_dsmc_output_key_path(dsmc_output: list[str]) -> list[PdcEncryptionKey
                 f"{parts[DsmcOutput.DATE_COLUMN_INDEX]} {parts[DsmcOutput.TIME_COLUMN_INDEX]}"
             )
 
-            query_response: PdcEncryptionKey = PdcEncryptionKey(
+            query_response = PdcEncryptionKey(
                 date_time=file_date_time,
                 path=Path(parts[DsmcOutput.PATH_COLUMN_INDEX]),
             )
