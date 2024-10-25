@@ -1,13 +1,20 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Workflow, DataDelivery, Sex
+from cg.constants import DataDelivery, Sex, Workflow
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import Sample, Customer, ApplicationVersion, Case, CaseSample
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Order,
+    Sample,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -79,6 +86,12 @@ class StoreMetagenomeOrderService(StoreOrderService):
             customer=customer, case_name=str(ticket_id)
         )
         case_dict: dict = items[0]
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+            workflow=Workflow(case_dict["data_analysis"]),
+        )
         with self.status_db.session.no_autoflush:
             for sample in case_dict["samples"]:
                 new_sample = self.status_db.add_sample(
@@ -119,7 +132,8 @@ class StoreMetagenomeOrderService(StoreOrderService):
                     case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status_db.session.add(new_relationship)
-
+        status_db_order.cases.append(case)
+        self.status_db.session.add(status_db_order)
         self.status_db.session.add_all(new_samples)
         self.status_db.session.commit()
         return new_samples
