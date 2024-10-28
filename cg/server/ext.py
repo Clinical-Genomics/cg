@@ -13,12 +13,14 @@ from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
-from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
+from cg.services.orders.order_summary_service.order_summary_service import (
+    OrderSummaryService,
+)
 from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,
 )
-from cg.services.rna_dna_collections_service.rna_dna_collections_service import (
+from cg.services.store.rna_dna_collections_service.rna_dna_collections_service import (
     RNADNACollectionService,
 )
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (

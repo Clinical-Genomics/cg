@@ -32,6 +32,7 @@ class RNADNACollectionService:
 
     def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
         """Return a list of DNA cases related to an RNA sample."""
+        # TODO How to do error handling? if no subject_id rna results shouldn't be uploaded.
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
