@@ -112,6 +112,13 @@ class PrepCategory(StrEnum):
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
+DNA_PREP_CATEGORIES: list[PrepCategory] = [
+    PrepCategory.WHOLE_GENOME_SEQUENCING,
+    PrepCategory.TARGETED_GENOME_SEQUENCING,
+    PrepCategory.WHOLE_EXOME_SEQUENCING,
+]
+
+
 class SexOptions(StrEnum):
     MALE: str = "male"
     FEMALE: str = "female"
