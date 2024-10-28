@@ -48,6 +48,7 @@ class GenePanelMasterList(StrEnum):
     STROKE: str = "STROKE"
     AID: str = "AID"
     INHERITED_CANCER: str = "Inherited cancer"
+    VEO-IBD: str = "VEO-IBD"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
