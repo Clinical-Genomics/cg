@@ -10,20 +10,13 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import (
-    CollaboratorSamplesRequest,
-)
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
-)
-from cg.store.filters.status_application_filters import (
-    ApplicationFilter,
-    apply_application_filter,
-)
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -33,23 +26,14 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import (
-    BedVersionFilter,
-    apply_bed_version_filter,
-)
+from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import (
-    CaseSampleFilter,
-    apply_case_sample_filter,
-)
+from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import (
-    CustomerFilter,
-    apply_customer_filter,
-)
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -64,10 +48,11 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
-from cg.store.filters.status_organism_filters import (
-    OrganismFilter,
-    apply_organism_filter,
+from cg.store.filters.status_ordertype_application_filters import (
+    OrderTypeApplicationFilter,
+    apply_order_type_application_filter,
 )
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
@@ -93,7 +78,7 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
-    PacBioSMRTCell,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
@@ -313,25 +298,26 @@ class ReadHandler(BaseHandler):
 
     def get_cases_by_ticket_id(self, ticket_id: str) -> list[Case]:
         """Return cases associated with a given ticket id."""
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket_id,
-        ).all()
+        if order := apply_order_filters(
+            orders=self._get_query(table=Order),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket_id),
+        ).first():
+            return order.cases
+        return []
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket."""
-        cases: list[Case] = self.get_cases_by_ticket_id(ticket_id=ticket)
-        if not cases:
-            raise ValueError(f"No case found for ticket {ticket}")
-        return cases[0].customer.internal_id
+        if order := self.get_order_by_ticket_id(int(ticket)):
+            return order.customer.internal_id
+        raise ValueError(f"No order found for ticket {ticket}")
 
     def get_samples_from_ticket(self, ticket: str) -> list[Sample]:
         """Returns the samples related to given ticket."""
-        return apply_case_filter(
-            cases=self._get_join_sample_family_query(),
-            filter_functions=[CaseFilter.BY_TICKET],
-            ticket_id=ticket,
+        return apply_order_filters(
+            orders=self._get_join_sample_case_order_query(),
+            filters=[OrderFilter.BY_TICKET_ID],
+            ticket_id=int(ticket),
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
@@ -836,6 +822,29 @@ class ReadHandler(BaseHandler):
             .order_by(Application.prep_category, Application.tag)
             .all()
         )
+
+    def get_active_applications_by_order_type(self, order_type: OrderType) -> list[Application]:
+        """
+        Return all possible non-archived applications with versions for an order type.
+        Raises:
+            EntryNotFoundError: If no applications are found for the order type.
+        """
+        filters: list[ApplicationFilter] = [
+            ApplicationFilter.IS_NOT_ARCHIVED,
+            ApplicationFilter.HAS_VERSIONS,
+        ]
+        non_archived_applications: Query = apply_application_filter(
+            applications=self._get_join_application_ordertype_query(),
+            filter_functions=filters,
+        )
+        applications: list[Application] = apply_order_type_application_filter(
+            order_type_applications=non_archived_applications,
+            filter_functions=[OrderTypeApplicationFilter.BY_ORDER_TYPE],
+            order_type=order_type,
+        ).all()
+        if not applications:
+            raise EntryNotFoundError(f"No applications found for order type {order_type}")
+        return applications
 
     def get_current_application_version_by_tag(self, tag: str) -> ApplicationVersion | None:
         """Return the current application version for an application tag."""
@@ -1525,10 +1534,10 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
-    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacBioSMRTCell:
+    def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
-            smrt_cells=self._get_query(table=PacBioSMRTCell),
+            smrt_cells=self._get_query(table=PacbioSMRTCell),
             internal_id=internal_id,
         ).first()
 

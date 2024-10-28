@@ -166,8 +166,8 @@ class GenomeVersion(StrEnum):
     GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19 = auto()
-    HG38 = auto()
+    HG19: str = "hg19"
+    HG38: str = "hg38"
 
 
 class SampleType(StrEnum):
@@ -197,6 +197,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BAM: str = ".bam"
+    BCF: str = ".bcf"
     BED: str = ".bed"
     COMPLETE: str = ".complete"
     CONFIG: str = ".config"
@@ -224,6 +225,7 @@ class FileExtensions(StrEnum):
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"
+    VCF_GZ: str = ".vcf.gz"
     XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"

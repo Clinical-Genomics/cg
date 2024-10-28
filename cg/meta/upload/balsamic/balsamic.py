@@ -6,7 +6,7 @@ import logging
 import click
 
 from cg.apps.gens import GensAPI
-from cg.cli.generate.report.base import generate_delivery_report
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
@@ -55,7 +55,7 @@ class BalsamicUploadAPI(UploadAPI):
             )
 
         # Genotype specific upload
-        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case_obj=case):
+        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case):
             ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")

@@ -5,8 +5,7 @@ import logging
 
 import click
 
-from cg.cli.generate.report.base import generate_delivery_report
-
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
@@ -35,8 +34,16 @@ class RarediseaseUploadAPI(UploadAPI):
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
+        # Delivery report generation
+        if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
+            ctx.invoke(generate_delivery_report, case_id=case.internal_id)
+
+        # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
 
+        # Scout specific upload
+        if DataDelivery.SCOUT in case.data_delivery:
+            ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
