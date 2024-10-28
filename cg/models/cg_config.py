@@ -30,10 +30,8 @@ from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -47,13 +45,21 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
-from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
+    PacBioMetricsParser,
+)
+from cg.services.run_devices.pacbio.post_processing_service import (
+    PacBioPostProcessingService,
+)
 from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
-from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
+    PacBioRunFileManager,
+)
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import (
+    PacBioRunValidator,
+)
 from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
@@ -248,18 +254,18 @@ class TomteConfig(CommonAppConfig):
 
 
 class RnafusionConfig(CommonAppConfig):
-    root: str
-    references: str
     binary_path: str
-    workflow_path: str
-    conda_env: str
     compute_env: str
-    profile: str
     conda_binary: str | None = None
+    conda_env: str
     launch_directory: str
+    profile: str
+    references: str
     revision: str
+    root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):

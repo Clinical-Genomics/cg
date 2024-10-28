@@ -24,7 +24,7 @@ def test_parse_analysis(
     analysis_model: NextflowAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)
 
     # THEN the analysis model and its content should have been correctly extracted
-    assert analysis_model.sample_metrics[sample_id].model_dump() == rnafusion_metrics
+    assert analysis_model.sample_metrics[sample_id] == rnafusion_metrics
 
 
 def test_get_latest_metadata(
