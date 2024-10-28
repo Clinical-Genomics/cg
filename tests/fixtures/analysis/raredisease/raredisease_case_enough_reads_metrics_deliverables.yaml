@@ -563,6 +563,36 @@ metrics:
   name: summed_median
   step: multiqc
   value: 327
+- condition:
+    norm: eq
+    threshold: female
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: gender
+  step: multiqc
+  value: female
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: reads_chry
+  step: multiqc
+  value: 103876
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: reads_chrx
+  step: multiqc
+  value: 37077016
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: ratio_chry_chrx
+  step: multiqc
+  value: 0.0028
 - condition: null
   header: null
   id: ADM1
@@ -1653,6 +1683,36 @@ metrics:
   name: summed_median
   step: multiqc
   value: 327
+- condition:
+    norm: eq
+    threshold: female
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: gender
+  step: multiqc
+  value: female
+- condition: null
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: reads_chry
+  step: multiqc
+  value: 103876
+- condition: null
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: reads_chrx
+  step: multiqc
+  value: 37077016
+- condition: null
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: ratio_chry_chrx
+  step: multiqc
+  value: 0.0028
 - condition: null
   header: null
   id: ADM2

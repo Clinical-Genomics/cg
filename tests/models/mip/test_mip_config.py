@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cg.models.mip.mip_config import MipBaseConfig
+from cg.models.mip.mip_config import AnalysisType, MipBaseConfig
 
 
 def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
@@ -57,16 +57,16 @@ def test_mip_config_case_id_with_family_id(mip_analysis_config_dna_raw: dict):
     assert config_object.case_id == "a_family_id"
 
 
-def test_mip_config_case_id(mip_analysis_config_dna_raw: dict):
-    """Test case_id validator"""
+def test_mip_config_analysis_type(mip_analysis_config_dna_raw: dict):
+    """Test analysis type validator."""
     # GIVEN a MIP config
 
     # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**mip_analysis_config_dna_raw)
 
-    # THEN assert that samples was set
+    # THEN assert that samples were set
     assert config_object.samples
 
     # THEN assert that dict is set
-    analysis_type: dict = config_object.samples.pop()
-    assert analysis_type == {"analysis_type": "wgs", "sample_id": "sample_id"}
+    analysis_type: AnalysisType = config_object.samples.pop()
+    assert analysis_type.model_dump() == {"analysis_type": "wgs", "sample_id": "sample_id"}

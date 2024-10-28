@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.deliver_files.delivery_file_fetcher_service.models import DeliveryFiles, SampleFile
-from cg.services.deliver_files.delivery_file_formatter_service.models import FormattedFile
+from cg.services.deliver_files.file_fetcher.models import DeliveryFiles, SampleFile
+from cg.services.deliver_files.file_formatter.models import FormattedFile
 
 
 @pytest.fixture
@@ -83,5 +83,5 @@ def expected_concatenated_fastq_formatted_files(
 
 
 @pytest.fixture
-def empty_case_files() -> None:
-    return None
+def empty_case_files() -> list:
+    return []

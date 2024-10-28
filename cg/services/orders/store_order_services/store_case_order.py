@@ -1,14 +1,21 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Workflow, Priority
+from cg.constants import Priority, Workflow
 from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.pedigree import Pedigree
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import Case, Customer, Sample, CaseSample, ApplicationVersion
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Order,
+    Sample,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -153,7 +160,12 @@ class StoreCaseOrderService(StoreOrderService):
             customer_internal_id=customer_id
         )
         new_cases: list[Case] = []
-
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+            workflow=Workflow(items[0]["data_analysis"]),
+        )
         for case in items:
             status_db_case: Case = self.status_db.get_case_by_internal_id(
                 internal_id=case["internal_id"]
@@ -169,8 +181,8 @@ class StoreCaseOrderService(StoreOrderService):
                 self._append_ticket(ticket_id=ticket_id, case=status_db_case)
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
                 self._update_case_panel(panels=case["panels"], case=status_db_case)
-
             case_samples: dict[str, Sample] = {}
+            status_db_order.cases.append(status_db_case)
             for sample in case["samples"]:
                 existing_sample: Sample = self.status_db.get_sample_by_internal_id(
                     internal_id=sample["internal_id"]
@@ -212,6 +224,7 @@ class StoreCaseOrderService(StoreOrderService):
                     sample=sample,
                 )
             self.status_db.session.add_all(new_cases)
+            self.status_db.session.add(status_db_order)
             self.status_db.session.commit()
         return new_cases
 

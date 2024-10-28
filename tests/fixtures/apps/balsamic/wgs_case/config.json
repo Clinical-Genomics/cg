@@ -1,0 +1,552 @@
+{
+    "QC": {
+        "picard_rmdup": false,
+        "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        "quality_trim": true,
+        "adapter_trim": true,
+        "umi_trim": false,
+        "min_seq_length": "25",
+        "umi_trim_length": "5",
+        "n_base_limit": "50"
+    },
+    "samples": [
+        {
+            "type": "tumor",
+            "name": "ACC0000A1",
+            "fastq_info": {
+                "2_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/2_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/2_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L002_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L002_R2_001.fastq.gz"
+                },
+                "1_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/1_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/1_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L001_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L001_R2_001.fastq.gz"
+                },
+                "4_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/4_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/4_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L004_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L004_R2_001.fastq.gz"
+                },
+                "8_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/8_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/8_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L008_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L008_R2_001.fastq.gz"
+                },
+                "6_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/6_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/6_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L006_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L006_R2_001.fastq.gz"
+                },
+                "7_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/7_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/7_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L007_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L007_R2_001.fastq.gz"
+                },
+                "5_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/5_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/5_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L005_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L005_R2_001.fastq.gz"
+                },
+                "3_171015_22C3TNLT4_ACC0000A1_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/3_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/3_171015_22C3TNLT4_ACC0000A1_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_2/file_S418_L003_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_2/file_S418_L003_R2_001.fastq.gz"
+                }
+            }
+        },
+        {
+            "type": "normal",
+            "name": "ACC0000A2",
+            "fastq_info": {
+                "7_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/7_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/7_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L007_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L007_R2_001.fastq.gz"
+                },
+                "4_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/4_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/4_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L004_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L004_R2_001.fastq.gz"
+                },
+                "1_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/1_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/1_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L001_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L001_R2_001.fastq.gz"
+                },
+                "8_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/8_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/8_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L008_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L008_R2_001.fastq.gz"
+                },
+                "2_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/2_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/2_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L002_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L002_R2_001.fastq.gz"
+                },
+                "1_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/1_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/1_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L001_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L001_R2_001.fastq.gz"
+                },
+                "2_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/2_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/2_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L002_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L002_R2_001.fastq.gz"
+                },
+                "5_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/5_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/5_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L005_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L005_R2_001.fastq.gz"
+                },
+                "8_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/8_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/8_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L008_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L008_R2_001.fastq.gz"
+                },
+                "6_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/6_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/6_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L006_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L006_R2_001.fastq.gz"
+                },
+                "3_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/3_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/3_171015_22GJ3YLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_3/file_S9_L003_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_3/file_S9_L003_R2_001.fastq.gz"
+                },
+                "7_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/7_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/7_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L007_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L007_R2_001.fastq.gz"
+                },
+                "4_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/4_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/4_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L004_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L004_R2_001.fastq.gz"
+                },
+                "6_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/6_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/6_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L006_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L006_R2_001.fastq.gz"
+                },
+                "3_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/3_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/3_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L003_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L003_R2_001.fastq.gz"
+                },
+                "5_171015_22GHNMLT3_ACC0000A2_XXXXXX_R": {
+                    "fwd": "/dummy/fastq/5_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_1.fastq.gz",
+                    "rev": "/dummy/fastq/5_171015_22GHNMLT3_ACC0000A2_XXXXXX_R_2.fastq.gz",
+                    "fwd_resolved": "/dummy_4/file_S9_L005_R1_001.fastq.gz",
+                    "rev_resolved": "/dummy_4/file_S9_L005_R2_001.fastq.gz"
+                }
+            }
+        }
+    ],
+    "reference": {
+        "genome_chrom_size": "/dummy_5/15.0.1/hg19/genome/hg19.chrom.sizes",
+        "reference_genome": "/dummy_5/15.0.1/hg19/genome/human_g1k_v37.fasta",
+        "refgene_bed": "/dummy_5/15.0.1/hg19/genome/refGene.flat.bed",
+        "refgene_flat": "/dummy_5/15.0.1/hg19/genome/refGene.flat",
+        "refgene_txt": "/dummy_5/15.0.1/hg19/genome/refGene.txt",
+        "access_regions": "/dummy_5/15.0.1/hg19/genome/access_5kb_hg19.txt",
+        "ascat_chr_y_loci": "/dummy_5/15.0.1/hg19/genome/GRCh37_Y.loci",
+        "ascat_gc_correction": "/dummy_5/15.0.1/hg19/genome/GRCh37_SnpGcCorrections.tsv",
+        "cadd_snv": "/dummy_5/15.0.1/hg19/variants/hg19.cadd_snv.tsv.gz",
+        "simple_repeat": "/dummy_5/15.0.1/hg19/variants/hg19.simple_repeat.txt.gz",
+        "clinvar": "/dummy_5/15.0.1/hg19/variants/clinvar.vcf.gz",
+        "cosmic": "/dummy_5/15.0.1/hg19/variants/cosmic_coding_muts_v97.vcf.gz",
+        "dbsnp": "/dummy_5/15.0.1/hg19/variants/dbsnp_grch37_b138.vcf.gz",
+        "delly_exclusion": "/dummy_5/15.0.1/hg19/genome/delly_exclusion.tsv",
+        "delly_exclusion_converted": "/dummy_5/15.0.1/hg19/genome/delly_exclusion_converted.tsv",
+        "delly_mappability": "/dummy_5/15.0.1/hg19/genome/delly_mappability.gz",
+        "gnomad_variant": "/dummy_5/15.0.1/hg19/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+        "hc_vcf_1kg": "/dummy_5/15.0.1/hg19/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "known_indel_1kg": "/dummy_5/15.0.1/hg19/variants/1kg_known_indels_b37.vcf.gz",
+        "mills_1kg": "/dummy_5/15.0.1/hg19/variants/mills_1kg_index.vcf.gz",
+        "rank_score": "/dummy_5/15.0.1/hg19/genome/cancer_rank_model_-v0.1-.ini",
+        "somalier_sites": "/dummy_5/15.0.1/hg19/variants/GRCh37.somalier.sites.vcf.gz",
+        "vcf_1kg": "/dummy_5/15.0.1/hg19/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "vep_dir": "/dummy_5/15.0.1/hg19/vep",
+        "wgs_calling_regions": "/dummy_5/15.0.1/hg19/genome/wgs_calling_regions.v1",
+        "cadd_annotations": "/dummy_6/cadd/data/annotations",
+        "genome_interval": "/dummy_6/gens/grch37_gens_targets_preprocessed_100bp.interval_list",
+        "gens_coverage_pon": "/dummy_6/gens/gens_pon_100bp.male.v1.hdf5",
+        "gnomad_min_af5": "/dummy_6/gens/gnomad.genomes.r2.1.1.sites_0.05AF.vcf.gz",
+        "clinical_snv_observations": "/dummy_6/loqusdb/loqusdb_clinical_snv_variants_export-20240103-.vcf.gz",
+        "clinical_sv_observations": "/dummy_6/loqusdb/loqusdb_clinical_sv_variants_export-20240103-.vcf.gz",
+        "cancer_germline_snv_observations": "/dummy_6/loqusdb/loqusdb_cancer_germline_snv_variants_export-20240103-.vcf.gz",
+        "cancer_somatic_snv_observations": "/dummy_6/loqusdb/loqusdb_cancer_somatic_snv_variants_export-20240103-.vcf.gz",
+        "cancer_somatic_sv_observations": "/dummy_6/loqusdb/loqusdb_cancer_somatic_sv_variants_export-20240103-.vcf.gz",
+        "swegen_snv_frequency": "/dummy_6/swegen/grch37_swegen_1k_snv_-20170830-.vcf.gz",
+        "swegen_sv_frequency": "/dummy_6/swegen/grch37_swegen_1k_sv_-20170830-.vcf.gz"
+    },
+    "singularity": {
+        "image": "/dummy_5/15.0.1/containers"
+    },
+    "bioinfo_tools": {
+        "bedtools": "align_qc",
+        "bwa": "align_qc",
+        "compress": "align_qc",
+        "fastqc": "align_qc",
+        "samtools": "align_qc",
+        "picard": "align_qc",
+        "multiqc": "align_qc",
+        "fastp": "align_qc",
+        "csvkit": "align_qc",
+        "ensembl-vep": "annotate",
+        "genmod": "annotate",
+        "vcfanno": "annotate",
+        "sambamba": "coverage_qc",
+        "mosdepth": "coverage_qc",
+        "bcftools": "varcall_py3",
+        "tabix": "varcall_py3",
+        "bgzip": "varcall_py3",
+        "vardict": "varcall_py3",
+        "svdb": "varcall_py3",
+        "tiddit": "varcall_py3",
+        "cnvpytor": "cnvpytor",
+        "manta": "varcall_py27",
+        "cnvkit": "cnvkit",
+        "delly": "delly",
+        "ascatNgs": "ascatNgs",
+        "vcf2cytosure": "vcf2cytosure",
+        "somalier": "somalier",
+        "cadd": "cadd",
+        "purecn": "purecn",
+        "gatk": "gatk"
+    },
+    "bioinfo_tools_version": {
+        "purecn": [
+            "2.6.4"
+        ],
+        "somalier": [
+            "0.2.16"
+        ],
+        "bcftools": [
+            "1.10.2",
+            "1.15.1",
+            "1.9"
+        ],
+        "bedtools": [
+            "2.30.0"
+        ],
+        "ensembl-vep": [
+            "104.3"
+        ],
+        "vcfanno": [
+            "0.3.3"
+        ],
+        "genmod": [
+            "3.7.4"
+        ],
+        "delly": [
+            "1.0.3"
+        ],
+        "bwa": [
+            "0.7.17"
+        ],
+        "gatk": [
+            "4.4.0.0"
+        ],
+        "samtools": [
+            "1.9",
+            "1.15.1"
+        ],
+        "svdb": [
+            "2.8.1"
+        ],
+        "tabix": [
+            "1.11",
+            "0.2.6"
+        ],
+        "tiddit": [
+            "3.3.2"
+        ],
+        "vardict": [
+            "2019.06.04"
+        ],
+        "cnvpytor": [
+            "1.3.1"
+        ],
+        "manta": [
+            "1.6.0"
+        ],
+        "cadd": [
+            "1.6"
+        ],
+        "ascatNgs": [
+            "4.5.0"
+        ],
+        "csvkit": [
+            "1.0.7"
+        ],
+        "fastp": [
+            "0.23.2"
+        ],
+        "fastqc": [
+            "0.11.9"
+        ],
+        "multiqc": [
+            "1.12"
+        ],
+        "picard": [
+            "2.27.1"
+        ],
+        "vcf2cytosure": [
+            "0.8.1"
+        ],
+        "cnvkit": [
+            "0.9.10"
+        ],
+        "mosdepth": [
+            "0.3.3"
+        ],
+        "sambamba": [
+            "0.8.2"
+        ]
+    },
+    "vcf": {
+        "vardict": {
+            "mutation": "somatic",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "tnscope": {
+            "mutation": "somatic",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "Sentieon"
+            ]
+        },
+        "dnascope": {
+            "mutation": "germline",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "Sentieon"
+            ]
+        },
+        "tnscope_umi": {
+            "mutation": "somatic",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "Sentieon_umi"
+            ]
+        },
+        "manta_germline": {
+            "mutation": "germline",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "manta": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "dellysv": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "cnvkit": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "ascat": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "paired"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "dellycnv": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "tiddit": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "cnvpytor": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "single"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "igh_dux4": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "svdb": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        }
+    },
+    "analysis": {
+        "case_id": "wgs-case",
+        "analysis_type": "paired",
+        "gender": "male",
+        "sequencing_type": "wgs",
+        "analysis_workflow": "balsamic",
+        "analysis_dir": "/home/proj/production/cancer/cases",
+        "fastq_path": "/dummy/fastq",
+        "log": "/dummy/logs",
+        "script": "/dummy/scripts",
+        "result": "/dummy/analysis",
+        "benchmark": "/dummy/benchmarks",
+        "dag": "/dummy/wgs-case_BALSAMIC_15.0.1_graph.pdf",
+        "BALSAMIC_version": "15.0.1",
+        "config_creation_date": "2024-09-25 09:01"
+    },
+    "custom_filters": {}
+}

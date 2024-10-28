@@ -5,17 +5,17 @@ from pathlib import Path
 import pytest
 
 from cg.io.yaml import read_yaml
-from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 
 
 def test_unlinked_family_is_linked(
-    mip_config_builder: MipConfigBuilder, delivery_report_html: Path
+    raredisease_config_builder: ScoutConfigBuilder, delivery_report_html: Path
 ):
     """Test that is_family check fails when samples are not linked"""
     # GIVEN a upload scout api and case data for a case without linked individuals
-    family_data: MipLoadConfig = MipLoadConfig(
+    family_data: ScoutLoadConfig = ScoutLoadConfig(
         **{
             "samples": [
                 {"sample_id": "ADM2", "father": "0", "mother": "0"},
@@ -25,15 +25,18 @@ def test_unlinked_family_is_linked(
         }
     )
     # WHEN running the check if case is linked
-    res = mip_config_builder.is_family_case(load_config=family_data)
+    res = raredisease_config_builder.is_family_case(load_config=family_data)
     # THEN assert that the test returns False
     assert res is False
 
 
-def test_family_is_linked(mip_config_builder: MipConfigBuilder, delivery_report_html: Path):
+def test_family_is_linked(
+    raredisease_config_builder: ScoutConfigBuilder, delivery_report_html: Path
+):
     """Test that is_family returns true when samples are linked"""
     # GIVEN a upload scout api and case data for a linked case
-    family_data: MipLoadConfig = MipLoadConfig(
+
+    family_data: ScoutLoadConfig = ScoutLoadConfig(
         **{
             "samples": [
                 {"sample_id": "ADM1", "father": "ADM2", "mother": "ADM3"},
@@ -44,7 +47,7 @@ def test_family_is_linked(mip_config_builder: MipConfigBuilder, delivery_report_
         }
     )
     # WHEN running the check if case is linked
-    res = mip_config_builder.is_family_case(family_data)
+    res = raredisease_config_builder.is_family_case(family_data)
     # THEN assert that the test returns True
     assert res is True
 

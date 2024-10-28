@@ -9,11 +9,11 @@ from cg.constants.housekeeper_tags import (
     AlignmentFileTag,
     SequencingFileTag,
 )
-from cg.services.deliver_files.delivery_file_fetcher_service.models import (
-    DeliveryFiles,
-    SampleFile,
+from cg.services.deliver_files.file_fetcher.models import (
     CaseFile,
+    DeliveryFiles,
     DeliveryMetaData,
+    SampleFile,
 )
 from cg.store.models import Case
 from cg.store.store import Store
@@ -47,11 +47,11 @@ def expected_fastq_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        case_id=case.internal_id,
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
-    return DeliveryFiles(
-        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
-    )
+    return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
 
 @pytest.fixture
@@ -82,11 +82,11 @@ def expected_bam_delivery_files(
     ]
     case: Case = delivery_store_microsalt.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        case_id=case.internal_id,
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
-    return DeliveryFiles(
-        delivery_data=delivery_meta_data, case_files=None, sample_files=sample_files
-    )
+    return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
 
 @pytest.fixture
@@ -131,7 +131,9 @@ def expected_analysis_delivery_files(
     ]
     case: Case = delivery_store_balsamic.get_case_by_internal_id(case_id)
     delivery_meta_data = DeliveryMetaData(
-        customer_internal_id=case.customer.internal_id, ticket_id=case.latest_ticket
+        case_id=case.internal_id,
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
     )
     return DeliveryFiles(
         delivery_data=delivery_meta_data, case_files=case_files, sample_files=sample_files
@@ -150,12 +152,13 @@ def expected_moved_fastq_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
+    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
     return DeliveryFiles(
         delivery_data=expected_fastq_delivery_files.delivery_data,
-        case_files=None,
+        case_files=[],
         sample_files=new_sample_files,
     )
 
@@ -172,17 +175,28 @@ def expected_moved_analysis_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
+    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
     )
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
+
     return DeliveryFiles(
         delivery_data=delivery_files.delivery_data,
         case_files=new_case_files,
         sample_files=new_sample_files,
     )
+
+
+@pytest.fixture
+def empty_delivery_files() -> DeliveryFiles:
+    """Return an empty delivery files object."""
+    delivery_data = DeliveryMetaData(
+        case_id="some_case", customer_internal_id="cust_id", ticket_id="ticket_id"
+    )
+    return DeliveryFiles(delivery_data=delivery_data, case_files=[], sample_files=[])
 
 
 @pytest.fixture
