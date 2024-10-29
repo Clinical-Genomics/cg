@@ -29,6 +29,7 @@ class Orderform(StrEnum):
     RML: str = "1604"
     SARS_COV_2: str = "2184"
     MICROBIAL_FASTQ: str = "microbial_sequencing"
+    PACBIO_LONG_READ: str = "???"
 
     @staticmethod
     def get_current_orderform_version(order_form: str) -> str:
@@ -39,6 +40,7 @@ class Orderform(StrEnum):
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "9",
             Orderform.MICROBIAL_FASTQ: "1",
+            Orderform.PACBIO_LONG_READ: "1",
         }
         return current_order_form_versions[order_form]
 
