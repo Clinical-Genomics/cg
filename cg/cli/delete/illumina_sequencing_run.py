@@ -9,7 +9,7 @@ from cg.services.illumina.post_processing.housekeeper_storage import (
 @click.command("illumina-run")
 @DRY_RUN
 @click.option(
-    "-f" "--flow-cell-id",
+    "--flow-cell-id",
     "flow_cell_id",
     type=str,
     multiple=False,
