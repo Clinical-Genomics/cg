@@ -6,7 +6,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import DNA_PREP_CATEGORIES, PrepCategory
+from cg.constants import DNA_PREP_CATEGORIES, PrepCategory
 from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

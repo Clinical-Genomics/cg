@@ -1,6 +1,6 @@
 import logging
 
-from cg.constants.constants import DNA_PREP_CATEGORIES, DNA_WORKFLOWS_WITH_SCOUT_UPLOAD
+from cg.constants import DNA_PREP_CATEGORIES, DNA_WORKFLOWS_WITH_SCOUT_UPLOAD
 from cg.exc import CgDataError
 from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
