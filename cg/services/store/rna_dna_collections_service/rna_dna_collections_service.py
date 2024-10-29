@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 
 class RNADNACollectionsService:
-    """Service that returns all or just uploaded related DNA cases for a given RNA case."""
+    """Service that returns all or just uploaded DNA cases related to the given RNA case."""
 
     def __init__(self, store: Store):
         self.store = store
