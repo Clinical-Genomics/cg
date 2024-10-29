@@ -31,7 +31,6 @@ def get_message(cases: list[Case]) -> str:
     return message_strategy.create_message(cases)
 
 
-# TODO add support for mip-rna
 def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Workflow.MICROSALT:
         return get_microsalt_message_strategy(case)
