@@ -29,7 +29,7 @@ def store_with_rna_and_related_dna_sample_and_cases(store: Store, helpers: Store
     )
     related_dna_sample: Sample = helpers.add_sample(
         store=store,
-        internal_id="related_dna_sample_1",
+        internal_id="related_dna_sample",
         application_tag=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
         subject_id="subject_1",
