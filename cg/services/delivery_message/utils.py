@@ -42,6 +42,9 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Workflow.MUTANT:
         return CovidMessage()
 
+    if case.data_analysis == Workflow.MIP_RNA:
+        return get_rna_message_strategy_from_data_delivery(case)
+
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
 
@@ -120,11 +123,6 @@ def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
         raise CaseNotFoundError("Internal id not found in the database")
     if not is_matching_order(cases):
         raise OrderMismatchError("Cases do not belong to the same order")
-    cases_with_mip_rna: list[Case] = [
-        case for case in cases if case.data_analysis == Workflow.MIP_RNA
-    ]
-    if cases_with_mip_rna:
-        raise DeliveryMessageNotSupportedError("Workflow is not supported.")
 
 
 def is_matching_order(cases: list[Case]) -> bool:
