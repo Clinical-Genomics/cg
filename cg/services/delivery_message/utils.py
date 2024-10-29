@@ -11,6 +11,10 @@ from cg.services.delivery_message.messages import (
     FastqMessage,
     FastqScoutMessage,
     MicrosaltMwrMessage,
+    RNAAnalysisScoutMessage,
+    RNAFastqAnalysisMessage,
+    RNAFastqScoutMessage,
+    RNAScoutMessage,
     ScoutMessage,
     StatinaMessage,
 )
@@ -31,7 +35,6 @@ def get_message(cases: list[Case]) -> str:
     return message_strategy.create_message(cases)
 
 
-# TODO add support for mip-rna
 def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Workflow.MICROSALT:
         return get_microsalt_message_strategy(case)
@@ -58,6 +61,22 @@ message_map = {
     DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
     DataDelivery.STATINA: StatinaMessage,
     DataDelivery.BAM: BamMessage,
+}
+
+
+def get_rna_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
+    message_strategy: DeliveryMessage = rna_message_map[case.data_delivery]()
+    return message_strategy
+
+
+rna_message_map = {
+    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.SCOUT: RNAScoutMessage,
+    DataDelivery.FASTQ_SCOUT: RNAFastqScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS: RNAFastqAnalysisMessage,
+    DataDelivery.ANALYSIS_SCOUT: RNAAnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
 }
 
 
