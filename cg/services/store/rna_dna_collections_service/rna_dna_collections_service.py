@@ -1,6 +1,6 @@
 import logging
 
-from cg.constants.constants import DNA_PREP_CATEGORIES, Workflow
+from cg.constants.constants import DNA_PREP_CATEGORIES, DNA_WORKFLOWS_WITH_SCOUT_UPLOAD
 from cg.exc import CgDataError
 from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
@@ -8,11 +8,11 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class RNADNACollectionService:
+class RNADNACollectionsService:
     def __init__(self, store: Store):
         self.store = store
 
-    def get_related_uploaded_dna_cases(self, rna_case: Case) -> list[Case]:
+    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
         dna_cases: set[Case] = self.get_related_dna_cases_from_rna_case(rna_case=rna_case)
         uploaded_dna_cases: list[Case] = []
@@ -45,20 +45,17 @@ class RNADNACollectionService:
             collaborators=collaborators,
         )
 
+        # TODO same issue here - rna case shouldn't be uploaded in the first place
         if len(related_dna_samples) != 1:
             raise CgDataError(
                 f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
                 f"{rna_sample.subject_id}. Number of matches: {len(related_dna_samples)} "
             )
         dna_sample: Sample = related_dna_samples[0]
-        workflows = [
-            Workflow.MIP_DNA,
-            Workflow.BALSAMIC,
-            Workflow.BALSAMIC_UMI,
-        ]
+
         dna_cases: list[Case] = self.store.get_related_cases(
             sample_internal_id=dna_sample.internal_id,
-            workflows=workflows,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
             collaborators=collaborators,
         )
 
