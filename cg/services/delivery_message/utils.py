@@ -1,9 +1,5 @@
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
-from cg.exc import (
-    CaseNotFoundError,
-    DeliveryMessageNotSupportedError,
-    OrderMismatchError,
-)
+from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
