@@ -146,6 +146,7 @@ class ExcelOrderformParser(OrderformParser):
             Orderform.MICROSALT: OrderType.MICROSALT,
             Orderform.SARS_COV_2: OrderType.SARS_COV_2,
             Orderform.MICROBIAL_FASTQ: OrderType.MICROBIAL_FASTQ,
+            Orderform.PACBIO_LONG_READ: OrderType.PACBIO_LONG_READ,
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
