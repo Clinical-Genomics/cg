@@ -61,28 +61,33 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
         self.include_pedigree_picture(load_config)
-        load_config.custom_images = self.load_custom_image_sample()
+        self.load_custom_image_sample(load_config)
         load_config.human_genome_build = GenomeBuild.hg19
         return load_config
 
-    def load_custom_image_sample(self) -> CustomImages:
+    def load_custom_image_sample(self, load_config: RarediseaseLoadConfig) -> None:
         """Build custom images config."""
         LOG.info("Adding custom images")
-        eklipse_images: list = []
-        for db_sample in self.analysis_obj.case.links:
-            sample_id: str = db_sample.sample.internal_id
-            eklipse_image = Eklipse(
-                title=sample_id,
-                path=self.get_file_from_hk(hk_tags=self.sample_tags.eklipse_path),
-                description="eKLIPse MT images",
-                width="800",
-                height="800",
-            )
-            eklipse_images.append(eklipse_image)
 
-        case_images = CaseImages(eKLIPse=eklipse_images)
-        config_custom_images = CustomImages(case_images=case_images)
-        return config_custom_images
+        eklipse_images: list = []
+        for sample in self.analysis_obj.case.samples:
+            sample_id: str = sample.internal_id
+            eklipse_image_path = self.get_file_from_hk(
+                hk_tags=set(self.sample_tags.eklipse_path).union({sample_id})
+            )
+            if eklipse_image_path:
+                eklipse_image = Eklipse(
+                    title=sample_id,
+                    path=eklipse_image_path,
+                    description="eKLIPse MT images",
+                    width="800",
+                    height="800",
+                )
+                eklipse_images.append(eklipse_image)
+        if eklipse_images:
+            case_images = CaseImages(eKLIPse=eklipse_images)
+            config_custom_images = CustomImages(case_images=case_images)
+            load_config.custom_images = config_custom_images
 
     def include_case_files(self, load_config: RarediseaseLoadConfig) -> None:
         """Include case level files for mip case."""
