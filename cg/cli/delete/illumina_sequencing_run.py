@@ -13,7 +13,7 @@ from cg.services.illumina.post_processing.housekeeper_storage import (
     "flow_cell_id",
     type=str,
     multiple=False,
-    help="Give the flow cell id of the run to delete",
+    help="Give the flow cell id of the run to delete from statusdb and housekeeper.",
 )
 @click.pass_context
 def delete_illumina_run(context: click.Context, dry_run: bool, flow_cell_id: str):
