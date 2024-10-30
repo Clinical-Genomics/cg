@@ -23,4 +23,4 @@ def delete_illumina_run(context: click.Context, flow_cell_id: str):
         flow_cell_id=flow_cell_id,
         hk_api=context.obj.housekeeper_api,
     )
-    context.obj.store.delete_illumina_flow_cell(internal_id=flow_cell_id)
+    context.obj.status_db.delete_illumina_flow_cell(internal_id=flow_cell_id)
