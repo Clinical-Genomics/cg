@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
+from cg.models.orders.constants import OrderType
 
 TICKET_PATTERN = r"^#\d{4,}"
 
@@ -11,11 +11,11 @@ class Order(BaseModel):
     connect_to_ticket: bool = False
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
+    order_type: OrderType = Field(alias="project_type")
     name: str = Field(min_length=1)
     skip_reception_control: bool = False
     ticket_number: str | None = Field(None, pattern=TICKET_PATTERN)
     user_id: int
-    workflow: Workflow
 
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):

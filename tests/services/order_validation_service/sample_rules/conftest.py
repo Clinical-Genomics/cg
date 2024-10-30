@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants.constants import Workflow
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
 from cg.services.order_validation_service.constants import (
     MINIMUM_VOLUME,
@@ -43,7 +43,7 @@ def create_microsalt_order(samples: list[MicrosaltSample]) -> MicrosaltOrder:
         delivery_type=MicrosaltDeliveryType.FASTQ_QC,
         name="order_name",
         ticket_number="#12345",
-        workflow=Workflow.MICROSALT,
+        project_type=OrderType.MICROSALT,
         user_id=1,
         customer="cust000",
         samples=samples,
