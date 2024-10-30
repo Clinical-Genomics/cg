@@ -40,6 +40,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 {
                     "application": sample.application,
                     "comment": sample.comment,
+                    "internal_id": sample.internal_id,
                     "data_analysis": sample.data_analysis,
                     "data_delivery": sample.data_delivery,
                     "name": sample.name,
@@ -121,6 +122,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             customer=customer,
             sex=SexOptions.UNKNOWN,
             comment=sample_dict["comment"],
+            internal_id=sample_dict["internal_id"],
             order=order,
             ordered=ordered,
             original_ticket=ticket_id,
