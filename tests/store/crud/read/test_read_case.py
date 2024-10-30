@@ -1,4 +1,4 @@
-from cg.constants import Workflow
+from cg.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, Workflow
 from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 
@@ -11,12 +11,7 @@ def test_get_related_cases(
 ):
     # GIVEN a database with a sample in several cases
     # GIVEN a list of workflows
-
-    workflows = [
-        Workflow.MIP_DNA,
-        Workflow.BALSAMIC,
-        Workflow.BALSAMIC_UMI,
-    ]
+    workflows: list[Workflow] = DNA_WORKFLOWS_WITH_SCOUT_UPLOAD
 
     # WHEN getting the cases from the given sample by the given workflows and within the given collaborators
     fetched_related_dna_cases: list[Case] = (

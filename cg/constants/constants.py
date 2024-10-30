@@ -112,6 +112,13 @@ class PrepCategory(StrEnum):
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
+DNA_PREP_CATEGORIES: list[PrepCategory] = [
+    PrepCategory.WHOLE_GENOME_SEQUENCING,
+    PrepCategory.TARGETED_GENOME_SEQUENCING,
+    PrepCategory.WHOLE_EXOME_SEQUENCING,
+]
+
+
 class SexOptions(StrEnum):
     MALE: str = "male"
     FEMALE: str = "female"
@@ -148,6 +155,13 @@ class Workflow(StrEnum):
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
     TOMTE: str = "tomte"
+
+
+DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
+    Workflow.MIP_DNA,
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+]
 
 
 class FileFormat(StrEnum):
