@@ -13,9 +13,7 @@ from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
-from cg.services.orders.order_summary_service.order_summary_service import (
-    OrderSummaryService,
-)
+from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,
