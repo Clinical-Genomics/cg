@@ -9,6 +9,7 @@ from cg.services.delivery_message.messages import (
     MicrosaltMwrMessage,
     RNAAnalysisScoutMessage,
     RNAFastqAnalysisMessage,
+    RNAFastqAnalysisScoutMessage,
     RNAFastqScoutMessage,
     RNAScoutMessage,
     ScoutMessage,
@@ -73,9 +74,9 @@ rna_message_map = {
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: RNAScoutMessage,
     DataDelivery.FASTQ_SCOUT: RNAFastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: RNAFastqAnalysisMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
     DataDelivery.ANALYSIS_SCOUT: RNAAnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: RNAFastqAnalysisScoutMessage,
 }
 
 

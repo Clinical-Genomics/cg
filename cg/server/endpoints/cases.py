@@ -1,9 +1,15 @@
 import logging
 from http import HTTPStatus
+
 from flask import Blueprint, abort, g, jsonify, request
+
 from cg.exc import CaseNotFoundError, OrderMismatchError
-from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
-from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, delivery_message_service
 from cg.store.models import Case, Customer
@@ -64,6 +70,8 @@ def get_cases_delivery_message():
         return jsonify(response.model_dump()), HTTPStatus.OK
     except (CaseNotFoundError, OrderMismatchError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+    except CgDataError as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
 @CASES_BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
@@ -75,6 +83,8 @@ def get_case_delivery_message(case_id: str):
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+    except CgDataError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
