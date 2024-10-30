@@ -63,7 +63,7 @@ def store_with_rna_and_related_dna_sample_and_cases(store: Store, helpers: Store
         customer_id="cust001",
     )
     helpers.add_relationship(store=store, sample=related_dna_sample, case=related_dna_case_1)
-    StoreHelpers.add_analysis(store=store, case=related_dna_case_1, uploaded_at=datetime.now())
+    helpers.add_analysis(store=store, case=related_dna_case_1, uploaded_at=datetime.now())
 
     related_dna_case_2: Case = helpers.add_case(
         store=store,
