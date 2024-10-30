@@ -11,7 +11,6 @@ def test_get_related_cases(
 ):
     # GIVEN a database with a sample in several cases
     # GIVEN a list of workflows
-
     workflows = [
         Workflow.MIP_DNA,
         Workflow.BALSAMIC,
