@@ -54,5 +54,5 @@ class DeliveryMessageService:
     def _get_delivery_message(self, case_ids: set[str]) -> str:
         cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
         validate_cases(cases=cases, case_ids=case_ids)
-        message: str = get_message(cases)
+        message: str = get_message(cases, self.store)
         return message

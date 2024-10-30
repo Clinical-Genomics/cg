@@ -8,7 +8,6 @@ from cg.services.delivery_message.messages import (
     FastqScoutMessage,
     MicrosaltMwrMessage,
     RNAAnalysisScoutMessage,
-    RNAFastqAnalysisMessage,
     RNAFastqAnalysisScoutMessage,
     RNAFastqScoutMessage,
     RNAScoutMessage,
@@ -25,14 +24,15 @@ from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 
-def get_message(cases: list[Case]) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(cases[0])
+def get_message(cases: list[Case], store: Store) -> str:
+    message_strategy: DeliveryMessage = get_message_strategy(cases[0], store)
     return message_strategy.create_message(cases)
 
 
-def get_message_strategy(case: Case) -> DeliveryMessage:
+def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
     if case.data_analysis == Workflow.MICROSALT:
         return get_microsalt_message_strategy(case)
 
@@ -40,7 +40,7 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
         return CovidMessage()
 
     if case.data_analysis == Workflow.MIP_RNA:
-        return get_rna_message_strategy_from_data_delivery(case)
+        return get_rna_message_strategy_from_data_delivery(case, store)
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
@@ -64,12 +64,21 @@ message_map = {
 }
 
 
-def get_rna_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
-    message_strategy: DeliveryMessage = rna_message_map[case.data_delivery]()
-    return message_strategy
+def get_rna_message_strategy_from_data_delivery(case: Case, store: Store) -> DeliveryMessage:
+
+    if case.data_delivery in scout_data_delivery:
+        return rna_message_map[case.data_delivery](store)
+    return rna_message_map[case.data_delivery]()
 
 
-rna_message_map = {
+scout_data_delivery: list[DataDelivery] = [
+    DataDelivery.SCOUT,
+    DataDelivery.FASTQ_SCOUT,
+    DataDelivery.ANALYSIS_SCOUT,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT,
+]
+
+rna_message_map: dict[DataDelivery, type[DeliveryMessage]] = {
     DataDelivery.ANALYSIS_FILES: AnalysisMessage,
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: RNAScoutMessage,

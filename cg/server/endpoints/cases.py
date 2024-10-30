@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.exc import CaseNotFoundError, OrderMismatchError
+from cg.exc import CaseNotFoundError, CgDataError, OrderMismatchError
 from cg.server.dto.delivery_message.delivery_message_request import (
     DeliveryMessageRequest,
 )
@@ -68,9 +68,7 @@ def get_cases_delivery_message():
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except (CaseNotFoundError, OrderMismatchError) as error:
-        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
-    except CgDataError as error:
+    except (CaseNotFoundError, OrderMismatchError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
@@ -82,9 +80,7 @@ def get_case_delivery_message(case_id: str):
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except CaseNotFoundError as error:
-        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
-    except CgDataError as error:
+    except (CaseNotFoundError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 

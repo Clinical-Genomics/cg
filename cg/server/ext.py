@@ -24,9 +24,6 @@ from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
 from cg.services.sample_service.sample_service import SampleService
-from cg.services.store.rna_dna_collections_service.rna_dna_collections_service import (
-    RNADNACollectionsService,
-)
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -97,7 +94,6 @@ summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
 flow_cell_service = SampleRunMetricsService(db)
-rna_dna_collections_service = RNADNACollectionsService(db)
 order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registry(
     lims=lims,
     status_db=db,

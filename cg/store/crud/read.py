@@ -8,15 +8,36 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.constants.constants import (
+    DNA_PREP_CATEGORIES,
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    CaseActions,
+    CustomerId,
+    PrepCategory,
+    SampleType,
+)
+from cg.exc import (
+    CaseNotFoundError,
+    CgDataError,
+    CgError,
+    OrderNotFoundError,
+    SampleNotFoundError,
+)
 from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -26,14 +47,23 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -52,7 +82,10 @@ from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
     apply_order_type_application_filter,
 )
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
@@ -1604,3 +1637,50 @@ class ReadHandler(BaseHandler):
                 CaseFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         ).all()
+
+    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
+        """Returns all uploaded DNA cases related to the specified RNA case."""
+        dna_cases: set[Case] = self.get_related_dna_cases_from_rna_case(rna_case=rna_case)
+        uploaded_dna_cases: list[Case] = []
+        for dna_case in dna_cases:
+            if dna_case.is_uploaded:
+                uploaded_dna_cases.append(dna_case)
+            else:
+                LOG.warning(f"Related DNA case {dna_case.internal_id} has not been completed.")
+        return uploaded_dna_cases
+
+    def get_related_dna_cases_from_rna_case(self, rna_case: Case) -> set[Case]:
+        """Return a list of unique DNA cases related to the samples of an RNA case."""
+        dna_cases: set[Case] = set()
+        for sample in rna_case.samples:
+            dna_cases.update(self._get_related_dna_cases_from_rna_sample(sample))
+        return dna_cases
+
+    def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
+        """Return a list of DNA cases related to an RNA sample."""
+
+        if not rna_sample.subject_id:
+            raise CgDataError(
+                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+            )
+
+        collaborators: set[Customer] = rna_sample.customer.collaborators
+        related_dna_samples: list[Sample] = self.get_related_samples(
+            sample_internal_id=rna_sample.internal_id,
+            prep_categories=DNA_PREP_CATEGORIES,
+            collaborators=collaborators,
+        )
+
+        if len(related_dna_samples) != 1:
+            raise CgDataError(
+                f"Unexpected number of DNA sample matches for subject_id: "
+                f"{rna_sample.subject_id}. Number of matches: {len(related_dna_samples)} "
+            )
+        dna_sample: Sample = related_dna_samples[0]
+
+        dna_cases: list[Case] = self.get_related_cases(
+            sample_internal_id=dna_sample.internal_id,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+            collaborators=collaborators,
+        )
+        return dna_cases
