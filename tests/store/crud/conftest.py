@@ -221,6 +221,11 @@ def related_dna_cases(store_with_rna_and_related_dna_sample_and_cases: Store) ->
 
 
 @pytest.fixture
+def related_dna_case_ids(related_dna_cases: list[Case]) -> list[str]:
+    return [case.internal_id for case in related_dna_cases]
+
+
+@pytest.fixture
 def store_with_active_sample_analyze(
     store: Store, helpers: StoreHelpers
 ) -> Generator[Store, None, None]:
@@ -457,11 +462,11 @@ def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
 
 
 @pytest.fixture
-def uploaded_related_dna_cases(related_dna_cases: list[Case]) -> list[Case]:
-    related_uploaded_dna_cases: list[Case] = []
+def uploaded_related_dna_case_ids(related_dna_cases: list[Case]) -> list[str]:
+    related_uploaded_dna_cases: list[str] = []
     for case in related_dna_cases:
         if case.is_uploaded:
-            related_uploaded_dna_cases.append(case)
+            related_uploaded_dna_cases.append(case.internal_id)
     return related_uploaded_dna_cases
 
 

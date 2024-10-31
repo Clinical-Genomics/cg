@@ -1585,14 +1585,13 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def get_related_samples(
+    def _get_related_samples_query(
         self,
-        sample_internal_id: str,
+        sample: Sample,
         prep_categories: list[PrepCategory],
         collaborators: set[Customer],
-    ) -> list[Sample]:
-        """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
-        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+    ) -> Query:
+        """Returns a query with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1602,7 +1601,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
         )
 
-        sample_application_version_query: Query = apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=sample_application_version_query,
             subject_id=sample.subject_id,
             is_tumour=sample.is_tumour,
@@ -1613,74 +1612,50 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        return samples
 
-        return sample_application_version_query.all()
-
-    def get_related_cases(
-        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
-    ) -> list[Case]:
-        """Return a list of cases linked to the given sample within the given list of workflows and customers in a collaboration."""
-
-        cases_with_samples: Query = self._join_sample_and_case()
-        cases_with_samples: Query = apply_case_sample_filter(
-            case_samples=cases_with_samples,
-            sample_internal_id=sample_internal_id,
-            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
-        )
-
-        return apply_case_filter(
-            cases=cases_with_samples,
-            workflows=workflows,
-            customer_entry_ids=[customer.id for customer in collaborators],
-            filter_functions=[
-                CaseFilter.BY_WORKFLOWS,
-                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-            ],
-        ).all()
-
-    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
+    def get_uploaded_related_dna_case_ids(self, rna_case_id: str) -> list[str]:
+        """Return a list of cases linked to the given rna sample within the given list of workflows and customers in a collaboration."""
         """Returns all uploaded DNA cases related to the specified RNA case."""
-        dna_cases: set[Case] = self.get_related_dna_cases_from_rna_case(rna_case=rna_case)
-        uploaded_dna_cases: list[Case] = []
-        for dna_case in dna_cases:
-            if dna_case.is_uploaded:
-                uploaded_dna_cases.append(dna_case)
-            else:
-                LOG.warning(f"Related DNA case {dna_case.internal_id} has not been completed.")
-        return uploaded_dna_cases
 
-    def get_related_dna_cases_from_rna_case(self, rna_case: Case) -> set[Case]:
-        """Return a list of unique DNA cases related to the samples of an RNA case."""
-        dna_cases: set[Case] = set()
-        for sample in rna_case.samples:
-            dna_cases.update(self._get_related_dna_cases_from_rna_sample(sample))
-        return dna_cases
+        rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
 
-    def _get_related_dna_cases_from_rna_sample(self, rna_sample: Sample) -> list[Case]:
-        """Return a list of DNA cases related to an RNA sample."""
+        related_dna_cases_ids: list[str] = []
+        for rna_sample in rna_case.samples:
 
-        if not rna_sample.subject_id:
-            raise CgDataError(
-                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+            collaborators: set[Customer] = rna_sample.customer.collaborators
+
+            related_dna_samples: Query = self._get_related_samples_query(
+                sample=rna_sample,
+                prep_categories=DNA_PREP_CATEGORIES,
+                collaborators=collaborators,
             )
 
-        collaborators: set[Customer] = rna_sample.customer.collaborators
-        related_dna_samples: list[Sample] = self.get_related_samples(
-            sample_internal_id=rna_sample.internal_id,
-            prep_categories=DNA_PREP_CATEGORIES,
-            collaborators=collaborators,
-        )
+            dna_samples_cases_query = related_dna_samples.join(
+                CaseSample, Case.id == CaseSample.case_id
+            ).join(Case, CaseSample.case_id == Case.id)
 
-        if len(related_dna_samples) != 1:
-            raise CgDataError(
-                f"Unexpected number of DNA sample matches for subject_id: "
-                f"{rna_sample.subject_id}. Number of matches: {len(related_dna_samples)} "
+            dna_samples_cases_query: Query = apply_case_filter(
+                cases=dna_samples_cases_query,
+                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+                customer_entry_ids=[customer.id for customer in collaborators],
+                filter_functions=[
+                    CaseFilter.BY_WORKFLOWS,
+                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+                ],
             )
-        dna_sample: Sample = related_dna_samples[0]
 
-        dna_cases: list[Case] = self.get_related_cases(
-            sample_internal_id=dna_sample.internal_id,
-            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-            collaborators=collaborators,
-        )
-        return dna_cases
+            dna_samples_cases_analysis: Query = dna_samples_cases_query.join(Analysis)
+
+            dna_samples_cases_analysis: Query = apply_analysis_filter(
+                analyses=dna_samples_cases_analysis,
+                filter_functions=[AnalysisFilter.IS_UPLOADED],
+            )
+
+            dna_samples_cases_analysis: list = dna_samples_cases_analysis.with_entities(
+                Case.internal_id
+            ).all()
+
+            related_dna_cases_ids.extend([row[0] for row in dna_samples_cases_analysis])
+
+        return related_dna_cases_ids
