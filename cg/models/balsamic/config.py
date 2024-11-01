@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
@@ -48,7 +47,7 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Annotated[str | None, Field(validate_default=True)] = None
+    reference_genome_version: str | None = Field(None, validate_default=True)
 
     @field_validator("reference_genome_version")
     @classmethod
@@ -72,7 +71,7 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: Annotated[str | None, Field(validate_default=True)] = None
+    capture_kit_version: str | None = Field(None, validate_default=True)
     chrom: list[str]
     pon_cnn: str | None = None
 
