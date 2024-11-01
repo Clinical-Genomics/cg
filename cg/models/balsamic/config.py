@@ -47,7 +47,7 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: str | None = Field(None, validate_default=True)
+    reference_genome_version: str | None = Field(default=None, validate_default=True)
 
     @field_validator("reference_genome_version")
     @classmethod
@@ -71,7 +71,7 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: str | None = Field(None, validate_default=True)
+    capture_kit_version: str | None = Field(default=None, validate_default=True)
     chrom: list[str]
     pon_cnn: str | None = None
 
