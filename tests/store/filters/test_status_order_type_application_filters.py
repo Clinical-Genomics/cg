@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Query
 
 from cg.models.orders.constants import OrderType
-from cg.store.filters.status_ordertype_application_filters import filter_applications_by_order_type
-from cg.store.models import Application, OrderTypeApplication
+from cg.store.filters.status_ordertype_application_filters import (
+    filter_applications_by_order_type,
+)
+from cg.store.models import Application
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -26,11 +28,14 @@ def test_filter_applications_by_order_type(applications_store: Store, helpers: S
     )
 
     # WHEN filtering applications by order type
-    order_type_applications: Query = applications_store._get_query(table=OrderTypeApplication)
+    order_type_applications: Query = applications_store._get_query(table=Application).join(
+        Application.order_type_applications
+    )
     filtered_order_type_applications: Query = filter_applications_by_order_type(
         order_type_applications=order_type_applications, order_type=order_type
     )
 
     # THEN assert that only the applications with the given order type are returned
     assert filtered_order_type_applications.count() == 1
-    assert filtered_order_type_applications.first().order_type == order_type
+    application = filtered_order_type_applications.first()
+    assert order_type in application.order_types

@@ -6,7 +6,12 @@ from typing import Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationLimitations,
+    ApplicationVersion,
+)
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
     Case,
@@ -82,7 +87,7 @@ class BaseHandler:
 
     def _get_join_application_ordertype_query(self) -> Query:
         """Return join application to order type query."""
-        return self._get_query(table=Application).join(Application.order_types)
+        return self._get_query(table=Application).join(Application.order_type_applications)
 
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
