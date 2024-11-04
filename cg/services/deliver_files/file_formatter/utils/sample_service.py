@@ -1,7 +1,15 @@
 import os
 from pathlib import Path
+
+from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
+from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
+    SampleFileConcatenationFormatter,
+)
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 
 
 class SampleFileFormatter:
@@ -55,3 +63,15 @@ class SampleFileFormatter:
                 )
             )
         return formatted_files
+
+
+class MutantFileFormatter(SampleFileConcatenationFormatter):
+    def __init__(self, lims_api: LimsAPI, concatenation_service: FastqConcatenationService):
+        self.lims_api: LimsAPI = lims_api
+        super().__init__(concatenation_service = concatenation_service)
+
+    def format_files() -> list[]:
+        formatted_files: list[FormattedFile] = super().format_files()
+        meta_data_files = _add_lims_meta_data(formatted_files)
+        return meta_data_files
+
