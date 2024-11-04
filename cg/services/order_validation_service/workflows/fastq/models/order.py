@@ -6,7 +6,3 @@ from cg.services.order_validation_service.workflows.fastq.models.sample import F
 class FastqOrder(OrderWithNonHumanSamples):
     delivery_type: DataDelivery.FASTQ
     samples: list[FastqSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[FastqSample]:
-        return enumerate(self.samples)
