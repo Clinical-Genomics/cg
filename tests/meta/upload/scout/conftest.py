@@ -263,7 +263,7 @@ def lims_family(fixtures_dir) -> dict:
     """Returns a LIMS-like case of samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON,
-        file_path=Path(fixtures_dir, "report", "lims_family" + FileFormat.JSON),
+        file_path=Path(fixtures_dir, "report", "lims_family." + FileFormat.JSON),
     )
 
 
@@ -608,7 +608,7 @@ def raredisease_analysis_hk_bundle_data(
                 "tags": ["multiqc-html", sample_id],
             },
             {
-                "path": Path(raredisease_analysis_dir, "manifest" + FileFormat.JSON).as_posix(),
+                "path": Path(raredisease_analysis_dir, "manifest." + FileFormat.JSON).as_posix(),
                 "archive": False,
                 "tags": [NFAnalysisTags.MANIFEST],
             },

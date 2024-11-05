@@ -3,6 +3,7 @@
 import datetime as dt
 
 from cg.meta.upload.upload_api import UploadAPI
+from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
 from tests.cli.workflow.conftest import tb_api
 from tests.cli.workflow.mip.conftest import (
