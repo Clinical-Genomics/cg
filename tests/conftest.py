@@ -4249,7 +4249,3 @@ def libary_sequencing_method() -> str:
 def capture_kit() -> str:
     return "panel.bed"
 
-
-@pytest.fixture
-def lims_naming_matadata() -> str:
-    return "01_SE100"
