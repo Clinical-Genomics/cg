@@ -29,7 +29,7 @@ def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Cas
     assert isinstance(dna_mip_analysis.uploaded_at, dt.datetime)
 
 
-def test_mip_rna_update_uploaded_at(mip_rna_context: mip_rna_context, mip_rna_analysis: Analysis):
+def test_mip_rna_update_uploaded_at(mip_rna_context: CGConfig, mip_rna_analysis: Analysis):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(
