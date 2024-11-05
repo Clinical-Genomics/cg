@@ -13,7 +13,7 @@ from tests.cli.workflow.mip.conftest import (
 )
 
 
-def test_mip_dna_update_uploaded_at(mip_dna_context: mip_dna_context, mip_dna_case: Case):
+def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Case):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(
