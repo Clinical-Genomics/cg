@@ -1,10 +1,11 @@
 from cg.models.orders.sample_base import PriorityEnum, SexEnum
+from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.models.sample import Sample
 
 
 class FastqSample(Sample):
     concentration_ng_ul: float | None = None
-    elution_buffer: ElutionBufferEnum
+    elution_buffer: ElutionBuffer
     priority: PriorityEnum
     quantity: int | None = None
     require_qc_ok: bool
