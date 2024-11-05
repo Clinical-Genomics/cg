@@ -92,7 +92,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def extract_rank_model_from_manifest(
         self, hk_manifest_file: File, variant_type: Variants
     ) -> str:
-        content: list[dict[str, str]] = ReadFile.get_content_from_file(
+        content: dict[str, dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
         return self.get_rank_model_version_from_manifest_content(
@@ -100,10 +100,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
 
     def get_rank_model_version_from_manifest_content(
-        self, content: list[dict[str, str]], variant_type: Variants
+        self, content: dict[str, dict[str, str]], variant_type: Variants
     ) -> str:
         """
-        Return the rank model version from manifest file content.
+        Return the rank model version from the manifest file content.
         """
         pattern: str = variant_type.upper() + ":GENMOD_SCORE"
         for key, value in content["tasks"].items():
