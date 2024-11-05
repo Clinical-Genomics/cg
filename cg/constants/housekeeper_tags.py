@@ -91,7 +91,7 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
-class HkNFAnalysisTags:
+class NFAnalysisTags:
     MANIFEST: str = "manifest"
 
 

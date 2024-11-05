@@ -13,7 +13,7 @@ from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     AnalysisTag,
-    HkNFAnalysisTags,
+    NFAnalysisTags,
 )
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
@@ -610,7 +610,7 @@ def raredisease_analysis_hk_bundle_data(
             {
                 "path": Path(raredisease_analysis_dir, "manifest" + FileFormat.JSON).as_posix(),
                 "archive": False,
-                "tags": [HkNFAnalysisTags.MANIFEST],
+                "tags": [NFAnalysisTags.MANIFEST],
             },
         ],
     }

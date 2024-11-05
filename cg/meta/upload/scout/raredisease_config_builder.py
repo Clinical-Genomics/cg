@@ -9,7 +9,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     AnalysisTag,
-    HkNFAnalysisTags,
+    NFAnalysisTags,
 )
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
@@ -82,7 +82,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         Returns the rank model version for a variant type from the manifest file.
         Raises FileNotFoundError if no manifest file is found in housekeeper.
         """
-        hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
+        hk_manifest_file: File = self.get_file_from_hk({NFAnalysisTags.MANIFEST})
         if not hk_manifest_file:
             raise FileNotFoundError("No manifest file found in Housekeeper.")
         return self.extract_rank_model_from_manifest(
