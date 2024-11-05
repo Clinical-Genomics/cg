@@ -43,7 +43,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.madeline_api: MadelineAPI = madeline_api
 
     def build_load_config(self, rank_score_threshold: int = RANK_MODEL_THRESHOLD) -> MipLoadConfig:
-        """Create a MIP specific load config for uploading analysis to Scout"""
+        """Create a MIP specific load config for uploading analysis to Scout."""
         LOG.info("Generate load config for mip case")
         load_config: MipLoadConfig = MipLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,

@@ -78,9 +78,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return load_config
 
     def get_rank_model_version(self, variant_type: Variants) -> str:
+        """
+        Returns the rank model version for a variant type from the manifest file.
+        Raises FileNotFoundError if no manifest file is found in housekeeper.
+        """
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
         if not hk_manifest_file:
-            raise FileNotFoundError("No manifest file found in housekeeper")
+            raise FileNotFoundError("No manifest file found in Housekeeper.")
         return self.extract_rank_model_from_manifest(
             hk_manifest_file=hk_manifest_file, variant_type=variant_type
         )
@@ -91,45 +95,28 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
-        return self.search_rank_model_in_manifest(content, variant_type)
+        return self.get_rank_model_version_from_manifest_content(
+            content=content, variant_type=variant_type
+        )
 
-    def search_rank_model_in_manifest(self, content, variant_type) -> str:
+    def get_rank_model_version_from_manifest_content(
+        self, content: list[dict[str, str]], variant_type: Variants
+    ) -> str:
         """
-        Extract the version from manifest.json. Structure is
-        {pipeline, published, tasks}
-        content['tasks']: {{
-        'id': '6',
-        'name': 'NFCORE_RAREDISEASE:RAREDISEASE:PREPARE_REFERENCES:GET_CHROM_SIZES',
-        'cached': True,
-        'process': 'NFCORE_RAREDISEASE:RAREDISEASE:PREPARE_REFERENCES:GET_CHROM_SIZES',
-        'script': 'genmod \
-        score \
-        --rank_results \
-        --family_file cleanshrimp.ped \
-        --score_config rank_model_-v1.38-.ini \
-        --outfile cleanshrimp_snv_genmod_score_clinical_score.vcf \
-        cleanshrimp_snv_genmod_models_clinical_models.vcf
-
-        cat <<-END_VERSIONS > versions.yml
-        "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE":
-            genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )
-        END_VERSIONS"',
-        'inputs': [...],
-        'outputs': [...],
-        },
-        ...
-        }
+        Return the rank model version from manifest file content.
         """
-        pattern = variant_type.upper() + ":GENMOD_SCORE"
+        pattern: str = variant_type.upper() + ":GENMOD_SCORE"
         for key, value in content["tasks"].items():
-            process = value.get("process")  # Use get to safely access the 'process' key
-            script = value.get("script")
+            process: str = value.get("process")
+            script: str = value.get("script")
             if pattern in process and AnalysisTag.CLINICAL in script:
-                match = re.search(r"v(\d+\.\d+)", script)  # Extract the version number
-                if match:
-                    version = match.group(1)
-                    return version
-        raise ValueError(f"No rank model version found for clinical {variant_type}")
+                return self._get_version_from_manifest_script(script)
+
+    def _get_version_from_manifest_script(self, script: str) -> str:
+        """<some_docstring>."""
+        if match := re.search(r"v(\d+\.\d+)", script):
+            return match.group(1)
+        raise ValueError("No rank model version found")
 
     def load_custom_image_sample(self, load_config: RarediseaseLoadConfig) -> None:
         """Build custom images config."""
