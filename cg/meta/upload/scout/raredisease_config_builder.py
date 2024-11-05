@@ -77,13 +77,17 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config.sv_rank_model_version = self.get_rank_model_version(variant_type=Variants.SV)
         return load_config
 
-    def get_rank_model_version(self, variant_type) -> str:
+    def get_rank_model_version(self, variant_type: Variants) -> str:
         hk_manifest_file: File = self.get_file_from_hk({HkNFAnalysisTags.MANIFEST})
         if not hk_manifest_file:
             raise FileNotFoundError("No manifest file found in housekeeper")
-        return self.extract_rank_model_from_manifest(hk_manifest_file, variant_type)
+        return self.extract_rank_model_from_manifest(
+            hk_manifest_file=hk_manifest_file, variant_type=variant_type
+        )
 
-    def extract_rank_model_from_manifest(self, hk_manifest_file, variant_type) -> str:
+    def extract_rank_model_from_manifest(
+        self, hk_manifest_file: File, variant_type: Variants
+    ) -> str:
         content: list[dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
