@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PosixPath
 
 import pytest
 
@@ -15,6 +15,7 @@ from cg.services.deliver_files.file_fetcher.models import (
     DeliveryMetaData,
     SampleFile,
 )
+from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -243,3 +244,21 @@ def swap_file_paths_with_inbox_paths(
         new_file_model.file_path = Path(inbox_dir_path, file_model.file_path.name)
         new_file_models.append(new_file_model)
     return new_file_models
+
+
+@pytest.fixture
+def lims_naming_matadata() -> str:
+    return "01_SE100_"
+
+
+@pytest.fixture
+def expected_mutant_formatted_files(expected_concatenated_fastq_formatted_files, lims_naming_matadata) -> list[FormattedFile]:
+    for formatted_file in expected_concatenated_fastq_formatted_files:
+        formatted_file.original_path = formatted_file.formatted_path
+        formatted_file.formatted_path = Path(formatted_file.formatted_path.parent, f"{lims_naming_matadata}{formatted_file.formatted_path.name}")
+    return expected_concatenated_fastq_formatted_files
+
+
+@pytest.fixture
+def mutant_moved_files(fastq_concatenation_sample_files) -> list[SampleFile]:
+    return fastq_concatenation_sample_files
