@@ -86,11 +86,11 @@ def test_mutant_file_formatter(
 
     os.makedirs(ticket_dir_path, exist_ok=True)
 
-    for moved_file in mutant_moved_files:
-        moved_file.file_path.touch()
+    for mutant_moved_file in mutant_moved_files:
+        mutant_moved_file.file_path.touch()
     
-    # Initialize file_formatter inside the function to avoid multiple values for 'lims_api'
-    file_formatter = MutantFileFormatter(concatenation_service=FastqConcatenationService(), lims_api=Mock()) # MockLimsAPI()?
+    # Initialize file_formatter
+    file_formatter = MutantFileFormatter(concatenation_service=FastqConcatenationService(), lims_api=Mock())
 
     # WHEN formatting the files
     with mock.patch.object(MutantFileFormatter, "_get_lims_naming_metadata", return_value=lims_naming_matadata):
