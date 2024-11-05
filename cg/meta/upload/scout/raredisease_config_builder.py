@@ -113,7 +113,10 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
                 return self._get_version_from_manifest_script(script)
 
     def _get_version_from_manifest_script(self, script: str) -> str:
-        """<some_docstring>."""
+        """
+        Returns the rank model version in the format 'vX.X from the given script string.
+        Raises a ValueError if no rank model version is found in the script string.
+        """
         if match := re.search(r"v(\d+\.\d+)", script):
             return match.group(1)
         raise ValueError("No rank model version found")
