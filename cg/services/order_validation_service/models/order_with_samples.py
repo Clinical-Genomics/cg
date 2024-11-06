@@ -2,7 +2,7 @@ from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.models.sample import Sample
 
 
-class OrderWithNonHumanSamples(Order):
+class OrderWithSamples(Order):
     samples: list[Sample]
 
     @property

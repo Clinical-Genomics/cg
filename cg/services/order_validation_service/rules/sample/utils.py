@@ -6,20 +6,18 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.models.order_with_samples import (
-    OrderWithNonHumanSamples,
-)
+from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
 
 
 class PlateSamplesValidator:
 
-    def __init__(self, order: OrderWithNonHumanSamples):
+    def __init__(self, order: OrderWithSamples):
         self.wells: dict[tuple[str, str], list[int]] = {}
         self.plate_samples: list[tuple[int, Sample]] = []
         self._initialize_wells(order)
 
-    def _initialize_wells(self, order: OrderWithNonHumanSamples):
+    def _initialize_wells(self, order: OrderWithSamples):
         """
         Construct a dict with keys being a (container_name, well_position) pair.
         The value will be a list of sample indices for samples located in the well.
@@ -57,7 +55,7 @@ def get_missing_well_errors(sample_indices: list[int]) -> list[WellPositionMissi
     return [WellPositionMissingError(sample_index) for sample_index in sample_indices]
 
 
-def get_indices_for_repeated_sample_names(order: OrderWithNonHumanSamples) -> list[int]:
+def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
     counter = Counter([sample.name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
@@ -70,7 +68,7 @@ def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
     return sample.container == ContainerEnum.tube and counter.get(sample.container_name) > 1
 
 
-def get_indices_for_tube_repeated_container_name(order: OrderWithNonHumanSamples) -> list[int]:
+def get_indices_for_tube_repeated_container_name(order: OrderWithSamples) -> list[int]:
     counter = Counter([sample.container_name for sample in order.samples])
     indices: list[int] = []
     for index, sample in order.enumerated_samples:

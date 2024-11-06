@@ -1,4 +1,3 @@
-from cg.apps.lims import order
 from cg.constants.constants import PrepCategory, Workflow
 from cg.services.order_validation_service.constants import WORKFLOW_PREP_CATEGORIES
 from cg.services.order_validation_service.errors.sample_errors import (
@@ -20,7 +19,6 @@ from cg.services.order_validation_service.rules.sample.utils import (
     get_indices_for_repeated_sample_names,
     get_indices_for_tube_repeated_container_name,
     is_container_name_missing,
-    get_indices_for_tube_repeated_container_name,
     is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
@@ -28,14 +26,12 @@ from cg.services.order_validation_service.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    OrderWithNonHumanSamples,
-)
+from cg.services.order_validation_service.workflows.microsalt.models.order import OrderWithSamples
 from cg.store.store import Store
 
 
 def validate_application_exists(
-    order: OrderWithNonHumanSamples, store: Store, **kwargs
+    order: OrderWithSamples, store: Store, **kwargs
 ) -> list[ApplicationNotValidError]:
     errors: list[ApplicationNotValidError] = []
     for sample_index, sample in order.enumerated_samples:
@@ -46,7 +42,7 @@ def validate_application_exists(
 
 
 def validate_applications_not_archived(
-    order: OrderWithNonHumanSamples, store: Store, **kwargs
+    order: OrderWithSamples, store: Store, **kwargs
 ) -> list[ApplicationArchivedError]:
     errors: list[ApplicationArchivedError] = []
     for sample_index, sample in order.enumerated_samples:
@@ -56,7 +52,7 @@ def validate_applications_not_archived(
     return errors
 
 
-def validate_volume_interval(order: OrderWithNonHumanSamples, **kwargs) -> list[InvalidVolumeError]:
+def validate_volume_interval(order: OrderWithSamples, **kwargs) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_volume_invalid(sample):
@@ -65,9 +61,7 @@ def validate_volume_interval(order: OrderWithNonHumanSamples, **kwargs) -> list[
     return errors
 
 
-def validate_required_volume(
-    order: OrderWithNonHumanSamples, **kwargs
-) -> list[VolumeRequiredError]:
+def validate_required_volume(order: OrderWithSamples, **kwargs) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_volume_missing(sample):
@@ -77,7 +71,7 @@ def validate_required_volume(
 
 
 def validate_organism_exists(
-    order: OrderWithNonHumanSamples, store: Store, **kwargs
+    order: OrderWithSamples, store: Store, **kwargs
 ) -> list[OrganismDoesNotExistError]:
     errors: list[OrganismDoesNotExistError] = []
     for sample_index, sample in order.enumerated_samples:
@@ -88,7 +82,7 @@ def validate_organism_exists(
 
 
 def validate_application_compatibility(
-    order: OrderWithNonHumanSamples,
+    order: OrderWithSamples,
     store: Store,
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
@@ -108,7 +102,7 @@ def validate_application_compatibility(
 
 
 def validate_wells_contain_at_most_one_sample(
-    order: OrderWithNonHumanSamples,
+    order: OrderWithSamples,
     **kwargs,
 ) -> list[OccupiedWellError]:
     plate_samples = PlateSamplesValidator(order)
@@ -116,7 +110,7 @@ def validate_wells_contain_at_most_one_sample(
 
 
 def validate_well_positions_required(
-    order: OrderWithNonHumanSamples,
+    order: OrderWithSamples,
     **kwargs,
 ) -> list[OccupiedWellError]:
     plate_samples = PlateSamplesValidator(order)
@@ -124,14 +118,14 @@ def validate_well_positions_required(
 
 
 def validate_sample_names_unique(
-    order: OrderWithNonHumanSamples, **kwargs
+    order: OrderWithSamples, **kwargs
 ) -> list[SampleNameRepeatedError]:
     sample_indices: list[int] = get_indices_for_repeated_sample_names(order)
     return [SampleNameRepeatedError(sample_index=sample_index) for sample_index in sample_indices]
 
 
 def validate_sample_names_available(
-    order: OrderWithNonHumanSamples, store: Store, **kwargs
+    order: OrderWithSamples, store: Store, **kwargs
 ) -> list[SampleNameNotAvailableError]:
     errors: list[SampleNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
@@ -145,7 +139,7 @@ def validate_sample_names_available(
 
 
 def validate_tube_container_name_unique(
-    order: OrderWithNonHumanSamples,
+    order: OrderWithSamples,
     **kwargs,
 ) -> list[ContainerNameRepeatedError]:
     errors: list[ContainerNameRepeatedError] = []
@@ -156,9 +150,7 @@ def validate_tube_container_name_unique(
     return errors
 
 
-def validate_well_position_format(
-    order: OrderWithNonHumanSamples, **kwargs
-) -> list[WellFormatError]:
+def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[WellFormatError]:
     errors: list[WellFormatError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_invalid_well_format(sample=sample):
@@ -168,7 +160,7 @@ def validate_well_position_format(
 
 
 def validate_container_name_required(
-    order: OrderWithNonHumanSamples, **kwargs
+    order: OrderWithSamples, **kwargs
 ) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
     for sample_index, sample in order.enumerated_samples:
