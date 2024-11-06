@@ -19,7 +19,7 @@ from cg.services.order_validation_service.workflows.balsamic.models.sample impor
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
-from cg.store.models import Application, Customer, OrderTypeApplication, User
+from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
 
@@ -81,7 +81,7 @@ def balsamic_application(base_store: Store) -> Application:
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
     )
-    OrderTypeApplication(application=application, order_type=OrderType.BALSAMIC)
+    application.order_types = [OrderType.BALSAMIC]
     base_store.session.add(application)
     base_store.commit_to_store()
     return application
