@@ -6,12 +6,13 @@ from cg.store.models import Case
 class FastqMessage(DeliveryMessage):
     def create_message(self, cases: list[Case]) -> str:
         delivery_path: str = get_caesar_delivery_path(cases[0])
-        case_names: str = "\n".join([case.name for case in cases])
-        case_s_: str = "case" if len(cases) == 1 else "cases"
+        sample_names: str = "\n".join([sample.name for case in cases for sample in case.samples])
+        number_of_samples: int = sum(len(case.samples) for case in cases)
+        sample_s_: str = "sample" if number_of_samples == 1 else "samples"
         return (
             f"Hello,\n\n"
-            f"The fastq files for the following {case_s_} have been uploaded to your inbox on Caesar:\n\n"
-            f"{case_names}\n"
+            f"The fastq files for the following {sample_s_} have been uploaded to your inbox on Caesar:\n\n"
+            f"{sample_names}\n"
             "Available under: \n\n"
             f"{delivery_path}"
         )
