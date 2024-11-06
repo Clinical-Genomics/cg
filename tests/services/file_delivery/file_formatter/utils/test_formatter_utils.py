@@ -88,7 +88,7 @@ def test_mutant_file_formatter(
     for moved_file in mutant_moved_files:
         moved_file.file_path.touch()
 
-    # Initialize file_formatter inside the function to avoid multiple values for 'lims_api'
+    # Initialize file_formatter
     file_formatter = MutantFileFormatter(
         concatenation_service=FastqConcatenationService(), lims_api=Mock()
     )
