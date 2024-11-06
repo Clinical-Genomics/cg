@@ -80,7 +80,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def get_rank_model_version(self, variant_type: Variants) -> str:
         """
         Returns the rank model version for a variant type from the manifest file.
-        Raises FileNotFoundError if no manifest file is found in housekeeper.
+        Raises:
+            FileNotFoundError if no manifest file is found in housekeeper.
         """
         hk_manifest_file: File = self.get_file_from_hk({NFAnalysisTags.MANIFEST})
         if not hk_manifest_file:
