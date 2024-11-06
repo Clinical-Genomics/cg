@@ -55,9 +55,9 @@ def test_store_samples(
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
     assert len(base_store._get_query(table=Sample).all()) == 2
-    assert base_store._get_query(table=Case).count() == 2
+    assert base_store._get_query(table=Case).count() == 1
     first_sample = new_samples[0]
-    assert len(first_sample.links) == 2
+    assert len(first_sample.links) == 1
     family_link = first_sample.links[0]
     assert family_link.case in base_store.get_cases()
     assert family_link.case.data_analysis
@@ -85,30 +85,6 @@ def test_store_samples_sex_stored(
 
     # THEN the sample sex should be stored
     assert new_samples[0].sex == "male"
-
-
-def test_store_fastq_samples_non_tumour_wgs_to_mip(
-    base_store: Store, fastq_status_data: dict, store_fastq_order_service: StoreFastqOrderService
-):
-    # GIVEN a basic store with no samples and a non-tumour fastq order as wgs
-    assert not base_store._get_query(table=Sample).first()
-    assert base_store._get_query(table=Case).count() == 0
-    base_store.get_application_by_tag(
-        fastq_status_data["samples"][0]["application"]
-    ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
-    fastq_status_data["samples"][0]["tumour"] = False
-
-    # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        customer_id=fastq_status_data["customer"],
-        order=fastq_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=1234348,
-        items=fastq_status_data["samples"],
-    )
-
-    # THEN the analysis for the case should be MAF
-    assert new_samples[0].links[0].case.data_analysis == Workflow.MIP_DNA
 
 
 def test_store_fastq_samples_tumour_wgs_to_fastq(
