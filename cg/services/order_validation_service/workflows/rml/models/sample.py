@@ -6,7 +6,8 @@ class RmlSample(Sample):
     control: ControlEnum | None = None
     index: str
     index_number: int
-    pool: str | None = None
-    pool_concentration: float | None = None
+    pool: str
+    pool_concentration: float
     priority: PriorityEnum
     sample_concentration: float | None = None
+    volume: int
