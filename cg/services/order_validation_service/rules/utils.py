@@ -33,9 +33,7 @@ def is_application_not_compatible(
     store: Store,
 ) -> bool:
     application: Application | None = store.get_application_by_tag(application_tag)
-    return application and order_type not in [
-        order_type_application.order_type for order_type_application in application.order_types
-    ]
+    return application and order_type not in application.order_types
 
 
 def is_volume_missing(sample: Sample) -> bool:
