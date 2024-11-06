@@ -4,11 +4,11 @@ from unittest.mock import Mock
 import pytest
 from pathlib import Path
 
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
 from cg.services.deliver_files.file_fetcher.models import (
-    DeliveryFiles,
     CaseFile,
     SampleFile,
 )
@@ -17,7 +17,6 @@ from cg.services.deliver_files.file_formatter.utils.case_service import (
     CaseFileFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
-    MutantFileFormatter,
     SampleFileConcatenationFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
@@ -80,7 +79,7 @@ def test_mutant_file_formatter(
     mutant_moved_files: list[SampleFile],
     expected_mutant_formatted_files: list[FormattedFile],
     lims_naming_matadata: str,
-    ):
+):
     # GIVEN existing ticket directory path and a customer inbox
     ticket_dir_path: Path = mutant_moved_files[0].file_path.parent
 
@@ -88,13 +87,17 @@ def test_mutant_file_formatter(
 
     for moved_file in mutant_moved_files:
         moved_file.file_path.touch()
-    
+
     # Initialize file_formatter inside the function to avoid multiple values for 'lims_api'
-    file_formatter = MutantFileFormatter(concatenation_service=FastqConcatenationService(), lims_api=Mock()) # MockLimsAPI()?
+    file_formatter = MutantFileFormatter(
+        concatenation_service=FastqConcatenationService(), lims_api=Mock()
+    )
 
     # WHEN formatting the files
-    with mock.patch.object(MutantFileFormatter, "_get_lims_naming_metadata", return_value=lims_naming_matadata):
-        
+    with mock.patch.object(
+        MutantFileFormatter, "_get_lims_naming_metadata", return_value=lims_naming_matadata
+    ):
+
         formatted_files: list[FormattedFile] = file_formatter.format_files(
             moved_files=mutant_moved_files,
             ticket_dir_path=ticket_dir_path,

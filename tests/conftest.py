@@ -4248,4 +4248,3 @@ def libary_sequencing_method() -> str:
 @pytest.fixture
 def capture_kit() -> str:
     return "panel.bed"
-
