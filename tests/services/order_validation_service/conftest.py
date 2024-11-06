@@ -1,6 +1,7 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion, PrepCategory, Workflow
+from cg.constants.constants import GenomeVersion, PrepCategory
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
 from cg.services.order_validation_service.workflows.tomte.constants import (
@@ -50,7 +51,7 @@ def create_tomte_order(cases: list[TomteCase]) -> TomteOrder:
         delivery_type=TomteDeliveryType.FASTQ,
         name="order_name",
         ticket_number="#12345",
-        workflow=Workflow.TOMTE,
+        project_type=OrderType.TOMTE,
         user_id=1,
         customer="cust000",
         cases=cases,
@@ -201,7 +202,7 @@ def sample_with_missing_well_position():
 
 @pytest.fixture
 def application_with_concentration_interval(base_store: Store) -> Application:
-    return base_store.add_application(
+    application: Application = base_store.add_application(
         tag="RNAPOAR100",
         prep_category="wts",
         description="This is an application with concentration interval",
@@ -210,6 +211,10 @@ def application_with_concentration_interval(base_store: Store) -> Application:
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
     )
+    application.order_types = [OrderType.TOMTE]
+    base_store.session.add(application)
+    base_store.commit_to_store()
+    return application
 
 
 @pytest.fixture

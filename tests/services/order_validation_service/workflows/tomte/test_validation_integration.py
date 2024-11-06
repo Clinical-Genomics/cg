@@ -9,7 +9,7 @@ def test_valid_order(valid_order: TomteOrder, tomte_validation_service: TomteVal
     # GIVEN a valid order
 
     # WHEN validating the order
-    errors = tomte_validation_service._get_errors(valid_order.model_dump())
+    errors = tomte_validation_service._get_errors(valid_order.model_dump(by_alias=True))
 
     # THEN no errors should be raised
     assert not errors.order_errors
@@ -22,7 +22,7 @@ def test_valid_order_conversion(
 ):
 
     # GIVEN a valid order
-    order: dict = valid_order.model_dump()
+    order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
     response = tomte_validation_service.validate(order)
@@ -37,7 +37,7 @@ def test_order_error_conversion(
 
     # GIVEN an order with a missing field on order level
     valid_order.name = ""
-    order: dict = valid_order.model_dump()
+    order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
     response: dict = tomte_validation_service.validate(order)
@@ -50,7 +50,7 @@ def test_case_error_conversion(valid_order, tomte_validation_service: TomteValid
 
     # GIVEN an order with a faulty case priority
     valid_order.cases[0].priority = "Non-existent priority"
-    order = valid_order.model_dump()
+    order = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
     response: dict = tomte_validation_service.validate(order)
@@ -65,7 +65,7 @@ def test_sample_error_conversion(
 
     # GIVEN an order with a sample with an invalid field
     valid_order.cases[0].samples[0].volume = 1
-    invalid_order: dict = valid_order.model_dump()
+    invalid_order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
     response = tomte_validation_service.validate(invalid_order)

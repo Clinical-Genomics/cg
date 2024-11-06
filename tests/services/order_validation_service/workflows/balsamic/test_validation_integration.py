@@ -13,7 +13,7 @@ def test_valid_order(
     # GIVEN a valid order
 
     # WHEN validating the order
-    errors = balsamic_validation_service._get_errors(valid_order.model_dump())
+    errors = balsamic_validation_service._get_errors(valid_order.model_dump(by_alias=True))
 
     # THEN no errors should be raised
     assert not errors.order_errors
@@ -71,7 +71,7 @@ def test_sample_error_conversion(
 
     # GIVEN an order with a sample with an invalid field
     valid_order.cases[0].samples[0].volume = 1
-    invalid_order: dict = valid_order.model_dump()
+    invalid_order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
     response = balsamic_validation_service.validate(invalid_order)

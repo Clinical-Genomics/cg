@@ -1,10 +1,7 @@
 from collections import Counter
 
-from cg.constants.constants import PrepCategory, Workflow
-from cg.services.order_validation_service.constants import (
-    ALLOWED_SKIP_RC_BUFFERS,
-    WORKFLOW_PREP_CATEGORIES,
-)
+from cg.models.orders.constants import OrderType
+from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import (
     InvalidGenePanelsError,
 )
@@ -55,7 +52,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.order_validation_service.rules.utils import (
-    is_application_not_compatible,
+    is_application_compatible,
     is_volume_invalid,
     is_volume_missing,
 )
@@ -69,12 +66,11 @@ def validate_application_compatibility(
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
     errors: list[ApplicationNotCompatibleError] = []
-    workflow: Workflow = order.workflow
-    allowed_prep_categories: list[PrepCategory] = WORKFLOW_PREP_CATEGORIES[workflow]
+    order_type: OrderType = order.order_type
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_application_not_compatible(
-                allowed_prep_categories=allowed_prep_categories,
+            if not is_application_compatible(
+                order_type=order_type,
                 application_tag=sample.application,
                 store=store,
             ):
