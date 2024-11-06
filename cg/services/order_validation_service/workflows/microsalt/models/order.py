@@ -1,13 +1,9 @@
-from cg.services.order_validation_service.models.order_with_samples import OrderWithNonHumanSamples
-from cg.services.order_validation_service.workflows.microsalt.constants import (
-    MicrosaltDeliveryType,
-)
-from cg.services.order_validation_service.workflows.microsalt.models.sample import (
-    MicrosaltSample,
-)
+from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
+from cg.services.order_validation_service.workflows.microsalt.constants import MicrosaltDeliveryType
+from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
 
 
-class MicrosaltOrder(OrderWithNonHumanSamples):
+class MicrosaltOrder(OrderWithSamples):
     delivery_type: MicrosaltDeliveryType
     samples: list[MicrosaltSample]
 
