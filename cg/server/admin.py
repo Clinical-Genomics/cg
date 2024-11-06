@@ -77,10 +77,10 @@ def is_external_application(unused1, unused2, model, unused3):
 
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    order_type_list = "<br>".join([order_type.order_type for order_type in model.order_types])
+    order_type_list = "<br>".join(model.order_types)
     return (
         Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
-        if model.order_types
+        if model.order_type_applications
         else ""
     )
 
@@ -168,7 +168,7 @@ class ApplicationView(BaseView):
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category", "versions", "order_types"]
+    form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
         "suitable_order_types": MultiCheckboxField(
             "Order Types", choices=[(choice, choice.name) for choice in OrderType]
@@ -205,10 +205,7 @@ class ApplicationView(BaseView):
 
         # Pre-select the existing order types for the application
         if obj and request.method != "POST":
-            form.suitable_order_types.data = [
-                order_type.order_type for order_type in obj.order_types
-            ]
-
+            form.suitable_order_types.data = obj.order_types
         return form
 
 
