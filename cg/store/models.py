@@ -181,9 +181,22 @@ class Application(Base):
     pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
         back_populates="application"
     )
-    order_types: Mapped[list["OrderTypeApplication"]] = orm.relationship(
-        "OrderTypeApplication", back_populates="application"
+    order_type_applications: Mapped[list["OrderTypeApplication"]] = orm.relationship(
+        "OrderTypeApplication",
+        back_populates="application",
     )
+
+    @property
+    def order_types(self) -> list[OrderType]:
+        return [entry.order_type for entry in self.order_type_applications]
+
+    @order_types.setter
+    def order_types(self, order_types: list[OrderType]) -> None:
+        self.order_type_applications.clear()
+        self.order_type_applications = [
+            OrderTypeApplication(order_type=order_type, application_id=self.id)
+            for order_type in order_types
+        ]
 
     def __str__(self) -> str:
         return self.tag
@@ -1205,4 +1218,6 @@ class OrderTypeApplication(Base):
     application_id: Mapped[int] = mapped_column(
         ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
     )
-    application: Mapped[Application] = orm.relationship("Application", back_populates="order_types")
+    application: Mapped[Application] = orm.relationship(
+        "Application", back_populates="order_type_applications"
+    )
