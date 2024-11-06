@@ -15,7 +15,7 @@ from cg.services.order_validation_service.workflows.tomte.models.sample import (
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
-from cg.store.models import Application, Customer, OrderTypeApplication, User
+from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
 
@@ -211,7 +211,7 @@ def application_with_concentration_interval(base_store: Store) -> Application:
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
     )
-    OrderTypeApplication(application=application, order_type=OrderType.TOMTE)
+    application.order_types = [OrderType.TOMTE]
     base_store.session.add(application)
     base_store.commit_to_store()
     return application
