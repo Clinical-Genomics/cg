@@ -52,7 +52,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.order_validation_service.rules.utils import (
-    is_application_not_compatible,
+    is_application_compatible,
     is_volume_invalid,
     is_volume_missing,
 )
@@ -69,7 +69,7 @@ def validate_application_compatibility(
     order_type: OrderType = order.order_type
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_application_not_compatible(
+            if not is_application_compatible(
                 order_type=order_type,
                 application_tag=sample.application,
                 store=store,

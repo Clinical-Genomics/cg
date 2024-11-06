@@ -21,11 +21,13 @@ from cg.services.order_validation_service.rules.sample.utils import (
     is_invalid_well_format,
 )
 from cg.services.order_validation_service.rules.utils import (
-    is_application_not_compatible,
+    is_application_compatible,
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import OrderWithSamples
+from cg.services.order_validation_service.workflows.microsalt.models.order import (
+    OrderWithSamples,
+)
 from cg.store.store import Store
 
 
@@ -88,12 +90,12 @@ def validate_application_compatibility(
     errors: list[ApplicationNotCompatibleError] = []
     order_type: OrderType = order.order_type
     for sample_index, sample in order.enumerated_samples:
-        incompatible: bool = is_application_not_compatible(
+        compatible: bool = is_application_compatible(
             order_type=order_type,
             application_tag=sample.application,
             store=store,
         )
-        if incompatible:
+        if not compatible:
             error = ApplicationNotCompatibleError(sample_index=sample_index)
             errors.append(error)
     return errors

@@ -27,13 +27,13 @@ def is_sample_on_plate(sample: Sample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
-def is_application_not_compatible(
+def is_application_compatible(
     order_type: OrderType,
     application_tag: str,
     store: Store,
 ) -> bool:
     application: Application | None = store.get_application_by_tag(application_tag)
-    return application and order_type not in application.order_types
+    return not application or order_type in application.order_types
 
 
 def is_volume_missing(sample: Sample) -> bool:
