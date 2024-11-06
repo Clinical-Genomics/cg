@@ -68,25 +68,6 @@ class StoreFastqOrderService(StoreOrderService):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
-        """Add a MAF case to the Status database."""
-        case: Case = self.status_db.add_case(
-            data_analysis=Workflow(Workflow.MIP_DNA),
-            data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
-            name="_".join([sample_obj.name, "MAF"]),
-            panels=[GenePanelMasterList.OMIM_AUTO],
-            priority=Priority.research,
-            ticket=sample_obj.original_ticket,
-        )
-        case.customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
-        )
-        relationship: CaseSample = self.status_db.relate_sample(
-            case=case, sample=sample_obj, status=StatusEnum.unknown
-        )
-        order.cases.append(case)
-        self.status_db.session.add_all([case, relationship])
-
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Sample]:
@@ -140,11 +121,7 @@ class StoreFastqOrderService(StoreOrderService):
                         priority=submitted_case["priority"],
                         ticket=ticket_id,
                     )
-                if (
-                    not new_sample.is_tumour
-                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
-                ):
-                    self.create_maf_case(sample_obj=new_sample, order=status_db_order)
+
                 case.customer = customer
                 new_relationship = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
