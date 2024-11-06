@@ -11,6 +11,4 @@ class MicrosaltSample(Sample):
     extraction_method: ExtractionMethod
     organism: str
     priority: PriorityEnum
-    quantity: int | None = None
     reference_genome: str = Field(max_length=255)
-    sample_concentration: float | None = None
