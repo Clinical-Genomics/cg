@@ -5,7 +5,6 @@ from cg.services.order_validation_service.workflows.mutant.models.sample import 
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 
-
 SampleWithRelatives = TomteSample | MipDnaSample
 CaseContainingRelatives = TomteCase | MipDnaCase
 
