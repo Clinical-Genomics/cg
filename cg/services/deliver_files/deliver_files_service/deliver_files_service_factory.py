@@ -2,10 +2,12 @@
 
 from typing import Type
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow, DataDelivery
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
@@ -65,12 +67,14 @@ class DeliveryServiceFactory:
     def __init__(
         self,
         store: Store,
+        lims_api: LimsAPI,
         hk_api: HousekeeperAPI,
         rsync_service: DeliveryRsyncService,
         tb_service: TrailblazerAPI,
         analysis_service: AnalysisService,
     ):
         self.store = store
+        self.lims_api = lims_api
         self.hk_api = hk_api
         self.rsync_service = rsync_service
         self.tb_service = tb_service
@@ -102,13 +106,17 @@ class DeliveryServiceFactory:
             tags_fetcher=file_tag_fetcher,
         )
 
-    @staticmethod
     def _get_sample_file_formatter(
+        self,
         workflow: Workflow,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
         """Get the file formatter service based on the workflow."""
-        if workflow in [Workflow.MICROSALT]:
+        if workflow == Workflow.MICROSALT:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
+        if workflow == Workflow.MUTANT:
+            return MutantFileFormatter(
+                concatenation_service=FastqConcatenationService(), lims_api=self.lims_api
+            )
         return SampleFileFormatter()
 
     @staticmethod

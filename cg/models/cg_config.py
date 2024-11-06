@@ -752,6 +752,7 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating delivery service factory")
             factory = DeliveryServiceFactory(
                 store=self.status_db,
+                lims_api=self.lims_api,
                 hk_api=self.housekeeper_api,
                 tb_service=self.trailblazer_api,
                 rsync_service=self.delivery_rsync_service,

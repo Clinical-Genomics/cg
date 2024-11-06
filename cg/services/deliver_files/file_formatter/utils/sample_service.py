@@ -57,4 +57,3 @@ class SampleFileFormatter:
                 )
             )
         return formatted_files
-

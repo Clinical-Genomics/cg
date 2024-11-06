@@ -252,11 +252,19 @@ def lims_naming_matadata() -> str:
 
 
 @pytest.fixture
-def expected_mutant_formatted_files(expected_concatenated_fastq_formatted_files, lims_naming_matadata) -> list[FormattedFile]:
+def expected_mutant_formatted_files(
+    expected_concatenated_fastq_formatted_files, lims_naming_matadata
+) -> list[FormattedFile]:
+    unique_combinations = []
     for formatted_file in expected_concatenated_fastq_formatted_files:
         formatted_file.original_path = formatted_file.formatted_path
-        formatted_file.formatted_path = Path(formatted_file.formatted_path.parent, f"{lims_naming_matadata}{formatted_file.formatted_path.name}")
-    return expected_concatenated_fastq_formatted_files
+        formatted_file.formatted_path = Path(
+            formatted_file.formatted_path.parent,
+            f"{lims_naming_matadata}{formatted_file.formatted_path.name}",
+        )
+        if formatted_file not in unique_combinations:
+            unique_combinations.append(formatted_file)
+    return unique_combinations
 
 
 @pytest.fixture
