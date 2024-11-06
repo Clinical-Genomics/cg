@@ -28,7 +28,11 @@ from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
+from cg.models.delivery_report.report import (
+    CaseModel,
+    ReportRequiredFields,
+    ScoutVariantsFiles,
+)
 from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -76,12 +80,12 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
     ) -> BalsamicTargetedSampleMetadataModel:
         """Return report metadata for Balsamic TGS analysis."""
         bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
-            analysis_metadata.config.panel.capture_kit
+            analysis_metadata.balsamic_config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
-            bait_set_version=analysis_metadata.config.panel.capture_kit_version,
+            bait_set_version=analysis_metadata.balsamic_config.panel.capture_kit_version,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
@@ -120,11 +124,11 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Return whether the Balsamic delivery report is accredited."""
-        if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
+        if analysis_metadata.balsamic_config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
                 for panel in BALSAMIC_REPORT_ACCREDITED_PANELS
-                if panel in str(analysis_metadata.config.panel.capture_kit)
+                if panel in str(analysis_metadata.balsamic_config.panel.capture_kit)
             ),
             None,
         ):

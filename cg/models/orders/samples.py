@@ -265,19 +265,8 @@ class MicrobialSample(OrderInSample):
     well_position: str | None
     # "Required if "Other" is chosen in column "Species""
     organism_other: constr(max_length=Organism.internal_id.property.columns[0].type.length) | None
-    # "These fields are not required"
-    concentration_sample: float | None
-    quantity: int | None
     verified_organism: bool | None  # sent to LIMS
     control: str | None
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
-
-    @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> float | None:
-        return OptionalFloatValidator.str_to_float(v=v)
 
 
 class MicrobialFastqSample(OrderInSample):
