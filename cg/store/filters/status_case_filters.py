@@ -25,6 +25,11 @@ def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
     return cases.filter(Case.action == action) if action else cases
 
 
+def filter_cases_by_delivery(cases: Query, data_delivery: DataDelivery, **kwargs) -> Query:
+    """Filter cases with matching delivery."""
+    return cases.filter(Case.data_delivery == data_delivery) if data_delivery else cases
+
+
 def filter_cases_by_case_search(cases: Query, case_search: str, **kwargs) -> Query:
     """Filter cases with matching internal id or name."""
     return (
@@ -228,6 +233,7 @@ def apply_case_filter(
     creation_date: datetime | None = None,
     customer_entry_id: int | None = None,
     customer_entry_ids: list[int] | None = None,
+    data_delivery: DataDelivery | None = None,
     entry_id: int | None = None,
     internal_id: str | None = None,
     internal_ids: list[str] | None = None,
@@ -251,6 +257,7 @@ def apply_case_filter(
             creation_date=creation_date,
             customer_entry_id=customer_entry_id,
             customer_entry_ids=customer_entry_ids,
+            data_delivery=data_delivery,
             entry_id=entry_id,
             internal_id=internal_id,
             internal_ids=internal_ids,
@@ -275,6 +282,7 @@ class CaseFilter(Enum):
     BY_CASE_SEARCH: Callable = filter_cases_by_case_search
     BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
     BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
+    BY_DELIVERY: Callable = filter_cases_by_delivery
     BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     BY_INTERNAL_ID: Callable = filter_case_by_internal_id
     BY_INTERNAL_IDS: Callable = filter_cases_by_internal_ids

@@ -15,6 +15,7 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
 from cg.models.cg_config import CGConfig
+from cg.services.MAF.case.service import MAFCaseService
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -154,3 +155,13 @@ def store_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> N
         metrics_api.create_case(case_id=case_id, dry_run=dry_run)
     except (JanusClientError, JanusServerError, ArnoldClientError, ArnoldServerError):
         return
+
+
+@click.command("maf-cases")
+@click.pass_obj
+def store_maf_cases(
+    config: CGConfig,
+) -> None:
+    """Create MAF cases for non-tumour whole genome raw data samples."""
+    maf_case_service = MAFCaseService(store=config.status_db)
+    maf_case_service.create_maf_cases()

@@ -8,7 +8,7 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
+from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType, DataDelivery
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -278,6 +278,29 @@ class ReadHandler(BaseHandler):
     def get_cases(self) -> list[Case]:
         """Return all cases."""
         return self._get_query(table=Case).all()
+
+    def get_samples_for_maf_cases(
+        self,
+    ) -> list[Sample]:
+        """Return samples for MAF cases."""
+        case_sample_join: Query = self._get_join_sample_application_case()
+        query_case_filters = apply_case_filter(
+            cases=case_sample_join,
+            filter_functions=[CaseFilter.BY_WORKFLOWS, CaseFilter.BY_DELIVERY],
+            workflows=[Workflow.RAW_DATA],
+            data_delivery=DataDelivery.FASTQ,
+        )
+        query_application_filters: Query = apply_application_filter(
+            applications=query_case_filters,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORY],
+            prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        )
+        query_sample_filters: Query = apply_sample_filter(
+            samples=query_application_filters,
+            filter_functions=[SampleFilter.BY_TUMOUR],
+            is_tumour=False,
+        )
+        return query_sample_filters.all()
 
     def get_case_samples_by_case_id(self, case_internal_id: str) -> list[CaseSample]:
         """Return the case-sample links associated with a case."""

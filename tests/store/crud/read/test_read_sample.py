@@ -629,3 +629,24 @@ def test_get_related_samples(
 
     # THEN the correct set of samples is returned
     assert set(related_dna_samples) == set(fetched_related_dna_samples)
+
+
+def test_get_samples_for_maf_cases(
+    store_with_sample_that_need_maf_cases: Store,
+    sample_name_for_maf_case: str,
+    sample_name_not_for_maf_case: str,
+):
+    """Test that samples for a MAF case can be returned."""
+    # GIVEN a store with samples for a MAF case and samples not for a MAF case
+    assert store_with_sample_that_need_maf_cases.get_sample_by_name(name=sample_name_for_maf_case)
+    assert store_with_sample_that_need_maf_cases.get_sample_by_name(
+        name=sample_name_not_for_maf_case
+    )
+
+    # WHEN getting the samples for a MAF case
+    samples: list[Sample] = store_with_sample_that_need_maf_cases.get_samples_for_maf_cases()
+
+    # THEN the samples should be returned
+    assert samples
+    assert len(samples) == 1
+    assert samples[0].name == sample_name_for_maf_case

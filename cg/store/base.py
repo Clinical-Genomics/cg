@@ -92,6 +92,16 @@ class BaseHandler:
             .join(ApplicationVersion.application)
         )
 
+    def _get_join_sample_application_case(self) -> Query:
+        """Return join sample to application version query."""
+        return (
+            self._get_query(table=Sample)
+            .join(ApplicationVersion, Sample.application_version)
+            .join(Application, ApplicationVersion.application)
+            .join(CaseSample, CaseSample.sample_id == Sample.id)
+            .join(Case, CaseSample.case_id == Case.id)
+        )
+
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
         return self._get_query(table=Analysis).join(Case).join(Case.links).join(CaseSample.sample)

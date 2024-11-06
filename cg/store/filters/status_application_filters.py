@@ -31,6 +31,13 @@ def filter_applications_has_versions(applications: Query, **kwargs) -> Query:
     return applications.filter(Application.versions.any())
 
 
+def filter_applications_by_prep_category(
+    applications: Query, prep_category: PrepCategory, **kwargs
+) -> Query:
+    """Return application corresponding to dna sequencing."""
+    return applications.filter(Application.prep_category == prep_category)
+
+
 def filter_application_by_prep_categories(
     applications: Query, prep_categories: list[PrepCategory], **kwargs
 ) -> Query:
@@ -67,4 +74,5 @@ class ApplicationFilter(Enum):
     IS_NOT_EXTERNAL = filter_applications_is_not_external
     BY_TAG = filter_applications_by_tag
     IS_NOT_ARCHIVED = filter_applications_is_not_archived
+    BY_PREP_CATEGORY = filter_applications_by_prep_category
     BY_PREP_CATEGORIES = filter_application_by_prep_categories

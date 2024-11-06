@@ -4,9 +4,9 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
-from cg.constants.constants import CustomerId, PrepCategory
+from cg.constants.constants import CustomerId, PrepCategory, DataDelivery
 from cg.constants.subject import PhenotypeStatus
-from cg.store.models import Case, CaseSample, Customer, Order, Sample
+from cg.store.models import Case, CaseSample, Customer, Order, Sample, ApplicationVersion
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -480,3 +480,54 @@ def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
         workflow=Workflow.BALSAMIC,
     )
     return order
+
+
+@pytest.fixture
+def sample_name_for_maf_case() -> str:
+    return "maf_sample"
+
+
+@pytest.fixture
+def sample_name_not_for_maf_case() -> str:
+    return "not_maf_sample"
+
+
+@pytest.fixture
+def store_with_sample_that_need_maf_cases(
+    store: Store,
+    helpers: StoreHelpers,
+    sample_name_for_maf_case: str,
+    sample_name_not_for_maf_case: str,
+) -> Store:
+    """Return a store with a sample that needs a MAF case."""
+
+    sample_for_maf: Sample = helpers.add_sample(
+        store=store,
+        name=sample_name_for_maf_case,
+        application_tag="MAFCASE",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=False,
+    )
+    raw_data_case: Case = helpers.add_case(
+        store=store,
+        name="case_with_sample_for_maf",
+        data_analysis=Workflow.RAW_DATA,
+        data_delivery=DataDelivery.FASTQ,
+    )
+    helpers.relate_samples(base_store=store, case=raw_data_case, samples=[sample_for_maf])
+
+    sample_not_for_maf: Sample = helpers.add_sample(
+        store=store,
+        name=sample_name_not_for_maf_case,
+        application_tag="NOTMAFCASE",
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        is_tumour=True,
+    )
+    mutant_case: Case = helpers.add_case(
+        store=store,
+        name="case_with_sample_not_for_maf",
+        data_analysis=Workflow.MUTANT,
+        data_delivery=DataDelivery.FASTQ,
+    )
+    helpers.relate_samples(base_store=store, case=mutant_case, samples=[sample_not_for_maf])
+    return store
