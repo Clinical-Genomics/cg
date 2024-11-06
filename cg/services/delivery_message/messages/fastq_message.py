@@ -12,7 +12,7 @@ class FastqMessage(DeliveryMessage):
         return (
             f"Hello,\n\n"
             f"The fastq files for the following {sample_s_} have been uploaded to your inbox on Caesar:\n\n"
-            f"{sample_names}\n"
+            f"{sample_names}\n\n"
             "Available under: \n\n"
             f"{delivery_path}"
         )

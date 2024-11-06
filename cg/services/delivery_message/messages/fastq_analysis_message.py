@@ -11,7 +11,7 @@ class FastqAnalysisMessage(DeliveryMessage):
         return (
             f"Hello,\n\n"
             f"The fastq and analysis files for the following {case_s_} are currently being uploaded to your inbox on Caesar:\n\n"
-            f"{case_names}\n"
+            f"{case_names}\n\n"
             f"Available under: \n"
             f"{delivery_path}"
         )

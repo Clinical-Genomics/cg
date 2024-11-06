@@ -10,7 +10,7 @@ def get_cases_message(cases: list[Case]) -> str:
     return (
         f"Hello,\n\n"
         f"The analysis files for the following {case_s_} are currently being uploaded to your inbox on Caesar:\n\n"
-        f"{case_names}\n"
+        f"{case_names}\n\n"
         f"Available under: \n\n"
         f"{delivery_path}"
     )
