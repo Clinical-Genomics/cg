@@ -180,7 +180,6 @@ def test_store_cancer_samples(
     assert new_case.name == "family1"
     assert new_case.data_analysis in [
         Workflow.BALSAMIC,
-        Workflow.BALSAMIC_QC,
         Workflow.BALSAMIC_UMI,
     ]
     assert new_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS_SCOUT)

@@ -3,7 +3,7 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 from cg.services.orders.submitters.order_submitter import ValidateOrderService
-from cg.store.models import Sample, Customer
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 
@@ -56,7 +56,7 @@ class ValidateCaseOrderService(ValidateOrderService):
     def _validate_samples_available_to_customer(
         self, samples: list[OrderInSample], customer_id: str
     ) -> None:
-        """Validate that the customer have access to all samples"""
+        """Validate that the customer has access to all samples"""
         sample: Of1508Sample
         for sample in samples:
             if not sample.internal_id:

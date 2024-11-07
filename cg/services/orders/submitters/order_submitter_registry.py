@@ -80,18 +80,6 @@ order_service_mapping = {
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
-    OrderType.BALSAMIC_QC: (
-        OrderLimsService,
-        ValidateCaseOrderService,
-        StoreCaseOrderService,
-        CaseOrderSubmitter,
-    ),
-    OrderType.BALSAMIC_UMI: (
-        OrderLimsService,
-        ValidateCaseOrderService,
-        StoreCaseOrderService,
-        CaseOrderSubmitter,
-    ),
     OrderType.FASTQ: (
         OrderLimsService,
         ValidateFastqOrderService,

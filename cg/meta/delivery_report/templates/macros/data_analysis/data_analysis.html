@@ -1,4 +1,3 @@
-{% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/raredisease_qc_metrics.html" import raredisease_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
@@ -11,10 +10,7 @@
   <h3 class="mb-4">Analys</h3>
     <!-- Workflow analysis data -->
     {{ workflow_analysis(case=case) }}
-    {% if "balsamic" in workflow %}
-      <!-- BALSAMIC QC metrics -->
-      {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
-    {% elif workflow == "mip-dna" %}
+    {% if workflow == "mip-dna" %}
       <!-- MIP-DNA QC metrics -->
       {{ mip_dna_qc_metrics(samples=case.samples) }}
     {% elif workflow == "raredisease" %}
