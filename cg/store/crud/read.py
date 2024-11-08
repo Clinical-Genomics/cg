@@ -1066,10 +1066,10 @@ class ReadHandler(BaseHandler):
         )
 
         sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
-        sorted_cases: list[Case] = [
+        cases_to_analyze: list[Case] = [
             case for case in sorted_cases if self._is_case_to_be_analyzed(case)
         ]
-        return sorted_cases[:limit]
+        return cases_to_analyze[:limit]
 
     def set_case_action(
         self, action: Literal[CaseActions.actions()], case_internal_id: str
