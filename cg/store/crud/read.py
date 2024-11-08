@@ -12,11 +12,19 @@ from cg.constants.constants import CaseActions, CustomerId, PrepCategory, Sample
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.collaborator_samples_request import (
+    CollaboratorSamplesRequest,
+)
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -26,14 +34,23 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -52,7 +69,10 @@ from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
     apply_order_type_application_filter,
 )
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
@@ -1019,6 +1039,19 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
+    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
+        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
+
+    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
+        return case.latest_analyzed < case.latest_sequenced
+
+    def _is_case_to_be_analyzed(self, case: Case) -> bool:
+        if not case.latest_sequenced:
+            return False
+        if self._is_case_set_to_analyse_or_not_analyzed(case):
+            return True
+        return bool(self._is_latest_analysis_done_on_all_sequences(case))
+
     def cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
@@ -1032,19 +1065,11 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         )
 
-        families: list[Query] = list(cases.order_by(Case.ordered_at))
-        families = [
-            case_obj
-            for case_obj in families
-            if case_obj.latest_sequenced
-            and (
-                case_obj.action == CaseActions.ANALYZE
-                or not case_obj.latest_analyzed
-                or case_obj.latest_analyzed < case_obj.latest_sequenced
-            )
+        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
+        sorted_cases: list[Case] = [
+            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
         ]
-
-        return families[:limit]
+        return sorted_cases[:limit]
 
     def set_case_action(
         self, action: Literal[CaseActions.actions()], case_internal_id: str
