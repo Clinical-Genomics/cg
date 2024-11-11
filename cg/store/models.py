@@ -991,8 +991,11 @@ class Order(Base):
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
-    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     is_open: Mapped[bool] = mapped_column(default=True)
+
+    @property
+    def workflow(self) -> Workflow:
+        return self.cases[0].data_analysis
 
     def to_dict(self):
         return to_dict(model_instance=self)
