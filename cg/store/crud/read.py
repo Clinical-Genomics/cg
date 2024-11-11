@@ -1051,7 +1051,6 @@ class ReadHandler(BaseHandler):
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
-
         sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
         return sorted_cases[:limit]
 
