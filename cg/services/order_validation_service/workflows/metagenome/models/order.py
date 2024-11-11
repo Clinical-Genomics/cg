@@ -9,7 +9,7 @@ from cg.services.order_validation_service.workflows.metagenome.models.sample imp
 )
 
 
-class MicrosaltOrder(OrderWithSamples):
+class MetagenomeOrder(OrderWithSamples):
     delivery_type: MetagenomeDeliveryType
     samples: list[MetagenomeSample]
 
