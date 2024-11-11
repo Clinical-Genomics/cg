@@ -105,7 +105,6 @@ class StoreFastqOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow(submitted_case["data_analysis"]),
         )
         with self.status_db.session.no_autoflush:
             for sample in items:

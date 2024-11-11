@@ -128,7 +128,6 @@ class StorePoolOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow(items[0]["data_analysis"]),
         )
         new_pools: list[Pool] = []
         new_samples: list[Sample] = []
