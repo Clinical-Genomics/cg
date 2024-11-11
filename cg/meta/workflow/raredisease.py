@@ -25,7 +25,6 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
