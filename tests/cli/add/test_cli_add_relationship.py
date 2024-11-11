@@ -308,8 +308,8 @@ def test_add_relationship_father_not_male(
     female_father: Sample = helpers.add_sample(disk_store, sex=Sex.FEMALE, name="father")
     female_father_id: str = female_father.internal_id
 
-    case = helpers.add_case(disk_store)
-    case_id = case.internal_id
+    case: Case = helpers.add_case(disk_store)
+    case_id: str = case.internal_id
     status = "affected"
 
     # WHEN adding a relationship with a female father
