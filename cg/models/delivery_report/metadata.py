@@ -151,6 +151,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
     @field_validator("rin")
+    @classmethod
     def ensure_rin_thresholds(cls, rin: str) -> str:
         if rin != NA_FIELD:
             rin_number = float(rin)
