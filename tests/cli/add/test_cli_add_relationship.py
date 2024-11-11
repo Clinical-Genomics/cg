@@ -266,8 +266,8 @@ def test_add_relationship_mother_not_female(
     """Test to add a relationship where the mother is not female"""
     # GIVEN a database with a sample, a case, and a male sample labeled as mother
     disk_store: Store = base_context.status_db
-    sample = helpers.add_sample(disk_store)
-    sample_id = sample.internal_id
+    sample: Sample = helpers.add_sample(disk_store)
+    sample_id: str = sample.internal_id
 
     male_mother = helpers.add_sample(disk_store, sex=Sex.MALE, name="mother")
     male_mother_id = male_mother.internal_id
