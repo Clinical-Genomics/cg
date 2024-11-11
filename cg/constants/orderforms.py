@@ -36,7 +36,7 @@ class Orderform(StrEnum):
         """Returns the current version of the given order form."""
         current_order_form_versions = {
             Orderform.MIP_DNA: "31",
-            Orderform.RML: "18",
+            Orderform.RML: "19",
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "9",
             Orderform.MICROBIAL_FASTQ: "1",
