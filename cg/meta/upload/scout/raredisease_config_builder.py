@@ -105,6 +105,8 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     ) -> str:
         """
         Return the rank model version from the manifest file content.
+        Raises:
+            ValueError if pattern not found ing process or clinical not found in script.
         """
         pattern: str = variant_type.upper() + ":GENMOD_SCORE"
         for key, value in content["tasks"].items():
@@ -112,6 +114,9 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             script: str = value.get("script")
             if pattern in process and AnalysisTag.CLINICAL in script:
                 return self._get_version_from_manifest_script(script)
+            raise ValueError(
+                f"Either {pattern} not found in {process} or {AnalysisTag.CLINICAL} not found in {script}"
+            )
 
     def _get_version_from_manifest_script(self, script: str) -> str:
         """
