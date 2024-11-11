@@ -272,8 +272,8 @@ def test_add_relationship_mother_not_female(
     male_mother: Sample = helpers.add_sample(disk_store, sex=Sex.MALE, name="mother")
     male_mother_id: str = male_mother.internal_id
 
-    case = helpers.add_case(disk_store)
-    case_id = case.internal_id
+    case: Case = helpers.add_case(disk_store)
+    case_id: str = case.internal_id
     status = "affected"
 
     # WHEN adding a relationship with a male mother
