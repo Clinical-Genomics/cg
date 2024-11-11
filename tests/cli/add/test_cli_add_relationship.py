@@ -305,8 +305,8 @@ def test_add_relationship_father_not_male(
     sample: Sample = helpers.add_sample(disk_store)
     sample_id: str = sample.internal_id
 
-    female_father = helpers.add_sample(disk_store, sex=Sex.FEMALE, name="father")
-    female_father_id = female_father.internal_id
+    female_father: Sample = helpers.add_sample(disk_store, sex=Sex.FEMALE, name="father")
+    female_father_id: str = female_father.internal_id
 
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
