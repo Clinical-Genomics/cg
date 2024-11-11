@@ -1,7 +1,10 @@
 from pydantic import Field
 
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum
-from cg.services.order_validation_service.constants import TissueBlockEnum
+from cg.services.order_validation_service.constants import (
+    ElutionBuffer,
+    TissueBlockEnum,
+)
 from cg.services.order_validation_service.models.sample import Sample
 
 
@@ -9,7 +12,7 @@ class MipRnaSample(Sample):
     age_at_sampling: float | None = None
     concentration_ng_ul: float | None = None
     control: ControlEnum
-    elution_buffer: str | None = None
+    elution_buffer: ElutionBuffer | None = None
     formalin_fixation_time: int | None = None
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
