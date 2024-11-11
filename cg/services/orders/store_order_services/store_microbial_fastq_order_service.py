@@ -6,7 +6,7 @@ from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import Case, CaseSample, Customer, Sample
+from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 
@@ -40,6 +40,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 {
                     "application": sample.application,
                     "comment": sample.comment,
+                    "internal_id": sample.internal_id,
                     "data_analysis": sample.data_analysis,
                     "data_delivery": sample.data_delivery,
                     "name": sample.name,
@@ -61,6 +62,12 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
     ) -> list[Sample]:
         customer: Customer = self._get_customer(customer_id)
         new_samples: list[Sample] = []
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+            workflow=Workflow.RAW_DATA,
+        )
         for sample in items:
             case_name: str = f'{sample["name"]}-case'
             case: Case = self._create_case_for_sample(
@@ -79,8 +86,10 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             case_sample: CaseSample = self.status_db.relate_sample(
                 case=case, sample=db_sample, status=StatusEnum.unknown
             )
+            status_db_order.cases.append(case)
             self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
             new_samples.append(db_sample)
+        self.status_db.session.add(status_db_order)
         self.status_db.commit_to_store()
         return new_samples
 
@@ -113,6 +122,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             customer=customer,
             sex=SexOptions.UNKNOWN,
             comment=sample_dict["comment"],
+            internal_id=sample_dict["internal_id"],
             order=order,
             ordered=ordered,
             original_ticket=ticket_id,

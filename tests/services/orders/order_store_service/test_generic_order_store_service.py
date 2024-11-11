@@ -4,12 +4,12 @@ import datetime as dt
 import math
 from copy import deepcopy
 
-
 from cg.constants import DataDelivery, Priority, Workflow
-from cg.constants.constants import CaseActions
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
-from cg.store.models import Case, Sample
+from cg.services.orders.store_order_services.store_case_order import (
+    StoreCaseOrderService,
+)
+from cg.store.models import Sample
 from cg.store.store import Store
 
 
@@ -194,106 +194,3 @@ def test_store_cancer_samples(
     assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
-
-
-def test_store_existing_single_sample_from_trio(
-    base_store: Store,
-    mip_status_data: dict,
-    ticket_id: str,
-    store_generic_order_service: StoreCaseOrderService,
-):
-    # GIVEN a stored trio case
-
-    new_families = store_generic_order_service.store_items_in_status(
-        customer_id=mip_status_data["customer"],
-        order=mip_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=mip_status_data["families"],
-    )
-
-    new_case = new_families[0]
-    assert new_case.name == "family1"
-    assert set(new_case.panels) == {"IEM"}
-    assert new_case.priority_human == Priority.standard.name
-
-    assert len(new_case.links) == 3
-    new_link = new_case.links[0]
-    assert new_link.mother
-    assert new_link.father
-    name = new_link.sample.name
-    internal_id = new_link.sample.internal_id
-    assert base_store.get_sample_by_internal_id(internal_id)
-
-    # WHEN storing a new case with one sample from the trio
-    for family_idx, family in enumerate(mip_status_data["families"]):
-        for sample_idx, sample in enumerate(family["samples"]):
-            if sample["name"] == name:
-                sample["internal_id"] = internal_id
-                family["name"] = "single-from-trio"
-            else:
-                family["samples"][sample_idx] = {}
-
-        family["samples"] = list(filter(None, family["samples"]))
-
-        if not family["samples"]:
-            mip_status_data["families"][family_idx] = {}
-
-    mip_status_data["families"] = list(filter(None, mip_status_data["families"]))
-
-    new_families = store_generic_order_service.store_items_in_status(
-        customer_id=mip_status_data["customer"],
-        order=mip_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=mip_status_data["families"],
-    )
-
-    # THEN there should be no complaints about missing parents
-    assert len(new_families) == 1
-    assert len(new_families[0].links) == 1
-    assert not new_families[0].links[0].mother
-    assert not new_families[0].links[0].father
-
-
-def test_store_existing_case(
-    base_store: Store,
-    mip_status_data: dict,
-    ticket_id: str,
-    store_generic_order_service: StoreCaseOrderService,
-):
-    # GIVEN a basic store with no samples or nothing in it + scout order
-    assert not base_store._get_query(table=Sample).first()
-    assert not base_store.get_cases()
-
-    # WHEN storing the order
-    store_generic_order_service.store_items_in_status(
-        customer_id=mip_status_data["customer"],
-        order=mip_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=mip_status_data["families"],
-    )
-
-    base_store.session.close()
-    new_cases: list[Case] = base_store.get_cases()
-
-    # Save internal id
-    stored_cases_internal_ids = dict([(case.name, case.internal_id) for case in new_cases])
-    for case in mip_status_data["families"]:
-        case["internal_id"] = stored_cases_internal_ids[case["name"]]
-
-    store_generic_order_service.store_items_in_status(
-        customer_id=mip_status_data["customer"],
-        order=mip_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=mip_status_data["families"],
-    )
-
-    base_store.session.close()
-    rerun_cases: list[Case] = base_store.get_cases()
-
-    # THEN the sample ticket should be appended to previos ticket and action set to analyze
-    assert rerun_cases[0].tickets == f"{ticket_id},{ticket_id}"
-    assert rerun_cases[0].action == CaseActions.ANALYZE

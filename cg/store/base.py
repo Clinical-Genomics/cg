@@ -85,6 +85,10 @@ class BaseHandler:
             self._get_query(table=Sample).join(Case.links).join(CaseSample.sample).join(Case.orders)
         )
 
+    def _get_join_application_ordertype_query(self) -> Query:
+        """Return join application to order type query."""
+        return self._get_query(table=Application).join(Application.order_type_applications)
+
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
         return (

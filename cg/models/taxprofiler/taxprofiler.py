@@ -1,5 +1,6 @@
 from pathlib import Path
-from pydantic.v1 import BaseModel, Field
+
+from pydantic import BaseModel, Field
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
@@ -40,7 +41,7 @@ class TaxprofilerParameters(WorkflowParameters):
     centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
-    clusterOptions: str = Field(..., alias="cluster_options")
+    clusterOptions: str = Field(alias="cluster_options")
     priority: str
 
 
