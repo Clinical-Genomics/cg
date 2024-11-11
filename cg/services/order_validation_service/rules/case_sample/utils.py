@@ -3,7 +3,7 @@ from collections import Counter
 
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
-from cg.models.orders.sample_base import ContainerEnum
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.order_validation_service.errors.case_errors import (
     RepeatedCaseNameError,
 )
@@ -307,3 +307,7 @@ def get_counter_container_names(order: OrderWithCases) -> Counter:
         for sample_index, sample in case.enumerated_new_samples
     )
     return counter
+
+
+def has_sex_and_subject(sample: Sample) -> bool:
+    return bool(sample.subject_id and sample.sex != SexEnum.unknown)
