@@ -32,8 +32,8 @@ workflows = [
     "rsync",
     "spring",
     "taxprofiler",
-    "sars-cov-2",
     "tomte",
+    "jasen",
 ]
 
 
