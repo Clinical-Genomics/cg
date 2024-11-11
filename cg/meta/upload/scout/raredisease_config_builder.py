@@ -115,7 +115,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             if pattern in process and AnalysisTag.CLINICAL in script:
                 return self._get_version_from_manifest_script(script)
         raise ValueError(
-            f"Either {pattern} not found in {process} or {AnalysisTag.CLINICAL} not found in {script}"
+            f"Either {pattern} not found in any process or {AnalysisTag.CLINICAL} not found in any script of the manifest file"
         )
 
     def _get_version_from_manifest_script(self, script: str) -> str:
