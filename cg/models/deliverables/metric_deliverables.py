@@ -1,8 +1,7 @@
 import operator
 from typing import Annotated, Any, Callable
 
-from pydantic import BaseModel, Field, field_validator
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
