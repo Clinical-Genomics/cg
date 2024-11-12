@@ -1403,7 +1403,7 @@ class ReadHandler(BaseHandler):
             search=orders_request.search,
             is_open=orders_request.is_open,
         )
-        total_count: int = orders.count()
+        total_count: int = orders.distinct().count()
         orders: list[Order] = self.sort_and_paginate_orders(
             orders=orders, orders_request=orders_request
         )
