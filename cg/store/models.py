@@ -181,6 +181,22 @@ class Application(Base):
     pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
         back_populates="application"
     )
+    order_type_applications: Mapped[list["OrderTypeApplication"]] = orm.relationship(
+        "OrderTypeApplication",
+        back_populates="application",
+    )
+
+    @property
+    def order_types(self) -> list[OrderType]:
+        return [entry.order_type for entry in self.order_type_applications]
+
+    @order_types.setter
+    def order_types(self, order_types: list[OrderType]) -> None:
+        self.order_type_applications.clear()
+        self.order_type_applications = [
+            OrderTypeApplication(order_type=order_type, application_id=self.id)
+            for order_type in order_types
+        ]
 
     def __str__(self) -> str:
         return self.tag
@@ -975,8 +991,11 @@ class Order(Base):
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
-    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     is_open: Mapped[bool] = mapped_column(default=True)
+
+    @property
+    def workflow(self) -> Workflow:
+        return self.cases[0].data_analysis
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -1103,10 +1122,10 @@ class PacbioSequencingRun(InstrumentRun):
     )
     well: Mapped[Str32]
     plate: Mapped[int]
-    run_name: Mapped[Str32 | None]
+    run_name: Mapped[Str32]
     movie_name: Mapped[Str32]
-    started_at: Mapped[datetime | None]
-    completed_at: Mapped[datetime | None]
+    started_at: Mapped[datetime]
+    completed_at: Mapped[datetime]
     hifi_reads: Mapped[BigInt]
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
@@ -1127,14 +1146,14 @@ class PacbioSequencingRun(InstrumentRun):
     failed_reads: Mapped[BigInt]
     failed_yield: Mapped[BigInt]
     failed_mean_read_length: Mapped[BigInt]
-    barcoded_hifi_reads: Mapped[BigInt | None]
-    barcoded_hifi_reads_percentage: Mapped[Num_6_2 | None]
-    barcoded_hifi_yield: Mapped[BigInt | None]
-    barcoded_hifi_yield_percentage: Mapped[Num_6_2 | None]
-    barcoded_hifi_mean_read_length: Mapped[BigInt | None]
-    unbarcoded_hifi_reads: Mapped[BigInt | None]
-    unbarcoded_hifi_yield: Mapped[BigInt | None]
-    unbarcoded_hifi_mean_read_length: Mapped[BigInt | None]
+    barcoded_hifi_reads: Mapped[BigInt]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    barcoded_hifi_yield: Mapped[BigInt]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    unbarcoded_hifi_reads: Mapped[BigInt]
+    unbarcoded_hifi_yield: Mapped[BigInt]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1188,7 +1207,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    polymerase_mean_read_length: Mapped[BigInt | None]
+    polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
@@ -1202,4 +1221,6 @@ class OrderTypeApplication(Base):
     application_id: Mapped[int] = mapped_column(
         ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
     )
-    application: Mapped[Application] = orm.relationship("Application")
+    application: Mapped[Application] = orm.relationship(
+        "Application", back_populates="order_type_applications"
+    )

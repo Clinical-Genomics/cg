@@ -100,6 +100,20 @@ def test_parse_microbial_orderform(microsalt_orderform: str):
     assert orderform_parser.project_type == OrderType.MICROSALT
 
 
+def test_parse_pacbio_sequencing_orderform(pacbio_revio_sequencing_orderform: str):
+    """Test to parse a pacbio orderform in excel format"""
+    # GIVEN a order form in excel format
+    assert is_excel(Path(pacbio_revio_sequencing_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=pacbio_revio_sequencing_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.PACBIO_LONG_READ
+
+
 def test_parse_sarscov2_orderform(sarscov2_orderform: str):
     """Test to parse a sarscov2 orderform in excel format"""
 

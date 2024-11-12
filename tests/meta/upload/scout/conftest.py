@@ -9,8 +9,12 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AnalysisTag,
+    NFAnalysisTags,
+)
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
@@ -18,11 +22,15 @@ from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -254,7 +262,8 @@ def rna_store(
 def lims_family(fixtures_dir) -> dict:
     """Returns a LIMS-like case of samples."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+        file_format=FileFormat.JSON,
+        file_path=Path(fixtures_dir, "report", "lims_family." + FileFormat.JSON),
     )
 
 
@@ -520,6 +529,94 @@ def balsamic_analysis_hk_bundle_data(
 
 
 @pytest.fixture(scope="function")
+def raredisease_analysis_hk_bundle_data(
+    case_id: str,
+    sample_id: str,
+    timestamp: datetime,
+    raredisease_analysis_dir: Path,
+    delivery_report_html: Path,
+) -> dict:
+    """Return RAREDISEASE Housekeeper bundle data."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(raredisease_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": [AnalysisTag.MULTIQC_HTML],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+            {
+                "path": str(raredisease_analysis_dir / "snv_vcf_file.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "snv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-snv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "str.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-str"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "smn.vcf").as_posix(),
+                "archive": False,
+                "tags": ["smn-calling"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.cram").as_posix(),
+                "archive": False,
+                "tags": ["cram", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "report.pdf").as_posix(),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.mt.bam").as_posix(),
+                "archive": False,
+                "tags": ["bam-mt", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "vcf2cytosure.txt").as_posix(),
+                "archive": False,
+                "tags": ["vcf2cytosure", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "multiqc.html").as_posix(),
+                "archive": False,
+                "tags": ["multiqc-html", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "manifest." + FileFormat.JSON).as_posix(),
+                "archive": False,
+                "tags": [NFAnalysisTags.MANIFEST],
+            },
+        ],
+    }
+
+
+@pytest.fixture(scope="function")
 def rnafusion_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, delivery_report_html: Path
 ) -> dict:
@@ -565,6 +662,14 @@ def mip_dna_analysis_hk_version(
 
 
 @pytest.fixture
+def raredisease_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return Housekeeper version for a MIP DNA bundle."""
+    return helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
+
+
+@pytest.fixture
 def mip_dna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -597,6 +702,15 @@ def balsamic_analysis_hk_api(
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with Balsamic analysis files."""
     helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
+def raredisease_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with some RAREDISEASE analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -662,6 +776,19 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture
+def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
+    """Return a Balsamic analysis object."""
+    analysis_obj.workflow = Workflow.RAREDISEASE
+    for link_object in analysis_obj.case.links:
+        link_object.sample.application_version.application.prep_category = (
+            PrepCategory.WHOLE_GENOME_SEQUENCING
+        )
+        link_object.sample.reference_genome = GenomeVersion.GRCh37
+        link_object.case.data_analysis = Workflow.RAREDISEASE
+    return analysis_obj
+
+
+@pytest.fixture
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.workflow = Workflow.RNAFUSION
@@ -689,6 +816,24 @@ def mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
+    )
+
+
+@pytest.fixture
+def raredisease_config_builder(
+    raredisease_analysis_hk_version: Version,
+    raredisease_analysis_obj: Analysis,
+    lims_api: MockLimsAPI,
+    raredisease_analysis_api: RarediseaseAnalysisAPI,
+    madeline_api: MockMadelineAPI,
+) -> MipConfigBuilder:
+    """Return a MIP config builder."""
+    return RarediseaseConfigBuilder(
+        hk_version_obj=raredisease_analysis_hk_version,
+        analysis_obj=raredisease_analysis_obj,
+        lims_api=lims_api,
+        madeline_api=madeline_api,
+        raredisease_analysis_api=raredisease_analysis_api,
     )
 
 
@@ -812,10 +957,10 @@ def upload_balsamic_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockBalsamicAnalysis(config=cg_context, workflow=Workflow.BALSAMIC)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -824,8 +969,36 @@ def upload_balsamic_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
+
+
+@pytest.fixture
+def upload_raredisease_analysis_scout_api(
+    raredisease_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    raredisease_analysis_hk_api: MockHousekeeperAPI,
+    analysis_store: Store,
+) -> Generator[UploadScoutAPI, None, None]:
+    """Return RAREDISEASE upload Scout API."""
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    yield UploadScoutAPI(
+        hk_api=raredisease_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=raredisease_context.meta_apis["analysis_api"],
+        lims_api=lims_api,
+        status_db=analysis_store,
+    )
+
+
+@pytest.fixture
+def raredisease_analysis_api(cg_context: CGConfig) -> NextflowAnalysis:
+    """Return a RAREDISEASE analysis API."""
+    return NextflowAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE, sample_metrics=dict())
 
 
 @pytest.fixture
@@ -853,7 +1026,7 @@ def upload_rnafusion_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
@@ -865,7 +1038,7 @@ def upload_rnafusion_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
     return _api

@@ -36,6 +36,7 @@ from cg.store.models import (
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     Panel,
     Pool,
@@ -250,6 +251,18 @@ class StoreHelpers:
         store.session.add(application)
         store.session.commit()
         return application
+
+    def add_application_order_type(
+        self, store: Store, application: Application, order_types: list[str]
+    ):
+        """Add an order type to an application."""
+        order_app_links: list[OrderTypeApplication] = store.link_order_types_to_application(
+            application=application, order_types=order_types
+        )
+        for link in order_app_links:
+            store.session.add(link)
+        store.session.commit()
+        return order_app_links
 
     @staticmethod
     def ensure_application_limitation(
@@ -503,7 +516,9 @@ class StoreHelpers:
         workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
-            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+            customer_id=customer_id,
+            ticket_id=ticket_id,
+            order_date=order_date,
         )
         store.session.add(order)
         store.session.commit()
@@ -555,7 +570,6 @@ class StoreHelpers:
         order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
             ticket_id=int(case_info["tickets"]),
             customer_id=customer_obj.id,
-            workflow=case_info.get("data_analysis", Workflow.MIP_DNA),
         )
         case = Case(
             name=case_info["name"],

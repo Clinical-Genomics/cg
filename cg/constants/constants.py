@@ -197,6 +197,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BAM: str = ".bam"
+    BCF: str = ".bcf"
     BED: str = ".bed"
     COMPLETE: str = ".complete"
     CONFIG: str = ".config"
@@ -224,6 +225,7 @@ class FileExtensions(StrEnum):
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"
+    VCF_GZ: str = ".vcf.gz"
     XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
@@ -259,7 +261,7 @@ class MicrosaltAppTags(StrEnum):
 class MutantQC:
     EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
     INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
-    FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_THRESHOLD: float = 0.2
     QUALITY_REPORT_FILE_NAME: str = f"QC_report{FileExtensions.JSON}"
 
 
