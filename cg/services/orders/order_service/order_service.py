@@ -1,6 +1,7 @@
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
+from cg.services.orders.order_service.models import OrderQueryParams
 from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
@@ -25,7 +26,8 @@ class OrderService:
         return create_order_response(order=order, summary=summary)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
-        orders, total_count = self.store.get_orders(orders_request)
+        order_query_params: OrderQueryParams = self._get_order_query_params(orders_request)
+        orders, total_count = self.store.get_orders(order_query_params)
         order_ids: list[int] = [order.id for order in orders]
         if not order_ids:
             return OrdersResponse(orders=[], total_count=0)
@@ -44,3 +46,14 @@ class OrderService:
             self.set_open(order_id=order_id, open=False)
         elif not order.is_open:
             self.set_open(order_id=order_id, open=True)
+
+    @staticmethod
+    def _get_order_query_params(orders_request: OrdersRequest) -> OrderQueryParams:
+        return OrderQueryParams(
+            page=orders_request.page,
+            page_size=orders_request.page_size,
+            offset=orders_request.offset,
+            open=orders_request.open,
+            customer_id=orders_request.customer_id,
+            workflows=[orders_request.workflow],
+        )
