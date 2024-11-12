@@ -43,7 +43,6 @@ class TaxprofilerParameters(WorkflowParameters):
     run_profile_standardisation: bool = True
 
 
-
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
