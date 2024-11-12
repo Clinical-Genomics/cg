@@ -1402,8 +1402,8 @@ class ReadHandler(BaseHandler):
             filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             search=orders_request.search,
             is_open=orders_request.is_open,
-        )
-        total_count: int = orders.distinct().count()
+        ).distinct()
+        total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
             orders=orders, orders_request=orders_request
         )
