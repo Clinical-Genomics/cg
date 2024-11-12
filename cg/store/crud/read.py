@@ -1396,13 +1396,13 @@ class ReadHandler(BaseHandler):
             cases=order_case,
             filter_functions=[CaseFilter.WITH_WORKFLOW],
             workflow=orders_request.workflow,
-        )
+        ).distinct()
         orders: Query = apply_order_filters(
             orders=order_for_workflow,
             filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             search=orders_request.search,
             is_open=orders_request.is_open,
-        ).distinct()
+        )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
             orders=orders, orders_request=orders_request
