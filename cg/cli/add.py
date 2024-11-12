@@ -292,7 +292,6 @@ def add_case(
         order = Order(
             customer_id=customer.id,
             ticket_id=int(ticket),
-            workflow=data_analysis,
         )
     new_case.orders.append(order)
 
