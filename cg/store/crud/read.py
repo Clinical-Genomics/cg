@@ -1391,10 +1391,15 @@ class ReadHandler(BaseHandler):
 
     def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
         """Filter, sort and paginate orders based on the provided request."""
-        orders: Query = apply_order_filters(
-            orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
+        order_case: Query = self._get_join_order_case_query()
+        order_for_workflow: Query = apply_case_filter(
+            cases=order_case,
+            filter_functions=[CaseFilter.WITH_WORKFLOW],
             workflow=orders_request.workflow,
+        )
+        orders: Query = apply_order_filters(
+            orders=order_for_workflow,
+            filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             search=orders_request.search,
             is_open=orders_request.is_open,
         )
