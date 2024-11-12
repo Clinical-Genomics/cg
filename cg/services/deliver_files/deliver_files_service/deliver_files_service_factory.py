@@ -104,10 +104,10 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _get_sample_file_formatter(
-        workflow: Workflow,
+        app_tag: str,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
         """Get the file formatter service based on the workflow."""
-        if workflow in [Workflow.MICROSALT]:
+        if app_tag in [I, DONT, KNOW, WHICH, ONES, TO, PUT, HERE]:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
         return SampleFileFormatter()
 
@@ -126,14 +126,14 @@ class DeliveryServiceFactory:
         )
 
     def build_delivery_service(
-        self, workflow: Workflow, delivery_type: DataDelivery
+        self, workflow: Workflow, delivery_type: DataDelivery, app_tag: str
     ) -> DeliverFilesService:
         """Build a delivery service based on the workflow and delivery type."""
         delivery_type: DataDelivery = self._sanitise_delivery_type(delivery_type)
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
         sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
-            self._get_sample_file_formatter(workflow)
+            self._get_sample_file_formatter(app_tag)
         )
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter

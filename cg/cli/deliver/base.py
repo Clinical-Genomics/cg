@@ -86,12 +86,14 @@ def deliver_case(
     inbox: str = context.delivery_path
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
+    app_tag: str = case.samples[0].application_version.application.tag
     if not case:
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else case.data_delivery,
         workflow=case.data_analysis,
+        app_tag=app_tag,
     )
     delivery_service.deliver_files_for_case(
         case=case, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -121,12 +123,16 @@ def deliver_ticket(
     inbox: str = context.delivery_path
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
     cases: list[Case] = context.status_db.get_cases_by_ticket_id(ticket_id=ticket)
+    app_tag: str = (
+        cases[0].samples[0].application_version.application.tag
+    )  # can this differ between cases of the same order?
     if not cases:
         LOG.error(f"Could not find case connected to ticket {ticket}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
         workflow=cases[0].data_analysis,
+        app_tag=app_tag,
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -169,12 +175,14 @@ def deliver_sample_raw_data(
     inbox: str = context.delivery_path
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
     case: Case = context.status_db.get_case_by_internal_id(internal_id=case_id)
+    app_tag: str = case.samples[0].application_version.application.tag
     if not case:
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type,
         workflow=case.data_analysis,
+        app_tag=app_tag,
     )
     delivery_service.deliver_files_for_sample(
         case=case, sample_id=sample_id, delivery_base_path=Path(inbox), dry_run=dry_run
