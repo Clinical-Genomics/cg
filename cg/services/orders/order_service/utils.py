@@ -10,7 +10,7 @@ def create_order_response(order: DatabaseOrder, summary: OrderSummary | None = N
         order_date=str(order.order_date.date()),
         id=order.id,
         is_open=order.is_open,
-        workflow=order.workflow if Workflow.BALSAMIC not in order.workflow else Workflow.BALSAMIC,
+        workflow=order.workflow,
         summary=summary,
     )
 
