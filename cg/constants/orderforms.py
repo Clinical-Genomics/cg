@@ -34,7 +34,8 @@ class Orderform(StrEnum):
 
     @staticmethod
     def get_current_orderform_version(order_form: str) -> str:
-        """Returns the current version of the given order form."""
+        """Returns the current version of the given order form. The orderforms are not unique
+        per order type - especially 1508 is used for many more order types than MIP."""
         current_order_form_versions = {
             Orderform.MIP_DNA: "32",
             Orderform.RML: "19",
