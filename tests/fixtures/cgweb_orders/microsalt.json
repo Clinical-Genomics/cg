@@ -18,8 +18,6 @@
       "container": "96 well plate",
       "container_name": "name of plate",
       "well_position": "A:1",
-      "quantity": "102",
-      "concentration_sample": "101",
       "comment": "plate comment"
     },
     {
@@ -88,8 +86,6 @@
       "container": "Tube",
       "container_name": "optional-fields",
       "well_position": "",
-      "quantity": "202",
-      "concentration_sample": "201",
       "comment": "optional comment"
     }
   ]
