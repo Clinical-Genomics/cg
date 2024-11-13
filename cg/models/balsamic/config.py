@@ -105,10 +105,9 @@ class BalsamicConfigQC(BaseModel):
         adapter: adapter sequence that has been trimmed
         min_seq_length: minimum sequence length cutoff for reads
     """
-    
+
     adapter: str | None
     min_seq_length: str | None
-
 
 
 class BalsamicVarCaller(BaseModel):
