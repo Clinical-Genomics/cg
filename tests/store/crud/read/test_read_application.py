@@ -11,7 +11,7 @@ def test_get_active_applications_by_order_type_no_application(store: Store):
     # GIVEN a store with applications without order types
     applications: list[Application] = store.get_applications()
     for application in applications:
-        assert not application.order_types
+        assert not application.order_type_applications
 
     # GIVEN an order type
     order_type: OrderType = OrderType.PACBIO_LONG_READ

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.store.base import BaseHandler
@@ -822,15 +823,19 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-    def get_active_applications_by_order_type(self, order_type: str) -> list[Application]:
+    def get_active_applications_by_order_type(self, order_type: OrderType) -> list[Application]:
         """
-        Return all possible non-archived applications for an order type.
+        Return all possible non-archived applications with versions for an order type.
         Raises:
             EntryNotFoundError: If no applications are found for the order type.
         """
+        filters: list[ApplicationFilter] = [
+            ApplicationFilter.IS_NOT_ARCHIVED,
+            ApplicationFilter.HAS_VERSIONS,
+        ]
         non_archived_applications: Query = apply_application_filter(
             applications=self._get_join_application_ordertype_query(),
-            filter_functions=[ApplicationFilter.IS_NOT_ARCHIVED],
+            filter_functions=filters,
         )
         applications: list[Application] = apply_order_type_application_filter(
             order_type_applications=non_archived_applications,
@@ -1386,10 +1391,15 @@ class ReadHandler(BaseHandler):
 
     def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
         """Filter, sort and paginate orders based on the provided request."""
-        orders: Query = apply_order_filters(
-            orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
+        order_case: Query = self._get_join_order_case_query()
+        order_for_workflow: Query = apply_case_filter(
+            cases=order_case,
+            filter_functions=[CaseFilter.WITH_WORKFLOW],
             workflow=orders_request.workflow,
+        ).distinct()
+        orders: Query = apply_order_filters(
+            orders=order_for_workflow,
+            filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
             search=orders_request.search,
             is_open=orders_request.is_open,
         )
