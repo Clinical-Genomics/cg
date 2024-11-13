@@ -11,7 +11,6 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
