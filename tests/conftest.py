@@ -12,8 +12,8 @@ from subprocess import CompletedProcess
 from typing import Any, Generator
 
 import pytest
-from pytest_mock import MockFixture
 from housekeeper.store.models import File, Version
+from pytest_mock import MockFixture
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
@@ -68,9 +68,7 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import (
     IlluminaDataTransferService,
@@ -2139,6 +2137,9 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
@@ -2696,7 +2697,6 @@ def raredisease_context(
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
     RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
-    samples = [sample_enough_reads, another_sample_enough_reads]
     return cg_context
 
 
