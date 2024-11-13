@@ -5,7 +5,6 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
-from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -60,6 +59,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
+
+    @property
+    def is_params_appended_to_nextflow_config(self) -> bool:
+        """Return True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
