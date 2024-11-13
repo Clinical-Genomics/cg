@@ -25,6 +25,7 @@ class TaxprofilerParameters(WorkflowParameters):
     databases: Path
     hostremoval_reference: Path
 
+
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
