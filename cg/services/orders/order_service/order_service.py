@@ -49,7 +49,7 @@ class OrderService:
             page=orders_request.page,
             page_size=orders_request.page_size,
             search=orders_request.search,
-            open=orders_request.open,
+            is_open=orders_request.is_open,
             customer_id=orders_request.customer_id,
             workflows=[orders_request.workflow],
         )
