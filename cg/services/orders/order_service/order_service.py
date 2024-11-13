@@ -1,12 +1,11 @@
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.orders.orders_response import Order as OrderResponse
+from cg.server.dto.orders.orders_response import Order as OrderResponse, Order
 from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
 from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
 )
-from cg.store.models import Order
 from cg.store.store import Store
 from cg.store.models import Order as DatabaseOrder
 
@@ -38,7 +37,7 @@ class OrderService:
         """Update the is_open parameter of an order based on the number of delivered analyses."""
         order: Order = self.store.get_order_by_id(order_id)
         case_count: int = len(order.cases)
-        if self._order_is_closed(case_count=case_count, delivered_analyses=delivered_analyses):
+        if self._is_order_closed(case_count=case_count, delivered_analyses=delivered_analyses):
             self.set_open(order_id=order_id, open=False)
         elif not order.is_open:
             self.set_open(order_id=order_id, open=True)
@@ -50,8 +49,9 @@ class OrderService:
             page_size=orders_request.page_size,
             search=orders_request.search,
             is_open=orders_request.is_open,
-            customer_id=orders_request.customer_id,
-            workflows=[orders_request.workflow],
+            sort_field=orders_request.sort_field,
+            sort_order=orders_request.sort_order,
+            workflows=[orders_request.workflow] if orders_request.workflow else [],
         )
 
     @staticmethod
@@ -69,7 +69,7 @@ class OrderService:
     def _create_orders_response(
         self, orders: list[DatabaseOrder], summaries: list[OrderSummary], total: int
     ) -> OrdersResponse:
-        orders: list[Order] = [self.create_order_response(order) for order in orders]
+        orders: list[Order] = [self._create_order_response(order) for order in orders]
         self._add_summaries(orders=orders, summaries=summaries)
         return OrdersResponse(orders=orders, total_count=total)
 
@@ -82,5 +82,5 @@ class OrderService:
         return orders
 
     @staticmethod
-    def _order_is_closed(case_count: int, delivered_analyses: int) -> bool:
+    def _is_order_closed(case_count: int, delivered_analyses: int) -> bool:
         return delivered_analyses >= case_count
