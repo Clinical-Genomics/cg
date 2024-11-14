@@ -6,8 +6,10 @@ from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
-from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import Of1508Sample
+from cg.models.orders.constants import OrderType
+from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
@@ -38,13 +40,13 @@ class TicketHandler:
         return None
 
     def create_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str
+        self, order: Order, user_name: str, user_mail: str, order_type: OrderType
     ) -> int | None:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
             order=order,
-            project=project,
+            order_type=order_type,
         )
 
         with TemporaryDirectory() as temp_dir:
@@ -57,7 +59,7 @@ class TicketHandler:
                 name=user_name,
                 subject=order.name,
                 type="Order",
-                tags=[order.samples[0].data_analysis],
+                tags=[ORDER_TYPE_WORKFLOW_MAP[order_type]],
                 custom_fields={
                     "cf_environment": self.env,
                 },
@@ -70,29 +72,29 @@ class TicketHandler:
 
         return ticket_response.id
 
-    def create_attachment_file(self, order: OrderIn, temp_dir: str) -> Path:
+    def create_attachment_file(self, order: Order, temp_dir: str) -> Path:
         """Create a single attachment file for the ticket"""
         order_file_path = Path(temp_dir) / "order.json"
         with order_file_path.open("w") as order_file:
             order_file.write(order.json())
         return order_file_path
 
-    def create_xml_sample_list(self, order: OrderIn, user_name: str) -> str:
+    def create_xml_sample_list(self, order: Order, user_name: str) -> str:
         message = ""
-        for sample in order.samples:
-            message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
-            message = self.add_sample_apptag_to_message(
-                message=message, application=sample.application
-            )
-            if isinstance(sample, Of1508Sample):
-                message = self.add_sample_case_name_to_message(
-                    message=message, case_name=sample.family_name
+        if isinstance(order, OrderWithCases):
+            message = self.create_case_xml_sample_list(order=order, user_name=user_name)
+        else:
+            for sample in order.samples:
+                message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
+                message = self.add_sample_apptag_to_message(
+                    message=message, application=sample.application
                 )
-                message = self.add_existing_sample_info_to_message(
-                    message=message, customer_id=order.customer, internal_id=sample.internal_id
+                message = self.add_sample_priority_to_message(
+                    message=message, priority=sample.priority
                 )
-            message = self.add_sample_priority_to_message(message=message, priority=sample.priority)
-            message = self.add_sample_comment_to_message(message=message, comment=sample.comment)
+                message = self.add_sample_comment_to_message(
+                    message=message, comment=sample.comment
+                )
 
         message += self.NEW_LINE
         message = self.add_order_comment_to_message(message=message, comment=order.comment)
@@ -102,13 +104,13 @@ class TicketHandler:
         return message
 
     @staticmethod
-    def create_new_ticket_header(message: str, order: OrderIn, project: str) -> str:
-        return f"New order with {len(order.samples)} {project} samples:" + message
+    def create_new_ticket_header(message: str, order: Order, order_type: OrderType) -> str:
+        return f"New order with {len(order.samples)} {order_type} samples:" + message
 
     @staticmethod
-    def add_existing_ticket_header(message: str, order: OrderIn, project: str) -> str:
+    def add_existing_ticket_header(message: str, order: Order, order_type: str) -> str:
         return (
-            f"A new order with {len(order.samples)} {project} samples has been connected to this ticket:"
+            f"A new order with {len(order.samples)} {order_type} samples has been connected to this ticket:"
             + message
         )
 
@@ -129,10 +131,8 @@ class TicketHandler:
         return message
 
     def add_existing_sample_info_to_message(
-        self, message: str, customer_id: str, internal_id: str | None
+        self, message: str, customer_id: str, internal_id: str, case_name: str
     ) -> str:
-        if not internal_id:
-            return message
 
         existing_sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=internal_id)
 
@@ -140,7 +140,7 @@ class TicketHandler:
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id
 
-        message += f" (already existing sample{sample_customer})"
+        message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority}"
         return message
 
     @staticmethod
@@ -190,7 +190,7 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self, order: OrderIn, user_name: str, project: str, ticket_number: str
+        self, order: Order, user_name: str, order_type: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info(f"Connecting order to ticket {ticket_number}")
@@ -198,7 +198,7 @@ class TicketHandler:
         message: str = self.add_existing_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
             order=order,
-            project=project,
+            order_type=order_type,
         )
 
         with TemporaryDirectory() as temp_dir:
@@ -212,3 +212,40 @@ class TicketHandler:
             )
 
             LOG.info(f"Connected order to ticket {ticket_number} in Freshdesk")
+
+    def create_case_xml_sample_list(self, order, message: str) -> str:
+        for case in order.cases:
+            if not case.is_new:
+                db_case = self.status_db.get_case_by_internal_id(case.internal_id)
+                for sample in db_case.samples:
+                    message = self.add_existing_sample_info_to_message(
+                        message=message,
+                        customer_id=sample.customer.internal_id,
+                        internal_id=sample.internal_id,
+                        case_name=db_case.name,
+                    )
+            else:
+                for sample in case.samples:
+                    if not sample.is_new:
+                        message = self.add_existing_sample_info_to_message(
+                            message=message,
+                            customer_id=order.customer,
+                            internal_id=sample.internal_id,
+                        )
+                    else:
+                        message = self.add_sample_name_to_message(
+                            message=message, sample_name=sample.name
+                        )
+                        message = self.add_sample_apptag_to_message(
+                            message=message, application=sample.application
+                        )
+                        message = self.add_sample_case_name_to_message(
+                            message=message, case_name=case.name
+                        )
+                        message = self.add_sample_priority_to_message(
+                            message=message, priority=sample.priority
+                        )
+                        message = self.add_sample_comment_to_message(
+                            message=message, comment=sample.comment
+                        )
+        return message

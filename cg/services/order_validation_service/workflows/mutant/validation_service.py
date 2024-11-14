@@ -1,16 +1,30 @@
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
-from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
-from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.order_validation_service.response_mapper import create_order_validation_response
+from cg.services.order_validation_service.errors.validation_errors import (
+    ValidationErrors,
+)
+from cg.services.order_validation_service.model_validator.model_validator import (
+    ModelValidator,
+)
+from cg.services.order_validation_service.order_validation_service import (
+    OrderValidationService,
+)
+from cg.services.order_validation_service.response_mapper import (
+    create_order_validation_response,
+)
 from cg.services.order_validation_service.utils import (
     apply_order_validation,
     apply_sample_validation,
 )
-from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
-from cg.services.order_validation_service.workflows.mutant.validation_rules import SAMPLE_RULES
-from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
+from cg.services.order_validation_service.workflows.mutant.models.order import (
+    MutantOrder,
+)
+from cg.services.order_validation_service.workflows.mutant.validation_rules import (
+    SAMPLE_RULES,
+)
+from cg.services.order_validation_service.workflows.order_validation_rules import (
+    ORDER_RULES,
+)
 from cg.store.store import Store
 
 
@@ -44,3 +58,6 @@ class MutantValidationService(OrderValidationService):
             sample_errors=sample_errors,
             order_errors=order_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> MutantOrder:
+        pass

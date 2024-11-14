@@ -5,6 +5,7 @@ from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.discriminators import has_internal_id
 from cg.services.order_validation_service.models.existing_case import ExistingCase
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.models.sample import Sample
 
 NewCaseType = Annotated[Case, Tag("new")]
 ExistingCaseType = Annotated[ExistingCase, Tag("existing")]
@@ -32,3 +33,10 @@ class OrderWithCases(Order):
             if not case.is_new:
                 cases.append((case_index, case))
         return cases
+
+    @property
+    def samples(self) -> list[Sample]:
+        samples = []
+        for case in self.cases:
+            samples.extend(case.samples)
+        return samples
