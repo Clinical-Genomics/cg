@@ -41,7 +41,6 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     get_mother_case_errors,
     get_mother_sex_errors,
     get_occupied_well_errors,
-    get_repeated_sample_name_errors,
     get_well_sample_map,
     is_concentration_missing,
     is_container_name_missing,
@@ -249,15 +248,30 @@ def validate_wells_contain_at_most_one_sample(
 
 
 def validate_sample_names_not_repeated(
-    order: OrderWithCases, **kwargs
+    order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
-    errors: list[SampleNameRepeatedError] = []
-    for index, case in order.enumerated_new_cases:
-        case_errors: list[SampleNameRepeatedError] = get_repeated_sample_name_errors(
-            case=case, case_index=index
-        )
-        errors.extend(case_errors)
-    return errors
+    old_sample_names: set[str] = _get_old_sample_names(order=order, status_db=store)
+    new_samples: list[tuple[int, int, Sample]] = order.enumerated_new_samples
+    sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
+    return [
+        SampleNameRepeatedError(case_index=case_index, sample_index=sample_index)
+        for case_index, sample_index, sample in new_samples
+        if sample_name_counter.get(sample.name) > 1 or sample.name in old_sample_names
+    ]
+
+
+def _get_old_sample_names(order: OrderWithCases, status_db: Store) -> set[str]:
+    existing_sample_names: set[str] = set()
+    for case_index, case in order.enumerated_cases:
+        if case.is_new:
+            for sample_index, sample in case.enumerated_existing_samples:
+                db_sample = status_db.get_sample_by_internal_id(sample.internal_id)
+                existing_sample_names.add(db_sample.name)
+        else:
+            db_case = status_db.get_case_by_internal_id(case.internal_id)
+            for sample in db_case.samples:
+                existing_sample_names.add(sample.name)
+    return existing_sample_names
 
 
 def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
