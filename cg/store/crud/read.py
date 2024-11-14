@@ -1031,7 +1031,7 @@ class ReadHandler(BaseHandler):
         )
         return records.order_by(Sample.prepared_at).all()
 
-    def get_families_with_analyses(self) -> Query:
+    def get_cases_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis."""
         return self._get_outer_join_cases_with_analyses_query()
 
@@ -1047,7 +1047,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_families_with_analyses(),
+            cases=self.get_cases_with_analyses(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
