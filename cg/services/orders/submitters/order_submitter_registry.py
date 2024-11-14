@@ -3,6 +3,18 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
+from cg.services.order_validation_service.workflows.microsalt.validation_service import (
+    MicroSaltValidationService,
+)
+from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
+    MipDnaValidationService,
+)
+from cg.services.order_validation_service.workflows.mutant.validation_service import (
+    MutantValidationService,
+)
+from cg.services.order_validation_service.workflows.tomte.validation_service import (
+    TomteValidationService,
+)
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.store_order_services.store_case_order import (
     StoreCaseOrderService,
@@ -103,13 +115,13 @@ order_service_mapping = {
     ),
     OrderType.MICROSALT: (
         OrderLimsService,
-        BalsamicValidationService,
+        MicroSaltValidationService,
         StoreMicrobialOrderService,
         MicrobialOrderSubmitter,
     ),
     OrderType.MIP_DNA: (
         OrderLimsService,
-        BalsamicValidationService,
+        MipDnaValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
@@ -139,7 +151,7 @@ order_service_mapping = {
     ),
     OrderType.SARS_COV_2: (
         OrderLimsService,
-        BalsamicValidationService,
+        MutantValidationService,
         StoreMicrobialOrderService,
         MicrobialOrderSubmitter,
     ),
@@ -151,7 +163,7 @@ order_service_mapping = {
     ),
     OrderType.TOMTE: (
         OrderLimsService,
-        BalsamicValidationService,
+        TomteValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
