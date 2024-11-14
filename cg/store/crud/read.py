@@ -11,10 +11,10 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import (
     CollaboratorSamplesRequest,
 )
+from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import (
@@ -1039,14 +1039,14 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]
-        cases = apply_case_filter(
+        cases: Query = apply_case_filter(
             cases=self.get_families_with_analyses(),
             filter_functions=case_filter_functions,
             workflow=workflow,
@@ -1397,29 +1397,37 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
+    def get_orders(self, orders_params: OrderQueryParams) -> tuple[list[Order], int]:
         """Filter, sort and paginate orders based on the provided request."""
+        orders: Query = self._get_join_order_case_query()
+        if len(orders_params.workflows) > 0:
+            orders: Query = apply_case_filter(
+                cases=orders,
+                filter_functions=[CaseFilter.BY_WORKFLOWS],
+                workflows=orders_params.workflows,
+            ).distinct()
         orders: Query = apply_order_filters(
-            orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
-            workflow=orders_request.workflow,
-            search=orders_request.search,
-            is_open=orders_request.is_open,
+            orders=orders,
+            filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
+            search=orders_params.search,
+            is_open=orders_params.is_open,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
-            orders=orders, orders_request=orders_request
+            orders=orders, orders_params=orders_params
         )
         return orders, total_count
 
-    def sort_and_paginate_orders(self, orders: Query, orders_request: OrdersRequest) -> list[Order]:
+    def sort_and_paginate_orders(
+        self, orders: Query, orders_params: OrderQueryParams
+    ) -> list[Order]:
         return apply_order_filters(
             orders=orders,
             filters=[OrderFilter.SORT, OrderFilter.PAGINATE],
-            sort_field=orders_request.sort_field,
-            sort_order=orders_request.sort_order,
-            page=orders_request.page,
-            page_size=orders_request.page_size,
+            sort_field=orders_params.sort_field,
+            sort_order=orders_params.sort_order,
+            page=orders_params.page,
+            page_size=orders_params.page_size,
         ).all()
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:

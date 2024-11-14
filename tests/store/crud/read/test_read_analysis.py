@@ -7,7 +7,7 @@ from sqlalchemy.orm import Query
 from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -165,7 +165,7 @@ def test_that_many_cases_can_have_one_sample_each(
     )
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should contain all cases since they are to be analysed
     assert len(cases) == len(test_cases)
@@ -193,7 +193,7 @@ def test_that_cases_can_have_many_samples(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -226,7 +226,7 @@ def test_external_sample_to_re_analyse(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -249,7 +249,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.BALSAMIC)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
@@ -275,7 +275,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -304,7 +304,7 @@ def test_all_samples_and_analysis_completed(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert not cases
@@ -326,7 +326,7 @@ def test_specified_analysis_in_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.BALSAMIC)
 
     # THEN cases should be returned
     assert cases
@@ -352,7 +352,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse for another workflow
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
@@ -376,7 +376,7 @@ def test_one_of_one_sequenced_samples(
     assert test_sample.last_sequenced_at is not None
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases

@@ -367,7 +367,7 @@ class AnalysisAPI(MetaAPI):
         return analyses_to_clean
 
     def get_cases_to_analyse(self) -> list[Case]:
-        return self.status_db.cases_to_analyse(workflow=self.workflow)
+        return self.status_db.get_cases_to_analyse(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

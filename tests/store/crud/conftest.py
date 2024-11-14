@@ -456,22 +456,31 @@ def three_pool_names() -> list[str]:
 
 @pytest.fixture
 def order(helpers: StoreHelpers, store: Store) -> Order:
+    case: Case = helpers.add_case(data_analysis=Workflow.MIP_DNA, store=store, name="order_case")
     order: Order = helpers.add_order(
         store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
     )
+    order.cases.append(case)
     return order
 
 
 @pytest.fixture
 def order_another(helpers: StoreHelpers, store: Store) -> Order:
+    case: Case = helpers.add_case(
+        data_analysis=Workflow.MIP_DNA, store=store, name="order_another_case"
+    )
     order: Order = helpers.add_order(
         store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
     )
+    order.cases.append(case)
     return order
 
 
 @pytest.fixture
 def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
+    case: Case = helpers.add_case(
+        data_analysis=Workflow.BALSAMIC, store=store, name="order_balsamic_case"
+    )
     order: Order = helpers.add_order(
         store=store,
         customer_id=2,
@@ -479,4 +488,5 @@ def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
         order_date=datetime.now(),
         workflow=Workflow.BALSAMIC,
     )
+    order.cases.append(case)
     return order
