@@ -9,12 +9,9 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Case
 from cg.store.store import Store
-from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
@@ -241,7 +238,6 @@ def test_slurm_rsync_single_case(
 
     # WHEN the destination path is created
     sbatch_number: int
-    is_complete_delivery: bool
     sbatch_number: int = delivery_rsync_service.run_rsync_for_case(
         case=case,
         dry_run=True,
