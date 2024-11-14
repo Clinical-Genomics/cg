@@ -14,14 +14,12 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     InvalidMotherSexError,
     MotherNotInCaseError,
     OccupiedWellError,
-    SampleNameRepeatedError,
     SubjectIdSameAsCaseNameError,
 )
 from cg.services.order_validation_service.models.aliases import (
     CaseContainingRelatives,
     SampleWithRelatives,
 )
-from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
@@ -100,25 +98,6 @@ def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
 def get_repeated_case_name_errors(order: OrderWithCases) -> list[RepeatedCaseNameError]:
     case_indices: list[int] = get_indices_for_repeated_case_names(order)
     return [RepeatedCaseNameError(case_index=case_index) for case_index in case_indices]
-
-
-def get_indices_for_repeated_sample_names(case: Case) -> list[int]:
-    counter = Counter([sample.name for sample in case.samples])
-    indices: list[int] = []
-
-    for index, sample in case.enumerated_new_samples:
-        if counter.get(sample.name) > 1:
-            indices.append(index)
-
-    return indices
-
-
-def get_repeated_sample_name_errors(case: Case, case_index: int) -> list[SampleNameRepeatedError]:
-    sample_indices: list[int] = get_indices_for_repeated_sample_names(case)
-    return [
-        SampleNameRepeatedError(sample_index=sample_index, case_index=case_index)
-        for sample_index in sample_indices
-    ]
 
 
 def get_father_sex_errors(
@@ -307,3 +286,17 @@ def get_counter_container_names(order: OrderWithCases) -> Counter:
         for sample_index, sample in case.enumerated_new_samples
     )
     return counter
+
+
+def get_old_sample_names(order: OrderWithCases, status_db: Store) -> set[str]:
+    existing_sample_names: set[str] = set()
+    for case_index, case in order.enumerated_cases:
+        if case.is_new:
+            for sample_index, sample in case.enumerated_existing_samples:
+                db_sample = status_db.get_sample_by_internal_id(sample.internal_id)
+                existing_sample_names.add(db_sample.name)
+        else:
+            db_case = status_db.get_case_by_internal_id(case.internal_id)
+            for sample in db_case.samples:
+                existing_sample_names.add(sample.name)
+    return existing_sample_names
