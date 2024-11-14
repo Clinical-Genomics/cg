@@ -164,7 +164,6 @@ class StoreCaseOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow(items[0]["data_analysis"]),
         )
         for case in items:
             status_db_case: Case = self.status_db.get_case_by_internal_id(
