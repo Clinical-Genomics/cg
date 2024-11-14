@@ -82,7 +82,7 @@ class TicketHandler:
     def create_xml_sample_list(self, order: Order, user_name: str) -> str:
         message = ""
         if isinstance(order, OrderWithCases):
-            message = self.create_case_xml_sample_list(order=order, user_name=user_name)
+            message = self.create_case_xml_sample_list(order=order, message=message)
         else:
             for sample in order.samples:
                 message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
@@ -231,6 +231,7 @@ class TicketHandler:
                             message=message,
                             customer_id=order.customer,
                             internal_id=sample.internal_id,
+                            case_name=case.name,
                         )
                     else:
                         message = self.add_sample_name_to_message(
