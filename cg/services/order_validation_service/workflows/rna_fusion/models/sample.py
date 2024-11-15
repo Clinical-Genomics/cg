@@ -9,7 +9,7 @@ class RnaFusionSample(Sample):
     age_at_sampling: float | None = None
     concentration_ng_ul: float | None = None
     control: ControlEnum | None
-    elution_buffer: str | None = None
+    elution_buffer: ElutionBuffer | None = None
     formalin_fixation_time: int | None = None
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
