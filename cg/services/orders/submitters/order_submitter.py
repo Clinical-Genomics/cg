@@ -4,6 +4,9 @@ import logging
 from abc import ABC, abstractmethod
 
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.order_validation_service import (
+    OrderValidationService,
+)
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.store.store import Store
 
@@ -45,7 +48,7 @@ class OrderSubmitter(ABC):
     @abstractmethod
     def __init__(
         self,
-        validate_order_service: ValidateOrderService,
+        validate_order_service: OrderValidationService,
         store_order_service: StoreOrderService,
     ):
         self.order_validation_service = validate_order_service
