@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.constants import FileFormat, Workflow
+from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
     OrderExistsError,
@@ -39,12 +39,13 @@ from cg.server.ext import (
     db,
     delivery_message_service,
     lims,
+    metagenome_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
     order_service,
     order_submitter_registry,
-    tomte_validation_service,
     ticket_handler,
+    tomte_validation_service,
 )
 from cg.store.models import Application, Customer
 
@@ -264,16 +265,18 @@ def get_options():
     )
 
 
-@ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
-def validate_order(workflow: str):
+@ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
+def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["workflow"] = workflow
+    raw_order["order_type"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
-    if workflow == Workflow.TOMTE:
+    if order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
-    if workflow == Workflow.MICROSALT:
+    if order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-    if workflow == Workflow.MIP_DNA:
+    if order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
+    if order_type == OrderType.METAGENOME:
+        response = metagenome_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
