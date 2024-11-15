@@ -73,7 +73,6 @@ class StoreFastqOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow.FASTQ,
         )
         with self.status_db.session.no_autoflush:
             for sample in order.samples:

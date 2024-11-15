@@ -69,7 +69,6 @@ class StorePacBioOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow.RAW_DATA,
         )
         new_samples = []
         with self.status_db.session.no_autoflush:

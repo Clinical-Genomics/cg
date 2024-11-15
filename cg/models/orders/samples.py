@@ -252,6 +252,10 @@ class MetagenomeSample(Of1508Sample):
         return None
 
 
+class TaxprofilerSample(MetagenomeSample):
+    _suitable_project = OrderType.TAXPROFILER
+
+
 class MicrobialSample(OrderInSample):
     # 1603 Orderform Microbial WGS
     # "These fields are required"

@@ -11,6 +11,7 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
+    Order,
 )
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
@@ -84,6 +85,10 @@ class BaseHandler:
         return (
             self._get_query(table=Sample).join(Case.links).join(CaseSample.sample).join(Case.orders)
         )
+
+    def _get_join_order_case_query(self) -> Query:
+        """Return a query joining sample, cases_sample, case and order. Selects from sample."""
+        return self._get_query(table=Order).join(Order.cases)
 
     def _get_join_application_ordertype_query(self) -> Query:
         """Return join application to order type query."""

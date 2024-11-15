@@ -23,6 +23,7 @@ def validate_data_analysis(data_analysis):
         "MIP RNA",  # OF 1508
         "RNAfusion",  # OF 1508
         "Mutant",  # OF 2184
+        "Taxprofiler",  # OF 1508
         "Tomte",  # OF 1508
         "No analysis",  # OF 1508, 1604, 2184
     ]
