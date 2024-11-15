@@ -3,7 +3,8 @@
 import logging
 
 import click
-
+from cg.models.cg_config import CGConfig
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.compress.fastq import (
     clean_fastq,
     decompress_case,
@@ -13,11 +14,8 @@ from cg.cli.compress.fastq import (
     fastq_cmd,
     fix_spring,
 )
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.compress import CompressAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.models.cg_config import CGConfig
+
+
 from cg.services.pdc_service.pdc_service import PdcService
 
 LOG = logging.getLogger(__name__)
@@ -30,6 +28,8 @@ def compress(context: CGConfig):
 
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
+
+    from cg.meta.compress import CompressAPI
 
     compress_api = CompressAPI(
         hk_api=hk_api,
@@ -59,15 +59,21 @@ def decompress(context: CGConfig):
     crunchy_api = context.crunchy_api
 
     pdc_service: PdcService = PdcService(binary_path=context.pdc.binary_path)
+    from cg.meta.encryption.encryption import SpringEncryptionAPI
+
     spring_encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=context.encryption.binary_path,
     )
+    from cg.meta.backup.backup import SpringBackupAPI
+
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=spring_encryption_api,
         hk_api=hk_api,
         pdc_service=pdc_service,
     )
     LOG.debug("Start spring retrieval if not dry run")
+
+    from cg.meta.compress import CompressAPI
 
     compress_api = CompressAPI(
         hk_api=hk_api,

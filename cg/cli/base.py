@@ -1,4 +1,4 @@
-""" Start of CLI """
+"""Start of CLI with lazy loading and local imports."""
 
 import logging
 import sys
@@ -8,26 +8,6 @@ import click
 import coloredlogs
 from sqlalchemy.orm import scoped_session
 
-import cg
-from cg.cli.add import add as add_cmd
-from cg.cli.archive import archive
-from cg.cli.backup import backup
-from cg.cli.clean import clean
-from cg.cli.compress.base import compress, decompress
-from cg.cli.delete.base import delete
-from cg.cli.deliver.base import deliver as deliver_cmd
-from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from cg.cli.downsample import downsample
-from cg.cli.generate.base import generate as generate_cmd
-from cg.cli.get import get
-from cg.cli.post_process.post_process import post_process_group as post_processing
-from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
-from cg.cli.set.base import set_cmd
-from cg.cli.store.base import store as store_cmd
-from cg.cli.transfer import transfer_group
-from cg.cli.upload.base import upload
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
@@ -50,31 +30,25 @@ def teardown_session():
         registry.remove()
 
 
-@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
-@click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
-@click.option("-d", "--database", help="path/URI of the SQL database")
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.option("-c", "--config", type=click.Path(exists=True), help="Path to config file")
+@click.option("-d", "--database", help="Path/URI of the SQL database")
 @click.option(
-    "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
+    "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="Lowest level to log at"
 )
-@click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
-@click.version_option(cg.__version__, prog_name=cg.__title__)
+@click.option("--verbose", is_flag=True, help="Show full log information, time stamp, etc.")
+@click.version_option("1.0", prog_name="cg")
 @click.pass_context
-def base(
-    context: click.Context,
-    config: click.Path,
-    database: str | None,
-    log_level: str,
-    verbose: bool,
-):
-    """cg - interface between tools at Clinical Genomics."""
+def base(context: click.Context, config: Path, database: str | None, log_level: str, verbose: bool):
+    """cg - Interface between tools at Clinical Genomics."""
     if verbose:
         log_format = "%(asctime)s %(hostname)s %(name)s[%(process)d] %(levelname)s %(message)s"
     else:
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    raw_config: dict = (
-        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=Path(config))
+    raw_config = (
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=config)
         if config
         else {"database": database}
     )
@@ -102,22 +76,28 @@ def init(context: CGConfig, reset: bool, force: bool):
     LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
-base.add_command(add_cmd)
-base.add_command(archive)
-base.add_command(backup)
-base.add_command(clean)
-base.add_command(compress)
-base.add_command(decompress)
-base.add_command(delete)
-base.add_command(get)
-base.add_command(set_cmd)
-base.add_command(transfer_group)
-base.add_command(upload)
-base.add_command(workflow_cmd)
-base.add_command(store_cmd)
-base.add_command(deliver_cmd)
-base.add_command(demultiplex_cmd)
-base.add_command(generate_cmd)
-base.add_command(downsample)
-base.add_command(post_processing)
-base.add_command(sequencing_qc)
+def load_command(module_name: str, command_name: str):
+    """Dynamically load and add commands."""
+    module = __import__(module_name, fromlist=[command_name])
+    return getattr(module, command_name)
+
+
+base.add_command(load_command("cg.cli.add", "add"))
+base.add_command(load_command("cg.cli.archive", "archive"))
+base.add_command(load_command("cg.cli.backup", "backup"))
+base.add_command(load_command("cg.cli.clean", "clean"))
+base.add_command(load_command("cg.cli.compress.base", "compress"))
+base.add_command(load_command("cg.cli.compress.base", "decompress"))
+base.add_command(load_command("cg.cli.delete.base", "delete"))
+base.add_command(load_command("cg.cli.get", "get"))
+base.add_command(load_command("cg.cli.set.base", "set_cmd"))
+base.add_command(load_command("cg.cli.transfer", "transfer_group"))
+base.add_command(load_command("cg.cli.upload.base", "upload"))
+base.add_command(load_command("cg.cli.workflow.base", "workflow"))
+base.add_command(load_command("cg.cli.store.base", "store"))
+base.add_command(load_command("cg.cli.deliver.base", "deliver"))
+base.add_command(load_command("cg.cli.demultiplex.base", "demultiplex_cmd"))
+base.add_command(load_command("cg.cli.generate.base", "generate"))
+base.add_command(load_command("cg.cli.downsample", "downsample"))
+base.add_command(load_command("cg.cli.post_process.post_process", "post_processing"))
+base.add_command(load_command("cg.cli.sequencing_qc.sequencing_qc", "sequencing_qc"))
