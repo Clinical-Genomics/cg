@@ -14,6 +14,5 @@ OldSample = Annotated[ExistingSample, Tag("existing")]
 
 class RnaFusionCase(Case):
     cohorts: list[str] | None = None
-    panels: list[str]
     synopsis: str | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]

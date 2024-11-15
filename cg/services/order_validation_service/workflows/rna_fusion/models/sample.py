@@ -1,7 +1,10 @@
 from pydantic import Field
 
-from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.constants import TissueBlockEnum
+from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum
+from cg.services.order_validation_service.constants import (
+    ElutionBuffer,
+    TissueBlockEnum,
+)
 from cg.services.order_validation_service.models.sample import Sample
 
 
@@ -17,6 +20,5 @@ class RnaFusionSample(Sample):
     require_qc_ok: bool
     sex: SexEnum
     source: str
-    status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, min_length=1, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
