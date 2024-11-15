@@ -35,13 +35,13 @@ from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pe
 )
 from cg.services.order_validation_service.rules.case_sample.utils import (
     get_counter_container_names,
+    get_existing_sample_names,
     get_father_case_errors,
     get_father_sex_errors,
     get_invalid_panels,
     get_mother_case_errors,
     get_mother_sex_errors,
     get_occupied_well_errors,
-    get_old_sample_names,
     get_well_sample_map,
     is_concentration_missing,
     is_container_name_missing,
@@ -251,7 +251,7 @@ def validate_wells_contain_at_most_one_sample(
 def validate_sample_names_not_repeated(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
-    old_sample_names: set[str] = get_old_sample_names(order=order, status_db=store)
+    old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
     new_samples: list[tuple[int, int, Sample]] = order.enumerated_new_samples
     sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
     return [
