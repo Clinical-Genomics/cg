@@ -8,7 +8,7 @@ from cg.services.order_validation_service.models.sample import Sample
 class RnaFusionSample(Sample):
     age_at_sampling: float | None = None
     concentration_ng_ul: float | None = None
-    control: ControlEnum | None
+    control: ControlEnum | None = None
     elution_buffer: ElutionBuffer | None = None
     formalin_fixation_time: int | None = None
     phenotype_groups: list[str] | None = None
