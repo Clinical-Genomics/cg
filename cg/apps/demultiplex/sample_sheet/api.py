@@ -15,10 +15,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import (
     CgError,
     FlowCellError,

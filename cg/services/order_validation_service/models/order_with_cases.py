@@ -15,7 +15,7 @@ class OrderWithCases(Order):
     cases: list[Annotated[NewCaseType | ExistingCaseType, Discriminator(has_internal_id)]]
 
     @property
-    def enumerated_cases(self) -> enumerate[Case]:
+    def enumerated_cases(self) -> enumerate[Case | ExistingCase]:
         return enumerate(self.cases)
 
     @property
