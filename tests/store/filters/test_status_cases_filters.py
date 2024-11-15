@@ -319,7 +319,7 @@ def test_filter_cases_for_analysis(
     )
 
     # Given an action set to analyze
-    test_analysis.case.action: str = CaseActions.ANALYZE
+    test_analysis.case.action = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
@@ -337,7 +337,7 @@ def test_filter_cases_for_analysis(
     assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
-    assert cases
+    assert test_analysis.case in cases
 
 
 def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
@@ -369,7 +369,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
-    assert cases
+    assert test_case in cases
 
 
 def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
@@ -410,7 +410,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
-    assert cases
+    assert test_analysis.case in cases
 
 
 def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
@@ -427,7 +427,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.case.action: str | None = None
+    test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
@@ -444,7 +444,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
 
-    # THEN cases should not contain the test case
+    # THEN no cases should be returned
     assert not cases.all()
 
 
@@ -475,7 +475,7 @@ def test_filter_cases_with_scout_data_delivery(
     assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
-    assert cases
+    assert test_case in cases
 
 
 def test_filter_report_supported_data_delivery_cases(
@@ -516,7 +516,7 @@ def test_filter_report_supported_data_delivery_cases(
 
 
 def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
-    """Test that an inactive case is returned when there is case which has no action set."""
+    """Test that an inactive case is returned when there is a case that has no action set."""
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -537,7 +537,7 @@ def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers
 
 
 def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
-    """Test that an inactivated case is returned when there is case which has action set to hold."""
+    """Test that an inactivated case is returned when there is a case that has action set to hold."""
 
     # GIVEN a case
     test_case = helpers.add_case(store=base_store, action=CaseActions.HOLD)
