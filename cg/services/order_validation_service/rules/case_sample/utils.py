@@ -290,7 +290,7 @@ def get_counter_container_names(order: OrderWithCases) -> Counter:
 
 def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[str]:
     existing_sample_names: set[str] = set()
-    for case_index, case in order.enumerated_cases:
+    for case in order.cases:
         if case.is_new:
             for sample_index, sample in case.enumerated_existing_samples:
                 db_sample = status_db.get_sample_by_internal_id(sample.internal_id)
