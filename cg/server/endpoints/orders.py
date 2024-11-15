@@ -25,7 +25,7 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
@@ -43,8 +43,8 @@ from cg.server.ext import (
     mip_dna_validation_service,
     order_service,
     order_submitter_registry,
-    tomte_validation_service,
     ticket_handler,
+    tomte_validation_service,
 )
 from cg.store.models import Application, Customer
 
@@ -154,7 +154,7 @@ def create_order_from_form():
 
 
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
-def submit_order(order_type):
+def submit_order(order_type: OrderType):
     """Submit an order for samples."""
     api = OrdersAPI(
         lims=lims,
@@ -171,15 +171,10 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project = OrderType(order_type)
-        order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
-        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
-            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
         result: dict = api.submit(
-            project=project,
-            order_in=order_in,
+            raw_order=request_json,
+            order_type=order_type,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )

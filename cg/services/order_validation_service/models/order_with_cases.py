@@ -5,7 +5,7 @@ from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.discriminators import has_internal_id
 from cg.services.order_validation_service.models.existing_case import ExistingCase
 from cg.services.order_validation_service.models.order import Order
-from cg.store.models import Sample
+from cg.services.order_validation_service.models.sample import Sample
 
 NewCaseType = Annotated[Case, Tag("new")]
 ExistingCaseType = Annotated[ExistingCase, Tag("existing")]

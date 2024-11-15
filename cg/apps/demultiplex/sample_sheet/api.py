@@ -8,8 +8,8 @@ from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSe
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.demultiplex.sample_sheet.utils import (
-    delete_sample_sheet_from_housekeeper,
     add_and_include_sample_sheet_path_to_housekeeper,
+    delete_sample_sheet_from_housekeeper,
 )
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
