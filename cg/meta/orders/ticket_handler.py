@@ -107,20 +107,20 @@ class TicketHandler:
     def create_new_ticket_header(message: str, order: Order, order_type: OrderType) -> str:
         nr_samples = (
             len(order.samples)
-            if isinstance(order, OrderWithCases)
+            is isinstance(order, OrderWithSamples)
             else len(order.enumerated_new_samples)
         )
-        return f"New order with {nr_samples} {order_type} samples:" + message
+        return f"New order with {nr_samples} new {order_type} samples:" + message
 
     @staticmethod
     def add_existing_ticket_header(message: str, order: Order, order_type: str) -> str:
         nr_samples = (
             len(order.samples)
-            if isinstance(order, OrderWithCases)
+            if isinstance(order, OrderWithSamples)
             else len(order.enumerated_new_samples)
         )
         return (
-            f"A new order with {nr_samples} {order_type} samples has been connected to this ticket:"
+            f"An order with {nr_samples} new {order_type} samples has been connected to this ticket:"
             + message
         )
 
