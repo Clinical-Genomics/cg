@@ -38,8 +38,8 @@ class Case(BaseModel):
         return samples
 
     @property
-    def enumerated_existing_samples(self) -> list[tuple[int, Sample]]:
-        samples: list[tuple[int, Sample]] = []
+    def enumerated_existing_samples(self) -> list[tuple[int, ExistingSample]]:
+        samples: list[tuple[int, ExistingSample]] = []
         for sample_index, sample in self.enumerated_samples:
             if not sample.is_new:
                 samples.append((sample_index, sample))

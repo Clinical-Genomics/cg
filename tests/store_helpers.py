@@ -516,7 +516,9 @@ class StoreHelpers:
         workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
-            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+            customer_id=customer_id,
+            ticket_id=ticket_id,
+            order_date=order_date,
         )
         store.session.add(order)
         store.session.commit()
@@ -568,7 +570,6 @@ class StoreHelpers:
         order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
             ticket_id=int(case_info["tickets"]),
             customer_id=customer_obj.id,
-            workflow=case_info.get("data_analysis", Workflow.MIP_DNA),
         )
         case = Case(
             name=case_info["name"],

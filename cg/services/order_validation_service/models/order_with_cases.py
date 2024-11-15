@@ -35,8 +35,9 @@ class OrderWithCases(Order):
         return cases
 
     @property
-    def samples(self) -> list[Sample]:
-        samples = []
-        for case in self.cases:
-            samples.extend(case.samples)
-        return samples
+    def enumerated_new_samples(self) -> list[tuple[int, int, Sample]]:
+        return [
+            (case_index, sample_index, sample)
+            for case_index, case in self.enumerated_new_cases
+            for sample_index, sample in case.enumerated_new_samples
+        ]
