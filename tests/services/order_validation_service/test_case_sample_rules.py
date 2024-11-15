@@ -269,12 +269,14 @@ def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: O
     assert isinstance(errors[0], OccupiedWellError)
 
 
-def test_repeated_sample_names_not_allowed(order_with_repeated_sample_names: OrderWithCases):
+def test_repeated_sample_names_not_allowed(
+    order_with_repeated_sample_names: OrderWithCases, base_store: Store
+):
     # GIVEN an order with samples in a case with the same name
 
     # WHEN validating the order
     errors: list[SampleNameRepeatedError] = validate_sample_names_not_repeated(
-        order_with_repeated_sample_names
+        order=order_with_repeated_sample_names, store=base_store
     )
 
     # THEN errors are returned
