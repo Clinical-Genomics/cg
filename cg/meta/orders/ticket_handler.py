@@ -9,6 +9,7 @@ from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketRespons
 from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
@@ -107,7 +108,7 @@ class TicketHandler:
     def create_new_ticket_header(message: str, order: Order, order_type: OrderType) -> str:
         nr_samples = (
             len(order.samples)
-            is isinstance(order, OrderWithSamples)
+            if isinstance(order, OrderWithSamples)
             else len(order.enumerated_new_samples)
         )
         return f"New order with {nr_samples} new {order_type} samples:" + message
