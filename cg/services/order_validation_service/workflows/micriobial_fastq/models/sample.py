@@ -1,6 +1,4 @@
-from pydantic import Field
-
-from cg.models.orders.sample_base import NAME_PATTERN, PriorityEnum, SexEnum
+from cg.models.orders.sample_base import PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.models.sample import Sample
 
@@ -11,7 +9,3 @@ class MicrobialFastqSample(Sample):
     priority: PriorityEnum
     quantity: int | None = None
     require_qc_ok: bool
-    sex: SexEnum
-    source: str
-    subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
-    tumour: bool = False
