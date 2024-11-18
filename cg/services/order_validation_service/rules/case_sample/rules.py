@@ -2,9 +2,7 @@ from collections import Counter
 
 from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
-from cg.services.order_validation_service.errors.case_errors import (
-    InvalidGenePanelsError,
-)
+from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -54,6 +52,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
 from cg.services.order_validation_service.rules.utils import (
     is_application_compatible,
     is_volume_invalid,
+    is_volume_missing,
 )
 from cg.store.models import Sample
 from cg.store.store import Store
