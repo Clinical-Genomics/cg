@@ -1,4 +1,7 @@
-from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
+from cg.services.order_validation_service.constants import (
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+)
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 
@@ -120,6 +123,11 @@ class ContainerNameMissingError(CaseSampleError):
 class InvalidVolumeError(CaseSampleError):
     field: str = "volume"
     message: str = f"Volume must be between {MINIMUM_VOLUME}-{MAXIMUM_VOLUME} μL"
+
+
+class VolumeRequiredError(CaseSampleError):
+    field: str = "volume"
+    message: str = "Volume is required"
 
 
 class InvalidBufferError(CaseSampleError):

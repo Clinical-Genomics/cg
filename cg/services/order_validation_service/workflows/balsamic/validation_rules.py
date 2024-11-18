@@ -8,6 +8,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_exists,
     validate_application_not_archived,
     validate_buffer_skip_rc_condition,
+    validate_required_volume,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
@@ -17,9 +18,9 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_subject_ids_different_from_sample_names,
     validate_tube_container_name_unique,
     validate_volume_interval,
-    validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    validate_well_position_format,
 )
 from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.rules import (
     validate_capture_kit_panel_requirement,
@@ -38,6 +39,7 @@ CASE_SAMPLE_RULES: list[callable] = [
     validate_application_not_archived,
     validate_buffer_skip_rc_condition,
     validate_capture_kit_panel_requirement,
+    validate_required_volume,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
