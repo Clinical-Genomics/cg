@@ -1,14 +1,10 @@
 from typing import Any
 
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import (
-    CaseSampleError,
-)
+from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
-from cg.services.order_validation_service.errors.validation_errors import (
-    ValidationErrors,
-)
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 
 
 def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
