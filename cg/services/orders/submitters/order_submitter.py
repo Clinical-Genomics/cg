@@ -39,7 +39,7 @@ class StoreOrderService(ABC):
             LOG.debug(f"{sample.name}: link sample to LIMS")
             internal_id = lims_map[sample.name]
             LOG.info(f"{sample.name} -> {internal_id}: connect sample to LIMS")
-            sample.generated_lims_id = internal_id
+            sample._generated_lims_id = internal_id
 
 
 class OrderSubmitter(ABC):

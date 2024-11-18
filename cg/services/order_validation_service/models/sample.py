@@ -8,7 +8,7 @@ class Sample(BaseModel):
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
-    generated_lims_id: str | None = PrivateAttr(default=None)  # Will be populated by LIMS
+    _generated_lims_id: str | None = PrivateAttr(default=None)  # Will be populated by LIMS
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     volume: int | None = None
     well_position: str | None = None
