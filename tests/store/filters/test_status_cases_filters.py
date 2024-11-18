@@ -353,7 +353,7 @@ def test_filter_cases_for_analysis_that_is_running_multiple_analyses_and_one_ana
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=test_case, completed_at=timestamp_now, workflow=Workflow.MIP_DNA
+        store=base_store, case=test_case, workflow=Workflow.MIP_DNA
     )
 
     # GIVEN a completed analysis older than the sample last sequenced
@@ -415,6 +415,65 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_older_t
     )
     # GIVEN an old analysis
     test_analysis_2.created_at = timestamp_yesterday
+
+    # Given an action set to None
+    test_analysis.case.action = None
+
+    # GIVEN a database with a case with one sequenced sample for specified analysis
+    link = base_store.relate_sample(
+        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+    )
+    base_store.session.add(link)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+
+    # WHEN getting cases to analyze
+    cases: Query = filter_cases_for_analysis(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
+
+    # THEN cases should contain the test case
+    assert test_analysis.case in cases
+
+
+def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_than_last_sequenced_and_one_is(
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
+    old_timestamp: datetime,
+):
+    """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+
+    # GIVEN a case
+    test_case: Case = helpers.add_case(base_store)
+
+    # GIVEN a sequenced sample
+    test_sample: Sample = helpers.add_sample(
+        store=base_store, last_sequenced_at=timestamp_yesterday
+    )
+
+    # GIVEN a completed analysis
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        case=test_case,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_now,
+        workflow=Workflow.MIP_DNA,
+    )
+
+    # GIVEN a completed analysis older than the sample last sequenced
+    test_analysis_2: Analysis = helpers.add_analysis(
+        store=base_store,
+        case=test_case,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.MIP_DNA,
+    )
+    # GIVEN an old analysis
+    test_analysis_2.created_at = old_timestamp
 
     # Given an action set to None
     test_analysis.case.action = None

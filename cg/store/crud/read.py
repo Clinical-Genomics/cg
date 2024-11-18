@@ -1052,7 +1052,17 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         )
         sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
-        return sorted_cases[:limit]
+        cases_to_analyze: list[Case] = [
+            case
+            for case in sorted_cases
+            if case.latest_sequenced
+            and (
+                case.action == CaseActions.ANALYZE
+                or not case.latest_analyzed
+                or case.latest_analyzed < case.latest_sequenced
+            )
+        ]
+        return cases_to_analyze[:limit]
 
     def set_case_action(
         self, action: Literal[CaseActions.actions()], case_internal_id: str
