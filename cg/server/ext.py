@@ -1,15 +1,6 @@
 from decimal import Decimal
 from json import JSONEncoder
 
-from cg.services.order_validation_service.workflows.microsalt.validation_service import (
-    MicroSaltValidationService,
-)
-from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
-    MipDnaValidationService,
-)
-from cg.services.order_validation_service.workflows.tomte.validation_service import (
-    TomteValidationService,
-)
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
@@ -21,6 +12,18 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.order_validation_service.workflows.microsalt.validation_service import (
+    MicroSaltValidationService,
+)
+from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
+    MipDnaValidationService,
+)
+from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
+    RnaFusionValidationService,
+)
+from cg.services.order_validation_service.workflows.tomte.validation_service import (
+    TomteValidationService,
+)
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.submitters.order_submitter_registry import (
@@ -109,6 +112,7 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
 tomte_validation_service = TomteValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
+rna_fusion_validation_service = RnaFusionValidationService(store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
