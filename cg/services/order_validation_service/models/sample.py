@@ -8,6 +8,7 @@ class Sample(BaseModel):
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
+    generated_lims_id: str | None = None  # Will be populated by LIMS and stored as the internal id
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     volume: int | None = None
     well_position: str | None = None
