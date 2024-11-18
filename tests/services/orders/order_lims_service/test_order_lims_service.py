@@ -1,15 +1,16 @@
 import pytest
 
 from cg.constants import Workflow
-from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.models.lims.sample import LimsSample
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 
 
 def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
-    order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
+    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
     # WHEN parsing the order to format for LIMS import
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust003", samples=order_data.samples

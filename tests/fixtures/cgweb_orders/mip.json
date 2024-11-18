@@ -2,6 +2,7 @@
   "name": "#123456",
   "customer": "cust000",
   "comment": "",
+  "data_delivery": "scout",
   "samples": [
     {
       "age_at_sampling": "17.18192",
@@ -10,8 +11,6 @@
       "comment": "comment",
       "container": "96 well plate",
       "container_name": "CMMS",
-      "data_analysis": "mip-dna",
-      "data_delivery": "scout",
       "family_name": "family1",
       "father": "sample3",
       "mother": "sample2",
@@ -39,8 +38,6 @@
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
-      "data_analysis": "mip-dna",
-      "data_delivery": "scout",
       "family_name": "family1",
       "name": "sample2",
       "panels": [
@@ -69,8 +66,6 @@
       "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
-      "data_analysis": "mip-dna",
-      "data_delivery": "scout",
       "family_name": "family1",
       "name": "sample3",
       "panels": [
@@ -99,8 +94,6 @@
       "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
-      "data_analysis": "mip-dna",
-      "data_delivery": "scout",
       "family_name": "family2",
       "name": "sample4",
       "panels": [
