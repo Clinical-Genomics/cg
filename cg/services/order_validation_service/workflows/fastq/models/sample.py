@@ -6,6 +6,7 @@ from cg.services.order_validation_service.models.sample import Sample
 
 
 class FastqSample(Sample):
+    capture_kit: str | None = None
     concentration_ng_ul: float | None = None
     elution_buffer: ElutionBuffer
     priority: PriorityEnum

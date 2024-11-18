@@ -8,14 +8,7 @@ from cg.models.orders.samples import FastqSample
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -89,12 +82,12 @@ class StoreFastqOrderService(StoreOrderService):
                     capture_kit=sample.capture_kit,
                     subject_id=sample.subject_id,
                 )
-                new_sample.customer: Customer = customer
+                new_sample.customer = customer
                 application_tag: str = sample.application
                 application_version: ApplicationVersion = (
                     self.status_db.get_current_application_version_by_tag(tag=application_tag)
                 )
-                new_sample.application_version: ApplicationVersion = application_version
+                new_sample.application_version = application_version
                 new_samples.append(new_sample)
                 case = self.status_db.add_case(
                     data_analysis=Workflow.RAW_DATA,
