@@ -195,7 +195,6 @@ class FastqSample(OrderInSample):
 class PacBioSample(OrderInSample):
     _suitable_project = OrderType.PACBIO_LONG_READ
 
-    buffer: str
     container: ContainerEnum
     container_name: str | None = None
     sex: SexEnum = SexEnum.unknown
