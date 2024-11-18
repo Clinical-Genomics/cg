@@ -4,9 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from cg.models.orders.order import OrderIn
-from cg.services.order_validation_service.order_validation_service import (
-    OrderValidationService,
-)
+from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.store.store import Store
 
@@ -34,14 +33,13 @@ class StoreOrderService(ABC):
         pass
 
     @staticmethod
-    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
+    def _fill_in_sample_ids(samples: list[Sample], lims_map: dict):
         """Fill in LIMS sample ids."""
         for sample in samples:
-            LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample.get(id_key):
-                internal_id = lims_map[sample["name"]]
-                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample[id_key] = internal_id
+            LOG.debug(f"{sample.name}: link sample to LIMS")
+            internal_id = lims_map[sample.name]
+            LOG.info(f"{sample.name} -> {internal_id}: connect sample to LIMS")
+            sample._generated_lims_id = internal_id
 
 
 class OrderSubmitter(ABC):
