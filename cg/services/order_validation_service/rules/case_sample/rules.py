@@ -51,7 +51,6 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
 from cg.services.order_validation_service.rules.utils import (
     is_application_compatible,
     is_volume_invalid,
-    is_volume_missing,
 )
 from cg.store.models import Sample
 from cg.store.store import Store
