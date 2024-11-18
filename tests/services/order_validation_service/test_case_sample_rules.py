@@ -31,6 +31,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_required_volume,
     validate_sample_names_not_repeated,
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,

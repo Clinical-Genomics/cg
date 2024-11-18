@@ -7,9 +7,7 @@ from cg.services.order_validation_service.models.order_with_cases import OrderWi
 from cg.services.order_validation_service.workflows.rna_fusion.constants import (
     RnaFusionDeliveryType,
 )
-from cg.services.order_validation_service.workflows.rna_fusion.models.case import (
-    RnaFusionCase,
-)
+from cg.services.order_validation_service.workflows.rna_fusion.models.case import RnaFusionCase
 
 NewCase = Annotated[RnaFusionCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
