@@ -353,7 +353,9 @@ class StoreHelpers:
         """Utility function to add an analysis for tests."""
 
         if not case:
-            case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
+            case = StoreHelpers.add_case(
+                store=store, data_analysis=workflow, data_delivery=data_delivery
+            )
 
         analysis = store.add_analysis(workflow=workflow, version=workflow_version, case_id=case.id)
 

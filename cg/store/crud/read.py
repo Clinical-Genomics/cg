@@ -1040,7 +1040,7 @@ class ReadHandler(BaseHandler):
         return self._get_join_cases_with_samples_query()
 
     def get_cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
+        """Returns a list of cases if a case is ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
             CaseFilter.WITH_WORKFLOW,
