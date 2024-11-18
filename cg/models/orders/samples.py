@@ -201,6 +201,7 @@ class PacBioSample(OrderInSample):
     source: str
     subject_id: str
     tumour: bool
+    well_position: str | None = None
 
 
 class RmlSample(OrderInSample):
