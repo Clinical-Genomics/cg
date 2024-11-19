@@ -3,10 +3,8 @@ from collections import Counter
 
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
-from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.errors.case_errors import (
-    RepeatedCaseNameError,
-)
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
+from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
 from cg.services.order_validation_service.errors.case_sample_errors import (
     FatherNotInCaseError,
     InvalidConcentrationIfSkipRCError,
@@ -18,6 +16,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 )
 from cg.services.order_validation_service.models.aliases import (
     CaseContainingRelatives,
+    HumanSample,
     SampleWithRelatives,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
@@ -187,6 +186,10 @@ def is_mother_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelati
 
 def create_mother_sex_error(case_index: int, sample_index: int) -> InvalidMotherSexError:
     return InvalidMotherSexError(case_index=case_index, sample_index=sample_index)
+
+
+def has_sex_and_subject(sample: HumanSample) -> bool:
+    return bool(sample.subject_id and sample.sex != SexEnum.unknown)
 
 
 def validate_subject_ids_in_case(

@@ -27,9 +27,7 @@ from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -43,8 +41,9 @@ from cg.server.ext import (
     mip_dna_validation_service,
     order_service,
     order_submitter_registry,
-    tomte_validation_service,
+    rna_fusion_validation_service,
     ticket_handler,
+    tomte_validation_service,
 )
 from cg.store.models import Application, Customer
 
@@ -270,10 +269,12 @@ def validate_order(workflow: str):
     raw_order["workflow"] = workflow
     raw_order["user_id"] = g.current_user.id
     response = {}
-    if workflow == Workflow.TOMTE:
-        response = tomte_validation_service.validate(raw_order)
     if workflow == Workflow.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
     if workflow == Workflow.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
+    if workflow == Workflow.RNAFUSION:
+        response = rna_fusion_validation_service.validate(raw_order)
+    if workflow == Workflow.TOMTE:
+        response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
