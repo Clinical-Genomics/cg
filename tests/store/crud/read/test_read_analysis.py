@@ -515,3 +515,67 @@ def test_get_analysis_by_entry_id(
 
     # THEN assert that the analysis is returned
     assert analysis.id == 1
+
+
+def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_than_last_sequenced_and_one_is(
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
+    old_timestamp: datetime,
+):
+    """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+
+    # GIVEN a case
+    test_case_to_be_analyzed: Case = helpers.add_case(store=base_store, name="a_case_to_analyze")
+
+    # GIVEN a case
+    test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered")
+
+    # GIVEN a sequenced sample
+    test_sample: Sample = helpers.add_sample(
+        store=base_store, last_sequenced_at=timestamp_yesterday
+    )
+
+    # GIVEN a completed analysis
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        case=test_case,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_now,
+        workflow=Workflow.MIP_DNA,
+    )
+
+    # GIVEN a completed analysis older than the sample last sequenced
+    test_analysis_2: Analysis = helpers.add_analysis(
+        store=base_store,
+        case=test_case,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.MIP_DNA,
+    )
+    # GIVEN an old analysis
+    test_analysis_2.created_at = old_timestamp
+
+    # Given an action set to None
+    test_analysis.case.action = None
+
+    # GIVEN a database with a case with one sequenced sample for specified analysis
+    link = base_store.relate_sample(
+        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+    )
+    base_store.session.add(link)
+
+    link_2 = base_store.relate_sample(
+        case=test_case_to_be_analyzed, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+    )
+    base_store.session.add(link_2)
+
+    # WHEN getting cases to analyze
+    cases_to_analyze: list[Case] = base_store.get_cases_to_analyse()
+
+    # Then assert that test_case_to_analyze is returned
+    assert test_case_to_be_analyzed in cases_to_analyze
+
+    # THEN cases should not contain the test case
+    assert test_case not in cases_to_analyze

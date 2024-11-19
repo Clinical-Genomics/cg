@@ -445,7 +445,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
     timestamp_yesterday: datetime,
     old_timestamp: datetime,
 ):
-    """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+    """Test that a case is returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
 
     # GIVEN a case
     test_case: Case = helpers.add_case(base_store)
