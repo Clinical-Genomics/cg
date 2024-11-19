@@ -169,7 +169,7 @@ def test_that_many_cases_can_have_one_sample_each(
     )
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should contain all cases since they are to be analyzed
     assert len(cases) == len(test_cases)
@@ -202,7 +202,7 @@ def test_that_cases_can_have_many_samples(
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -239,7 +239,7 @@ def test_external_sample_to_re_analyse(
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -266,7 +266,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.BALSAMIC)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
@@ -294,7 +294,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -325,7 +325,7 @@ def test_all_samples_and_analysis_completed(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert not cases
@@ -349,7 +349,7 @@ def test_specified_analysis_in_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.BALSAMIC)
 
     # THEN cases should be returned
     assert cases
@@ -377,7 +377,7 @@ def test_exclude_other_workflow_analysis_from_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyze for another workflow
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
@@ -403,7 +403,7 @@ def test_one_of_one_sequenced_samples(
     assert test_sample.last_sequenced_at is not None
 
     # WHEN getting cases to analyze
-    cases: list[Case] = base_store.get_cases_to_analyse(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -526,10 +526,10 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
 ):
     """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
 
-    # GIVEN a case
+    # GIVEN a case to be analyzed
     test_case_to_be_analyzed: Case = helpers.add_case(store=base_store, name="a_case_to_analyze")
 
-    # GIVEN a case
+    # GIVEN a case to be not returned
     test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered")
 
     # GIVEN a sequenced sample
@@ -572,7 +572,7 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
     base_store.session.add(link_2)
 
     # WHEN getting cases to analyze
-    cases_to_analyze: list[Case] = base_store.get_cases_to_analyse()
+    cases_to_analyze: list[Case] = base_store.get_cases_to_analyze()
 
     # Then assert that test_case_to_analyze is returned
     assert test_case_to_be_analyzed in cases_to_analyze

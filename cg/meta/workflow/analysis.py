@@ -121,9 +121,9 @@ class AnalysisAPI(MetaAPI):
     def get_cases_ready_for_analysis(self):
         """
         Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
+        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
         """
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_passing_quality_check: list[Case] = [
             case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
@@ -366,8 +366,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyse(self) -> list[Case]:
-        return self.status_db.get_cases_to_analyse(workflow=self.workflow)
+    def get_cases_to_analyze(self) -> list[Case]:
+        return self.status_db.get_cases_to_analyze(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

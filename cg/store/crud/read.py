@@ -1052,8 +1052,10 @@ class ReadHandler(BaseHandler):
             return True
         return bool(self._is_latest_analysis_done_on_all_sequences(case))
 
-    def get_cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
+    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed.
+        1. Get cases to be analyzed using BE query
+        2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
             CaseFilter.WITH_WORKFLOW,
