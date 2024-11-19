@@ -9,3 +9,4 @@ class MicrobialFastqSample(Sample):
     priority: PriorityEnum
     quantity: int | None = None
     require_qc_ok: bool
+    volume: int
