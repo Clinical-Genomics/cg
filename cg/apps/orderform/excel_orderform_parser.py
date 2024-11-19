@@ -22,7 +22,7 @@ class ExcelOrderformParser(OrderformParser):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
-    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
+    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form", "Order Form"]
     VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WGS
