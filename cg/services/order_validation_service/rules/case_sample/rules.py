@@ -335,21 +335,19 @@ def validate_subject_sex_consistency(
 ) -> list[SexSubjectIdError]:
     errors: list[SexSubjectIdError] = []
 
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if not has_sex_and_subject(sample):
-                continue
-
-            if store.sample_exists_with_different_sex(
-                customer_internal_id=order.customer,
-                subject_id=sample.subject_id,
-                sex=sample.sex,
-            ):
-                error = SexSubjectIdError(
-                    case_index=case_index,
-                    sample_index=sample_index,
-                )
-                errors.append(error)
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if not has_sex_and_subject(sample):
+            continue
+        if store.sample_exists_with_different_sex(
+            customer_internal_id=order.customer,
+            subject_id=sample.subject_id,
+            sex=sample.sex,
+        ):
+            error = SexSubjectIdError(
+                case_index=case_index,
+                sample_index=sample_index,
+            )
+            errors.append(error)
     return errors
 
 
