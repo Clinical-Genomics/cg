@@ -18,9 +18,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -92,7 +90,6 @@ def deliver_case(
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else case.data_delivery,
-        workflow=case.data_analysis,
         app_tag=app_tag,
     )
     delivery_service.deliver_files_for_case(
@@ -131,7 +128,6 @@ def deliver_ticket(
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
-        workflow=cases[0].data_analysis,
         app_tag=app_tag,
     )
     delivery_service.deliver_files_for_ticket(
@@ -181,7 +177,6 @@ def deliver_sample_raw_data(
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type,
-        workflow=case.data_analysis,
         app_tag=app_tag,
     )
     delivery_service.deliver_files_for_sample(
