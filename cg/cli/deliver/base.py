@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.deliver.utils import deliver_raw_data_for_analyses
+from cg.cli.deliver.utils import deliver_raw_data_for_analyses, get_pseudo_workflow
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
@@ -18,9 +18,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -89,9 +87,10 @@ def deliver_case(
     if not case:
         LOG.error(f"Could not find case with id {case_id}")
         return
+    pseudo_workflow: str = get_pseudo_workflow(case=cases[0])
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else case.data_delivery,
-        workflow=case.data_analysis,
+        workflow=pseudo_workflow,
     )
     delivery_service.deliver_files_for_case(
         case=case, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -124,9 +123,10 @@ def deliver_ticket(
     if not cases:
         LOG.error(f"Could not find case connected to ticket {ticket}")
         return
+    pseudo_workflow: str = get_pseudo_workflow(case=cases[0])
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
         delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
-        workflow=cases[0].data_analysis,
+        workflow=pseudo_workflow,
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
