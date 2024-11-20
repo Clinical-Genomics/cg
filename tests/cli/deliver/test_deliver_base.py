@@ -1,7 +1,5 @@
 """Tests for the deliver base command"""
 
-import logging
-
 from click.testing import CliRunner
 
 from cg.cli.deliver.base import deliver as deliver_cmd
@@ -35,7 +33,7 @@ def test_run_deliver_analysis_help(cli_runner: CliRunner, base_context: CGConfig
 
 
 def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to run the deliver base command with --help"""
+    """Test to run the deliver base command with --help."""
     # GIVEN a cli runner
     # GIVEN a context with store and housekeeper information
 
@@ -46,8 +44,8 @@ def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, ticket_id):
-    """Test for delivering tu customer inbox"""
+def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, ticket_id: str):
+    """Test for delivering tu customer inbox."""
     # GIVEN a cli runner
 
     # WHEN running cg deliver ticket

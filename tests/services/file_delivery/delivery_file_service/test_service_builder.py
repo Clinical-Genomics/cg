@@ -1,73 +1,72 @@
-import pytest
 from unittest.mock import MagicMock
 
-from cg.constants import Workflow, DataDelivery
+import pytest
+from pydantic import BaseModel
+
+from cg.constants import DataDelivery
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
 from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
     DeliveryServiceFactory,
 )
-from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
-    SampleAndCaseDeliveryTagsFetcher,
-)
-from cg.services.deliver_files.file_fetcher.analysis_service import (
-    AnalysisDeliveryFileFetcher,
-)
+from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
     RawDataAndAnalysisDeliveryFileFetcher,
 )
-from cg.services.deliver_files.file_fetcher.raw_data_service import (
-    RawDataDeliveryFileFetcher,
-)
+from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
+from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
-    SampleFileFormatter,
+from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
+from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
+from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
+    SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.services.deliver_files.file_mover.service import (
-    DeliveryFilesMover,
-)
+
+
+class DeliveryScenario(BaseModel):
+    app_tag: str
+    delivery_type: DataDelivery
+    expected_tag_fetcher: type[FetchDeliveryFileTagsService]
+    expected_file_fetcher: type[FetchDeliveryFilesService]
+    expected_file_mover: type[DeliveryFilesMover]
+    expected_sample_file_formatter: type[SampleFileFormatter]
 
 
 @pytest.mark.parametrize(
-    "workflow,delivery_type,expected_tag_fetcher,expected_file_fetcher,expected_file_mover,expected_sample_file_formatter",
+    "scenario",
     [
-        (
-            Workflow.MICROSALT,
-            DataDelivery.FASTQ,
-            SampleAndCaseDeliveryTagsFetcher,
-            RawDataDeliveryFileFetcher,
-            DeliveryFilesMover,
-            SampleFileConcatenationFormatter,
+        DeliveryScenario(
+            app_tag="MWRNXTR003",
+            delivery_type=DataDelivery.FASTQ,
+            expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
+            expected_file_fetcher=RawDataDeliveryFileFetcher,
+            expected_file_mover=DeliveryFilesMover,
+            expected_sample_file_formatter=SampleFileConcatenationFormatter,
         ),
-        (
-            Workflow.MUTANT,
-            DataDelivery.ANALYSIS_FILES,
-            SampleAndCaseDeliveryTagsFetcher,
-            AnalysisDeliveryFileFetcher,
-            DeliveryFilesMover,
-            SampleFileFormatter,
+        DeliveryScenario(
+            app_tag="VWGDPTR001",
+            delivery_type=DataDelivery.ANALYSIS_FILES,
+            expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
+            expected_file_fetcher=AnalysisDeliveryFileFetcher,
+            expected_file_mover=DeliveryFilesMover,
+            expected_sample_file_formatter=SampleFileFormatter,
         ),
-        (
-            Workflow.BALSAMIC,
-            DataDelivery.FASTQ_ANALYSIS,
-            SampleAndCaseDeliveryTagsFetcher,
-            RawDataAndAnalysisDeliveryFileFetcher,
-            DeliveryFilesMover,
-            SampleFileFormatter,
+        DeliveryScenario(
+            app_tag="PANKTTR020",
+            delivery_type=DataDelivery.FASTQ_ANALYSIS,
+            expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
+            expected_file_fetcher=RawDataAndAnalysisDeliveryFileFetcher,
+            expected_file_mover=DeliveryFilesMover,
+            expected_sample_file_formatter=SampleFileFormatter,
         ),
     ],
+    ids=["microbial-fastq", "SARS-COV2", "Targeted"],
 )
-def test_build_delivery_service(
-    workflow,
-    delivery_type,
-    expected_tag_fetcher,
-    expected_file_fetcher,
-    expected_file_mover,
-    expected_sample_file_formatter,
-):
+def test_build_delivery_service(scenario: DeliveryScenario):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
         store=MagicMock(),
@@ -79,13 +78,14 @@ def test_build_delivery_service(
 
     # WHEN building a delivery service
     delivery_service: DeliverFilesService = builder.build_delivery_service(
-        workflow=workflow, delivery_type=delivery_type
+        delivery_type=scenario.delivery_type, app_tag=scenario.app_tag
     )
 
     # THEN the correct file formatter and file fetcher services are used
-    assert isinstance(delivery_service.file_manager.tags_fetcher, expected_tag_fetcher)
-    assert isinstance(delivery_service.file_manager, expected_file_fetcher)
-    assert isinstance(delivery_service.file_mover, expected_file_mover)
+    assert isinstance(delivery_service.file_manager.tags_fetcher, scenario.expected_tag_fetcher)
+    assert isinstance(delivery_service.file_manager, scenario.expected_file_fetcher)
+    assert isinstance(delivery_service.file_mover, scenario.expected_file_mover)
     assert isinstance(
-        delivery_service.file_formatter.sample_file_formatter, expected_sample_file_formatter
+        delivery_service.file_formatter.sample_file_formatter,
+        scenario.expected_sample_file_formatter,
     )
