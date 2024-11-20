@@ -48,7 +48,7 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
 
 MULTIQC_NEXFLOW_CONFIG = """process {
     withName:'MULTIQC' {
-        memory = { 1.GB * task.attempt }
+        memory = { 4.GB * task.attempt }
         time   = { 4.h  * task.attempt }
         cpus = 2
         ext.args = ' --data-format json '
