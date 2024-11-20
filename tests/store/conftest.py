@@ -12,7 +12,9 @@ from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
+from cg.services.orders.store_order_services.store_pool_order import (
+    StorePoolOrderService,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -171,12 +173,6 @@ def microbial_store(
 
     base_store.session.commit()
     yield base_store
-
-
-@pytest.fixture(name="case")
-def case_obj(analysis_store: Store) -> Case:
-    """Return a case models object."""
-    return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample")

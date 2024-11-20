@@ -1260,7 +1260,7 @@ def crunchy_api():
 # Store fixtures
 
 
-@pytest.fixture(name="analysis_store")
+@pytest.fixture
 def analysis_store(
     base_store: Store,
     analysis_family: dict,
@@ -4248,3 +4248,9 @@ def libary_sequencing_method() -> str:
 @pytest.fixture
 def capture_kit() -> str:
     return "panel.bed"
+
+
+@pytest.fixture
+def case(analysis_store: Store) -> Case:
+    """Return a case models object."""
+    return analysis_store.get_cases()[0]
