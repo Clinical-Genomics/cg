@@ -97,8 +97,8 @@ class UploadAPI(MetaAPI):
         """Uploads the analysis files to the customer inbox."""
         factory_service: DeliveryServiceFactory = self.config.delivery_service_factory
         delivery_service: DeliverFilesService = factory_service.build_delivery_service(
+            case=case,
             delivery_type=case.data_delivery,
-            workflow=case.data_analysis,
         )
         delivery_service.deliver_files_for_case(
             case=case, delivery_base_path=Path(self.config.delivery_path)

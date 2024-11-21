@@ -28,8 +28,8 @@ def deliver_raw_data_for_analyses(
         try:
             case: Case = analysis.case
             delivery_service: DeliverFilesService = service_builder.build_delivery_service(
+                case=case,
                 delivery_type=case.data_delivery,
-                workflow=Workflow.RAW_DATA,
             )
 
             delivery_service.deliver_files_for_case(

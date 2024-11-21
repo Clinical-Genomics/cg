@@ -5,6 +5,7 @@ from typing import Type
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
+from cg.constants.constants import MICROBIAL_APP_TAGS
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
@@ -34,6 +35,7 @@ from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.store.models import Case
 from cg.store.store import Store
 
 
@@ -100,18 +102,23 @@ class DeliveryServiceFactory:
         ]:
             return
         raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES}, {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are"
+            f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
+            f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
         )
 
     def build_delivery_service(
-        self, workflow: str, delivery_type: DataDelivery
+        self, case: Case, delivery_type: DataDelivery
     ) -> DeliverFilesService:
         """Build a delivery service based on the workflow and delivery type."""
-        delivery_type: DataDelivery = self._sanitise_delivery_type(delivery_type)
+        delivery_type: DataDelivery = self._sanitise_delivery_type(
+            delivery_type if delivery_type else case.data_delivery
+        )
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
+        converted_workflow: Workflow = self._convert_workflow(case)
         sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
-            self._get_sample_file_formatter(workflow)
+            self._get_sample_file_formatter(converted_workflow)
         )
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
@@ -126,6 +133,17 @@ class DeliveryServiceFactory:
             tb_service=self.tb_service,
             analysis_service=self.analysis_service,
         )
+
+    @staticmethod
+    def _convert_workflow(case: Case) -> Workflow:
+        """Converts a workflow with the introduction of the microbial-fastq delivery type an
+        unsupported combination of delivery type and workflow setup is required. This function
+        makes sure that a raw data workflow with microbial fastq delivery type is treated as a
+        microsalt workflow so that the microbial-fastq sample files can be concatenated."""
+        tag: str = case.samples[0].application_version.application.tag
+        if case.data_analysis == Workflow.RAW_DATA and tag in MICROBIAL_APP_TAGS:
+            return Workflow.MICROSALT
+        return case.data_analysis
 
     @staticmethod
     def _sanitise_delivery_type(delivery_type: DataDelivery) -> DataDelivery:

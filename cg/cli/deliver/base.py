@@ -87,10 +87,9 @@ def deliver_case(
     if not case:
         LOG.error(f"Could not find case with id {case_id}")
         return
-    pseudo_workflow: str = get_pseudo_workflow(case=cases[0])
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=delivery_type if delivery_type else case.data_delivery,
-        workflow=pseudo_workflow,
+        case=case,
+        delivery_type=delivery_type,
     )
     delivery_service.deliver_files_for_case(
         case=case, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -99,8 +98,8 @@ def deliver_case(
 
 @deliver.command(
     name="ticket",
-    help="Deliver all case files for cases in a ticket based on delivery type to the customer inbox on the HPC "
-    "and start an Rsync job to clinical-delivery. "
+    help="Deliver all case files for cases in a ticket based on delivery type to the customer"
+    "inbox on the HPC and start an Rsync job to clinical-delivery. "
     "NOTE: the dry-run flag will copy files to the customer inbox on Hasta, "
     "but will not perform the Rsync job.",
 )
@@ -115,7 +114,8 @@ def deliver_ticket(
     dry_run: bool,
 ):
     """
-    Deliver all case files based on delivery type to the customer inbox on the HPC for cases connected to a ticket.
+    Deliver all case files based on delivery type to the customer inbox on the HPC for cases
+    connected to a ticket.
     """
     inbox: str = context.delivery_path
     service_builder: DeliveryServiceFactory = context.delivery_service_factory
@@ -123,10 +123,9 @@ def deliver_ticket(
     if not cases:
         LOG.error(f"Could not find case connected to ticket {ticket}")
         return
-    pseudo_workflow: str = get_pseudo_workflow(case=cases[0])
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        delivery_type=delivery_type if delivery_type else cases[0].data_delivery,
-        workflow=pseudo_workflow,
+        case=cases[0],
+        delivery_type=delivery_type,
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -173,8 +172,8 @@ def deliver_sample_raw_data(
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
+        case=case,
         delivery_type=delivery_type,
-        workflow=case.data_analysis,
     )
     delivery_service.deliver_files_for_sample(
         case=case, sample_id=sample_id, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -186,7 +185,8 @@ def deliver_sample_raw_data(
 @DRY_RUN
 def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
     """
-    Deliver all case files for the raw data workflow to the customer inbox on the HPC and start a Rsync job.
+    Deliver all case files for the raw data workflow to the customer inbox on the HPC and start a
+    Rsync job.
     1. get all cases with analysis type fastq that need to be delivered
     2. check if their upload has started
     3. if not, start the upload
