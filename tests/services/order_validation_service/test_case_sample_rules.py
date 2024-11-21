@@ -1,6 +1,6 @@
 import pytest
 
-from cg.models.orders.sample_base import ContainerEnum, StatusEnum
+from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.models.orders.samples import TomteSample
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
@@ -15,6 +15,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameRepeatedError,
+    SexSubjectIdError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     VolumeRequiredError,
@@ -36,6 +37,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
+    validate_subject_sex_consistency,
     validate_tube_container_name_unique,
     validate_volume_interval,
     validate_well_position_format,
@@ -43,7 +45,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.store.models import Application
+from cg.store.models import Application, Sample
 from cg.store.store import Store
 
 
@@ -370,3 +372,27 @@ def test_missing_volume_no_container(valid_order: OrderWithCases):
 
     # THEN no error should be returned
     assert not errors
+
+
+def test_validate_sex_subject_id_clash(valid_order: OrderWithCases, sample_store: Store):
+    # GIVEN an existing sample
+    sample = sample_store.session.query(Sample).first()
+
+    # GIVEN an order and sample with the same customer and subject id
+    valid_order.customer = sample.customer.internal_id
+    valid_order.cases[0].samples[0].subject_id = "subject"
+    sample.subject_id = "subject"
+
+    # GIVEN a sample in the order that has a different sex
+    valid_order.cases[0].samples[0].sex = SexEnum.female
+    sample.sex = SexEnum.male
+
+    # WHEN validating the order
+    errors: list[SexSubjectIdError] = validate_subject_sex_consistency(
+        order=valid_order,
+        store=sample_store,
+    )
+
+    # THEN an error should be given for the clash
+    assert errors
+    assert isinstance(errors[0], SexSubjectIdError)

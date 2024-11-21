@@ -1,6 +1,6 @@
+from cg.exc import OrderError
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
-from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
@@ -11,16 +11,15 @@ from cg.services.order_validation_service.utils import (
     apply_order_validation,
 )
 from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.validation_rules import (
+from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.order_validation_service.workflows.rna_fusion.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
 from cg.store.store import Store
 
 
-class TomteValidationService(OrderValidationService):
-
+class RnaFusionValidationService(OrderValidationService):
     def __init__(self, store: Store):
         self.store = store
 
@@ -29,7 +28,7 @@ class TomteValidationService(OrderValidationService):
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = ModelValidator.validate(order=raw_order, model=TomteOrder)
+        order, field_errors = ModelValidator.validate(order=raw_order, model=RnaFusionOrder)
 
         if not order:
             return field_errors

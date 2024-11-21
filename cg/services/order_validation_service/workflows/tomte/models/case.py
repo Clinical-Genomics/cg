@@ -4,9 +4,7 @@ from typing_extensions import Annotated
 from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.discriminators import has_internal_id
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
-from cg.services.order_validation_service.workflows.tomte.models.sample import (
-    TomteSample,
-)
+from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 
 NewSample = Annotated[TomteSample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]

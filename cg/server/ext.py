@@ -21,6 +21,9 @@ from cg.services.order_validation_service.workflows.microsalt.validation_service
 from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
     MipDnaValidationService,
 )
+from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
+    RnaFusionValidationService,
+)
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
@@ -115,6 +118,7 @@ tomte_validation_service = TomteValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
 metagenome_validation_service = MetagenomeValidationService(store=db)
+rna_fusion_validation_service = RnaFusionValidationService(store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )

@@ -27,9 +27,7 @@ from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -44,6 +42,7 @@ from cg.server.ext import (
     mip_dna_validation_service,
     order_service,
     order_submitter_registry,
+    rna_fusion_validation_service,
     ticket_handler,
     tomte_validation_service,
 )
@@ -279,4 +278,8 @@ def validate_order(order_type: OrderType):
         response = mip_dna_validation_service.validate(raw_order)
     if order_type == OrderType.METAGENOME:
         response = metagenome_validation_service.validate(raw_order)
+    if order_type == OrderType.RNAFUSION:
+        response = rna_fusion_validation_service.validate(raw_order)
+    if workflow == Workflow.TOMTE:
+        response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
