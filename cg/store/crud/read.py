@@ -11,8 +11,8 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
@@ -1011,40 +1011,47 @@ class ReadHandler(BaseHandler):
         )
         return records.order_by(Sample.prepared_at).all()
 
-    def get_families_with_analyses(self) -> Query:
+    def get_cases_with_analyzes(self) -> Query:
         """Return all cases in the database with an analysis."""
         return self._get_outer_join_cases_with_analyses_query()
 
-    def get_families_with_samples(self) -> Query:
+    def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
+    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
+        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
+
+    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
+        return case.latest_analyzed < case.latest_sequenced
+
+    def _is_case_to_be_analyzed(self, case: Case) -> bool:
+        if not case.latest_sequenced:
+            return False
+        if self._is_case_set_to_analyse_or_not_analyzed(case):
+            return True
+        return bool(self._is_latest_analysis_done_on_all_sequences(case))
+
+    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed.
+        1. Get cases to be analyzed using BE query
+        2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_families_with_analyses(),
+            cases=self.get_cases_with_analyzes(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
 
-        families: list[Query] = list(cases.order_by(Case.ordered_at))
-        families = [
-            case_obj
-            for case_obj in families
-            if case_obj.latest_sequenced
-            and (
-                case_obj.action == CaseActions.ANALYZE
-                or not case_obj.latest_analyzed
-                or case_obj.latest_analyzed < case_obj.latest_sequenced
-            )
+        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
+        cases_to_analyze: list[Case] = [
+            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
         ]
-
-        return families[:limit]
+        return cases_to_analyze[:limit]
 
     def set_case_action(
         self, action: Literal[CaseActions.actions()], case_internal_id: str
@@ -1211,7 +1218,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
@@ -1222,7 +1229,7 @@ class ReadHandler(BaseHandler):
     def observations_uploaded(self, workflow: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=[CaseFilter.WITH_LOQUSDB_SUPPORTED_WORKFLOW],
             workflow=workflow,
         )
@@ -1389,29 +1396,37 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
+    def get_orders(self, orders_params: OrderQueryParams) -> tuple[list[Order], int]:
         """Filter, sort and paginate orders based on the provided request."""
+        orders: Query = self._get_join_order_case_query()
+        if len(orders_params.workflows) > 0:
+            orders: Query = apply_case_filter(
+                cases=orders,
+                filter_functions=[CaseFilter.BY_WORKFLOWS],
+                workflows=orders_params.workflows,
+            ).distinct()
         orders: Query = apply_order_filters(
-            orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
-            workflow=orders_request.workflow,
-            search=orders_request.search,
-            is_open=orders_request.is_open,
+            orders=orders,
+            filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
+            search=orders_params.search,
+            is_open=orders_params.is_open,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
-            orders=orders, orders_request=orders_request
+            orders=orders, orders_params=orders_params
         )
         return orders, total_count
 
-    def sort_and_paginate_orders(self, orders: Query, orders_request: OrdersRequest) -> list[Order]:
+    def sort_and_paginate_orders(
+        self, orders: Query, orders_params: OrderQueryParams
+    ) -> list[Order]:
         return apply_order_filters(
             orders=orders,
             filters=[OrderFilter.SORT, OrderFilter.PAGINATE],
-            sort_field=orders_request.sort_field,
-            sort_order=orders_request.sort_order,
-            page=orders_request.page,
-            page_size=orders_request.page_size,
+            sort_field=orders_params.sort_field,
+            sort_order=orders_params.sort_order,
+            page=orders_params.page,
+            page_size=orders_params.page_size,
         ).all()
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:

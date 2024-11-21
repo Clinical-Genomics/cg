@@ -66,7 +66,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow.RAW_DATA,
         )
         for sample in items:
             case_name: str = f'{sample["name"]}-case'
