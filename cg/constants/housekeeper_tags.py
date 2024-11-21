@@ -91,6 +91,10 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
+class NFAnalysisTags:
+    MANIFEST: str = "manifest"
+
+
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]

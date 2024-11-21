@@ -8,7 +8,7 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
-from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
     Application,
@@ -1207,7 +1207,7 @@ def test_get_orders_empty_store(store: Store):
     # GIVEN a store without any orders
 
     # WHEN fetching orders
-    orders, total = store.get_orders(OrdersRequest())
+    orders, total = store.get_orders(OrderQueryParams())
 
     # THEN none should be returned
     assert not orders
@@ -1218,7 +1218,7 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
     # GIVEN a store with two orders
 
     # WHEN fetching orders
-    orders, total = store.get_orders(OrdersRequest())
+    orders, total = store.get_orders(OrderQueryParams())
 
     # THEN both should be returned
     assert len(orders) == 2
@@ -1227,7 +1227,7 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
-    orders_request = OrdersRequest(pageSize=1, page=1)
+    orders_request = OrderQueryParams(page_size=1, page=1)
 
     # WHEN fetching a limited amount of orders
     orders, total = store.get_orders(orders_request)
@@ -1241,7 +1241,7 @@ def test_get_orders_workflow_filter(
     store: Store, order: Order, order_another: Order, order_balsamic: Order
 ):
     # GIVEN a store with three orders, one of which is a Balsamic order
-    orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
+    orders_request = OrderQueryParams(workflows=[Workflow.BALSAMIC])
 
     # WHEN fetching only balsamic orders
     orders, _ = store.get_orders(orders_request)
@@ -1268,7 +1268,7 @@ def test_get_orders_mip_dna_and_limit_filter(
     expected_returned: int,
 ):
     # GIVEN a store with three orders, two of which are MIP-DNA orders
-    orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, pageSize=limit)
+    orders_request = OrderQueryParams(workflows=[Workflow.MIP_DNA], page_size=limit)
     # WHEN fetching only MIP-DNA orders
     orders, _ = store.get_orders(orders_request)
 

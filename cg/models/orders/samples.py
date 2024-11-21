@@ -190,13 +190,13 @@ class FastqSample(OrderInSample):
 class PacBioSample(OrderInSample):
     _suitable_project = OrderType.PACBIO_LONG_READ
 
-    buffer: str
     container: ContainerEnum
     container_name: str | None = None
     sex: SexEnum = SexEnum.unknown
     source: str
     subject_id: str
     tumour: bool
+    well_position: str | None = None
 
 
 class RmlSample(OrderInSample):
@@ -245,6 +245,10 @@ class MetagenomeSample(Of1508Sample):
     def required_for_new_samples(cls, v: str) -> None:
         """Overrides the parent validator since subject_id is optional for these samples."""
         return None
+
+
+class TaxprofilerSample(MetagenomeSample):
+    _suitable_project = OrderType.TAXPROFILER
 
 
 class MicrobialSample(OrderInSample):

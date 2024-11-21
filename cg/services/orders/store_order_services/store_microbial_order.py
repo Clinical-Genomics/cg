@@ -105,7 +105,6 @@ class StoreMicrobialOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=data_analysis,
         )
 
         with self.status.session.no_autoflush:
