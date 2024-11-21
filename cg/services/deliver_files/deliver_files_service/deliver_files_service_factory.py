@@ -84,7 +84,7 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _get_sample_file_formatter(
-        workflow: str,
+        workflow: Workflow,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
         """Get the file formatter service based on the workflow."""
         if workflow in [Workflow.MICROSALT]:
