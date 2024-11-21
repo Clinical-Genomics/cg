@@ -108,9 +108,9 @@ class DeliveryServiceFactory:
         )
 
     def build_delivery_service(
-        self, case: Case, delivery_type: DataDelivery
+        self, case: Case, delivery_type: DataDelivery | None = None
     ) -> DeliverFilesService:
-        """Build a delivery service based on the workflow and delivery type."""
+        """Build a delivery service based on a case."""
         delivery_type: DataDelivery = self._sanitise_delivery_type(
             delivery_type if delivery_type else case.data_delivery
         )

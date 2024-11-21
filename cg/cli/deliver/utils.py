@@ -2,8 +2,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants import Workflow
-from cg.constants.constants import MICROBIAL_APP_TAGS
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
