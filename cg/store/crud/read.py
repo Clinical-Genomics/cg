@@ -1015,7 +1015,7 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with an analysis."""
         return self._get_outer_join_cases_with_analyses_query()
 
-    def get_families_with_samples(self) -> Query:
+    def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
@@ -1218,7 +1218,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
@@ -1229,7 +1229,7 @@ class ReadHandler(BaseHandler):
     def observations_uploaded(self, workflow: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=[CaseFilter.WITH_LOQUSDB_SUPPORTED_WORKFLOW],
             workflow=workflow,
         )
