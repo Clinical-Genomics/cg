@@ -71,7 +71,7 @@ class DeliveryScenario(BaseModel):
     ],
     ids=["microbial-fastq", "SARS-COV2", "Targeted"],
 )
-def test_build_delivery_service(scenario: DeliveryScenario, store: Store):
+def test_build_delivery_service(scenario: DeliveryScenario):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
         store=MagicMock(),
