@@ -87,7 +87,7 @@ class DeliveryServiceFactory:
         workflow: str,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
         """Get the file formatter service based on the workflow."""
-        if workflow in [Workflow.MICROSALT, "microbial-fastq"]:
+        if workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
         return SampleFileFormatter()
 
