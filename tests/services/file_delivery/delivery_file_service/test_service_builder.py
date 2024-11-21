@@ -27,7 +27,9 @@ from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
 )
 
 
-class DeliveryScenario(BaseModel):
+class DeliveryServiceScenario(BaseModel):
+    """Model holding the necessary parameters to build a specific delivery service."""
+
     app_tag: str
     data_analysis: Workflow
     delivery_type: DataDelivery
@@ -40,7 +42,7 @@ class DeliveryScenario(BaseModel):
 @pytest.mark.parametrize(
     "scenario",
     [
-        DeliveryScenario(
+        DeliveryServiceScenario(
             app_tag="MWRNXTR003",
             data_analysis=Workflow.RAW_DATA,
             delivery_type=DataDelivery.FASTQ,
@@ -49,7 +51,7 @@ class DeliveryScenario(BaseModel):
             expected_file_mover=DeliveryFilesMover,
             expected_sample_file_formatter=SampleFileConcatenationFormatter,
         ),
-        DeliveryScenario(
+        DeliveryServiceScenario(
             app_tag="VWGDPTR001",
             data_analysis=Workflow.MUTANT,
             delivery_type=DataDelivery.ANALYSIS_FILES,
@@ -58,7 +60,7 @@ class DeliveryScenario(BaseModel):
             expected_file_mover=DeliveryFilesMover,
             expected_sample_file_formatter=SampleFileFormatter,
         ),
-        DeliveryScenario(
+        DeliveryServiceScenario(
             app_tag="PANKTTR020",
             data_analysis=Workflow.BALSAMIC,
             delivery_type=DataDelivery.FASTQ_ANALYSIS,
@@ -70,7 +72,7 @@ class DeliveryScenario(BaseModel):
     ],
     ids=["microbial-fastq", "SARS-COV2", "Targeted"],
 )
-def test_build_delivery_service(scenario: DeliveryScenario):
+def test_build_delivery_service(scenario: DeliveryServiceScenario):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
         store=MagicMock(),

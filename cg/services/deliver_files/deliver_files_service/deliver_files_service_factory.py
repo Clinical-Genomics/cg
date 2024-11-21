@@ -82,12 +82,13 @@ class DeliveryServiceFactory:
             tags_fetcher=file_tag_fetcher,
         )
 
-    @staticmethod
     def _get_sample_file_formatter(
-        workflow: Workflow,
+        self,
+        case: Case,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
         """Get the file formatter service based on the workflow."""
-        if workflow in [Workflow.MICROSALT]:
+        converted_workflow: Workflow = self._convert_workflow(case)
+        if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
         return SampleFileFormatter()
 
@@ -116,9 +117,8 @@ class DeliveryServiceFactory:
         )
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
-        converted_workflow: Workflow = self._convert_workflow(case)
         sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
-            self._get_sample_file_formatter(converted_workflow)
+            self._get_sample_file_formatter(case)
         )
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
