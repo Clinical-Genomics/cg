@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from cg.constants import DataDelivery, Workflow
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
@@ -25,7 +25,6 @@ from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTags
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
-from cg.store.store import Store
 
 
 class DeliveryScenario(BaseModel):
