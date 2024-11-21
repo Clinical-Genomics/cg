@@ -1,41 +1,27 @@
 from cg.apps.lims import LimsAPI
 from cg.models.orders.constants import OrderType
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.store_order_services.store_case_order import (
-    StoreCaseOrderService,
-)
-from cg.services.orders.store_order_services.store_fastq_order_service import (
-    StoreFastqOrderService,
-)
+from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
+from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
 from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
     StoreMicrobialFastqOrderService,
 )
-from cg.services.orders.store_order_services.store_microbial_order import (
-    StoreMicrobialOrderService,
-)
+from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pacbio_order_service import (
     StorePacBioOrderService,
 )
-from cg.services.orders.store_order_services.store_pool_order import (
-    StorePoolOrderService,
-)
+from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.services.orders.submitters.case_order_submitter import CaseOrderSubmitter
 from cg.services.orders.submitters.fastq_order_submitter import FastqOrderSubmitter
-from cg.services.orders.submitters.metagenome_order_submitter import (
-    MetagenomeOrderSubmitter,
-)
-from cg.services.orders.submitters.microbial_order_submitter import (
-    MicrobialOrderSubmitter,
-)
+from cg.services.orders.submitters.metagenome_order_submitter import MetagenomeOrderSubmitter
+from cg.services.orders.submitters.microbial_order_submitter import MicrobialOrderSubmitter
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.pacbio_order_submitter import PacbioOrderSubmitter
 from cg.services.orders.submitters.pool_order_submitter import PoolOrderSubmitter
-from cg.services.orders.validate_order_services.validate_case_order import (
-    ValidateCaseOrderService,
-)
+from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
 from cg.services.orders.validate_order_services.validate_fastq_order import (
     ValidateFastqOrderService,
 )
@@ -48,9 +34,7 @@ from cg.services.orders.validate_order_services.validate_microbial_order import 
 from cg.services.orders.validate_order_services.validate_pacbio_order import (
     ValidatePacbioOrderService,
 )
-from cg.services.orders.validate_order_services.validate_pool_order import (
-    ValidatePoolOrderService,
-)
+from cg.services.orders.validate_order_services.validate_pool_order import ValidatePoolOrderService
 from cg.store.store import Store
 
 
@@ -75,6 +59,12 @@ class OrderSubmitterRegistry:
 
 order_service_mapping = {
     OrderType.BALSAMIC: (
+        OrderLimsService,
+        ValidateCaseOrderService,
+        StoreCaseOrderService,
+        CaseOrderSubmitter,
+    ),
+    OrderType.BALSAMIC_UMI: (
         OrderLimsService,
         ValidateCaseOrderService,
         StoreCaseOrderService,
