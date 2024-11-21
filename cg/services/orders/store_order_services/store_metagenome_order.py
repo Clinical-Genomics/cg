@@ -90,7 +90,6 @@ class StoreMetagenomeOrderService(StoreOrderService):
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
-            workflow=Workflow(case_dict["data_analysis"]),
         )
         with self.status_db.session.no_autoflush:
             for sample in case_dict["samples"]:
