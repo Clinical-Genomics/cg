@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "64.5.0"
+version = "64.5.8"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -95,6 +95,10 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+include_trailing_comma = "true"
+line_length=100
+multi_line_output=3
+ensure_newline_before_comments = "true"
 
 [tool.ruff]
 line-length = 100

@@ -157,15 +157,15 @@ def mip_dna_context(
 def setup_mocks(
     mocker,
     can_at_least_one_sample_be_decompressed: bool = False,
-    case_to_analyze: Case = None,
+    get_case_to_analyze: Case = None,
     decompress_spring: bool = False,
     has_latest_analysis_started: bool = False,
     is_spring_decompression_needed: bool = False,
     is_spring_decompression_running: bool = False,
 ) -> None:
     """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(ReadHandler, "cases_to_analyse")
-    ReadHandler.cases_to_analyse.return_value = [case_to_analyze]
+    mocker.patch.object(ReadHandler, "get_cases_to_analyze")
+    ReadHandler.get_cases_to_analyze.return_value = [get_case_to_analyze]
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
