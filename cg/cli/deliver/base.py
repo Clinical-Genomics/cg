@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.deliver.utils import deliver_raw_data_for_analyses, get_pseudo_workflow
+from cg.cli.deliver.utils import deliver_raw_data_for_analyses
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN

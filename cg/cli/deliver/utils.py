@@ -44,11 +44,3 @@ def deliver_raw_data_for_analyses(
             )
             LOG.error(f"Could not deliver files for analysis {analysis.id}: {error}")
             continue
-
-
-def get_pseudo_workflow(case: Case) -> str:
-    """Return the literal '' if the case is Microbial-fastq, otherwise return the case workflow."""
-    tag: str = case.samples[0].application_version.application.tag
-    if case.data_analysis == Workflow.RAW_DATA and tag in MICROBIAL_APP_TAGS:
-        return "microbial-fastq"
-    return case.data_analysis
