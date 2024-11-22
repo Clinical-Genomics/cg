@@ -5,7 +5,7 @@ from typing import Type
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import MICROBIAL_APP_TAGS, PrepCategory
+from cg.constants.constants import PrepCategory
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,

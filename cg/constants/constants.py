@@ -258,13 +258,6 @@ class MicrosaltAppTags(StrEnum):
     PREP_CATEGORY: str = "mic"
 
 
-MICROBIAL_APP_TAGS = [
-    MicrosaltAppTags.MWRNXTR003,
-    MicrosaltAppTags.MWXNXTR003,
-    MicrosaltAppTags.VWGNXTR001,
-]
-
-
 class MutantQC:
     EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
     INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
