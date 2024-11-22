@@ -2,7 +2,8 @@ import datetime as dt
 
 import pytest
 
-from cg.constants import DataDelivery, SeqLibraryPrepCategory, Workflow
+from cg.constants import DataDelivery, Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService

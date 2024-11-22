@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.constants import SeqLibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Case
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary

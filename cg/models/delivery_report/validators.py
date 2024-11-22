@@ -12,10 +12,10 @@ from cg.constants import (
     PRECISION,
     REPORT_SEX,
     YES_FIELD,
-    SeqLibraryPrepCategory,
 )
 from cg.constants.constants import Workflow
 from cg.constants.report import REPORT_QC_FLAG
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType

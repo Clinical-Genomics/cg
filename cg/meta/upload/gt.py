@@ -5,10 +5,10 @@ from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import SeqLibraryPrepCategory
 from cg.constants.constants import FileExtensions, FileFormat, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
 from cg.models.deliverables.metric_deliverables import MetricsBase

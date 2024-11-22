@@ -3,7 +3,8 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.constants import SeqLibraryPrepCategory, Workflow
+from cg.constants import Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Application
 
 

@@ -1,7 +1,7 @@
 import logging
 
-from cg.constants import SeqLibraryPrepCategory
 from cg.constants.priority import Priority
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)

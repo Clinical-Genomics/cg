@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants import SeqLibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,

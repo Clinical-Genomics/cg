@@ -1,7 +1,6 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants import SeqLibraryPrepCategory
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -15,6 +14,7 @@ from cg.constants.report import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
 from cg.constants.scout import ScoutUploadKey
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI

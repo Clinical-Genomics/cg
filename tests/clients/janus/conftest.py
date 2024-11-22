@@ -10,7 +10,8 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
     FilePathAndTag,
     WorkflowInfo,
 )
-from cg.constants import SeqLibraryPrepCategory, Workflow
+from cg.constants import Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 
 
 @pytest.fixture

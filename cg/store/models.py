@@ -20,13 +20,7 @@ from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from cg.constants import (
-    DataDelivery,
-    Priority,
-    SeqLibraryPrepCategory,
-    SequencingRunDataAvailability,
-    Workflow,
-)
+from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
@@ -37,6 +31,7 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 

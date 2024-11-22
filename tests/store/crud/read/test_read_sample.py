@@ -6,7 +6,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
-from cg.constants import SeqLibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

@@ -7,8 +7,9 @@ from typing import Callable, Iterator, Literal
 
 from sqlalchemy.orm import Query, Session
 
-from cg.constants import SeqLibraryPrepCategory, SequencingRunDataAvailability, Workflow
+from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, SampleType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
