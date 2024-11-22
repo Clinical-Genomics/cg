@@ -57,6 +57,36 @@ class DeliveryServiceFactory:
         self.analysis_service = analysis_service
 
     @staticmethod
+    def _sanitise_delivery_type(delivery_type: DataDelivery) -> DataDelivery:
+        """Sanitise the delivery type."""
+        if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
+            return DataDelivery.FASTQ
+        if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
+            return DataDelivery.ANALYSIS_FILES
+        if delivery_type in [
+            DataDelivery.FASTQ_ANALYSIS_SCOUT,
+            DataDelivery.FASTQ_QC_ANALYSIS,
+        ]:
+            return DataDelivery.FASTQ_ANALYSIS
+        return delivery_type
+
+    @staticmethod
+    def _validate_delivery_type(delivery_type: DataDelivery):
+        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
+        if delivery_type in [
+            DataDelivery.FASTQ,
+            DataDelivery.ANALYSIS_FILES,
+            DataDelivery.FASTQ_ANALYSIS,
+            DataDelivery.BAM,
+        ]:
+            return
+        raise DeliveryTypeNotSupported(
+            f"Delivery type {delivery_type} is not supported. Supported delivery types are"
+            f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
+            f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
+        )
+
+    @staticmethod
     def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
         """Get the file tag fetcher based on the delivery type."""
         service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
@@ -82,6 +112,22 @@ class DeliveryServiceFactory:
             tags_fetcher=file_tag_fetcher,
         )
 
+    def _convert_workflow(self, case: Case) -> Workflow:
+        """Converts a workflow with the introduction of the microbial-fastq delivery type an
+        unsupported combination of delivery type and workflow setup is required. This function
+        makes sure that a raw data workflow with microbial fastq delivery type is treated as a
+        microsalt workflow so that the microbial-fastq sample files can be concatenated."""
+        tag: str = case.samples[0].application_version.application.tag
+        microbial_tags: list[str] = [
+            application.tag
+            for application in self.store.get_active_applications_by_prep_category(
+                prep_category=PrepCategory.MICROBIAL
+            )
+        ]
+        if case.data_analysis == Workflow.RAW_DATA and tag in microbial_tags:
+            return Workflow.MICROSALT
+        return case.data_analysis
+
     def _get_sample_file_formatter(
         self,
         case: Case,
@@ -91,22 +137,6 @@ class DeliveryServiceFactory:
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(FastqConcatenationService())
         return SampleFileFormatter()
-
-    @staticmethod
-    def _validate_delivery_type(delivery_type: DataDelivery):
-        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
-        if delivery_type in [
-            DataDelivery.FASTQ,
-            DataDelivery.ANALYSIS_FILES,
-            DataDelivery.FASTQ_ANALYSIS,
-            DataDelivery.BAM,
-        ]:
-            return
-        raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are"
-            f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
-            f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
-        )
 
     def build_delivery_service(
         self, case: Case, delivery_type: DataDelivery | None = None
@@ -133,33 +163,3 @@ class DeliveryServiceFactory:
             tb_service=self.tb_service,
             analysis_service=self.analysis_service,
         )
-
-    def _convert_workflow(self, case: Case) -> Workflow:
-        """Converts a workflow with the introduction of the microbial-fastq delivery type an
-        unsupported combination of delivery type and workflow setup is required. This function
-        makes sure that a raw data workflow with microbial fastq delivery type is treated as a
-        microsalt workflow so that the microbial-fastq sample files can be concatenated."""
-        tag: str = case.samples[0].application_version.application.tag
-        microbial_tags: list[str] = [
-            application.tag
-            for application in self.store.get_active_applications_by_prep_category(
-                prep_category=PrepCategory.MICROBIAL
-            )
-        ]
-        if case.data_analysis == Workflow.RAW_DATA and tag in microbial_tags:
-            return Workflow.MICROSALT
-        return case.data_analysis
-
-    @staticmethod
-    def _sanitise_delivery_type(delivery_type: DataDelivery) -> DataDelivery:
-        """Sanitise the delivery type."""
-        if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
-            return DataDelivery.FASTQ
-        if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
-            return DataDelivery.ANALYSIS_FILES
-        if delivery_type in [
-            DataDelivery.FASTQ_ANALYSIS_SCOUT,
-            DataDelivery.FASTQ_QC_ANALYSIS,
-        ]:
-            return DataDelivery.FASTQ_ANALYSIS
-        return delivery_type
