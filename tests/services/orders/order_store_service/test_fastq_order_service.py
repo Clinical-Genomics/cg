@@ -2,8 +2,7 @@ import datetime as dt
 
 import pytest
 
-from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import LibraryPrepCategory
+from cg.constants import DataDelivery, LibraryPrepCategory, Workflow
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService

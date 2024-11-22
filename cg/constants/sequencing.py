@@ -71,3 +71,13 @@ class RecordType(StrEnum):
 class SequencingPlatform(StrEnum):
     ILLUMINA: str = "ILLUMINA"
     OXFORD_NANOPORE: str = "OXFORD_NANOPORE"
+
+
+class LibraryPrepCategory(StrEnum):
+    COVID: str = "cov"
+    MICROBIAL: str = "mic"
+    READY_MADE_LIBRARY: str = "rml"
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"

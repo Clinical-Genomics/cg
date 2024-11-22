@@ -1,6 +1,6 @@
 import logging
 
-from cg.constants.constants import LibraryPrepCategory
+from cg.constants import LibraryPrepCategory
 from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
 

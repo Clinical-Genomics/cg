@@ -8,8 +8,8 @@ from typing import Generator
 import pytest
 from housekeeper.store.models import Version
 
-from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, GenomeVersion, LibraryPrepCategory
+from cg.constants import DataDelivery, LibraryPrepCategory, Workflow
+from cg.constants.constants import FileFormat, GenomeVersion
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack

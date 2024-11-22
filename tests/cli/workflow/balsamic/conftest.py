@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat, LibraryPrepCategory
+from cg.constants import LibraryPrepCategory, SequencingFileTag, Workflow
+from cg.constants.constants import CaseActions, FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig

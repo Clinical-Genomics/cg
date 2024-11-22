@@ -1,4 +1,5 @@
-from cg.constants.constants import LibraryPrepCategory, Workflow
+from cg.constants import LibraryPrepCategory
+from cg.constants.constants import Workflow
 from cg.constants.priority import Priority
 from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store

@@ -20,12 +20,17 @@ from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
+from cg.constants import (
+    DataDelivery,
+    LibraryPrepCategory,
+    Priority,
+    SequencingRunDataAvailability,
+    Workflow,
+)
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
-    LibraryPrepCategory,
     SequencingQCStatus,
     SexOptions,
     StatusOptions,

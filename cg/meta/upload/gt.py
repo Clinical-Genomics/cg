@@ -5,7 +5,8 @@ from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import FileExtensions, FileFormat, LibraryPrepCategory, Workflow
+from cg.constants import LibraryPrepCategory
+from cg.constants.constants import FileExtensions, FileFormat, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex

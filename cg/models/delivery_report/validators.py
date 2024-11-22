@@ -12,8 +12,9 @@ from cg.constants import (
     PRECISION,
     REPORT_SEX,
     YES_FIELD,
+    LibraryPrepCategory,
 )
-from cg.constants.constants import LibraryPrepCategory, Workflow
+from cg.constants.constants import Workflow
 from cg.constants.report import REPORT_QC_FLAG
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile

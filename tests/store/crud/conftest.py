@@ -3,8 +3,8 @@ from typing import Generator
 
 import pytest
 
-from cg.constants import Workflow
-from cg.constants.constants import CustomerId, LibraryPrepCategory
+from cg.constants import LibraryPrepCategory, Workflow
+from cg.constants.constants import CustomerId
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store

@@ -1,6 +1,7 @@
 import pytest
 
-from cg.constants.constants import LibraryPrepCategory, Workflow
+from cg.constants import LibraryPrepCategory
+from cg.constants.constants import Workflow
 from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (

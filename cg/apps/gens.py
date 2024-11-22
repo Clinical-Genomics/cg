@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.constants.constants import LibraryPrepCategory
+from cg.constants import LibraryPrepCategory
 from cg.store.models import Case
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary

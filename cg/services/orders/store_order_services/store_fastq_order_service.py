@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
-from cg.constants.constants import CustomerId, LibraryPrepCategory
+from cg.constants import DataDelivery, GenePanelMasterList, LibraryPrepCategory, Priority, Workflow
+from cg.constants.constants import CustomerId
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
