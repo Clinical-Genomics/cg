@@ -1,14 +1,22 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Workflow, DataDelivery
+from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import ApplicationVersion, Customer, Pool, Sample, CaseSample, Case
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Order,
+    Pool,
+    Sample,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -116,6 +124,11 @@ class StorePoolOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+        )
         new_pools: list[Pool] = []
         new_samples: list[Sample] = []
         for pool in items:
@@ -171,7 +184,9 @@ class StorePoolOrderService(StoreOrderService):
                     case=case, sample=new_sample, status="unknown"
                 )
                 self.status_db.session.add(link)
+            status_db_order.cases.append(case)
             new_pools.append(new_pool)
+        self.status_db.session.add(status_db_order)
         self.status_db.session.add_all(new_pools)
         self.status_db.session.commit()
         return new_pools

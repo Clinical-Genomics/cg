@@ -40,10 +40,8 @@ class BalsamicUploadAPI(UploadAPI):
 
         self.upload_files_to_customer_inbox(case)
 
-        if GensAPI.is_suitable_for_upload(case):
-            ctx.invoke(upload_to_gens, case_id=case.internal_id)
-        else:
-            LOG.info(f"Balsamic case {case.internal_id} is not compatible for Gens upload")
+        # Upload CNV and BAF profile to GENS
+        ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
@@ -55,7 +53,7 @@ class BalsamicUploadAPI(UploadAPI):
             )
 
         # Genotype specific upload
-        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case_obj=case):
+        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case):
             ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")

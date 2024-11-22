@@ -4,6 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
+
 from cg.constants.scout import UploadTrack
 from cg.models.scout.validators import field_not_none
 
@@ -118,7 +119,7 @@ class ScoutLoadConfig(BaseModel):
     sv_rank_model_version: str | None = None
     analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
-    custom_images: CustomImages = CustomImages()
+    customer_images: CustomImages | None = None
     delivery_report: str | None = None
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
