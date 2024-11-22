@@ -6,7 +6,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
-from cg.constants import PrepCategory
+from cg.constants import LibraryPrepCategory
 from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -614,10 +614,10 @@ def test_get_related_samples(
     # GIVEN a database with an RNA sample and several DNA samples with the same subject_id and tumour status as the given sample
     # GIVEN that all customers are in a collaboration
     # GIVEN a list of dna prep categories
-    dna_prep_categories: list[PrepCategory] = [
-        PrepCategory.WHOLE_GENOME_SEQUENCING,
-        PrepCategory.TARGETED_GENOME_SEQUENCING,
-        PrepCategory.WHOLE_EXOME_SEQUENCING,
+    dna_prep_categories: list[LibraryPrepCategory] = [
+        LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        LibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        LibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     ]
 
     # WHEN getting the related DNA samples to the given sample

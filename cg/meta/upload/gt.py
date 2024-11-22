@@ -5,7 +5,7 @@ from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import FileExtensions, FileFormat, PrepCategory, Workflow
+from cg.constants.constants import FileExtensions, FileFormat, LibraryPrepCategory, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
 from cg.constants.subject import Sex
@@ -72,7 +72,10 @@ class UploadGenotypesAPI(object):
         """Returns True if there are any non-tumor WGS samples in the case."""
         samples: list[Sample] = case.samples
         return any(
-            (not sample.is_tumour and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category)
+            (
+                not sample.is_tumour
+                and LibraryPrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
+            )
             for sample in samples
         )
 

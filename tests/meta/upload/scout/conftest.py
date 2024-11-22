@@ -9,12 +9,8 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    AnalysisTag,
-    NFAnalysisTags,
-)
+from cg.constants.constants import FileFormat, GenomeVersion, LibraryPrepCategory
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
@@ -756,7 +752,7 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.BALSAMIC
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_EXOME_SEQUENCING
+            LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC
     return analysis_obj
@@ -768,7 +764,7 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.BALSAMIC_UMI
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_EXOME_SEQUENCING
+            LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC_UMI
 
@@ -781,7 +777,7 @@ def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.RAREDISEASE
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_GENOME_SEQUENCING
+            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         )
         link_object.sample.reference_genome = GenomeVersion.GRCh37
         link_object.case.data_analysis = Workflow.RAREDISEASE
@@ -794,7 +790,7 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.RNAFUSION
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+            LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.RNAFUSION
         link_object.case.panels = None

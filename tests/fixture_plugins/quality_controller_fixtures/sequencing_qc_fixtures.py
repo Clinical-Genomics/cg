@@ -1,9 +1,8 @@
 import pytest
 
-from cg.store.models import Case, Sample
+from cg.constants.constants import LibraryPrepCategory, Workflow
 from cg.constants.priority import Priority
-from cg.constants.constants import PrepCategory, Workflow
-
+from cg.store.models import Case, Sample
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
     SequencingQCCheckScenarios,
 )
@@ -20,7 +19,7 @@ def ready_made_library_sample_passing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.standard,
-        prep_category=PrepCategory.READY_MADE_LIBRARY,
+        prep_category=LibraryPrepCategory.READY_MADE_LIBRARY,
         pass_sequencing_qc=True,
     )
 
@@ -31,7 +30,7 @@ def ready_made_library_sample_failing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.standard,
-        prep_category=PrepCategory.READY_MADE_LIBRARY,
+        prep_category=LibraryPrepCategory.READY_MADE_LIBRARY,
         pass_sequencing_qc=False,
     )
 
@@ -42,7 +41,7 @@ def express_sample_passing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.express,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         pass_sequencing_qc=True,
     )
 
@@ -53,7 +52,7 @@ def express_sample_failing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.express,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         pass_sequencing_qc=False,
     )
 
@@ -64,7 +63,7 @@ def sample_passing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.standard,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         pass_sequencing_qc=True,
     )
 
@@ -75,7 +74,7 @@ def sample_failing_sequencing_qc(
 ) -> Sample:
     return sequencing_qc_check_scenarios.get_sample_scenario(
         priority=Priority.standard,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         pass_sequencing_qc=False,
     )
 
@@ -87,7 +86,7 @@ def case_passing_sequencing_qc(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=True,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         workflow=Workflow.MIP_DNA,
     )
 
@@ -99,7 +98,7 @@ def case_failing_sequencing_qc(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=False,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         workflow=Workflow.MIP_DNA,
     )
 
@@ -111,7 +110,7 @@ def express_case_passing_sequencing_qc(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.express,
         pass_sequencing_qc=True,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         workflow=Workflow.MIP_DNA,
     )
 
@@ -123,7 +122,7 @@ def express_case_failing_sequencing_qc(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.express,
         pass_sequencing_qc=False,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         workflow=Workflow.MIP_DNA,
     )
 
@@ -135,7 +134,7 @@ def one_sample_in_case_has_reads(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=True,
-        prep_category=PrepCategory.MICROBIAL,
+        prep_category=LibraryPrepCategory.MICROBIAL,
         workflow=Workflow.MICROSALT,
     )
 
@@ -147,6 +146,6 @@ def no_sample_in_case_has_reads(
     return sequencing_qc_check_scenarios.get_case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=False,
-        prep_category=PrepCategory.MICROBIAL,
+        prep_category=LibraryPrepCategory.MICROBIAL,
         workflow=Workflow.MICROSALT,
     )

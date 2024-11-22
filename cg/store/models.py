@@ -25,7 +25,7 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
-    PrepCategory,
+    LibraryPrepCategory,
     SequencingQCStatus,
     SexOptions,
     StatusOptions,
@@ -146,7 +146,7 @@ class Application(Base):
 
     tag: Mapped[UniqueStr]
     prep_category: Mapped[str] = mapped_column(
-        types.Enum(*(category.value for category in PrepCategory))
+        types.Enum(*(category.value for category in LibraryPrepCategory))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -211,13 +211,13 @@ class Application(Base):
 
     @property
     def analysis_type(self) -> str:
-        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        if self.prep_category == LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
+            return LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
-            PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
+            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == LibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else LibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
     def to_dict(self):

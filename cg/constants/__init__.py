@@ -9,7 +9,7 @@ from cg.constants.constants import (
     STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
-    PrepCategory,
+    LibraryPrepCategory,
     SequencingRunDataAvailability,
     SexOptions,
 )

@@ -102,7 +102,7 @@ class CancerAnalysisType(StrEnum):
     TUMOR_WGS = auto()
 
 
-class PrepCategory(StrEnum):
+class LibraryPrepCategory(StrEnum):
     COVID: str = "cov"
     MICROBIAL: str = "mic"
     READY_MADE_LIBRARY: str = "rml"
