@@ -257,7 +257,7 @@ class TaxprofilerSample(MetagenomeSample):
 
 
 class MicrobialSample(OrderInSample):
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
     # "These fields are required"
     organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
@@ -287,7 +287,7 @@ class MicrobialFastqSample(OrderInSample):
 
 class MicrosaltSample(MicrobialSample):
     _suitable_project = OrderType.MICROSALT
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
 
 
 class SarsCov2Sample(MicrobialSample):

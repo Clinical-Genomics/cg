@@ -8,12 +8,12 @@ from typing import Generator
 import pytest
 from housekeeper.store.models import Version
 
-from cg.constants import DataDelivery, LibraryPrepCategory, Workflow
+from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, GenomeVersion
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import LibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -136,25 +136,25 @@ def rna_store(
 
     rna_sample_son = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_son_id,
         subject_id="son",
     )
     rna_sample_daughter = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_daughter_id,
         subject_id="daughter",
     )
     rna_sample_mother = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_mother_id,
         subject_id=Pedigree.MOTHER,
     )
     rna_sample_father = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_father_id,
         subject_id=Pedigree.FATHER,
     )
@@ -196,29 +196,29 @@ def rna_store(
 
     dna_sample_son = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_son_id,
         subject_id="son",
     )
     dna_sample_daughter = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_daughter_id,
         subject_id="daughter",
     )
     dna_sample_mother = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_mother_id,
         subject_id=Pedigree.MOTHER,
     )
     dna_sample_father = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_father_id,
         subject_id=Pedigree.FATHER,
     )

@@ -3,7 +3,7 @@
 from enum import Enum, StrEnum
 
 from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import LibraryPrepCategory
 
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.BALSAMIC, Workflow.MIP_DNA, Workflow.RAREDISEASE]
@@ -14,7 +14,10 @@ LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST143,
     CustomerId.CUST147,
 ]
-LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
+LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [
+    LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    LibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+]
 LOQUSDB_CANCER_SEQUENCING_METHODS = [
     CancerAnalysisType.TUMOR_WGS,
     CancerAnalysisType.TUMOR_NORMAL_WGS,

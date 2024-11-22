@@ -117,9 +117,9 @@ def test_target_bed_from_lims(
 
 
 def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
-    """Test with case_id that requires PAIRED WGS analysis."""
+    """Test with case_id that requires PAIRED WHOLE_GENOME_SEQUENCING analysis."""
     caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, ONE normal, WGS application
+    # GIVEN case_id containing ONE tumor, ONE normal, WHOLE_GENOME_SEQUENCING application
     case_id = "balsamic_case_wgs_paired"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -133,9 +133,9 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
 
 
 def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
-    """Test with case_id that requires PAIRED TGS analysis."""
+    """Test with case_id that requires PAIRED TARGETED_GENOME_SEQUENCING analysis."""
     caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, ONE normal, TGS application
+    # GIVEN case_id containing ONE tumor, ONE normal, TARGETED_GENOME_SEQUENCING application
     case_id = "balsamic_case_tgs_paired"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -177,9 +177,9 @@ def test_pon_cnn(
 
 
 def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
-    """Test with case_id that requires SINGLE WGS analysis."""
+    """Test with case_id that requires SINGLE WHOLE_GENOME_SEQUENCING analysis."""
     caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, WGS application
+    # GIVEN case_id containing ONE tumor, WHOLE_GENOME_SEQUENCING application
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -194,9 +194,9 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
 
 
 def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
-    """Test with case_id that requires SINGLE TGS analysis."""
+    """Test with case_id that requires SINGLE TARGETED_GENOME_SEQUENCING analysis."""
     caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, TGS application
+    # GIVEN case_id containing ONE tumor, TARGETED_GENOME_SEQUENCING application
     case_id = "balsamic_case_tgs_single"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -213,9 +213,9 @@ def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog:
 def test_error_single_wgs_panel_arg(
     balsamic_context: CGConfig, cg_dir: Path, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument."""
+    """Test with case_id that requires SINGLE WHOLE_GENOME_SEQUENCING analysis and --panel-bed argument."""
     caplog.set_level(logging.ERROR)
-    # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
+    # GIVEN case_id containing ONE tumor, WHOLE_GENOME_SEQUENCING application and panel bed argument
     case_id = "balsamic_case_wgs_single"
     panel_bed = Path(cg_dir, "balsamic_bed_1.bed")
     # WHEN dry running
@@ -226,8 +226,8 @@ def test_error_single_wgs_panel_arg(
     )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN log warning not to set panel for WGS should be printed
-    assert "Cannot set panel_bed for WGS sample" in caplog.text
+    # THEN log warning not to set panel for WHOLE_GENOME_SEQUENCING should be printed
+    assert "Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample" in caplog.text
 
 
 def test_single_normal_only(
@@ -255,9 +255,9 @@ def test_single_normal_only(
 def test_error_two_tumor(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples."""
+    """Test with case_id that requires WHOLE_GENOME_SEQUENCING analysis but has TWO tumor ONE normal samples."""
     caplog.set_level(logging.ERROR)
-    # GIVEN case_id containing TWO tumor, ONE normal, TGS application
+    # GIVEN case_id containing TWO tumor, ONE normal, TARGETED_GENOME_SEQUENCING application
     case_id = "balsamic_case_tgs_paired_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -270,7 +270,7 @@ def test_error_two_tumor(
 def test_error_mixed_application(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id that has ONE tumor ONE normal samples marked for WGS and TGS analysis."""
+    """Test with case_id that has ONE tumor ONE normal samples marked for WHOLE_GENOME_SEQUENCING and TARGETED_GENOME_SEQUENCING analysis."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_paired_error"
     # WHEN dry running
@@ -284,7 +284,7 @@ def test_error_mixed_application(
 def test_error_not_balsamic_application(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id that has PAIRED samples marked for WGS and MIC analysis."""
+    """Test with case_id that has PAIRED samples marked for WHOLE_GENOME_SEQUENCING and MIC analysis."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_wgs_mic_paired_error"
     # WHEN dry running
@@ -299,7 +299,7 @@ def test_error_mixed_panel_bed_resque(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
     """
-    Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS
+    Test with case_id marked for PAIRED TARGETED_GENOME_SEQUENCING analysis but different BED files in LIMS
     and supplying --panel-bed option should prevent error.
     """
     caplog.set_level(logging.INFO)

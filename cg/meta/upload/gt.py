@@ -70,7 +70,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def is_suitable_for_genotype_upload(case: Case) -> bool:
-        """Returns True if there are any non-tumor WGS samples in the case."""
+        """Returns True if there are any non-tumor WHOLE_GENOME_SEQUENCING samples in the case."""
         samples: list[Sample] = case.samples
         return any(
             (

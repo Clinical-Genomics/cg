@@ -337,7 +337,7 @@ def balsamic_context(
         target_reads=10,
     )
 
-    # Create textbook case for WGS PAIRED with enough reads
+    # Create textbook case for WHOLE_GENOME_SEQUENCING PAIRED with enough reads
     case_wgs_paired_enough_reads = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired_enough_reads",
@@ -372,7 +372,7 @@ def balsamic_context(
         sample=sample_case_wgs_paired_normal_enough_reads,
     )
 
-    # Create textbook case for WGS PAIRED
+    # Create textbook case for WHOLE_GENOME_SEQUENCING PAIRED
     case_wgs_paired = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired",
@@ -399,7 +399,7 @@ def balsamic_context(
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
-    # Create textbook case for TGS PAIRED without enough reads
+    # Create textbook case for TARGETED_GENOME_SEQUENCING PAIRED without enough reads
     case_tgs_paired = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired",
@@ -427,7 +427,7 @@ def balsamic_context(
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_normal)
 
-    # Create textbook case for WGS TUMOR ONLY
+    # Create textbook case for WHOLE_GENOME_SEQUENCING TUMOR ONLY
     case_wgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_single",
@@ -444,7 +444,7 @@ def balsamic_context(
     )
     helpers.add_relationship(status_db, case=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
-    # Create textbook case for TGS TUMOR ONLY
+    # Create textbook case for TARGETED_GENOME_SEQUENCING TUMOR ONLY
     case_tgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single",
@@ -461,7 +461,7 @@ def balsamic_context(
     )
     helpers.add_relationship(status_db, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
-    # Create ERROR case for TGS NORMAL ONLY
+    # Create ERROR case for TARGETED_GENOME_SEQUENCING NORMAL ONLY
     case_tgs_single_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single_error",
@@ -483,7 +483,7 @@ def balsamic_context(
         sample=sample_case_tgs_single_normal_error,
     )
 
-    # Create ERROR case for TGS TWO TUMOR ONE NORMAL
+    # Create ERROR case for TARGETED_GENOME_SEQUENCING TWO TUMOR ONE NORMAL
     case_tgs_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired_error",
@@ -638,7 +638,7 @@ def balsamic_context(
         sample=mixed_sample_case_mixed_bed_paired_normal_error,
     )
 
-    # Create ERROR case for WGS TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
+    # Create ERROR case for WHOLE_GENOME_SEQUENCING TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
     mip_case_wgs_single = helpers.add_case(
         status_db,
         internal_id="mip_case_wgs_single",
@@ -658,7 +658,7 @@ def balsamic_context(
         sample=mip_sample_case_wgs_single_tumor,
     )
 
-    # Create ERROR case for WGS ONE TUMOR TWO NORMAL
+    # Create ERROR case for WHOLE_GENOME_SEQUENCING ONE TUMOR TWO NORMAL
     case_wgs_paired_two_normal_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_paired_two_normal_error",
@@ -708,7 +708,7 @@ def balsamic_context(
         sample=sample_case_wgs_paired_two_normal_normal2_error,
     )
 
-    # Create WES case with 1 tumor sample
+    # Create WHOLE_EXOME_SEQUENCING case with 1 tumor sample
     case_wes_tumor = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_tumor",
@@ -725,7 +725,7 @@ def balsamic_context(
     )
     helpers.add_relationship(status_db, case=case_wes_tumor, sample=sample_case_wes_tumor)
 
-    # Create ERROR case for WES when no panel is found
+    # Create ERROR case for WHOLE_EXOME_SEQUENCING when no panel is found
     case_wes_panel_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_panel_error",

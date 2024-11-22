@@ -47,15 +47,6 @@ FLOWCELL_Q30_THRESHOLD = {
 }
 
 
-class SequencingMethod(StrEnum):
-    """Sequencing method types."""
-
-    TGS: str = "tgs"
-    WES: str = "wes"
-    WGS: str = "wgs"
-    WTS: str = "wts"
-
-
 class Variants(StrEnum):
     """Type of variants."""
 

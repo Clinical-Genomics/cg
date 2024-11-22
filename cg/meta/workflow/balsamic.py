@@ -207,7 +207,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError("Multiple application types found in LIMS")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             if panel_bed:
-                raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
+                raise BalsamicStartError("Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample!")
             return None
         if panel_bed:
             return panel_bed.as_posix()
