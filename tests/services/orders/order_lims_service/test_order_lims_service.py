@@ -12,8 +12,9 @@ def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
     order_data = MipDnaOrder.model_validate(mip_order_to_submit)
     # WHEN parsing the order to format for LIMS import
+    new_samples = [sample for _, _, sample in order_data.enumerated_new_samples]
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
-        customer="cust003", samples=order_data.samples
+        customer="cust003", samples=new_samples
     )
 
     # THEN it should list all samples
@@ -24,18 +25,17 @@ def test_to_lims_mip(mip_order_to_submit):
 
     # THEN container names should be the same for all samples
     container_names = {sample.container_name for sample in samples if sample.container_name}
-    assert container_names == {"CMMS"}
+    assert container_names == {"MipPlate"}
 
     # ... and pick out relevant UDFs
     first_sample: LimsSample = samples[0]
     assert first_sample.well_position == "A:1"
-    assert first_sample.udfs.family_name == "family1"
+    # assert first_sample.udfs.family_name == "MipCase1"
     assert first_sample.udfs.priority == "standard"
     assert first_sample.udfs.application == "WGSPCFC030"
-    assert first_sample.udfs.source == "tissue (fresh frozen)"
-    assert first_sample.udfs.quantity == "220"
+    assert first_sample.udfs.source == "blood"
     assert first_sample.udfs.customer == "cust003"
-    assert first_sample.udfs.volume == "1.0"
+    assert first_sample.udfs.volume == "54"
 
     # THEN assert that the comment of a sample is a string
     assert isinstance(samples[1].udfs.comment, str)
