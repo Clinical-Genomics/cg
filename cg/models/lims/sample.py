@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from pydantic_core.core_schema import ValidationInfo
 from typing_extensions import Literal
 
 from cg.constants import Priority
@@ -65,9 +66,9 @@ class LimsSample(BaseModel):
     udfs: Udf | None = None
     well_position: str | None = None
 
-    @validator("well_position", pre=False)
-    def reset_well_positions_for_tubes(cls, value: str, values: dict[str, str]):
-        return None if values["container"] == "Tube" else value
+    @field_validator("well_position", mode="before")
+    def reset_well_positions_for_tubes(cls, value: str, info: ValidationInfo):
+        return None if info.data.get("container") == "Tube" else value
 
     @classmethod
     def parse_obj(cls, obj: dict):
