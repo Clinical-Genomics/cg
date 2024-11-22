@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from pydantic import BaseModel
 
 from cg.constants import DataDelivery, Workflow
@@ -37,6 +38,7 @@ class DeliveryServiceScenario(BaseModel):
     expected_file_fetcher: type[FetchDeliveryFilesService]
     expected_file_mover: type[DeliveryFilesMover]
     expected_sample_file_formatter: type[SampleFileFormatter]
+    store_name: str
 
 
 @pytest.mark.parametrize(
@@ -50,6 +52,7 @@ class DeliveryServiceScenario(BaseModel):
             expected_file_fetcher=RawDataDeliveryFileFetcher,
             expected_file_mover=DeliveryFilesMover,
             expected_sample_file_formatter=SampleFileConcatenationFormatter,
+            store_name="microbial_store",
         ),
         DeliveryServiceScenario(
             app_tag="VWGDPTR001",
@@ -59,6 +62,7 @@ class DeliveryServiceScenario(BaseModel):
             expected_file_fetcher=AnalysisDeliveryFileFetcher,
             expected_file_mover=DeliveryFilesMover,
             expected_sample_file_formatter=SampleFileFormatter,
+            store_name="mutant_store",
         ),
         DeliveryServiceScenario(
             app_tag="PANKTTR020",
@@ -68,14 +72,15 @@ class DeliveryServiceScenario(BaseModel):
             expected_file_fetcher=RawDataAndAnalysisDeliveryFileFetcher,
             expected_file_mover=DeliveryFilesMover,
             expected_sample_file_formatter=SampleFileFormatter,
+            store_name="applications_store",
         ),
     ],
     ids=["microbial-fastq", "SARS-COV2", "Targeted"],
 )
-def test_build_delivery_service(scenario: DeliveryServiceScenario):
+def test_build_delivery_service(scenario: DeliveryServiceScenario, request: FixtureRequest):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
-        store=MagicMock(),
+        store=request.getfixturevalue(scenario.store_name),
         hk_api=MagicMock(),
         rsync_service=MagicMock(),
         tb_service=MagicMock(),

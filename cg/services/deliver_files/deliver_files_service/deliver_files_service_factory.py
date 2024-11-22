@@ -5,7 +5,7 @@ from typing import Type
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import MICROBIAL_APP_TAGS
+from cg.constants.constants import MICROBIAL_APP_TAGS, PrepCategory
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
@@ -134,14 +134,19 @@ class DeliveryServiceFactory:
             analysis_service=self.analysis_service,
         )
 
-    @staticmethod
-    def _convert_workflow(case: Case) -> Workflow:
+    def _convert_workflow(self, case: Case) -> Workflow:
         """Converts a workflow with the introduction of the microbial-fastq delivery type an
         unsupported combination of delivery type and workflow setup is required. This function
         makes sure that a raw data workflow with microbial fastq delivery type is treated as a
         microsalt workflow so that the microbial-fastq sample files can be concatenated."""
         tag: str = case.samples[0].application_version.application.tag
-        if case.data_analysis == Workflow.RAW_DATA and tag in MICROBIAL_APP_TAGS:
+        microbial_tags: list[str] = [
+            application.tag
+            for application in self.store.get_active_applications_by_prep_category(
+                prep_category=PrepCategory.MICROBIAL
+            )
+        ]
+        if case.data_analysis == Workflow.RAW_DATA and tag in microbial_tags:
             return Workflow.MICROSALT
         return case.data_analysis
 
