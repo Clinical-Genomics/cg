@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-from cg.constants import DataDelivery, LibraryPrepCategory, Workflow
+from cg.constants import DataDelivery, SeqLibraryPrepCategory, Workflow
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
@@ -94,7 +94,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
-    ).prep_category = LibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    ).prep_category = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = False
 
     # WHEN storing the order
@@ -121,7 +121,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
-    ).prep_category = LibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    ).prep_category = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = True
 
     # WHEN storing the order
@@ -146,7 +146,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     # GIVEN a basic store with no samples and a fastq order as non wgs
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
-    non_wgs_prep_category = LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+    non_wgs_prep_category = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
 
     non_wgs_applications = base_store._get_query(table=Application).filter(
         Application.prep_category == non_wgs_prep_category

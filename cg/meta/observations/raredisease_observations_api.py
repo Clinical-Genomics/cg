@@ -13,7 +13,7 @@ from cg.constants.observations import (
     RarediseaseLoadParameters,
     RarediseaseObservationsAnalysisTag,
 )
-from cg.constants.sequencing import LibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -64,10 +64,12 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def set_loqusdb_instance(self, case_id: str) -> None:
         """Set the Loqusdb instance associated to the sequencing method."""
-        sequencing_method: LibraryPrepCategory = self.analysis_api.get_data_analysis_type(case_id)
-        loqusdb_instances: dict[LibraryPrepCategory, LoqusdbInstance] = {
-            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS,
-            LibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
+        sequencing_method: SeqLibraryPrepCategory = self.analysis_api.get_data_analysis_type(
+            case_id
+        )
+        loqusdb_instances: dict[SeqLibraryPrepCategory, LoqusdbInstance] = {
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
         }
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
 
@@ -117,7 +119,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                     version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SV_VCF]
                 ).first()
                 if self.analysis_api.get_data_analysis_type(case_id)
-                == LibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+                == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 else None
             ),
             "profile_vcf_path": self.housekeeper_api.files(

@@ -10,7 +10,7 @@ from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.observations.utils import get_observations_api, get_observations_verified_case
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import Workflow
-from cg.constants.sequencing import LibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -32,7 +32,7 @@ def test_observations(
     case: Case = helpers.add_case(store)
     case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(
-        store, application_type=LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+        store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
     link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
@@ -96,7 +96,7 @@ def test_get_observations_api(cg_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a Loqusdb supported case
     case: Case = helpers.add_case(store, data_analysis=Workflow.MIP_DNA)
     sample: Sample = helpers.add_sample(
-        store, application_type=LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+        store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
     link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
@@ -118,7 +118,7 @@ def test_get_observations_api_raredisease(cg_context: CGConfig, helpers: StoreHe
     # GIVEN a Loqusdb supported case
     case: Case = helpers.add_case(store, data_analysis=Workflow.RAREDISEASE)
     sample: Sample = helpers.add_sample(
-        store, application_type=LibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+        store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
     case_sample: CaseSample = store.relate_sample(
         case=case, sample=sample, status=PhenotypeStatus.UNKNOWN

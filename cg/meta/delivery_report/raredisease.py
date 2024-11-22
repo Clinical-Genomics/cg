@@ -1,7 +1,7 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants import LibraryPrepCategory
+from cg.constants import SeqLibraryPrepCategory
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -85,7 +85,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS
-                if LibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+                if SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_RAREDISEASE_FIELDS
             )

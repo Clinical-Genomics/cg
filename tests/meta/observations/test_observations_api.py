@@ -13,7 +13,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sample_sources import SourceType
-from cg.constants.sequencing import LibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -38,7 +38,7 @@ from cg.store.models import Case, Customer
         (
             Workflow.MIP_DNA,
             MipDNAAnalysisAPI,
-            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             True,
             "Uploaded {number_of_loaded_variants} variants to Loqusdb",
         ),
@@ -52,14 +52,14 @@ from cg.store.models import Case, Customer
         (
             Workflow.MIP_DNA,
             MipDNAAnalysisAPI,
-            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             False,
             "Case {case_id} is not eligible for observations upload",
         ),
         (
             Workflow.RAREDISEASE,
             RarediseaseAnalysisAPI,
-            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             False,
             "Case {case_id} is not eligible for observations upload",
         ),
@@ -330,8 +330,12 @@ def test_is_customer_not_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_is_sequencing_method_eligible_for_observations_upload(
@@ -365,11 +369,15 @@ def test_is_sequencing_method_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_PANEL),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING),
+        (
+            Workflow.MIP_DNA,
+            MipDNAAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+        ),
         (
             Workflow.RAREDISEASE,
             RarediseaseAnalysisAPI,
-            LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         ),
     ],
 )
@@ -458,8 +466,12 @@ def test_is_sample_source_not_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_delete_case(
@@ -495,8 +507,12 @@ def test_delete_case(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, LibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_delete_case_not_found(

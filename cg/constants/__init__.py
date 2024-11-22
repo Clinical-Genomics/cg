@@ -19,5 +19,5 @@ from cg.constants.priority import Priority
 from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.report import *
 from cg.constants.sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, LibraryPrepCategory
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, SeqLibraryPrepCategory
 from cg.constants.symbols import SPACE

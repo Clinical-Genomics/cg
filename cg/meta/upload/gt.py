@@ -5,7 +5,7 @@ from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import LibraryPrepCategory
+from cg.constants import SeqLibraryPrepCategory
 from cg.constants.constants import FileExtensions, FileFormat, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
@@ -75,7 +75,7 @@ class UploadGenotypesAPI(object):
         return any(
             (
                 not sample.is_tumour
-                and LibraryPrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
+                and SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
             )
             for sample in samples
         )

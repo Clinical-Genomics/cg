@@ -22,8 +22,8 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import (
     DataDelivery,
-    LibraryPrepCategory,
     Priority,
+    SeqLibraryPrepCategory,
     SequencingRunDataAvailability,
     Workflow,
 )
@@ -151,7 +151,7 @@ class Application(Base):
 
     tag: Mapped[UniqueStr]
     prep_category: Mapped[str] = mapped_column(
-        types.Enum(*(category.value for category in LibraryPrepCategory))
+        types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -216,13 +216,13 @@ class Application(Base):
 
     @property
     def analysis_type(self) -> str:
-        if self.prep_category == LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
+            return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
-            LibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == LibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else LibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
     def to_dict(self):

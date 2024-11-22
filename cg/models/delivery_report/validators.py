@@ -12,7 +12,7 @@ from cg.constants import (
     PRECISION,
     REPORT_SEX,
     YES_FIELD,
-    LibraryPrepCategory,
+    SeqLibraryPrepCategory,
 )
 from cg.constants.constants import Workflow
 from cg.constants.report import REPORT_QC_FLAG
@@ -82,7 +82,7 @@ def get_sex_as_string(sex: Sex | None) -> str:
     return get_report_string(REPORT_SEX.get(sex))
 
 
-def get_prep_category_as_string(prep_category: LibraryPrepCategory | None) -> str:
+def get_prep_category_as_string(prep_category: SeqLibraryPrepCategory | None) -> str:
     """Return a report validated prep category as string."""
     if prep_category == OrderType.RML:
         LOG.error("The delivery report generation does not support RML samples")

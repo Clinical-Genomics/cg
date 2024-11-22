@@ -6,7 +6,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.constants.sequencing import LibraryPrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -62,7 +62,7 @@ def test_is_case_eligible_for_observations_upload(
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_data_analysis_type",
-        return_value=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        return_value=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
 
     # WHEN checking the upload eligibility for a case
@@ -88,7 +88,7 @@ def test_is_case_not_eligible_for_observations_upload(
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_data_analysis_type",
-        return_value=LibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+        return_value=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
     )
 
     # WHEN checking the upload eligibility for a case
@@ -119,7 +119,7 @@ def test_load_observations(
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_data_analysis_type",
-        return_value=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        return_value=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     mocker.patch.object(
         RarediseaseObservationsAPI,
@@ -154,7 +154,7 @@ def test_load_duplicated_observations(
     mocker.patch.object(
         RarediseaseAnalysisAPI,
         "get_data_analysis_type",
-        return_value=LibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        return_value=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     mocker.patch.object(
         RarediseaseObservationsAPI,

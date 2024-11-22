@@ -64,7 +64,7 @@ class SequencingPlatform(StrEnum):
     OXFORD_NANOPORE: str = "OXFORD_NANOPORE"
 
 
-class LibraryPrepCategory(StrEnum):
+class SeqLibraryPrepCategory(StrEnum):
     COVID: str = "cov"
     MICROBIAL: str = "mic"
     READY_MADE_LIBRARY: str = "rml"

@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants import LibraryPrepCategory
+from cg.constants import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
@@ -265,7 +265,7 @@ def test_any_sample_in_case_has_reads(
     case: Case = request.getfixturevalue(case_fixture)
     # GIVEN that another sample on the case has no reads
     another_sample: Sample = sequencing_qc_check_scenarios.add_sample(
-        prep_category=LibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         pass_sequencing_qc=False,
         priority=case.priority,
     )

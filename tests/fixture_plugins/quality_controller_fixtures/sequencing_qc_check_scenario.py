@@ -1,4 +1,4 @@
-from cg.constants import LibraryPrepCategory
+from cg.constants import SeqLibraryPrepCategory
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority
 from cg.store.models import Application, ApplicationVersion, Case, Sample
@@ -13,12 +13,12 @@ class SequencingQCCheckScenarios:
 
     def add_sample(
         self,
-        prep_category: LibraryPrepCategory,
+        prep_category: SeqLibraryPrepCategory,
         pass_sequencing_qc: bool,
         priority: Priority,
     ) -> Sample:
         """
-        Add a sample to the store with a specified LibraryPrepCategory. The sample
+        Add a sample to the store with a specified SeqLibraryPrepCategory. The sample
         will have reads if pass_sequencing_qc is True.
         """
         application: Application = self.helpers.ensure_application(
@@ -36,12 +36,12 @@ class SequencingQCCheckScenarios:
     def add_case(
         self,
         pass_sequencing_qc: bool,
-        prep_category: LibraryPrepCategory,
+        prep_category: SeqLibraryPrepCategory,
         workflow: Workflow,
         priority: Priority = Priority.standard,
     ) -> Case:
         """
-        Add a case to the store. The case will have a sample with the specified LibraryPrepCategory. The
+        Add a case to the store. The case will have a sample with the specified SeqLibraryPrepCategory. The
         sample will have reads if pass_sequencing_qc is True. The case will have the specified
         workflow.
         """
@@ -55,11 +55,11 @@ class SequencingQCCheckScenarios:
         return case
 
     def get_sample_scenario(
-        self, priority: Priority, prep_category: LibraryPrepCategory, pass_sequencing_qc: bool
+        self, priority: Priority, prep_category: SeqLibraryPrepCategory, pass_sequencing_qc: bool
     ) -> Sample:
         """
         Create a sample scenario. The sample will have reads if pass_sequencing_qc is True. The
-        sample will have the specified LibraryPrepCategory.
+        sample will have the specified SeqLibraryPrepCategory.
         """
         return self.add_sample(
             prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc, priority=priority
@@ -69,11 +69,11 @@ class SequencingQCCheckScenarios:
         self,
         priority: Priority,
         pass_sequencing_qc: bool,
-        prep_category: LibraryPrepCategory,
+        prep_category: SeqLibraryPrepCategory,
         workflow: Workflow,
     ) -> Case:
         """
-        Create a case scenario. The case will have a sample with the specified LibraryPrepCategory. The
+        Create a case scenario. The case will have a sample with the specified SeqLibraryPrepCategory. The
         sample will have reads if pass_sequencing_qc is True. The case will have the specified
         workflow.
         """
