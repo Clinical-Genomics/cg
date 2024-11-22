@@ -213,8 +213,9 @@ class ReadHandler(BaseHandler):
         customers: list[Customer] | None,
         action: str | None,
         case_search: str | None,
-        limit: int | None = 30,
-    ) -> list[Case]:
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Case], int]:
         """
         Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
 
@@ -223,7 +224,7 @@ class ReadHandler(BaseHandler):
             action (str | None): The action string to filter cases by.
             case_search (str | None): The case search string to filter cases by.
             limit (int | None, default=30): The maximum number of cases to return.
-
+            offset (int, default=0): The offset to start returning cases by.
         Returns:
             list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
         """
@@ -245,7 +246,8 @@ class ReadHandler(BaseHandler):
             case_search=case_search,
             customer_entry_ids=customer_entry_ids,
         )
-        return filtered_cases.limit(limit=limit).all()
+        total: int = filtered_cases.count()
+        return filtered_cases.offset(offset).limit(limit=limit).all(), total
 
     def get_cases_by_customer_workflow_and_case_search(
         self,
