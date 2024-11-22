@@ -24,7 +24,7 @@ class FileManagingService:
 
 class SampleFileNameFormatter:
     """
-    Format sample file names. Takes a list of SampleFile objects and returns a list of FormattedFile objects.
+    Class to format sample file names.
     """
 
     @staticmethod
@@ -33,9 +33,9 @@ class SampleFileNameFormatter:
         return {sample_file.sample_name for sample_file in sample_files}
 
     @staticmethod
-    def generate_formatted_files(sample_files: list[SampleFile]) -> list[FormattedFile]:
+    def format_sample_file_names(sample_files: list[SampleFile]) -> list[FormattedFile]:
         """
-        Returns formatted files:
+        Returns formatted files with original and formatted file names:
         1. Adds a folder with sample name to the path of the sample files.
         2. Replaces sample id by sample name.
         """
@@ -70,19 +70,15 @@ class SampleFileFormatter:
     ) -> list[FormattedFile]:
         """Format the sample files to deliver and return the formatted files."""
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
-        [
+        for sample_name in sample_names:
             self.file_manager.create_directories(
                 base_path=ticket_dir_path, directories={sample_name}
             )
-            for sample_name in sample_names
-        ]
-        formatted_files: list[FormattedFile] = self.file_name_formatter.generate_formatted_files(
+        formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
             sample_files=moved_files
         )
-        [
+        for formatted_file in formatted_files:
             self.file_manager.rename_file(
                 src=formatted_file.original_path, dst=formatted_file.formatted_path
             )
-            for formatted_file in formatted_files
-        ]
         return formatted_files

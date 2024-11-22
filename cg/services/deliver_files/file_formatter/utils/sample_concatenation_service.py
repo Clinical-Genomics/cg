@@ -35,21 +35,17 @@ class SampleFileConcatenationFormatter:
     ) -> list[FormattedFile]:
         """Format the sample files to deliver, concatenate fastq files and return the formatted files."""
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
-        [
+        for sample_name in sample_names:
             self.file_manager.create_directories(
                 base_path=ticket_dir_path, directories={sample_name}
             )
-            for sample_name in sample_names
-        ]
-        formatted_files: list[FormattedFile] = self.file_name_formatter.generate_formatted_files(
+        formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
             sample_files=moved_files
         )
-        [
+        for formatted_file in formatted_files:
             self.file_manager.rename_file(
                 src=formatted_file.original_path, dst=formatted_file.formatted_path
             )
-            for formatted_file in formatted_files
-        ]
         forward_paths, reverse_path = self._concatenate_fastq_files(formatted_files=formatted_files)
         self._replace_fastq_paths(
             reverse_paths=reverse_path,
