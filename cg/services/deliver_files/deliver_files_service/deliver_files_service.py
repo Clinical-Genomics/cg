@@ -9,21 +9,13 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.error_handling import (
     handle_no_delivery_files_error,
 )
-from cg.services.deliver_files.file_fetcher.abstract import (
-    FetchDeliveryFilesService,
-)
+from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
-from cg.services.deliver_files.file_formatter.abstract import (
-    DeliveryFileFormattingService,
-)
-from cg.services.deliver_files.file_formatter.models import (
-    FormattedFiles,
-)
+from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
+from cg.services.deliver_files.file_formatter.models import FormattedFiles
 from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
 from cg.store.store import Store
