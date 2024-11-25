@@ -25,9 +25,7 @@ from cg.services.order_validation_service.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    OrderWithSamples,
-)
+from cg.services.order_validation_service.workflows.microsalt.models.order import OrderWithSamples
 from cg.store.store import Store
 
 
@@ -62,7 +60,7 @@ def validate_volume_interval(order: OrderWithSamples, **kwargs) -> list[InvalidV
     return errors
 
 
-def validate_required_volume(order: OrderWithSamples, **kwargs) -> list[VolumeRequiredError]:
+def validate_volume_required(order: OrderWithSamples, **kwargs) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_volume_missing(sample):
