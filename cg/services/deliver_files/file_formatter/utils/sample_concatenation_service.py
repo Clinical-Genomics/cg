@@ -10,26 +10,43 @@ from cg.services.fastq_concatenation_service.utils import generate_concatenated_
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
-    SampleFileFormatter,
+    SampleFileNameFormatter,
+    FileManagingService,
 )
 
 
-class SampleFileConcatenationFormatter(SampleFileFormatter):
+class SampleFileConcatenationFormatter:
     """
     Format the sample files to deliver, concatenate fastq files and return the formatted files.
-    Used for workflows: Microsalt and Mutant.
+    Used for workflows: Microsalt.
     """
 
-    def __init__(self, concatenation_service: FastqConcatenationService):
+    def __init__(
+        self,
+        file_manager: FileManagingService,
+        file_formatter: SampleFileNameFormatter,
+        concatenation_service: FastqConcatenationService,
+    ):
+        self.file_manager = file_manager
+        self.file_name_formatter = file_formatter
         self.concatenation_service = concatenation_service
 
     def format_files(
         self, moved_files: list[SampleFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
         """Format the sample files to deliver, concatenate fastq files and return the formatted files."""
-        formatted_files: list[FormattedFile] = super().format_files(
-            moved_files=moved_files, ticket_dir_path=ticket_dir_path
+        sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
+        for sample_name in sample_names:
+            self.file_manager.create_directories(
+                base_path=ticket_dir_path, directories={sample_name}
+            )
+        formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
+            sample_files=moved_files
         )
+        for formatted_file in formatted_files:
+            self.file_manager.rename_file(
+                src=formatted_file.original_path, dst=formatted_file.formatted_path
+            )
         forward_paths, reverse_path = self._concatenate_fastq_files(formatted_files=formatted_files)
         self._replace_fastq_paths(
             reverse_paths=reverse_path,

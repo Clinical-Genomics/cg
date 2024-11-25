@@ -21,6 +21,8 @@ from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
+    FileManagingService,
+    SampleFileNameFormatter,
 )
 
 
@@ -35,12 +37,18 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import (
         (
             "expected_moved_analysis_sample_delivery_files",
             "expected_formatted_analysis_sample_files",
-            SampleFileFormatter(),
+            SampleFileFormatter(
+                file_manager=FileManagingService(), file_name_formatter=SampleFileNameFormatter()
+            ),
         ),
         (
             "fastq_concatenation_sample_files",
             "expected_concatenated_fastq_formatted_files",
-            SampleFileConcatenationFormatter(FastqConcatenationService()),
+            SampleFileConcatenationFormatter(
+                file_manager=FileManagingService(),
+                file_formatter=SampleFileNameFormatter(),
+                concatenation_service=FastqConcatenationService(),
+            ),
         ),
     ],
 )
@@ -90,7 +98,13 @@ def test_mutant_file_formatter(
 
     # Initialize file_formatter
     file_formatter = MutantFileFormatter(
-        concatenation_service=FastqConcatenationService(), lims_api=Mock()
+        file_manager=FileManagingService(),
+        file_formatter=SampleFileConcatenationFormatter(
+            file_manager=FileManagingService(),
+            file_formatter=SampleFileNameFormatter(),
+            concatenation_service=FastqConcatenationService(),
+        ),
+        lims_api=Mock(),
     )
 
     # WHEN formatting the files

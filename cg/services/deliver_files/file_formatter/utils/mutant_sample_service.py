@@ -6,45 +6,45 @@ from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
+from cg.services.deliver_files.file_formatter.utils.sample_service import FileManagingService
 
 
-class MutantFileFormatter(SampleFileConcatenationFormatter):
-    def __init__(self, lims_api: LimsAPI, concatenation_service: FastqConcatenationService):
+class MutantFileFormatter:
+    def __init__(
+        self,
+        lims_api: LimsAPI,
+        file_formatter: SampleFileConcatenationFormatter,
+        file_manager: FileManagingService,
+    ):
         self.lims_api: LimsAPI = lims_api
-        super().__init__(concatenation_service=concatenation_service)
+        self.file_formatter: SampleFileConcatenationFormatter = file_formatter
+        self.file_manager = file_manager
 
     def format_files(
         self, moved_files: list[SampleFile], ticket_dir_path: Path
     ) -> list[FormattedFile]:
-        formatted_files: list[FormattedFile] = super().format_files(
+        formatted_files: list[FormattedFile] = self.file_formatter.format_files(
             moved_files=moved_files, ticket_dir_path=ticket_dir_path
         )
         formatted_files = self._add_lims_metadata(
             formatted_files=formatted_files, sample_files=moved_files
         )
         unique_formatted_files = self._filter_unique_path_combinations(formatted_files)
-        return self._format_sample_files(unique_formatted_files)
+        for unique_files in unique_formatted_files:
+            self.file_manager.rename_file(
+                src=unique_files.original_path, dst=unique_files.formatted_path
+            )
+        return unique_formatted_files
 
-    def _get_lims_naming_metadata(self, sample_id: str) -> str:
-        region_code = self.lims_api.get_sample_attribute(
-            lims_id=sample_id, key="region_code"
-        ).split(" ")[0]
-        lab_code = self.lims_api.get_sample_attribute(lims_id=sample_id, key="lab_code").split(" ")[
-            0
-        ]
-        return f"{region_code}_{lab_code}_"
-
-    def _add_lims_metadata(
+    def _add_lims_metadata_to_file_name(
         self, formatted_files: list[FormattedFile], sample_files: list[SampleFile]
     ) -> list[FormattedFile]:
+        """This functions adds the region and lab code to the file name of the formatted files."""
         for formatted_file in formatted_files:
             sample_id: str = self._get_sample_id_by_original_path(
                 original_path=formatted_file.original_path, sample_files=sample_files
             )
-            lims_meta_data = self._get_lims_naming_metadata(sample_id)
+            lims_meta_data = self.lims_api.get_sample_region_and_lab_code(sample_id)
             formatted_file.original_path = formatted_file.formatted_path
             formatted_file.formatted_path = Path(
                 formatted_file.formatted_path.parent,
@@ -63,6 +63,13 @@ class MutantFileFormatter(SampleFileConcatenationFormatter):
     def _filter_unique_path_combinations(
         formatted_files: list[FormattedFile],
     ) -> list[FormattedFile]:
+        """
+        During fastq concatenation Sample_R1 and Sample_R2 files are concatenated and moved to the same file Concat_Sample.
+        This mean that there can be multiple entries for the same concatenated file in the formatted_files list coming
+        from the SampleFileConcatenationService.
+        This function filters out the duplicates to avoid moving the same file multiple times
+        which would result in an error the second time since the files is no longer in the original path.
+        """
         unique_combinations = set()
         unique_files = []
         for formatted_file in formatted_files:
