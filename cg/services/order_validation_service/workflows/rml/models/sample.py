@@ -11,3 +11,4 @@ class RmlSample(Sample):
     priority: PriorityEnum
     sample_concentration: float | None = None
     volume: int
+    well_position_rml: str | None = None

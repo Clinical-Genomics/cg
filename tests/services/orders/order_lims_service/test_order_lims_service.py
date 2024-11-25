@@ -4,7 +4,9 @@ from cg.constants import Workflow
 from cg.models.lims.sample import LimsSample
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 
 
@@ -43,7 +45,7 @@ def test_to_lims_mip(mip_order_to_submit):
 
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
-    order_data = OrderIn.parse_obj(obj=fastq_order_to_submit, project=OrderType.FASTQ)
+    order_data = FastqOrder.model_validate(fastq_order_to_submit)
 
     # WHEN parsing the order to format for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
@@ -52,17 +54,17 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
     # THEN should "work"
     assert len(samples) == 2
-    normal_sample = samples[0]
-    tumor_sample = samples[1]
+    tumour_sample = samples[0]
+    normal_sample = samples[1]
     # ... and pick out relevant UDF values
     assert normal_sample.udfs.tumour is False
-    assert tumor_sample.udfs.tumour is True
-    assert normal_sample.udfs.volume == "1"
+    assert tumour_sample.udfs.tumour is True
+    assert normal_sample.udfs.volume == "54"
 
 
 def test_to_lims_rml(rml_order_to_submit):
     # GIVEN a rml order for four samples
-    order_data = OrderIn.parse_obj(obj=rml_order_to_submit, project=OrderType.RML)
+    order_data = RmlOrder.model_validate(rml_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
