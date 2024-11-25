@@ -26,7 +26,7 @@ class MutantFileFormatter:
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
             moved_files=moved_files, ticket_dir_path=ticket_dir_path
         )
-        formatted_files = self._add_lims_metadata(
+        formatted_files = self._add_lims_metadata_to_file_name(
             formatted_files=formatted_files, sample_files=moved_files
         )
         unique_formatted_files = self._filter_unique_path_combinations(formatted_files)
