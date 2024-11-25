@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 from pathlib import Path
 
+from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
@@ -96,6 +97,9 @@ def test_mutant_file_formatter(
     for moved_file in mutant_moved_files:
         moved_file.file_path.touch()
 
+    lims_mock = Mock()
+    lims_mock.get_sample_region_and_lab_code.return_value = lims_naming_matadata
+
     # Initialize file_formatter
     file_formatter = MutantFileFormatter(
         file_manager=FileManagingService(),
@@ -104,18 +108,14 @@ def test_mutant_file_formatter(
             file_formatter=SampleFileNameFormatter(),
             concatenation_service=FastqConcatenationService(),
         ),
-        lims_api=Mock(),
+        lims_api=lims_mock,
     )
 
     # WHEN formatting the files
-    with mock.patch.object(
-        MutantFileFormatter, "_get_lims_naming_metadata", return_value=lims_naming_matadata
-    ):
-
-        formatted_files: list[FormattedFile] = file_formatter.format_files(
-            moved_files=mutant_moved_files,
-            ticket_dir_path=ticket_dir_path,
-        )
+    formatted_files: list[FormattedFile] = file_formatter.format_files(
+        moved_files=mutant_moved_files,
+        ticket_dir_path=ticket_dir_path,
+    )
 
     # THEN the files should be formatted
     assert formatted_files == expected_mutant_formatted_files

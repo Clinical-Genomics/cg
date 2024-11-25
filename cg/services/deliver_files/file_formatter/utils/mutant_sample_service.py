@@ -26,10 +26,12 @@ class MutantFileFormatter:
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
             moved_files=moved_files, ticket_dir_path=ticket_dir_path
         )
-        formatted_files = self._add_lims_metadata_to_file_name(
+        appended_formatted_files: list[FormattedFile] = self._add_lims_metadata_to_file_name(
             formatted_files=formatted_files, sample_files=moved_files
         )
-        unique_formatted_files = self._filter_unique_path_combinations(formatted_files)
+        unique_formatted_files: list[FormattedFile] = self._filter_unique_path_combinations(
+            appended_formatted_files
+        )
         for unique_files in unique_formatted_files:
             self.file_manager.rename_file(
                 src=unique_files.original_path, dst=unique_files.formatted_path
@@ -40,17 +42,22 @@ class MutantFileFormatter:
         self, formatted_files: list[FormattedFile], sample_files: list[SampleFile]
     ) -> list[FormattedFile]:
         """This functions adds the region and lab code to the file name of the formatted files."""
+        appended_formatted_files: list[FormattedFile] = []
         for formatted_file in formatted_files:
             sample_id: str = self._get_sample_id_by_original_path(
                 original_path=formatted_file.original_path, sample_files=sample_files
             )
             lims_meta_data = self.lims_api.get_sample_region_and_lab_code(sample_id)
-            formatted_file.original_path = formatted_file.formatted_path
-            formatted_file.formatted_path = Path(
+
+            new_original_path: Path = formatted_file.formatted_path
+            new_formatted_path = Path(
                 formatted_file.formatted_path.parent,
                 f"{lims_meta_data}{formatted_file.formatted_path.name}",
             )
-        return formatted_files
+            appended_formatted_files.append(
+                FormattedFile(original_path=new_original_path, formatted_path=new_formatted_path)
+            )
+        return appended_formatted_files
 
     @staticmethod
     def _get_sample_id_by_original_path(original_path: Path, sample_files: list[SampleFile]) -> str:
@@ -71,7 +78,7 @@ class MutantFileFormatter:
         which would result in an error the second time since the files is no longer in the original path.
         """
         unique_combinations = set()
-        unique_files = []
+        unique_files: list[FormattedFile] = []
         for formatted_file in formatted_files:
             combination = (formatted_file.original_path, formatted_file.formatted_path)
             if combination not in unique_combinations:
