@@ -48,11 +48,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         return TaxprofilerSampleSheetEntry.headers()
 
     @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True

@@ -51,11 +51,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RnafusionSampleSheetEntry.headers()
 
     @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
-
-    @property
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False

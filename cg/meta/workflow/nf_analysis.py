@@ -20,7 +20,8 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
-from cg.io.config import write_config_nextflow_style
+
+# from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
@@ -99,11 +100,6 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
@@ -131,7 +127,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
@@ -145,14 +141,12 @@ class NfAnalysisAPI(AnalysisAPI):
         extra_parameters_str: list[str] = [
             self.set_cluster_options(case_id=case_id),
         ]
-        if self.is_params_appended_to_nextflow_config:
-            extra_parameters_str.append(
-                write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict())
-            )
         return concat_txt(
             file_paths=config_files_list,
             str_content=extra_parameters_str,
         )
+
+    # def include_config_statement(self, config_file: str):
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -330,7 +324,7 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
-    def create_sample_sheet(self, case_id: str, dry_run: bool):
+    def create_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """Create sample sheet for a case."""
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         if not dry_run:
@@ -340,12 +334,17 @@ class NfAnalysisAPI(AnalysisAPI):
                 header=self.sample_sheet_headers,
             )
 
-    def create_params_file(self, case_id: str, dry_run: bool):
+    def params_file_content(self, case_id: str, dry_run: bool) -> None:
         """Create parameters file for a case."""
-        LOG.debug("Getting parameters information")
-        workflow_parameters = None
-        if not self.is_params_appended_to_nextflow_config:
-            workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
+        LOG.debug("Getting parameters information build from CG")
+        built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
+            case_id=case_id
+        ).dict()
+        LOG.debug("Add to parameters from config")
+        workflow_parameters: str = concat_txt(
+            file_paths=self.config_params,
+            str_content=built_workflow_parameters,
+        )
         if not dry_run:
             self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
 
@@ -377,7 +376,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
-        self.create_params_file(case_id=case_id, dry_run=dry_run)
+        self.params_file_content(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
