@@ -1,8 +1,8 @@
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
-from cg.services.order_validation_service.workflows.micriobial_fastq.constants import (
+from cg.services.order_validation_service.workflows.microbial_fastq.constants import (
     MicrobialFastqDeliveryType,
 )
-from cg.services.order_validation_service.workflows.micriobial_fastq.models.sample import (
+from cg.services.order_validation_service.workflows.microbial_fastq.models.sample import (
     MicrobialFastqSample,
 )
 
