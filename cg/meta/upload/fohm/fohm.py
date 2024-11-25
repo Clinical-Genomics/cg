@@ -29,7 +29,6 @@ LOG = logging.getLogger(__name__)
 class FOHMUploadAPI:
     def __init__(
         self,
-        delivery_factory: DeliveryServiceFactory,
         config: CGConfig,
         dry_run: bool = False,
         datestr: str | None = None,
@@ -49,7 +48,7 @@ class FOHMUploadAPI:
         self._reports_dataframe = None
         self._pangolin_dataframe = None
         self._aggregation_dataframe = None
-        self._delivery_factory: DeliveryServiceFactory = delivery_factory
+        self._delivery_factory: DeliveryServiceFactory = config.delivery_service_factory
 
     @property
     def current_datestr(self) -> str:

@@ -42,7 +42,6 @@ def aggregate_delivery(
 ):
     """Re-aggregates delivery files for FOHM and saves them to default working directory."""
     fohm_api = FOHMUploadAPI(
-        delivery_factory=context.delivery_service_factory,
         config=context,
         dry_run=dry_run,
         datestr=datestr,
@@ -63,7 +62,6 @@ def create_komplettering(
 ):
     """Re-aggregates komplettering files for FOHM and saves them to default working directory."""
     fohm_api = FOHMUploadAPI(
-        delivery_factory=context.delivery_service_factory,
         config=context,
         dry_run=dry_run,
         datestr=datestr,
@@ -84,7 +82,6 @@ def preprocess_all(
 ):
     """Create all FOHM upload files, upload to GISAID, sync SFTP and mail reports for all provided cases."""
     fohm_api = FOHMUploadAPI(
-        delivery_factory=context.delivery_service_factory,
         config=context,
         dry_run=dry_run,
         datestr=datestr,
@@ -121,7 +118,6 @@ def preprocess_all(
 def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Deliver files in daily upload directory via sftp."""
     fohm_api = FOHMUploadAPI(
-        delivery_factory=context.delivery_service_factory,
         config=context,
         dry_run=dry_run,
         datestr=datestr,
@@ -136,7 +132,6 @@ def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: str | None
 def send_reports(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Send all komplettering reports found in the current daily directory to target recipients."""
     fohm_api = FOHMUploadAPI(
-        delivery_factory=context.delivery_service_factory,
         config=context,
         dry_run=dry_run,
         datestr=datestr,

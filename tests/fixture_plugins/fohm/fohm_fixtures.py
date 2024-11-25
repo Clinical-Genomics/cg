@@ -109,7 +109,9 @@ def fohm_upload_api(
     cg_context: CGConfig, mocker: MockFixture, helpers: StoreHelpers
 ) -> FOHMUploadAPI:
     """FOHM upload API fixture."""
-    fohm_upload_api = FOHMUploadAPI(cg_context)
+    fohm_upload_api = FOHMUploadAPI(
+        config=cg_context, delivery_factory=cg_context.delivery_service_factory
+    )
 
     # Mock getting Sample object from StatusDB
     mocker.patch.object(
