@@ -400,21 +400,6 @@ def expected_number_of_applications() -> int:
 
 
 @pytest.fixture
-def microbial_store(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
-    """Populate a store with microbial application tags"""
-    microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
-    microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
-
-    for app_tag in microbial_active_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=False)
-
-    for app_tag in microbial_inactive_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=True)
-
-    return store
-
-
-@pytest.fixture
 def max_nr_of_samples() -> int:
     """Return maximum numbers of samples"""
     return 50
