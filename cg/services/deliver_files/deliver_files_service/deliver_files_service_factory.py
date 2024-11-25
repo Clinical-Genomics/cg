@@ -24,7 +24,11 @@ from cg.services.deliver_files.file_formatter.utils.case_service import CaseFile
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
+from cg.services.deliver_files.file_formatter.utils.sample_service import (
+    SampleFileFormatter,
+    FileManagingService,
+    SampleFileNameFormatter,
+)
 from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
@@ -135,8 +139,14 @@ class DeliveryServiceFactory:
         """Get the file formatter service based on the workflow."""
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
-            return SampleFileConcatenationFormatter(FastqConcatenationService())
-        return SampleFileFormatter()
+            return SampleFileConcatenationFormatter(
+                file_manager=FileManagingService(),
+                file_formatter=SampleFileNameFormatter(),
+                concatenation_service=FastqConcatenationService(),
+            )
+        return SampleFileFormatter(
+            file_manager=FileManagingService(), file_name_formatter=SampleFileNameFormatter()
+        )
 
     def build_delivery_service(
         self, case: Case, delivery_type: DataDelivery | None = None

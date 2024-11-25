@@ -37,7 +37,7 @@ class DeliveryServiceScenario(BaseModel):
     expected_tag_fetcher: type[FetchDeliveryFileTagsService]
     expected_file_fetcher: type[FetchDeliveryFilesService]
     expected_file_mover: type[DeliveryFilesMover]
-    expected_sample_file_formatter: type[SampleFileFormatter]
+    expected_sample_file_formatter: type[SampleFileFormatter | SampleFileConcatenationFormatter]
     store_name: str
 
 
