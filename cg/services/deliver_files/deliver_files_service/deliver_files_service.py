@@ -107,6 +107,19 @@ class DeliverFilesService:
         )
         self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
+    def deliver_files_for_FOHM_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
+        """Deliver the files for a sample to the customer folder."""
+        delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
+            case_id=case.internal_id
+        )
+        filtered_files: DeliveryFiles = self.file_filter.filter_delivery_files(
+            delivery_files=delivery_files, sample_id=sample_id
+        )
+        moved_files: DeliveryFiles = self.file_mover.move_files(
+            delivery_files=filtered_files, delivery_base_path=delivery_base_path
+        )
+        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
         job_id: int = self.rsync_service.run_rsync_for_case(
