@@ -30,7 +30,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
         self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
-        self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
@@ -83,15 +82,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         return RnafusionParameters(
-            genomes_base=genomes_base or self.get_references_path(),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
-
-    def get_references_path(self, genomes_base: Path | None = None) -> Path:
-        if genomes_base:
-            return genomes_base.absolute()
-        return Path(self.references).absolute()
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

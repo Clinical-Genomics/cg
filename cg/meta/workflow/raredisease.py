@@ -50,7 +50,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
         self.workflow_bin_path: str = config.raredisease.workflow_bin_path
-        self.references: str = config.raredisease.references
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
@@ -117,11 +116,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
-            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
-            target_bed=Path(self.references, target_bed).as_posix(),
+            target_bed=Path("${local_genomes}", target_bed).as_posix(),
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
