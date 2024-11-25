@@ -266,17 +266,17 @@ def related_dna_cases(store_with_rna_and_dna_samples_and_cases: Store) -> list[C
     return [related_dna_case_1, related_dna_case_2]
 
 
-@pytest.fixture
-def related_dna_case_ids(related_dna_cases: list[Case]) -> list[str]:
-    return [case.internal_id for case in related_dna_cases]
+# @pytest.fixture
+# def related_dna_case_ids(related_dna_cases: list[Case]) -> list[str]:
+#     return [case.internal_id for case in related_dna_cases]
 
 
 @pytest.fixture
-def uploaded_related_dna_case_ids(related_dna_cases: list[Case]) -> list[str]:
-    related_uploaded_dna_cases: list[str] = []
+def uploaded_related_dna_case(related_dna_cases: list[Case]) -> list[Case]:
+    related_uploaded_dna_cases: list[Case] = []
     for case in related_dna_cases:
         if case.is_uploaded:
-            related_uploaded_dna_cases.append(case.internal_id)
+            related_uploaded_dna_cases.append(case)
     return related_uploaded_dna_cases
 
 

@@ -18,20 +18,12 @@ from cg.constants.constants import (
 )
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.samples.collaborator_samples_request import (
-    CollaboratorSamplesRequest,
-)
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
-)
-from cg.store.filters.status_application_filters import (
-    ApplicationFilter,
-    apply_application_filter,
-)
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -41,23 +33,14 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import (
-    BedVersionFilter,
-    apply_bed_version_filter,
-)
+from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import (
-    CaseSampleFilter,
-    apply_case_sample_filter,
-)
+from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import (
-    CustomerFilter,
-    apply_customer_filter,
-)
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -76,10 +59,7 @@ from cg.store.filters.status_ordertype_application_filters import (
     OrderTypeApplicationFilter,
     apply_order_type_application_filter,
 )
-from cg.store.filters.status_organism_filters import (
-    OrganismFilter,
-    apply_organism_filter,
-)
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_pacbio_smrt_cell_filters import (
     PacBioSMRTCellFilter,
     apply_pac_bio_smrt_cell_filters,
@@ -1636,12 +1616,12 @@ class ReadHandler(BaseHandler):
         )
         return samples
 
-    def get_uploaded_related_dna_case_ids(self, rna_case_id: str) -> list[str]:
+    def get_uploaded_related_dna_cases(self, rna_case_id: str) -> list[Case]:
         """Returns all uploaded DNA cases ids related to the given RNA case."""
 
         rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
 
-        related_dna_cases_ids: list[str] = []
+        related_dna_cases: list[Case] = []
         for rna_sample in rna_case.samples:
 
             collaborators: set[Customer] = rna_sample.customer.collaborators
@@ -1673,8 +1653,8 @@ class ReadHandler(BaseHandler):
                 filter_functions=[AnalysisFilter.IS_UPLOADED],
             )
 
-            dna_cases_ids: list = dna_samples_cases_analysis.with_entities(Case.internal_id).all()
+            dna_cases = dna_samples_cases_analysis.all()
 
-            related_dna_cases_ids.extend([row[0] for row in dna_cases_ids])
+            related_dna_cases.extend([case for case in dna_cases])
 
-        return related_dna_cases_ids
+        return related_dna_cases
