@@ -614,15 +614,14 @@ def test_get_related_samples(
     # GIVEN a database with an RNA sample and several DNA samples with the same subject_id and tumour status as the given sample
     # GIVEN that all customers are in a collaboration
     # GIVEN a list of dna prep categories
+    store: Store = store_with_rna_and_dna_samples_and_cases
     prep_categories: list[PrepCategory] = DNA_PREP_CATEGORIES
 
     # WHEN getting the related DNA samples to the given sample
-    fetched_related_dna_samples_query = (
-        store_with_rna_and_dna_samples_and_cases._get_related_samples_query(
-            sample=rna_sample,
-            prep_categories=prep_categories,
-            collaborators=rna_sample_collaborators,
-        )
+    fetched_related_dna_samples_query = store._get_related_samples_query(
+        sample=rna_sample,
+        prep_categories=prep_categories,
+        collaborators=rna_sample_collaborators,
     )
 
     fetched_related_dna_samples: list[Sample] = fetched_related_dna_samples_query.all()
