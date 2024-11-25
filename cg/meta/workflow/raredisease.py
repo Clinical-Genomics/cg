@@ -49,13 +49,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
-        self.nfcore_workflow_path: str = config.raredisease.workflow_path
+        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.references: str = config.raredisease.references
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
         self.config_platform: str = config.raredisease.config_platform
         self.config_params: str = config.raredisease.config_params
+        self.config_config: str = config.raredisease.config_config
         self.config_resources: str = config.raredisease.config_resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
@@ -108,7 +109,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             return True
         return False
 
-    def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)

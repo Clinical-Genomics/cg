@@ -28,7 +28,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
-        self.nfcore_workflow_path: str = config.taxprofiler.workflow_path
+        self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
@@ -77,7 +77,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
         return TaxprofilerParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",

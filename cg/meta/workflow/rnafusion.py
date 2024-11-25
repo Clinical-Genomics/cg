@@ -29,13 +29,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_workflow_path: str = config.rnafusion.workflow_path
+        self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
         self.config_platform: str = config.rnafusion.config_platform
         self.config_params: str = config.rnafusion.config_params
+        self.config_config: str = config.rnafusion.config_config
         self.config_resources: str = config.rnafusion.config_resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.rnafusion.tower_workflow
@@ -77,7 +78,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_workflow_parameters(
+    def get_built_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""

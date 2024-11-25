@@ -20,8 +20,6 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
-
-# from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
@@ -56,13 +54,14 @@ class NfAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.nfcore_workflow_path: str | None = None
+        self.workflow_bin_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
         self.config_platform: str | None = None
         self.config_params: str | None = None
+        self.config_config: str | None = None
         self.config_resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
@@ -135,7 +134,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return nextflow config content."""
         config_files_list: list[str] = [
             self.config_platform,
-            self.config_params,
+            self.config_config,
             self.config_resources,
         ]
         extra_parameters_str: list[str] = [
@@ -334,9 +333,9 @@ class NfAnalysisAPI(AnalysisAPI):
                 header=self.sample_sheet_headers,
             )
 
-    def params_file_content(self, case_id: str, dry_run: bool) -> None:
+    def create_params_file(self, case_id: str, dry_run: bool) -> None:
         """Create parameters file for a case."""
-        LOG.debug("Getting parameters information build from CG")
+        LOG.debug("Getting parameters information built from CG")
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
             case_id=case_id
         ).dict()
@@ -352,12 +351,11 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create nextflow config file."""
         if content := self.get_nextflow_config_content(case_id=case_id):
             LOG.debug("Writing nextflow config file")
-            if dry_run:
-                return
-            write_txt(
-                content=content,
-                file_path=self.get_nextflow_config_path(case_id=case_id),
-            )
+            if not dry_run:
+                write_txt(
+                    content=content,
+                    file_path=self.get_nextflow_config_path(case_id=case_id),
+                )
 
     def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
@@ -376,7 +374,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
-        self.params_file_content(case_id=case_id, dry_run=dry_run)
+        self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
@@ -401,7 +399,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            workflow_path=self.nfcore_workflow_path,
+            workflow_bin_path=self.workflow_bin_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
