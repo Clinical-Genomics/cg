@@ -24,20 +24,17 @@ from cg.services.deliver_files.file_formatter.utils.case_service import CaseFile
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-<<<<<<< HEAD
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
     FileManagingService,
     SampleFileNameFormatter,
-=======
-from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
+)
 from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
->>>>>>> master
 )
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
@@ -150,6 +147,7 @@ class DeliveryServiceFactory:
         return SampleFileFormatter(
             file_manager=FileManagingService(), file_name_formatter=SampleFileNameFormatter()
         )
+
     def build_delivery_service(
         self, case: Case, delivery_type: DataDelivery | None = None
     ) -> DeliverFilesService:
