@@ -16,13 +16,7 @@ from cg.constants.constants import (
     PrepCategory,
     SampleType,
 )
-from cg.exc import (
-    CaseNotFoundError,
-    CgDataError,
-    CgError,
-    OrderNotFoundError,
-    SampleNotFoundError,
-)
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.samples.collaborator_samples_request import (
@@ -1591,7 +1585,7 @@ class ReadHandler(BaseHandler):
         prep_categories: list[PrepCategory],
         collaborators: set[Customer],
     ) -> Query:
-        """Returns a query with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
+        """Returns a sample query with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1615,8 +1609,7 @@ class ReadHandler(BaseHandler):
         return samples
 
     def get_uploaded_related_dna_case_ids(self, rna_case_id: str) -> list[str]:
-        """Return a list of cases linked to the given rna sample within the given list of workflows and customers in a collaboration."""
-        """Returns all uploaded DNA cases related to the specified RNA case."""
+        """Returns all uploaded DNA cases ids related to the given RNA case."""
 
         rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
 
@@ -1652,10 +1645,8 @@ class ReadHandler(BaseHandler):
                 filter_functions=[AnalysisFilter.IS_UPLOADED],
             )
 
-            dna_samples_cases_analysis: list = dna_samples_cases_analysis.with_entities(
-                Case.internal_id
-            ).all()
+            dna_cases_ids: list = dna_samples_cases_analysis.with_entities(Case.internal_id).all()
 
-            related_dna_cases_ids.extend([row[0] for row in dna_samples_cases_analysis])
+            related_dna_cases_ids.extend([row[0] for row in dna_cases_ids])
 
         return related_dna_cases_ids

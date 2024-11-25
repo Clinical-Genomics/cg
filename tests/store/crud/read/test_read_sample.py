@@ -617,11 +617,15 @@ def test_get_related_samples(
     prep_categories: list[PrepCategory] = DNA_PREP_CATEGORIES
 
     # WHEN getting the related DNA samples to the given sample
-    fetched_related_dna_samples = store_with_rna_and_dna_samples_and_cases.get_related_samples(
-        sample_internal_id=rna_sample.internal_id,
-        prep_categories=prep_categories,
-        collaborators=rna_sample_collaborators,
+    fetched_related_dna_samples_query = (
+        store_with_rna_and_dna_samples_and_cases._get_related_samples_query(
+            sample=rna_sample,
+            prep_categories=prep_categories,
+            collaborators=rna_sample_collaborators,
+        )
     )
+
+    fetched_related_dna_samples: list[Sample] = fetched_related_dna_samples_query.all()
 
     # THEN the correct set of samples is returned
     assert set(related_dna_samples) == set(fetched_related_dna_samples)
