@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import Blueprint, abort, g, jsonify, request
 
 from cg.exc import CaseNotFoundError, OrderMismatchError
-from cg.server.dto.cases.cases_request import CasesRequest
+from cg.server.dto.cases.requests import CasesRequest
 from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.endpoints.utils import before_request

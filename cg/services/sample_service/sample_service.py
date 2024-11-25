@@ -1,6 +1,4 @@
-from cg.server.dto.samples.collaborator_samples_request import (
-    CollaboratorSamplesRequest,
-)
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.services.sample_service.utils import (
     create_samples_response,

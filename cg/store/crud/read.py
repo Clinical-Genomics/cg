@@ -11,7 +11,7 @@ from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
@@ -612,8 +612,8 @@ class ReadHandler(BaseHandler):
 
     def get_samples_by_customers_and_pattern(
         self, *, customers: list[Customer] | None = None, pattern: str = None
-    ) -> list[Sample]:
-        """Get samples by customer and sample internal id  or sample name pattern."""
+    ) -> tuple[list[Sample], int]:
+        """Get samples by customer and sample internal id or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
         if customers:
@@ -623,12 +623,13 @@ class ReadHandler(BaseHandler):
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        return apply_sample_filter(
+        samples: list[Sample] = apply_sample_filter(
             samples=samples,
             customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
+        return samples, len(samples)
 
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
         customer: Customer | None = self.get_customer_by_internal_id(request.customer)
