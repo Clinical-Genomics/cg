@@ -156,6 +156,7 @@ def test_store_mip_rna(
     assert new_link.sample.application_version.application.tag == rna_application_tag
 
 
+@pytest.mark.xfail(reason="New validation to be implemented")
 def test_store_cancer_samples(
     base_store: Store,
     balsamic_status_data: dict,

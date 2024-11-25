@@ -9,6 +9,7 @@ class RmlSample(Sample):
     pool: str
     pool_concentration: float
     priority: PriorityEnum
+    rml_plate_name: str | None = None
     sample_concentration: float | None = None
     volume: int
     well_position_rml: str | None = None

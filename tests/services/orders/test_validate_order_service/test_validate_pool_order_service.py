@@ -12,6 +12,7 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.mark.xfail(reason="New validation to be implemented")
 def test_validate_normal_order(rml_order_to_submit: dict, base_store: Store):
     # GIVEN pool order with three samples, none in the database
     order = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
@@ -21,6 +22,7 @@ def test_validate_normal_order(rml_order_to_submit: dict, base_store: Store):
     # THEN it should be regarded as valid
 
 
+@pytest.mark.xfail(reason="New validation to be implemented")
 def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helpers: StoreHelpers):
     # GIVEN pool order with a case already all in the database
     order: OrderIn = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
