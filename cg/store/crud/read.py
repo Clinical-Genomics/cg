@@ -1653,7 +1653,7 @@ class ReadHandler(BaseHandler):
                 filter_functions=[AnalysisFilter.IS_UPLOADED],
             )
 
-            dna_cases = dna_samples_cases_analysis.all()
+            dna_cases: list[Case] = dna_samples_cases_analysis.with_entities(Case).all()
 
             related_dna_cases.extend([case for case in dna_cases])
 
