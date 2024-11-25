@@ -30,13 +30,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    FileFormat,
-    GenomeVersion,
-    Strandedness,
-)
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -57,22 +51,14 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.raredisease.raredisease import (
-    RarediseaseParameters,
-    RarediseaseSampleSheetHeaders,
-)
+from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import (
-    IlluminaDataTransferService,
-)
+from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -146,6 +132,7 @@ pytest_plugins = [
     "tests.fixture_plugins.pacbio_fixtures.unprocessed_runs_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
+    "tests.fixture_plugins.store_fixtures",
     "tests.fixture_plugins.timestamp_fixtures",
 ]
 
@@ -1260,7 +1247,7 @@ def crunchy_api():
 # Store fixtures
 
 
-@pytest.fixture(name="analysis_store")
+@pytest.fixture
 def analysis_store(
     base_store: Store,
     analysis_family: dict,
@@ -4258,3 +4245,9 @@ def libary_sequencing_method() -> str:
 @pytest.fixture
 def capture_kit() -> str:
     return "panel.bed"
+
+
+@pytest.fixture
+def case(analysis_store: Store) -> Case:
+    """Return a case models object."""
+    return analysis_store.get_cases()[0]
