@@ -8,7 +8,8 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
+from cg.constants.constants import CaseActions, CustomerId, SampleType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.constants import OrderType
@@ -602,7 +603,7 @@ class ReadHandler(BaseHandler):
 
         application: Application = self.get_application_by_case(case_id=case_id)
 
-        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+        if application.prep_category != SeqLibraryPrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -864,7 +865,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_active_applications_by_prep_category(
-        self, prep_category: PrepCategory
+        self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
         """Return all active applications by prep category."""
         return apply_application_filter(
@@ -1625,7 +1626,7 @@ class ReadHandler(BaseHandler):
     def get_related_samples(
         self,
         sample_internal_id: str,
-        prep_categories: list[PrepCategory],
+        prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> list[Sample]:
         """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""

@@ -11,11 +11,11 @@ import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.scout import ScoutCustomCaseReportTags
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Case, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI, MockFile
+from tests.mocks.hk_mock import MockFile, MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 
@@ -45,8 +45,8 @@ def ensure_two_dna_tumour_matches(
     )
     another_sample_id = helpers.add_sample(
         store=rna_store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         name=another_sample_id,
         subject_id=subject_id,
@@ -70,7 +70,7 @@ def ensure_extra_rna_case_match(
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     another_rna_sample_id = helpers.add_sample(
         store=rna_store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         is_tumour=False,
         internal_id=another_rna_sample_id,
         subject_id=subject_id,

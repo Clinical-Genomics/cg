@@ -215,7 +215,7 @@ class AnalysisAPI(MetaAPI):
         return source_types.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
-        """Returns True if the application type for all samples in a case is WES."""
+        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
