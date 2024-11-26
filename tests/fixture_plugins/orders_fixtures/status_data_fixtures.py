@@ -111,4 +111,6 @@ def tomte_status_data(
 
 @pytest.fixture
 def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
-    return FastqOrder.model_validate(fastq_order_to_submit)
+    fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
+    fastq_order.ticket_number = 123456
+    return fastq_order

@@ -1,32 +1,9 @@
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import PrepCategory
-from cg.models.orders.order import OrderIn, OrderType
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
-
-
-def xtest_samples_to_status(
-    fastq_order_to_submit: dict, store_fastq_order_service: StoreFastqOrderService
-):
-    # GIVEN fastq order with two samples
-    order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
-
-    # WHEN parsing for status
-    data: dict = store_fastq_order_service.order_to_status(order=order)
-
-    # THEN it should pick out samples and relevant information
-    assert len(data["samples"]) == 2
-    first_sample: dict = data["samples"][0]
-    assert first_sample["name"] == "prov1"
-    assert first_sample["application"] == "WGSPCFC060"
-    assert first_sample["priority"] == "priority"
-    assert first_sample["tumour"] is False
-    assert first_sample["volume"] == "1"
-
-    # THEN the other sample is a tumour
-    assert data["samples"][1]["tumour"] is True
 
 
 def test_store_samples(
@@ -40,10 +17,7 @@ def test_store_samples(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        order=fastq_order,
-        ticket_id=ticket_id,
-    )
+    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
 
     # THEN it should store the samples and create one raw-data case and one maf case
     assert len(new_samples) == 2
@@ -66,10 +40,7 @@ def test_store_samples_sex_stored(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        order=fastq_order,
-        ticket_id=ticket_id,
-    )
+    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
 
     # THEN the sample sex should be stored
     assert new_samples[0].sex == "male"
@@ -87,10 +58,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(
     fastq_order.samples[0].tumour = False
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        order=fastq_order,
-        ticket_id="1234348",
-    )
+    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
 
     # THEN the analysis for the case should be MAF
     assert new_samples[0].links[0].case.data_analysis == Workflow.MIP_DNA
@@ -111,10 +79,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     fastq_order.samples[1].tumour = True
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        order=fastq_order,
-        ticket_id=ticket_id,
-    )
+    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
 
     # THEN the analysis for the case should be RAW_DATA
     assert new_samples[1].links[0].case.data_analysis == Workflow.RAW_DATA
@@ -141,10 +106,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         sample.application = non_wgs_applications[0].tag
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(
-        order=fastq_order,
-        ticket_id=ticket_id,
-    )
+    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
 
     # THEN the analysis for the case should be RAW_DATA (none)
     assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
