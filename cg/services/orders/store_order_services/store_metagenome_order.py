@@ -7,14 +7,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +22,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
 
     def store_order(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["families"][0]["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(

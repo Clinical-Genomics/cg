@@ -28,7 +28,7 @@ class StoreMicrobialOrderService(StoreOrderService):
     def store_order(self, order: OrderIn) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
         # submit samples to LIMS
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
         # prepare order for status database
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)

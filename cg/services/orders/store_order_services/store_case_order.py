@@ -8,14 +8,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -52,9 +45,7 @@ class StoreCaseOrderService(StoreOrderService):
         # submit new samples to lims
         new_samples = [sample for sample in order.samples if sample.internal_id is None]
         if new_samples:
-            project_data, lims_map = self.lims.process_lims(
-                lims_order=order, new_samples=new_samples
-            )
+            project_data, lims_map = self.lims.process_lims(order=order, new_samples=new_samples)
 
         status_data = self.order_to_status(order=order)
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
