@@ -195,13 +195,13 @@ class FastqSample(OrderInSample):
 class PacBioSample(OrderInSample):
     _suitable_project = OrderType.PACBIO_LONG_READ
 
-    buffer: str
     container: ContainerEnum
     container_name: str | None = None
     sex: SexEnum = SexEnum.unknown
     source: str
     subject_id: str
     tumour: bool
+    well_position: str | None = None
 
 
 class RmlSample(OrderInSample):
@@ -257,7 +257,7 @@ class TaxprofilerSample(MetagenomeSample):
 
 
 class MicrobialSample(OrderInSample):
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
     # "These fields are required"
     organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
@@ -287,7 +287,7 @@ class MicrobialFastqSample(OrderInSample):
 
 class MicrosaltSample(MicrobialSample):
     _suitable_project = OrderType.MICROSALT
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
 
 
 class SarsCov2Sample(MicrobialSample):
