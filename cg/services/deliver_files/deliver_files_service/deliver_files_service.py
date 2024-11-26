@@ -118,7 +118,7 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        self.file_formatter.format_files(moved_files)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
