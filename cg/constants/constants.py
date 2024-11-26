@@ -102,23 +102,6 @@ class CancerAnalysisType(StrEnum):
     TUMOR_WGS = auto()
 
 
-class PrepCategory(StrEnum):
-    COVID: str = "cov"
-    MICROBIAL: str = "mic"
-    READY_MADE_LIBRARY: str = "rml"
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-
-
-DNA_PREP_CATEGORIES: list[PrepCategory] = [
-    PrepCategory.WHOLE_GENOME_SEQUENCING,
-    PrepCategory.TARGETED_GENOME_SEQUENCING,
-    PrepCategory.WHOLE_EXOME_SEQUENCING,
-]
-
-
 class SexOptions(StrEnum):
     MALE: str = "male"
     FEMALE: str = "female"

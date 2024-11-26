@@ -9,14 +9,12 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
-    DNA_PREP_CATEGORIES,
     DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
     CaseActions,
     CustomerId,
-    PrepCategory,
     SampleType,
 )
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
@@ -1591,7 +1589,7 @@ class ReadHandler(BaseHandler):
     def _get_related_samples_query(
         self,
         sample: Sample,
-        prep_categories: list[PrepCategory],
+        prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> Query:
         """Returns a sample query with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
