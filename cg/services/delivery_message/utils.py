@@ -22,6 +22,35 @@ from cg.services.delivery_message.messages.microsalt_mwx_message import Microsal
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
+MESSAGE_MAP = {
+    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.SCOUT: ScoutMessage,
+    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
+    DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.STATINA: StatinaMessage,
+    DataDelivery.BAM: BamMessage,
+}
+
+SCOUT_DATA_DELIVERY: list[DataDelivery] = [
+    DataDelivery.SCOUT,
+    DataDelivery.FASTQ_SCOUT,
+    DataDelivery.ANALYSIS_SCOUT,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT,
+]
+
+RNA_MESSAGE_MAP: dict[DataDelivery, type[DeliveryMessage]] = {
+    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.SCOUT: RNAScoutMessage,
+    DataDelivery.FASTQ_SCOUT: RNAFastqScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
+    DataDelivery.ANALYSIS_SCOUT: RNAAnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: RNAFastqAnalysisScoutMessage,
+}
+
 
 def get_message(cases: list[Case], store: Store) -> str:
     message_strategy: DeliveryMessage = get_message_strategy(cases[0], store)
@@ -43,46 +72,15 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
 
 
 def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
-    message_strategy: DeliveryMessage = message_map[case.data_delivery]()
+    message_strategy: DeliveryMessage = MESSAGE_MAP[case.data_delivery]()
     return message_strategy
-
-
-message_map = {
-    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: ScoutMessage,
-    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
-    DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
-    DataDelivery.STATINA: StatinaMessage,
-    DataDelivery.BAM: BamMessage,
-}
 
 
 def get_rna_message_strategy_from_data_delivery(case: Case, store: Store) -> DeliveryMessage:
 
-    if case.data_delivery in scout_data_delivery:
-        return rna_message_map[case.data_delivery](store)
-    return rna_message_map[case.data_delivery]()
-
-
-scout_data_delivery: list[DataDelivery] = [
-    DataDelivery.SCOUT,
-    DataDelivery.FASTQ_SCOUT,
-    DataDelivery.ANALYSIS_SCOUT,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT,
-]
-
-rna_message_map: dict[DataDelivery, type[DeliveryMessage]] = {
-    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: RNAScoutMessage,
-    DataDelivery.FASTQ_SCOUT: RNAFastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
-    DataDelivery.ANALYSIS_SCOUT: RNAAnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: RNAFastqAnalysisScoutMessage,
-}
+    if case.data_delivery in SCOUT_DATA_DELIVERY:
+        return RNA_MESSAGE_MAP[case.data_delivery](store)
+    return RNA_MESSAGE_MAP[case.data_delivery]()
 
 
 def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
