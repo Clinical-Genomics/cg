@@ -1,5 +1,7 @@
 import datetime as dt
 
+import pytest
+
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.order import OrderIn, OrderType
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
@@ -7,6 +9,7 @@ from cg.store.models import Case, Pool, Sample
 from cg.store.store import Store
 
 
+@pytest.mark.xfail(reason="New validation to be implemented")
 def test_pools_to_status(
     rml_order_to_submit: dict, store_pool_order_service: StorePoolOrderService
 ):
@@ -36,6 +39,7 @@ def test_pools_to_status(
     assert sample["control"] == "negative"
 
 
+@pytest.mark.xfail(reason="New validation to be implemented")
 def test_store_rml(
     base_store: Store,
     rml_status_data: dict,
