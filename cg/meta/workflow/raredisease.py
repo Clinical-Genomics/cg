@@ -96,12 +96,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """
         Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
-        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed:
+        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed_file:
             if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
                 return DEFAULT_CAPTURE_KIT
             raise ValueError("No capture kit was found in LIMS")
-        return target_bed
+        return target_bed_file
 
     def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
         if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
