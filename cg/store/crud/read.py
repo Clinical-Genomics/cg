@@ -1592,7 +1592,8 @@ class ReadHandler(BaseHandler):
         prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> Query:
-        """Returns a sample query with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
+        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories."""
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 

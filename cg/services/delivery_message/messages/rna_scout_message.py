@@ -1,5 +1,5 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import get_scout_link
+from cg.services.delivery_message.messages.utils import get_scout_links_row_separated
 from cg.store.models import Case
 
 
@@ -18,8 +18,7 @@ class RNAScoutMessage(DeliveryMessage):
         related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
             rna_case=case
         )
-        scout_links: list[str] = [get_scout_link(case) for case in related_uploaded_dna_cases]
-        scout_links_row_separated: str = "\n".join(scout_links)
+        scout_links_row_separated = get_scout_links_row_separated(cases=related_uploaded_dna_cases)
 
         return (
             f"Hello,\n\n"
@@ -33,8 +32,9 @@ class RNAScoutMessage(DeliveryMessage):
             related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
                 rna_case=case
             )
-            scout_links: list[str] = [get_scout_link(case) for case in related_uploaded_dna_cases]
-            scout_links_row_separated: str = "\n".join(scout_links)
+            scout_links_row_separated = get_scout_links_row_separated(
+                cases=related_uploaded_dna_cases
+            )
 
             message = (
                 message

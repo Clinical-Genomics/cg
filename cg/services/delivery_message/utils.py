@@ -17,12 +17,8 @@ from cg.services.delivery_message.messages import (
 from cg.services.delivery_message.messages.analysis_message import AnalysisMessage
 from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.fastq_analysis_message import (
-    FastqAnalysisMessage,
-)
-from cg.services.delivery_message.messages.microsalt_mwx_message import (
-    MicrosaltMwxMessage,
-)
+from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
+from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -40,7 +36,7 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
         return CovidMessage()
 
     if case.data_analysis == Workflow.MIP_RNA:
-        return get_rna_message_strategy_from_data_delivery(case, store)
+        return get_rna_message_strategy_from_data_delivery(case=case, store=store)
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
