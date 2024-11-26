@@ -16,6 +16,7 @@ from cg.constants.constants import (
     PrepCategory,
     SampleType,
 )
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
@@ -608,7 +609,7 @@ class ReadHandler(BaseHandler):
 
         application: Application = self.get_application_by_case(case_id=case_id)
 
-        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+        if application.prep_category != SeqLibraryPrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -870,7 +871,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_active_applications_by_prep_category(
-        self, prep_category: PrepCategory
+        self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
         """Return all active applications by prep category."""
         return apply_application_filter(

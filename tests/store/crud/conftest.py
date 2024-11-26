@@ -4,7 +4,8 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
-from cg.constants.constants import CustomerId, PrepCategory
+from cg.constants.constants import CustomerId
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
@@ -130,7 +131,7 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
     rna_sample: Sample = helpers.add_sample(
         store=store,
         internal_id="rna_sample",
-        application_type=PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
         subject_id="subject_1",
         is_tumour=True,
         customer_id="cust000",
@@ -138,8 +139,8 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
     related_dna_sample_1: Sample = helpers.add_sample(
         store=store,
         internal_id="related_dna_sample_1",
-        application_tag=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
         subject_id="subject_1",
         is_tumour=True,
         customer_id="cust001",
@@ -148,8 +149,8 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
     helpers.add_sample(
         store=store,
         internal_id="related_dna_sample_2",
-        application_tag=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        application_tag=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
         subject_id="subject_1",
         is_tumour=True,
         customer_id="cust000",
@@ -157,8 +158,8 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
     helpers.add_sample(
         store=store,
         internal_id="related_dna_sample_3",
-        application_tag=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
-        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        application_tag=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
         subject_id="subject_1",
         is_tumour=True,
         customer_id="cust000",
@@ -167,8 +168,8 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
     helpers.add_sample(
         store=store,
         internal_id="not_related_dna_sample",
-        application_tag=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
-        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        application_tag=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
+        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
         subject_id="subject_2",
         is_tumour=False,
         customer_id="cust000",

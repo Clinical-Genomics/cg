@@ -11,7 +11,6 @@ from cg.constants.constants import (
     STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
-    PrepCategory,
     SequencingRunDataAvailability,
     SexOptions,
 )

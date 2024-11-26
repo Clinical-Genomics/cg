@@ -47,9 +47,9 @@ def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, capl
 
 
 def test_single_panel(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
-    """Test with case_id that requires SINGLE TGS analysis"""
+    """Test with case_id that requires SINGLE TARGETED_GENOME_SEQUENCING analysis"""
     caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, TGS application
+    # GIVEN case_id containing ONE tumor, TARGETED_GENOME_SEQUENCING application
     case_id = "balsamic_case_tgs_single"
     # WHEN dry running
     result = cli_runner.invoke(link, [case_id], obj=balsamic_context)
