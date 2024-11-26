@@ -4,7 +4,6 @@ from datetime import datetime
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.orders.samples import FastqSample
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
@@ -65,7 +64,6 @@ class StoreFastqOrderService(StoreOrderService):
         case: Case = self.status_db.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
-        first_sample: FastqSample = order.samples[0]
         status_db_order = Order(
             customer=customer,
             order_date=datetime.now(),
@@ -98,7 +96,7 @@ class StoreFastqOrderService(StoreOrderService):
                         data_analysis=Workflow.RAW_DATA,
                         data_delivery=DataDelivery.FASTQ,
                         name=ticket_id,
-                        priority=first_sample.priority,
+                        priority=sample.priority,
                         ticket=ticket_id,
                     )
                 if (
