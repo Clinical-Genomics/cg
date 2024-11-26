@@ -145,8 +145,6 @@ class NfAnalysisAPI(AnalysisAPI):
             str_content=extra_parameters_str,
         )
 
-    # def include_config_statement(self, config_file: str):
-
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)

@@ -256,7 +256,6 @@ class RnafusionConfig(CommonAppConfig):
     config_resources: str
     launch_directory: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
