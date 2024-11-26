@@ -119,7 +119,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
-            target_bed=Path("${local_genomes}", target_bed).as_posix(),
+            target_bed_file=target_bed,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
