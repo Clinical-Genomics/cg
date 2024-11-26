@@ -369,7 +369,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         return replaced_workflow_parameters
 
-    def replace_params_placeholders(value, replaced_workflow_parameters):
+    def replace_params_placeholders(self, value, replaced_workflow_parameters):
         if isinstance(value, str):
             placeholders = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
             for placeholder in placeholders:
