@@ -13,7 +13,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sample_sources import SourceType
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -38,7 +38,7 @@ from cg.store.models import Case, Customer
         (
             Workflow.MIP_DNA,
             MipDNAAnalysisAPI,
-            SequencingMethod.WGS,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             True,
             "Uploaded {number_of_loaded_variants} variants to Loqusdb",
         ),
@@ -52,14 +52,14 @@ from cg.store.models import Case, Customer
         (
             Workflow.MIP_DNA,
             MipDNAAnalysisAPI,
-            SequencingMethod.WGS,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             False,
             "Case {case_id} is not eligible for observations upload",
         ),
         (
             Workflow.RAREDISEASE,
             RarediseaseAnalysisAPI,
-            SequencingMethod.WGS,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             False,
             "Case {case_id} is not eligible for observations upload",
         ),
@@ -132,7 +132,7 @@ def test_get_loqusdb_api(
 ):
     """Test Loqusdb API retrieval given a Loqusdb instance."""
 
-    # GIVEN a WES Loqusdb instance and an observations API
+    # GIVEN a WHOLE_EXOME_SEQUENCING Loqusdb instance and an observations API
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
@@ -144,7 +144,7 @@ def test_get_loqusdb_api(
     # WHEN calling the Loqusdb API get method
     loqusdb_api: LoqusdbAPI = observations_api.get_loqusdb_api(loqusdb_instance)
 
-    # THEN a WES Loqusdb API should be returned
+    # THEN a WHOLE_EXOME_SEQUENCING Loqusdb API should be returned
     assert isinstance(loqusdb_api, LoqusdbAPI)
     assert loqusdb_api.binary_path == loqusdb_config["binary_path"]
     assert loqusdb_api.config_path == loqusdb_config["config_path"]
@@ -330,8 +330,12 @@ def test_is_customer_not_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_is_sequencing_method_eligible_for_observations_upload(
@@ -365,8 +369,16 @@ def test_is_sequencing_method_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_PANEL),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WTS),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WTS),
+        (
+            Workflow.MIP_DNA,
+            MipDNAAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+        ),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+        ),
     ],
 )
 def test_is_sequencing_method_not_eligible_for_observations_upload(
@@ -454,8 +466,12 @@ def test_is_sample_source_not_eligible_for_observations_upload(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_delete_case(
@@ -491,8 +507,12 @@ def test_delete_case(
     "workflow, analysis_api, sequencing_method",
     [
         (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
-        (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, SequencingMethod.WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ),
     ],
 )
 def test_delete_case_not_found(

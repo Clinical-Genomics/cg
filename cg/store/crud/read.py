@@ -8,7 +8,8 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
+from cg.constants.constants import CaseActions, CustomerId, SampleType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
@@ -601,7 +602,7 @@ class ReadHandler(BaseHandler):
 
         application: Application = self.get_application_by_case(case_id=case_id)
 
-        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+        if application.prep_category != SeqLibraryPrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -861,6 +862,19 @@ class ReadHandler(BaseHandler):
             application_entry_id=application.id,
             valid_from=dt.datetime.now(),
         ).first()
+
+    def get_active_applications_by_prep_category(
+        self, prep_category: SeqLibraryPrepCategory
+    ) -> list[Application]:
+        """Return all active applications by prep category."""
+        return apply_application_filter(
+            applications=self._get_query(table=Application),
+            filter_functions=[
+                ApplicationFilter.BY_PREP_CATEGORIES,
+                ApplicationFilter.IS_NOT_ARCHIVED,
+            ],
+            prep_categories=[prep_category],
+        ).all()
 
     def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
         """Return bed version with file name."""
@@ -1570,7 +1584,7 @@ class ReadHandler(BaseHandler):
     def get_related_samples(
         self,
         sample_internal_id: str,
-        prep_categories: list[PrepCategory],
+        prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> list[Sample]:
         """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
