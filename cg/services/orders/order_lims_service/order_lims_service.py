@@ -17,7 +17,7 @@ class OrderLimsService:
     def _build_lims_sample(
         customer: str, samples: list[Sample], workflow: Workflow, delivery_type: DataDelivery
     ) -> list[LimsSample]:
-        """Convert order input to lims interface input."""
+        """Convert order input to LIMS interface input."""
         samples_lims = []
         for sample in samples:
             dict_sample = sample.model_dump()
@@ -33,7 +33,7 @@ class OrderLimsService:
         self,
         samples: list[Sample],
         customer: str,
-        ticket: int,
+        ticket: int | None,
         order_name: str,
         workflow: Workflow,
         delivery_type: DataDelivery,

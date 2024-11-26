@@ -386,8 +386,8 @@ def test_validate_sex_inconsistent_sex(
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
-    samples: list[MipDnaSample] = [sample for _, _, sample in order_data.enumerated_new_samples]
-    for _, _, sample in order_data.enumerated_new_samples:
+    samples: list[Sample] = [sample for _, _, sample in order_data.enumerated_new_samples]
+    for sample in samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
             customer_id=customer.internal_id,
