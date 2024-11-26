@@ -1626,18 +1626,18 @@ class ReadHandler(BaseHandler):
 
             collaborators: set[Customer] = rna_sample.customer.collaborators
 
-            related_dna_samples: Query = self._get_related_samples_query(
+            related_dna_samples_query: Query = self._get_related_samples_query(
                 sample=rna_sample,
                 prep_categories=DNA_PREP_CATEGORIES,
                 collaborators=collaborators,
             )
 
-            dna_samples_cases_query = related_dna_samples.join(
-                CaseSample, Case.id == CaseSample.case_id
-            ).join(Case, CaseSample.case_id == Case.id)
+            dna_samples_cases_analysis_query: Query = (
+                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+            )
 
-            dna_samples_cases_query: Query = apply_case_filter(
-                cases=dna_samples_cases_query,
+            dna_samples_cases_analysis_query: Query = apply_case_filter(
+                cases=dna_samples_cases_analysis_query,
                 workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
                 customer_entry_ids=[customer.id for customer in collaborators],
                 filter_functions=[
@@ -1646,15 +1646,15 @@ class ReadHandler(BaseHandler):
                 ],
             )
 
-            dna_samples_cases_analysis: Query = dna_samples_cases_query.join(Analysis)
-
-            dna_samples_cases_analysis: Query = apply_analysis_filter(
-                analyses=dna_samples_cases_analysis,
-                filter_functions=[AnalysisFilter.IS_UPLOADED],
+            uploaded_dna_cases: list[Case] = (
+                apply_analysis_filter(
+                    analyses=dna_samples_cases_analysis_query,
+                    filter_functions=[AnalysisFilter.IS_UPLOADED],
+                )
+                .with_entities(Case)
+                .all()
             )
 
-            dna_cases: list[Case] = dna_samples_cases_analysis.with_entities(Case).all()
-
-            related_dna_cases.extend([case for case in dna_cases])
+            related_dna_cases.extend([case for case in uploaded_dna_cases])
 
         return related_dna_cases
