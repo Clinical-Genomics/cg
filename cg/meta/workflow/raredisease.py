@@ -111,7 +111,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
         skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
         outdir = self.get_case_path(case_id=case_id)
 
@@ -119,7 +119,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
-            target_bed_file=target_bed,
+            target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",

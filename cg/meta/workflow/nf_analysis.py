@@ -1,4 +1,6 @@
+import copy
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
@@ -275,12 +277,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict = None) -> None:
+    def write_params_file(self, case_id: str, replaced_workflow_parameters: dict = None) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        if workflow_parameters:
+        if replaced_workflow_parameters:
             write_yaml_nextflow_style(
-                content=workflow_parameters,
+                content=replaced_workflow_parameters,
                 file_path=self.get_params_file_path(case_id=case_id),
             )
         else:
@@ -344,8 +346,38 @@ class NfAnalysisAPI(AnalysisAPI):
             if hasattr(self, "config_params") and self.config_params
             else {}
         )
+        replaced_workflow_parameters: dict = self.replace_values_in_params_file(
+            workflow_parameters=workflow_parameters
+        )
         if not dry_run:
-            self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
+            self.write_params_file(
+                case_id=case_id, replaced_workflow_parameters=replaced_workflow_parameters
+            )
+
+    def replace_values_in_params_file(self, workflow_parameters: dict) -> dict:
+        replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
+        # Iterate through the dictionary until all placeholders are resolved
+        while True:
+            resolved = True
+            for key, value in replaced_workflow_parameters.items():
+                new_value = self.replace_params_placeholders(value, replaced_workflow_parameters)
+                if new_value != value:
+                    resolved = False
+                    replaced_workflow_parameters[key] = new_value
+            if resolved:
+                break
+
+        return replaced_workflow_parameters
+
+    def replace_params_placeholders(value, replaced_workflow_parameters):
+        if isinstance(value, str):
+            placeholders = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
+            for placeholder in placeholders:
+                if placeholder in replaced_workflow_parameters:
+                    value = value.replace(
+                        f"{{{{{placeholder}}}}}", str(replaced_workflow_parameters[placeholder])
+                    )
+        return value
 
     def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
         """Create nextflow config file."""
