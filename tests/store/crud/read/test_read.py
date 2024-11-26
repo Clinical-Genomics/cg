@@ -5,7 +5,8 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import CaseActions, MicrosaltAppTags, PrepCategory, Workflow
+from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
 from cg.services.orders.order_service.models import OrderQueryParams
@@ -94,7 +95,7 @@ def test_get_active_beds_when_archived(base_store: Store):
 def test_get_active_applications_by_prep_category(microbial_store: Store):
     """Test that non-archived and correct applications are returned for the given prep category."""
     # GIVEN a store with applications with a given prep category
-    prep_category = PrepCategory.MICROBIAL
+    prep_category = SeqLibraryPrepCategory.MICROBIAL
 
     # WHEN fetching the active applications for a given prep category
     applications: list[Application] = microbial_store.get_active_applications_by_prep_category(

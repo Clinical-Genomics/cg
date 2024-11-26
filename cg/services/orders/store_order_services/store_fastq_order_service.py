@@ -2,20 +2,14 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
-from cg.constants.constants import CustomerId, PrepCategory
+from cg.constants.constants import CustomerId
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -141,7 +135,7 @@ class StoreFastqOrderService(StoreOrderService):
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
+                    and new_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
                     self.create_maf_case(sample_obj=new_sample, order=status_db_order)
                 case.customer = customer

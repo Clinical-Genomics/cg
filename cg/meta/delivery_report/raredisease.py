@@ -1,7 +1,6 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants.constants import PrepCategory
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -15,14 +14,15 @@ from cg.constants.report import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
 from cg.constants.scout import ScoutUploadKey
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
-from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.delivery_report.metadata import RarediseaseSampleMetadataModel
 from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
+from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.store.models import Case, Sample
 
 
@@ -85,7 +85,8 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS
-                if PrepCategory.WHOLE_GENOME_SEQUENCING in sample.application.prep_category.lower()
+                if SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+                in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_RAREDISEASE_FIELDS
             )
             required_sample_metadata_fields.update({sample.id: required_fields})

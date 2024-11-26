@@ -94,7 +94,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
-        Return the target bed file from LIMS and use default capture kit for WGS.
+        Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
         target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
         if not target_bed:
