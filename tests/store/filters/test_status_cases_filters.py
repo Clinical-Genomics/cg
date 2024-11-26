@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import CaseActions, DataDelivery, Workflow
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
@@ -248,7 +248,9 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # GIVEN a sample with a valid Loqusdb sequencing method
     test_sample_wes: Sample = helpers.add_sample(
-        store=base_store, application_type=SequencingMethod.WES, last_sequenced_at=timestamp_now
+        store=base_store,
+        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        last_sequenced_at=timestamp_now,
     )
 
     # GIVEN a MIP-DNA associated test case

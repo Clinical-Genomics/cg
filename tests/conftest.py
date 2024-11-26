@@ -1405,19 +1405,19 @@ def external_wes_application_tag() -> str:
 
 @pytest.fixture
 def wgs_application_tag() -> str:
-    """Return the WGS application tag."""
+    """Return the WHOLE_GENOME_SEQUENCING application tag."""
     return "WGSPCFC030"
 
 
 @pytest.fixture
 def wts_application_tag() -> str:
-    """Return a WTS application tag."""
+    """Return a WHOLE_TRANSCRIPTOME_SEQUENCING application tag."""
     return "RNAPOAR100"
 
 
 @pytest.fixture
 def microbial_application_tag() -> str:
-    """Return the WGS microbial application tag."""
+    """Return the WHOLE_GENOME_SEQUENCING microbial application tag."""
     return "MWRNXTR003"
 
 
@@ -1520,7 +1520,7 @@ def base_store(
         store.add_application(
             tag="WGXCUSC000",
             prep_category="wgs",
-            description="External WGS",
+            description="External WHOLE_GENOME_SEQUENCING",
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
@@ -1530,7 +1530,7 @@ def base_store(
         store.add_application(
             tag="EXXCUSR000",
             prep_category="wes",
-            description="External WES",
+            description="External WHOLE_EXOME_SEQUENCING",
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
@@ -1540,7 +1540,7 @@ def base_store(
         store.add_application(
             tag="WGSPCFC060",
             prep_category="wgs",
-            description="WGS, double",
+            description="WHOLE_GENOME_SEQUENCING, double",
             sequencing_depth=30,
             is_accredited=True,
             percent_kth=80,
@@ -1559,7 +1559,7 @@ def base_store(
         store.add_application(
             tag="WGSPCFC030",
             prep_category="wgs",
-            description="WGS trio",
+            description="WHOLE_GENOME_SEQUENCING trio",
             is_accredited=True,
             sequencing_depth=30,
             target_reads=30,

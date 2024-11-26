@@ -11,7 +11,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.sample_sources import SourceType
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbUploadCaseError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
@@ -123,7 +123,7 @@ class ObservationsAPI:
 
     def is_sequencing_method_eligible_for_observations_upload(self, case_id: str) -> bool:
         """Return whether a sequencing method is valid for observations upload."""
-        sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
+        sequencing_method: SeqLibraryPrepCategory | None = self.analysis_api.get_data_analysis_type(
             case_id
         )
         if sequencing_method not in self.loqusdb_sequencing_methods:

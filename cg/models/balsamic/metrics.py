@@ -54,7 +54,7 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
 
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
-    """BALSAMIC WGS QC metrics"""
+    """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
 
     median_coverage: float | None = None
     pct_15x: float | None = None
