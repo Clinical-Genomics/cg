@@ -205,7 +205,7 @@ class FOHMUploadAPI:
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case, delivery_type=DataDelivery.FASTQ
             )
-            delivery_service.deliver_files_for_FOHM_upload(
+            delivery_service.deliver_files_for_fohm_upload(
                 case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
             )
 
