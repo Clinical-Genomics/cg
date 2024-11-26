@@ -1,8 +1,6 @@
 from cg.constants import DataDelivery, Workflow
-
-from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
-
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
@@ -79,7 +77,6 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
     fastq_order.samples[1].tumour = True
-
 
     # WHEN storing the order
     new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
