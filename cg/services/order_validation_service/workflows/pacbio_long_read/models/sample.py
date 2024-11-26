@@ -12,4 +12,4 @@ class PacbioSample(Sample):
     sex: SexEnum
     source: str
     subject_id: str | None = Field(pattern=NAME_PATTERN, max_length=128)
-    tumour: bool = False
+    tumour: bool
