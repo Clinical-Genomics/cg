@@ -1,10 +1,6 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import (
-    get_caesar_delivery_path,
-    get_scout_link,
-)
+from cg.services.delivery_message.messages.utils import get_caesar_delivery_path, get_scout_link
 from cg.store.models import Case
-from cg.store.store import Store
 
 
 class RNAFastqScoutMessage(DeliveryMessage):
@@ -14,10 +10,10 @@ class RNAFastqScoutMessage(DeliveryMessage):
 
     def create_message(self, cases: list[Case]) -> str:
         if len(cases) == 1:
-            return self.get_case_message(cases[0])
-        return self.get_cases_message(cases)
+            return self._get_case_message(cases[0])
+        return self._get_cases_message(cases)
 
-    def get_case_message(self, case: Case) -> str:
+    def _get_case_message(self, case: Case) -> str:
 
         related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
             rna_case=case
@@ -34,7 +30,7 @@ class RNAFastqScoutMessage(DeliveryMessage):
             f"{delivery_path}"
         )
 
-    def get_cases_message(self, cases: list[Case]) -> str:
+    def _get_cases_message(self, cases: list[Case]) -> str:
         message: str = "Hello,\n\n"
         for case in cases:
             related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(

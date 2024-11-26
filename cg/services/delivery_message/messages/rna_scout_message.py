@@ -10,10 +10,10 @@ class RNAScoutMessage(DeliveryMessage):
 
     def create_message(self, cases: list[Case]) -> str:
         if len(cases) == 1:
-            return self.get_case_message(cases[0])
-        return self.get_cases_message(cases)
+            return self._get_case_message(cases[0])
+        return self._get_cases_message(cases)
 
-    def get_case_message(self, case: Case) -> str:
+    def _get_case_message(self, case: Case) -> str:
 
         related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
             rna_case=case
@@ -27,7 +27,7 @@ class RNAScoutMessage(DeliveryMessage):
             f"{scout_links_row_separated}\n\n"
         )
 
-    def get_cases_message(self, cases: list[Case]) -> str:
+    def _get_cases_message(self, cases: list[Case]) -> str:
         message: str = "Hello,\n\n"
         for case in cases:
             related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
