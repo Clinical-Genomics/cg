@@ -339,8 +339,13 @@ class NfAnalysisAPI(AnalysisAPI):
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
             case_id=case_id
         ).model_dump()
-        LOG.debug("Adding parameters from the pipeline config file")
-        workflow_parameters: dict = built_workflow_parameters | read_yaml(self.config_params)
+        LOG.debug("Adding parameters from the pipeline config file if it exist")
+
+        workflow_parameters: dict = built_workflow_parameters | (
+            read_yaml(self.config_params)
+            if hasattr(self, "config_params") and self.config_params
+            else {}
+        )
         if not dry_run:
             self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
 
