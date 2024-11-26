@@ -3,7 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 
-import click
+import rich_click as click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
