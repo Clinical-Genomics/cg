@@ -23,7 +23,7 @@ from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
-from cg.io.yaml import write_yaml_nextflow_style
+from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
@@ -335,15 +335,12 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def create_params_file(self, case_id: str, dry_run: bool) -> None:
         """Create parameters file for a case."""
-        LOG.debug("Getting parameters information built from CG")
+        LOG.debug("Getting parameters information built on-the-fly")
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
             case_id=case_id
-        ).dict()
-        LOG.debug("Add to parameters from config")
-        workflow_parameters: str = concat_txt(
-            file_paths=self.config_params,
-            str_content=built_workflow_parameters,
-        )
+        ).model_dump()
+        LOG.debug("Adding parameters from the pipeline config file")
+        workflow_parameters: dict = built_workflow_parameters | read_yaml(self.config_params)
         if not dry_run:
             self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
 

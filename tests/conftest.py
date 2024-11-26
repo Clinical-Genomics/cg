@@ -2586,7 +2586,6 @@ def raredisease_parameters_default(
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
         ),
-        local_genomes=Path(raredisease_dir, "references").as_posix(),
         vep_filters_scout_fmt=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.PANELS)
         ),
