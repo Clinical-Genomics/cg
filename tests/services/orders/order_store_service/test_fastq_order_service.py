@@ -1,6 +1,8 @@
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import PrepCategory
+
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
@@ -53,7 +55,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(fastq_order.samples[0].application).prep_category = (
-        PrepCategory.WHOLE_GENOME_SEQUENCING
+        SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
     fastq_order.samples[0].tumour = False
 
@@ -74,9 +76,10 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(fastq_order.samples[0].application).prep_category = (
-        PrepCategory.WHOLE_GENOME_SEQUENCING
+        SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
     fastq_order.samples[1].tumour = True
+
 
     # WHEN storing the order
     new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
@@ -94,7 +97,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     # GIVEN a basic store with no samples and a fastq order as non wgs
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
-    non_wgs_prep_category = PrepCategory.WHOLE_EXOME_SEQUENCING
+    non_wgs_prep_category = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
 
     non_wgs_applications = base_store._get_query(table=Application).filter(
         Application.prep_category == non_wgs_prep_category
