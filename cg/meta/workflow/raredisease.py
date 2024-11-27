@@ -49,14 +49,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
-        self.nfcore_workflow_path: str = config.raredisease.workflow_path
-        self.references: str = config.raredisease.references
+        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
-        self.config_platform: str = config.raredisease.config_platform
-        self.config_params: str = config.raredisease.config_params
-        self.config_resources: str = config.raredisease.config_resources
+        self.platform: str = config.raredisease.platform
+        self.params: str = config.raredisease.params
+        self.config: str = config.raredisease.config
+        self.resources: str = config.raredisease.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account
@@ -96,31 +96,30 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """
         Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
-        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed:
+        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed_file:
             if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
                 return DEFAULT_CAPTURE_KIT
             raise ValueError("No capture kit was found in LIMS")
-        return target_bed
+        return target_bed_file
 
     def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
         if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
             return True
         return False
 
-    def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
         skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
-            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
-            target_bed=Path(self.references, target_bed).as_posix(),
+            target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
@@ -156,10 +155,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def is_managed_variants_required(self) -> bool:
         """Return True if a managed variants needs to be exported from Scout."""
         return True
-
-    @property
-    def root(self) -> str:
-        return self.config.raredisease.root
 
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
