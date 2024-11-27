@@ -22,6 +22,7 @@ from cg.services.deliver_files.file_filter.sample_service import SampleFileFilte
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.service import DeliveryFileFormatter
 from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
@@ -138,7 +139,7 @@ class DeliveryServiceFactory:
     def _get_sample_file_formatter(
         self,
         case: Case,
-    ) -> SampleFileFormatter | SampleFileConcatenationFormatter:
+    ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
         """Get the file formatter service based on the workflow."""
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
@@ -146,6 +147,16 @@ class DeliveryServiceFactory:
                 file_manager=FileManagingService(),
                 file_formatter=SampleFileNameFormatter(),
                 concatenation_service=FastqConcatenationService(),
+            )
+        if converted_workflow == Workflow.MUTANT:
+            return MutantFileFormatter(
+                lims_api=self.lims_api,
+                file_manager=FileManagingService(),
+                file_formatter=SampleFileConcatenationFormatter(
+                    file_manager=FileManagingService(),
+                    file_formatter=SampleFileNameFormatter(),
+                    concatenation_service=FastqConcatenationService(),
+                ),
             )
         return SampleFileFormatter(
             file_manager=FileManagingService(), file_name_formatter=SampleFileNameFormatter()
