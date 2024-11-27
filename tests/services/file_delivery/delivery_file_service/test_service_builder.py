@@ -17,6 +17,7 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
@@ -37,7 +38,9 @@ class DeliveryServiceScenario(BaseModel):
     expected_tag_fetcher: type[FetchDeliveryFileTagsService]
     expected_file_fetcher: type[FetchDeliveryFilesService]
     expected_file_mover: type[DeliveryFilesMover]
-    expected_sample_file_formatter: type[SampleFileFormatter | SampleFileConcatenationFormatter]
+    expected_sample_file_formatter: type[
+        SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
+    ]
     store_name: str
 
 
@@ -61,7 +64,7 @@ class DeliveryServiceScenario(BaseModel):
             expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
             expected_file_fetcher=AnalysisDeliveryFileFetcher,
             expected_file_mover=DeliveryFilesMover,
-            expected_sample_file_formatter=SampleFileFormatter,
+            expected_sample_file_formatter=MutantFileFormatter,
             store_name="mutant_store",
         ),
         DeliveryServiceScenario(
