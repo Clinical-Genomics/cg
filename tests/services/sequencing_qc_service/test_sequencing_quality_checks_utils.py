@@ -1,18 +1,19 @@
 import pytest
-from cg.store.models import Case, Sample
-from cg.constants.constants import PrepCategory
+
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    is_case_express_priority,
     case_pass_sequencing_qc,
     express_case_pass_sequencing_qc,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
-    is_sample_ready_made_library,
+    is_case_express_priority,
     is_sample_express_priority,
+    is_sample_ready_made_library,
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
@@ -264,7 +265,7 @@ def test_any_sample_in_case_has_reads(
     case: Case = request.getfixturevalue(case_fixture)
     # GIVEN that another sample on the case has no reads
     another_sample: Sample = sequencing_qc_check_scenarios.add_sample(
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         pass_sequencing_qc=False,
         priority=case.priority,
     )
