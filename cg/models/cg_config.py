@@ -215,10 +215,10 @@ class RarediseaseConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_config: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
     workflow_bin_path: str
     profile: str
@@ -233,10 +233,10 @@ class TomteConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_config: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     workflow_bin_path: str
     profile: str
     revision: str
@@ -250,10 +250,10 @@ class RnafusionConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_config: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
     profile: str
     revision: str

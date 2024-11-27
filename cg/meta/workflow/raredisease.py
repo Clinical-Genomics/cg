@@ -53,10 +53,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
-        self.config_platform: str = config.raredisease.config_platform
-        self.config_params: str = config.raredisease.config_params
-        self.config_config: str = config.raredisease.config_config
-        self.config_resources: str = config.raredisease.config_resources
+        self.platform: str = config.raredisease.platform
+        self.params: str = config.raredisease.params
+        self.config: str = config.raredisease.config
+        self.resources: str = config.raredisease.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account

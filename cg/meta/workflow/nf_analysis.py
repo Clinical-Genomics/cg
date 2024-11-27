@@ -61,10 +61,10 @@ class NfAnalysisAPI(AnalysisAPI):
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
-        self.config_platform: str | None = None
-        self.config_params: str | None = None
-        self.config_config: str | None = None
-        self.config_resources: str | None = None
+        self.platform: str | None = None
+        self.params: str | None = None
+        self.config: str | None = None
+        self.resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
         self.account: str | None = None
@@ -135,9 +135,9 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         config_files_list: list[str] = [
-            self.config_platform,
-            self.config_config,
-            self.config_resources,
+            self.platform,
+            self.config,
+            self.resources,
         ]
         extra_parameters_str: list[str] = [
             self.set_cluster_options(case_id=case_id),
@@ -342,9 +342,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 
         workflow_parameters: dict = built_workflow_parameters | (
-            read_yaml(self.config_params)
-            if hasattr(self, "config_params") and self.config_params
-            else {}
+            read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
         replaced_workflow_parameters: dict = self.replace_values_in_params_file(
             workflow_parameters=workflow_parameters

@@ -29,10 +29,10 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.tomte.profile
         self.conda_env: str = config.tomte.conda_env
         self.conda_binary: str = config.tomte.conda_binary
-        self.config_platform: str = config.tomte.config_platform
-        self.config_params: str = config.tomte.config_params
-        self.config_config: str = config.tomte.config_config
-        self.config_resources: str = config.tomte.config_resources
+        self.platform: str = config.tomte.platform
+        self.params: str = config.tomte.params
+        self.config: str = config.tomte.config
+        self.resources: str = config.tomte.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.tomte.tower_workflow
         self.account: str = config.tomte.slurm.account

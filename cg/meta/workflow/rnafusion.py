@@ -33,10 +33,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
-        self.config_platform: str = config.rnafusion.config_platform
-        self.config_params: str = config.rnafusion.config_params
-        self.config_config: str = config.rnafusion.config_config
-        self.config_resources: str = config.rnafusion.config_resources
+        self.platform: str = config.rnafusion.platform
+        self.params: str = config.rnafusion.params
+        self.config: str = config.rnafusion.config
+        self.resources: str = config.rnafusion.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
