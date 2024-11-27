@@ -6,7 +6,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import PrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
@@ -129,7 +129,7 @@ class DeliveryServiceFactory:
         microbial_tags: list[str] = [
             application.tag
             for application in self.store.get_active_applications_by_prep_category(
-                prep_category=PrepCategory.MICROBIAL
+                prep_category=SeqLibraryPrepCategory.MICROBIAL
             )
         ]
         if case.data_analysis == Workflow.RAW_DATA and tag in microbial_tags:

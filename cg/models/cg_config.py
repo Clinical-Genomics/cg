@@ -45,21 +45,13 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
-    PacBioMetricsParser,
-)
-from cg.services.run_devices.pacbio.post_processing_service import (
-    PacBioPostProcessingService,
-)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
-    PacBioRunFileManager,
-)
-from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import (
-    PacBioRunValidator,
-)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
@@ -223,13 +215,13 @@ class RarediseaseConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
-    workflow_path: str
+    workflow_bin_path: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -241,12 +233,12 @@ class TomteConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
-    workflow_path: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    workflow_bin_path: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -258,17 +250,17 @@ class RnafusionConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    workflow_path: str
+    workflow_bin_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
@@ -278,7 +270,7 @@ class TaxprofilerConfig(CommonAppConfig):
     compute_env: str
     databases: str
     hostremoval_reference: str
-    workflow_path: str
+    workflow_bin_path: str
     profile: str
     revision: str
     root: str

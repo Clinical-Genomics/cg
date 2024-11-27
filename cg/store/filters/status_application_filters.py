@@ -3,7 +3,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.constants import PrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Application
 
 
@@ -32,7 +32,7 @@ def filter_applications_has_versions(applications: Query, **kwargs) -> Query:
 
 
 def filter_application_by_prep_categories(
-    applications: Query, prep_categories: list[PrepCategory], **kwargs
+    applications: Query, prep_categories: list[SeqLibraryPrepCategory], **kwargs
 ) -> Query:
     """Return application corresponding to dna sequencing."""
     return applications.filter(Application.prep_category.in_(prep_categories))
@@ -42,7 +42,7 @@ def apply_application_filter(
     filter_functions: list[Callable],
     applications: Query,
     tag: str = None,
-    prep_categories: list[PrepCategory] = None,
+    prep_categories: list[SeqLibraryPrepCategory] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
