@@ -197,6 +197,7 @@ class FOHMUploadAPI:
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
+        LOG.debug("Linking sample raw data files to FOHM delivery folder")
         for report in reports:
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=report.internal_id
@@ -205,6 +206,7 @@ class FOHMUploadAPI:
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case, delivery_type=DataDelivery.FASTQ
             )
+            LOG.debug(f"Linking files for sample {sample.internal_id}")
             delivery_service.deliver_files_for_fohm_upload(
                 case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
             )
