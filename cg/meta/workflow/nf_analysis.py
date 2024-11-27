@@ -354,26 +354,26 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def replace_values_in_params_file(self, workflow_parameters: dict) -> dict:
         replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
-        # Iterate through the dictionary until all placeholders are resolved
+        """Iterate through the dictionary until all placeholders are replaced with the corresponding value from the dictionary"""
         while True:
-            resolved = True
+            resolved: bool = True
             for key, value in replaced_workflow_parameters.items():
-                new_value = self.replace_params_placeholders(value, replaced_workflow_parameters)
+                new_value: str | int = self.replace_params_placeholders(value, workflow_parameters)
                 if new_value != value:
                     resolved = False
                     replaced_workflow_parameters[key] = new_value
             if resolved:
                 break
-
         return replaced_workflow_parameters
 
-    def replace_params_placeholders(self, value, replaced_workflow_parameters):
+    def replace_params_placeholders(self, value: str | int, workflow_parameters: dict) -> str:
+        """Replace values marked as placeholders with values from the given dictionary"""
         if isinstance(value, str):
-            placeholders = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
+            placeholders: list[str] = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
             for placeholder in placeholders:
-                if placeholder in replaced_workflow_parameters:
+                if placeholder in workflow_parameters:
                     value = value.replace(
-                        f"{{{{{placeholder}}}}}", str(replaced_workflow_parameters[placeholder])
+                        f"{{{{{placeholder}}}}}", str(workflow_parameters[placeholder])
                     )
         return value
 
