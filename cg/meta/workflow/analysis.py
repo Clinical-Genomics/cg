@@ -206,7 +206,9 @@ class AnalysisAPI(MetaAPI):
         Raises:
             CgError: If different sources are set for the samples linked to a case.
         """
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        sample_ids: Iterator[str] = self.status_db.get_original_sample_ids_by_case_id(
+            case_id=case_id
+        )
         source_types: set[str | None] = {
             self.lims_api.get_source(sample_id) for sample_id in sample_ids
         }
