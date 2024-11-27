@@ -1616,10 +1616,8 @@ class ReadHandler(BaseHandler):
         )
         return samples
 
-    def get_uploaded_related_dna_cases(self, rna_case_id: str) -> list[Case]:
+    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
         """Returns all uploaded DNA cases ids related to the given RNA case."""
-
-        rna_case: Case = self.get_case_by_internal_id(internal_id=rna_case_id)
 
         related_dna_cases: list[Case] = []
         for rna_sample in rna_case.samples:
