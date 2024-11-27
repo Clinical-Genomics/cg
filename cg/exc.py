@@ -104,7 +104,7 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
-class FrontendForbiddenTransactionError(CgError):
+class AuthorisationError(CgError):
     """Raised when a forbidden transaction is attempted by an external user."""
 
 

@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.exc import FrontendForbiddenTransactionError
+from cg.exc import AuthorisationError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
@@ -48,6 +48,6 @@ def get_samples():
     samples_request = SamplesRequest.model_validate(request.args.to_dict())
     try:
         samples, total = sample_service.get_samples(request=samples_request, user=g.current_user)
-    except FrontendForbiddenTransactionError:
+    except AuthorisationError:
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(samples=samples, total=total)

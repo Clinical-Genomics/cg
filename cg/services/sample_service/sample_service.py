@@ -1,5 +1,5 @@
 from cg.constants.constants import SampleStatus
-from cg.exc import FrontendForbiddenTransactionError
+from cg.exc import AuthorisationError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.services.sample_service.utils import (
@@ -43,7 +43,7 @@ class SampleService:
     def get_samples(self, request: SamplesRequest, user: any) -> tuple[list[dict], int]:
         if request.status in SampleStatus.statuses():
             if not user.is_admin:
-                raise FrontendForbiddenTransactionError()
+                raise AuthorisationError()
             else:
                 return self._get_samples_handled_by_status(request=request)
         customers: list[Customer] | None = None if user.is_admin else user.customers
