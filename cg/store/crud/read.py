@@ -618,9 +618,10 @@ class ReadHandler(BaseHandler):
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Sample], int]:
-        """Get samples by customer and sample internal id or sample name pattern.
-        This query is used in the front end next to the samples it also return the total number of
-        samples used to determine the pagination.
+        """
+        Return the samples by customer and internal id or name pattern, plus the total number of
+        samples matching the filter criteria. A limit and offset can be applied to the query for
+        pagination purposes.
         """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
