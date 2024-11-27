@@ -156,10 +156,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return True if a managed variants needs to be exported from Scout."""
         return True
 
-    @property
-    def root(self) -> str:
-        return self.config.raredisease.root
-
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
