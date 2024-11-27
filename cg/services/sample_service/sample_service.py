@@ -48,7 +48,10 @@ class SampleService:
                 return self._get_samples_handled_by_status(request=request)
         customers: list[Customer] | None = None if user.is_admin else user.customers
         samples, total = self.store.get_samples_by_customers_and_pattern(
-            pattern=request.enquiry, customers=customers
+            pattern=request.enquiry,
+            customers=customers,
+            limit=request.page_size,
+            offset=request.page,
         )
         parsed_samples: list[dict] = [sample.to_dict() for sample in samples]
         return parsed_samples, total
