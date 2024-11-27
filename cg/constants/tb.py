@@ -16,6 +16,5 @@ class AnalysisTypes(StrEnum):
     WGS: str = "wgs"
     WES: str = "wes"
     TGS: str = "tgs"
-    RNA: str = "rna"
     WTS: str = "wts"
     OTHER: str = "other"
