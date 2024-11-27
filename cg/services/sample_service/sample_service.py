@@ -8,7 +8,7 @@ from cg.services.sample_service.utils import (
     get_confirmation_message,
     get_start_and_finish_indexes_from_request,
 )
-from cg.store.models import Customer, Sample
+from cg.store.models import Customer, Sample, User
 from cg.store.store import Store
 
 
@@ -40,7 +40,7 @@ class SampleService:
         samples: list[Sample] = self.store.get_collaborator_samples(request)
         return create_samples_response(samples)
 
-    def get_samples(self, request: SamplesRequest, user: any) -> tuple[list[dict], int]:
+    def get_samples(self, request: SamplesRequest, user: User) -> tuple[list[dict], int]:
         if request.status in SampleStatus.statuses():
             if not user.is_admin:
                 raise AuthorisationError()
