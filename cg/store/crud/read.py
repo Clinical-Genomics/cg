@@ -611,9 +611,17 @@ class ReadHandler(BaseHandler):
         return application.expected_reads
 
     def get_samples_by_customers_and_pattern(
-        self, *, customers: list[Customer] | None = None, pattern: str = None
+        self,
+        *,
+        customers: list[Customer] | None = None,
+        pattern: str = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> tuple[list[Sample], int]:
-        """Get samples by customer and sample internal id or sample name pattern."""
+        """Get samples by customer and sample internal id or sample name pattern.
+        This query is used in the front end next to the samples it also return the total number of
+        samples used to determine the pagination.
+        """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
         if customers:
@@ -623,13 +631,14 @@ class ReadHandler(BaseHandler):
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        samples: list[Sample] = apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=samples,
             customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
-        ).all()
-        return samples, len(samples)
+        )
+        total: int = samples.count()
+        return samples.offset(offset).limit(limit).all(), total
 
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
         customer: Customer | None = self.get_customer_by_internal_id(request.customer)

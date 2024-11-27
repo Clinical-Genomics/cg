@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
+from cg.exc import FrontendForbiddenTransactionError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
@@ -45,29 +46,8 @@ def parse_sample_in_collaboration(sample_id):
 def get_samples():
     """Return samples."""
     samples_request = SamplesRequest.model_validate(request.args.to_dict())
-    if samples_request.status:
-        if not g.current_user.is_admin:
-            return abort(HTTPStatus.FORBIDDEN)
-        else:
-            return _get_samples_handled_from_lims(request=samples_request)
-    customers: list[Customer] | None = None if g.current_user.is_admin else g.current_user.customers
-    samples, total = db.get_samples_by_customers_and_pattern(
-        pattern=samples_request.enquiry, customers=customers
-    )
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples]
-    return jsonify(samples=parsed_samples, total=total)
-
-
-def _get_samples_handled_from_lims(request: SamplesRequest):
-    """Get samples based on the provided status."""
-    if request.status == "incoming":
-        samples: list[Sample] = db.get_samples_to_receive()
-    elif request.status == "labprep":
-        samples: list[Sample] = db.get_samples_to_prepare()
-    elif request.status == "sequencing":
-        samples: list[Sample] = db.get_samples_to_sequence()
-    else:
-        return abort(HTTPStatus.BAD_REQUEST)
-    limit: int = request.page_size or 50
-    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_samples, total=len(samples))
+    try:
+        samples, total = sample_service.get_samples(request=samples_request, user=g.current_user)
+    except FrontendForbiddenTransactionError:
+        return abort(HTTPStatus.FORBIDDEN)
+    return jsonify(samples=samples, total=total)

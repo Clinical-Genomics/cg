@@ -1,11 +1,14 @@
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.constants.constants import SampleStatus
+from cg.exc import FrontendForbiddenTransactionError
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.services.sample_service.utils import (
     create_samples_response,
     get_cancel_comment,
     get_confirmation_message,
+    get_start_and_finish_indexes_from_request,
 )
-from cg.store.models import Sample
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 
@@ -36,3 +39,28 @@ class SampleService:
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> SamplesResponse:
         samples: list[Sample] = self.store.get_collaborator_samples(request)
         return create_samples_response(samples)
+
+    def get_samples(self, request: SamplesRequest, user: any) -> tuple[list[dict], int]:
+        if request.status in SampleStatus.statuses():
+            if not user.is_admin:
+                raise FrontendForbiddenTransactionError()
+            else:
+                return self._get_samples_handled_by_status(request=request)
+        customers: list[Customer] | None = None if user.is_admin else user.customers
+        samples, total = self.store.get_samples_by_customers_and_pattern(
+            pattern=request.enquiry, customers=customers
+        )
+        parsed_samples: list[dict] = [sample.to_dict() for sample in samples]
+        return parsed_samples, total
+
+    def _get_samples_handled_by_status(self, request: SamplesRequest) -> tuple[list[dict], int]:
+        """Get samples based on the provided status."""
+        if request.status == SampleStatus.INCOMING:
+            samples: list[Sample] = self.store.get_samples_to_receive()
+        elif request.status == SampleStatus.LABPREP:
+            samples: list[Sample] = self.store.get_samples_to_prepare()
+        else:
+            samples: list[Sample] = self.store.get_samples_to_sequence()
+        start, finish = get_start_and_finish_indexes_from_request(request)
+        parsed_samples: list[dict] = [sample.to_dict() for sample in samples[start:finish]]
+        return parsed_samples, len(parsed_samples)

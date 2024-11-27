@@ -309,3 +309,13 @@ class SequencingQCStatus(Enum):
     FAILED = auto()
     PASSED = auto()
     PENDING = auto()
+
+
+class SampleStatus(Enum):
+    INCOMING = "incoming"
+    LABPREP = "labprep"
+    SEQUENCING = "sequencing"
+
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return list(map(lambda state: state.value, cls))
