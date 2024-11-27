@@ -14,7 +14,7 @@ def test_get_uploaded_related_dna_case(
 
     # WHEN getting the related DNA cases that are uploaded
     fetched_uploaded_related_dna_case: list[Case] = store.get_uploaded_related_dna_cases(
-        rna_case_id=rna_case.internal_id,
+        rna_case=rna_case,
     )
 
     # THEN the correct set of cases is returned
