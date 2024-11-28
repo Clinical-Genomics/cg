@@ -23,7 +23,7 @@ from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.tb import AnalysisStatus, AnalysisType, AnalysisTypes
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -182,7 +182,7 @@ class AnalysisAPI(MetaAPI):
             SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
-        return AnalysisTypes.OTHER
+        return AnalysisType.OTHER
 
     def get_case_application_type(self, case_id: str) -> str:
         """Returns the application type for samples in a case."""
