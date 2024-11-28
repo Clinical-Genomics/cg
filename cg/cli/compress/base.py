@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.compress.fastq import (
     clean_fastq,

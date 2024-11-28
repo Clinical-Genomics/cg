@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from housekeeper.store.models import Version
 
 from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID
