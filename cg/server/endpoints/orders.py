@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.constants import FileFormat, Workflow
+from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
     OrderExistsError,
@@ -25,28 +25,27 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
-from cg.server.dto.orders.order_delivery_update_request import (
-    OrderDeliveredUpdateRequest,
-)
-from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
+from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_validation_service,
     db,
     delivery_message_service,
     lims,
+    microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
+    mutant_validation_service,
     order_service,
     order_submitter_registry,
-    osticket,
+    rna_fusion_validation_service,
+    ticket_handler,
     tomte_validation_service,
 )
 from cg.store.models import Application, Customer
@@ -76,24 +75,24 @@ def get_order(order_id: int):
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
-@ORDERS_BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
-def set_order_delivered(order_id: int):
+@ORDERS_BLUEPRINT.route("/orders/<order_id>/open", methods=["PATCH"])
+def set_order_open(order_id: int):
     try:
-        request_data = OrderDeliveredPatch.model_validate(request.json)
-        delivered: bool = request_data.delivered
-        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        request_data = OrderOpenPatch.model_validate(request.json)
+        is_open: bool = request_data.open
+        response_data: Order = order_service.set_open(order_id=order_id, open=is_open)
         return jsonify(response_data.model_dump()), HTTPStatus.OK
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
 
-@ORDERS_BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
-def update_order_delivered(order_id: int):
-    """Update the delivery status of an order based on the number of delivered analyses."""
+@ORDERS_BLUEPRINT.route("/orders/<order_id>/update-open-status", methods=["POST"])
+def update_order_open(order_id: int):
+    """Update the is_open parameter of an order based on the number of delivered analyses."""
     try:
-        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        request_data = OrderOpenUpdateRequest.model_validate(request.json)
         delivered_analyses: int = request_data.delivered_analyses_count
-        order_service.update_delivered(order_id=order_id, delivered_analyses=delivered_analyses)
+        order_service.update_is_open(order_id=order_id, delivered_analyses=delivered_analyses)
     except OrderNotFoundError as error:
         return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
@@ -160,7 +159,10 @@ def create_order_from_form():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(
-        lims=lims, status=db, osticket=osticket, submitter_registry=order_submitter_registry
+        lims=lims,
+        status=db,
+        ticket_handler=ticket_handler,
+        submitter_registry=order_submitter_registry,
     )
     error_message: str
     try:
@@ -173,7 +175,7 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
         if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
             raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
@@ -183,7 +185,6 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service.create_order(order_in)
 
     except (  # user misbehaviour
         OrderError,
@@ -265,16 +266,24 @@ def get_options():
     )
 
 
-@ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
-def validate_order(workflow: str):
+@ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
+def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["workflow"] = workflow
+    raw_order["workflow"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
-    if workflow == Workflow.TOMTE:
-        response = tomte_validation_service.validate(raw_order)
-    if workflow == Workflow.MICROSALT:
+    if order_type == OrderType.BALSAMIC:
+        response = balsamic_validation_service.validate(raw_order)
+    if order_type == OrderType.MICROBIAL_FASTQ:
+        response = microbial_fastq_validation_service.validate(raw_order)
+    if order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-    if workflow == Workflow.MIP_DNA:
+    if order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
+    if order_type == OrderType.SARS_COV_2:
+        response = mutant_validation_service.validate(raw_order)
+    if order_type == OrderType.RNAFUSION:
+        response = rna_fusion_validation_service.validate(raw_order)
+    if order_type == OrderType.TOMTE:
+        response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK

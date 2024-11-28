@@ -1,4 +1,4 @@
-from cg.constants import PrepCategory
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.constants import (
     MAXIMUM_VOLUME,
@@ -27,13 +27,13 @@ def is_sample_on_plate(sample: Sample) -> bool:
     return sample.container == ContainerEnum.plate
 
 
-def is_application_not_compatible(
-    allowed_prep_categories: list[PrepCategory],
+def is_application_compatible(
+    order_type: OrderType,
     application_tag: str,
     store: Store,
 ) -> bool:
-    application: Application = store.get_application_by_tag(application_tag)
-    return application and (application.prep_category not in allowed_prep_categories)
+    application: Application | None = store.get_application_by_tag(application_tag)
+    return not application or order_type in application.order_types
 
 
 def is_volume_missing(sample: Sample) -> bool:

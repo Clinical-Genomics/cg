@@ -1,13 +1,8 @@
 from collections import Counter
 
-from cg.constants.constants import PrepCategory, Workflow
-from cg.services.order_validation_service.constants import (
-    ALLOWED_SKIP_RC_BUFFERS,
-    WORKFLOW_PREP_CATEGORIES,
-)
-from cg.services.order_validation_service.errors.case_errors import (
-    InvalidGenePanelsError,
-)
+from cg.models.orders.constants import OrderType
+from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
+from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -39,13 +34,13 @@ from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pe
 )
 from cg.services.order_validation_service.rules.case_sample.utils import (
     get_counter_container_names,
+    get_existing_sample_names,
     get_father_case_errors,
     get_father_sex_errors,
     get_invalid_panels,
     get_mother_case_errors,
     get_mother_sex_errors,
     get_occupied_well_errors,
-    get_repeated_sample_name_errors,
     get_well_sample_map,
     has_sex_and_subject,
     is_concentration_missing,
@@ -57,7 +52,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.order_validation_service.rules.utils import (
-    is_application_not_compatible,
+    is_application_compatible,
     is_volume_invalid,
     is_volume_missing,
 )
@@ -71,12 +66,11 @@ def validate_application_compatibility(
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
     errors: list[ApplicationNotCompatibleError] = []
-    workflow: Workflow = order.workflow
-    allowed_prep_categories: list[PrepCategory] = WORKFLOW_PREP_CATEGORIES[workflow]
+    order_type: OrderType = order.order_type
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_application_not_compatible(
-                allowed_prep_categories=allowed_prep_categories,
+            if not is_application_compatible(
+                order_type=order_type,
                 application_tag=sample.application,
                 store=store,
             ):
@@ -215,7 +209,7 @@ def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVol
     return errors
 
 
-def validate_required_volume(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
+def validate_volume_required(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
@@ -255,15 +249,16 @@ def validate_wells_contain_at_most_one_sample(
 
 
 def validate_sample_names_not_repeated(
-    order: OrderWithCases, **kwargs
+    order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
-    errors: list[SampleNameRepeatedError] = []
-    for index, case in order.enumerated_new_cases:
-        case_errors: list[SampleNameRepeatedError] = get_repeated_sample_name_errors(
-            case=case, case_index=index
-        )
-        errors.extend(case_errors)
-    return errors
+    old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
+    new_samples: list[tuple[int, int, Sample]] = order.enumerated_new_samples
+    sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
+    return [
+        SampleNameRepeatedError(case_index=case_index, sample_index=sample_index)
+        for case_index, sample_index, sample in new_samples
+        if sample_name_counter.get(sample.name) > 1 or sample.name in old_sample_names
+    ]
 
 
 def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
@@ -331,6 +326,28 @@ def validate_subject_ids_different_from_case_names(
             case_index=index,
         )
         errors.extend(case_errors)
+    return errors
+
+
+def validate_subject_sex_consistency(
+    order: OrderWithCases,
+    store: Store,
+) -> list[SexSubjectIdError]:
+    errors: list[SexSubjectIdError] = []
+
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if not has_sex_and_subject(sample):
+            continue
+        if store.sample_exists_with_different_sex(
+            customer_internal_id=order.customer,
+            subject_id=sample.subject_id,
+            sex=sample.sex,
+        ):
+            error = SexSubjectIdError(
+                case_index=case_index,
+                sample_index=sample_index,
+            )
+            errors.append(error)
     return errors
 
 

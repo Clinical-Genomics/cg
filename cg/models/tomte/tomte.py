@@ -1,7 +1,7 @@
 from enum import StrEnum
 from pathlib import Path
 
-from pydantic.v1 import validator
+from pydantic import field_validator
 
 from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.sample_sources import SourceType
@@ -51,16 +51,18 @@ class TomteParameters(WorkflowParameters):
 
     gene_panel_clinical_filter: Path
     tissue: str
-    genome: str
+    genome: str = GenomeVersion.HG38
 
-    @validator("tissue", pre=True)
+    @field_validator("tissue", mode="before")
+    @classmethod
     def restrict_tissue_values(cls, tissue: str | None) -> str:
         if tissue:
             return replace_non_alphanumeric(string=tissue)
         else:
             return SourceType.UNKNOWN
 
-    @validator("genome", pre=True)
+    @field_validator("genome", mode="before")
+    @classmethod
     def restrict_genome_values(cls, genome: str) -> str:
         if genome == GenomeVersion.HG38:
             return GenomeVersion.GRCh38.value

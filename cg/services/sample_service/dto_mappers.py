@@ -23,7 +23,7 @@ def create_sample_dto(sample: Sample) -> SampleDTO:
         priority=sample.priority_human,
         reference_genome=sample.reference_genome,
         subject_id=sample.subject_id,
-        tumour=sample.is_tumour,
+        is_tumour=sample.is_tumour,
         application=application,
         application_version=application_version,
         sex=sample.sex,

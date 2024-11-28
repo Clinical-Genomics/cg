@@ -8,6 +8,7 @@ from cg.models.orders.order import OrderType
 class JsonOrderformParser(OrderformParser):
     ACCEPTED_DATA_ANALYSES: list[str] = [
         Workflow.MIP_DNA,
+        Workflow.MIP_RNA,
         Workflow.FLUFFY,
         Workflow.BALSAMIC,
     ]

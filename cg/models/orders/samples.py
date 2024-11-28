@@ -192,6 +192,18 @@ class FastqSample(OrderInSample):
         return OptionalIntValidator.str_to_int(v=v)
 
 
+class PacBioSample(OrderInSample):
+    _suitable_project = OrderType.PACBIO_LONG_READ
+
+    container: ContainerEnum
+    container_name: str | None = None
+    sex: SexEnum = SexEnum.unknown
+    source: str
+    subject_id: str
+    tumour: bool
+    well_position: str | None = None
+
+
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
 
@@ -240,8 +252,12 @@ class MetagenomeSample(Of1508Sample):
         return None
 
 
+class TaxprofilerSample(MetagenomeSample):
+    _suitable_project = OrderType.TAXPROFILER
+
+
 class MicrobialSample(OrderInSample):
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
     # "These fields are required"
     organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
@@ -253,19 +269,8 @@ class MicrobialSample(OrderInSample):
     well_position: str | None
     # "Required if "Other" is chosen in column "Species""
     organism_other: constr(max_length=Organism.internal_id.property.columns[0].type.length) | None
-    # "These fields are not required"
-    concentration_sample: float | None
-    quantity: int | None
     verified_organism: bool | None  # sent to LIMS
     control: str | None
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
-
-    @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> float | None:
-        return OptionalFloatValidator.str_to_float(v=v)
 
 
 class MicrobialFastqSample(OrderInSample):
@@ -282,7 +287,7 @@ class MicrobialFastqSample(OrderInSample):
 
 class MicrosaltSample(MicrobialSample):
     _suitable_project = OrderType.MICROSALT
-    # 1603 Orderform Microbial WGS
+    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
 
 
 class SarsCov2Sample(MicrobialSample):

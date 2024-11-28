@@ -15,11 +15,13 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, W
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
+    CustomerId,
     FileFormat,
     GenomeVersion,
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
+from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -27,6 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.meta.workflow.utils.utils import are_all_samples_control
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -118,22 +121,20 @@ class AnalysisAPI(MetaAPI):
     def get_cases_ready_for_analysis(self):
         """
         Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
+        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
         """
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_passing_quality_check: list[Case] = [
             case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 
-    def get_priority_for_case(self, case_id: str) -> int:
-        """Get priority from the status db case priority"""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case.priority or Priority.research
-
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
-        priority: int = self.get_priority_for_case(case_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if are_all_samples_control(case=case):
+            return SlurmQos.EXPRESS
+        priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
@@ -214,7 +215,7 @@ class AnalysisAPI(MetaAPI):
         return source_types.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
-        """Returns True if the application type for all samples in a case is WES."""
+        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
@@ -275,7 +276,11 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id: str) -> None:
+    def add_pending_trailblazer_analysis(
+        self,
+        case_id: str,
+        tower_workflow_id: str | None = None,
+    ) -> None:
         self.check_analysis_ongoing(case_id)
         application_type: str = self.get_application_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
@@ -288,6 +293,7 @@ class AnalysisAPI(MetaAPI):
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
+        is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
             analysis_type=application_type,
             case_id=case_id,
@@ -299,7 +305,13 @@ class AnalysisAPI(MetaAPI):
             ticket=ticket,
             workflow=workflow,
             workflow_manager=workflow_manager,
+            tower_workflow_id=tower_workflow_id,
+            is_hidden=is_case_for_development,
         )
+
+    def _is_case_for_development(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -354,8 +366,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyse(self) -> list[Case]:
-        return self.status_db.cases_to_analyse(workflow=self.workflow)
+    def get_cases_to_analyze(self) -> list[Case]:
+        return self.status_db.get_cases_to_analyze(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

@@ -36,6 +36,7 @@ from cg.store.models import (
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     Panel,
     Pool,
@@ -219,6 +220,8 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = None,
         is_archived: bool = False,
+        target_reads: int = None,
+        percent_reads_guaranteed: int = 75,
         is_accredited: bool = False,
         is_external: bool = False,
         min_sequencing_depth: int = 30,
@@ -237,7 +240,8 @@ class StoreHelpers:
             description=description,
             is_archived=is_archived,
             percent_kth=80,
-            percent_reads_guaranteed=75,
+            target_reads=target_reads,
+            percent_reads_guaranteed=percent_reads_guaranteed,
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
@@ -247,6 +251,18 @@ class StoreHelpers:
         store.session.add(application)
         store.session.commit()
         return application
+
+    def add_application_order_type(
+        self, store: Store, application: Application, order_types: list[str]
+    ):
+        """Add an order type to an application."""
+        order_app_links: list[OrderTypeApplication] = store.link_order_types_to_application(
+            application=application, order_types=order_types
+        )
+        for link in order_app_links:
+            store.session.add(link)
+        store.session.commit()
+        return order_app_links
 
     @staticmethod
     def ensure_application_limitation(
@@ -337,7 +353,9 @@ class StoreHelpers:
         """Utility function to add an analysis for tests."""
 
         if not case:
-            case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
+            case = StoreHelpers.add_case(
+                store=store, data_analysis=workflow, data_delivery=data_delivery
+            )
 
         analysis = store.add_analysis(workflow=workflow, version=workflow_version, case_id=case.id)
 
@@ -378,6 +396,7 @@ class StoreHelpers:
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Utility function to add a sample to use in tests."""
@@ -404,6 +423,7 @@ class StoreHelpers:
             tumour=is_tumour,
             reads=reads,
             internal_id=internal_id,
+            subject_id=subject_id,
         )
 
         sample.application_version_id = application_version_id
@@ -498,7 +518,9 @@ class StoreHelpers:
         workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
-            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+            customer_id=customer_id,
+            ticket_id=ticket_id,
+            order_date=order_date,
         )
         store.session.add(order)
         store.session.commit()
@@ -547,6 +569,10 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
+        order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
+            ticket_id=int(case_info["tickets"]),
+            customer_id=customer_obj.id,
+        )
         case = Case(
             name=case_info["name"],
             panels=case_info["panels"],
@@ -558,7 +584,7 @@ class StoreHelpers:
             action=case_info.get("action"),
             tickets=case_info["tickets"],
         )
-
+        case.orders.append(order)
         case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"
@@ -940,9 +966,9 @@ class StoreHelpers:
         """Utility function to add many cases with two samples to use in tests."""
 
         cases: list[Case] = []
-        for i in range(nr_cases):
-            case: list[Case] = cls.add_case_with_samples(
-                base_store, f"f{i}", 2, sequenced_at=sequenced_at
+        for index in range(nr_cases):
+            case: Case = cls.add_case_with_samples(
+                base_store=base_store, case_id=f"f{index}", nr_samples=2, sequenced_at=sequenced_at
             )
             cases.append(case)
         return cases

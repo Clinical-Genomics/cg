@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
 
+from dateutil.parser import parse
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
@@ -26,6 +27,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -40,7 +42,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -109,7 +111,12 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
+        return False
+
+    @property
+    def is_managed_variants_required(self) -> bool:
+        """Return True if a managed variant export needs to be exported it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -200,10 +207,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str) -> Path:
         """Path to NF log."""
-        if log:
-            return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
@@ -376,6 +381,13 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
         if self.is_gene_panel_required:
             self.create_gene_panel(case_id=case_id, dry_run=dry_run)
+        if self.is_managed_variants_required:
+            vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
+            if dry_run:
+                for line in vcf_lines:
+                    LOG.debug(line)
+            else:
+                self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -412,7 +424,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def _run_analysis_with_tower(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
-    ) -> None:
+    ) -> str | None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
         if command_args.resume:
@@ -434,12 +446,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
+            return tower_id
         LOG.info(self.process.stdout)
 
     def get_command_args(
         self,
         case_id: str,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -448,10 +460,11 @@ class NfAnalysisAPI(AnalysisAPI):
         revision: str,
         compute_env: str,
         nf_tower_id: str | None,
+        stub_run: bool,
     ) -> NfCommandArgs:
         command_args: NfCommandArgs = NfCommandArgs(
             **{
-                "log": self.get_log_path(case_id=case_id, workflow=self.workflow, log=log),
+                "log": self.get_log_path(case_id=case_id, workflow=self.workflow),
                 "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
                 "resume": not from_start,
                 "profile": self.get_profile(profile=profile),
@@ -462,6 +475,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 "revision": revision or self.revision,
                 "wait": NfTowerStatus.SUBMITTED,
                 "id": nf_tower_id,
+                "stub_run": stub_run,
             }
         )
         return command_args
@@ -470,7 +484,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         use_nextflow: bool,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -478,6 +491,7 @@ class NfAnalysisAPI(AnalysisAPI):
         params_file: str | None,
         revision: str,
         compute_env: str,
+        stub_run: bool,
         nf_tower_id: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -486,7 +500,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
         command_args = self.get_command_args(
             case_id=case_id,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
@@ -495,13 +508,14 @@ class NfAnalysisAPI(AnalysisAPI):
             revision=revision,
             compute_env=compute_env,
             nf_tower_id=nf_tower_id,
+            stub_run=stub_run,
         )
 
         try:
             self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
             self.check_analysis_ongoing(case_id=case_id)
             LOG.info(f"Running analysis for {case_id}")
-            self.run_analysis(
+            tower_workflow_id: str | None = self.run_analysis(
                 case_id=case_id,
                 command_args=command_args,
                 use_nextflow=use_nextflow,
@@ -519,7 +533,10 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError
 
         if not dry_run:
-            self.add_pending_trailblazer_analysis(case_id=case_id)
+            self.add_pending_trailblazer_analysis(
+                case_id=case_id,
+                tower_workflow_id=tower_workflow_id,
+            )
 
     def run_analysis(
         self,
@@ -527,7 +544,7 @@ class NfAnalysisAPI(AnalysisAPI):
         command_args: NfCommandArgs,
         use_nextflow: bool,
         dry_run: bool = False,
-    ) -> None:
+    ) -> str | None:
         """Execute run analysis with given options."""
         if use_nextflow:
             self._run_analysis_with_nextflow(
@@ -536,7 +553,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
         else:
-            self._run_analysis_with_tower(
+            return self._run_analysis_with_tower(
                 case_id=case_id,
                 command_args=command_args,
                 dry_run=dry_run,
@@ -627,11 +644,10 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
         """Return search patterns for MultiQC. Each key is a search pattern and each value
         corresponds to the metric ID to set in the metrics deliverables file.
-        Multiple search patterns can be added. Ideally patterns used should be sample ids, e.g.
+        Multiple search patterns can be added. Ideally, used patterns should be sample ids, e.g.
         {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
-        return search_patterns
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
+        return {sample_id: sample_id for sample_id in sample_ids}
 
     @staticmethod
     def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
@@ -645,11 +661,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 deduplicated_metrics.append(metric)
         return deduplicated_metrics
 
+    def get_multiqc_data_json(self, case_id: str) -> MultiqcDataJson:
+        return MultiqcDataJson(**read_json(file_path=self.get_multiqc_json_path(case_id=case_id)))
+
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
+        multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
         for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
@@ -664,6 +681,14 @@ class NfAnalysisAPI(AnalysisAPI):
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
+    @staticmethod
+    def _is_pattern_found(pattern: str, text: str, exact_match: bool) -> bool:
+        if exact_match:
+            is_pattern_found: bool = pattern == text
+        else:
+            is_pattern_found: bool = pattern in text
+        return is_pattern_found
+
     def get_metrics_from_multiqc_json_with_pattern(
         self,
         search_pattern: str,
@@ -674,13 +699,11 @@ class NfAnalysisAPI(AnalysisAPI):
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
         for section in multiqc_json.report_general_stats_data:
-            for section_name, section_values in section.items():
-                if exact_match:
-                    is_pattern_found: bool = search_pattern == section_name
-                else:
-                    is_pattern_found: bool = search_pattern in section_name
-                if is_pattern_found:
-                    for metric_name, metric_value in section_values.items():
+            for subsection, metrics_dict in section.items():
+                if self._is_pattern_found(
+                    pattern=search_pattern, text=subsection, exact_match=exact_match
+                ):
+                    for metric_name, metric_value in metrics_dict.items():
                         metric: MetricsBase = self.get_multiqc_metric(
                             metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
                         )
@@ -849,17 +872,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        reference_genome: set[str] = {
-            sample.reference_genome
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
-        if len(reference_genome) == 1:
-            return reference_genome.pop()
-        if len(reference_genome) > 1:
-            raise CgError(
-                f"Samples linked to case {case_id} have different reference genome versions set"
-            )
-        raise CgError(f"No reference genome specified for case {case_id}")
+        case = self.status_db.get_case_by_internal_id(case_id)
+        return get_genome_build(case)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
@@ -893,3 +907,23 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def clean_past_run_dirs(self, before_date: str, skip_confirmation: bool = False) -> None:
+        """Clean past run directories"""
+        before_date: datetime = parse(before_date)
+        analyses_to_clean: list[Analysis] = self.get_analyses_to_clean(before_date)
+        LOG.info(f"Cleaning {len(analyses_to_clean)} analyses created before {before_date}")
+
+        for analysis in analyses_to_clean:
+            case_id = analysis.case.internal_id
+            case_path = self.get_case_path(case_id)
+            try:
+                LOG.info(f"Cleaning output for {case_id}")
+                self.clean_run_dir(
+                    case_id=case_id, skip_confirmation=skip_confirmation, case_path=case_path
+                )
+            except FileNotFoundError:
+                continue
+            except Exception as error:
+                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
+        LOG.info(f"Done cleaning {self.workflow} output")

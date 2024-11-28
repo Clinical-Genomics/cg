@@ -8,11 +8,11 @@ from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, ext, invoices
 from cg.server.app_config import app_config
-from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
-from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
@@ -33,6 +33,8 @@ from cg.store.models import (
     Invoice,
     Order,
     Organism,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     Panel,
     Pool,
     Sample,
@@ -66,8 +68,6 @@ def _configure_extensions(app: Flask):
     ext.db.init_app(app)
     ext.lims.init_app(app)
     ext.analysis_client.init_app(app)
-    if app.config["osticket_api_key"]:
-        ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
     app.json_provider_class = ext.CustomJSONEncoder
 
@@ -149,6 +149,10 @@ def _register_admin_views():
     )
     ext.admin.add_view(
         admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
+    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSequencingRun, ext.db.session))
+    ext.admin.add_view(
+        admin.PacbioSampleRunMetricsView(PacbioSampleSequencingMetrics, ext.db.session)
     )
 
 

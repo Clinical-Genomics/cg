@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import Customer, Pool
 
 
-def filter_pools_by_customer_id(pools: Query, customer_ids: list[int], **kwargs) -> Query:
+def filter_pools_by_customer_ids(pools: Query, customer_ids: list[int], **kwargs) -> Query:
     """Return pools by customer id."""
     return pools.filter(Pool.customer_id.in_(customer_ids))
 
@@ -71,6 +71,12 @@ def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Quer
     return pools.filter(Pool.customer == customer)
 
 
+def filter_pools_by_customers(pools: Query, customers: list[Customer], **kwargs) -> Query:
+    """Return pools by customers."""
+    customer_ids = [customer.id for customer in customers]
+    return pools.filter(Pool.customer_id.in_(customer_ids))
+
+
 def apply_pool_filter(
     filter_functions: list[Callable],
     pools: Query,
@@ -78,6 +84,7 @@ def apply_pool_filter(
     entry_id: int | None = None,
     name: str | None = None,
     customer_ids: list[int] | None = None,
+    customers: list[Customer] | None = None,
     name_enquiry: str | None = None,
     order_enquiry: str | None = None,
     customer: Customer | None = None,
@@ -94,6 +101,7 @@ def apply_pool_filter(
             name_enquiry=name_enquiry,
             order_enquiry=order_enquiry,
             customer=customer,
+            customers=customers,
         )
     return pools
 
@@ -110,7 +118,8 @@ class PoolFilter(Enum):
     BY_INVOICE_ID: Callable = filter_pools_by_invoice_id
     WITHOUT_INVOICE_ID: Callable = filter_pools_without_invoice_id
     DO_INVOICE: Callable = filter_pools_do_invoice
-    BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
+    BY_CUSTOMER_IDS: Callable = filter_pools_by_customer_ids
     BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
     BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry
     BY_CUSTOMER: Callable = filter_pools_by_customer
+    BY_CUSTOMERS: Callable = filter_pools_by_customers

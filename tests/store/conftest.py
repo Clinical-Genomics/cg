@@ -19,9 +19,9 @@ from cg.store.models import (
     Case,
     CaseSample,
     Customer,
+    IlluminaFlowCell,
     Organism,
     Sample,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -118,7 +118,7 @@ def microbial_submitted_order() -> dict:
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=Workflow.FASTQ,
+            analysis=Workflow.RAW_DATA,
             concentration_sample="1",
             mother=None,
             father=None,
@@ -137,46 +137,6 @@ def microbial_submitted_order() -> dict:
         ],
         "project_type": "microbial",
     }
-
-
-@pytest.fixture(name="microbial_store")
-def microbial_store(
-    base_store: Store, microbial_submitted_order: dict
-) -> Generator[Store, None, None]:
-    """Set up a microbial store instance."""
-    customer: Customer = base_store.get_customer_by_internal_id(
-        customer_internal_id=microbial_submitted_order["customer"]
-    )
-
-    for sample_data in microbial_submitted_order["items"]:
-        application_version = base_store.get_application_by_tag(
-            sample_data["application"]
-        ).versions[0]
-        organism: Organism = Organism(
-            internal_id=sample_data["organism"], name=sample_data["organism"]
-        )
-        base_store.session.add(organism)
-        sample = base_store.add_sample(
-            name=sample_data["name"],
-            sex=Sex.UNKNOWN,
-            comment=sample_data["comment"],
-            priority=sample_data["priority"],
-            reads=sample_data["reads"],
-            reference_genome=sample_data["reference_genome"],
-        )
-        sample.application_version = application_version
-        sample.customer = customer
-        sample.organism = organism
-        base_store.session.add(sample)
-
-    base_store.session.commit()
-    yield base_store
-
-
-@pytest.fixture(name="case")
-def case_obj(analysis_store: Store) -> Case:
-    """Return a case models object."""
-    return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample")
@@ -337,15 +297,6 @@ def store_with_application_limitations(
             workflow=workflow,
         )
     return store_with_an_application_with_and_without_attributes
-
-
-@pytest.fixture(name="applications_store")
-def applications_store(store: Store, helpers: StoreHelpers) -> Store:
-    """Return a store populated with applications from excel file"""
-    app_tags: list[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
-    for app_tag in app_tags:
-        helpers.ensure_application(store=store, tag=app_tag)
-    return store
 
 
 @pytest.fixture(name="store_with_different_application_versions")

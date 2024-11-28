@@ -53,7 +53,7 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
 
 
 @pytest.fixture
-def fastq_context(
+def raw_data_fastq_context(
     base_context,
     cg_context: CGConfig,
     fastq_case,
@@ -76,7 +76,7 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
         "name": family_name,
         "panels": None,
         "internal_id": case_id,
-        "data_analysis": Workflow.FASTQ,
+        "data_analysis": Workflow.RAW_DATA,
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,

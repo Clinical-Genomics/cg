@@ -1,16 +1,14 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion, PrepCategory, Workflow
+from cg.constants.constants import GenomeVersion
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
-from cg.services.order_validation_service.workflows.tomte.constants import (
-    TomteDeliveryType,
-)
+from cg.services.order_validation_service.workflows.tomte.constants import TomteDeliveryType
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
-from cg.services.order_validation_service.workflows.tomte.models.sample import (
-    TomteSample,
-)
+from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
@@ -50,7 +48,7 @@ def create_tomte_order(cases: list[TomteCase]) -> TomteOrder:
         delivery_type=TomteDeliveryType.FASTQ,
         name="order_name",
         ticket_number="#12345",
-        workflow=Workflow.TOMTE,
+        project_type=OrderType.TOMTE,
         user_id=1,
         customer="cust000",
         cases=cases,
@@ -201,7 +199,7 @@ def sample_with_missing_well_position():
 
 @pytest.fixture
 def application_with_concentration_interval(base_store: Store) -> Application:
-    return base_store.add_application(
+    application: Application = base_store.add_application(
         tag="RNAPOAR100",
         prep_category="wts",
         description="This is an application with concentration interval",
@@ -210,6 +208,10 @@ def application_with_concentration_interval(base_store: Store) -> Application:
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
     )
+    application.order_types = [OrderType.TOMTE]
+    base_store.session.add(application)
+    base_store.commit_to_store()
+    return application
 
 
 @pytest.fixture
@@ -244,7 +246,7 @@ def tomte_validation_service(
 def application_tgs(base_store: Store) -> Application:
     application: Application = base_store.add_application(
         tag="PANKTTR020",
-        prep_category=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         description="Panel-based sequencing, 20 M read pairs.",
         percent_kth=59,
         percent_reads_guaranteed=75,

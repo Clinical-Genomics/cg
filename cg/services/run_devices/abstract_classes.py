@@ -1,9 +1,13 @@
 """Post-processing service abstract classes."""
 
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.services.run_devices.abstract_models import PostProcessingDTOs, RunData, RunMetrics
+from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
+
+LOG = logging.getLogger(__name__)
 
 
 class RunDataGenerator(ABC):
@@ -12,6 +16,15 @@ class RunDataGenerator(ABC):
     @abstractmethod
     def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
         """Get the run data for a sequencing run."""
+        pass
+
+
+class RunValidator(ABC):
+    """Abstract class that holds functionality to validate a run and ensure it can start post processing."""
+
+    @abstractmethod
+    def ensure_post_processing_can_start(self, run_data: RunData):
+        """Ensure a post processing run can start."""
         pass
 
 
@@ -73,11 +86,15 @@ class PostProcessingService(ABC):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass
 
-
-class FileTransferValidationService(ABC):
-    """Abstract class that validates file transfers for instrument runs from NAS to Hasta."""
-
     @abstractmethod
-    def validate_file_transfer(self, run_data: RunData):
-        """Validate an instrument run transfer."""
+    def is_run_processed(self, run_name: str) -> bool:
+        """Check if a run has been post-processed."""
         pass
+
+    @staticmethod
+    def _touch_post_processing_complete(run_data: RunData, dry_run: bool = False) -> None:
+        """Touch the post-processing complete file."""
+        processing_complete_file = Path(run_data.full_path, POST_PROCESSING_COMPLETED)
+        if not dry_run:
+            processing_complete_file.touch()
+        LOG.debug(f"Post-processing complete for {run_data.full_path}")

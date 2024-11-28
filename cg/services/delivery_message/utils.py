@@ -15,6 +15,7 @@ from cg.services.delivery_message.messages import (
     StatinaMessage,
 )
 from cg.services.delivery_message.messages.analysis_message import AnalysisMessage
+from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import (
     FastqAnalysisMessage,
@@ -55,6 +56,7 @@ message_map = {
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
     DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
     DataDelivery.STATINA: StatinaMessage,
+    DataDelivery.BAM: BamMessage,
 }
 
 

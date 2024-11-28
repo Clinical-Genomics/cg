@@ -1,6 +1,7 @@
 import pytest
 
-from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion, Workflow
+from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
 from cg.services.order_validation_service.workflows.balsamic.constants import (
@@ -55,7 +56,7 @@ def create_order(cases: list[BalsamicCase]) -> BalsamicOrder:
         delivery_type=BalsamicDeliveryType.FASTQ_ANALYSIS,
         name="order_name",
         ticket_number="#12345",
-        workflow=Workflow.BALSAMIC,
+        project_type=OrderType.BALSAMIC,
         user_id=1,
         customer="cust000",
         cases=cases,
@@ -71,7 +72,7 @@ def valid_order() -> BalsamicOrder:
 
 @pytest.fixture
 def balsamic_application(base_store: Store) -> Application:
-    return base_store.add_application(
+    application: Application = base_store.add_application(
         tag="PANKTTR020",
         prep_category="tgs",
         description="This is an application which is compatible with balsamic",
@@ -80,6 +81,10 @@ def balsamic_application(base_store: Store) -> Application:
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
     )
+    application.order_types = [OrderType.BALSAMIC]
+    base_store.session.add(application)
+    base_store.commit_to_store()
+    return application
 
 
 @pytest.fixture

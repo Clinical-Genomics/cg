@@ -134,7 +134,9 @@ class IlluminaPostProcessingService:
     ) -> None:
         unique_samples_on_run: list[str] = self.get_unique_samples_from_run(sample_metrics)
         for sample_id in unique_samples_on_run:
-            self.status_db.update_sample_reads_illumina(internal_id=sample_id)
+            self.status_db.update_sample_reads_illumina(
+                internal_id=sample_id, sequencer_type=sequencing_run.sequencer_type
+            )
             self.status_db.update_sample_sequenced_at(
                 sample_id, date=sequencing_run.sequencing_completed_at
             )
@@ -229,6 +231,7 @@ class IlluminaPostProcessingService:
             )
         except Exception as e:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
+            self.status_db.rollback()
             raise
         if sequencing_run:
             self.status_db.update_illumina_sequencing_run_has_backup(
