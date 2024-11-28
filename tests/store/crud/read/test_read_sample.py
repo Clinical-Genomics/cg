@@ -590,7 +590,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     assert customer
 
     # WHEN getting the samples for a customer
-    samples: list[Sample] = (
+    samples, n_samples = (
         store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
             customers=customer,
             pattern="sample",
@@ -599,7 +599,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
 
     # THEN the samples should be returned
     assert samples
-    assert len(samples) == 3
+    assert n_samples == 3
 
     for sample in samples:
         assert "sample" in sample.name

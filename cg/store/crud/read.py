@@ -12,7 +12,7 @@ from cg.constants.constants import CaseActions, CustomerId, SampleType
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
@@ -214,8 +214,9 @@ class ReadHandler(BaseHandler):
         customers: list[Customer] | None,
         action: str | None,
         case_search: str | None,
-        limit: int | None = 30,
-    ) -> list[Case]:
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Case], int]:
         """
         Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
 
@@ -224,7 +225,7 @@ class ReadHandler(BaseHandler):
             action (str | None): The action string to filter cases by.
             case_search (str | None): The case search string to filter cases by.
             limit (int | None, default=30): The maximum number of cases to return.
-
+            offset (int, default=0): The offset to start returning cases by.
         Returns:
             list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
         """
@@ -246,7 +247,8 @@ class ReadHandler(BaseHandler):
             case_search=case_search,
             customer_entry_ids=customer_entry_ids,
         )
-        return filtered_cases.limit(limit=limit).all()
+        total: int = filtered_cases.count()
+        return filtered_cases.offset(offset).limit(limit=limit).all(), total
 
     def get_cases_by_customer_workflow_and_case_search(
         self,
@@ -610,9 +612,18 @@ class ReadHandler(BaseHandler):
         return application.expected_reads
 
     def get_samples_by_customers_and_pattern(
-        self, *, customers: list[Customer] | None = None, pattern: str = None
-    ) -> list[Sample]:
-        """Get samples by customer and sample internal id  or sample name pattern."""
+        self,
+        *,
+        customers: list[Customer] | None = None,
+        pattern: str = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Sample], int]:
+        """
+        Return the samples by customer and internal id or name pattern, plus the total number of
+        samples matching the filter criteria. A limit and offset can be applied to the query for
+        pagination purposes.
+        """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
         if customers:
@@ -622,12 +633,14 @@ class ReadHandler(BaseHandler):
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        return apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=samples,
             customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
-        ).all()
+        )
+        total: int = samples.count()
+        return samples.offset(offset).limit(limit).all(), total
 
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
         customer: Customer | None = self.get_customer_by_internal_id(request.customer)
