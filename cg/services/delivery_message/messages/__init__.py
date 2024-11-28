@@ -20,6 +20,6 @@ from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAFastqStrategy,
     RNAAnalysisStrategy,
     RNAFastqAnalysisStrategy,
-    RNAMessageStrategy,
+    RNAUploadMessageStrategy,
     RNADeliveryMessage,
 )

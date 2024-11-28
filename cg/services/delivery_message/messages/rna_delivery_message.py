@@ -7,7 +7,7 @@ from cg.services.delivery_message.messages.utils import (
 from cg.store.models import Case
 
 
-class RNAMessageStrategy(ABC):
+class RNAUploadMessageStrategy(ABC):
     """Abstract base class for delivery message strategies."""
 
     @abstractmethod
@@ -16,7 +16,7 @@ class RNAMessageStrategy(ABC):
         pass
 
 
-class RNAAnalysisStrategy(RNAMessageStrategy):
+class RNAAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The analysis files are currently being uploaded to your inbox on Caesar:\n\n"
@@ -24,7 +24,7 @@ class RNAAnalysisStrategy(RNAMessageStrategy):
         )
 
 
-class RNAFastqAnalysisStrategy(RNAMessageStrategy):
+class RNAFastqAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The fastq and analysis files are currently being uploaded to your inbox on Caesar:\n\n"
@@ -32,7 +32,7 @@ class RNAFastqAnalysisStrategy(RNAMessageStrategy):
         )
 
 
-class RNAFastqStrategy(RNAMessageStrategy):
+class RNAFastqStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"
@@ -40,13 +40,13 @@ class RNAFastqStrategy(RNAMessageStrategy):
         )
 
 
-class RNAScoutStrategy(RNAMessageStrategy):
+class RNAScoutStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return ""  # No file upload message needed for this case.
 
 
 class RNADeliveryMessage:
-    def __init__(self, store, strategy: RNAMessageStrategy):
+    def __init__(self, store, strategy: RNAUploadMessageStrategy):
         self.store = store
         self.strategy = strategy
 

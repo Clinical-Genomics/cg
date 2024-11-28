@@ -20,7 +20,7 @@ from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAFastqStrategy,
     RNAAnalysisStrategy,
     RNAFastqAnalysisStrategy,
-    RNAMessageStrategy,
+    RNAUploadMessageStrategy,
     RNADeliveryMessage,
 )
 from cg.store.models import Case, Sample
@@ -39,7 +39,7 @@ MESSAGE_MAP = {
 }
 
 
-RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAMessageStrategy]] = {
+RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAUploadMessageStrategy]] = {
     # Only returns a message strategy if there is a scout delivery for the case.
     DataDelivery.SCOUT: RNAScoutStrategy,
     DataDelivery.FASTQ_SCOUT: RNAFastqStrategy,
