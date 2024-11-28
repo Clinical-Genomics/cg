@@ -58,20 +58,6 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
     assert orderform_parser.project_type == OrderType.BALSAMIC
 
 
-def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
-    """Test to parse a balsamic QC orderform in excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(balsamic_qc_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=balsamic_qc_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.BALSAMIC_QC
-
-
 def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
     """Test to parse a balsamic orderform in excel format"""
     # GIVEN a orderform in excel format
