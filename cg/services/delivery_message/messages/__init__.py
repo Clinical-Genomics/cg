@@ -13,15 +13,13 @@ from cg.services.delivery_message.messages.microsalt_mwr_message import (
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
-from cg.services.delivery_message.messages.rna_analysis_scout_message import (
-    RNAAnalysisScoutMessage,
-)
-from cg.services.delivery_message.messages.rna_fastq_analysis_scout_message import (
-    RNAFastqAnalysisScoutMessage,
-)
-from cg.services.delivery_message.messages.rna_fastq_scout_message import (
-    RNAFastqScoutMessage,
-)
-from cg.services.delivery_message.messages.rna_scout_message import RNAScoutMessage
 from cg.services.delivery_message.messages.scout_message import ScoutMessage
 from cg.services.delivery_message.messages.statina_message import StatinaMessage
+from cg.services.delivery_message.messages.rna_delivery_message import (
+    RNAScoutStrategy,
+    RNAFastqStrategy,
+    RNAAnalysisStrategy,
+    RNAFastqAnalysisStrategy,
+    RNAMessageStrategy,
+    RNADeliveryMessage,
+)

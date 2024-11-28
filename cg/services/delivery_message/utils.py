@@ -7,10 +7,6 @@ from cg.services.delivery_message.messages import (
     FastqMessage,
     FastqScoutMessage,
     MicrosaltMwrMessage,
-    RNAAnalysisScoutMessage,
-    RNAFastqAnalysisScoutMessage,
-    RNAFastqScoutMessage,
-    RNAScoutMessage,
     ScoutMessage,
     StatinaMessage,
 )
@@ -19,6 +15,14 @@ from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
+from cg.services.delivery_message.messages.rna_delivery_message import (
+    RNAScoutStrategy,
+    RNAFastqStrategy,
+    RNAAnalysisStrategy,
+    RNAFastqAnalysisStrategy,
+    RNAMessageStrategy,
+    RNADeliveryMessage,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -34,21 +38,12 @@ MESSAGE_MAP = {
     DataDelivery.BAM: BamMessage,
 }
 
-SCOUT_DATA_DELIVERY: list[DataDelivery] = [
-    DataDelivery.SCOUT,
-    DataDelivery.FASTQ_SCOUT,
-    DataDelivery.ANALYSIS_SCOUT,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT,
-]
 
-RNA_MESSAGE_MAP: dict[DataDelivery, type[DeliveryMessage]] = {
-    DataDelivery.ANALYSIS_FILES: AnalysisMessage,
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: RNAScoutMessage,
-    DataDelivery.FASTQ_SCOUT: RNAFastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
-    DataDelivery.ANALYSIS_SCOUT: RNAAnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: RNAFastqAnalysisScoutMessage,
+RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAMessageStrategy]] = {
+    DataDelivery.SCOUT: RNAScoutStrategy,
+    DataDelivery.FASTQ_SCOUT: RNAFastqStrategy,
+    DataDelivery.ANALYSIS_SCOUT: RNAAnalysisStrategy,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: RNAFastqAnalysisStrategy,
 }
 
 
@@ -76,11 +71,13 @@ def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
     return message_strategy
 
 
-def get_rna_message_strategy_from_data_delivery(case: Case, store: Store) -> DeliveryMessage:
-
-    if case.data_delivery in SCOUT_DATA_DELIVERY:
-        return RNA_MESSAGE_MAP[case.data_delivery](store)
-    return RNA_MESSAGE_MAP[case.data_delivery]()
+def get_rna_message_strategy_from_data_delivery(
+    case: Case, store: Store
+) -> DeliveryMessage | RNADeliveryMessage:
+    message_strategy = RNA_STRATEGY_MAP[case.data_delivery]
+    if message_strategy:
+        return RNADeliveryMessage(store=store, strategy=message_strategy())
+    return MESSAGE_MAP[case.data_delivery]()
 
 
 def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
