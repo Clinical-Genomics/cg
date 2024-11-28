@@ -40,6 +40,7 @@ MESSAGE_MAP = {
 
 
 RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAMessageStrategy]] = {
+    # Only returns a message strategy if there is a scout delivery for the case.
     DataDelivery.SCOUT: RNAScoutStrategy,
     DataDelivery.FASTQ_SCOUT: RNAFastqStrategy,
     DataDelivery.ANALYSIS_SCOUT: RNAAnalysisStrategy,
@@ -74,6 +75,10 @@ def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
 def get_rna_message_strategy_from_data_delivery(
     case: Case, store: Store
 ) -> DeliveryMessage | RNADeliveryMessage:
+    """Get the RNA delivery message strategy based on the data delivery type.
+    If a scout delivery is required it will use the RNADeliveryMessage class that links RNA to DNA cases.
+    Otherwise it used the conventional delivery message strategy.
+    """
     message_strategy = RNA_STRATEGY_MAP[case.data_delivery]
     if message_strategy:
         return RNADeliveryMessage(store=store, strategy=message_strategy())
