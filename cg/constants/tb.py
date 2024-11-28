@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from cg.constants.sequencing import SeqLibraryPrepCategory
+
 
 class AnalysisStatus:
     CANCELLED: str = "cancelled"
@@ -13,8 +15,8 @@ class AnalysisStatus:
 
 
 class AnalysisTypes(StrEnum):
-    WGS: str = "wgs"
-    WES: str = "wes"
-    TGS: str = "tgs"
-    WTS: str = "wts"
     OTHER: str = "other"
+    TGS: str = SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+    WES: str = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+    WGS: str = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    WTS: str = SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING

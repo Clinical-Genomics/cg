@@ -1423,7 +1423,8 @@ class ReadHandler(BaseHandler):
                 cases=orders,
                 filter_functions=[CaseFilter.BY_WORKFLOWS],
                 workflows=orders_params.workflows,
-            ).distinct()
+            )
+        orders = orders.distinct()
         orders: Query = apply_order_filters(
             orders=orders,
             filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
