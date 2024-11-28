@@ -91,7 +91,6 @@ class AnalysisType(StrEnum):
     WHOLE_EXOME_SEQUENCING: str = "wes"
     WHOLE_GENOME_SEQUENCING: str = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-    OTHER: str = "other"
 
 
 class CancerAnalysisType(StrEnum):

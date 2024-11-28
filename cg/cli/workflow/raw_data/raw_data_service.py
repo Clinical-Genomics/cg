@@ -1,8 +1,8 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.constants.constants import AnalysisType, Workflow
-from cg.constants.tb import AnalysisStatus
+from cg.constants.constants import Workflow
+from cg.constants.tb import AnalysisStatus, AnalysisTypes
 from cg.exc import CaseNotFoundError
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -37,7 +37,7 @@ class RawDataAnalysisService:
     def _add_analysis_to_trailblazer(self, case: Case) -> None:
         self.trailblazer_api.add_pending_analysis(
             case_id=case.internal_id,
-            analysis_type=AnalysisType.OTHER,
+            analysis_type=AnalysisTypes.OTHER,
             config_path="",
             order_id=case.latest_order.id,
             out_dir="",

@@ -23,7 +23,8 @@ from cg.constants.constants import (
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
-from cg.constants.tb import AnalysisStatus
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.tb import AnalysisStatus, AnalysisTypes
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -168,20 +169,21 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(sample_obj: Sample) -> str:
+    def get_application_type(sample: Sample) -> str:
         """
-        Gets application type for sample. Only application types supported by trailblazer (or other)
+        Return the application type for sample.
+        Only application types supported by Trailblazer (or other)
         are valid outputs.
         """
-        prep_category: str = sample_obj.prep_category
+        prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
-            AnalysisType.TARGETED_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_EXOME_SEQUENCING,
-            AnalysisType.WHOLE_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
-        return AnalysisType.OTHER
+        return AnalysisTypes.OTHER
 
     def get_case_application_type(self, case_id: str) -> str:
         """Returns the application type for samples in a case."""
