@@ -13,7 +13,6 @@ from cg.apps.environ import environ_email
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
-    AnalysisType,
     CaseActions,
     CustomerId,
     FileFormat,
@@ -24,7 +23,7 @@ from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.tb import AnalysisStatus, AnalysisTypes
+from cg.constants.tb import AnalysisStatus, AnalysisType, AnalysisTypes
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -199,7 +198,7 @@ class AnalysisAPI(MetaAPI):
 
     def are_case_samples_rna(self, case_id: str) -> bool:
         analysis_type: str = self.get_case_application_type(case_id)
-        return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
+        return analysis_type == AnalysisType.WTS
 
     def get_case_source_type(self, case_id: str) -> str | None:
         """
@@ -219,7 +218,7 @@ class AnalysisAPI(MetaAPI):
     def has_case_only_exome_samples(self, case_id: str) -> bool:
         """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
         application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
+        return application_type == AnalysisType.WES
 
     def upload_bundle_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False

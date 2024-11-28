@@ -86,13 +86,6 @@ class SequencingRunDataAvailability(StrEnum):
         return list(map(lambda status: status.value, cls))
 
 
-class AnalysisType(StrEnum):
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-
-
 class CancerAnalysisType(StrEnum):
     TUMOR_NORMAL = auto()
     TUMOR_NORMAL_PANEL = auto()
