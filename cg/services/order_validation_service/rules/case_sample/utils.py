@@ -291,11 +291,6 @@ def get_counter_container_names(order: OrderWithCases) -> Counter:
     return counter
 
 
-
-def has_sex_and_subject(sample: Sample) -> bool:
-    return bool(sample.subject_id and sample.sex != SexEnum.unknown)
-  
-  
 def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[str]:
     existing_sample_names: set[str] = set()
     for case in order.cases:
