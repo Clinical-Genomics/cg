@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from cg.exc import CaseNotFoundError
 from cg.services.delivery_message.messages.utils import (
     get_caesar_delivery_path,
     get_scout_links_row_separated,
@@ -56,10 +55,6 @@ class RNADeliveryMessage:
 
     def _get_scout_message_for_case(self, case: Case) -> str:
         related_uploaded_dna_cases = self.store.get_uploaded_related_dna_cases(rna_case=case)
-        if not related_uploaded_dna_cases:
-            raise CaseNotFoundError(
-                f"No matching DNA cases for case {case.internal_id} ({case.name})."
-            )
         scout_links = get_scout_links_row_separated(cases=related_uploaded_dna_cases)
         return (
             f"The analysis for case {case.name} has been uploaded to the corresponding DNA case(s) on Scout at:\n\n"
