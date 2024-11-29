@@ -1,19 +1,19 @@
 from typing import Any
 
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import (
-    CaseSampleError,
-)
+from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
-from cg.services.order_validation_service.errors.validation_errors import (
-    ValidationErrors,
-)
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
+from cg.services.order_validation_service.models.order import Order
 
 
-def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
+def create_order_validation_response(
+    raw_order: dict, errors: ValidationErrors, model: type[Order]
+) -> dict:
     """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
-    wrap_fields(raw_order)
+    partially_validated_model: model = model.model_construct(**raw_order)
+    wrap_fields(partially_validated_model.model_dump())
     map_errors_to_order(order=raw_order, errors=errors)
     return raw_order
 
