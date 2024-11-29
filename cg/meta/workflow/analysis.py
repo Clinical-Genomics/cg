@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Iterator
 
-import click
+import rich_click as click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email

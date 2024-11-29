@@ -132,6 +132,13 @@ class Workflow(StrEnum):
     TOMTE: str = "tomte"
 
 
+DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
+    Workflow.MIP_DNA,
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+]
+
+
 class FileFormat(StrEnum):
     CSV: str = "csv"
     FASTQ: str = "fastq"

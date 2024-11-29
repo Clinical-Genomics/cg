@@ -1,6 +1,6 @@
 """Code for validating an upload via CLI"""
 
-import click
+import rich_click as click
 
 from cg.apps.coverage import ChanjoAPI
 from cg.models.cg_config import CGConfig
