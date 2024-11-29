@@ -66,7 +66,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type"""
 
-        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample=sample)
+        analysis_type: str = BalsamicAnalysisAPI.get_analysis_type(sample=sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":
