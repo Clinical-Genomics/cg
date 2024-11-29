@@ -60,7 +60,6 @@ class RNADeliveryMessage:
             raise CaseNotFoundError(f"No matching DNA cases for case {case.name}.")
         scout_links = get_scout_links_row_separated(cases=related_uploaded_dna_cases)
         return (
-            f"Hello,\n\n"
             f"The analysis for case {case.name} has been uploaded to the corresponding DNA case(s) on Scout at:\n\n"
             f"{scout_links}\n\n"
         )
