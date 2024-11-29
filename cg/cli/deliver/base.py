@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.deliver.utils import deliver_raw_data_for_analyses
