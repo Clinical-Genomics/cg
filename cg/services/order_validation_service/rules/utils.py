@@ -1,9 +1,8 @@
+from cg.constants.sample_sources import SourceType
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.constants import (
-    MAXIMUM_VOLUME,
-    MINIMUM_VOLUME,
-)
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
+from cg.services.order_validation_service.models.aliases import SampleWithSkipRC
 from cg.services.order_validation_service.models.sample import Sample
 from cg.store.models import Application
 from cg.store.store import Store
@@ -41,3 +40,37 @@ def is_volume_missing(sample: Sample) -> bool:
     if is_in_container(sample.container) and not sample.volume:
         return True
     return False
+
+
+def has_sample_invalid_concentration(sample: SampleWithSkipRC, store: Store) -> bool:
+    application: Application | None = store.get_application_by_tag(sample.application)
+    if not application:
+        return False
+    concentration: float | None = sample.concentration_ng_ul
+    is_cfdna: bool = is_sample_cfdna(sample)
+    allowed_interval: tuple[float, float] = get_concentration_interval(
+        application=application, is_cfdna=is_cfdna
+    )
+    return not is_sample_concentration_within_interval(
+        concentration=concentration, interval=allowed_interval
+    )
+
+
+def is_sample_cfdna(sample: SampleWithSkipRC) -> bool:
+    source = sample.source
+    return source == SourceType.CELL_FREE_DNA
+
+
+def get_concentration_interval(application: Application, is_cfdna: bool) -> tuple[float, float]:
+    if is_cfdna:
+        return (
+            application.sample_concentration_minimum_cfdna,
+            application.sample_concentration_maximum_cfdna,
+        )
+    return application.sample_concentration_minimum, application.sample_concentration_maximum
+
+
+def is_sample_concentration_within_interval(
+    concentration: float, interval: tuple[float, float]
+) -> bool:
+    return interval[0] <= concentration <= interval[1]

@@ -1,7 +1,6 @@
 import re
 from collections import Counter
 
-from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
@@ -16,13 +15,18 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 )
 from cg.services.order_validation_service.models.aliases import (
     CaseContainingRelatives,
+    CaseWithSkipRC,
     HumanSample,
     SampleWithRelatives,
+    SampleWithSkipRC,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
+    get_concentration_interval,
+    has_sample_invalid_concentration,
     is_in_container,
+    is_sample_cfdna,
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
@@ -204,7 +208,7 @@ def validate_subject_ids_in_case(
 
 
 def validate_concentration_in_case(
-    case: CaseContainingRelatives, case_index: int, store: Store
+    case: CaseWithSkipRC, case_index: int, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors: list[InvalidConcentrationIfSkipRCError] = []
     for sample_index, sample in case.enumerated_new_samples:
@@ -220,7 +224,7 @@ def validate_concentration_in_case(
 
 
 def create_invalid_concentration_error(
-    case_index: int, sample: SampleWithRelatives, sample_index: int, store: Store
+    case_index: int, sample: SampleWithSkipRC, sample_index: int, store: Store
 ) -> InvalidConcentrationIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna: bool = is_sample_cfdna(sample)
@@ -233,40 +237,6 @@ def create_invalid_concentration_error(
         sample_index=sample_index,
         allowed_interval=allowed_interval,
     )
-
-
-def has_sample_invalid_concentration(sample: SampleWithRelatives, store: Store) -> bool:
-    application: Application | None = store.get_application_by_tag(sample.application)
-    if not application:
-        return False
-    concentration: float | None = sample.concentration_ng_ul
-    is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application, is_cfdna=is_cfdna
-    )
-    return not is_sample_concentration_within_interval(
-        concentration=concentration, interval=allowed_interval
-    )
-
-
-def is_sample_cfdna(sample: SampleWithRelatives) -> bool:
-    source = sample.source
-    return source == SourceType.CELL_FREE_DNA
-
-
-def get_concentration_interval(application: Application, is_cfdna: bool) -> tuple[float, float]:
-    if is_cfdna:
-        return (
-            application.sample_concentration_minimum_cfdna,
-            application.sample_concentration_maximum_cfdna,
-        )
-    return application.sample_concentration_minimum, application.sample_concentration_maximum
-
-
-def is_sample_concentration_within_interval(
-    concentration: float, interval: tuple[float, float]
-) -> bool:
-    return interval[0] <= concentration <= interval[1]
 
 
 def is_invalid_plate_well_format(sample: Sample) -> bool:
