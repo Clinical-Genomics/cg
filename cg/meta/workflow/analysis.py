@@ -283,7 +283,7 @@ class AnalysisAPI(MetaAPI):
         tower_workflow_id: str | None = None,
     ) -> None:
         self.check_analysis_ongoing(case_id)
-        application_type: str = self.get_analysis_type(
+        analysis_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
         )
         config_path: str = self.get_job_ids_path(case_id).as_posix()
@@ -296,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
-            analysis_type=application_type,
+            analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
             email=email,
