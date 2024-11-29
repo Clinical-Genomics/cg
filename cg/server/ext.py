@@ -15,6 +15,9 @@ from cg.services.delivery_message.delivery_message_service import DeliveryMessag
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
+from cg.services.order_validation_service.workflows.fastq.validation_service import (
+    FastqValidationService,
+)
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
 )
@@ -119,6 +122,7 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
 )
 
 balsamic_validation_service = BalsamicValidationService(store=db)
+fastq_validation_service = FastqValidationService(store=db)
 microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)

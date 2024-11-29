@@ -37,6 +37,7 @@ from cg.server.ext import (
     balsamic_validation_service,
     db,
     delivery_message_service,
+    fastq_validation_service,
     lims,
     microbial_fastq_validation_service,
     microsalt_validation_service,
@@ -274,6 +275,8 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
+    if order_type == OrderType.FASTQ:
+        response = fastq_validation_service.validate(raw_order)
     if order_type == OrderType.MICROBIAL_FASTQ:
         response = microbial_fastq_validation_service.validate(raw_order)
     if order_type == OrderType.MICROSALT:
