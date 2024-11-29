@@ -21,7 +21,9 @@ class MutantValidationService(OrderValidationService):
 
     def validate(self, raw_order: dict) -> dict:
         errors: ValidationErrors = self._get_errors(raw_order)
-        return create_order_validation_response(raw_order=raw_order, errors=errors)
+        return create_order_validation_response(
+            raw_order=raw_order, errors=errors, model=MutantOrder
+        )
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
         order, field_errors = ModelValidator.validate(order=raw_order, model=MutantOrder)
