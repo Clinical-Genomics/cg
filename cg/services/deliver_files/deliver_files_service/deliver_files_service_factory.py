@@ -8,6 +8,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_service.analysis_service import AnalysisService
+from cg.services.deliver_files.constants import DeliveryDestination
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
@@ -29,9 +30,11 @@ from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
     FileManager,
-    SampleFileNameFormatter,
+    NestedSampleFileNameFormatter,
+    FlatSampleFileNameFormatter,
 )
 from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.fohm_upload_files_mover import GenericFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
@@ -47,7 +50,11 @@ from cg.store.store import Store
 
 
 class DeliveryServiceFactory:
-    """Class to build the delivery services based on workflow and delivery type."""
+    """
+    Class to build the delivery services based on workflow, delivery type, delivery destination.
+    The delivery destination is used to specify delivery to the customer or for upload.
+    It determines how the delivery_base_path is managed and its underlying folder structure.
+    """
 
     def __init__(
         self,
@@ -140,47 +147,83 @@ class DeliveryServiceFactory:
     def _get_sample_file_formatter(
         self,
         case: Case,
+        delivery_destination: str,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
         """Get the file formatter service based on the workflow."""
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                file_formatter=SampleFileNameFormatter(),
+                file_formatter=NestedSampleFileNameFormatter(),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
+            if delivery_destination == "upload":
+                return MutantFileFormatter(
+                    lims_api=self.lims_api,
+                    file_manager=FileManager(),
+                    file_formatter=SampleFileConcatenationFormatter(
+                        file_manager=FileManager(),
+                        file_formatter=FlatSampleFileNameFormatter(),
+                        concatenation_service=FastqConcatenationService(),
+                    ),
+                )
             return MutantFileFormatter(
                 lims_api=self.lims_api,
                 file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
                     file_manager=FileManager(),
-                    file_formatter=SampleFileNameFormatter(),
+                    file_formatter=NestedSampleFileNameFormatter(),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
-            file_manager=FileManager(), file_name_formatter=SampleFileNameFormatter()
+            file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
         )
 
+    @staticmethod
+    def _get_file_mover(
+        delivery_destination: DeliveryDestination,
+    ) -> DeliveryFilesMover | GenericFilesMover:
+        """Get the file mover based on the delivery type.
+
+        Args:
+            delivery_destination: The destination of the delivery defaults to customer.
+        """
+        if delivery_destination == DeliveryDestination.UPLOAD:
+            return GenericFilesMover(FileMover(FileManager()))
+        return DeliveryFilesMover(FileMover(FileManager()))
+
     def build_delivery_service(
-        self, case: Case, delivery_type: DataDelivery | None = None
+        self,
+        case: Case,
+        delivery_type: DataDelivery | None = None,
+        delivery_destination: DeliveryDestination = DeliveryDestination.CUSTOMER,
     ) -> DeliverFilesService:
-        """Build a delivery service based on a case."""
+        """Build a delivery service based on a case.
+
+        Args:
+            case: The case to deliver files for.
+            delivery_type: The type of delivery to perform.
+            delivery_destination: The destination of the delivery defaults to customer.
+        """
         delivery_type: DataDelivery = self._sanitise_delivery_type(
             delivery_type if delivery_type else case.data_delivery
         )
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
-        sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter = (
-            self._get_sample_file_formatter(case)
+        file_move_service: DeliveryFilesMover | GenericFilesMover = self._get_file_mover(
+            delivery_destination=delivery_destination
         )
+        sample_file_formatter: (
+            SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
+        ) = self._get_sample_file_formatter(case)
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
         )
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
-            move_file_service=DeliveryFilesMover(FileMover(FileManager())),
+            move_file_service=file_move_service,
             file_filter=SampleFileFilter(),
             file_formatter_service=file_formatter,
             status_db=self.store,

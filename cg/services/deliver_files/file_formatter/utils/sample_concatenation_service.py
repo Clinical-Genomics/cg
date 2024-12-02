@@ -10,8 +10,9 @@ from cg.services.fastq_concatenation_service.utils import generate_concatenated_
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
-    SampleFileNameFormatter,
+    NestedSampleFileNameFormatter,
     FileManager,
+    FlatSampleFileNameFormatter,
 )
 
 
@@ -24,7 +25,7 @@ class SampleFileConcatenationFormatter:
     def __init__(
         self,
         file_manager: FileManager,
-        file_formatter: SampleFileNameFormatter,
+        file_formatter: NestedSampleFileNameFormatter | FlatSampleFileNameFormatter,
         concatenation_service: FastqConcatenationService,
     ):
         self.file_manager = file_manager
