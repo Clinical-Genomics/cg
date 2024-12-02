@@ -12,7 +12,7 @@ from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
 from cg.exc import (
     AnalysisNotCompletedError,
@@ -20,6 +20,7 @@ from cg.exc import (
     TrailblazerAPIHTTPError,
 )
 from cg.io.controller import APIRequest, ReadStream
+
 
 LOG = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        slurm_quality_of_service: SlurmQos,
+        priority: TrailblazerPriority,
         email: str = None,
         order_id: int | None = None,
         workflow: Workflow = None,
@@ -128,7 +129,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "order_id": order_id,
             "out_dir": out_dir,
-            "priority": slurm_quality_of_service,
+            "priority": priority,
             "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
