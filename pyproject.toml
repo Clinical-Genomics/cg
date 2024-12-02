@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "64.5.14"
+version = "64.5.20"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -72,6 +72,7 @@ genologics = "*"
 housekeeper = ">=4.11.3"
 pydantic-settings = "^2.3.3"
 email-validator = "^2.2.0"
+rich-click = "^1.8.4"
 
 
 [tool.poetry.dev-dependencies]

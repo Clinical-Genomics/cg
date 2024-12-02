@@ -1,4 +1,4 @@
-import click
+import rich_click as click
 from click.core import ParameterSource
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
