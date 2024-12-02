@@ -127,9 +127,15 @@ class DeliverFilesService:
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
         formatted_files = self.file_formatter.format_files(moved_files)
-        # Move files back to the delivery base path so it conforms to the FOHM upload structure
+
         for formatted_file in formatted_files.files:
+            # Move files back to the delivery base path so it conforms to the FOHM upload structure
+            LOG.debug(
+                f"Moving files for sample {formatted_file} back to the delivery base path {delivery_base_path}"
+            )
             shutil.move(src=formatted_file.formatted_path.parent, dst=delivery_base_path)
+            # Delete the formatted folder
+            shutil.rmtree(path=formatted_file.formatted_path.parent)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
