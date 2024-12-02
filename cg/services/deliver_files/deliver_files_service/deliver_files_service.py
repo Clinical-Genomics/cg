@@ -109,7 +109,14 @@ class DeliverFilesService:
         self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
     def deliver_files_for_fohm_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
-        """Deliver the files for a sample to the specified folder."""
+        """
+        Deliver the files for a sample to the FOHM upload destination. In addition to the normal delivery,
+        the files need to be moved back to the delivery base path so it conforms to the FOHM upload structure.
+
+            :param case: The case to deliver files for
+            :param sample_id: The sample to deliver files for
+            :param delivery_base_path: The base path to deliver the files to
+        """
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
             case_id=case.internal_id
         )
