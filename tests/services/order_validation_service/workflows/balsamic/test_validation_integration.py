@@ -54,7 +54,7 @@ def test_case_error_conversion(
 
     # GIVEN an order with a faulty case priority
     valid_order.cases[0].priority = "Non-existent priority"
-    order = valid_order.model_dump(by_alias=True)
+    order = valid_order.model_dump()
 
     # WHEN validating the order
     response: dict = balsamic_validation_service.validate(order)
