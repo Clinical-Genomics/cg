@@ -100,7 +100,7 @@ class SexOptions(StrEnum):
     UNKNOWN: str = "unknown"
 
 
-SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
+SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}TEST$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
