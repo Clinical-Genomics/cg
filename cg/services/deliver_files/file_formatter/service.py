@@ -6,6 +6,7 @@ from cg.services.deliver_files.file_fetcher.models import CaseFile, DeliveryFile
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.models import FormattedFile, FormattedFiles
 from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
@@ -25,7 +26,9 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
     def __init__(
         self,
         case_file_formatter: CaseFileFormatter,
-        sample_file_formatter: SampleFileFormatter | SampleFileConcatenationFormatter,
+        sample_file_formatter: (
+            SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
+        ),
     ):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter

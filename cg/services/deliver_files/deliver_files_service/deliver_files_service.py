@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
@@ -118,7 +119,10 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
-        self.file_formatter.format_files(moved_files)
+        formatted_files = self.file_formatter.format_files(moved_files)
+        # Move files back to the delivery base path so it conforms to the FOHM upload structure
+        for formatted_file in formatted_files.files:
+            shutil.move(src=formatted_file.formatted_path.parent, dst=delivery_base_path)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
