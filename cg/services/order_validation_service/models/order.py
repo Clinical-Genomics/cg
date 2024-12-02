@@ -15,7 +15,7 @@ class Order(BaseModel):
     name: str = Field(min_length=1)
     skip_reception_control: bool = False
     ticket_number: str | None = Field(None, pattern=TICKET_PATTERN)
-    user_id: int
+    user_id: int = Field(None, exclude=True)
 
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):
