@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
@@ -15,7 +15,7 @@ class Order(BaseModel):
     name: str = Field(min_length=1)
     skip_reception_control: bool = False
     ticket_number: str | None = Field(None, pattern=TICKET_PATTERN)
-    user_id: int = Field(None, exclude=True)
+    user_id: int
 
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):
@@ -24,3 +24,5 @@ class Order(BaseModel):
                 if value == "":
                     data[key] = None
         return data
+
+    model_config = ConfigDict(extra="ignore")
