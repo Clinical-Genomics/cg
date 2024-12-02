@@ -147,7 +147,7 @@ class DeliveryServiceFactory:
     def _get_sample_file_formatter(
         self,
         case: Case,
-        delivery_destination: str,
+        delivery_destination: DeliveryDestination,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
         """Get the file formatter service based on the workflow."""
         converted_workflow: Workflow = self._convert_workflow(case)
@@ -217,7 +217,7 @@ class DeliveryServiceFactory:
         )
         sample_file_formatter: (
             SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
-        ) = self._get_sample_file_formatter(case)
+        ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
         file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
             case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
         )
