@@ -13,7 +13,6 @@ from cg.apps.environ import environ_email
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
-    AnalysisType,
     CaseActions,
     CustomerId,
     FileFormat,
@@ -23,7 +22,8 @@ from cg.constants.constants import (
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
-from cg.constants.tb import AnalysisStatus
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -168,17 +168,18 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(sample_obj: Sample) -> str:
+    def get_analysis_type(sample: Sample) -> str:
         """
-        Gets application type for sample. Only application types supported by trailblazer (or other)
+        Return the analysis type for sample.
+        Only analysis types supported by Trailblazer
         are valid outputs.
         """
-        prep_category: str = sample_obj.prep_category
+        prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
-            AnalysisType.TARGETED_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_EXOME_SEQUENCING,
-            AnalysisType.WHOLE_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
@@ -186,7 +187,7 @@ class AnalysisAPI(MetaAPI):
     def get_case_application_type(self, case_id: str) -> str:
         """Returns the application type for samples in a case."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
-        application_types: set[str] = {self.get_application_type(sample) for sample in samples}
+        application_types: set[str] = {self.get_analysis_type(sample) for sample in samples}
 
         if len(application_types) > 1:
             raise CgError(
@@ -197,7 +198,7 @@ class AnalysisAPI(MetaAPI):
 
     def are_case_samples_rna(self, case_id: str) -> bool:
         analysis_type: str = self.get_case_application_type(case_id)
-        return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
+        return analysis_type == AnalysisType.WTS
 
     def get_case_source_type(self, case_id: str) -> str | None:
         """
@@ -217,7 +218,7 @@ class AnalysisAPI(MetaAPI):
     def has_case_only_exome_samples(self, case_id: str) -> bool:
         """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
         application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
+        return application_type == AnalysisType.WES
 
     def upload_bundle_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False
@@ -282,7 +283,7 @@ class AnalysisAPI(MetaAPI):
         tower_workflow_id: str | None = None,
     ) -> None:
         self.check_analysis_ongoing(case_id)
-        application_type: str = self.get_application_type(
+        analysis_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
         )
         config_path: str = self.get_job_ids_path(case_id).as_posix()
@@ -295,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
-            analysis_type=application_type,
+            analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
             email=email,

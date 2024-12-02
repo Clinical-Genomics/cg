@@ -37,7 +37,7 @@ from cg.constants.priority import SlurmQos
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
-from cg.constants.tb import AnalysisTypes
+from cg.constants.tb import AnalysisType
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
@@ -2581,7 +2581,7 @@ def raredisease_parameters_default(
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed_file=bed_version_file_name,
         skip_germlinecnvcaller=False,
-        analysis_type=AnalysisTypes.WES,
+        analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
