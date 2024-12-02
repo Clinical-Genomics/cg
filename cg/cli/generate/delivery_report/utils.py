@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-import click
+import rich_click as click
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, REPORT_SUPPORTED_WORKFLOW, Workflow
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI

@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow

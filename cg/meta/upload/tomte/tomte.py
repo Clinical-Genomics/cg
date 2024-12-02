@@ -3,7 +3,7 @@
 import logging
 from subprocess import CalledProcessError
 
-import click
+import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.scout import upload_tomte_to_scout

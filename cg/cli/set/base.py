@@ -5,7 +5,7 @@ import getpass
 import logging
 from typing import Iterable
 
-import click
+import rich_click as click
 
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
