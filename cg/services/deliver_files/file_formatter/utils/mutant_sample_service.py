@@ -21,10 +21,10 @@ class MutantFileFormatter:
         self.file_manager = file_manager
 
     def format_files(
-        self, moved_files: list[SampleFile], ticket_dir_path: Path
+        self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
-            moved_files=moved_files, ticket_dir_path=ticket_dir_path
+            moved_files=moved_files, delivery_path=delivery_path
         )
         appended_formatted_files: list[FormattedFile] = self._add_lims_metadata_to_file_name(
             formatted_files=formatted_files, sample_files=moved_files

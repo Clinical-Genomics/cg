@@ -24,6 +24,7 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
     FileManager,
     NestedSampleFileNameFormatter,
+    FlatSampleFileNameFormatter,
 )
 
 
@@ -51,6 +52,15 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import (
                 concatenation_service=FastqConcatenationService(),
             ),
         ),
+        (
+            "fastq_concatenation_sample_files_flat",
+            "expected_concatenated_fastq_flat_formatted_files",
+            SampleFileConcatenationFormatter(
+                file_manager=FileManager(),
+                file_formatter=FlatSampleFileNameFormatter(),
+                concatenation_service=FastqConcatenationService(),
+            ),
+        ),
     ],
 )
 def test_file_formatter_utils(
@@ -64,9 +74,9 @@ def test_file_formatter_utils(
     expected_formatted_files: list[FormattedFile] = request.getfixturevalue(
         expected_formatted_files
     )
-    ticket_dir_path: Path = moved_files[0].file_path.parent
+    delivery_path: Path = moved_files[0].file_path.parent
 
-    os.makedirs(ticket_dir_path, exist_ok=True)
+    os.makedirs(delivery_path, exist_ok=True)
 
     for moved_file in moved_files:
         moved_file.file_path.touch()
@@ -74,7 +84,7 @@ def test_file_formatter_utils(
     # WHEN formatting the case files
     formatted_files: list[FormattedFile] = file_formatter.format_files(
         moved_files=moved_files,
-        ticket_dir_path=ticket_dir_path,
+        delivery_path=delivery_path,
     )
 
     # THEN the case files should be formatted
@@ -114,7 +124,7 @@ def test_mutant_file_formatter(
     # WHEN formatting the files
     formatted_files: list[FormattedFile] = file_formatter.format_files(
         moved_files=mutant_moved_files,
-        ticket_dir_path=ticket_dir_path,
+        delivery_path=ticket_dir_path,
     )
 
     # THEN the files should be formatted

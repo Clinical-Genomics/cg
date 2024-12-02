@@ -21,7 +21,7 @@ from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeli
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
 from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
-from cg.services.deliver_files.file_formatter.service import DeliveryFileFormatter
+from cg.services.deliver_files.file_formatter.delivery_file_formatter import DeliveryFileFormatter
 from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
 from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
@@ -158,7 +158,7 @@ class DeliveryServiceFactory:
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
-            if delivery_destination == "upload":
+            if delivery_destination == DeliveryDestination.UPLOAD:
                 return MutantFileFormatter(
                     lims_api=self.lims_api,
                     file_manager=FileManager(),
@@ -194,6 +194,24 @@ class DeliveryServiceFactory:
             return GenericFilesMover(FileMover(FileManager()))
         return DeliveryFilesMover(FileMover(FileManager()))
 
+    def _get_file_formatter(
+        self,
+        delivery_destination: DeliveryDestination,
+        case: Case,
+    ) -> DeliveryFileFormattingService:
+        """Get the file formatter service based on the delivery destination."""
+        sample_file_formatter: (
+            SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
+        ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
+        if delivery_destination == DeliveryDestination.UPLOAD:
+            return DeliveryFileFormatter(
+                case_file_formatter=CaseFileFormatter(),
+                sample_file_formatter=sample_file_formatter,
+            )
+        return DeliveryFileFormatter(
+            case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
+        )
+
     def build_delivery_service(
         self,
         case: Case,
@@ -215,11 +233,8 @@ class DeliveryServiceFactory:
         file_move_service: DeliveryFilesMover | GenericFilesMover = self._get_file_mover(
             delivery_destination=delivery_destination
         )
-        sample_file_formatter: (
-            SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
-        ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
-        file_formatter: DeliveryFileFormattingService = DeliveryFileFormatter(
-            case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
+        file_formatter: DeliveryFileFormattingService = self._get_file_formatter(
+            case=case, delivery_destination=delivery_destination
         )
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,

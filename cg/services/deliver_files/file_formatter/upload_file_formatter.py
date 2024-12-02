@@ -15,12 +15,12 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import Sample
 LOG = logging.getLogger(__name__)
 
 
-class DeliveryFileFormatter(DeliveryFileFormattingService):
+class UploadFileFormatter(DeliveryFileFormattingService):
     """
     Format the files to be delivered in the generic format.
     Expected structure:
-    <customer>/inbox/<ticket_id>/<case_name>/<case_files>
-    <customer>/inbox/<ticket_id>/<sample_name>/<sample_files>
+    base_path/<case_files>
+    base_path/<sample_files>
     """
 
     def __init__(
@@ -36,32 +36,25 @@ class DeliveryFileFormatter(DeliveryFileFormattingService):
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
-        ticket_dir_path: Path = delivery_files.delivery_data.customer_ticket_inbox
-        self._create_ticket_dir(ticket_dir_path)
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
-            ticket_dir_path=ticket_dir_path,
+            base_dir_path=delivery_files.sample_files[0].file_path.parent,
         )
         return FormattedFiles(files=formatted_files)
 
     def _format_sample_and_case_files(
-        self, sample_files: list[SampleFile], case_files: list[CaseFile], ticket_dir_path: Path
+        self, sample_files: list[SampleFile], case_files: list[CaseFile], base_dir_path: Path
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
         formatted_files: list[FormattedFile] = self.sample_file_formatter.format_files(
             moved_files=sample_files,
-            ticket_dir_path=ticket_dir_path,
+            delivery_path=base_dir_path,
         )
         if case_files:
             formatted_case_files: list[FormattedFile] = self.case_file_formatter.format_files(
                 moved_files=case_files,
-                ticket_dir_path=ticket_dir_path,
+                delivery_path=base_dir_path,
             )
             formatted_files.extend(formatted_case_files)
         return formatted_files
-
-    @staticmethod
-    def _create_ticket_dir(ticket_dir_path: Path) -> None:
-        """Create the ticket directory if it does not exist."""
-        os.makedirs(ticket_dir_path, exist_ok=True)

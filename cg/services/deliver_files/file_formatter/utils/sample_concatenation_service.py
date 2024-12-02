@@ -33,14 +33,12 @@ class SampleFileConcatenationFormatter:
         self.concatenation_service = concatenation_service
 
     def format_files(
-        self, moved_files: list[SampleFile], ticket_dir_path: Path
+        self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
         """Format the sample files to deliver, concatenate fastq files and return the formatted files."""
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
         for sample_name in sample_names:
-            self.file_manager.create_directories(
-                base_path=ticket_dir_path, directories={sample_name}
-            )
+            self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})
         formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
             sample_files=moved_files
         )

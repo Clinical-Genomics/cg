@@ -16,7 +16,7 @@ from cg.services.deliver_files.file_fetcher.analysis_service import (
 from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.file_formatter.service import (
+from cg.services.deliver_files.file_formatter.delivery_file_formatter import (
     DeliveryFileFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.case_service import (

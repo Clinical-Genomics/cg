@@ -3,13 +3,10 @@ from pathlib import Path
 
 from cg.constants.delivery import INBOX_NAME
 from cg.services.deliver_files.file_fetcher.models import (
-    CaseFile,
     DeliveryFiles,
     DeliveryMetaData,
-    SampleFile,
 )
 from cg.services.deliver_files.utils import FileMover
-from cg.utils.files import link_or_overwrite_file
 
 LOG = logging.getLogger(__name__)
 
