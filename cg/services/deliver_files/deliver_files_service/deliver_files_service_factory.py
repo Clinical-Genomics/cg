@@ -28,10 +28,10 @@ from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import (
     SampleFileFormatter,
-    FileManagingService,
+    FileManager,
     SampleFileNameFormatter,
 )
-from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
@@ -144,22 +144,22 @@ class DeliveryServiceFactory:
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
-                file_manager=FileManagingService(),
+                file_manager=FileManager(),
                 file_formatter=SampleFileNameFormatter(),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
             return MutantFileFormatter(
                 lims_api=self.lims_api,
-                file_manager=FileManagingService(),
+                file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
-                    file_manager=FileManagingService(),
+                    file_manager=FileManager(),
                     file_formatter=SampleFileNameFormatter(),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
-            file_manager=FileManagingService(), file_name_formatter=SampleFileNameFormatter()
+            file_manager=FileManager(), file_name_formatter=SampleFileNameFormatter()
         )
 
     def build_delivery_service(

@@ -1,31 +1,13 @@
-import os
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
-
-
-class FileManagingService:
-    """
-    Service to manage files.
-    Handles operations that create or rename files and directories.
-    """
-
-    @staticmethod
-    def create_directories(base_path: Path, directories: set[str]) -> None:
-        """Create directories for given names under the base path."""
-        for directory in directories:
-            Path(base_path, directory).mkdir(exist_ok=True)
-
-    @staticmethod
-    def rename_file(src: Path, dst: Path) -> None:
-        """Rename a file from src to dst."""
-        os.rename(src, dst)
+from cg.services.deliver_files.utils import FileManager
 
 
 class SampleFileNameFormatter:
     """
-    Class to format sample file names.
+    Class to format sample file names and paths.
     """
 
     @staticmethod
@@ -60,9 +42,7 @@ class SampleFileFormatter:
     Used for all workflows except Microsalt and Mutant.
     """
 
-    def __init__(
-        self, file_manager: FileManagingService, file_name_formatter: SampleFileNameFormatter
-    ):
+    def __init__(self, file_manager: FileManager, file_name_formatter: SampleFileNameFormatter):
         self.file_manager = file_manager
         self.file_name_formatter = file_name_formatter
 

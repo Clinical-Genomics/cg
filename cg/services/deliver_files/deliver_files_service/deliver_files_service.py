@@ -15,7 +15,7 @@ from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.models import FormattedFiles
-from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case

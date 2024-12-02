@@ -6,7 +6,7 @@ from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import FileManagingService
+from cg.services.deliver_files.file_formatter.utils.sample_service import FileManager
 
 
 class MutantFileFormatter:
@@ -14,7 +14,7 @@ class MutantFileFormatter:
         self,
         lims_api: LimsAPI,
         file_formatter: SampleFileConcatenationFormatter,
-        file_manager: FileManagingService,
+        file_manager: FileManager,
     ):
         self.lims_api: LimsAPI = lims_api
         self.file_formatter: SampleFileConcatenationFormatter = file_formatter

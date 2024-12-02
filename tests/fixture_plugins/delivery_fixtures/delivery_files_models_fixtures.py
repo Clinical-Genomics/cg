@@ -270,3 +270,25 @@ def expected_mutant_formatted_files(
 @pytest.fixture
 def mutant_moved_files(fastq_concatenation_sample_files) -> list[SampleFile]:
     return fastq_concatenation_sample_files
+
+
+@pytest.fixture
+def expected_upload_files(expected_analysis_delivery_files: DeliveryFiles):
+    return expected_analysis_delivery_files
+
+
+@pytest.fixture
+def expected_moved_upload_files(expected_analysis_delivery_files: DeliveryFiles, tmp_path: Path):
+    delivery_files = DeliveryFiles(**expected_analysis_delivery_files.model_dump())
+    new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
+        file_models=delivery_files.case_files, inbox_dir_path=tmp_path
+    )
+    new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
+        file_models=delivery_files.sample_files, inbox_dir_path=tmp_path
+    )
+
+    return DeliveryFiles(
+        delivery_data=delivery_files.delivery_data,
+        case_files=new_case_files,
+        sample_files=new_sample_files,
+    )

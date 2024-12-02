@@ -22,7 +22,7 @@ from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service
     SampleFileConcatenationFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
-from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
