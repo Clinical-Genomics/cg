@@ -13,9 +13,10 @@ def create_order_validation_response(
 ) -> dict:
     """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
     partially_validated_model: model = model.model_construct(**raw_order)
-    wrap_fields(partially_validated_model.model_dump())
-    map_errors_to_order(order=raw_order, errors=errors)
-    return raw_order
+    response: dict = partially_validated_model.model_dump(by_alias=True)
+    wrap_fields(response)
+    map_errors_to_order(order=response, errors=errors)
+    return response
 
 
 def map_errors_to_order(order: dict, errors: ValidationErrors) -> None:
