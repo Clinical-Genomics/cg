@@ -48,7 +48,7 @@ class DeliveryRsyncService:
         self.workflow: str = Workflow.RSYNC
 
     @property
-    def trailblazer_priority(self) -> str:
+    def trailblazer_priority(self) -> TrailblazerPriority:
         """Return the trailblazer priority depending on the slurm account."""
         return TrailblazerPriority.HIGH if self.account == SlurmAccount.PRODUCTION else TrailblazerPriority.LOW
 
