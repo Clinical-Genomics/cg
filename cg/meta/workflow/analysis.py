@@ -136,6 +136,12 @@ class AnalysisAPI(MetaAPI):
             return SlurmQos.EXPRESS
         priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
+    
+    def get_trailblazer_priority(self, case_id: str) -> int:
+        """Get the priority for the case in Trailblazer."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        priority: int = case.priority or Priority.research
+        return trailblazer_priority(priority)
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given workflow."""
