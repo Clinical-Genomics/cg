@@ -9,7 +9,7 @@ import pytest
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import ControlOptions
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -53,6 +53,36 @@ def test_get_slurm_qos_for_case(
 
     # THEN the expected slurm QOS should be returned
     assert slurm_qos is expected_slurm_qos
+
+@pytest.mark.parametrize(
+    "priority,expected_trailblazer_priority",
+    [
+        (Priority.clinical_trials, TrailblazerPriority.NORMAL),
+        (Priority.research, TrailblazerPriority.LOW),
+        (Priority.standard, TrailblazerPriority.NORMAL),
+        (Priority.priority, TrailblazerPriority.HIGH),
+        (Priority.express, TrailblazerPriority.EXPRESS),
+    ],
+)
+def test_get_trailblazer_priority(
+        case_id: str,
+        priority,
+        expected_trailblazer_priority,
+        mip_analysis_api: MipDNAAnalysisAPI,
+        analysis_store: Store,
+):
+    """Test get trailblazer priority from the case priority"""
+
+    # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.priority = priority
+
+    # WHEN getting the trailblazer priority for the case
+    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(case_id=case_id)
+
+    # THEN the expected trailblazer priority should be returned
+    assert trailblazer_priority is expected_trailblazer_priority
 
 
 def test_gene_panels_not_part_of_master_list(customer_id: str):
