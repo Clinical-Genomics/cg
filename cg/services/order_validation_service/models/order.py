@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
@@ -24,3 +24,5 @@ class Order(BaseModel):
                 if value == "":
                     data[key] = None
         return data
+
+    model_config = ConfigDict(extra="ignore")
