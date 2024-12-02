@@ -4,6 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.constants.constants import Workflow
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CaseNotFoundError
+from cg.meta.workflow.utils.utils import map_to_trailblazer_priority
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
@@ -41,7 +42,7 @@ class RawDataAnalysisService:
             config_path="",
             order_id=case.latest_order.id,
             out_dir="",
-            slurm_quality_of_service=case.slurm_priority,
+            priority=map_to_trailblazer_priority(case.priority),
             workflow=Workflow.RAW_DATA,
             ticket=case.latest_ticket,
         )
