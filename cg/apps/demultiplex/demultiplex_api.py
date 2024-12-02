@@ -12,7 +12,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.tb import AnalysisType
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
@@ -45,9 +45,9 @@ class DemultiplexingAPI:
         self.dry_run: bool = False
 
     @property
-    def slurm_quality_of_service(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
-        """Return SLURM quality of service."""
-        return SlurmQos.LOW if self.environment == "stage" else SlurmQos.HIGH
+    def trailblazer_priority(self) -> Literal[TrailblazerPriority.HIGH, TrailblazerPriority.LOW]:
+        """Return TrailBlazer quality of service."""
+        return TrailblazerPriority.LOW if self.environment == "stage" else TrailblazerPriority.HIGH
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -213,7 +213,7 @@ class DemultiplexingAPI:
             analysis_type=AnalysisType.OTHER,
             config_path=sequencing_run.trailblazer_config_path.as_posix(),
             out_dir=sequencing_run.trailblazer_config_path.parent.as_posix(),
-            slurm_quality_of_service=self.slurm_quality_of_service,
+            priority=self.trailblazer_priority,
             email=self.mail,
             workflow=Workflow.DEMULTIPLEX,
         )
