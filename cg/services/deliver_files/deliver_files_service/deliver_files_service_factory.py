@@ -38,6 +38,7 @@ from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFet
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
+from cg.services.deliver_files.utils import FileMover
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -179,7 +180,7 @@ class DeliveryServiceFactory:
         )
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
-            move_file_service=DeliveryFilesMover(),
+            move_file_service=DeliveryFilesMover(FileMover(FileManager())),
             file_filter=SampleFileFilter(),
             file_formatter_service=file_formatter,
             status_db=self.store,
