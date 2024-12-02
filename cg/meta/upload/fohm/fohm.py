@@ -198,6 +198,7 @@ class FOHMUploadAPI:
     ) -> None:
         """Hardlink samples raw data files to FOHM delivery folder."""
         LOG.debug("Linking sample raw data files to FOHM delivery folder")
+        LOG.debug(f"NR of Reports: {len(reports)}")
         for report in reports:
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=report.internal_id
