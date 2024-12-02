@@ -133,9 +133,9 @@ class DeliverFilesService:
             LOG.debug(
                 f"Moving files for sample {formatted_file} back to the delivery base path {delivery_base_path}"
             )
-            shutil.move(src=formatted_file.formatted_path.parent, dst=delivery_base_path)
+            shutil.move(src=formatted_file.formatted_path, dst=delivery_base_path)
             # Delete the formatted folder
-            shutil.rmtree(path=formatted_file.formatted_path.parent)
+        shutil.rmtree(path=formatted_files[0].formatted_path.parent)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
