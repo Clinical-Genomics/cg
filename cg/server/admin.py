@@ -631,6 +631,7 @@ class SampleView(BaseView):
         "_phenotype_terms",
         "links",
         "mother_links",
+        "sequencing_metrics",
     ]
 
     @staticmethod

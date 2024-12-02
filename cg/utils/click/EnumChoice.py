@@ -4,7 +4,7 @@ based on suggestion https://github.com/pallets/click/issues/605#issuecomment-277
 
 from enum import EnumMeta
 
-import click
+import rich_click as click
 
 
 class EnumChoice(click.Choice):
