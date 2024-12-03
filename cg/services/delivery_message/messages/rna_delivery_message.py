@@ -51,7 +51,13 @@ class RNADeliveryMessage:
         self.strategy = strategy
 
     def create_message(self, cases: list[Case]) -> str:
-        return self._get_cases_message(cases)
+        message = "Hello,\n\n"
+        for case in cases:
+            scout_message = self._get_scout_message_for_case(case=case)
+            message += scout_message
+        delivery_path = get_caesar_delivery_path(cases[0])
+        file_upload_message = self.strategy.get_file_upload_message(delivery_path)
+        return message + file_upload_message
 
     def _get_scout_message_for_case(self, case: Case) -> str:
         related_uploaded_dna_cases = self.store.get_uploaded_related_dna_cases(rna_case=case)
@@ -60,12 +66,3 @@ class RNADeliveryMessage:
             f"The analysis for case {case.name} has been uploaded to the corresponding DNA case(s) on Scout at:\n\n"
             f"{scout_links}\n\n"
         )
-
-    def _get_cases_message(self, cases: list[Case]) -> str:
-        message = "Hello,\n\n"
-        for case in cases:
-            scout_message = self._get_scout_message_for_case(case=case)
-            message += scout_message
-        delivery_path = get_caesar_delivery_path(cases[0])
-        file_upload_message = self.strategy.get_file_upload_message(delivery_path)
-        return message + file_upload_message
