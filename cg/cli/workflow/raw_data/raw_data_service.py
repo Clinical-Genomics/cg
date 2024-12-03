@@ -1,8 +1,8 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.constants.constants import AnalysisType, Workflow
-from cg.constants.tb import AnalysisStatus
+from cg.constants.constants import Workflow
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CaseNotFoundError
 from cg.store.models import Analysis, Case
 from cg.store.store import Store

@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.coverage import upload_coverage

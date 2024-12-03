@@ -13,7 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.constants.tb import AnalysisTypes
+from cg.constants.tb import AnalysisType
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
@@ -210,7 +210,7 @@ class DemultiplexingAPI:
         )
         tb_api.add_pending_analysis(
             case_id=sequencing_run.id,
-            analysis_type=AnalysisTypes.OTHER,
+            analysis_type=AnalysisType.OTHER,
             config_path=sequencing_run.trailblazer_config_path.as_posix(),
             out_dir=sequencing_run.trailblazer_config_path.parent.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,

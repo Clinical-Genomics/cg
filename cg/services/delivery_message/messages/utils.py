@@ -13,6 +13,11 @@ def get_scout_link(case: Case) -> str:
     return f"https://scout.scilifelab.se/{customer_id}/{case_name}"
 
 
+def get_scout_links_row_separated(cases: list[Case]) -> str:
+    scout_links: list[str] = [get_scout_link(case) for case in cases]
+    return "\n".join(scout_links)
+
+
 def get_pangolin_delivery_path(case: Case) -> str:
     customer_id: str = case.customer.internal_id
     return f"/home/{customer_id}/inbox/wwLab_automatisk_hamtning"
