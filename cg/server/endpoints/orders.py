@@ -275,7 +275,6 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
-    response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
     if order_type == OrderType.MICROBIAL_FASTQ:

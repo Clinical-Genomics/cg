@@ -12,10 +12,11 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.order_validation_service.workflows.metagenome.validation_service import (
-    MetagenomeValidationService,
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
+)
+from cg.services.order_validation_service.workflows.metagenome.validation_service import (
+    MetagenomeValidationService,
 )
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
@@ -36,9 +37,7 @@ from cg.services.order_validation_service.workflows.tomte.validation_service imp
     TomteValidationService,
 )
 from cg.services.orders.order_service.order_service import OrderService
-from cg.services.orders.order_summary_service.order_summary_service import (
-    OrderSummaryService,
-)
+from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,
