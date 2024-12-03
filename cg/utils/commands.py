@@ -54,7 +54,7 @@ class Process:
         if container:
             LOG.debug(f"Using: {self.container}")
             self.base_call.insert(
-                0, f"{self.container} run --bind /home/proj/stage:/home/proj/stage"
+                1, f"{self.container} run --bind /home/proj/stage:/home/proj/stage"
             )
         if config:
             self.base_call.extend([config_parameter, config])
