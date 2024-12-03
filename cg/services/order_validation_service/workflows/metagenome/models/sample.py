@@ -4,7 +4,7 @@ from cg.services.order_validation_service.models.sample import Sample
 
 
 class MetagenomeSample(Sample):
-    concentration_ng_ul: float | None = None
+    concentration_sample: float | None = None
     control: ControlEnum | None = None
     elution_buffer: ElutionBuffer
     organism: str

@@ -15,6 +15,9 @@ from cg.services.delivery_message.delivery_message_service import DeliveryMessag
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
+from cg.services.order_validation_service.workflows.metagenome.validation_service import (
+    MetagenomeValidationService,
+)
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
 )
@@ -122,6 +125,7 @@ balsamic_validation_service = BalsamicValidationService(store=db)
 microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
+metagenome_validation_service = MetagenomeValidationService(store=db)
 mutant_validation_service = MutantValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)
 tomte_validation_service = TomteValidationService(store=db)
