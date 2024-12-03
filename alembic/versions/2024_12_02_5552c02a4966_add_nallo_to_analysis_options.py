@@ -5,6 +5,7 @@ Revises: 05ffb5e13d7b
 Create Date: 2024-12-02 11:35:31.725343
 
 """
+
 from enum import StrEnum
 
 from alembic import op
@@ -13,8 +14,8 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 # revision identifiers, used by Alembic.
-revision = '5552c02a4966'
-down_revision = '05ffb5e13d7b'
+revision = "5552c02a4966"
+down_revision = "05ffb5e13d7b"
 branch_labels = None
 depends_on = None
 
@@ -75,7 +76,7 @@ class Base(DeclarativeBase):
 class Analysis(Base):
     __tablename__ = "analysis"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
+    workflow = sa.Column(sa.types.Enum(*list(Pipeline)))
 
 
 class Case(Base):
@@ -87,20 +88,18 @@ class Case(Base):
 
 def upgrade():
     op.alter_column("case", "data_analysis", type_=new_analysis_enum)
-    op.alter_column("analysis", "pipeline", type_=new_analysis_enum)
+    op.alter_column("analysis", "workflow", type_=new_analysis_enum)
 
 
 def downgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for analysis in session.query(Analysis).filter(Analysis.pipeline == "nallo"):
-        print(
-            f"Changing pipeline for Case {Case.internal_id} to raw-data"
-        )
+    for analysis in session.query(Analysis).filter(Analysis.workflow == "nallo"):
+        print(f"Changing pipeline for Case {Case.internal_id} to raw-data")
         analysis.pipeline = "raw-data"
     for case in session.query(Case).filter(Case.data_analysis == "nallo"):
         print(f"Changing data_analysis for Case {case.internal_id} to raw-data")
         case.data_analysis = "raw-data"
     op.alter_column("case", "data_analysis", type_=old_analysis_enum)
-    op.alter_column("analysis", "pipeline", type_=old_analysis_enum)
+    op.alter_column("analysis", "workflow", type_=old_analysis_enum)
     session.commit()
