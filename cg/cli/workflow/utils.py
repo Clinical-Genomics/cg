@@ -1,6 +1,6 @@
 """CLI utility methods."""
 
-import click
+import rich_click as click
 
 
 def validate_force_store_option(force: bool, comment: str | None):

@@ -121,8 +121,14 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
 
 @pytest.fixture
 def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers) -> Store:
-    """Return a store with 1 rna sample 3 dna samples related to the rna sample and 1 more dna sample not related to the dna sample."""
-    helpers.add_sample(
+    """Return a store with:
+    - 1 rna sample
+    - 3 dna samples related to the rna sample (with different prep categories)
+    - 1 more dna sample not related to the dna sample
+    - 2 dna cases including the related dna sample
+    - 1 dna case including the unrelated dna sample"""
+
+    rna_sample: Sample = helpers.add_sample(
         store=store,
         internal_id="rna_sample",
         application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
@@ -139,6 +145,7 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
         is_tumour=True,
         customer_id="cust001",
     )
+
     helpers.add_sample(
         store=store,
         internal_id="related_dna_sample_2",
@@ -157,6 +164,7 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
         is_tumour=True,
         customer_id="cust000",
     )
+
     helpers.add_sample(
         store=store,
         internal_id="not_related_dna_sample",
@@ -167,6 +175,15 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
         customer_id="cust000",
     )
 
+    rna_case: Case = helpers.add_case(
+        store=store,
+        internal_id="rna_case",
+        name="rna_case",
+        data_analysis=Workflow.MIP_RNA,
+        customer_id="cust000",
+    )
+    helpers.add_relationship(store=store, sample=rna_sample, case=rna_case)
+
     related_dna_case_1: Case = helpers.add_case(
         store=store,
         internal_id="related_dna_case_1",
@@ -174,6 +191,7 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
         customer_id="cust001",
     )
     helpers.add_relationship(store=store, sample=related_dna_sample_1, case=related_dna_case_1)
+    helpers.add_analysis(store=store, case=related_dna_case_1, uploaded_at=datetime.now())
 
     related_dna_case_2: Case = helpers.add_case(
         store=store,
@@ -208,16 +226,18 @@ def rna_sample_collaborators(rna_sample: Sample) -> set[Customer]:
 
 
 @pytest.fixture
-def related_dna_sample_1(store_with_rna_and_dna_samples_and_cases: Store) -> Sample:
-    return store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
-        internal_id="related_dna_sample_1"
-    )
+def rna_case(store_with_rna_and_dna_samples_and_cases: Store) -> Case:
+    return store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id("rna_case")
 
 
 @pytest.fixture
-def related_dna_samples(
-    store_with_rna_and_dna_samples_and_cases: Store, related_dna_sample_1: Sample
-) -> list[Sample]:
+def related_dna_samples(store_with_rna_and_dna_samples_and_cases: Store) -> list[Sample]:
+    related_dna_sample_1: Sample = (
+        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+            internal_id="related_dna_sample_1"
+        )
+    )
+
     related_dna_sample_2: Sample = (
         store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
             internal_id="related_dna_sample_2"
@@ -245,6 +265,15 @@ def related_dna_cases(store_with_rna_and_dna_samples_and_cases: Store) -> list[C
         internal_id="related_dna_case_2"
     )
     return [related_dna_case_1, related_dna_case_2]
+
+
+@pytest.fixture
+def uploaded_related_dna_case(related_dna_cases: list[Case]) -> list[Case]:
+    related_uploaded_dna_cases: list[Case] = []
+    for case in related_dna_cases:
+        if case.is_uploaded:
+            related_uploaded_dna_cases.append(case)
+    return related_uploaded_dna_cases
 
 
 @pytest.fixture
