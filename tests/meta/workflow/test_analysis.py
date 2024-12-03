@@ -17,7 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.meta.workflow.utils.utils import are_all_samples_control
+from cg.meta.workflow.utils.utils import are_all_samples_control, map_to_trailblazer_priority
 from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.store.store import Store
@@ -71,7 +71,7 @@ def test_get_trailblazer_priority(
         mip_analysis_api: MipDNAAnalysisAPI,
         analysis_store: Store,
 ):
-    """Test get trailblazer priority from the case priority"""
+    """Test get Trailblazer priority from the case priority"""
 
     # GIVEN a store with a case with a specific priority
     mip_analysis_api.status_db = analysis_store
@@ -654,3 +654,26 @@ def test_case_with_controls_get_correct_slurmqos(
 
     # THEN the result should match the expected QOS
     assert qos == expected_qos
+
+
+@pytest.mark.parametrize(
+    "priority, expected_trailblazer_priority",
+    [
+        (Priority.clinical_trials, TrailblazerPriority.NORMAL),
+        (Priority.research, TrailblazerPriority.LOW),
+        (Priority.standard, TrailblazerPriority.NORMAL),
+        (Priority.priority, TrailblazerPriority.HIGH),
+        (Priority.express, TrailblazerPriority.EXPRESS),
+    ],
+)
+def test_map_to_trailblazer_priority(
+    priority, 
+    expected_trailblazer_priority, 
+    )-> None:
+    """Tests that map_to_trailblazer_priority returns the correct Trailblazer priority for a given priority."""
+
+    # WHEN mapping the priority to a Trailblazer priority
+    trailblazer_priority: TrailblazerPriority = map_to_trailblazer_priority(priority)
+
+    # THEN the result should match the expected Trailblazer priority
+    assert trailblazer_priority is expected_trailblazer_priority
