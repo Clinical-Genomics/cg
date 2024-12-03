@@ -16,8 +16,8 @@ class HermesApi:
 
     def __init__(self, config: dict):
         self.process = Process(
-            binary="/home/proj/stage/singularity_containers/hermes_latest.sif",
-            container="singularity",
+            binary="singularity run --bind /home/proj/stage:/home/proj/stage /home/proj/stage/singularity_containers/hermes_latest.sif",
+            #             container="singularity",
         )
 
     def convert_deliverables(
