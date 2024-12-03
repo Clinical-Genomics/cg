@@ -96,7 +96,7 @@ def downgrade():
     session = sa.orm.Session(bind=bind)
     for analysis in session.query(Analysis).filter(Analysis.workflow == "nallo"):
         print(f"Changing pipeline for Case {Case.internal_id} to raw-data")
-        analysis.pipeline = "raw-data"
+        analysis.workflow = "raw-data"
     for case in session.query(Case).filter(Case.data_analysis == "nallo"):
         print(f"Changing data_analysis for Case {case.internal_id} to raw-data")
         case.data_analysis = "raw-data"
