@@ -123,7 +123,6 @@ class Workflow(StrEnum):
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
-    NALLO: str = "nallo"
     RAREDISEASE: str = "raredisease"
     RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
