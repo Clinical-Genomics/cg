@@ -17,7 +17,7 @@ from cg.services.order_validation_service.utils import (
     apply_sample_validation,
 )
 from cg.services.order_validation_service.workflows.fluffy.models.order import (
-    fluffyOrder,
+    FluffyOrder,
 )
 from cg.services.order_validation_service.workflows.fluffy.validation_rules import (
     SAMPLE_RULES,
@@ -38,7 +38,7 @@ class FluffyValidationService(OrderValidationService):
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = ModelValidator.validate(order=raw_order, model=fluffyOrder)
+        order, field_errors = ModelValidator.validate(order=raw_order, model=FluffyOrder)
 
         if not order:
             return field_errors
