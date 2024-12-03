@@ -11,4 +11,3 @@ class FluffySample(Sample):
     pool: str
     pool_concentration: float
     concentration_sample: float | None = None
-    concentration_sample: float | None = None
