@@ -41,4 +41,6 @@ class IndexEnum(Enum):
     TEN_X_TN_A = "10X Genomics Dual Index kit TN Set A"
     TEN_X_TT_A = "10X Genomics Dual Index kit TT Set A"
     KAPA_UDI_NIPT = "KAPA UDI NIPT"
+    AVIDA_INDEX_PLATE = "Avida index plate"
+    AVIDA_INDEX_STRIP = "Avida index strip"
     NOINDEX = "NoIndex"
