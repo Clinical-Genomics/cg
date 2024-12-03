@@ -92,6 +92,15 @@ class Process:
             LOG.info("Dry run: process call will not be executed!!")
             return EXIT_SUCCESS
 
+        if self.container:
+            res = subprocess.run(
+                " ".join(command),
+                shell=True,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
         if self.environment:
             res = subprocess.run(
                 " ".join(command),
