@@ -2,9 +2,7 @@ from collections import Counter
 
 from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
-from cg.services.order_validation_service.errors.case_errors import (
-    InvalidGenePanelsError,
-)
+from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -318,6 +316,28 @@ def validate_pedigree(order: OrderWithCases, **kwargs) -> list[PedigreeError]:
     return errors
 
 
+def validate_subject_sex_consistency(
+    order: OrderWithCases,
+    store: Store,
+) -> list[SexSubjectIdError]:
+    errors: list[SexSubjectIdError] = []
+
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if not has_sex_and_subject(sample):
+            continue
+        if store.sample_exists_with_different_sex(
+            customer_internal_id=order.customer,
+            subject_id=sample.subject_id,
+            sex=sample.sex,
+        ):
+            error = SexSubjectIdError(
+                case_index=case_index,
+                sample_index=sample_index,
+            )
+            errors.append(error)
+    return errors
+
+
 def validate_subject_ids_different_from_case_names(
     order: OrderWithCases, **kwargs
 ) -> list[SubjectIdSameAsCaseNameError]:
@@ -368,29 +388,5 @@ def validate_tube_container_name_unique(
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
-    return errors
-
-
-def validate_subject_sex_consistency(
-    order: OrderWithCases,
-    store: Store,
-) -> list[SexSubjectIdError]:
-    errors: list[SexSubjectIdError] = []
-
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if not has_sex_and_subject(sample):
-                continue
-
-            if store.sample_exists_with_different_sex(
-                customer_internal_id=order.customer,
-                subject_id=sample.subject_id,
-                sex=sample.sex,
-            ):
-                error = SexSubjectIdError(
-                    case_index=case_index,
-                    sample_index=sample_index,
-                )
                 errors.append(error)
     return errors
