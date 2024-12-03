@@ -86,14 +86,6 @@ class SequencingRunDataAvailability(StrEnum):
         return list(map(lambda status: status.value, cls))
 
 
-class AnalysisType(StrEnum):
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-    OTHER: str = "other"
-
-
 class CancerAnalysisType(StrEnum):
     TUMOR_NORMAL = auto()
     TUMOR_NORMAL_PANEL = auto()
@@ -131,6 +123,7 @@ class Workflow(StrEnum):
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
+    NALLO: str = "nallo"
     RAREDISEASE: str = "raredisease"
     RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"

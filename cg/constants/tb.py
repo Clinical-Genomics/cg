@@ -14,7 +14,7 @@ class AnalysisStatus:
     QC: str = "qc"
 
 
-class AnalysisTypes(StrEnum):
+class AnalysisType(StrEnum):
     OTHER: str = "other"
     TGS: str = SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
     WES: str = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
