@@ -8,13 +8,15 @@ from cg.services.order_validation_service.utils import (
     apply_order_validation,
     apply_sample_validation,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.order_validation_service.workflows.microsalt.validation_rules import SAMPLE_RULES
 from cg.services.order_validation_service.workflows.order_validation_rules import ORDER_RULES
+from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
+from cg.services.order_validation_service.workflows.pacbio_long_read.validation_rules import (
+    SAMPLE_RULES,
+)
 from cg.store.store import Store
 
 
-class MicroSaltValidationService(OrderValidationService):
+class PacbioLongReadValidationService(OrderValidationService):
 
     def __init__(self, store: Store):
         self.store = store
@@ -24,7 +26,7 @@ class MicroSaltValidationService(OrderValidationService):
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = ModelValidator.validate(order=raw_order, model=MicrosaltOrder)
+        order, field_errors = ModelValidator.validate(order=raw_order, model=PacbioOrder)
 
         if not order:
             return field_errors

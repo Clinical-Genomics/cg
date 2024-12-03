@@ -27,6 +27,9 @@ from cg.services.order_validation_service.workflows.mip_dna.validation_service i
 from cg.services.order_validation_service.workflows.mutant.validation_service import (
     MutantValidationService,
 )
+from cg.services.order_validation_service.workflows.pacbio_long_read.validation_service import (
+    PacbioLongReadValidationService,
+)
 from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
     RnaFusionValidationService,
 )
@@ -123,6 +126,7 @@ microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
 mutant_validation_service = MutantValidationService(store=db)
+pacbio_long_read_validation_service = PacbioLongReadValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)
 tomte_validation_service = TomteValidationService(store=db)
 
