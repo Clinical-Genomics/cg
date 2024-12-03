@@ -23,6 +23,7 @@ class Process:
         self,
         binary: str,
         conda_binary: str = None,
+        container: str = None,
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
@@ -37,6 +38,7 @@ class Process:
         super(Process, self).__init__()
         self.binary: str = binary
         self.conda_binary: str = conda_binary
+        self.container: str = container
         self.config: str = config
         self.environment: str = environment
         self.launch_directory: str = launch_directory
@@ -49,6 +51,11 @@ class Process:
         elif environment:
             LOG.debug(f"Activating environment with: {self.environment}")
             self.base_call.insert(0, f"source activate {self.environment};")
+        if container:
+            LOG.debug(f"Using: {self.container}")
+            self.base_call.insert(
+                0, f"{self.container} run -bind /home/proj/stage:/home/proj/stage ;"
+            )
         if config:
             self.base_call.extend([config_parameter, config])
         if launch_directory:
