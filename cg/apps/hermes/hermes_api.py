@@ -15,7 +15,9 @@ class HermesApi:
     """Class to communicate with hermes"""
 
     def __init__(self, config: dict):
-        self.process = Process(binary="hermes")
+        self.process = Process(
+            binary="singularity run --bind /home/proj/stage:/home/proj/stage /home/proj/stage/singularity_containers/hermes_latest.sif"
+        )
 
     def convert_deliverables(
         self,
