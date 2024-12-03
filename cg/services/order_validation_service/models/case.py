@@ -45,6 +45,11 @@ class Case(BaseModel):
                 samples.append((sample_index, sample))
         return samples
 
+    def get_sample(self, sample_name: str) -> Sample | None:
+        for sample in self.samples:
+            if sample.name == sample_name:
+                return sample
+
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):
         if isinstance(data, dict):

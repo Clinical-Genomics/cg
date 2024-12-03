@@ -16,11 +16,6 @@ class TomteCase(Case):
     synopsis: str | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]
 
-    def get_sample(self, sample_name: str) -> TomteSample | None:
-        for sample in self.samples:
-            if sample.name == sample_name:
-                return sample
-
     def get_samples_with_father(self) -> list[tuple[TomteSample, int]]:
         return [(sample, index) for index, sample in self.enumerated_samples if sample.father]
 

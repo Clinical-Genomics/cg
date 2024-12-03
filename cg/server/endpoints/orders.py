@@ -34,12 +34,15 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_validation_service,
     db,
     delivery_message_service,
     lims,
     metagenome_validation_service,
+    microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
+    mutant_validation_service,
     order_service,
     order_submitter_registry,
     rna_fusion_validation_service,
@@ -272,14 +275,21 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
+    response = {}
+    if order_type == OrderType.BALSAMIC:
+        response = balsamic_validation_service.validate(raw_order)
+    if order_type == OrderType.MICROBIAL_FASTQ:
+        response = microbial_fastq_validation_service.validate(raw_order)
     if order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
     if order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
     if order_type == OrderType.METAGENOME:
         response = metagenome_validation_service.validate(raw_order)
+    if order_type == OrderType.SARS_COV_2:
+        response = mutant_validation_service.validate(raw_order)
     if order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
-    if workflow == Workflow.TOMTE:
+    if order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK

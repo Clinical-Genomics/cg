@@ -102,22 +102,12 @@ class BalsamicConfigQC(BaseModel):
     """Config QC attributes.
 
     Attributes:
-        picard_rmdup: if the duplicates has been removed or not
         adapter: adapter sequence that has been trimmed
-        quality_trim: whether quality trimming has been performed in the workflow
-        adapter_trim: whether adapter trimming has been performed in the workflow
-        umi_trim: whether UMI trimming has been performed in the workflow
         min_seq_length: minimum sequence length cutoff for reads
-        umi_trim_length: UMI trimming length
     """
 
-    picard_rmdup: bool
-    adapter: str | None = None
-    quality_trim: bool
-    adapter_trim: bool
-    umi_trim: bool
-    min_seq_length: str | None = None
-    umi_trim_length: str | None = None
+    adapter: str | None
+    min_seq_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):

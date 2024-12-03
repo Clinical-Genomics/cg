@@ -32,7 +32,6 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
-    validate_required_volume,
     validate_sample_names_not_repeated,
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
@@ -40,6 +39,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_subject_sex_consistency,
     validate_tube_container_name_unique,
     validate_volume_interval,
+    validate_volume_required,
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
@@ -134,7 +134,7 @@ def test_missing_required_volume(valid_order: OrderWithCases):
     valid_order.cases[0].samples[1].volume = None
 
     # WHEN validating that required volumes are set
-    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
+    errors: list[VolumeRequiredError] = validate_volume_required(order=valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -368,7 +368,7 @@ def test_missing_volume_no_container(valid_order: OrderWithCases):
     valid_order.cases[0].samples[0].volume = None
 
     # WHEN validating that the order has required volumes set
-    errors: list[VolumeRequiredError] = validate_required_volume(order=valid_order)
+    errors: list[VolumeRequiredError] = validate_volume_required(order=valid_order)
 
     # THEN no error should be returned
     assert not errors

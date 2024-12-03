@@ -8,7 +8,8 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
+from cg.constants.constants import CaseActions, CustomerId, SampleType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.constants import OrderType
@@ -602,7 +603,7 @@ class ReadHandler(BaseHandler):
 
         application: Application = self.get_application_by_case(case_id=case_id)
 
-        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+        if application.prep_category != SeqLibraryPrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -863,6 +864,19 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
+    def get_active_applications_by_prep_category(
+        self, prep_category: SeqLibraryPrepCategory
+    ) -> list[Application]:
+        """Return all active applications by prep category."""
+        return apply_application_filter(
+            applications=self._get_query(table=Application),
+            filter_functions=[
+                ApplicationFilter.BY_PREP_CATEGORIES,
+                ApplicationFilter.IS_NOT_ARCHIVED,
+            ],
+            prep_categories=[prep_category],
+        ).all()
+
     def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
         """Return bed version with file name."""
         return apply_bed_version_filter(
@@ -1029,40 +1043,47 @@ class ReadHandler(BaseHandler):
         )
         return records.order_by(Sample.prepared_at).all()
 
-    def get_families_with_analyses(self) -> Query:
+    def get_cases_with_analyzes(self) -> Query:
         """Return all cases in the database with an analysis."""
         return self._get_outer_join_cases_with_analyses_query()
 
-    def get_families_with_samples(self) -> Query:
+    def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
+    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
+        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
+
+    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
+        return case.latest_analyzed < case.latest_sequenced
+
+    def _is_case_to_be_analyzed(self, case: Case) -> bool:
+        if not case.latest_sequenced:
+            return False
+        if self._is_case_set_to_analyse_or_not_analyzed(case):
+            return True
+        return bool(self._is_latest_analysis_done_on_all_sequences(case))
+
+    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed.
+        1. Get cases to be analyzed using BE query
+        2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_families_with_analyses(),
+            cases=self.get_cases_with_analyzes(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
 
-        families: list[Query] = list(cases.order_by(Case.ordered_at))
-        families = [
-            case_obj
-            for case_obj in families
-            if case_obj.latest_sequenced
-            and (
-                case_obj.action == CaseActions.ANALYZE
-                or not case_obj.latest_analyzed
-                or case_obj.latest_analyzed < case_obj.latest_sequenced
-            )
+        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
+        cases_to_analyze: list[Case] = [
+            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
         ]
-
-        return families[:limit]
+        return cases_to_analyze[:limit]
 
     def set_case_action(
         self, action: Literal[CaseActions.actions()], case_internal_id: str
@@ -1229,7 +1250,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
@@ -1240,7 +1261,7 @@ class ReadHandler(BaseHandler):
     def observations_uploaded(self, workflow: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples(),
             filter_functions=[CaseFilter.WITH_LOQUSDB_SUPPORTED_WORKFLOW],
             workflow=workflow,
         )
@@ -1605,7 +1626,7 @@ class ReadHandler(BaseHandler):
     def get_related_samples(
         self,
         sample_internal_id: str,
-        prep_categories: list[PrepCategory],
+        prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> list[Sample]:
         """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""

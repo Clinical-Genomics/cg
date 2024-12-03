@@ -2,28 +2,14 @@ import logging
 import os
 from pathlib import Path
 
-from cg.constants.delivery import INBOX_NAME
-from cg.services.deliver_files.file_fetcher.models import (
-    CaseFile,
-    DeliveryFiles,
-    SampleFile,
-)
-from cg.services.deliver_files.file_formatter.abstract import (
-    DeliveryFileFormattingService,
-)
-from cg.services.deliver_files.file_formatter.models import (
-    FormattedFile,
-    FormattedFiles,
-)
-from cg.services.deliver_files.file_formatter.utils.case_service import (
-    CaseFileFormatter,
-)
+from cg.services.deliver_files.file_fetcher.models import CaseFile, DeliveryFiles, SampleFile
+from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
+from cg.services.deliver_files.file_formatter.models import FormattedFile, FormattedFiles
+from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
-    SampleFileFormatter,
-)
+from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
 
 LOG = logging.getLogger(__name__)
 

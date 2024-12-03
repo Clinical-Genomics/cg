@@ -209,7 +209,7 @@ def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVol
     return errors
 
 
-def validate_required_volume(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
+def validate_volume_required(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:

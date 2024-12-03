@@ -12,12 +12,12 @@ from pytest_mock import MockFixture
 from cg.apps.lims import LimsAPI
 from cg.constants import (
     NA_FIELD,
-    YES_FIELD,
     NO_FIELD,
     REPORT_SEX,
-    Sex,
     RIN_MAX_THRESHOLD,
     RIN_MIN_THRESHOLD,
+    YES_FIELD,
+    Sex,
 )
 from cg.constants.constants import AnalysisType, Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
@@ -26,20 +26,20 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.models.delivery_report.validators import (
-    get_report_string,
-    get_boolean_as_string,
-    get_number_as_string,
-    get_float_as_percentage,
-    get_date_as_string,
-    get_list_as_string,
-    get_delivered_files_as_file_names,
-    get_path_as_string,
-    get_sex_as_string,
-    get_prep_category_as_string,
     get_analysis_type_as_string,
+    get_boolean_as_string,
+    get_date_as_string,
+    get_delivered_files_as_file_names,
+    get_float_as_percentage,
+    get_list_as_string,
+    get_number_as_string,
+    get_path_as_string,
+    get_prep_category_as_string,
+    get_report_string,
+    get_sex_as_string,
 )
 from cg.models.orders.constants import OrderType
-from cg.store.models import Case, Analysis, Sample
+from cg.store.models import Analysis, Case, Sample
 
 
 def test_get_report_string():
@@ -220,7 +220,7 @@ def test_get_prep_category_as_string(caplog: LogCaptureFixture):
 def test_get_analysis_type_as_string():
     """Test analysis type formatting for the delivery report generation."""
 
-    # GIVEN a WGS analysis type and a model info dictionary
+    # GIVEN a WHOLE_GENOME_SEQUENCING analysis type and a model info dictionary
     analysis_type: str = AnalysisType.WHOLE_GENOME_SEQUENCING
     model_info = ValidationInfo
     model_info.data = {"workflow": Workflow.MIP_DNA.value}
@@ -237,7 +237,7 @@ def test_get_analysis_type_as_string():
 def test_get_analysis_type_as_string_balsamic():
     """Test analysis type formatting for the delivery report generation."""
 
-    # GIVEN a WGS analysis type and a model info dictionary
+    # GIVEN a WHOLE_GENOME_SEQUENCING analysis type and a model info dictionary
     analysis_type = "tumor_normal_wgs"
     model_info = ValidationInfo
     model_info.data = {"workflow": Workflow.BALSAMIC.value}

@@ -28,11 +28,7 @@ from cg.models.delivery_report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.delivery_report.report import (
-    CaseModel,
-    ReportRequiredFields,
-    ScoutVariantsFiles,
-)
+from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -78,7 +74,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
-        """Return report metadata for Balsamic TGS analysis."""
+        """Return report metadata for Balsamic TARGETED_GENOME_SEQUENCING analysis."""
         bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
             analysis_metadata.balsamic_config.panel.capture_kit
         )
@@ -105,7 +101,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         passed_initial_qc: bool | None,
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
-        """Return report metadata for Balsamic WGS analysis."""
+        """Return report metadata for Balsamic WHOLE_GENOME_SEQUENCING analysis."""
         return BalsamicWGSSampleMetadataModel(
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,

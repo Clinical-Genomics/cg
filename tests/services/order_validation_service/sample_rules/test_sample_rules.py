@@ -7,15 +7,13 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellFormatError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
-    validate_required_volume,
     validate_container_name_required,
     validate_sample_names_available,
     validate_tube_container_name_unique,
+    validate_volume_required,
     validate_well_position_format,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicrosaltOrder,
-)
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -128,7 +126,7 @@ def test_missing_required_sample_volume(valid_order: MicrosaltOrder):
     valid_order.samples[1].volume = None
 
     # WHEN validating the volume
-    errors = validate_required_volume(order=valid_order)
+    errors = validate_volume_required(order=valid_order)
 
     # THEN an error should be returned
     assert errors
@@ -148,7 +146,7 @@ def test_non_required_sample_volume(valid_order: MicrosaltOrder):
     valid_order.samples[0].volume = None
 
     # WHEN validating the volume
-    errors = validate_required_volume(order=valid_order)
+    errors = validate_volume_required(order=valid_order)
 
     # THEN no error should be returned
     assert not errors
