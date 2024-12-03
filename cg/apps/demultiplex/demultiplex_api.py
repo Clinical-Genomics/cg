@@ -48,7 +48,7 @@ class DemultiplexingAPI:
     def slurm_quality_of_service(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
         """Return SLURM quality of service."""
         return SlurmQos.LOW if self.environment == "stage" else SlurmQos.HIGH
-    
+
     @property
     def trailblazer_priority(self) -> Literal[TrailblazerPriority.HIGH, TrailblazerPriority.LOW]:
         """Return Trailblazer quality of service."""

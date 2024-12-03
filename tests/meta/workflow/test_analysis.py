@@ -54,6 +54,7 @@ def test_get_slurm_qos_for_case(
     # THEN the expected slurm QOS should be returned
     assert slurm_qos is expected_slurm_qos
 
+
 @pytest.mark.parametrize(
     "priority,expected_trailblazer_priority",
     [
@@ -65,11 +66,11 @@ def test_get_slurm_qos_for_case(
     ],
 )
 def test_get_trailblazer_priority(
-        case_id: str,
-        priority,
-        expected_trailblazer_priority,
-        mip_analysis_api: MipDNAAnalysisAPI,
-        analysis_store: Store,
+    case_id: str,
+    priority,
+    expected_trailblazer_priority,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
 ):
     """Test get Trailblazer priority from the case priority"""
 
@@ -79,7 +80,9 @@ def test_get_trailblazer_priority(
     case.priority = priority
 
     # WHEN getting the trailblazer priority for the case
-    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(case_id=case_id)
+    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(
+        case_id=case_id
+    )
 
     # THEN the expected trailblazer priority should be returned
     assert trailblazer_priority is expected_trailblazer_priority
@@ -667,9 +670,9 @@ def test_case_with_controls_get_correct_slurmqos(
     ],
 )
 def test_map_to_trailblazer_priority(
-    priority, 
-    expected_trailblazer_priority, 
-    )-> None:
+    priority,
+    expected_trailblazer_priority,
+) -> None:
     """Tests that map_to_trailblazer_priority returns the correct Trailblazer priority for a given priority."""
 
     # WHEN mapping the priority to a Trailblazer priority
