@@ -270,7 +270,7 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
 def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["order_type"] = order_type
+    raw_order["project_type"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
     if order_type == OrderType.TOMTE:
