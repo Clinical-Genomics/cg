@@ -53,9 +53,7 @@ class Process:
             self.base_call.insert(0, f"source activate {self.environment};")
         if container:
             LOG.debug(f"Using: {self.container}")
-            self.base_call.insert(
-                1, f"{self.container} run --bind /home/proj/stage:/home/proj/stage"
-            )
+            self.base_call.insert(1, f"{self.container}")
         if config:
             self.base_call.extend([config_parameter, config])
         if launch_directory:
