@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from cg.constants import DataDelivery
 
 
-class MipRnaDeliveryType(Enum):
+class MipRnaDeliveryType(StrEnum):
     ANALYSIS = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     SCOUT = DataDelivery.SCOUT
