@@ -51,7 +51,7 @@ class DemultiplexingAPI:
     
     @property
     def trailblazer_priority(self) -> Literal[TrailblazerPriority.HIGH, TrailblazerPriority.LOW]:
-        """Return TrailBlazer quality of service."""
+        """Return Trailblazer quality of service."""
         return TrailblazerPriority.LOW if self.environment == "stage" else TrailblazerPriority.HIGH
 
     def set_dry_run(self, dry_run: bool) -> None:
