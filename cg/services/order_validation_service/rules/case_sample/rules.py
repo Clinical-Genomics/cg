@@ -7,6 +7,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    CaseNameSampleNameSameError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
