@@ -8,6 +8,8 @@ class TissueBlockEnum(StrEnum):
 
 
 class ElutionBuffer(StrEnum):
+    """The choices of buffers. The way to specify 'other buffer' is not consistent in the forms."""
+
     OTHER_1 = "Other (add to comment)"
     OTHER_2 = 'Other (specify in "Comments")'
     TRIS_HCL = "Tris-HCl"
