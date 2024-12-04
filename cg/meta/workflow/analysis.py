@@ -140,7 +140,7 @@ class AnalysisAPI(MetaAPI):
     def get_trailblazer_priority(self, case_id: str) -> int:
         """Get the priority for the case in Trailblazer."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        priority: int = case.priority or Priority.research
+        priority: int = case.priority
         return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
