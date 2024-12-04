@@ -4,6 +4,7 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
+    AllSamplesUnknownStatusError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
@@ -34,6 +35,7 @@ from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pe
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.rules.case_sample.utils import (
+    are_all_samples_unknown,
     get_counter_container_names,
     get_existing_sample_names,
     get_father_case_errors,
