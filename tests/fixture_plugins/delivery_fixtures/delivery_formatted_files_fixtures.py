@@ -43,6 +43,22 @@ def expected_formatted_analysis_sample_files(
 
 
 @pytest.fixture
+def expected_flat_formatted_analysis_sample_files(
+    expected_moved_analysis_delivery_files: DeliveryFiles,
+) -> list[FormattedFile]:
+    formatted_files: list[FormattedFile] = []
+    for sample_file in expected_moved_analysis_delivery_files.sample_files:
+        replaced_sample_file_name: str = sample_file.file_path.name.replace(
+            sample_file.sample_id, sample_file.sample_name
+        )
+        formatted_file_path = Path(sample_file.file_path.parent, replaced_sample_file_name)
+        formatted_files.append(
+            FormattedFile(original_path=sample_file.file_path, formatted_path=formatted_file_path)
+        )
+    return formatted_files
+
+
+@pytest.fixture
 def expected_formatted_fastq_sample_files(
     expected_moved_fastq_delivery_files: DeliveryFiles,
 ) -> list[FormattedFile]:
@@ -62,10 +78,10 @@ def expected_formatted_fastq_sample_files(
 
 @pytest.fixture
 def expected_concatenated_fastq_formatted_files(
-    fastq_concatenation_sample_files_flat,
+    fastq_concatenation_sample_files,
 ) -> list[FormattedFile]:
     formatted_files: list[FormattedFile] = []
-    for sample_file in fastq_concatenation_sample_files_flat:
+    for sample_file in fastq_concatenation_sample_files:
         replaced_sample_file_name: str = sample_file.file_path.name.replace(
             sample_file.sample_id, sample_file.sample_name
         )
@@ -84,10 +100,10 @@ def expected_concatenated_fastq_formatted_files(
 
 @pytest.fixture
 def expected_concatenated_fastq_flat_formatted_files(
-    fastq_concatenation_sample_files,
+    fastq_concatenation_sample_files_flat,
 ) -> list[FormattedFile]:
     formatted_files: list[FormattedFile] = []
-    for sample_file in fastq_concatenation_sample_files:
+    for sample_file in fastq_concatenation_sample_files_flat:
         replaced_sample_file_name: str = sample_file.file_path.name.replace(
             sample_file.sample_id, sample_file.sample_name
         )

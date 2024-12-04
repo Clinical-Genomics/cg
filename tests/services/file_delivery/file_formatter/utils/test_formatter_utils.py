@@ -1,10 +1,7 @@
 import os
-from unittest import mock
 from unittest.mock import Mock
 import pytest
 from pathlib import Path
-
-from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
@@ -109,8 +106,6 @@ def test_mutant_file_formatter(
 
     lims_mock = Mock()
     lims_mock.get_sample_region_and_lab_code.return_value = lims_naming_matadata
-
-    # Initialize file_formatter
     file_formatter = MutantFileFormatter(
         file_manager=FileManager(),
         file_formatter=SampleFileConcatenationFormatter(
@@ -132,3 +127,39 @@ def test_mutant_file_formatter(
     for file in formatted_files:
         assert file.formatted_path.exists()
         assert not file.original_path.exists()
+
+
+@pytest.mark.parametrize(
+    "sample_files,expected_formatted_files,sample_file_formatter",
+    [
+        (
+            "expected_moved_analysis_sample_delivery_files",
+            "expected_formatted_analysis_sample_files",
+            NestedSampleFileNameFormatter(),
+        ),
+        (
+            "expected_moved_analysis_sample_delivery_files",
+            "expected_flat_formatted_analysis_sample_files",
+            FlatSampleFileNameFormatter(),
+        ),
+    ],
+)
+def test_sample_file_name_formatters(
+    sample_files: list[SampleFile],
+    expected_formatted_files: list[FormattedFile],
+    sample_file_formatter: NestedSampleFileNameFormatter | FlatSampleFileNameFormatter,
+    request,
+):
+    # GIVEN existing sample files and a sample file formatter
+    sample_files: list[SampleFile] = request.getfixturevalue(sample_files)
+    expected_formatted_files: list[FormattedFile] = request.getfixturevalue(
+        expected_formatted_files
+    )
+
+    # WHEN formatting the sample files
+    formatted_files: list[FormattedFile] = sample_file_formatter.format_sample_file_names(
+        sample_files=sample_files
+    )
+
+    # THEN the sample files should be formatted
+    assert formatted_files == expected_formatted_files

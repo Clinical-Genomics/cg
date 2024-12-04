@@ -7,7 +7,7 @@ from cg.services.deliver_files.utils import FileManager
 
 class NestedSampleFileNameFormatter:
     """
-    Class to format sample file names and paths.
+    Class to format sample file names and paths in a nested format used to deliver files to a customer inbox.
     """
 
     @staticmethod
@@ -38,7 +38,7 @@ class NestedSampleFileNameFormatter:
 
 class FlatSampleFileNameFormatter:
     """
-    Class to format sample file names.
+    Class to format sample file names in place.
     """
 
     @staticmethod
