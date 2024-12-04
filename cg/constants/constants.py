@@ -100,7 +100,7 @@ class SexOptions(StrEnum):
     UNKNOWN: str = "unknown"
 
 
-SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}TEST$"
+SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
@@ -123,6 +123,7 @@ class Workflow(StrEnum):
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
+    NALLO: str = "nallo"
     RAREDISEASE: str = "raredisease"
     RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
