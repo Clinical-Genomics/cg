@@ -45,6 +45,7 @@ from cg.server.ext import (
     mutant_validation_service,
     order_service,
     order_submitter_registry,
+    pacbio_long_read_validation_service,
     rna_fusion_validation_service,
     ticket_handler,
     tomte_validation_service,
@@ -275,18 +276,20 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
-    if order_type == OrderType.FASTQ:
+    elif order_type == OrderType.FASTQ:
         response = fastq_validation_service.validate(raw_order)
-    if order_type == OrderType.MICROBIAL_FASTQ:
+    elif order_type == OrderType.MICROBIAL_FASTQ:
         response = microbial_fastq_validation_service.validate(raw_order)
-    if order_type == OrderType.MICROSALT:
+    elif order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-    if order_type == OrderType.MIP_DNA:
+    elif order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
-    if order_type == OrderType.SARS_COV_2:
+    elif order_type == OrderType.PACBIO_LONG_READ:
+        response = pacbio_long_read_validation_service.validate(raw_order)
+    elif order_type == OrderType.SARS_COV_2:
         response = mutant_validation_service.validate(raw_order)
-    if order_type == OrderType.RNAFUSION:
+    elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
-    if order_type == OrderType.TOMTE:
+    elif order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
