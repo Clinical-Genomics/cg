@@ -6,6 +6,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    CaseNameSampleNameSameError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -29,6 +30,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_exists,
     validate_application_not_archived,
     validate_buffers_are_allowed,
+    validate_case_names_different_from_sample_names,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
@@ -396,3 +398,19 @@ def test_validate_sex_subject_id_clash(valid_order: OrderWithCases, sample_store
     # THEN an error should be given for the clash
     assert errors
     assert isinstance(errors[0], SexSubjectIdError)
+
+
+def test_validate_case_names_different_from_sample_names(valid_order: OrderWithCases):
+    # GIVEN an order with a sample with the same name as the case
+    valid_order.cases[0].samples[0].name = valid_order.cases[0].name
+
+    # WHEN validating that the case names are different from the sample names
+    errors: list[CaseNameSampleNameSameError] = validate_case_names_different_from_sample_names(
+        valid_order
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the same case and sample name
+    assert isinstance(errors[0], CaseNameSampleNameSameError)
