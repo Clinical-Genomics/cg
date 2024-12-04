@@ -16,8 +16,8 @@ class HermesApi:
 
     def __init__(self, config: dict):
         self.process = Process(
-            binary="singularity run --bind /home/proj/stage:/home/proj/stage /home/proj/stage/singularity_containers/hermes_latest.sif",
-            # container="",
+            binary="singularity",
+            # container="run --bind /home/proj/stage:/home/proj/stage /home/proj/stage/singularity_containers/hermes_latest.sif",
         )
 
     def convert_deliverables(
@@ -30,6 +30,10 @@ class HermesApi:
         """Convert deliverables file in raw workflow format to CG format with Hermes."""
         LOG.info("Converting workflow deliverables to CG deliverables")
         convert_command = [
+            "run",
+            "--bind",
+            "/home/proj/stage:/home/proj/stage",
+            "/home/proj/stage/singularity_containers/hermes_latest.sif",
             "convert",
             "deliverables",
             "--workflow",
