@@ -393,7 +393,7 @@ def validate_tube_container_name_unique(
     return errors
 
 
-def validate_case_name_sample_name_different(
+def validate_case_names_different_from_sample_names(
     order: OrderWithCases, **kwargs
 ) -> list[CaseNameSampleNameSameError]:
     errors: list[CaseNameSampleNameSameError] = []
