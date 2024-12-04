@@ -38,7 +38,6 @@ class Process:
         super(Process, self).__init__()
         self.binary: str = binary
         self.conda_binary: str = conda_binary
-        self.container: str = container
         self.config: str = config
         self.environment: str = environment
         self.launch_directory: str = launch_directory
@@ -51,9 +50,6 @@ class Process:
         elif environment:
             LOG.debug(f"Activating environment with: {self.environment}")
             self.base_call.insert(0, f"source activate {self.environment};")
-        if container:
-            LOG.debug(f"Using: {self.container}")
-            # self.base_call.insert(1, f"{self.container}")
         if config:
             self.base_call.extend([config_parameter, config])
         if launch_directory:
@@ -90,14 +86,6 @@ class Process:
             LOG.info("Dry run: process call will not be executed!!")
             return EXIT_SUCCESS
 
-        if self.container:
-            res = subprocess.run(
-                " ".join(command),
-                shell=True,
-                check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
         if self.environment:
             res = subprocess.run(
                 " ".join(command),
