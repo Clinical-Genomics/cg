@@ -97,6 +97,7 @@ class SampleFileConcatenationFormatter:
             )
             reverse_paths.append(reverse_path)
             self.concatenation_service.concatenate(
+                sample_id=sample,
                 fastq_directory=fastq_directory,
                 forward_output_path=forward_path,
                 reverse_output_path=reverse_path,

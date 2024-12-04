@@ -226,40 +226,54 @@ def fastq_concatenation_sample_files(
         INBOX_NAME,
         expected_fastq_delivery_files.delivery_data.ticket_id,
     )
-    fastq_paths: list[Path] = [
-        Path(tmp_path, inbox, "S1_1_R1_1.fastq.gz"),
-        Path(tmp_path, inbox, "S1_2_R1_1.fastq.gz"),
-        Path(tmp_path, inbox, "S1_1_R2_1.fastq.gz"),
-        Path(tmp_path, inbox, "S1_2_R2_1.fastq.gz"),
-    ]
-    return [
-        SampleFile(
-            sample_id="S1",
-            case_id="Case1",
-            sample_name="Sample1",
-            file_path=fastq_path,
+    sample_data = [("Sample_ID1", "Sample_Name1"), ("Sample_ID2", "Sample_Name2")]
+    sample_files = []
+    for sample_id, sample_name in sample_data:
+        fastq_paths: list[Path] = [
+            Path(tmp_path, inbox, f"{sample_id}_1_R1_1.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_2_R1_1.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_1_R2_1.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_2_R2_1.fastq.gz"),
+        ]
+
+        sample_files.extend(
+            [
+                SampleFile(
+                    sample_id=sample_id,
+                    case_id="Case1",
+                    sample_name=sample_name,
+                    file_path=fastq_path,
+                )
+                for fastq_path in fastq_paths
+            ]
         )
-        for fastq_path in fastq_paths
-    ]
+    return sample_files
 
 
 @pytest.fixture
 def fastq_concatenation_sample_files_flat(tmp_path: Path) -> list[SampleFile]:
-    fastq_paths: list[Path] = [
-        Path(tmp_path, "S1_1_R1_1.fastq.gz"),
-        Path(tmp_path, "S1_2_R1_1.fastq.gz"),
-        Path(tmp_path, "S1_1_R2_1.fastq.gz"),
-        Path(tmp_path, "S1_2_R2_1.fastq.gz"),
-    ]
-    return [
-        SampleFile(
-            sample_id="S1",
-            case_id="Case1",
-            sample_name="Sample1",
-            file_path=fastq_path,
+    sample_data = [("Sample_ID1", "Sample_Name1"), ("Sample_ID2", "Sample_Name2")]
+    sample_files = []
+    for sample_id, sample_name in sample_data:
+        fastq_paths: list[Path] = [
+            Path(tmp_path, f"{sample_id}_1_R1_1.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_2_R1_1.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_1_R2_1.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_2_R2_1.fastq.gz"),
+        ]
+
+        sample_files.extend(
+            [
+                SampleFile(
+                    sample_id=sample_id,
+                    case_id="Case1",
+                    sample_name=sample_name,
+                    file_path=fastq_path,
+                )
+                for fastq_path in fastq_paths
+            ]
         )
-        for fastq_path in fastq_paths
-    ]
+    return sample_files
 
 
 def swap_file_paths_with_inbox_paths(

@@ -9,7 +9,9 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
 
 
-def test_empty_directory(fastq_file_service: FastqConcatenationService, tmp_path):
+def test_empty_directory(
+    fastq_file_service: FastqConcatenationService, tmp_path: Path, sample_id: str
+):
     # GIVEN an empty directory
 
     # GIVEN output files
@@ -18,6 +20,7 @@ def test_empty_directory(fastq_file_service: FastqConcatenationService, tmp_path
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
+        sample_id=sample_id,
         fastq_directory=tmp_path,
         forward_output_path=forward_output_path,
         reverse_output_path=reverse_output_path,
@@ -28,7 +31,9 @@ def test_empty_directory(fastq_file_service: FastqConcatenationService, tmp_path
     assert not reverse_output_path.exists()
 
 
-def test_concatenate(fastq_file_service: FastqConcatenationService, fastqs_dir: Path):
+def test_concatenate(
+    fastq_file_service: FastqConcatenationService, fastqs_dir: Path, sample_id: str
+):
     # GIVEN a directory with forward and reverse reads
 
     # GIVEN output files for the concatenated reads
@@ -37,6 +42,7 @@ def test_concatenate(fastq_file_service: FastqConcatenationService, fastqs_dir: 
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
+        sample_id=sample_id,
         fastq_directory=fastqs_dir,
         forward_output_path=forward_output_path,
         reverse_output_path=reverse_output_path,
@@ -57,7 +63,7 @@ def test_concatenate(fastq_file_service: FastqConcatenationService, fastqs_dir: 
 
 
 def test_concatenate_when_output_exists(
-    fastq_file_service: FastqConcatenationService, fastqs_dir: Path
+    fastq_file_service: FastqConcatenationService, fastqs_dir: Path, sample_id: str
 ):
     # GIVEN a directory with forward and reverse reads
     existing_fastq_files = list(fastqs_dir.iterdir())
@@ -69,6 +75,7 @@ def test_concatenate_when_output_exists(
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
+        sample_id=sample_id,
         fastq_directory=fastqs_dir,
         forward_output_path=forward_output_path,
         reverse_output_path=reverse_output_path,
@@ -89,7 +96,7 @@ def test_concatenate_when_output_exists(
 
 
 def test_concatenate_missing_reverse(
-    fastq_file_service: FastqConcatenationService, fastqs_forward: Path, tmp_path
+    fastq_file_service: FastqConcatenationService, fastqs_forward: Path, tmp_path, sample_id: str
 ):
     # GIVEN a directory with forward reads only
 
@@ -99,6 +106,7 @@ def test_concatenate_missing_reverse(
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
+        sample_id=sample_id,
         fastq_directory=fastqs_forward,
         forward_output_path=forward_output_path,
         reverse_output_path=reverse_output_path,
