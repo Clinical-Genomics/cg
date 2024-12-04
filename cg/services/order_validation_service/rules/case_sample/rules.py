@@ -390,3 +390,18 @@ def validate_tube_container_name_unique(
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
+
+
+def validate_case_name_sample_name_different(
+    order: OrderWithCases, **kwargs
+) -> list[CaseNameSampleNameSameError]:
+    errors: list[CaseNameSampleNameSameError] = []
+
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if sample.name == case.name:
+                error = CaseNameSampleNameSameError(
+                    case_index=case_index, sample_index=sample_index
+                )
+                errors.append(error)
+    return errors
