@@ -406,3 +406,15 @@ def validate_case_names_different_from_sample_names(
                 )
                 errors.append(error)
     return errors
+
+
+def validate_not_all_samples_unknown_in_case(
+    order: OrderWithCases, **kwargs
+) -> list[AllSamplesUnknownStatusError]:
+    errors: list[AllSamplesUnknownStatusError] = []
+
+    for case_index, case in order.enumerated_cases:
+        if are_all_samples_unknown(case):
+            error = AllSamplesUnknownStatusError(case_index=case_index)
+            errors.append(error)
+    return errors
