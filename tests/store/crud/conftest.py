@@ -501,7 +501,6 @@ def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
         customer_id=2,
         ticket_id=3,
         order_date=datetime.now(),
-        workflow=Workflow.BALSAMIC,
     )
     order.cases.append(case)
     return order

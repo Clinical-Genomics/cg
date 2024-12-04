@@ -215,13 +215,22 @@ def expected_moved_analysis_case_delivery_files(
 
 
 @pytest.fixture
-def fastq_concatenation_sample_files(tmp_path: Path) -> list[SampleFile]:
-    some_ticket: str = "some_ticket"
+def fastq_concatenation_sample_files(
+    tmp_path: Path, expected_fastq_delivery_files: DeliveryFiles
+) -> list[SampleFile]:
+    """
+    Return a list of sample files that are to be concatenated.
+    """
+    inbox = Path(
+        expected_fastq_delivery_files.delivery_data.customer_internal_id,
+        INBOX_NAME,
+        expected_fastq_delivery_files.delivery_data.ticket_id,
+    )
     fastq_paths: list[Path] = [
-        Path(tmp_path, some_ticket, "S1_1_R1_1.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_2_R1_1.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_1_R2_1.fastq.gz"),
-        Path(tmp_path, some_ticket, "S1_2_R2_1.fastq.gz"),
+        Path(tmp_path, inbox, "S1_1_R1_1.fastq.gz"),
+        Path(tmp_path, inbox, "S1_2_R1_1.fastq.gz"),
+        Path(tmp_path, inbox, "S1_1_R2_1.fastq.gz"),
+        Path(tmp_path, inbox, "S1_2_R2_1.fastq.gz"),
     ]
     return [
         SampleFile(
