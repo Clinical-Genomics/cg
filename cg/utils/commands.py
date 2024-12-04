@@ -23,7 +23,6 @@ class Process:
         self,
         binary: str,
         conda_binary: str = None,
-        container: str = None,
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
