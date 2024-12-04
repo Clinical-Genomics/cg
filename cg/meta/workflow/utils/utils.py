@@ -12,12 +12,10 @@ def are_all_samples_control(case: Case) -> bool:
     )
 
 
-def map_to_trailblazer_priority(priority: int) -> TrailblazerPriority:
-    """Map a priority to a Trailblazer priority."""
-    return {
-        0: TrailblazerPriority.LOW,
-        1: TrailblazerPriority.NORMAL,
-        2: TrailblazerPriority.HIGH,
-        3: TrailblazerPriority.EXPRESS,
-        4: TrailblazerPriority.NORMAL,
-    }[priority]
+MAP_TO_TRAILBLAZER_PRIORITY: dict[int, TrailblazerPriority] = {
+    0: TrailblazerPriority.LOW,
+    1: TrailblazerPriority.NORMAL,
+    2: TrailblazerPriority.HIGH,
+    3: TrailblazerPriority.EXPRESS,
+    4: TrailblazerPriority.NORMAL,
+}

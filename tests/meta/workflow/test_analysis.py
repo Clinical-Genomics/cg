@@ -17,7 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.meta.workflow.utils.utils import are_all_samples_control, map_to_trailblazer_priority
+from cg.meta.workflow.utils.utils import are_all_samples_control, MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, Sample, IlluminaSequencingRun
 from cg.store.store import Store
@@ -669,14 +669,24 @@ def test_case_with_controls_get_correct_slurmqos(
         (Priority.express, TrailblazerPriority.EXPRESS),
     ],
 )
-def test_map_to_trailblazer_priority(
+def test_get_trailblazer_priority(
+    case_id: str,
     priority,
     expected_trailblazer_priority,
-) -> None:
-    """Tests that map_to_trailblazer_priority returns the correct Trailblazer priority for a given priority."""
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+):
+    """Test get Trailblazer priority from the case priority"""
 
-    # WHEN mapping the priority to a Trailblazer priority
-    trailblazer_priority: TrailblazerPriority = map_to_trailblazer_priority(priority)
+    # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.priority = priority
 
-    # THEN the result should match the expected Trailblazer priority
+    # WHEN getting the trailblazer priority for the priority
+    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(
+        case_id=case_id
+    )
+
+    # THEN the expected trailblazer priority should be returned
     assert trailblazer_priority is expected_trailblazer_priority

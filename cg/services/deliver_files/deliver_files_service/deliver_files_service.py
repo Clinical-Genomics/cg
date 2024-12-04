@@ -5,7 +5,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.tb import AnalysisType
-from cg.meta.workflow.utils.utils import map_to_trailblazer_priority
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.error_handling import (
     handle_no_delivery_files_error,
@@ -133,7 +133,7 @@ class DeliverFilesService:
                 config_path=self.rsync_service.trailblazer_config_path.as_posix(),
                 order_id=case.latest_order.id,
                 out_dir=self.rsync_service.log_dir.as_posix(),
-                priority=map_to_trailblazer_priority(case.priority),
+                priority=MAP_TO_TRAILBLAZER_PRIORITY[case.priority],
                 workflow=Workflow.RSYNC,
                 ticket=case.latest_ticket,
             )

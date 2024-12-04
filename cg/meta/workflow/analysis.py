@@ -29,7 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.utils.utils import are_all_samples_control, map_to_trailblazer_priority
+from cg.meta.workflow.utils.utils import are_all_samples_control, MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -141,7 +141,7 @@ class AnalysisAPI(MetaAPI):
         """Get the priority for the case in Trailblazer."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         priority: int = case.priority or Priority.research
-        return map_to_trailblazer_priority(priority)
+        return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given workflow."""
