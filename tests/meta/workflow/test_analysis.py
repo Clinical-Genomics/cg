@@ -671,8 +671,8 @@ def test_case_with_controls_get_correct_slurmqos(
 )
 def test_get_trailblazer_priority(
     case_id: str,
-    priority,
-    expected_trailblazer_priority,
+    priority: Priority,
+    expected_trailblazer_priority: TrailblazerPriority,
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
 ):
