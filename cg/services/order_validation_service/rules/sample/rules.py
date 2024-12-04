@@ -34,6 +34,9 @@ def validate_application_compatibility(
     store: Store,
     **kwargs,
 ) -> list[ApplicationNotCompatibleError]:
+    """
+    Validate that the applications of all samples in the order are compatible with the order type.
+    """
     errors: list[ApplicationNotCompatibleError] = []
     order_type: OrderType = order.order_type
     for sample_index, sample in order.enumerated_samples:
@@ -51,6 +54,7 @@ def validate_application_compatibility(
 def validate_application_exists(
     order: OrderWithSamples, store: Store, **kwargs
 ) -> list[ApplicationNotValidError]:
+    """Validate that the applications of all samples in the order exist in the database."""
     errors: list[ApplicationNotValidError] = []
     for sample_index, sample in order.enumerated_samples:
         if not store.get_application_by_tag(sample.application):
@@ -95,6 +99,7 @@ def validate_organism_exists(
 def validate_sample_names_available(
     order: OrderWithSamples, store: Store, **kwargs
 ) -> list[SampleNameNotAvailableError]:
+    """Validate that the sample names do not exists in the database under the same customer."""
     errors: list[SampleNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
     for sample_index, sample in order.enumerated_samples:
@@ -117,6 +122,7 @@ def validate_tube_container_name_unique(
     order: OrderWithSamples,
     **kwargs,
 ) -> list[ContainerNameRepeatedError]:
+    """Validate that the container names are unique for tube samples."""
     errors: list[ContainerNameRepeatedError] = []
     repeated_container_name_indices: list = get_indices_for_tube_repeated_container_name(order)
     for sample_index in repeated_container_name_indices:

@@ -87,6 +87,7 @@ def apply_case_sample_filter(
     cases_to_exclude: list[str] = [],
     sample_entry_id: int | None = None,
     sample_internal_id: str | None = None,
+    sample_internal_ids: list[str] | None = None,
     order_id: int | None = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
@@ -98,6 +99,7 @@ def apply_case_sample_filter(
             cases_to_exclude=cases_to_exclude,
             sample_entry_id=sample_entry_id,
             sample_internal_id=sample_internal_id,
+            sample_internal_ids=sample_internal_ids,
             order_id=order_id,
         )
     return case_samples

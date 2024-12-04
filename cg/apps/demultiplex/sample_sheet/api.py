@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting

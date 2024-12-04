@@ -12,18 +12,17 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount, SlurmQos
-from cg.constants.tb import AnalysisTypes
+from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.controller import WriteFile
+from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.sbatch import (
+    COVID_REPORT_RSYNC,
     COVID_RSYNC,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
-    COVID_REPORT_RSYNC,
 )
-
-from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -159,7 +158,7 @@ class DeliveryRsyncService:
         )
         tb_api.add_pending_analysis(
             case_id=ticket,
-            analysis_type=AnalysisTypes.OTHER,
+            analysis_type=AnalysisType.OTHER,
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
