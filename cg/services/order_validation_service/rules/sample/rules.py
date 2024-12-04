@@ -16,17 +16,18 @@ from cg.services.order_validation_service.errors.sample_errors import (
     SampleNameRepeatedError,
     VolumeRequiredError,
     WellFormatError,
+    WellPositionMissingError,
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
-    create_invalid_concentration_error,
     get_indices_for_repeated_sample_names,
     get_indices_for_tube_repeated_container_name,
     is_container_name_missing,
     is_invalid_well_format,
+    validate_concentration_interval,
+    validate_concentration_required,
 )
 from cg.services.order_validation_service.rules.utils import (
-    has_sample_invalid_concentration,
     is_application_compatible,
     is_volume_invalid,
     is_volume_missing,
@@ -81,6 +82,31 @@ def validate_applications_not_archived(
     return errors
 
 
+def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[InvalidBufferError]:
+    errors: list[InvalidBufferError] = []
+    if order.skip_reception_control:
+        errors.extend(validate_buffers_are_allowed(order))
+    return errors
+
+
+def validate_buffers_are_allowed(order: FastqOrder) -> list[InvalidBufferError]:
+    errors: list[InvalidBufferError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
+            error = InvalidBufferError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_concentration_interval_if_skip_rc(
+    order: FastqOrder, store: Store, **kwargs
+) -> list[InvalidConcentrationIfSkipRCError]:
+    errors: list[InvalidConcentrationIfSkipRCError] = []
+    if order.skip_reception_control:
+        errors.extend(validate_concentration_interval(order=order, store=store))
+    return errors
+
+
 def validate_container_name_required(
     order: OrderWithSamples, **kwargs
 ) -> list[ContainerNameMissingError]:
@@ -89,6 +115,15 @@ def validate_container_name_required(
         if is_container_name_missing(sample=sample):
             error = ContainerNameMissingError(sample_index=sample_index)
             errors.append(error)
+    return errors
+
+
+def validate_concentration_required_if_skip_rc(
+    order: FastqOrder, **kwargs
+) -> list[ConcentrationRequiredError]:
+    errors: list[ConcentrationRequiredError] = []
+    if order.skip_reception_control:
+        errors.extend(validate_concentration_required(order))
     return errors
 
 
@@ -176,64 +211,6 @@ def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[Wel
 def validate_well_positions_required(
     order: OrderWithSamples,
     **kwargs,
-) -> list[OccupiedWellError]:
+) -> list[WellPositionMissingError]:
     plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_well_position_missing_errors()
-
-
-def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[InvalidBufferError]:
-    errors: list[InvalidBufferError] = []
-    if order.skip_reception_control:
-        errors.extend(validate_buffers_are_allowed(order))
-    return errors
-
-
-def validate_buffers_are_allowed(order: FastqOrder) -> list[InvalidBufferError]:
-    errors: list[InvalidBufferError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
-            error = InvalidBufferError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_concentration_required_if_skip_rc(
-    order: FastqOrder, **kwargs
-) -> list[ConcentrationRequiredError]:
-    errors: list[ConcentrationRequiredError] = []
-    if order.skip_reception_control:
-        errors.extend(validate_concentration_required(order))
-    return errors
-
-
-def validate_concentration_required(order: FastqOrder) -> list[ConcentrationRequiredError]:
-    errors: list[ConcentrationRequiredError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if not sample.concentration_ng_ul:
-            error = ConcentrationRequiredError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_concentration_interval_if_skip_rc(
-    order: FastqOrder, store: Store, **kwargs
-) -> list[InvalidConcentrationIfSkipRCError]:
-    errors: list[InvalidConcentrationIfSkipRCError] = []
-    if order.skip_reception_control:
-        errors.extend(validate_concentration_interval(order=order, store=store))
-    return errors
-
-
-def validate_concentration_interval(
-    order: FastqOrder, store: Store
-) -> list[InvalidConcentrationIfSkipRCError]:
-    errors: list[InvalidConcentrationIfSkipRCError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if has_sample_invalid_concentration(sample=sample, store=store):
-            error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
-                sample=sample,
-                sample_index=sample_index,
-                store=store,
-            )
-            errors.append(error)
-    return errors

@@ -18,7 +18,6 @@ from cg.services.order_validation_service.models.aliases import (
     CaseWithSkipRC,
     HumanSample,
     SampleWithRelatives,
-    SampleWithSkipRC,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
@@ -26,11 +25,9 @@ from cg.services.order_validation_service.rules.utils import (
     get_concentration_interval,
     has_sample_invalid_concentration,
     is_in_container,
-    is_sample_cfdna,
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.store.models import Application
 from cg.store.store import Store
 
 
@@ -212,26 +209,21 @@ def validate_concentration_in_case(
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors: list[InvalidConcentrationIfSkipRCError] = []
     for sample_index, sample in case.enumerated_new_samples:
-        if has_sample_invalid_concentration(sample=sample, store=store):
-            error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
-                case_index=case_index,
-                sample=sample,
-                sample_index=sample_index,
-                store=store,
-            )
-            errors.append(error)
+        if application := store.get_application_by_tag(sample.application):
+            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            if has_sample_invalid_concentration(sample=sample, allowed_interval=allowed_interval):
+                error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
+                    case_index=case_index,
+                    sample_index=sample_index,
+                    allowed_interval=allowed_interval,
+                )
+                errors.append(error)
     return errors
 
 
 def create_invalid_concentration_error(
-    case_index: int, sample: SampleWithSkipRC, sample_index: int, store: Store
+    case_index: int, sample_index: int, allowed_interval: tuple[float, float]
 ) -> InvalidConcentrationIfSkipRCError:
-    application: Application = store.get_application_by_tag(sample.application)
-    is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application,
-        is_cfdna=is_cfdna,
-    )
     return InvalidConcentrationIfSkipRCError(
         case_index=case_index,
         sample_index=sample_index,

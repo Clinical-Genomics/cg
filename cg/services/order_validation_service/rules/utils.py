@@ -42,18 +42,23 @@ def is_volume_missing(sample: Sample) -> bool:
     return False
 
 
-def has_sample_invalid_concentration(sample: SampleWithSkipRC, store: Store) -> bool:
-    application: Application | None = store.get_application_by_tag(sample.application)
-    if not application:
-        return False
-    concentration: float | None = sample.concentration_ng_ul
-    is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application, is_cfdna=is_cfdna
-    )
+def has_sample_invalid_concentration(
+    sample: SampleWithSkipRC, allowed_interval: tuple[float, float]
+) -> bool:
+    concentration: float = sample.concentration_ng_ul
     return not is_sample_concentration_within_interval(
         concentration=concentration, interval=allowed_interval
     )
+
+
+def get_concentration_interval(
+    sample: SampleWithSkipRC, application: Application
+) -> tuple[float, float] | None:
+    is_cfdna: bool = is_sample_cfdna(sample)
+    allowed_interval: tuple[float, float] = get_application_concentration_interval(
+        application=application, is_cfdna=is_cfdna
+    )
+    return allowed_interval
 
 
 def is_sample_cfdna(sample: SampleWithSkipRC) -> bool:
@@ -61,7 +66,9 @@ def is_sample_cfdna(sample: SampleWithSkipRC) -> bool:
     return source == SourceType.CELL_FREE_DNA
 
 
-def get_concentration_interval(application: Application, is_cfdna: bool) -> tuple[float, float]:
+def get_application_concentration_interval(
+    application: Application, is_cfdna: bool
+) -> tuple[float, float]:
     if is_cfdna:
         return (
             application.sample_concentration_minimum_cfdna,

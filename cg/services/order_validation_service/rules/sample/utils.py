@@ -3,6 +3,7 @@ from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.sample_errors import (
+    ConcentrationRequiredError,
     InvalidConcentrationIfSkipRCError,
     OccupiedWellError,
     WellPositionMissingError,
@@ -10,9 +11,12 @@ from cg.services.order_validation_service.errors.sample_errors import (
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
+    get_application_concentration_interval,
     get_concentration_interval,
+    has_sample_invalid_concentration,
     is_sample_cfdna,
 )
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
 from cg.store.models import Application
 from cg.store.store import Store
@@ -105,7 +109,7 @@ def create_invalid_concentration_error(
 ) -> InvalidConcentrationIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
+    allowed_interval: tuple[float, float] = get_application_concentration_interval(
         application=application,
         is_cfdna=is_cfdna,
     )
@@ -113,3 +117,31 @@ def create_invalid_concentration_error(
         sample_index=sample_index,
         allowed_interval=allowed_interval,
     )
+
+
+def validate_concentration_interval(
+    order: FastqOrder, store: Store
+) -> list[InvalidConcentrationIfSkipRCError]:
+    errors: list[InvalidConcentrationIfSkipRCError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if application := store.get_application_by_tag(sample.application):
+            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            if allowed_interval and has_sample_invalid_concentration(
+                sample=sample, allowed_interval=allowed_interval
+            ):
+                error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
+                    sample=sample,
+                    sample_index=sample_index,
+                    store=store,
+                )
+                errors.append(error)
+    return errors
+
+
+def validate_concentration_required(order: FastqOrder) -> list[ConcentrationRequiredError]:
+    errors: list[ConcentrationRequiredError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if not sample.concentration_ng_ul:
+            error = ConcentrationRequiredError(sample_index=sample_index)
+            errors.append(error)
+    return errors
