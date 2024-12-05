@@ -3,8 +3,8 @@ from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.sample_errors import (
+    ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
-    InvalidConcentrationIfSkipRCError,
     OccupiedWellError,
     WellPositionMissingError,
 )
@@ -106,14 +106,14 @@ def is_container_name_missing(sample: Sample) -> bool:
 
 def create_invalid_concentration_error(
     sample: FastqSample, sample_index: int, store: Store
-) -> InvalidConcentrationIfSkipRCError:
+) -> ConcentrationInvalidIfSkipRCError:
     application: Application = store.get_application_by_tag(sample.application)
     is_cfdna: bool = is_sample_cfdna(sample)
     allowed_interval: tuple[float, float] = get_application_concentration_interval(
         application=application,
         is_cfdna=is_cfdna,
     )
-    return InvalidConcentrationIfSkipRCError(
+    return ConcentrationInvalidIfSkipRCError(
         sample_index=sample_index,
         allowed_interval=allowed_interval,
     )
@@ -121,15 +121,15 @@ def create_invalid_concentration_error(
 
 def validate_concentration_interval(
     order: FastqOrder, store: Store
-) -> list[InvalidConcentrationIfSkipRCError]:
-    errors: list[InvalidConcentrationIfSkipRCError] = []
+) -> list[ConcentrationInvalidIfSkipRCError]:
+    errors: list[ConcentrationInvalidIfSkipRCError] = []
     for sample_index, sample in order.enumerated_samples:
         if application := store.get_application_by_tag(sample.application):
             allowed_interval = get_concentration_interval(sample=sample, application=application)
             if allowed_interval and has_sample_invalid_concentration(
                 sample=sample, allowed_interval=allowed_interval
             ):
-                error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
+                error: ConcentrationInvalidIfSkipRCError = create_invalid_concentration_error(
                     sample=sample,
                     sample_index=sample_index,
                     store=store,

@@ -4,11 +4,11 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    BufferInvalidError,
+    ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
-    InvalidBufferError,
-    InvalidConcentrationIfSkipRCError,
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
@@ -82,26 +82,26 @@ def validate_applications_not_archived(
     return errors
 
 
-def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[InvalidBufferError]:
-    errors: list[InvalidBufferError] = []
+def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[BufferInvalidError]:
+    errors: list[BufferInvalidError] = []
     if order.skip_reception_control:
         errors.extend(validate_buffers_are_allowed(order))
     return errors
 
 
-def validate_buffers_are_allowed(order: FastqOrder) -> list[InvalidBufferError]:
-    errors: list[InvalidBufferError] = []
+def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
+    errors: list[BufferInvalidError] = []
     for sample_index, sample in order.enumerated_samples:
         if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
-            error = InvalidBufferError(sample_index=sample_index)
+            error = BufferInvalidError(sample_index=sample_index)
             errors.append(error)
     return errors
 
 
 def validate_concentration_interval_if_skip_rc(
     order: FastqOrder, store: Store, **kwargs
-) -> list[InvalidConcentrationIfSkipRCError]:
-    errors: list[InvalidConcentrationIfSkipRCError] = []
+) -> list[ConcentrationInvalidIfSkipRCError]:
+    errors: list[ConcentrationInvalidIfSkipRCError] = []
     if order.skip_reception_control:
         errors.extend(validate_concentration_interval(order=order, store=store))
     return errors

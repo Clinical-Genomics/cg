@@ -71,7 +71,7 @@ class ContainerNameMissingError(SampleError):
     message: str = "Container must have a name"
 
 
-class InvalidBufferError(SampleError):
+class BufferInvalidError(SampleError):
     field: str = "elution_buffer"
     message: str = "Buffer must be Tris-HCl or Nuclease-free water when skipping reception control."
 
@@ -81,7 +81,7 @@ class ConcentrationRequiredError(SampleError):
     message: str = "Concentration is required when skipping reception control."
 
 
-class InvalidConcentrationIfSkipRCError(SampleError):
+class ConcentrationInvalidIfSkipRCError(SampleError):
     def __init__(self, sample_index: int, allowed_interval: tuple[float, float]):
         field: str = "concentration_ng_ul"
         message: str = (
