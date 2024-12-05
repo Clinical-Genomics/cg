@@ -3,7 +3,6 @@ from cg.services.order_validation_service.constants import (
     MINIMUM_VOLUME,
 )
 from cg.services.order_validation_service.errors.order_errors import OrderError
-from cg.models.orders.sample_base import ContainerEnum
 
 
 class SampleError(OrderError):
