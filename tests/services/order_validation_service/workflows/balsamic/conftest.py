@@ -4,18 +4,10 @@ from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
-from cg.services.order_validation_service.workflows.balsamic.constants import (
-    BalsamicDeliveryType,
-)
-from cg.services.order_validation_service.workflows.balsamic.models.case import (
-    BalsamicCase,
-)
-from cg.services.order_validation_service.workflows.balsamic.models.order import (
-    BalsamicOrder,
-)
-from cg.services.order_validation_service.workflows.balsamic.models.sample import (
-    BalsamicSample,
-)
+from cg.services.order_validation_service.workflows.balsamic.constants import BalsamicDeliveryType
+from cg.services.order_validation_service.workflows.balsamic.models.case import BalsamicCase
+from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.order_validation_service.workflows.balsamic.models.sample import BalsamicSample
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
@@ -39,7 +31,7 @@ def create_sample(id: int) -> BalsamicSample:
         subject_id=f"subject{id}",
         well_position=f"A:{id}",
         volume=MINIMUM_VOLUME,
-        is_tumour=False,
+        tumour=False,
     )
 
 

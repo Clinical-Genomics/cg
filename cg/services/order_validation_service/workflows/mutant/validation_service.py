@@ -44,3 +44,6 @@ class MutantValidationService(OrderValidationService):
             sample_errors=sample_errors,
             order_errors=order_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> MutantOrder:
+        pass

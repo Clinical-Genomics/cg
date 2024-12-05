@@ -6,15 +6,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Organism,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Organism, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -36,12 +28,10 @@ class StoreMicrobialOrderService(StoreOrderService):
     def store_order(self, order: OrderIn) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
         # submit samples to LIMS
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
         # prepare order for status database
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(
-            samples=status_data["samples"], lims_map=lims_map, id_key="internal_id"
-        )
+        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
 
         # submit samples to Status
         samples = self.store_items_in_status(
