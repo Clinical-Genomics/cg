@@ -18,7 +18,7 @@ class HermesApi:
         self.process = Process(
             binary=config["hermes"]["binary_path"],
         )
-        self.container_mount_volume = (config["hermes"]["container_mount_volume"],)
+        self.container_mount_volume = config["hermes"]["container_mount_volume"]
 
     def convert_deliverables(
         self,
