@@ -1,6 +1,7 @@
 import re
 from collections import Counter
 
+from cg.constants.constants import StatusOptions
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
@@ -19,6 +20,7 @@ from cg.services.order_validation_service.models.aliases import (
     HumanSample,
     SampleWithRelatives,
 )
+from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
@@ -303,3 +305,8 @@ def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[st
             for sample in db_case.samples:
                 existing_sample_names.add(sample.name)
     return existing_sample_names
+
+
+def are_all_samples_unknown(case: Case) -> bool:
+    """Check if all samples in a case are unknown."""
+    return all(sample.status == StatusOptions.UNKNOWN for sample in case.samples)
