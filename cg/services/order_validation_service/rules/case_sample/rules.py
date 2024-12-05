@@ -417,6 +417,9 @@ def validate_not_all_samples_unknown_in_case(
 
     for case_index, case in order.enumerated_cases:
         if are_all_samples_unknown(case):
-            error = AllSamplesUnknownStatusError(case_index=case_index)
-            errors.append(error)
+            for sample_index, _ in case.enumerated_samples:
+                error = AllSamplesUnknownStatusError(
+                    case_index=case_index, sample_index=sample_index
+                )
+                errors.append(error)
     return errors
