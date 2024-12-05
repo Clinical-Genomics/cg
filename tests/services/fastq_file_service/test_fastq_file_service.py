@@ -119,6 +119,48 @@ def test_concatenate_missing_reverse(
     assert not reverse_output_path.exists()
 
 
+def test_concatenate_fastqs_multiple_samples_in_dir(
+    fastqs_multiple_samples: Path,
+    fastq_file_service: FastqConcatenationService,
+    sample_id: str,
+    another_sample_id: str,
+    tmp_path: Path,
+):
+    # GIVEN a fastq directory with fastq files for multiple samples that should be concatenated
+    samples: list[str] = [sample_id, another_sample_id]
+
+    # GIVEN output files for the concatenated reads
+    for fastq_sample in samples:
+        forward_output_path = Path(tmp_path, f"{fastq_sample}_forward.fastq.gz")
+        reverse_output_path = Path(tmp_path, f"{fastq_sample}_reverse.fastq.gz")
+
+        # WHEN concatenating the reads
+        fastq_file_service.concatenate(
+            sample_id=fastq_sample,
+            fastq_directory=fastqs_multiple_samples,
+            forward_output_path=forward_output_path,
+            reverse_output_path=reverse_output_path,
+            remove_raw=True,
+        )
+
+        not_current_sample: str = another_sample_id if fastq_sample == sample_id else sample_id
+        # THEN the output files should exist
+        assert forward_output_path.exists()
+        assert reverse_output_path.exists()
+
+        # THEN the concatenated forward reads only contain forward reads
+        assert "forward" in forward_output_path.read_text()
+        assert "reverse" not in forward_output_path.read_text()
+        assert fastq_sample in forward_output_path.read_text()
+        assert not_current_sample not in forward_output_path.read_text()
+
+        # THEN the concatenated reverse reads only contain reverse reads
+        assert "reverse" in reverse_output_path.read_text()
+        assert "forward" not in reverse_output_path.read_text()
+        assert fastq_sample in reverse_output_path.read_text()
+        assert not_current_sample not in reverse_output_path.read_text()
+
+
 @pytest.mark.parametrize(
     "fastq_directory, sample_name, direction, expected_output_path",
     [
