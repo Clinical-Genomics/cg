@@ -3,7 +3,7 @@ import pytest
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.models.orders.samples import TomteSample
 from cg.services.order_validation_service.errors.case_sample_errors import (
-    AllSamplesUnknownStatusError,
+    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
@@ -425,12 +425,10 @@ def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):
         sample.status = StatusEnum.unknown
 
     # WHEN validating that not all samples are unknown in a case
-    errors: list[AllSamplesUnknownStatusError] = validate_not_all_samples_unknown_in_case(
-        order=valid_order
-    )
+    errors: list[StatusUnknownError] = validate_not_all_samples_unknown_in_case(order=valid_order)
 
     # THEN an error should be returned
     assert errors
 
     # THEN the error should concern the case with all samples unknown
-    assert isinstance(errors[0], AllSamplesUnknownStatusError)
+    assert isinstance(errors[0], StatusUnknownError)

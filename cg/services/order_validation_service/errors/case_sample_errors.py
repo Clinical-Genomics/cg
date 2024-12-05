@@ -160,6 +160,6 @@ class CaseNameSampleNameSameError(CaseSampleError):
     message: str = "Sample name must be different from case name"
 
 
-class AllSamplesUnknownStatusError(CaseSampleError):
+class StatusUnknownError(CaseSampleError):
     field: str = "status"
     message: str = "Samples in case cannot all have status unknown"

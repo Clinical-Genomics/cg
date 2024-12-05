@@ -4,7 +4,7 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
-    AllSamplesUnknownStatusError,
+    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
@@ -412,14 +412,12 @@ def validate_case_names_different_from_sample_names(
 
 def validate_not_all_samples_unknown_in_case(
     order: OrderWithCases, **kwargs
-) -> list[AllSamplesUnknownStatusError]:
-    errors: list[AllSamplesUnknownStatusError] = []
+) -> list[StatusUnknownError]:
+    errors: list[StatusUnknownError] = []
 
     for case_index, case in order.enumerated_cases:
         if are_all_samples_unknown(case):
             for sample_index, _ in case.enumerated_samples:
-                error = AllSamplesUnknownStatusError(
-                    case_index=case_index, sample_index=sample_index
-                )
+                error = StatusUnknownError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
