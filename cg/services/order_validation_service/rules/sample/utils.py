@@ -3,11 +3,23 @@ from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.errors.sample_errors import (
+    ConcentrationInvalidIfSkipRCError,
+    ConcentrationRequiredError,
     OccupiedWellError,
     WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.rules.utils import (
+    get_application_concentration_interval,
+    get_concentration_interval,
+    has_sample_invalid_concentration,
+    is_sample_cfdna,
+)
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
+from cg.store.models import Application
+from cg.store.store import Store
 
 
 class PlateSamplesValidator:
@@ -32,13 +44,13 @@ class PlateSamplesValidator:
 
     def get_occupied_well_errors(self) -> list[OccupiedWellError]:
         """Get errors for samples assigned to wells that are already occupied."""
-        conflicting_samples: list[Sample] = []
+        conflicting_samples: list[int] = []
         for samples_indices in self.wells.values():
             if len(samples_indices) > 1:
                 conflicting_samples.extend(samples_indices[1:])
         return get_occupied_well_errors(conflicting_samples)
 
-    def get_well_position_missing_errors(self) -> list[OccupiedWellError]:
+    def get_well_position_missing_errors(self) -> list[WellPositionMissingError]:
         """Get errors for samples missing well positions."""
         samples_missing_wells: list[int] = []
         for sample_index, sample in self.plate_samples:
@@ -52,7 +64,7 @@ def get_occupied_well_errors(sample_indices: list[int]) -> list[OccupiedWellErro
 
 
 def get_missing_well_errors(sample_indices: list[int]) -> list[WellPositionMissingError]:
-    return [WellPositionMissingError(sample_index) for sample_index in sample_indices]
+    return [WellPositionMissingError(sample_index=sample_index) for sample_index in sample_indices]
 
 
 def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
@@ -90,3 +102,46 @@ def is_container_name_missing(sample: Sample) -> bool:
     if sample.is_on_plate and not sample.container_name:
         return True
     return False
+
+
+def create_invalid_concentration_error(
+    sample: FastqSample, sample_index: int, store: Store
+) -> ConcentrationInvalidIfSkipRCError:
+    application: Application = store.get_application_by_tag(sample.application)
+    is_cfdna: bool = is_sample_cfdna(sample)
+    allowed_interval: tuple[float, float] = get_application_concentration_interval(
+        application=application,
+        is_cfdna=is_cfdna,
+    )
+    return ConcentrationInvalidIfSkipRCError(
+        sample_index=sample_index,
+        allowed_interval=allowed_interval,
+    )
+
+
+def validate_concentration_interval(
+    order: FastqOrder, store: Store
+) -> list[ConcentrationInvalidIfSkipRCError]:
+    errors: list[ConcentrationInvalidIfSkipRCError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if application := store.get_application_by_tag(sample.application):
+            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            if allowed_interval and has_sample_invalid_concentration(
+                sample=sample, allowed_interval=allowed_interval
+            ):
+                error: ConcentrationInvalidIfSkipRCError = create_invalid_concentration_error(
+                    sample=sample,
+                    sample_index=sample_index,
+                    store=store,
+                )
+                errors.append(error)
+    return errors
+
+
+def validate_concentration_required(order: FastqOrder) -> list[ConcentrationRequiredError]:
+    errors: list[ConcentrationRequiredError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if not sample.concentration_ng_ul:
+            error = ConcentrationRequiredError(sample_index=sample_index)
+            errors.append(error)
+    return errors
