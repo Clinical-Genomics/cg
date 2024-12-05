@@ -12,11 +12,26 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.order_validation_service.workflows.balsamic.validation_service import (
+    BalsamicValidationService,
+)
+from cg.services.order_validation_service.workflows.fastq.validation_service import (
+    FastqValidationService,
+)
+from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
+    MicrobialFastqValidationService,
+)
 from cg.services.order_validation_service.workflows.microsalt.validation_service import (
     MicroSaltValidationService,
 )
 from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
     MipDnaValidationService,
+)
+from cg.services.order_validation_service.workflows.mutant.validation_service import (
+    MutantValidationService,
+)
+from cg.services.order_validation_service.workflows.pacbio_long_read.validation_service import (
+    PacbioLongReadValidationService,
 )
 from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
     RnaFusionValidationService,
@@ -109,10 +124,16 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
     status_db=db,
 )
 
-tomte_validation_service = TomteValidationService(store=db)
+balsamic_validation_service = BalsamicValidationService(store=db)
+fastq_validation_service = FastqValidationService(store=db)
+microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
+mutant_validation_service = MutantValidationService(store=db)
+pacbio_long_read_validation_service = PacbioLongReadValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)
+tomte_validation_service = TomteValidationService(store=db)
+
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )

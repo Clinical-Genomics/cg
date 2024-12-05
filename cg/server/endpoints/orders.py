@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.constants import FileFormat, Workflow
+from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
     OrderExistsError,
@@ -34,13 +34,18 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_validation_service,
     db,
     delivery_message_service,
+    fastq_validation_service,
     lims,
+    microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
+    mutant_validation_service,
     order_service,
     order_submitter_registry,
+    pacbio_long_read_validation_service,
     rna_fusion_validation_service,
     ticket_handler,
     tomte_validation_service,
@@ -258,18 +263,28 @@ def get_options():
     )
 
 
-@ORDERS_BLUEPRINT.route("/validate_order/<workflow>", methods=["POST"])
-def validate_order(workflow: str):
+@ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
+def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["workflow"] = workflow
+    raw_order["workflow"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
-    if workflow == Workflow.MICROSALT:
+    if order_type == OrderType.BALSAMIC:
+        response = balsamic_validation_service.validate(raw_order)
+    elif order_type == OrderType.FASTQ:
+        response = fastq_validation_service.validate(raw_order)
+    elif order_type == OrderType.MICROBIAL_FASTQ:
+        response = microbial_fastq_validation_service.validate(raw_order)
+    elif order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-    if workflow == Workflow.MIP_DNA:
+    elif order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
-    if workflow == Workflow.RNAFUSION:
+    elif order_type == OrderType.PACBIO_LONG_READ:
+        response = pacbio_long_read_validation_service.validate(raw_order)
+    elif order_type == OrderType.SARS_COV_2:
+        response = mutant_validation_service.validate(raw_order)
+    elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
-    if workflow == Workflow.TOMTE:
+    elif order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
