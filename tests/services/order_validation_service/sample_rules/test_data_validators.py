@@ -13,23 +13,19 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_organism_exists,
     validate_volume_interval,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicrosaltOrder,
-)
-from cg.services.order_validation_service.workflows.microsalt.models.sample import (
-    MicrosaltSample,
-)
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
 from cg.store.models import Application
 from cg.store.store import Store
 
 
-def test_applications_exist_sample_order(valid_order: MicrosaltOrder, base_store: Store):
+def test_applications_exist_sample_order(valid_microsalt_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a sample with an application which is not found in the database
-    valid_order.samples[0].application = "Non-existent app tag"
+    valid_microsalt_order.samples[0].application = "Non-existent app tag"
 
     # WHEN validating that the specified applications exist
-    errors = validate_application_exists(order=valid_order, store=base_store)
+    errors = validate_application_exists(order=valid_microsalt_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
@@ -39,16 +35,16 @@ def test_applications_exist_sample_order(valid_order: MicrosaltOrder, base_store
 
 
 def test_application_is_incompatible(
-    valid_order: MicrosaltOrder,
+    valid_microsalt_order: MicrosaltOrder,
     sample_with_non_compatible_application: MicrosaltSample,
     base_store: Store,
 ):
 
     # GIVEN an order that has a sample with an application which is incompatible with microsalt
-    valid_order.samples.append(sample_with_non_compatible_application)
+    valid_microsalt_order.samples.append(sample_with_non_compatible_application)
 
     # WHEN validating the order
-    errors = validate_application_compatibility(order=valid_order, store=base_store)
+    errors = validate_application_compatibility(order=valid_microsalt_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
@@ -58,16 +54,16 @@ def test_application_is_incompatible(
 
 
 def test_application_is_not_archived(
-    valid_order: MicrosaltOrder, archived_application: Application, base_store: Store
+    valid_microsalt_order: MicrosaltOrder, archived_application: Application, base_store: Store
 ):
 
     # GIVEN an order with a new sample with an archived application
-    valid_order.samples[0].application = archived_application.tag
+    valid_microsalt_order.samples[0].application = archived_application.tag
     base_store.session.add(archived_application)
     base_store.commit_to_store()
 
     # WHEN validating that the applications are not archived
-    errors = validate_applications_not_archived(order=valid_order, store=base_store)
+    errors = validate_applications_not_archived(order=valid_microsalt_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
@@ -76,13 +72,13 @@ def test_application_is_not_archived(
     assert isinstance(errors[0], ApplicationArchivedError)
 
 
-def test_invalid_volume(valid_order: MicrosaltOrder, base_store: Store):
+def test_invalid_volume(valid_microsalt_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a sample with an invalid volume
-    valid_order.samples[0].volume = MAXIMUM_VOLUME + 10
+    valid_microsalt_order.samples[0].volume = MAXIMUM_VOLUME + 10
 
     # WHEN validating the volume interval
-    errors = validate_volume_interval(order=valid_order)
+    errors = validate_volume_interval(order=valid_microsalt_order)
 
     # THEN an error should be returned
     assert errors
@@ -91,13 +87,13 @@ def test_invalid_volume(valid_order: MicrosaltOrder, base_store: Store):
     assert isinstance(errors[0], InvalidVolumeError)
 
 
-def test_invalid_organism(valid_order: MicrosaltOrder, base_store: Store):
+def test_invalid_organism(valid_microsalt_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN an order with a sample specifying a non-existent organism
-    valid_order.samples[0].organism = "Non-existent organism"
+    valid_microsalt_order.samples[0].organism = "Non-existent organism"
 
     # WHEN validating that all organisms exist
-    errors = validate_organism_exists(order=valid_order, store=base_store)
+    errors = validate_organism_exists(order=valid_microsalt_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
@@ -106,12 +102,12 @@ def test_invalid_organism(valid_order: MicrosaltOrder, base_store: Store):
     assert isinstance(errors[0], OrganismDoesNotExistError)
 
 
-def test_valid_organisms(valid_order: MicrosaltOrder, base_store: Store):
+def test_valid_organisms(valid_microsalt_order: MicrosaltOrder, base_store: Store):
 
     # GIVEN a valid order
 
     # WHEN validating that all organisms exist
-    errors = validate_organism_exists(order=valid_order, store=base_store)
+    errors = validate_organism_exists(order=valid_microsalt_order, store=base_store)
 
     # THEN no error should be returned
     assert not errors
