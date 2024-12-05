@@ -169,7 +169,9 @@ def test_validate_concentration_required_if_skip_rc(valid_fastq_order: FastqOrde
     valid_fastq_order.samples[0].concentration_ng_ul = None
 
     # WHEN validating that the concentration is not missing
-    errors = validate_concentration_required_if_skip_rc(order=valid_fastq_order)
+    errors: list[ConcentrationRequiredError] = validate_concentration_required_if_skip_rc(
+        order=valid_fastq_order
+    )
 
     # THEN an error should be returned
     assert errors
@@ -194,7 +196,9 @@ def test_validate_concentration_interval_if_skip_rc(
     base_store.commit_to_store()
 
     # WHEN validating that the order's samples' concentrations are within allowed intervals
-    errors = validate_concentration_interval_if_skip_rc(order=valid_fastq_order, store=base_store)
+    errors: list[ConcentrationInvalidIfSkipRCError] = validate_concentration_interval_if_skip_rc(
+        order=valid_fastq_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
@@ -212,7 +216,7 @@ def test_validate_buffer_skip_rc_condition(valid_fastq_order: FastqOrder):
     valid_fastq_order.samples[0].elution_buffer = ElutionBuffer.OTHER
 
     # WHEN validating that the buffers follow the 'skip reception control' requirements
-    errors = validate_buffer_skip_rc_condition(order=valid_fastq_order)
+    errors: list[BufferInvalidError] = validate_buffer_skip_rc_condition(order=valid_fastq_order)
 
     # THEN an error should be returned
     assert errors
