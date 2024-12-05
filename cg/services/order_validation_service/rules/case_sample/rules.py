@@ -415,7 +415,7 @@ def validate_not_all_samples_unknown_in_case(
 ) -> list[StatusUnknownError]:
     errors: list[StatusUnknownError] = []
 
-    for case_index, case in order.enumerated_cases:
+    for case_index, case in order.enumerated_new_cases:
         if are_all_samples_unknown(case):
             for sample_index, _ in case.enumerated_samples:
                 error = StatusUnknownError(case_index=case_index, sample_index=sample_index)
