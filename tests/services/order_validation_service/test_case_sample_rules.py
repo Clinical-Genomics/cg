@@ -422,7 +422,7 @@ def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):
 
     # GIVEN an order with a case with all samples unknown
     for sample in valid_order.cases[0].samples:
-        sample.status = StatusEnum.UNKNOWN
+        sample.status = StatusEnum.unknown
 
     # WHEN validating that not all samples are unknown in a case
     errors: list[AllSamplesUnknownStatusError] = validate_not_all_samples_unknown_in_case(
