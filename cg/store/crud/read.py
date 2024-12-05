@@ -1655,5 +1655,8 @@ class ReadHandler(BaseHandler):
             )
 
             related_dna_cases.extend([case for case in uploaded_dna_cases])
-
+        if not related_dna_cases:
+            raise CaseNotFoundError(
+                f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
+            )
         return related_dna_cases
