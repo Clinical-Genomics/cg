@@ -1,8 +1,11 @@
+import logging
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
 from cg.services.deliver_files.utils import FileManager
+
+LOG = logging.getLogger(__name__)
 
 
 class NestedSampleFileNameFormatter:
@@ -82,6 +85,7 @@ class SampleFileFormatter:
         self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
         """Format the sample files to deliver and return the formatted files."""
+        LOG.debug("[FORMAT SERVICE] Formatting sample files")
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
         for sample_name in sample_names:
             self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})

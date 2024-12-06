@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -7,6 +8,8 @@ from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service
     SampleFileConcatenationFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import FileManager
+
+LOG = logging.getLogger(__name__)
 
 
 class MutantFileFormatter:
@@ -23,6 +26,7 @@ class MutantFileFormatter:
     def format_files(
         self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
+        LOG.debug("[FORMAT SERVICE] Formatting and concatenating mutant files")
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
             moved_files=moved_files, delivery_path=delivery_path
         )

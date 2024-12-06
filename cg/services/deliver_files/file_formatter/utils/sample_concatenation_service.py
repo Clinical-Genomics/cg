@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
 from cg.services.deliver_files.file_formatter.utils.models import FastqFile
@@ -14,6 +15,8 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import (
     FlatSampleFileNameFormatter,
 )
 from cg.utils.files import get_all_files_in_directory_tree
+
+LOG = logging.getLogger(__name__)
 
 
 class SampleFileConcatenationFormatter:
@@ -41,6 +44,7 @@ class SampleFileConcatenationFormatter:
             moved_files: list[SampleFile]: List of sample files to deliver.
             delivery_path: Path: Path to the delivery directory.
         """
+        LOG.debug("[FORMAT SERVICE] Formatting and concatenating sample files")
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
         self._create_sample_directories(delivery_path=delivery_path, sample_names=sample_names)
         formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
