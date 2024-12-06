@@ -14,9 +14,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderType
 from cg.services.order_validation_service.models.order import Order
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
-from cg.services.orders.submitters.order_submitter_registry import (
-    OrderSubmitterRegistry,
-)
+from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -47,6 +45,8 @@ class OrdersAPI:
         """
         submit_handler: OrderSubmitter = self.submitter_registry.get_order_submitter(order_type)
         order: Order = submit_handler.order_validation_service.parse_and_validate(raw_order)
+        if isinstance(order, dict):
+            return order
         # detect manual ticket assignment
         ticket_number: str | None = self.ticket_handler.parse_ticket_number(order.name)
         if not ticket_number:
