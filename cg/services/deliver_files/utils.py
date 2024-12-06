@@ -16,17 +16,21 @@ class FileManager:
     @staticmethod
     def create_directories(base_path: Path, directories: set[str]) -> None:
         """Create directories for given names under the base path."""
+
         for directory in directories:
+            LOG.debug(f"[FileManager] Creating directory or file: {base_path}/{directory}")
             Path(base_path, directory).mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def rename_file(src: Path, dst: Path) -> None:
         """Rename a file from src to dst."""
+        LOG.debug(f"[FileManager] Renaming file: {src} -> {dst}")
         os.rename(src=src, dst=dst)
 
     @staticmethod
     def create_hard_link(src: Path, dst: Path) -> None:
         """Create a hard link from src to dst."""
+        LOG.debug(f"[FileManager] Creating hard link: {src} -> {dst}")
         os.link(src=src, dst=dst)
 
 
