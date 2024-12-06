@@ -1,6 +1,5 @@
 from unittest import mock
 from unittest.mock import Mock
-
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
