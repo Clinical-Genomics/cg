@@ -175,6 +175,7 @@ def submit_order(order_type: OrderType):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
+        request.json["delivery_type"] = "fastq"
         request_json["project_type"] = order_type
         request_json["user_id"] = g.current_user.id
 
