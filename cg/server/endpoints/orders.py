@@ -46,6 +46,7 @@ from cg.server.ext import (
     order_service,
     order_submitter_registry,
     pacbio_long_read_validation_service,
+    rml_validation_service,
     rna_fusion_validation_service,
     ticket_handler,
     tomte_validation_service,
@@ -288,6 +289,8 @@ def validate_order(order_type: OrderType):
         response = pacbio_long_read_validation_service.validate(raw_order)
     elif order_type == OrderType.SARS_COV_2:
         response = mutant_validation_service.validate(raw_order)
+    elif order_type == OrderType.RML:
+        response = rml_validation_service.validate(raw_order)
     elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
     elif order_type == OrderType.TOMTE:
