@@ -319,19 +319,6 @@ def validate_pedigree(order: OrderWithCases, **kwargs) -> list[PedigreeError]:
     return errors
 
 
-def validate_subject_ids_different_from_case_names(
-    order: OrderWithCases, **kwargs
-) -> list[SubjectIdSameAsCaseNameError]:
-    errors: list[SubjectIdSameAsCaseNameError] = []
-    for index, case in order.enumerated_new_cases:
-        case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
-            case=case,
-            case_index=index,
-        )
-        errors.extend(case_errors)
-    return errors
-
-
 def validate_subject_sex_consistency(
     order: OrderWithCases,
     store: Store,
@@ -351,6 +338,19 @@ def validate_subject_sex_consistency(
                 sample_index=sample_index,
             )
             errors.append(error)
+    return errors
+
+
+def validate_subject_ids_different_from_case_names(
+    order: OrderWithCases, **kwargs
+) -> list[SubjectIdSameAsCaseNameError]:
+    errors: list[SubjectIdSameAsCaseNameError] = []
+    for index, case in order.enumerated_new_cases:
+        case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
+            case=case,
+            case_index=index,
+        )
+        errors.extend(case_errors)
     return errors
 
 
