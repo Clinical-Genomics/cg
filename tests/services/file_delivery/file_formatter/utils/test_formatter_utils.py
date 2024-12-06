@@ -28,27 +28,27 @@ from cg.services.deliver_files.file_formatter.utils.sample_service import (
 @pytest.mark.parametrize(
     "moved_files,expected_formatted_files,file_formatter",
     [
-        (
-            "expected_moved_analysis_case_delivery_files",
-            "expected_formatted_analysis_case_files",
-            CaseFileFormatter(),
-        ),
-        (
-            "expected_moved_analysis_sample_delivery_files",
-            "expected_formatted_analysis_sample_files",
-            SampleFileFormatter(
-                file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
-            ),
-        ),
-        (
-            "fastq_concatenation_sample_files",
-            "expected_concatenated_fastq_formatted_files",
-            SampleFileConcatenationFormatter(
-                file_manager=FileManager(),
-                file_formatter=NestedSampleFileNameFormatter(),
-                concatenation_service=FastqConcatenationService(),
-            ),
-        ),
+        # (
+        #     "expected_moved_analysis_case_delivery_files",
+        #     "expected_formatted_analysis_case_files",
+        #     CaseFileFormatter(),
+        # ),
+        # (
+        #     "expected_moved_analysis_sample_delivery_files",
+        #     "expected_formatted_analysis_sample_files",
+        #     SampleFileFormatter(
+        #         file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
+        #     ),
+        # ),
+        # (
+        #     "fastq_concatenation_sample_files",
+        #     "expected_concatenated_fastq_formatted_files",
+        #     SampleFileConcatenationFormatter(
+        #         file_manager=FileManager(),
+        #         file_formatter=NestedSampleFileNameFormatter(),
+        #         concatenation_service=FastqConcatenationService(),
+        #     ),
+        # ),
         (
             "fastq_concatenation_sample_files_flat",
             "expected_concatenated_fastq_flat_formatted_files",

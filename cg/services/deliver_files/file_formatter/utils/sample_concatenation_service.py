@@ -1,6 +1,4 @@
 from pathlib import Path
-
-from cg.apps.lims import LimsAPI
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
 from cg.services.deliver_files.file_formatter.utils.models import FastqFile
 
@@ -43,20 +41,27 @@ class SampleFileConcatenationFormatter:
         formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
             sample_files=moved_files
         )
-        for formatted_file in formatted_files:
-            self.file_manager.rename_file(
-                src=formatted_file.original_path, dst=formatted_file.formatted_path
-            )
-        forward_paths, reverse_path = self._concatenate_fastq_files(
+        self._rename_original_files(formatted_files)
+        concatenation_map: dict[Path, Path] = self._concatenate_fastq_files(
             delivery_path=delivery_path,
             sample_names=sample_names,
         )
         self._replace_fastq_paths(
-            reverse_paths=reverse_path,
-            forward_paths=forward_paths,
+            concatenation_maps=concatenation_map,
             formatted_files=formatted_files,
         )
         return formatted_files
+
+    def _rename_original_files(self, formatted_files: list[FormattedFile]) -> None:
+        """
+        Rename the formatted files.
+        args:
+            formatted_files: list[FormattedFile]: List of formatted files.
+        """
+        for formatted_file in formatted_files:
+            self.file_manager.rename_file(
+                src=formatted_file.original_path, dst=formatted_file.formatted_path
+            )
 
     def _create_sample_directories(self, sample_names: set[str], delivery_path: Path) -> None:
         """Create directories for each sample name only if the file name formatter is the NestedSampleFileFormatter.
@@ -71,31 +76,29 @@ class SampleFileConcatenationFormatter:
 
     def _concatenate_fastq_files(
         self, delivery_path: Path, sample_names: set[str]
-    ) -> tuple[list[Path], list[Path]]:
+    ) -> dict[Path, Path]:
+        """Concatenate fastq files for each sample and return the forward and reverse concatenated paths."""
         fastq_files: list[FastqFile] = self._get_unique_sample_fastq_paths(
             sample_names=sample_names, delivery_path=delivery_path
         )
         grouped_fastq_files: dict[str, list[FastqFile]] = self._group_fastq_files_per_sample(
             sample_names=sample_names, fastq_files=fastq_files
         )
-        forward_paths: list[Path] = []
-        reverse_paths: list[Path] = []
-
+        concatenation_maps: dict[Path, Path] = {}
         # Generate  one forward and one reverse path for each sample
         for sample in grouped_fastq_files.keys():
+            # The parent is dependent on the nested or flat structure within the delivery path.
             fastq_directory: Path = grouped_fastq_files[sample][0].fastq_file_path.parent
             forward_path: Path = generate_concatenated_fastq_delivery_path(
                 fastq_directory=fastq_directory,
                 sample_name=sample,
                 direction=ReadDirection.FORWARD,
             )
-            forward_paths.append(forward_path)
             reverse_path: Path = generate_concatenated_fastq_delivery_path(
                 fastq_directory=fastq_directory,
                 sample_name=sample,
                 direction=ReadDirection.REVERSE,
             )
-            reverse_paths.append(reverse_path)
             self.concatenation_service.concatenate(
                 sample_id=sample,
                 fastq_directory=fastq_directory,
@@ -103,11 +106,17 @@ class SampleFileConcatenationFormatter:
                 reverse_output_path=reverse_path,
                 remove_raw=True,
             )
-        return forward_paths, reverse_paths
+            concatenation_maps.update(
+                self._get_concatenation_map(
+                    forward_path=forward_path,
+                    reverse_path=reverse_path,
+                    fastq_files=grouped_fastq_files[sample],
+                )
+            )
+        return concatenation_maps
 
-    @staticmethod
     def _get_unique_sample_fastq_paths(
-        sample_names: set[str], delivery_path: Path
+        self, sample_names: set[str], delivery_path: Path
     ) -> list[FastqFile]:
         """Get a list of unique sample fastq file paths given a delivery path."""
         sample_paths: list[FastqFile] = []
@@ -120,15 +129,53 @@ class SampleFileConcatenationFormatter:
                 ):
                     sample_paths.append(
                         FastqFile(
-                            fastq_file_path=Path(delivery_path, file), sample_name=sample_name
+                            fastq_file_path=Path(delivery_path, file),
+                            sample_name=sample_name,
+                            read_direction=self._determine_read_direction(file),
                         )
                     )
         return sample_paths
 
+    @staticmethod
+    def _get_concatenation_map(
+        forward_path: Path, reverse_path: Path, fastq_files: list[FastqFile]
+    ) -> dict[Path, Path]:
+        """
+        Get a list of ConcatenationMap objects for a sample.
+        NOTE: the fastq_files must be grouped by sample name.
+        args:
+            forward_path: Path: Path to the forward concatenated file.
+            reverse_path: Path: Path to the reverse concatenated file.
+            fastq_files: list[FastqFile]: List of fastq files for a single ample.
+        """
+        concatenation_map: dict[Path, Path] = {}
+        for fastq_file in fastq_files:
+            concatenation_map[fastq_file.fastq_file_path] = (
+                forward_path if fastq_file.read_direction == ReadDirection.FORWARD else reverse_path
+            )
+        return concatenation_map
+
+    @staticmethod
+    def _determine_read_direction(fastq_path: Path) -> ReadDirection:
+        """Determine the read direction of a fastq file.
+            Assumes that the fastq file path contains 'R1' or 'R2' to determine the read direction.
+        args:
+            fastq_path: Path: Path to the fastq file.
+        """
+        if f"R{ReadDirection.FORWARD}" in fastq_path.as_posix():
+            return ReadDirection.FORWARD
+        return ReadDirection.REVERSE
+
     def _group_fastq_files_per_sample(
         self, sample_names: set[str], fastq_files: list[FastqFile]
     ) -> dict[str, list[FastqFile]]:
-        """Group fastq files per sample."""
+        """Group fastq files per sample.
+        returns a dictionary with sample names as keys and a list of fastq files as values.
+        args:
+            sample_names: set[str]: Set of sample names.
+            fastq_files: list[FastqFile]: List of fastq files.
+        """
+
         sample_fastq_files: dict[str, list[FastqFile]] = {
             sample_name: [] for sample_name in sample_names
         }
@@ -137,40 +184,18 @@ class SampleFileConcatenationFormatter:
         self._all_sample_fastq_file_share_same_directory(sample_fastq_files=sample_fastq_files)
         return sample_fastq_files
 
-    @staticmethod
-    def _replace_fastq_formatted_file_path(
-        formatted_files: list[FormattedFile],
-        direction: ReadDirection,
-        new_path: Path,
-    ) -> None:
-        """Replace the formatted file path with the new path."""
-        for formatted_file in formatted_files:
-            if (
-                formatted_file.formatted_path.parent == new_path.parent
-                and f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in formatted_file.formatted_path.name
-                and f"R{direction}" in formatted_file.formatted_path.name
-            ):
-                formatted_file.formatted_path = new_path
-
     def _replace_fastq_paths(
         self,
-        forward_paths: list[Path],
-        reverse_paths: list[Path],
+        concatenation_maps: dict[Path, Path],
         formatted_files: list[FormattedFile],
     ) -> None:
-        """Replace the fastq file paths with the new concatenated fastq file paths."""
-        for forward_path in forward_paths:
-            self._replace_fastq_formatted_file_path(
-                formatted_files=formatted_files,
-                direction=ReadDirection.FORWARD,
-                new_path=forward_path,
-            )
-        for reverse_path in reverse_paths:
-            self._replace_fastq_formatted_file_path(
-                formatted_files=formatted_files,
-                direction=ReadDirection.REVERSE,
-                new_path=reverse_path,
-            )
+        """Replace the fastq file paths with the new concatenated fastq file paths.
+        args:
+            concatenation_maps: list[ConcatenationMap]: List of ConcatenationMap objects.
+            formatted_files: list[FormattedFile]: List of formatted files.
+        """
+        for formatted_file in formatted_files:
+            formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 
     @staticmethod
     def _all_sample_fastq_file_share_same_directory(
@@ -178,6 +203,7 @@ class SampleFileConcatenationFormatter:
     ) -> None:
         """
         Assert that all fastq files for a sample share the same directory.
+        This is to ensure that the files are concatenated within the expected directory path.
         args:
             sample_fastq_files: dict[str, list[FastqFile]]: Dictionary of sample names and their fastq files.
         """

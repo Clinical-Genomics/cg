@@ -252,7 +252,7 @@ def fastq_concatenation_sample_files(
 
 @pytest.fixture
 def fastq_concatenation_sample_files_flat(tmp_path: Path) -> list[SampleFile]:
-    sample_data = [("Sample_ID1", "Sample_Name1"), ("Sample_ID2", "Sample_Name2")]
+    sample_data = [("Sample_ID2", "Sample_Name2"), ("Sample_ID1", "Sample_Name1")]
     sample_files = []
     for sample_id, sample_name in sample_data:
         fastq_paths: list[Path] = [
