@@ -25,6 +25,8 @@ class FileManager:
     def rename_file(src: Path, dst: Path) -> None:
         """Rename a file from src to dst."""
         LOG.debug(f"[FileManager] Renaming file: {src} -> {dst}")
+        if not src.exists():
+            raise FileNotFoundError(f"Source file {src} does not exist.")
         os.rename(src=src, dst=dst)
 
     @staticmethod
