@@ -26,10 +26,10 @@ class MutantFileFormatter:
     def format_files(
         self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
-        LOG.debug("[FORMAT SERVICE] Formatting and concatenating mutant files")
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
             moved_files=moved_files, delivery_path=delivery_path
         )
+        LOG.debug("[FORMAT SERVICE] Formatting and concatenating mutant files")
         appended_formatted_files: list[FormattedFile] = self._add_lims_metadata_to_file_name(
             formatted_files=formatted_files, sample_files=moved_files
         )

@@ -67,6 +67,7 @@ class SampleFileConcatenationFormatter:
         args:
             formatted_files: list[FormattedFile]: List of formatted files.
         """
+        LOG.debug("[FORMAT SERVICE] Renaming original files")
         for formatted_file in formatted_files:
             self.file_manager.rename_file(
                 src=formatted_file.original_path, dst=formatted_file.formatted_path
@@ -217,6 +218,7 @@ class SampleFileConcatenationFormatter:
             concatenation_maps: list[ConcatenationMap]: List of ConcatenationMap objects.
             formatted_files: list[FormattedFile]: List of formatted files.
         """
+
         for formatted_file in formatted_files:
             formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 

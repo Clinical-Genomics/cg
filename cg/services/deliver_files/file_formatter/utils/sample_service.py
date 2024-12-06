@@ -25,6 +25,7 @@ class NestedSampleFileNameFormatter:
         1. Adds a folder with sample name to the path of the sample files.
         2. Replaces sample id by sample name.
         """
+        LOG.debug("[FORMAT SERVICE] Formatting sample file names with nested structure.")
         formatted_files = []
         for sample_file in sample_files:
             replaced_name = sample_file.file_path.name.replace(
@@ -55,6 +56,7 @@ class FlatSampleFileNameFormatter:
         Returns formatted files with original and formatted file names:
         Replaces sample id by sample name.
         """
+        LOG.debug("[FORMAT SERVICE] Formatting sample file names with flat structure.")
         formatted_files = []
         for sample_file in sample_files:
             replaced_name = sample_file.file_path.name.replace(
