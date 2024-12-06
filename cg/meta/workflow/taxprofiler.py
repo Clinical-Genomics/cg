@@ -5,7 +5,6 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
-from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -31,6 +30,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
+        self.conda_binary: str = config.taxprofiler.conda_binary
+        self.config_platform: str = config.taxprofiler.config_platform
+        self.config_params: str = config.taxprofiler.config_params
+        self.config_resources: str = config.taxprofiler.config_resources
         self.profile: str = config.taxprofiler.profile
         self.revision: str = config.taxprofiler.revision
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
@@ -52,14 +55,15 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
 
-    def get_nextflow_config_content(self, case_id: str) -> str:
-        """Return nextflow config content."""
-        return MULTIQC_NEXFLOW_CONFIG
-
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
+
+    @property
+    def is_params_appended_to_nextflow_config(self) -> bool:
+        """Return True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
@@ -80,12 +84,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_built_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
         return TaxprofilerParameters(
-            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             databases=self.databases,
             hostremoval_reference=self.hostremoval_reference,
-            priority=self.account,
         )
 
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
