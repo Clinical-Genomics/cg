@@ -6,9 +6,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_sample_names_unique,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.services.order_validation_service.workflows.microsalt.models.order import (
-    MicrosaltOrder,
-)
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 
 
 def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: MicrosaltOrder):
@@ -25,25 +23,25 @@ def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: M
     assert isinstance(errors[0], OccupiedWellError)
 
 
-def test_order_without_multiple_samples_in_well(valid_order: MicrosaltOrder):
+def test_order_without_multiple_samples_in_well(valid_microsalt_order: MicrosaltOrder):
 
     # GIVEN a valid order with no samples in the same well
 
     # WHEN validating the order
-    errors = validate_wells_contain_at_most_one_sample(valid_order)
+    errors = validate_wells_contain_at_most_one_sample(valid_microsalt_order)
 
     # THEN no errors should be returned
     assert not errors
 
 
-def test_sample_name_repeated(valid_order: MicrosaltOrder):
+def test_sample_name_repeated(valid_microsalt_order: MicrosaltOrder):
 
     # GIVEN a valid order within sample names are repeated
-    sample_name_1 = valid_order.samples[0].name
-    valid_order.samples[1].name = sample_name_1
+    sample_name_1 = valid_microsalt_order.samples[0].name
+    valid_microsalt_order.samples[1].name = sample_name_1
 
     # WHEN validating that the sample names are unique
-    errors = validate_sample_names_unique(valid_order)
+    errors = validate_sample_names_unique(valid_microsalt_order)
 
     # THEN an error should be returned
     assert errors

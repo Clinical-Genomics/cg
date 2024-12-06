@@ -13,3 +13,6 @@ CaseContainingRelatives = TomteCase | MipDnaCase
 
 NonHumanSample = MutantSample | MicrosaltSample
 HumanSample = BalsamicSample | FastqSample | MipDnaSample | RnaFusionSample | TomteSample
+
+CaseWithSkipRC = TomteCase | MipDnaCase
+SampleWithSkipRC = TomteSample | MipDnaSample | FastqSample
