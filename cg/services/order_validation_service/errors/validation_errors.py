@@ -11,3 +11,7 @@ class ValidationErrors(BaseModel):
     case_errors: list[CaseError] = []
     sample_errors: list[SampleError] = []
     case_sample_errors: list[CaseSampleError] = []
+
+    @property
+    def is_empty(self) -> bool:
+        return all(not getattr(self, field) for field in self.model_fields)
