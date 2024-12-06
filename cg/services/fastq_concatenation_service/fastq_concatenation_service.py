@@ -30,6 +30,9 @@ class FastqConcatenationService:
             reverse_output_path: The path where the concatenated reverse reads will be written.
             remove_raw: If True, remove the raw fastq files after concatenation.
         """
+        LOG.debug(
+            f"[Concatenation Service] Concatenating fastq files for {sample_id} in {fastq_directory}"
+        )
         temp_forward: Path | None = concatenate_fastq_reads_for_direction(
             directory=fastq_directory, sample_id=sample_id, direction=ReadDirection.FORWARD
         )
