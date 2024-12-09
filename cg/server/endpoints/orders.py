@@ -34,6 +34,7 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_umi_validation_service,
     balsamic_validation_service,
     db,
     delivery_message_service,
@@ -276,6 +277,8 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
+    elif order_type == OrderType.BALSAMIC_UMI:
+        response = balsamic_umi_validation_service.validate(raw_order)
     elif order_type == OrderType.FASTQ:
         response = fastq_validation_service.validate(raw_order)
     elif order_type == OrderType.MICROBIAL_FASTQ:
