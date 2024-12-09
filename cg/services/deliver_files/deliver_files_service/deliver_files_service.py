@@ -112,8 +112,7 @@ class DeliverFilesService:
 
     def deliver_files_for_fohm_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
         """
-        Deliver the files for a sample to the FOHM upload destination. In addition to the normal delivery,
-        the files need to be moved back to the delivery base path so it conforms to the FOHM upload structure.
+        Deliver the files for a sample to the FOHM upload destination.
 
             :param case: The case to deliver files for
             :param sample_id: The sample to deliver files for

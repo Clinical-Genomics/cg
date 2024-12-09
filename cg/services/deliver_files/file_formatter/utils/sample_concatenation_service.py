@@ -152,6 +152,9 @@ class SampleFileConcatenationFormatter:
                     sample_name in file.as_posix()
                     and f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file.as_posix()
                 ):
+                    LOG.debug(
+                        f"[CONCATENATION SERVICE] Found fastq file: {file} for sample: {sample_name}"
+                    )
                     sample_paths.append(
                         FastqFile(
                             fastq_file_path=Path(delivery_path, file),
