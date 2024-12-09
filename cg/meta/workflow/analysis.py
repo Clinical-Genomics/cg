@@ -20,7 +20,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisStatus, AnalysisType
@@ -29,7 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.utils.utils import are_all_samples_control
+from cg.meta.workflow.utils.utils import are_all_samples_control, MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -136,6 +136,12 @@ class AnalysisAPI(MetaAPI):
             return SlurmQos.EXPRESS
         priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
+
+    def get_trailblazer_priority(self, case_id: str) -> int:
+        """Get the priority for the case in Trailblazer."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        priority: int = case.priority
+        return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given workflow."""
@@ -290,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         email: str = environ_email()
         order_id: int = self._get_order_id_from_case_id(case_id)
         out_dir: str = self.get_job_ids_path(case_id).parent.as_posix()
-        slurm_quality_of_service: str = self.get_slurm_qos_for_case(case_id)
+        priority: TrailblazerPriority = self.get_trailblazer_priority(case_id)
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
@@ -302,7 +308,7 @@ class AnalysisAPI(MetaAPI):
             email=email,
             order_id=order_id,
             out_dir=out_dir,
-            slurm_quality_of_service=slurm_quality_of_service,
+            priority=priority,
             ticket=ticket,
             workflow=workflow,
             workflow_manager=workflow_manager,
