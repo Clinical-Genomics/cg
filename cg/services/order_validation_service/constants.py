@@ -8,7 +8,9 @@ class TissueBlockEnum(StrEnum):
 
 
 class ElutionBuffer(StrEnum):
-    OTHER = "Other (add to comment)"
+    """The choices of buffers."""
+
+    OTHER = "Other"
     TRIS_HCL = "Tris-HCl"
     WATER = "Nuclease-free water"
 

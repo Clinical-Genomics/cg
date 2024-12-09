@@ -1,6 +1,6 @@
 from typing import Callable
 
-
+from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
@@ -41,3 +41,7 @@ def apply_sample_validation(rules: list[Callable], order: Order, store: Store) -
         rule_errors: list[SampleError] = rule(order=order, store=store)
         errors.extend(rule_errors)
     return errors
+
+
+def parse_buffer(buffer: str | None) -> ElutionBuffer | None:
+    return ElutionBuffer.OTHER if buffer and buffer.startswith("Other") else buffer

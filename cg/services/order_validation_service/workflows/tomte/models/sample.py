@@ -1,15 +1,17 @@
-from pydantic import Field
+from pydantic import BeforeValidator, Field
+from typing_extensions import Annotated
 
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.constants import TissueBlockEnum
+from cg.services.order_validation_service.constants import ElutionBuffer, TissueBlockEnum
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.utils import parse_buffer
 
 
 class TomteSample(Sample):
     age_at_sampling: float | None = None
     control: ControlEnum | None
-    elution_buffer: str | None = None
+    elution_buffer: Annotated[ElutionBuffer | None, BeforeValidator(parse_buffer)] = None
     father: str | None = Field(None, pattern=NAME_PATTERN)
     formalin_fixation_time: int | None = None
     mother: str | None = Field(None, pattern=NAME_PATTERN)
