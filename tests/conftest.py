@@ -1220,7 +1220,12 @@ def hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
+    hermes_config = {
+        "hermes": {
+            "binary_path": "/bin/true",
+            "container_mount_volume": "a_str",
+        }
+    }
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
