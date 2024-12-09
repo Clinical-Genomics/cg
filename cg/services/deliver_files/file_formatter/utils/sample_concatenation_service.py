@@ -145,6 +145,9 @@ class SampleFileConcatenationFormatter:
             list[FastqFile]: List of FastqFile objects.
         """
         sample_paths: list[FastqFile] = []
+        LOG.debug(
+            f"[CONCATENATION SERVICE] Getting unique sample fastq file paths in {delivery_path}"
+        )
         list_of_files: list[Path] = get_all_files_in_directory_tree(delivery_path)
         for sample_name in sample_names:
             for file in list_of_files:
