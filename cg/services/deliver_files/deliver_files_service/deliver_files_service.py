@@ -65,7 +65,9 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        formatted_files: FormattedFiles = self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_path=delivery_base_path
+        )
         for formatted_file in formatted_files.files:
             assert formatted_file.formatted_path.exists()
         folders_to_deliver: set[Path] = set(
@@ -101,7 +103,9 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        formatted_files: FormattedFiles = self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_path=delivery_base_path
+        )
         folders_to_deliver: set[Path] = set(
             [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
         )
@@ -112,11 +116,11 @@ class DeliverFilesService:
 
     def deliver_files_for_fohm_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
         """
-        Deliver the files for a sample to the FOHM upload destination.
-
-            :param case: The case to deliver files for
-            :param sample_id: The sample to deliver files for
-            :param delivery_base_path: The base path to deliver the files to
+        Deliver the files for a sample to the FOHM upload destination. Does not perform rsync.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample to deliver files for
+            delivery_base_path: The base path to deliver the files to
         """
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
             case_id=case.internal_id
@@ -127,7 +131,9 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
-        self.file_formatter.format_files(moved_files)
+        self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_base_path=delivery_base_path
+        )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
