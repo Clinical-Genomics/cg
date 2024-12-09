@@ -15,7 +15,10 @@ class HermesApi:
     """Class to communicate with hermes"""
 
     def __init__(self, config: dict):
-        self.process = Process(binary=config["hermes"]["binary_path"])
+        self.process = Process(
+            binary=config["hermes"]["binary_path"],
+        )
+        self.container_mount_volume = config["hermes"]["container_mount_volume"]
 
     def convert_deliverables(
         self,
@@ -27,6 +30,10 @@ class HermesApi:
         """Convert deliverables file in raw workflow format to CG format with Hermes."""
         LOG.info("Converting workflow deliverables to CG deliverables")
         convert_command = [
+            "run",
+            "--bind",
+            self.container_mount_volume,
+            "/home/proj/stage/singularity_containers/hermes_latest.sif",
             "convert",
             "deliverables",
             "--workflow",
