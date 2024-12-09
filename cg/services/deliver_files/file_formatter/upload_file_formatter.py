@@ -39,22 +39,23 @@ class UploadFileFormatter(DeliveryFileFormattingService):
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
-            base_dir_path=delivery_files.sample_files[0].file_path.parent,
+            delivery_path=delivery_files.sample_files[0].file_path.parent,
         )
         return FormattedFiles(files=formatted_files)
 
     def _format_sample_and_case_files(
-        self, sample_files: list[SampleFile], case_files: list[CaseFile], base_dir_path: Path
+        self, sample_files: list[SampleFile], case_files: list[CaseFile], delivery_path: Path
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
+        LOG.debug(f"[FORMAT SERVICE] delivery_path: {delivery_path}")
         formatted_files: list[FormattedFile] = self.sample_file_formatter.format_files(
             moved_files=sample_files,
-            delivery_path=base_dir_path,
+            delivery_path=delivery_path,
         )
         if case_files:
             formatted_case_files: list[FormattedFile] = self.case_file_formatter.format_files(
                 moved_files=case_files,
-                delivery_path=base_dir_path,
+                delivery_path=delivery_path,
             )
             formatted_files.extend(formatted_case_files)
         return formatted_files

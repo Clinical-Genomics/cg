@@ -45,6 +45,7 @@ class SampleFileConcatenationFormatter:
             delivery_path: Path: Path to the delivery directory.
         """
         LOG.debug("[FORMAT SERVICE] Formatting and concatenating sample files")
+        LOG.debug(f"[FORMAT SERVICE] delivery_path: {delivery_path}")
         sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
         self._create_sample_directories(delivery_path=delivery_path, sample_names=sample_names)
         formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
@@ -54,6 +55,7 @@ class SampleFileConcatenationFormatter:
             f"[FORMAT SERVICE] number of formatted files: {len(formatted_files)}, number of moved files: {len(moved_files)}"
         )
         self._rename_original_files(formatted_files)
+        LOG.debug(f"[FORMAT SERVICE] delivery_path: {delivery_path}")
         concatenation_map: dict[Path, Path] = self._concatenate_fastq_files(
             delivery_path=delivery_path,
             sample_names=sample_names,
@@ -97,6 +99,7 @@ class SampleFileConcatenationFormatter:
         returns:
             dict[Path, Path]: Dictionary with the original fastq file path as key and the concatenated path as value.
         """
+        LOG.debug(f"[FORMAT SERVICE] delivery_path: {delivery_path}")
         fastq_files: list[FastqFile] = self._get_unique_sample_fastq_paths(
             sample_names=sample_names, delivery_path=delivery_path
         )
