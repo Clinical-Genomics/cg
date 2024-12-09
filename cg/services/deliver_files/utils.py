@@ -69,6 +69,7 @@ class FileMover:
 
     def _move_or_link_file(self, src: Path, dst: Path) -> None:
         """Move or create a hard link for a file."""
+        LOG.debug(f"[FileMover] Moving file: {src} -> {dst}")
         if dst.exists():
             LOG.debug(f"Overwriting existing file: {dst}")
             dst.unlink()
