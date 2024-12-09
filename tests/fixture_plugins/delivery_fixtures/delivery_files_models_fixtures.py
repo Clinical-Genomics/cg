@@ -90,6 +90,18 @@ def expected_bam_delivery_files(
     return DeliveryFiles(delivery_data=delivery_meta_data, case_files=[], sample_files=sample_files)
 
 
+@pytest.fixture()
+def expected_bam_delivery_files_single_sample(
+    expected_bam_delivery_files: DeliveryFiles, sample_id: str
+) -> DeliveryFiles:
+    expected_bam_delivery_files.sample_files = [
+        sample_file
+        for sample_file in expected_bam_delivery_files.sample_files
+        if sample_file.sample_id == sample_id
+    ]
+    return expected_bam_delivery_files
+
+
 @pytest.fixture
 def expected_analysis_delivery_files(
     delivery_housekeeper_api: HousekeeperAPI,
@@ -334,3 +346,8 @@ def expected_moved_upload_files(expected_analysis_delivery_files: DeliveryFiles,
         case_files=new_case_files,
         sample_files=new_sample_files,
     )
+
+
+@pytest.fixture
+def empty_sample() -> None:
+    return None
