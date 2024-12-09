@@ -1,11 +1,12 @@
 from datetime import date
 
+from pydantic import BeforeValidator
+from typing_extensions import Annotated
+
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
-from cg.services.order_validation_service.constants import (
-    ElutionBuffer,
-    ExtractionMethod,
-)
+from cg.services.order_validation_service.constants import ElutionBuffer, ExtractionMethod
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.utils import parse_buffer
 from cg.services.order_validation_service.workflows.mutant.constants import (
     OriginalLab,
     PreProcessingMethod,
@@ -19,7 +20,7 @@ class MutantSample(Sample):
     collection_date: date
     concentration_sample: float | None = None
     control: ControlEnum
-    elution_buffer: ElutionBuffer
+    elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     extraction_method: ExtractionMethod
     organism: str
     original_lab: OriginalLab
