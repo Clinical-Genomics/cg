@@ -12,7 +12,6 @@ from cg.services.deliver_files.deliver_files_service.error_handling import (
 )
 from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.models import FormattedFiles
 from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
