@@ -21,6 +21,9 @@ from cg.services.order_validation_service.workflows.balsamic_umi.validation_serv
 from cg.services.order_validation_service.workflows.fastq.validation_service import (
     FastqValidationService,
 )
+from cg.services.order_validation_service.workflows.metagenome.validation_service import (
+    MetagenomeValidationService,
+)
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
 )
@@ -133,6 +136,7 @@ fastq_validation_service = FastqValidationService(store=db)
 microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
+metagenome_validation_service = MetagenomeValidationService(store=db)
 mutant_validation_service = MutantValidationService(store=db)
 pacbio_long_read_validation_service = PacbioLongReadValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)

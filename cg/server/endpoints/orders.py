@@ -40,6 +40,7 @@ from cg.server.ext import (
     delivery_message_service,
     fastq_validation_service,
     lims,
+    metagenome_validation_service,
     microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
@@ -272,7 +273,7 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
 def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["workflow"] = order_type
+    raw_order["project_type"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
     if order_type == OrderType.BALSAMIC:
@@ -281,6 +282,8 @@ def validate_order(order_type: OrderType):
         response = balsamic_umi_validation_service.validate(raw_order)
     elif order_type == OrderType.FASTQ:
         response = fastq_validation_service.validate(raw_order)
+    elif order_type == OrderType.METAGENOME:
+        response = metagenome_validation_service.validate(raw_order)
     elif order_type == OrderType.MICROBIAL_FASTQ:
         response = microbial_fastq_validation_service.validate(raw_order)
     elif order_type == OrderType.MICROSALT:
