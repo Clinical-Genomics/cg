@@ -15,13 +15,14 @@ from cg.services.delivery_message.delivery_message_service import DeliveryMessag
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
-from cg.services.order_validation_service.workflows.metagenome.validation_service import (
-    MetagenomeValidationService,
 from cg.services.order_validation_service.workflows.balsamic_umi.validation_service import (
     BalsamicUmiValidationService,
 )
 from cg.services.order_validation_service.workflows.fastq.validation_service import (
     FastqValidationService,
+)
+from cg.services.order_validation_service.workflows.metagenome.validation_service import (
+    MetagenomeValidationService,
 )
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
