@@ -60,8 +60,8 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
     # THEN should "work"
     assert len(samples) == 2
-    tumour_sample = samples[0]
-    normal_sample = samples[1]
+    normal_sample = samples[0]
+    tumour_sample = samples[1]
     # ... and pick out relevant UDF values
     assert normal_sample.udfs.tumour is False
     assert tumour_sample.udfs.tumour is True

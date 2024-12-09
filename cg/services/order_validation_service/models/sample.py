@@ -29,3 +29,9 @@ class Sample(BaseModel):
                 if value == "":
                     data[key] = None
         return data
+
+    @model_validator(mode="after")
+    def set_tube_name_default(self):
+        if self.container == ContainerEnum.tube and not self.container_name:
+            self.container_name = self.name
+        return self
