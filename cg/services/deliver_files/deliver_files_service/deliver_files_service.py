@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
@@ -15,7 +16,7 @@ from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.models import FormattedFiles
-from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
@@ -65,7 +66,11 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        formatted_files: FormattedFiles = self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_path=delivery_base_path
+        )
+        for formatted_file in formatted_files.files:
+            assert formatted_file.formatted_path.exists()
         folders_to_deliver: set[Path] = set(
             [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
         )
@@ -99,7 +104,9 @@ class DeliverFilesService:
         moved_files: DeliveryFiles = self.file_mover.move_files(
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
-        formatted_files: FormattedFiles = self.file_formatter.format_files(moved_files)
+        formatted_files: FormattedFiles = self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_path=delivery_base_path
+        )
         folders_to_deliver: set[Path] = set(
             [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
         )
@@ -107,6 +114,27 @@ class DeliverFilesService:
             case=case, dry_run=dry_run, folders_to_deliver=folders_to_deliver
         )
         self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
+
+    def deliver_files_for_fohm_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
+        """
+        Deliver the files for a sample to the FOHM upload destination. Does not perform rsync.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample to deliver files for
+            delivery_base_path: The base path to deliver the files to
+        """
+        delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
+            case_id=case.internal_id
+        )
+        filtered_files: DeliveryFiles = self.file_filter.filter_delivery_files(
+            delivery_files=delivery_files, sample_id=sample_id
+        )
+        moved_files: DeliveryFiles = self.file_mover.move_files(
+            delivery_files=filtered_files, delivery_base_path=delivery_base_path
+        )
+        self.file_formatter.format_files(
+            delivery_files=moved_files, delivery_path=delivery_base_path
+        )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")

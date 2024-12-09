@@ -17,11 +17,12 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
+from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
     SampleFileConcatenationFormatter,
 )
 from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
-from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
+from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -37,7 +38,9 @@ class DeliveryServiceScenario(BaseModel):
     expected_tag_fetcher: type[FetchDeliveryFileTagsService]
     expected_file_fetcher: type[FetchDeliveryFilesService]
     expected_file_mover: type[DeliveryFilesMover]
-    expected_sample_file_formatter: type[SampleFileFormatter | SampleFileConcatenationFormatter]
+    expected_sample_file_formatter: type[
+        SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
+    ]
     store_name: str
 
 
@@ -61,7 +64,7 @@ class DeliveryServiceScenario(BaseModel):
             expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
             expected_file_fetcher=AnalysisDeliveryFileFetcher,
             expected_file_mover=DeliveryFilesMover,
-            expected_sample_file_formatter=SampleFileFormatter,
+            expected_sample_file_formatter=MutantFileFormatter,
             store_name="mutant_store",
         ),
         DeliveryServiceScenario(
@@ -80,6 +83,7 @@ class DeliveryServiceScenario(BaseModel):
 def test_build_delivery_service(scenario: DeliveryServiceScenario, request: FixtureRequest):
     # GIVEN a delivery service builder with mocked store and hk_api
     builder = DeliveryServiceFactory(
+        lims_api=MagicMock(),
         store=request.getfixturevalue(scenario.store_name),
         hk_api=MagicMock(),
         rsync_service=MagicMock(),
