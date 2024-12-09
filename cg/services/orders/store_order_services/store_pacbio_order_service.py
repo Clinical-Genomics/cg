@@ -22,7 +22,7 @@ class StorePacBioOrderService(StoreOrderService):
     def store_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for PacBio Long Read delivery."""
 
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
         status_data: dict = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
         new_samples = self._store_samples_in_statusdb(
