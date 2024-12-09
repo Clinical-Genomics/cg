@@ -132,7 +132,7 @@ class DeliverFilesService:
             delivery_files=filtered_files, delivery_base_path=delivery_base_path
         )
         self.file_formatter.format_files(
-            delivery_files=moved_files, delivery_base_path=delivery_base_path
+            delivery_files=moved_files, delivery_path=delivery_base_path
         )
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:

@@ -33,13 +33,13 @@ class UploadFileFormatter(DeliveryFileFormattingService):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter
 
-    def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
+    def format_files(self, delivery_files: DeliveryFiles, delivery_path: Path) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for Upload")
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
-            delivery_path=delivery_files.sample_files[0].file_path.parent,
+            delivery_path=delivery_path,
         )
         return FormattedFiles(files=formatted_files)
 
