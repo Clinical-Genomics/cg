@@ -50,6 +50,9 @@ class SampleFileConcatenationFormatter:
         formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
             sample_files=moved_files
         )
+        LOG.debug(
+            f"[FORMAT SERVICE] number of formatted files: {len(formatted_files)}, number of moved files: {len(moved_files)}"
+        )
         self._rename_original_files(formatted_files)
         concatenation_map: dict[Path, Path] = self._concatenate_fastq_files(
             delivery_path=delivery_path,
