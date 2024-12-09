@@ -4,9 +4,11 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
+    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    CaseNameSampleNameSameError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -33,6 +35,7 @@ from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pe
     get_pedigree_errors,
 )
 from cg.services.order_validation_service.rules.case_sample.utils import (
+    are_all_samples_unknown,
     get_counter_container_names,
     get_existing_sample_names,
     get_father_case_errors,
@@ -316,19 +319,6 @@ def validate_pedigree(order: OrderWithCases, **kwargs) -> list[PedigreeError]:
     return errors
 
 
-def validate_subject_ids_different_from_case_names(
-    order: OrderWithCases, **kwargs
-) -> list[SubjectIdSameAsCaseNameError]:
-    errors: list[SubjectIdSameAsCaseNameError] = []
-    for index, case in order.enumerated_new_cases:
-        case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
-            case=case,
-            case_index=index,
-        )
-        errors.extend(case_errors)
-    return errors
-
-
 def validate_subject_sex_consistency(
     order: OrderWithCases,
     store: Store,
@@ -348,6 +338,19 @@ def validate_subject_sex_consistency(
                 sample_index=sample_index,
             )
             errors.append(error)
+    return errors
+
+
+def validate_subject_ids_different_from_case_names(
+    order: OrderWithCases, **kwargs
+) -> list[SubjectIdSameAsCaseNameError]:
+    errors: list[SubjectIdSameAsCaseNameError] = []
+    for index, case in order.enumerated_new_cases:
+        case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
+            case=case,
+            case_index=index,
+        )
+        errors.extend(case_errors)
     return errors
 
 
@@ -388,5 +391,33 @@ def validate_tube_container_name_unique(
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_case_names_different_from_sample_names(
+    order: OrderWithCases, **kwargs
+) -> list[CaseNameSampleNameSameError]:
+    errors: list[CaseNameSampleNameSameError] = []
+
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if sample.name == case.name:
+                error = CaseNameSampleNameSameError(
+                    case_index=case_index, sample_index=sample_index
+                )
+                errors.append(error)
+    return errors
+
+
+def validate_not_all_samples_unknown_in_case(
+    order: OrderWithCases, **kwargs
+) -> list[StatusUnknownError]:
+    errors: list[StatusUnknownError] = []
+
+    for case_index, case in order.enumerated_new_cases:
+        if are_all_samples_unknown(case):
+            for sample_index, _ in case.enumerated_samples:
+                error = StatusUnknownError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors

@@ -1,6 +1,6 @@
 """Code for uploading coverage reports via CLI"""
 
-import click
+import rich_click as click
 
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import CGConfig

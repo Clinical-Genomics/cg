@@ -19,7 +19,8 @@ from cg.constants import (
     YES_FIELD,
     Sex,
 )
-from cg.constants.constants import AnalysisType, Workflow
+from cg.constants.constants import Workflow
+from cg.constants.tb import AnalysisType
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.models.analysis import NextflowAnalysis
@@ -94,7 +95,7 @@ def test_get_number_as_string(input_value: Any, expected_output: str, caplog: Lo
 
     # GIVEN a list of number inputs and their expected values
 
-    if expected_output == ValueError:
+    if expected_output is ValueError:
         # WHEN getting a string representation of a number
         with pytest.raises(ValueError):
             get_number_as_string(input_value)
@@ -221,7 +222,7 @@ def test_get_analysis_type_as_string():
     """Test analysis type formatting for the delivery report generation."""
 
     # GIVEN a WHOLE_GENOME_SEQUENCING analysis type and a model info dictionary
-    analysis_type: str = AnalysisType.WHOLE_GENOME_SEQUENCING
+    analysis_type: str = AnalysisType.WGS
     model_info = ValidationInfo
     model_info.data = {"workflow": Workflow.MIP_DNA.value}
 

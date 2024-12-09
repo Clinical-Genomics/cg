@@ -4,7 +4,7 @@ import logging
 import sys
 import traceback
 
-import click
+import rich_click as click
 
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
