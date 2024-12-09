@@ -22,6 +22,7 @@ from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliv
 from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.delivery_file_formatter import DeliveryFileFormatter
+from cg.services.deliver_files.file_formatter.upload_file_formatter import UploadFileFormatter
 from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
 from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
@@ -204,7 +205,7 @@ class DeliveryServiceFactory:
             SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
         ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
         if delivery_destination == DeliveryDestination.UPLOAD:
-            return DeliveryFileFormatter(
+            return UploadFileFormatter(
                 case_file_formatter=CaseFileFormatter(),
                 sample_file_formatter=sample_file_formatter,
             )
