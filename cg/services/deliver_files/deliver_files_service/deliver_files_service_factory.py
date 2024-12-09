@@ -240,7 +240,6 @@ class DeliveryServiceFactory:
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
             move_file_service=file_move_service,
-            file_filter=SampleFileFilter(),
             file_formatter_service=file_formatter,
             status_db=self.store,
             rsync_service=self.rsync_service,
