@@ -144,6 +144,7 @@ class StatinaConfig(BaseModel):
 class CommonAppConfig(BaseModel):
     binary_path: str | None = None
     config_path: str | None = None
+    container_mount_volume: str | None = None
 
 
 class FluffyUploadConfig(BaseModel):
