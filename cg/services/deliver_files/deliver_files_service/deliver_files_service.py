@@ -11,6 +11,7 @@ from cg.services.deliver_files.deliver_files_service.error_handling import (
 )
 from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
+
 from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
@@ -38,6 +39,7 @@ class DeliverFilesService:
     def __init__(
         self,
         delivery_file_manager_service: FetchDeliveryFilesService,
+
         file_filter: FilterDeliveryFilesService,
         move_file_service: CustomerInboxFilesMover,
         file_formatter_service: DeliveryDestinationFormatter,
@@ -47,7 +49,6 @@ class DeliverFilesService:
         status_db: Store,
     ):
         self.file_manager = delivery_file_manager_service
-        self.file_filter = file_filter
         self.file_mover = move_file_service
         self.file_formatter = file_formatter_service
         self.status_db = status_db
@@ -96,13 +97,10 @@ class DeliverFilesService:
     ):
         """Deliver the files for a sample to the customer folder."""
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
-            case_id=case.internal_id
-        )
-        filtered_files: DeliveryFiles = self.file_filter.filter_delivery_files(
-            delivery_files=delivery_files, sample_id=sample_id
+            case_id=case.internal_id, sample_id=sample_id
         )
         moved_files: DeliveryFiles = self.file_mover.move_files(
-            delivery_files=filtered_files, delivery_base_path=delivery_base_path
+            delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
         formatted_files: FormattedFiles = self.file_formatter.format_files(
             delivery_files=moved_files, delivery_path=delivery_base_path
