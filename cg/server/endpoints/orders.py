@@ -49,6 +49,7 @@ from cg.server.ext import (
     order_submitter_registry,
     pacbio_long_read_validation_service,
     rna_fusion_validation_service,
+    taxprofiler_validation_service,
     ticket_handler,
     tomte_validation_service,
 )
@@ -296,6 +297,8 @@ def validate_order(order_type: OrderType):
         response = mutant_validation_service.validate(raw_order)
     elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
+    elif order_type == OrderType.TAXPROFILER:
+        response = taxprofiler_validation_service.validate(raw_order)
     elif order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK
