@@ -46,16 +46,25 @@ class FileMover:
 
     def __init__(self, file_manager):
         """
-        :param file_manager: Service for file operations (e.g., create directories, move files).
+        args:
+         file_manager: Service for file operations (e.g., create directories, move files).
         """
         self.file_management_service = file_manager
 
     def create_directories(self, base_path: Path, directories: set[str]) -> None:
-        """Create required directories."""
+        """Create required directories.
+        args:
+            base_path: The base path to create the directories under.
+            directories: The directories to create.
+        """
         self.file_management_service.create_directories(base_path, directories)
 
     def move_files_to_directory(self, file_models: list, target_dir: Path) -> None:
-        """Move files to the target directory."""
+        """Move files to the target directory.
+        args:
+            file_models: The file models that contain the files to move.
+            target_dir: The directory to move the files to.
+        """
         for file_model in file_models:
             target_path = Path(target_dir, file_model.file_path.name)
             self._move_or_link_file(src=file_model.file_path, dst=target_path)
@@ -64,13 +73,32 @@ class FileMover:
     def update_file_paths(
         file_models: list[CaseFile | SampleFile], target_dir: Path
     ) -> list[CaseFile | SampleFile]:
-        """Update file paths to point to the target directory."""
+        """Update file paths to point to the target directory.
+        args:
+            file_models: The file models to update.
+            target_dir: The target directory to point the file paths to.
+        """
         for file_model in file_models:
             file_model.file_path = Path(target_dir, file_model.file_path.name)
         return file_models
 
+    def move_and_update_files(self, file_models: list[CaseFile | SampleFile], target_dir):
+        """Move files to the target directory and update the file paths.
+        args:
+            file_models: The file models that contain the files to move.
+            target_dir: The directory to move the files to.
+        """
+        if file_models:
+            self.move_files_to_directory(file_models=file_models, target_dir=target_dir)
+            return self.update_file_paths(file_models=file_models, target_dir=target_dir)
+        return file_models
+
     def _move_or_link_file(self, src: Path, dst: Path) -> None:
-        """Move or create a hard link for a file."""
+        """Move or create a hard link for a file.
+        args:
+            src: The source file path
+            dst: The destination file path
+        """
         LOG.debug(f"[FileMover] Moving file: {src} -> {dst}")
         if dst.exists():
             LOG.debug(f"Overwriting existing file: {dst}")

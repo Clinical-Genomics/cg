@@ -11,6 +11,6 @@ class DeliveryDestinationFormatter(ABC):
     """
 
     @abstractmethod
-    def format_files(self, delivery_files: DeliveryFiles, delivery_path: Path) -> FormattedFiles:
+    def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to deliver."""
         pass

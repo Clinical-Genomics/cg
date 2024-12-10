@@ -41,16 +41,13 @@ class CustomerInboxDeliveryFormatter(DeliveryDestinationFormatter):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter
 
-    def format_files(
-        self, delivery_files: DeliveryFiles, delivery_path: Path = None
-    ) -> FormattedFiles:
+    def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the customer inbox format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
-        ticket_dir_path: Path = delivery_files.delivery_data.customer_ticket_inbox
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
-            ticket_dir_path=ticket_dir_path,
+            ticket_dir_path=delivery_files.delivery_data.delivery_path,
         )
         return FormattedFiles(files=formatted_files)
 

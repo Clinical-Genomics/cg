@@ -3,10 +3,10 @@
 import pytest
 
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.file_mover.delivery_files_mover import (
-    CustomerInboxFilesMover,
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
 )
-from cg.services.deliver_files.file_mover.fohm_upload_files_mover import BaseFilesMover
+from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
 from cg.services.deliver_files.utils import FileMover, FileManager
 
 
@@ -16,24 +16,24 @@ from cg.services.deliver_files.utils import FileMover, FileManager
         (
             "expected_moved_fastq_delivery_files",
             "expected_fastq_delivery_files",
-            CustomerInboxFilesMover(FileMover(FileManager())),
+            CustomerInboxDestinationFilesMover(FileMover(FileManager())),
         ),
         (
             "expected_moved_analysis_delivery_files",
             "expected_analysis_delivery_files",
-            CustomerInboxFilesMover(FileMover(FileManager())),
+            CustomerInboxDestinationFilesMover(FileMover(FileManager())),
         ),
         (
             "expected_moved_upload_files",
             "expected_upload_files",
-            BaseFilesMover(FileMover(FileManager())),
+            BaseDestinationFilesMover(FileMover(FileManager())),
         ),
     ],
 )
 def test_move_files(
     expected_moved_delivery_files: DeliveryFiles,
     delivery_files: DeliveryFiles,
-    move_files_service: CustomerInboxFilesMover,
+    move_files_service: CustomerInboxDestinationFilesMover,
     tmp_path,
     request,
 ):

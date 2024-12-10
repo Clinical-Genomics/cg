@@ -19,7 +19,6 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
 from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
 )
@@ -47,8 +46,10 @@ from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
 from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
     NestedStructurePathFormatter,
 )
-from cg.services.deliver_files.file_mover.delivery_files_mover import CustomerInboxFilesMover
-from cg.services.deliver_files.file_mover.fohm_upload_files_mover import BaseFilesMover
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
+)
+from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
@@ -213,14 +214,14 @@ class DeliveryServiceFactory:
     @staticmethod
     def _get_file_mover(
         delivery_destination: DeliveryDestination,
-    ) -> CustomerInboxFilesMover | BaseFilesMover:
+    ) -> CustomerInboxDestinationFilesMover | BaseDestinationFilesMover:
         """Get the file mover based on the delivery type.
         Args:
             delivery_destination: The destination of the delivery.
         """
         if delivery_destination == DeliveryDestination.BASE:
-            return BaseFilesMover(FileMover(FileManager()))
-        return CustomerInboxFilesMover(FileMover(FileManager()))
+            return BaseDestinationFilesMover(FileMover(FileManager()))
+        return CustomerInboxDestinationFilesMover(FileMover(FileManager()))
 
     def _get_file_formatter(
         self,
@@ -265,8 +266,8 @@ class DeliveryServiceFactory:
         )
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
-        file_move_service: CustomerInboxFilesMover | BaseFilesMover = self._get_file_mover(
-            delivery_destination=delivery_destination
+        file_move_service: CustomerInboxDestinationFilesMover | BaseDestinationFilesMover = (
+            self._get_file_mover(delivery_destination=delivery_destination)
         )
         file_formatter: DeliveryDestinationFormatter = self._get_file_formatter(
             case=case, delivery_destination=delivery_destination

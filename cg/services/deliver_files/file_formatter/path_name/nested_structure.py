@@ -14,6 +14,11 @@ class NestedStructurePathFormatter(PathNameFormatter):
         Returns formatted files with original and formatted file names:
         1. Adds a folder with provided name to the path of the files.
         2. Replaces id by name.
+
+        args:
+            file_path: The path to the file
+            provided_id: The id to replace
+            provided_name: The name to replace the id with
         """
         LOG.debug("[FORMAT SERVICE] Formatting sample file names with nested structure.")
         replaced_name = file_path.name.replace(provided_id, provided_name)

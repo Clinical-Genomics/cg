@@ -16,7 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 from cg.services.deliver_files.constants import DeliveryDestination
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Case, Sample

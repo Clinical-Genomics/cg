@@ -15,7 +15,10 @@ from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
 )
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFiles
-from cg.services.deliver_files.file_mover.delivery_files_mover import CustomerInboxFilesMover
+from cg.services.deliver_files.file_mover.abstract import DestinationFilesMover
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
+)
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
@@ -37,7 +40,7 @@ class DeliverFilesService:
     def __init__(
         self,
         delivery_file_manager_service: FetchDeliveryFilesService,
-        move_file_service: CustomerInboxFilesMover,
+        move_file_service: DestinationFilesMover,
         file_formatter_service: DeliveryDestinationFormatter,
         rsync_service: DeliveryRsyncService,
         tb_service: TrailblazerAPI,
@@ -64,7 +67,7 @@ class DeliverFilesService:
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
         formatted_files: FormattedFiles = self.file_formatter.format_files(
-            delivery_files=moved_files, delivery_path=delivery_base_path
+            delivery_files=moved_files
         )
         for formatted_file in formatted_files.files:
             assert formatted_file.formatted_path.exists()
