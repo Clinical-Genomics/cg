@@ -29,14 +29,14 @@ from cg.services.deliver_files.file_formatter.destination.customer_inbox_service
 from cg.services.deliver_files.file_formatter.destination.base_service import (
     BaseDeliveryFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.case_service import CaseFileFormatter
-from cg.services.deliver_files.file_formatter.component_file.mutant_service import (
+from cg.services.deliver_files.file_formatter.component_files.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
     MutantFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.concatenation_service import (
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
 )

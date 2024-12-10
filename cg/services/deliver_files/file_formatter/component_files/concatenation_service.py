@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
-from cg.services.deliver_files.file_formatter.component_file.models import FastqFile
+from cg.services.deliver_files.file_formatter.component_files.models import FastqFile
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -10,7 +10,7 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_file.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     FileManager,
 )
 from cg.services.deliver_files.file_formatter.path_name.nested_structure import (

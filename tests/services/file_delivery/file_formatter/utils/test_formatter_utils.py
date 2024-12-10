@@ -2,7 +2,7 @@ import os
 from unittest.mock import Mock
 import pytest
 from pathlib import Path
-from cg.services.deliver_files.file_formatter.component_file.mutant_service import (
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
     MutantFileFormatter,
 )
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -13,13 +13,13 @@ from cg.services.deliver_files.file_fetcher.models import (
     SampleFile,
 )
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_file.case_service import (
+from cg.services.deliver_files.file_formatter.component_files.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.concatenation_service import (
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
 )

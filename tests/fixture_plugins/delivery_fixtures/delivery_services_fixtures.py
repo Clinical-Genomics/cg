@@ -16,10 +16,10 @@ from cg.services.deliver_files.file_fetcher.raw_data_service import (
 from cg.services.deliver_files.file_formatter.destination.customer_inbox_service import (
     CustomerInboxDeliveryFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.case_service import (
+from cg.services.deliver_files.file_formatter.component_files.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
 )

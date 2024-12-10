@@ -4,10 +4,10 @@ from pathlib import Path
 from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_file.concatenation_service import (
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_file.sample_service import FileManager
+from cg.services.deliver_files.file_formatter.component_files.sample_service import FileManager
 
 LOG = logging.getLogger(__name__)
 
