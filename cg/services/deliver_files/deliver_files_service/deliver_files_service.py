@@ -11,8 +11,6 @@ from cg.services.deliver_files.deliver_files_service.error_handling import (
 )
 from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-
-from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
 from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
 )
@@ -39,7 +37,6 @@ class DeliverFilesService:
     def __init__(
         self,
         delivery_file_manager_service: FetchDeliveryFilesService,
-        file_filter: FilterDeliveryFilesService,
         move_file_service: CustomerInboxFilesMover,
         file_formatter_service: DeliveryDestinationFormatter,
         rsync_service: DeliveryRsyncService,
