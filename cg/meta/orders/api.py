@@ -12,9 +12,7 @@ import logging
 from cg.apps.lims import LimsAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.submitters.order_submitter_registry import (
-    OrderSubmitterRegistry,
-)
+from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -43,18 +41,8 @@ class OrdersAPI:
         """
         submit_handler = self.submitter_registry.get_order_submitter(project)
         submit_handler.order_validation_service.validate_order(order_in)
-        # detect manual ticket assignment
-        ticket_number: str | None = self.ticket_handler.parse_ticket_number(order_in.name)
-        if not ticket_number:
-            ticket_number = self.ticket_handler.create_ticket(
-                order=order_in, user_name=user_name, user_mail=user_mail, project=project
-            )
-        else:
-            self.ticket_handler.connect_to_ticket(
-                order=order_in,
-                user_name=user_name,
-                project=project,
-                ticket_number=ticket_number,
-            )
+        ticket_number = self.ticket_handler.create_ticket(
+            order=order_in, user_name=user_name, user_mail=user_mail, project=project
+        )
         order_in.ticket = ticket_number
         return submit_handler.submit_order(order_in=order_in)
