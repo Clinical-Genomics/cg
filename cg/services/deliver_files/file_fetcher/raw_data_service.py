@@ -43,11 +43,11 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
+    def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
         """Return a list of raw data files to be delivered for a case and its samples."""
         LOG.debug(f"[FETCH SERVICE] Fetching raw data files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_ids: list[str] = case.sample_ids
+        sample_ids: list[str] = [sample_id] if sample_id else case.sample_ids
         raw_data_files: list[SampleFile] = []
         for sample_id in sample_ids:
             raw_data_files.extend(

@@ -1,19 +1,19 @@
+import logging
 import os
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import CaseFile
 from cg.services.deliver_files.file_formatter.models import FormattedFile
 
+LOG = logging.getLogger(__name__)
+
 
 class CaseFileFormatter:
 
-    def format_files(
-        self, moved_files: list[CaseFile], ticket_dir_path: Path
-    ) -> list[FormattedFile]:
+    def format_files(self, moved_files: list[CaseFile], delivery_path: Path) -> list[FormattedFile]:
+        LOG.debug("[FORMAT SERVICE] Formatting case files")
         """Format the case files to deliver and return the formatted files."""
-        self._create_case_name_folder(
-            ticket_path=ticket_dir_path, case_name=moved_files[0].case_name
-        )
+        self._create_case_name_folder(ticket_path=delivery_path, case_name=moved_files[0].case_name)
         return self._format_case_files(moved_files)
 
     def _format_case_files(self, case_files: list[CaseFile]) -> list[FormattedFile]:

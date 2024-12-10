@@ -515,7 +515,6 @@ class StoreHelpers:
         customer_id: int,
         ticket_id: int,
         order_date: datetime = datetime(year=2023, month=12, day=24),
-        workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
             customer_id=customer_id,

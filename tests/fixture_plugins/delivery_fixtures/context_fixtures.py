@@ -7,7 +7,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Sample, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -112,7 +112,8 @@ def delivery_store_microsalt(
         data_analysis=Workflow.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
     )
-
+    order: Order = helpers.add_order(store=status_db, customer_id=case.customer.id, ticket_id=1)
+    case.orders.append(order)
     # MicroSALT samples
     sample: Sample = helpers.add_sample(
         store=status_db,
