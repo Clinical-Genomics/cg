@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_fetcher.models import SampleFile
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
@@ -12,7 +13,7 @@ from cg.services.deliver_files.file_formatter.component_files.sample_service imp
 LOG = logging.getLogger(__name__)
 
 
-class MutantFileFormatter:
+class MutantFileFormatter(ComponentFormatter):
     """
     Formatter for file to deliver or upload for the Mutant workflow.
     """
@@ -39,7 +40,7 @@ class MutantFileFormatter:
         """
         LOG.debug("[FORMAT SERVICE] Formatting and concatenating mutant files")
         formatted_files: list[FormattedFile] = self.file_formatter.format_files(
-            moved_sample_files=moved_files, delivery_path=delivery_path
+            moved_files=moved_files, delivery_path=delivery_path
         )
         appended_formatted_files: list[FormattedFile] = self._add_lims_metadata_to_file_name(
             formatted_files=formatted_files, sample_files=moved_files

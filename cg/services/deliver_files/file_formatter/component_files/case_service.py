@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import CaseFile
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
@@ -12,7 +13,7 @@ from cg.services.deliver_files.utils import FileManager
 LOG = logging.getLogger(__name__)
 
 
-class CaseFileFormatter:
+class CaseFileFormatter(ComponentFormatter):
 
     def __init__(
         self,
@@ -22,9 +23,7 @@ class CaseFileFormatter:
         self.path_name_formatter = path_name_formatter
         self.file_manager = file_manager
 
-    def format_files(
-        self, moved_case_files: list[CaseFile], delivery_path: Path
-    ) -> list[FormattedFile]:
+    def format_files(self, moved_files: list[CaseFile], delivery_path: Path) -> list[FormattedFile]:
         """Format the case files to deliver and return the formatted files.
         args:
             moved_files: The case files to format
@@ -33,9 +32,9 @@ class CaseFileFormatter:
         LOG.debug("[FORMAT SERVICE] Formatting case files")
         """Format the case files to deliver and return the formatted files."""
         self._create_case_name_folder(
-            delivery_path=delivery_path, case_name=moved_case_files[0].case_name
+            delivery_path=delivery_path, case_name=moved_files[0].case_name
         )
-        return self._format_case_files(moved_case_files)
+        return self._format_case_files(moved_files)
 
     def _format_case_files(self, case_files: list[CaseFile]) -> list[FormattedFile]:
         """Format the case files to deliver and return the formatted files.
@@ -69,11 +68,11 @@ class CaseFileFormatter:
         formatted_files: list[FormattedFile] = []
         for case_file in case_files:
             formatted_path = self.path_name_formatter.format_file_path(
-                file_path=case_file.original_path,
-                provided_id=case_file.case_name,
+                file_path=case_file.file_path,
+                provided_id=case_file.case_id,
                 provided_name=case_file.case_name,
             )
             formatted_files.append(
-                FormattedFile(original_path=case_file.original_path, formatted_path=formatted_path)
+                FormattedFile(original_path=case_file.file_path, formatted_path=formatted_path)
             )
         return formatted_files

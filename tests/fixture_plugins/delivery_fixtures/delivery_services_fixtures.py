@@ -118,7 +118,7 @@ def generic_delivery_file_formatter() -> CustomerInboxDeliveryFormatter:
     """Fixture to get an instance of GenericDeliveryFileFormatter."""
     return CustomerInboxDeliveryFormatter(
         sample_file_formatter=SampleFileFormatter(
-            file_manager=FileManager(), file_name_formatter=NestedStructurePathFormatter()
+            file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
         ),
         case_file_formatter=CaseFileFormatter(
             file_manager=FileManager(),

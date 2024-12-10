@@ -59,12 +59,12 @@ class CustomerInboxDeliveryFormatter(DeliveryDestinationFormatter):
     ) -> list[FormattedFile]:
         """Helper method to format both sample and case files."""
         formatted_files: list[FormattedFile] = self.sample_file_formatter.format_files(
-            moved_sample_files=sample_files,
+            moved_files=sample_files,
             delivery_path=ticket_dir_path,
         )
         if case_files:
             formatted_case_files: list[FormattedFile] = self.case_file_formatter.format_files(
-                moved_case_files=case_files,
+                moved_files=case_files,
                 delivery_path=ticket_dir_path,
             )
             formatted_files.extend(formatted_case_files)

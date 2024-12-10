@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import SampleFile
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.utils import FileManager
@@ -9,7 +10,7 @@ from cg.services.deliver_files.utils import FileManager
 LOG = logging.getLogger(__name__)
 
 
-class SampleFileFormatter:
+class SampleFileFormatter(ComponentFormatter):
     """
     Format the sample files to deliver.
     Used for all workflows except Microsalt and Mutant.
@@ -18,13 +19,13 @@ class SampleFileFormatter:
     def __init__(
         self,
         file_manager: FileManager,
-        file_name_formatter: PathNameFormatter,
+        path_name_formatter: PathNameFormatter,
     ):
         self.file_manager = file_manager
-        self.file_name_formatter = file_name_formatter
+        self.path_name_formatter = path_name_formatter
 
     def format_files(
-        self, moved_sample_files: list[SampleFile], delivery_path: Path
+        self, moved_files: list[SampleFile], delivery_path: Path
     ) -> list[FormattedFile]:
         """
         Format the sample files to deliver and return the formatted files.
@@ -33,10 +34,10 @@ class SampleFileFormatter:
             delivery_path: The path to deliver the files to
         """
         LOG.debug("[FORMAT SERVICE] Formatting sample files")
-        sample_names: set[str] = self._get_sample_names(sample_files=moved_sample_files)
+        sample_names: set[str] = self._get_sample_names(sample_files=moved_files)
         for sample_name in sample_names:
             self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})
-        formatted_files: list[FormattedFile] = self._format_sample_file_paths(moved_sample_files)
+        formatted_files: list[FormattedFile] = self._format_sample_file_paths(moved_files)
         for formatted_file in formatted_files:
             self.file_manager.rename_file(
                 src=formatted_file.original_path, dst=formatted_file.formatted_path
@@ -57,7 +58,7 @@ class SampleFileFormatter:
         return [
             FormattedFile(
                 original_path=sample_file.file_path,
-                formatted_path=self.file_name_formatter.format_file_path(
+                formatted_path=self.path_name_formatter.format_file_path(
                     file_path=sample_file.file_path,
                     provided_id=sample_file.sample_id,
                     provided_name=sample_file.sample_name,

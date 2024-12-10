@@ -34,33 +34,35 @@ from cg.services.deliver_files.file_formatter.path_name.nested_structure import 
 @pytest.mark.parametrize(
     "moved_files,expected_formatted_files,file_formatter",
     [
-        # (
-        #     "expected_moved_analysis_case_delivery_files",
-        #     "expected_formatted_analysis_case_files",
-        #     CaseFileFormatter(),
-        # ),
-        # (
-        #     "expected_moved_analysis_sample_delivery_files",
-        #     "expected_formatted_analysis_sample_files",
-        #     SampleFileFormatter(
-        #         file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
-        #     ),
-        # ),
-        # (
-        #     "fastq_concatenation_sample_files",
-        #     "expected_concatenated_fastq_formatted_files",
-        #     SampleFileConcatenationFormatter(
-        #         file_manager=FileManager(),
-        #         file_formatter=NestedSampleFileNameFormatter(),
-        #         concatenation_service=FastqConcatenationService(),
-        #     ),
-        # ),
+        (
+            "expected_moved_analysis_case_delivery_files",
+            "expected_formatted_analysis_case_files",
+            CaseFileFormatter(
+                file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+            ),
+        ),
+        (
+            "expected_moved_analysis_sample_delivery_files",
+            "expected_formatted_analysis_sample_files",
+            SampleFileFormatter(
+                file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+            ),
+        ),
+        (
+            "fastq_concatenation_sample_files",
+            "expected_concatenated_fastq_formatted_files",
+            SampleFileConcatenationFormatter(
+                file_manager=FileManager(),
+                path_name_formatter=NestedStructurePathFormatter(),
+                concatenation_service=FastqConcatenationService(),
+            ),
+        ),
         (
             "fastq_concatenation_sample_files_flat",
             "expected_concatenated_fastq_flat_formatted_files",
             SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                file_formatter=FlatStructurePathFormatter(),
+                path_name_formatter=FlatStructurePathFormatter(),
                 concatenation_service=FastqConcatenationService(),
             ),
         ),
@@ -86,7 +88,7 @@ def test_file_formatter_utils(
 
     # WHEN formatting the case files
     formatted_files: list[FormattedFile] = file_formatter.format_files(
-        moved_sample_files=moved_files,
+        moved_files=moved_files,
         delivery_path=delivery_path,
     )
 
@@ -116,7 +118,7 @@ def test_mutant_file_formatter(
         file_manager=FileManager(),
         file_formatter=SampleFileConcatenationFormatter(
             file_manager=FileManager(),
-            file_formatter=NestedStructurePathFormatter(),
+            path_name_formatter=NestedStructurePathFormatter(),
             concatenation_service=FastqConcatenationService(),
         ),
         lims_api=lims_mock,

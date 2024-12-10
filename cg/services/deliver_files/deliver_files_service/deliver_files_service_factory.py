@@ -167,7 +167,7 @@ class DeliveryServiceFactory:
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                file_formatter=NestedStructurePathFormatter(),
+                path_name_formatter=NestedStructurePathFormatter(),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
@@ -177,7 +177,7 @@ class DeliveryServiceFactory:
                     file_manager=FileManager(),
                     file_formatter=SampleFileConcatenationFormatter(
                         file_manager=FileManager(),
-                        file_formatter=FlatStructurePathFormatter(),
+                        path_name_formatter=FlatStructurePathFormatter(),
                         concatenation_service=FastqConcatenationService(),
                     ),
                 )
@@ -186,12 +186,12 @@ class DeliveryServiceFactory:
                 file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
                     file_manager=FileManager(),
-                    file_formatter=NestedStructurePathFormatter(),
+                    path_name_formatter=NestedStructurePathFormatter(),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
-            file_manager=FileManager(), file_name_formatter=NestedStructurePathFormatter()
+            file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
         )
 
     @staticmethod
