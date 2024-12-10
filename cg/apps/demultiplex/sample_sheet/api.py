@@ -8,8 +8,8 @@ from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSe
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.demultiplex.sample_sheet.utils import (
-    delete_sample_sheet_from_housekeeper,
     add_and_include_sample_sheet_path_to_housekeeper,
+    delete_sample_sheet_from_housekeeper,
 )
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -160,6 +160,16 @@ class IlluminaSampleSheetService:
                 "would have copied it to sequencing run directory"
             )
             return
+
+        try:
+            if sample_sheet_path.samefile(run_directory_data.sample_sheet_path):
+                LOG.info(
+                    "Sample sheet from Housekeeper already matches the target location. Skipping."
+                )
+                return
+        except FileNotFoundError:
+            LOG.warning("Sample sheet or target path does not exist.")
+
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
         link_or_overwrite_file(src=sample_sheet_path, dst=run_directory_data.sample_sheet_path)
 
