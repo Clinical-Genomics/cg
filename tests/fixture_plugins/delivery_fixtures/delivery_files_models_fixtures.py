@@ -1,4 +1,4 @@
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 import pytest
 
@@ -15,7 +15,7 @@ from cg.services.deliver_files.file_fetcher.models import (
     DeliveryMetaData,
     SampleFile,
 )
-from cg.services.deliver_files.file_formatter.models import FormattedFile
+from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -165,7 +165,7 @@ def expected_moved_fastq_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
-    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
+    delivery_files.delivery_data.delivery_path = inbox_dir_path
     new_sample_files: list[SampleFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.sample_files, inbox_dir_path=inbox_dir_path
     )
@@ -188,7 +188,7 @@ def expected_moved_analysis_delivery_files(
         INBOX_NAME,
         delivery_files.delivery_data.ticket_id,
     )
-    delivery_files.delivery_data.customer_ticket_inbox = inbox_dir_path
+    delivery_files.delivery_data.delivery_path = inbox_dir_path
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.case_files, inbox_dir_path=inbox_dir_path
     )
@@ -334,6 +334,7 @@ def expected_upload_files(expected_analysis_delivery_files: DeliveryFiles):
 @pytest.fixture
 def expected_moved_upload_files(expected_analysis_delivery_files: DeliveryFiles, tmp_path: Path):
     delivery_files = DeliveryFiles(**expected_analysis_delivery_files.model_dump())
+    delivery_files.delivery_data.delivery_path = tmp_path
     new_case_files: list[CaseFile] = swap_file_paths_with_inbox_paths(
         file_models=delivery_files.case_files, inbox_dir_path=tmp_path
     )

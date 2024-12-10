@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Analysis, Case

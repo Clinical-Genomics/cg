@@ -8,7 +8,7 @@ from cg.constants import DataDelivery, Workflow
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
@@ -17,12 +17,18 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
-from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+    MutantFileFormatter,
+)
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
-from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+    SampleFileFormatter,
+)
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
+)
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -37,7 +43,7 @@ class DeliveryServiceScenario(BaseModel):
     delivery_type: DataDelivery
     expected_tag_fetcher: type[FetchDeliveryFileTagsService]
     expected_file_fetcher: type[FetchDeliveryFilesService]
-    expected_file_mover: type[DeliveryFilesMover]
+    expected_file_mover: type[CustomerInboxDestinationFilesMover]
     expected_sample_file_formatter: type[
         SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
     ]
@@ -53,7 +59,7 @@ class DeliveryServiceScenario(BaseModel):
             delivery_type=DataDelivery.FASTQ,
             expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
             expected_file_fetcher=RawDataDeliveryFileFetcher,
-            expected_file_mover=DeliveryFilesMover,
+            expected_file_mover=CustomerInboxDestinationFilesMover,
             expected_sample_file_formatter=SampleFileConcatenationFormatter,
             store_name="microbial_store",
         ),
@@ -63,7 +69,7 @@ class DeliveryServiceScenario(BaseModel):
             delivery_type=DataDelivery.ANALYSIS_FILES,
             expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
             expected_file_fetcher=AnalysisDeliveryFileFetcher,
-            expected_file_mover=DeliveryFilesMover,
+            expected_file_mover=CustomerInboxDestinationFilesMover,
             expected_sample_file_formatter=MutantFileFormatter,
             store_name="mutant_store",
         ),
@@ -73,7 +79,7 @@ class DeliveryServiceScenario(BaseModel):
             delivery_type=DataDelivery.FASTQ_ANALYSIS,
             expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
             expected_file_fetcher=RawDataAndAnalysisDeliveryFileFetcher,
-            expected_file_mover=DeliveryFilesMover,
+            expected_file_mover=CustomerInboxDestinationFilesMover,
             expected_sample_file_formatter=SampleFileFormatter,
             store_name="applications_store",
         ),
