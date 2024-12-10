@@ -16,7 +16,7 @@ class Process:
     """Class to handle communication with other programs via the shell.
 
     The other parts of the code should not need to have any knowledge about how the processes are
-    called, that will be handled in this module.Output form stdout and stdin will be handled here.
+    called; that will be handled in this module.Output form stdout and stdin will be handled here.
     """
 
     def __init__(
