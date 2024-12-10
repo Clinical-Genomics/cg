@@ -92,7 +92,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         ]
 
     def _get_analysis_sample_delivery_files(
-        self, case: Case, sample_id: str
+        self, case: Case, sample_id: str | None
     ) -> list[SampleFile] | None:
         """Return a all sample files to deliver for a case."""
         sample_ids: list[str] = [sample_id] if sample_id else case.sample_ids
