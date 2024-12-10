@@ -42,6 +42,9 @@ from cg.services.order_validation_service.workflows.pacbio_long_read.validation_
 from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
     RnaFusionValidationService,
 )
+from cg.services.order_validation_service.workflows.taxprofiler.validation_service import (
+    TaxprofilerValidationService,
+)
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
 )
@@ -140,6 +143,7 @@ metagenome_validation_service = MetagenomeValidationService(store=db)
 mutant_validation_service = MutantValidationService(store=db)
 pacbio_long_read_validation_service = PacbioLongReadValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)
+taxprofiler_validation_service = TaxprofilerValidationService(store=db)
 tomte_validation_service = TomteValidationService(store=db)
 
 freshdesk_client = FreshdeskClient(
