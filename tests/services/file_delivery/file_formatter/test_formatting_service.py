@@ -8,12 +8,12 @@ from cg.services.deliver_files.file_fetcher.models import (
     CaseFile,
     DeliveryMetaData,
 )
-from cg.services.deliver_files.file_formatter.abstract import (
-    DeliveryFileFormattingService,
+from cg.services.deliver_files.file_formatter.destination.abstract import (
+    DeliveryDestinationFormatter,
 )
 import pytest
 
-from cg.services.deliver_files.file_formatter.models import (
+from cg.services.deliver_files.file_formatter.destination.models import (
     FormattedFiles,
     FormattedFile,
 )
@@ -39,7 +39,7 @@ from cg.services.deliver_files.file_formatter.models import (
     ],
 )
 def test_reformat_files(
-    formatter_service: DeliveryFileFormattingService,
+    formatter_service: DeliveryDestinationFormatter,
     formatted_case_files: list[FormattedFile],
     formatted_sample_files: list[FormattedFile],
     case_files: list[CaseFile],

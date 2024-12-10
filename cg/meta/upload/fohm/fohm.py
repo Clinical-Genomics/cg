@@ -209,7 +209,7 @@ class FOHMUploadAPI:
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case,
                 delivery_type=DataDelivery.FASTQ,
-                delivery_destination=DeliveryDestination.UPLOAD,
+                delivery_destination=DeliveryDestination.BASE,
             )
             LOG.debug(f"Linking files for sample {sample.internal_id}")
             delivery_service.deliver_files_for_fohm_upload(

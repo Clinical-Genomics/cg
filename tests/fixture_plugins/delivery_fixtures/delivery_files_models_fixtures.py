@@ -1,4 +1,4 @@
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 import pytest
 
@@ -15,7 +15,7 @@ from cg.services.deliver_files.file_fetcher.models import (
     DeliveryMetaData,
     SampleFile,
 )
-from cg.services.deliver_files.file_formatter.models import FormattedFile
+from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.store.models import Case
 from cg.store.store import Store
 

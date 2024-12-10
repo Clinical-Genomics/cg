@@ -4,7 +4,7 @@ from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.utils import FileMover
 
 
-class GenericFilesMover:
+class BaseFilesMover:
     """
     Class to move files directly to the delivery base path.
     """

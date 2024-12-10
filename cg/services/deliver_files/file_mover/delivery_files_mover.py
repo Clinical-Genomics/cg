@@ -11,7 +11,7 @@ from cg.services.deliver_files.utils import FileMover
 LOG = logging.getLogger(__name__)
 
 
-class DeliveryFilesMover:
+class CustomerInboxFilesMover:
     """
     Class to move files to the customer folder.
     """
