@@ -2,6 +2,8 @@ import os
 from unittest.mock import Mock
 import pytest
 from pathlib import Path
+
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
 from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
     MutantFileFormatter,
 )
@@ -68,10 +70,10 @@ from cg.services.deliver_files.file_formatter.path_name.nested_structure import 
         ),
     ],
 )
-def test_file_formatter_utils(
+def test_component_formatters(
     moved_files: list[CaseFile | SampleFile],
     expected_formatted_files: list[FormattedFile],
-    file_formatter: CaseFileFormatter | SampleFileFormatter | SampleFileConcatenationFormatter,
+    file_formatter: ComponentFormatter,
     request,
 ):
     # GIVEN existing case files, a case file formatter and a ticket directory path and a customer inbox
@@ -135,47 +137,3 @@ def test_mutant_file_formatter(
     for file in formatted_files:
         assert file.formatted_path.exists()
         assert not file.original_path.exists()
-
-
-@pytest.mark.parametrize(
-    "sample_files,expected_formatted_files,path_name_formatter",
-    [
-        (
-            "expected_moved_analysis_sample_delivery_files",
-            "expected_formatted_analysis_sample_files",
-            NestedStructurePathFormatter(),
-        ),
-        (
-            "expected_moved_analysis_sample_delivery_files",
-            "expected_flat_formatted_analysis_sample_files",
-            FlatStructurePathFormatter(),
-        ),
-    ],
-)
-def test_sample_file_name_formatters(
-    sample_files: list[SampleFile],
-    expected_formatted_files: list[FormattedFile],
-    path_name_formatter,
-    request,
-):
-    # GIVEN existing sample files and a sample file formatter
-    sample_files: list[SampleFile] = request.getfixturevalue(sample_files)
-    expected_formatted_files: list[FormattedFile] = request.getfixturevalue(
-        expected_formatted_files
-    )
-
-    # WHEN formatting the sample files
-    formatted_files: list[FormattedFile] = [
-        FormattedFile(
-            formatted_path=path_name_formatter.format_file_path(
-                file_path=sample_file.file_path,
-                provided_name=sample_file.sample_name,
-                provided_id=sample_file.sample_id,
-            ),
-            original_path=sample_file.file_path,
-        )
-        for sample_file in sample_files
-    ]
-
-    # THEN the sample files should be formatted
-    assert formatted_files == expected_formatted_files
