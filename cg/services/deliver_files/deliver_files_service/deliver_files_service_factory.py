@@ -40,6 +40,7 @@ from cg.services.deliver_files.file_formatter.component_files.sample_service imp
     SampleFileFormatter,
     FileManager,
 )
+from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
     FlatStructurePathFormatter,
 )
@@ -101,7 +102,9 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _validate_delivery_type(delivery_type: DataDelivery):
-        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
+        """
+        Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
+        """
         if delivery_type in [
             DataDelivery.FASTQ,
             DataDelivery.ANALYSIS_FILES,
@@ -145,7 +148,10 @@ class DeliveryServiceFactory:
         """Converts a workflow with the introduction of the microbial-fastq delivery type an
         unsupported combination of delivery type and workflow setup is required. This function
         makes sure that a raw data workflow with microbial fastq delivery type is treated as a
-        microsalt workflow so that the microbial-fastq sample files can be concatenated."""
+        microsalt workflow so that the microbial-fastq sample files can be concatenated.
+        args:
+            case: The case to convert the workflow for
+        """
         tag: str = case.samples[0].application_version.application.tag
         microbial_tags: list[str] = [
             application.tag
@@ -162,37 +168,47 @@ class DeliveryServiceFactory:
         case: Case,
         delivery_destination: DeliveryDestination,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
-        """Get the file formatter service based on the workflow."""
+        """Get the file formatter service based on the workflow.
+        Depending on the delivery destination the path name formatter will be different.
+        Args:
+            case: The case to deliver files for.
+            delivery_destination: The destination of the delivery defaults to customer.
+        """
+
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                path_name_formatter=NestedStructurePathFormatter(),
+                path_name_formatter=self._get_path_name_formatter(delivery_destination),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
-            if delivery_destination == DeliveryDestination.BASE:
-                return MutantFileFormatter(
-                    lims_api=self.lims_api,
-                    file_manager=FileManager(),
-                    file_formatter=SampleFileConcatenationFormatter(
-                        file_manager=FileManager(),
-                        path_name_formatter=FlatStructurePathFormatter(),
-                        concatenation_service=FastqConcatenationService(),
-                    ),
-                )
             return MutantFileFormatter(
                 lims_api=self.lims_api,
                 file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
                     file_manager=FileManager(),
-                    path_name_formatter=NestedStructurePathFormatter(),
+                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
-            file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+            file_manager=FileManager(),
+            path_name_formatter=self._get_path_name_formatter(delivery_destination),
         )
+
+    @staticmethod
+    def _get_path_name_formatter(
+        delivery_destination: DeliveryDestination,
+    ) -> PathNameFormatter:
+        """
+        Get the path name formatter based on the delivery destination
+        Args:
+            delivery_destination: The destination of the .
+        """
+        if delivery_destination == DeliveryDestination.BASE:
+            return FlatStructurePathFormatter()
+        return NestedStructurePathFormatter()
 
     @staticmethod
     def _get_file_mover(
@@ -200,7 +216,7 @@ class DeliveryServiceFactory:
     ) -> CustomerInboxFilesMover | BaseFilesMover:
         """Get the file mover based on the delivery type.
         Args:
-            delivery_destination: The destination of the delivery defaults to customer.
+            delivery_destination: The destination of the delivery.
         """
         if delivery_destination == DeliveryDestination.BASE:
             return BaseFilesMover(FileMover(FileManager()))
@@ -217,12 +233,16 @@ class DeliveryServiceFactory:
         ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
         if delivery_destination == DeliveryDestination.BASE:
             return BaseDeliveryFormatter(
-                case_file_formatter=CaseFileFormatter(),
+                case_file_formatter=CaseFileFormatter(
+                    file_manager=FileManager(),
+                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
+                ),
                 sample_file_formatter=sample_file_formatter,
             )
         return CustomerInboxDeliveryFormatter(
             case_file_formatter=CaseFileFormatter(
-                file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+                file_manager=FileManager(),
+                path_name_formatter=self._get_path_name_formatter(delivery_destination),
             ),
             sample_file_formatter=sample_file_formatter,
         )
