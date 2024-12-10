@@ -99,7 +99,7 @@ class DeliverFilesService:
             delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
         formatted_files: FormattedFiles = self.file_formatter.format_files(
-            delivery_files=moved_files, delivery_path=delivery_base_path
+            delivery_files=moved_files
         )
         folders_to_deliver: set[Path] = set(
             [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
@@ -118,17 +118,12 @@ class DeliverFilesService:
             delivery_base_path: The base path to deliver the files to
         """
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
-            case_id=case.internal_id
-        )
-        filtered_files: DeliveryFiles = self.file_filter.filter_delivery_files(
-            delivery_files=delivery_files, sample_id=sample_id
+            case_id=case.internal_id, sample_id=sample_id
         )
         moved_files: DeliveryFiles = self.file_mover.move_files(
-            delivery_files=filtered_files, delivery_base_path=delivery_base_path
+            delivery_files=delivery_files, delivery_base_path=delivery_base_path
         )
-        self.file_formatter.format_files(
-            delivery_files=moved_files, delivery_path=delivery_base_path
-        )
+        self.file_formatter.format_files(delivery_files=moved_files)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
