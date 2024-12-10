@@ -8,16 +8,18 @@ from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 
 
 @pytest.mark.parametrize(
-    "expected_delivery_files,delivery_file_service",
+    "expected_delivery_files,delivery_file_service,sample_id",
     [
-        ("expected_fastq_delivery_files", "raw_data_delivery_service"),
-        ("expected_analysis_delivery_files", "analysis_delivery_service"),
-        ("expected_bam_delivery_files", "bam_data_delivery_service"),
+        ("expected_fastq_delivery_files", "raw_data_delivery_service", "empty_sample"),
+        ("expected_analysis_delivery_files", "analysis_delivery_service", "empty_sample"),
+        ("expected_bam_delivery_files", "bam_data_delivery_service", "empty_sample"),
+        ("expected_bam_delivery_files_single_sample", "bam_data_delivery_service", "sample_id"),
     ],
 )
 def test_get_files_to_deliver(
     expected_delivery_files: DeliveryFiles,
     delivery_file_service: FetchDeliveryFilesService,
+    sample_id: str | None,
     case_id: str,
     request,
 ):
@@ -25,9 +27,12 @@ def test_get_files_to_deliver(
     # GIVEN a case id, samples that are present in Housekeeper and a delivery service
     delivery_file_service = request.getfixturevalue(delivery_file_service)
     expected_delivery_files = request.getfixturevalue(expected_delivery_files)
+    sample_id = request.getfixturevalue(sample_id)
 
     # WHEN getting the files to deliver
-    delivery_files: DeliveryFiles = delivery_file_service.get_files_to_deliver(case_id)
+    delivery_files: DeliveryFiles = delivery_file_service.get_files_to_deliver(
+        case_id=case_id, sample_id=sample_id
+    )
 
     # THEN assert that the files to deliver are fetched
     assert delivery_files == expected_delivery_files

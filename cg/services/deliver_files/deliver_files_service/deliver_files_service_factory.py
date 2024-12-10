@@ -19,7 +19,6 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_filter.sample_service import SampleFileFilter
 from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
 from cg.services.deliver_files.file_formatter.delivery_file_formatter import DeliveryFileFormatter
 from cg.services.deliver_files.file_formatter.upload_file_formatter import UploadFileFormatter
@@ -240,7 +239,6 @@ class DeliveryServiceFactory:
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
             move_file_service=file_move_service,
-            file_filter=SampleFileFilter(),
             file_formatter_service=file_formatter,
             status_db=self.store,
             rsync_service=self.rsync_service,

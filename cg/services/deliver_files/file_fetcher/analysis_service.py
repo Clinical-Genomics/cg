@@ -38,12 +38,14 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
+    def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
         """Return a list of analysis files to be delivered for a case."""
         LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(case)
-        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
+        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(
+            case=case, sample_id=sample_id
+        )
         delivery_data = DeliveryMetaData(
             case_id=case.internal_id,
             customer_internal_id=case.customer.internal_id,
@@ -89,9 +91,11 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             for sample_file in sample_files
         ]
 
-    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile] | None:
+    def _get_analysis_sample_delivery_files(
+        self, case: Case, sample_id: str | None
+    ) -> list[SampleFile] | None:
         """Return a all sample files to deliver for a case."""
-        sample_ids: list[str] = case.sample_ids
+        sample_ids: list[str] = [sample_id] if sample_id else case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
             sample_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
