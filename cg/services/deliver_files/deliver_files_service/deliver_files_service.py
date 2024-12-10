@@ -16,9 +16,6 @@ from cg.services.deliver_files.file_formatter.destination.abstract import (
 )
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFiles
 from cg.services.deliver_files.file_mover.abstract import DestinationFilesMover
-from cg.services.deliver_files.file_mover.customer_inbox_service import (
-    CustomerInboxDestinationFilesMover,
-)
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
