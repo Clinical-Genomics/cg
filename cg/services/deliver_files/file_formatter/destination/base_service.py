@@ -26,9 +26,9 @@ LOG = logging.getLogger(__name__)
 class BaseDeliveryFormatter(DeliveryDestinationFormatter):
     """
     Format the files to be delivered in the generic format.
-    Expected structure:
-    base_path/<case_files>
-    base_path/<sample_files>
+    args:
+        case_file_formatter: The case file formatter
+        sample_file_formatter: The sample file formatter. This can be a SampleFileFormatter, SampleFileConcatenationFormatter or MutantFileFormatter.
     """
 
     def __init__(
@@ -43,7 +43,7 @@ class BaseDeliveryFormatter(DeliveryDestinationFormatter):
 
     def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
-        LOG.debug("[FORMAT SERVICE] Formatting files for Upload")
+        LOG.debug("[FORMAT SERVICE] Formatting files for delivery")
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,

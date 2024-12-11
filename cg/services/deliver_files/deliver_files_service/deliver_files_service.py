@@ -27,12 +27,15 @@ LOG = logging.getLogger(__name__)
 
 class DeliverFilesService:
     """
-    Deliver files to the customer inbox on the HPC and Rsync them to the inbox folder on the delivery server.
-    1. Get the files to deliver from Housekeeper based on workflow and data delivery
-    2. Create a delivery folder structure in the customer folder on Hasta and move the files there
-    3. Reformatting of output / renaming of files
-    4. Rsync the files to the customer inbox on the delivery server
-    5. Add the rsync job to Trailblazer
+    Deliver files for a case, cases in a ticket or a sample to a specified destination or upload location.
+    Requires:
+        - FetchDeliveryFilesService: Service to fetch the files to deliver from housekeeper
+        - DestinationFilesMover: Service to move the files to the destination of delivery or upload
+        - DeliveryDestinationFormatter: Service to format the files to the destination format
+        - DeliveryRsyncService: Service to run rsync for the delivery
+        - TrailblazerAPI: Service to interact with Trailblazer
+        - AnalysisService: Service to interact with the analysis
+        - Store: Store to interact with the database
     """
 
     def __init__(

@@ -22,9 +22,6 @@ from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliv
 from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
 )
-from cg.services.deliver_files.file_formatter.destination.customer_inbox_service import (
-    CustomerInboxDeliveryFormatter,
-)
 from cg.services.deliver_files.file_formatter.destination.base_service import (
     BaseDeliveryFormatter,
 )
@@ -232,15 +229,7 @@ class DeliveryServiceFactory:
         sample_file_formatter: (
             SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
         ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
-        if delivery_destination == DeliveryDestination.BASE:
-            return BaseDeliveryFormatter(
-                case_file_formatter=CaseFileFormatter(
-                    file_manager=FileManager(),
-                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
-                ),
-                sample_file_formatter=sample_file_formatter,
-            )
-        return CustomerInboxDeliveryFormatter(
+        return BaseDeliveryFormatter(
             case_file_formatter=CaseFileFormatter(
                 file_manager=FileManager(),
                 path_name_formatter=self._get_path_name_formatter(delivery_destination),

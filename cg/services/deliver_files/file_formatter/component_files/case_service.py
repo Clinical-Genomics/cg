@@ -14,6 +14,12 @@ LOG = logging.getLogger(__name__)
 
 
 class CaseFileFormatter(ComponentFormatter):
+    """
+    Format the case files to deliver and return the formatted files.
+    args:
+        path_name_formatter: The path name formatter to format paths to either a flat or nested structure in the delivery destination
+        file_manager: The file manager
+    """
 
     def __init__(
         self,

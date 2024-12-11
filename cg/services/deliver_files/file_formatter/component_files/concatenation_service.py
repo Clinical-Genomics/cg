@@ -26,6 +26,10 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
     """
     Format the sample files to deliver, concatenate fastq files and return the formatted files.
     Used for workflows: Microsalt.
+    args:
+        file_manager: The file manager
+        path_name_formatter: The path name formatter to format paths to either a flat or nested structure in the delivery destination
+        concatenation_service: The fastq concatenation service to concatenate fastq files.
     """
 
     def __init__(

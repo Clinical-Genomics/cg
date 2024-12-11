@@ -16,6 +16,11 @@ LOG = logging.getLogger(__name__)
 class MutantFileFormatter(ComponentFormatter):
     """
     Formatter for file to deliver or upload for the Mutant workflow.
+    Args:
+        lims_api: The LIMS API
+        file_formatter: The SampleFileConcatenationFormatter. This is used to format the files and concatenate the fastq files.
+        file_manager: The FileManager
+
     """
 
     def __init__(

@@ -14,6 +14,9 @@ class SampleFileFormatter(ComponentFormatter):
     """
     Format the sample files to deliver.
     Used for all workflows except Microsalt and Mutant.
+    args:
+        file_manager: The file manager
+        path_name_formatter: The path name formatter to format paths to either a flat or nested structure in the delivery destination
     """
 
     def __init__(

@@ -1,6 +1,7 @@
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.deliver_files.file_formatter.destination.base_service import BaseDeliveryFormatter
 from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
@@ -12,9 +13,6 @@ from cg.services.deliver_files.file_fetcher.analysis_service import (
 )
 from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
-)
-from cg.services.deliver_files.file_formatter.destination.customer_inbox_service import (
-    CustomerInboxDeliveryFormatter,
 )
 from cg.services.deliver_files.file_formatter.component_files.case_service import (
     CaseFileFormatter,
@@ -114,9 +112,9 @@ def analysis_delivery_service_no_housekeeper_bundle(
 
 
 @pytest.fixture
-def generic_delivery_file_formatter() -> CustomerInboxDeliveryFormatter:
+def generic_delivery_file_formatter() -> BaseDeliveryFormatter:
     """Fixture to get an instance of GenericDeliveryFileFormatter."""
-    return CustomerInboxDeliveryFormatter(
+    return BaseDeliveryFormatter(
         sample_file_formatter=SampleFileFormatter(
             file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
         ),
