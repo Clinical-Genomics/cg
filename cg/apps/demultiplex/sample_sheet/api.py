@@ -164,11 +164,15 @@ class IlluminaSampleSheetService:
         try:
             if sample_sheet_path.samefile(run_directory_data.sample_sheet_path):
                 LOG.info(
-                    "Sample sheet from Housekeeper already matches the target location. Skipping."
+                    "Sample sheet from Housekeeper is the same as the sequencing directory sample sheet"
                 )
                 return
         except FileNotFoundError:
-            LOG.warning("Sample sheet or target path does not exist.")
+            LOG.info(
+                f"Sample sheet or target path does not exist. "
+                f"Housekeeper sample sheet path: {sample_sheet_path}, "
+                f"Target sample sheet path: {run_directory_data.sample_sheet_path}"
+            )
 
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
         link_or_overwrite_file(src=sample_sheet_path, dst=run_directory_data.sample_sheet_path)
