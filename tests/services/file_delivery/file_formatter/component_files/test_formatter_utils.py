@@ -2,7 +2,11 @@ import os
 from unittest.mock import Mock
 import pytest
 from pathlib import Path
-from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
+
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+    MutantFileFormatter,
+)
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
@@ -10,60 +14,66 @@ from cg.services.deliver_files.file_fetcher.models import (
     CaseFile,
     SampleFile,
 )
-from cg.services.deliver_files.file_formatter.models import FormattedFile
-from cg.services.deliver_files.file_formatter.utils.case_service import (
+from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
+from cg.services.deliver_files.file_formatter.component_files.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
-    NestedSampleFileNameFormatter,
-    FlatSampleFileNameFormatter,
+)
+from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
+    FlatStructurePathFormatter,
+)
+from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
+    NestedStructurePathFormatter,
 )
 
 
 @pytest.mark.parametrize(
     "moved_files,expected_formatted_files,file_formatter",
     [
-        # (
-        #     "expected_moved_analysis_case_delivery_files",
-        #     "expected_formatted_analysis_case_files",
-        #     CaseFileFormatter(),
-        # ),
-        # (
-        #     "expected_moved_analysis_sample_delivery_files",
-        #     "expected_formatted_analysis_sample_files",
-        #     SampleFileFormatter(
-        #         file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
-        #     ),
-        # ),
-        # (
-        #     "fastq_concatenation_sample_files",
-        #     "expected_concatenated_fastq_formatted_files",
-        #     SampleFileConcatenationFormatter(
-        #         file_manager=FileManager(),
-        #         file_formatter=NestedSampleFileNameFormatter(),
-        #         concatenation_service=FastqConcatenationService(),
-        #     ),
-        # ),
+        (
+            "expected_moved_analysis_case_delivery_files",
+            "expected_formatted_analysis_case_files",
+            CaseFileFormatter(
+                file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+            ),
+        ),
+        (
+            "expected_moved_analysis_sample_delivery_files",
+            "expected_formatted_analysis_sample_files",
+            SampleFileFormatter(
+                file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
+            ),
+        ),
+        (
+            "fastq_concatenation_sample_files",
+            "expected_concatenated_fastq_formatted_files",
+            SampleFileConcatenationFormatter(
+                file_manager=FileManager(),
+                path_name_formatter=NestedStructurePathFormatter(),
+                concatenation_service=FastqConcatenationService(),
+            ),
+        ),
         (
             "fastq_concatenation_sample_files_flat",
             "expected_concatenated_fastq_flat_formatted_files",
             SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                file_formatter=FlatSampleFileNameFormatter(),
+                path_name_formatter=FlatStructurePathFormatter(),
                 concatenation_service=FastqConcatenationService(),
             ),
         ),
     ],
 )
-def test_file_formatter_utils(
+def test_component_formatters(
     moved_files: list[CaseFile | SampleFile],
     expected_formatted_files: list[FormattedFile],
-    file_formatter: CaseFileFormatter | SampleFileFormatter | SampleFileConcatenationFormatter,
+    file_formatter: ComponentFormatter,
     request,
 ):
     # GIVEN existing case files, a case file formatter and a ticket directory path and a customer inbox
@@ -110,7 +120,7 @@ def test_mutant_file_formatter(
         file_manager=FileManager(),
         file_formatter=SampleFileConcatenationFormatter(
             file_manager=FileManager(),
-            file_formatter=NestedSampleFileNameFormatter(),
+            path_name_formatter=NestedStructurePathFormatter(),
             concatenation_service=FastqConcatenationService(),
         ),
         lims_api=lims_mock,
@@ -127,39 +137,3 @@ def test_mutant_file_formatter(
     for file in formatted_files:
         assert file.formatted_path.exists()
         assert not file.original_path.exists()
-
-
-@pytest.mark.parametrize(
-    "sample_files,expected_formatted_files,sample_file_formatter",
-    [
-        (
-            "expected_moved_analysis_sample_delivery_files",
-            "expected_formatted_analysis_sample_files",
-            NestedSampleFileNameFormatter(),
-        ),
-        (
-            "expected_moved_analysis_sample_delivery_files",
-            "expected_flat_formatted_analysis_sample_files",
-            FlatSampleFileNameFormatter(),
-        ),
-    ],
-)
-def test_sample_file_name_formatters(
-    sample_files: list[SampleFile],
-    expected_formatted_files: list[FormattedFile],
-    sample_file_formatter: NestedSampleFileNameFormatter | FlatSampleFileNameFormatter,
-    request,
-):
-    # GIVEN existing sample files and a sample file formatter
-    sample_files: list[SampleFile] = request.getfixturevalue(sample_files)
-    expected_formatted_files: list[FormattedFile] = request.getfixturevalue(
-        expected_formatted_files
-    )
-
-    # WHEN formatting the sample files
-    formatted_files: list[FormattedFile] = sample_file_formatter.format_sample_file_names(
-        sample_files=sample_files
-    )
-
-    # THEN the sample files should be formatted
-    assert formatted_files == expected_formatted_files

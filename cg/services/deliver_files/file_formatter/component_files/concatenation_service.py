@@ -1,25 +1,28 @@
 import logging
 from pathlib import Path
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
-from cg.services.deliver_files.file_formatter.utils.models import FastqFile
+from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
+from cg.services.deliver_files.file_formatter.component_files.models import FastqFile
+from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
 from cg.services.deliver_files.file_fetcher.models import SampleFile
-from cg.services.deliver_files.file_formatter.models import FormattedFile
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
-    NestedSampleFileNameFormatter,
+from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     FileManager,
-    FlatSampleFileNameFormatter,
+)
+from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
+    NestedStructurePathFormatter,
 )
 from cg.utils.files import get_all_files_in_directory_tree
 
 LOG = logging.getLogger(__name__)
 
 
-class SampleFileConcatenationFormatter:
+class SampleFileConcatenationFormatter(ComponentFormatter):
     """
     Format the sample files to deliver, concatenate fastq files and return the formatted files.
     Used for workflows: Microsalt.
@@ -28,11 +31,11 @@ class SampleFileConcatenationFormatter:
     def __init__(
         self,
         file_manager: FileManager,
-        file_formatter: NestedSampleFileNameFormatter | FlatSampleFileNameFormatter,
+        path_name_formatter: PathNameFormatter,
         concatenation_service: FastqConcatenationService,
     ):
         self.file_manager = file_manager
-        self.file_name_formatter = file_formatter
+        self.path_name_formatter = path_name_formatter
         self.concatenation_service = concatenation_service
 
     def format_files(
@@ -42,15 +45,13 @@ class SampleFileConcatenationFormatter:
         Format the sample files to deliver, concatenate fastq files and return the formatted files.
         args:
             moved_files: list[SampleFile]: List of sample files to deliver.
+            These are files that have been moved from housekeeper to the delivery path.
             delivery_path: Path: Path to the delivery directory.
         """
         LOG.debug("[FORMAT SERVICE] Formatting and concatenating sample files")
-        LOG.debug(f"[FORMAT SERVICE] delivery_path: {delivery_path}")
-        sample_names: set[str] = self.file_name_formatter.get_sample_names(sample_files=moved_files)
+        sample_names: set[str] = self._get_sample_names(sample_files=moved_files)
         self._create_sample_directories(delivery_path=delivery_path, sample_names=sample_names)
-        formatted_files: list[FormattedFile] = self.file_name_formatter.format_sample_file_names(
-            sample_files=moved_files
-        )
+        formatted_files: list[FormattedFile] = self._format_sample_file_paths(moved_files)
         LOG.debug(
             f"[FORMAT SERVICE] number of formatted files: {len(formatted_files)}, number of moved files: {len(moved_files)}"
         )
@@ -65,6 +66,29 @@ class SampleFileConcatenationFormatter:
             formatted_files=formatted_files,
         )
         return formatted_files
+
+    @staticmethod
+    def _get_sample_names(sample_files: list[SampleFile]) -> set[str]:
+        """Extract sample names from the sample files."""
+        return {sample_file.sample_name for sample_file in sample_files}
+
+    def _format_sample_file_paths(self, sample_files: list[SampleFile]) -> list[FormattedFile]:
+        """
+        Return a list of formatted sample files.
+        args:
+            sample_files: The sample files to format
+        """
+        return [
+            FormattedFile(
+                original_path=sample_file.file_path,
+                formatted_path=self.path_name_formatter.format_file_path(
+                    file_path=sample_file.file_path,
+                    provided_id=sample_file.sample_id,
+                    provided_name=sample_file.sample_name,
+                ),
+            )
+            for sample_file in sample_files
+        ]
 
     def _rename_original_files(self, formatted_files: list[FormattedFile]) -> None:
         """
@@ -84,7 +108,7 @@ class SampleFileConcatenationFormatter:
             sample_names: set[str]: Set of sample names.
             delivery_path: Path: Path to the delivery directory.
         """
-        if not isinstance(self.file_name_formatter, NestedSampleFileNameFormatter):
+        if not isinstance(self.path_name_formatter, NestedStructurePathFormatter):
             return
         for sample_name in sample_names:
             self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})

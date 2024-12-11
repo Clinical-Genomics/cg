@@ -19,22 +19,37 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
-from cg.services.deliver_files.file_formatter.delivery_file_formatter import DeliveryFileFormatter
-from cg.services.deliver_files.file_formatter.upload_file_formatter import UploadFileFormatter
-from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
-from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
-from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
+from cg.services.deliver_files.file_formatter.destination.abstract import (
+    DeliveryDestinationFormatter,
+)
+from cg.services.deliver_files.file_formatter.destination.customer_inbox_service import (
+    CustomerInboxDeliveryFormatter,
+)
+from cg.services.deliver_files.file_formatter.destination.base_service import (
+    BaseDeliveryFormatter,
+)
+from cg.services.deliver_files.file_formatter.component_files.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+    MutantFileFormatter,
+)
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
-    NestedSampleFileNameFormatter,
-    FlatSampleFileNameFormatter,
 )
-from cg.services.deliver_files.file_mover.delivery_files_mover import DeliveryFilesMover
-from cg.services.deliver_files.file_mover.fohm_upload_files_mover import GenericFilesMover
+from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
+from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
+    FlatStructurePathFormatter,
+)
+from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
+    NestedStructurePathFormatter,
+)
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
+)
+from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
@@ -88,7 +103,9 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _validate_delivery_type(delivery_type: DataDelivery):
-        """Check if the delivery type is supported. Raises DeliveryTypeNotSupported error."""
+        """
+        Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
+        """
         if delivery_type in [
             DataDelivery.FASTQ,
             DataDelivery.ANALYSIS_FILES,
@@ -132,7 +149,10 @@ class DeliveryServiceFactory:
         """Converts a workflow with the introduction of the microbial-fastq delivery type an
         unsupported combination of delivery type and workflow setup is required. This function
         makes sure that a raw data workflow with microbial fastq delivery type is treated as a
-        microsalt workflow so that the microbial-fastq sample files can be concatenated."""
+        microsalt workflow so that the microbial-fastq sample files can be concatenated.
+        args:
+            case: The case to convert the workflow for
+        """
         tag: str = case.samples[0].application_version.application.tag
         microbial_tags: list[str] = [
             application.tag
@@ -149,67 +169,83 @@ class DeliveryServiceFactory:
         case: Case,
         delivery_destination: DeliveryDestination,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
-        """Get the file formatter service based on the workflow."""
+        """Get the file formatter service based on the workflow.
+        Depending on the delivery destination the path name formatter will be different.
+        Args:
+            case: The case to deliver files for.
+            delivery_destination: The destination of the delivery defaults to customer.
+        """
+
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                file_formatter=NestedSampleFileNameFormatter(),
+                path_name_formatter=self._get_path_name_formatter(delivery_destination),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
-            if delivery_destination == DeliveryDestination.UPLOAD:
-                return MutantFileFormatter(
-                    lims_api=self.lims_api,
-                    file_manager=FileManager(),
-                    file_formatter=SampleFileConcatenationFormatter(
-                        file_manager=FileManager(),
-                        file_formatter=FlatSampleFileNameFormatter(),
-                        concatenation_service=FastqConcatenationService(),
-                    ),
-                )
             return MutantFileFormatter(
                 lims_api=self.lims_api,
                 file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
                     file_manager=FileManager(),
-                    file_formatter=NestedSampleFileNameFormatter(),
+                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
-            file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
+            file_manager=FileManager(),
+            path_name_formatter=self._get_path_name_formatter(delivery_destination),
         )
+
+    @staticmethod
+    def _get_path_name_formatter(
+        delivery_destination: DeliveryDestination,
+    ) -> PathNameFormatter:
+        """
+        Get the path name formatter based on the delivery destination
+        Args:
+            delivery_destination: The destination of the .
+        """
+        if delivery_destination == DeliveryDestination.BASE:
+            return FlatStructurePathFormatter()
+        return NestedStructurePathFormatter()
 
     @staticmethod
     def _get_file_mover(
         delivery_destination: DeliveryDestination,
-    ) -> DeliveryFilesMover | GenericFilesMover:
+    ) -> CustomerInboxDestinationFilesMover | BaseDestinationFilesMover:
         """Get the file mover based on the delivery type.
-
         Args:
-            delivery_destination: The destination of the delivery defaults to customer.
+            delivery_destination: The destination of the delivery.
         """
-        if delivery_destination == DeliveryDestination.UPLOAD:
-            return GenericFilesMover(FileMover(FileManager()))
-        return DeliveryFilesMover(FileMover(FileManager()))
+        if delivery_destination == DeliveryDestination.BASE:
+            return BaseDestinationFilesMover(FileMover(FileManager()))
+        return CustomerInboxDestinationFilesMover(FileMover(FileManager()))
 
     def _get_file_formatter(
         self,
         delivery_destination: DeliveryDestination,
         case: Case,
-    ) -> DeliveryFileFormattingService:
+    ) -> DeliveryDestinationFormatter:
         """Get the file formatter service based on the delivery destination."""
         sample_file_formatter: (
             SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
         ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
-        if delivery_destination == DeliveryDestination.UPLOAD:
-            return UploadFileFormatter(
-                case_file_formatter=CaseFileFormatter(),
+        if delivery_destination == DeliveryDestination.BASE:
+            return BaseDeliveryFormatter(
+                case_file_formatter=CaseFileFormatter(
+                    file_manager=FileManager(),
+                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
+                ),
                 sample_file_formatter=sample_file_formatter,
             )
-        return DeliveryFileFormatter(
-            case_file_formatter=CaseFileFormatter(), sample_file_formatter=sample_file_formatter
+        return CustomerInboxDeliveryFormatter(
+            case_file_formatter=CaseFileFormatter(
+                file_manager=FileManager(),
+                path_name_formatter=self._get_path_name_formatter(delivery_destination),
+            ),
+            sample_file_formatter=sample_file_formatter,
         )
 
     def build_delivery_service(
@@ -230,10 +266,10 @@ class DeliveryServiceFactory:
         )
         self._validate_delivery_type(delivery_type)
         file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
-        file_move_service: DeliveryFilesMover | GenericFilesMover = self._get_file_mover(
-            delivery_destination=delivery_destination
+        file_move_service: CustomerInboxDestinationFilesMover | BaseDestinationFilesMover = (
+            self._get_file_mover(delivery_destination=delivery_destination)
         )
-        file_formatter: DeliveryFileFormattingService = self._get_file_formatter(
+        file_formatter: DeliveryDestinationFormatter = self._get_file_formatter(
             case=case, delivery_destination=delivery_destination
         )
         return DeliverFilesService(

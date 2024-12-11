@@ -1,21 +1,29 @@
 import logging
-import os
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import CaseFile, DeliveryFiles, SampleFile
-from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
-from cg.services.deliver_files.file_formatter.models import FormattedFile, FormattedFiles
-from cg.services.deliver_files.file_formatter.utils.case_service import CaseFileFormatter
-from cg.services.deliver_files.file_formatter.utils.mutant_sample_service import MutantFileFormatter
-from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
+from cg.services.deliver_files.file_formatter.destination.abstract import (
+    DeliveryDestinationFormatter,
+)
+from cg.services.deliver_files.file_formatter.destination.models import (
+    FormattedFile,
+    FormattedFiles,
+)
+from cg.services.deliver_files.file_formatter.component_files.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+    MutantFileFormatter,
+)
+from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_service import SampleFileFormatter
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+    SampleFileFormatter,
+)
 
 LOG = logging.getLogger(__name__)
 
 
-class UploadFileFormatter(DeliveryFileFormattingService):
+class BaseDeliveryFormatter(DeliveryDestinationFormatter):
     """
     Format the files to be delivered in the generic format.
     Expected structure:
@@ -33,13 +41,13 @@ class UploadFileFormatter(DeliveryFileFormattingService):
         self.case_file_formatter = case_file_formatter
         self.sample_file_formatter = sample_file_formatter
 
-    def format_files(self, delivery_files: DeliveryFiles, delivery_path: Path) -> FormattedFiles:
+    def format_files(self, delivery_files: DeliveryFiles) -> FormattedFiles:
         """Format the files to be delivered and return the formatted files in the generic format."""
         LOG.debug("[FORMAT SERVICE] Formatting files for Upload")
         formatted_files: list[FormattedFile] = self._format_sample_and_case_files(
             sample_files=delivery_files.sample_files,
             case_files=delivery_files.case_files,
-            delivery_path=delivery_path,
+            delivery_path=delivery_files.delivery_data.delivery_path,
         )
         return FormattedFiles(files=formatted_files)
 

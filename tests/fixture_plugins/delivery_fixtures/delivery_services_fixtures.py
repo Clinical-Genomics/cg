@@ -4,9 +4,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
@@ -16,19 +13,18 @@ from cg.services.deliver_files.file_fetcher.analysis_service import (
 from cg.services.deliver_files.file_fetcher.raw_data_service import (
     RawDataDeliveryFileFetcher,
 )
-from cg.services.deliver_files.file_formatter.delivery_file_formatter import (
-    DeliveryFileFormatter,
+from cg.services.deliver_files.file_formatter.destination.customer_inbox_service import (
+    CustomerInboxDeliveryFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.case_service import (
+from cg.services.deliver_files.file_formatter.component_files.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.utils.sample_concatenation_service import (
-    SampleFileConcatenationFormatter,
-)
-from cg.services.deliver_files.file_formatter.utils.sample_service import (
+from cg.services.deliver_files.file_formatter.component_files.sample_service import (
     SampleFileFormatter,
     FileManager,
-    NestedSampleFileNameFormatter,
+)
+from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
+    NestedStructurePathFormatter,
 )
 from cg.store.store import Store
 
@@ -118,11 +114,14 @@ def analysis_delivery_service_no_housekeeper_bundle(
 
 
 @pytest.fixture
-def generic_delivery_file_formatter() -> DeliveryFileFormatter:
+def generic_delivery_file_formatter() -> CustomerInboxDeliveryFormatter:
     """Fixture to get an instance of GenericDeliveryFileFormatter."""
-    return DeliveryFileFormatter(
+    return CustomerInboxDeliveryFormatter(
         sample_file_formatter=SampleFileFormatter(
-            file_manager=FileManager(), file_name_formatter=NestedSampleFileNameFormatter()
+            file_manager=FileManager(), path_name_formatter=NestedStructurePathFormatter()
         ),
-        case_file_formatter=CaseFileFormatter(),
+        case_file_formatter=CaseFileFormatter(
+            file_manager=FileManager(),
+            path_name_formatter=NestedStructurePathFormatter(),
+        ),
     )

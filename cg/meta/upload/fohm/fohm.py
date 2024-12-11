@@ -16,7 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 from cg.services.deliver_files.constants import DeliveryDestination
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Case, Sample
@@ -206,7 +206,7 @@ class FOHMUploadAPI:
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case,
                 delivery_type=DataDelivery.FASTQ,
-                delivery_destination=DeliveryDestination.UPLOAD,
+                delivery_destination=DeliveryDestination.BASE,
             )
             delivery_service.deliver_files_for_fohm_upload(
                 case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
