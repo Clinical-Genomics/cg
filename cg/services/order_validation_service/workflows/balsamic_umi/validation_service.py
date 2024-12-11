@@ -3,6 +3,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import CaseS
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
+from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.utils import (
@@ -10,8 +11,10 @@ from cg.services.order_validation_service.utils import (
     apply_case_validation,
     apply_order_validation,
 )
-from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.order_validation_service.workflows.balsamic.validation_rules import (
+from cg.services.order_validation_service.workflows.balsamic_umi.models.order import (
+    BalsamicUmiOrder,
+)
+from cg.services.order_validation_service.workflows.balsamic_umi.validation_rules import (
     CASE_RULES,
     CASE_SAMPLE_RULES,
 )
@@ -19,7 +22,7 @@ from cg.services.order_validation_service.workflows.order_validation_rules impor
 from cg.store.store import Store
 
 
-class BalsamicValidationService(OrderValidationService):
+class BalsamicUmiValidationService(OrderValidationService):
 
     def __init__(self, store: Store):
         self.store = store
@@ -29,7 +32,7 @@ class BalsamicValidationService(OrderValidationService):
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = ModelValidator.validate(order=raw_order, model=BalsamicOrder)
+        order, field_errors = ModelValidator.validate(order=raw_order, model=BalsamicUmiOrder)
 
         if not order:
             return field_errors
@@ -56,5 +59,5 @@ class BalsamicValidationService(OrderValidationService):
             case_sample_errors=case_sample_errors,
         )
 
-    def parse_and_validate(self, raw_order: dict) -> BalsamicOrder:
+    def parse_and_validate(self, raw_order: dict) -> Order:
         pass

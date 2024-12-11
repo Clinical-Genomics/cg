@@ -1,16 +1,12 @@
-from pydantic import BeforeValidator
-from typing_extensions import Annotated
-
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.utils import parse_buffer
 
 
-class MetagenomeSample(Sample):
+class TaxprofilerSample(Sample):
     concentration_ng_ul: float | None = None
     control: ControlEnum | None = None
-    elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
+    elution_buffer: ElutionBuffer
     organism: str
     priority: PriorityEnum
     quantity: int | None = None

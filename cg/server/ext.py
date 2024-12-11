@@ -15,8 +15,14 @@ from cg.services.delivery_message.delivery_message_service import DeliveryMessag
 from cg.services.order_validation_service.workflows.balsamic.validation_service import (
     BalsamicValidationService,
 )
+from cg.services.order_validation_service.workflows.balsamic_umi.validation_service import (
+    BalsamicUmiValidationService,
+)
 from cg.services.order_validation_service.workflows.fastq.validation_service import (
     FastqValidationService,
+)
+from cg.services.order_validation_service.workflows.metagenome.validation_service import (
+    MetagenomeValidationService,
 )
 from cg.services.order_validation_service.workflows.microbial_fastq.validation_service import (
     MicrobialFastqValidationService,
@@ -35,6 +41,9 @@ from cg.services.order_validation_service.workflows.pacbio_long_read.validation_
 )
 from cg.services.order_validation_service.workflows.rna_fusion.validation_service import (
     RnaFusionValidationService,
+)
+from cg.services.order_validation_service.workflows.taxprofiler.validation_service import (
+    TaxprofilerValidationService,
 )
 from cg.services.order_validation_service.workflows.tomte.validation_service import (
     TomteValidationService,
@@ -125,13 +134,16 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
 )
 
 balsamic_validation_service = BalsamicValidationService(store=db)
+balsamic_umi_validation_service = BalsamicUmiValidationService(store=db)
 fastq_validation_service = FastqValidationService(store=db)
 microbial_fastq_validation_service = MicrobialFastqValidationService(store=db)
 microsalt_validation_service = MicroSaltValidationService(store=db)
 mip_dna_validation_service = MipDnaValidationService(store=db)
+metagenome_validation_service = MetagenomeValidationService(store=db)
 mutant_validation_service = MutantValidationService(store=db)
 pacbio_long_read_validation_service = PacbioLongReadValidationService(store=db)
 rna_fusion_validation_service = RnaFusionValidationService(store=db)
+taxprofiler_validation_service = TaxprofilerValidationService(store=db)
 tomte_validation_service = TomteValidationService(store=db)
 
 freshdesk_client = FreshdeskClient(

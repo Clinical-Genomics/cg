@@ -8,7 +8,9 @@ class TissueBlockEnum(StrEnum):
 
 
 class ElutionBuffer(StrEnum):
-    OTHER = "Other (add to comment)"
+    """The choices of buffers."""
+
+    OTHER = "Other"
     TRIS_HCL = "Tris-HCl"
     WATER = "Nuclease-free water"
 
@@ -27,7 +29,7 @@ class ExtractionMethod(StrEnum):
     OTHER = 'Other (specify in "Comments")'
 
 
-class IndexEnum(Enum):
+class IndexEnum(StrEnum):
     IDT_DS_B = "IDT DupSeq 10 bp Set B"
     IDT_DS_F = "IDT DupSeq 10 bp Set F"
     DT_XGEN_UDI = "IDT xGen UDI Adapters"

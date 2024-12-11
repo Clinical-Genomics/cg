@@ -34,11 +34,13 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_umi_validation_service,
     balsamic_validation_service,
     db,
     delivery_message_service,
     fastq_validation_service,
     lims,
+    metagenome_validation_service,
     microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
@@ -47,6 +49,7 @@ from cg.server.ext import (
     order_submitter_registry,
     pacbio_long_read_validation_service,
     rna_fusion_validation_service,
+    taxprofiler_validation_service,
     ticket_handler,
     tomte_validation_service,
 )
@@ -274,8 +277,12 @@ def validate_order(order_type: OrderType):
     response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
+    elif order_type == OrderType.BALSAMIC_UMI:
+        response = balsamic_umi_validation_service.validate(raw_order)
     elif order_type == OrderType.FASTQ:
         response = fastq_validation_service.validate(raw_order)
+    elif order_type == OrderType.METAGENOME:
+        response = metagenome_validation_service.validate(raw_order)
     elif order_type == OrderType.MICROBIAL_FASTQ:
         response = microbial_fastq_validation_service.validate(raw_order)
     elif order_type == OrderType.MICROSALT:
@@ -288,6 +295,8 @@ def validate_order(order_type: OrderType):
         response = mutant_validation_service.validate(raw_order)
     elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
+    elif order_type == OrderType.TAXPROFILER:
+        response = taxprofiler_validation_service.validate(raw_order)
     elif order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK

@@ -2,6 +2,7 @@ from cg.exc import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
+from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.utils import (
