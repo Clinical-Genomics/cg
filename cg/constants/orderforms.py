@@ -39,7 +39,7 @@ class Orderform(StrEnum):
             Orderform.MIP_DNA: "32",
             Orderform.RML: "19",
             Orderform.MICROSALT: "11",
-            Orderform.SARS_COV_2: "9",
+            Orderform.SARS_COV_2: "10",
             Orderform.MICROBIAL_FASTQ: "1",
             Orderform.PACBIO_LONG_READ: "1",
         }
