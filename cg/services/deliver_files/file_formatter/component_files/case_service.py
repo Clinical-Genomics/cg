@@ -30,7 +30,6 @@ class CaseFileFormatter(ComponentFormatter):
             delivery_path: The path to deliver the files to
         """
         LOG.debug("[FORMAT SERVICE] Formatting case files")
-        """Format the case files to deliver and return the formatted files."""
         self._create_case_name_folder(
             delivery_path=delivery_path, case_name=moved_files[0].case_name
         )
