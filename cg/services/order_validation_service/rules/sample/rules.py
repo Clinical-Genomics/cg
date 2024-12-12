@@ -24,6 +24,7 @@ from cg.services.order_validation_service.rules.sample.utils import (
     get_indices_for_tube_repeated_container_name,
     is_container_name_missing,
     is_invalid_well_format,
+    is_invalid_well_format_rml,
     validate_concentration_interval,
     validate_concentration_required,
 )
@@ -203,6 +204,15 @@ def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[Wel
     errors: list[WellFormatError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_invalid_well_format(sample=sample):
+            error = WellFormatError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_well_position_rml_format(order: OrderWithSamples, **kwargs) -> list[WellFormatError]:
+    errors: list[WellFormatError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_invalid_well_format_rml(sample=sample):
             error = WellFormatError(sample_index=sample_index)
             errors.append(error)
     return errors

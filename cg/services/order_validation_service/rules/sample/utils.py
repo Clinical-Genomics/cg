@@ -8,6 +8,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
+from cg.services.order_validation_service.models.aliases import IndexedSample
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
@@ -94,6 +95,14 @@ def is_invalid_well_format(sample: Sample) -> bool:
     correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
     if sample.is_on_plate:
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
+    return False
+
+
+def is_invalid_well_format_rml(sample: IndexedSample) -> bool:
+    """Check if an indexed sample has an invalid well format."""
+    correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
+    if sample.is_on_plate:
+        return not bool(re.match(correct_well_position_pattern, sample.well_position_rml))
     return False
 
 
