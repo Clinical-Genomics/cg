@@ -13,6 +13,9 @@ from cg.services.order_validation_service.workflows.fastq.models.sample import F
 from cg.services.order_validation_service.workflows.microsalt.constants import MicrosaltDeliveryType
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
+from cg.services.order_validation_service.workflows.rml.constants import RmlDeliveryType
+from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
+from cg.services.order_validation_service.workflows.rml.models.sample import RmlSample
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -113,4 +116,36 @@ def valid_fastq_order() -> FastqOrder:
         delivery_type=FastqDeliveryType.FASTQ,
         samples=samples,
         name="FastqOrder",
+    )
+
+
+def create_rml_sample(id: int) -> RmlSample:
+    return RmlSample(
+        application="RMLCUSR800",
+        container=ContainerEnum.plate,
+        index_number=4,
+        index="Kapa UDI NIPT",
+        rml_plate_name="Rml-plate",
+        name=f"rml-sample-{id}",
+        pool="pool-2",
+        pool_concentration=30,
+        volume=54,
+        priority=PriorityEnum.priority,
+        well_position_rml=f"A:{id}",
+    )
+
+
+@pytest.fixture
+def valid_rml_order() -> RmlOrder:
+    sample_1: RmlSample = create_rml_sample(1)
+    sample_2: RmlSample = create_rml_sample(2)
+    sample_3: RmlSample = create_rml_sample(3)
+    samples = [sample_1, sample_2, sample_3]
+    return RmlOrder(
+        customer="cust000",
+        project_type=OrderType.RML,
+        user_id=0,
+        delivery_type=RmlDeliveryType.FASTQ,
+        samples=samples,
+        name="RmlOrder",
     )

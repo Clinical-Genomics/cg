@@ -4,7 +4,6 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
-    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
@@ -24,6 +23,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleDoesNotExistError,
     SampleNameRepeatedError,
     SexSubjectIdError,
+    StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     VolumeRequiredError,
