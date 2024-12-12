@@ -182,10 +182,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
         list_of_files: list[Path] = get_all_files_in_directory_tree(delivery_path)
         for sample_name in sample_names:
             for file in list_of_files:
-                if (
-                    sample_name in file.as_posix()
-                    and f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file.as_posix()
-                ):
+                if sample_name in file.as_posix() and self._is_fastq_file(file):
                     LOG.debug(
                         f"[CONCATENATION SERVICE] Found fastq file: {file} for sample: {sample_name}"
                     )
@@ -258,9 +255,9 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
             concatenation_maps: list[ConcatenationMap]: List of ConcatenationMap objects.
             formatted_files: list[FormattedFile]: List of formatted files.
         """
-
         for formatted_file in formatted_files:
-            formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
+            if self._is_fastq_file(formatted_file.formatted_path):
+                formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 
     @staticmethod
     def _all_sample_fastq_file_share_same_directory(
@@ -281,3 +278,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
                         f"Sample {sample_name} fastq files are not in the same directory. "
                         f"Cannot concatenate. It will would result in sporadic file paths."
                     )
+
+    @staticmethod
+    def _is_fastq_file(file_path: Path) -> bool:
+        return f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file_path.as_posix()
