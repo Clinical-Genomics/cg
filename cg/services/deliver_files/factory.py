@@ -8,7 +8,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import DataDelivery, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.deliver_files.constants import DeliveryDestination
+from cg.services.deliver_files.constants import DeliveryDestination, DeliveryStructure
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
@@ -43,6 +43,7 @@ from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
 from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
     NestedStructurePathFormatter,
 )
+from cg.services.deliver_files.file_mover.abstract import DestinationFilesMover
 from cg.services.deliver_files.file_mover.customer_inbox_service import (
     CustomerInboxDestinationFilesMover,
 )
@@ -50,6 +51,7 @@ from cg.services.deliver_files.file_mover.base_service import BaseDestinationFil
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
+from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
@@ -117,8 +119,20 @@ class DeliveryServiceFactory:
         )
 
     @staticmethod
-    def _get_file_tag_fetcher(delivery_type: DataDelivery) -> FetchDeliveryFileTagsService:
-        """Get the file tag fetcher based on the delivery type."""
+    def _get_file_tag_fetcher(
+        delivery_type: DataDelivery, delivery_destination: DeliveryDestination
+    ) -> FetchDeliveryFileTagsService:
+        """
+        Get the file tag fetcher based on the delivery type or delivery destination.
+        NOTE: added complexity to handle the FOHM delivery type as it requires a special set of tags as compared to customer delivery.
+        It overrides the default behaviour of the delivery type given by the case.
+        args:
+            delivery_type: The type of delivery to perform.
+            delivery_destination: The destination of the delivery defaults to customer.
+
+        """
+        if delivery_destination == DeliveryDestination.FOHM:
+            return FOHMUploadTagsFetcher()
         service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
@@ -127,7 +141,9 @@ class DeliveryServiceFactory:
         }
         return service_map[delivery_type]()
 
-    def _get_file_fetcher(self, delivery_type: DataDelivery) -> FetchDeliveryFilesService:
+    def _get_file_fetcher(
+        self, delivery_type: DataDelivery, delivery_destination: DeliveryDestination
+    ) -> FetchDeliveryFilesService:
         """Get the file fetcher based on the delivery type."""
         service_map: dict[DataDelivery, Type[FetchDeliveryFilesService]] = {
             DataDelivery.FASTQ: RawDataDeliveryFileFetcher,
@@ -135,7 +151,9 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ_ANALYSIS: RawDataAndAnalysisDeliveryFileFetcher,
             DataDelivery.BAM: RawDataDeliveryFileFetcher,
         }
-        file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(delivery_type)
+        file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(
+            delivery_type=delivery_type, delivery_destination=delivery_destination
+        )
         return service_map[delivery_type](
             status_db=self.store,
             hk_api=self.hk_api,
@@ -164,20 +182,20 @@ class DeliveryServiceFactory:
     def _get_sample_file_formatter(
         self,
         case: Case,
-        delivery_destination: DeliveryDestination,
+        delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
         """Get the file formatter service based on the workflow.
-        Depending on the delivery destination the path name formatter will be different.
+        Depending on the delivery structure the path name formatter will be different.
         Args:
             case: The case to deliver files for.
-            delivery_destination: The destination of the delivery defaults to customer.
+            delivery_structure: The structure of the delivery. See DeliveryStructure enum for explanation. Defaults to nested.
         """
 
         converted_workflow: Workflow = self._convert_workflow(case)
         if converted_workflow in [Workflow.MICROSALT]:
             return SampleFileConcatenationFormatter(
                 file_manager=FileManager(),
-                path_name_formatter=self._get_path_name_formatter(delivery_destination),
+                path_name_formatter=self._get_path_name_formatter(delivery_structure),
                 concatenation_service=FastqConcatenationService(),
             )
         if converted_workflow == Workflow.MUTANT:
@@ -186,25 +204,36 @@ class DeliveryServiceFactory:
                 file_manager=FileManager(),
                 file_formatter=SampleFileConcatenationFormatter(
                     file_manager=FileManager(),
-                    path_name_formatter=self._get_path_name_formatter(delivery_destination),
+                    path_name_formatter=self._get_path_name_formatter(delivery_structure),
                     concatenation_service=FastqConcatenationService(),
                 ),
             )
         return SampleFileFormatter(
             file_manager=FileManager(),
-            path_name_formatter=self._get_path_name_formatter(delivery_destination),
+            path_name_formatter=self._get_path_name_formatter(delivery_structure),
+        )
+
+    def _get_case_file_formatter(self, delivery_structure: DeliveryStructure) -> CaseFileFormatter:
+        """
+        Get the case file formatter based on the delivery structure.
+        args:
+            delivery_structure: The structure of the delivery. See DeliveryStructure enum for explanation.
+        """
+        return CaseFileFormatter(
+            file_manager=FileManager(),
+            path_name_formatter=self._get_path_name_formatter(delivery_structure),
         )
 
     @staticmethod
     def _get_path_name_formatter(
-        delivery_destination: DeliveryDestination,
+        delivery_structure: DeliveryStructure,
     ) -> PathNameFormatter:
         """
         Get the path name formatter based on the delivery destination
-        Args:
-            delivery_destination: The destination of the .
+        args:
+            delivery_structure: The structure of the delivery. See DeliveryStructure enum for explanation.
         """
-        if delivery_destination == DeliveryDestination.BASE:
+        if delivery_structure == DeliveryStructure.FLAT:
             return FlatStructurePathFormatter()
         return NestedStructurePathFormatter()
 
@@ -213,27 +242,32 @@ class DeliveryServiceFactory:
         delivery_destination: DeliveryDestination,
     ) -> CustomerInboxDestinationFilesMover | BaseDestinationFilesMover:
         """Get the file mover based on the delivery type.
-        Args:
-            delivery_destination: The destination of the delivery.
+        args:
+            delivery_destination: The destination of the delivery. See DeliveryDestination enum for explanation.
         """
-        if delivery_destination == DeliveryDestination.BASE:
+        if delivery_destination in [DeliveryDestination.BASE, DeliveryDestination.FOHM]:
             return BaseDestinationFilesMover(FileMover(FileManager()))
         return CustomerInboxDestinationFilesMover(FileMover(FileManager()))
 
     def _get_file_formatter(
         self,
-        delivery_destination: DeliveryDestination,
+        delivery_structure: DeliveryStructure,
         case: Case,
     ) -> DeliveryDestinationFormatter:
-        """Get the file formatter service based on the delivery destination."""
+        """
+        Get the file formatter service based on the delivery destination.
+        args:
+            delivery_structure: The structure of the delivery. See DeliveryStructure enum for explanation.
+            case: The case to deliver files for.
+        """
         sample_file_formatter: (
             SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter
-        ) = self._get_sample_file_formatter(case=case, delivery_destination=delivery_destination)
+        ) = self._get_sample_file_formatter(case=case, delivery_structure=delivery_structure)
+        case_file_formatter: CaseFileFormatter = self._get_case_file_formatter(
+            delivery_structure=delivery_structure
+        )
         return BaseDeliveryFormatter(
-            case_file_formatter=CaseFileFormatter(
-                file_manager=FileManager(),
-                path_name_formatter=self._get_path_name_formatter(delivery_destination),
-            ),
+            case_file_formatter=case_file_formatter,
             sample_file_formatter=sample_file_formatter,
         )
 
@@ -242,24 +276,27 @@ class DeliveryServiceFactory:
         case: Case,
         delivery_type: DataDelivery | None = None,
         delivery_destination: DeliveryDestination = DeliveryDestination.CUSTOMER,
+        delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,
     ) -> DeliverFilesService:
         """Build a delivery service based on a case.
-
-        Args:
+        args:
             case: The case to deliver files for.
             delivery_type: The type of delivery to perform.
-            delivery_destination: The destination of the delivery defaults to customer.
+            delivery_destination: The destination of the delivery defaults to customer. See DeliveryDestination enum for explanation.
+            delivery_structure: The structure of the delivery defaults to nested. See DeliveryStructure enum for explanation.
         """
         delivery_type: DataDelivery = self._sanitise_delivery_type(
             delivery_type if delivery_type else case.data_delivery
         )
         self._validate_delivery_type(delivery_type)
-        file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(delivery_type)
-        file_move_service: CustomerInboxDestinationFilesMover | BaseDestinationFilesMover = (
-            self._get_file_mover(delivery_destination=delivery_destination)
+        file_fetcher: FetchDeliveryFilesService = self._get_file_fetcher(
+            delivery_type=delivery_type, delivery_destination=delivery_destination
+        )
+        file_move_service: DestinationFilesMover = self._get_file_mover(
+            delivery_destination=delivery_destination
         )
         file_formatter: DeliveryDestinationFormatter = self._get_file_formatter(
-            case=case, delivery_destination=delivery_destination
+            case=case, delivery_structure=delivery_structure
         )
         return DeliverFilesService(
             delivery_file_manager_service=file_fetcher,
