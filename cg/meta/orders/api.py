@@ -45,8 +45,6 @@ class OrdersAPI:
         """
         submit_handler: OrderSubmitter = self.submitter_registry.get_order_submitter(order_type)
         order: Order = submit_handler.order_validation_service.parse_and_validate(raw_order)
-        if isinstance(order, dict):
-            return order
         # detect manual ticket assignment
         ticket_number: str | None = self.ticket_handler.parse_ticket_number(order.name)
         if not ticket_number:

@@ -30,7 +30,7 @@ class StoreFastqOrderService(StoreOrderService):
             order_name=order.name,
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
-            delivery_type=order.delivery_type,
+            delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples = self.store_items_in_status(order=order)
@@ -39,8 +39,8 @@ class StoreFastqOrderService(StoreOrderService):
     def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
         """Add a MAF case to the Status database."""
         case: Case = self.status_db.add_case(
-            data_analysis=Workflow(Workflow.MIP_DNA),
-            data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
+            data_analysis=Workflow.MIP_DNA,
+            data_delivery=DataDelivery.NO_DELIVERY,
             name="_".join([sample_obj.name, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
