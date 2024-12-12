@@ -205,7 +205,7 @@ class FOHMUploadAPI:
             case: Case = sample.links[0].case
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case,
-                delivery_type=DataDelivery.FASTQ_ANALYSIS,
+                delivery_type=DataDelivery.FASTQ,
                 delivery_destination=DeliveryDestination.BASE,
             )
             delivery_service.deliver_files_for_fohm_upload(
