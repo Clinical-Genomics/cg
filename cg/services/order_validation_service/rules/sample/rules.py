@@ -18,7 +18,9 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellFormatError,
     WellFormatRmlError,
     WellPositionMissingError,
+    WellPositionRmlMissingError,
 )
+from cg.services.order_validation_service.models.aliases import OrderWithIndexedSamples
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
@@ -227,3 +229,14 @@ def validate_well_positions_required(
 ) -> list[WellPositionMissingError]:
     plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_well_position_missing_errors()
+
+
+def validate_well_positions_required_rml(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[WellPositionRmlMissingError]:
+    errors: list[WellPositionRmlMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if sample.is_on_plate and not sample.well_position_rml:
+            error = WellPositionRmlMissingError(sample_index=sample_index)
+            errors.append(error)
+    return errors

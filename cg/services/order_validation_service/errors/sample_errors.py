@@ -31,6 +31,11 @@ class WellPositionMissingError(SampleError):
     message: str = "Well position is required for well plates"
 
 
+class WellPositionRmlMissingError(SampleError):
+    field: str = "well_position_rml"
+    message: str = "Well position is required for RML plates"
+
+
 class SampleNameRepeatedError(SampleError):
     field: str = "name"
     message: str = "Sample name repeated"

@@ -9,7 +9,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_volume_interval,
     validate_volume_required,
     validate_well_position_rml_format,
-    validate_well_positions_required,
+    validate_well_positions_required_rml,
 )
 
 SAMPLE_RULES: list[callable] = [
@@ -23,5 +23,5 @@ SAMPLE_RULES: list[callable] = [
     validate_volume_interval,
     validate_volume_required,
     validate_well_position_rml_format,
-    validate_well_positions_required,
+    validate_well_positions_required_rml,
 ]
