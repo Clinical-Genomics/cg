@@ -1,7 +1,4 @@
-from cg.services.order_validation_service.constants import (
-    MAXIMUM_VOLUME,
-    MINIMUM_VOLUME,
-)
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 
@@ -33,6 +30,11 @@ class ApplicationNotCompatibleError(CaseSampleError):
 class SampleNameRepeatedError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already used"
+
+
+class SampleNameSameAsCaseNameError(CaseSampleError):
+    field: str = "name"
+    message: str = "Sample name must be different from case name"
 
 
 class InvalidFatherSexError(CaseSampleError):

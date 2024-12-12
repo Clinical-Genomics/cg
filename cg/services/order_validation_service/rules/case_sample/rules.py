@@ -22,6 +22,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     PedigreeError,
     SampleDoesNotExistError,
     SampleNameRepeatedError,
+    SampleNameSameAsCaseNameError,
     SexSubjectIdError,
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
@@ -262,6 +263,23 @@ def validate_sample_names_not_repeated(
         for case_index, sample_index, sample in new_samples
         if sample_name_counter.get(sample.name) > 1 or sample.name in old_sample_names
     ]
+
+
+def validate_sample_names_different_from_case_names(
+    order: OrderWithCases, **kwargs
+) -> list[SampleNameSameAsCaseNameError]:
+    errors: list[SampleNameSameAsCaseNameError] = []
+    all_case_names: set[str] = {case.name for case in order.cases}
+    all_sample_names: set[str] = {sample.name for case in order.cases for sample in case.samples}
+    for case_index, case in order.enumerated_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if sample.name in all_case_names or case.name in all_sample_names:
+                error = SampleNameSameAsCaseNameError(
+                    case_index=case_index,
+                    sample_index=sample_index,
+                )
+                errors.append(error)
+    return errors
 
 
 def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
