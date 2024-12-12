@@ -19,7 +19,10 @@ class FOHMUploadTagsFetcher(FetchDeliveryFileTagsService):
 
     @staticmethod
     def _validate_workflow(workflow: Workflow):
-        """Validate the workflow."""
-        if workflow != Workflow.MUTANT:
+        """
+        Validate the workflow.
+        NOTE: workflow raw data here is required to fit the implementation of the raw data delivery file fetcher.
+        """
+        if workflow != Workflow.MUTANT or workflow != Workflow.RAW_DATA:
             raise ValueError(f"Workflow {workflow} is not supported for FOHM upload file delivery.")
         return workflow
