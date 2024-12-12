@@ -73,7 +73,7 @@ class WellFormatError(SampleError):
 
 class WellFormatRmlError(SampleError):
     field: str = "well_position_rml"
-    message: str = "Well position must follow the format A1-H12"
+    message: str = "Well position must follow the format A-H:1-12"
 
 
 class ContainerNameMissingError(SampleError):

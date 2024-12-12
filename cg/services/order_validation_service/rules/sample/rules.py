@@ -213,7 +213,7 @@ def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[Wel
 
 
 def validate_well_position_rml_format(
-    order: OrderWithSamples, **kwargs
+    order: OrderWithIndexedSamples, **kwargs
 ) -> list[WellFormatRmlError]:
     errors: list[WellFormatRmlError] = []
     for sample_index, sample in order.enumerated_samples:
