@@ -34,7 +34,7 @@ class StoreFastqOrderService(StoreOrderService):
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples = self.store_items_in_status(order=order)
-        return {"samples": new_samples, "project_data": project_data}
+        return {"records": new_samples, "project_data": project_data}
 
     def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
         """Add a MAF case to the Status database."""
