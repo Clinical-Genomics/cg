@@ -8,7 +8,7 @@
 	"samples": [
 		{
 			"age_at_sampling": null,
-			"application": "EXOKTTR040",
+			"application": "WGSPCFC030",
 			"capture_kit": null,
 			"collection_date": null,
 			"comment": "This is a test comment",
@@ -58,7 +58,7 @@
 			"status": null,
 			"subject_id": "subject1",
 			"tissue_block_size": null,
-			"tumour": true,
+			"tumour": false,
 			"tumour_purity": null,
 			"verified_organism": null,
 			"volume": 54,
@@ -67,7 +67,7 @@
 		},
 		{
 			"age_at_sampling": null,
-			"application": "EXOKTTR040",
+			"application": "WGSPCFC030",
 			"capture_kit": null,
 			"collection_date": null,
 			"comment": "This is another test comment",
@@ -117,7 +117,7 @@
 			"status": null,
 			"subject_id": "subject2",
 			"tissue_block_size": null,
-			"tumour": false,
+			"tumour": true,
 			"tumour_purity": null,
 			"verified_organism": null,
 			"volume": 54,

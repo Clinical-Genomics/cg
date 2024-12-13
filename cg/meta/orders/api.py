@@ -14,9 +14,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderType
 from cg.services.order_validation_service.models.order import Order
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
-from cg.services.orders.submitters.order_submitter_registry import (
-    OrderSubmitterRegistry,
-)
+from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)

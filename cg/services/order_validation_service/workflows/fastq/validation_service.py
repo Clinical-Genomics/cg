@@ -1,8 +1,8 @@
-from cg.exc import OrderError
+from cg.exc import OrderSubmissionError
+from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
-from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.utils import (
@@ -21,14 +21,12 @@ class FastqValidationService(OrderValidationService):
         self.store = store
 
     def validate(self, raw_order: dict) -> dict:
-        errors: ValidationErrors = self._get_errors(raw_order)
+        parsed_order, errors = ModelValidator.validate(order=raw_order, model=FastqOrder)
+        if parsed_order:
+            errors: ValidationErrors = self._perform_rule_validation(order=parsed_order)
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
-    def _get_errors(self, raw_order: dict) -> ValidationErrors:
-        order, field_errors = ModelValidator.validate(order=raw_order, model=FastqOrder)
-
-        if not order:
-            return field_errors
+    def _perform_rule_validation(self, order: FastqOrder) -> ValidationErrors:
 
         order_errors: list[OrderError] = apply_order_validation(
             rules=ORDER_RULES,
@@ -46,5 +44,10 @@ class FastqValidationService(OrderValidationService):
             order_errors=order_errors,
         )
 
-    def parse_and_validate(self, raw_order: dict) -> Order:
-        pass
+    def parse_and_validate(self, raw_order: dict) -> FastqOrder:
+        parsed_order, errors = ModelValidator.validate(order=raw_order, model=FastqOrder)
+        if parsed_order:
+            errors: ValidationErrors = self._perform_rule_validation(order=parsed_order)
+        if not errors.is_empty:
+            raise OrderSubmissionError(message="Order contained errors")
+        return parsed_order

@@ -2,8 +2,8 @@ import pytest
 
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
-from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
@@ -25,16 +25,6 @@ def balsamic_status_data(
     project: OrderType = OrderType.BALSAMIC
     order: OrderIn = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=project)
     return store_generic_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def fastq_status_data(
-    fastq_order_to_submit, store_fastq_order_service: StoreFastqOrderService
-) -> dict:
-    """Parse fastq order example."""
-    project: OrderType = OrderType.FASTQ
-    order: OrderIn = OrderIn.parse_obj(obj=fastq_order_to_submit, project=project)
-    return store_fastq_order_service.order_to_status(order=order)
 
 
 @pytest.fixture
@@ -117,3 +107,10 @@ def tomte_status_data(
     project: OrderType = OrderType.TOMTE
     order: OrderIn = OrderIn.parse_obj(obj=tomte_order_to_submit, project=project)
     return store_generic_order_service.order_to_status(order=order)
+
+
+@pytest.fixture
+def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
+    fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
+    fastq_order.ticket_number = 123456
+    return fastq_order
