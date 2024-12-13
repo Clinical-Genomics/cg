@@ -109,8 +109,12 @@ def hk_delivery_case_bundle_fohm_upload(
     sample_id: str,
     another_sample_id: str,
     delivery_report_file: Path,
-    delivery_cram_file: Path,
-    delivery_another_cram_file: Path,
+    delivery_case_fastq_file: Path,
+    delivery_another_case_fastq_file: Path,
+    delivery_consensus_sample_file: Path,
+    delivery_another_consensus_sample_file: Path,
+    delivery_vcf_report_file: Path,
+    delivery_another_vcf_report_file: Path,
 ) -> dict:
     case_hk_bundle: dict[str, Any] = deepcopy(case_hk_bundle_no_files)
     case_hk_bundle["name"] = case_id
@@ -122,12 +126,32 @@ def hk_delivery_case_bundle_fohm_upload(
         },
         {
             "archive": False,
-            "path": delivery_cram_file.as_posix(),
+            "path": delivery_case_fastq_file.as_posix(),
+            "tags": ["fastq", sample_id],
+        },
+        {
+            "archive": False,
+            "path": delivery_another_case_fastq_file.as_posix(),
+            "tags": ["fastq", another_sample_id],
+        },
+        {
+            "archive": False,
+            "path": delivery_consensus_sample_file.as_posix(),
             "tags": ["consensus-sample", sample_id],
         },
         {
             "archive": False,
-            "path": delivery_another_cram_file.as_posix(),
+            "path": delivery_another_consensus_sample_file.as_posix(),
+            "tags": ["consensus-sample", another_sample_id],
+        },
+        {
+            "archive": False,
+            "path": delivery_vcf_report_file.as_posix(),
+            "tags": ["vcf-report", sample_id],
+        },
+        {
+            "archive": False,
+            "path": delivery_another_vcf_report_file.as_posix(),
             "tags": ["vcf-report", another_sample_id],
         },
     ]

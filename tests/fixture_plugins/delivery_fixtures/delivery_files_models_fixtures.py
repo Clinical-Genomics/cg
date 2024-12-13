@@ -103,6 +103,66 @@ def expected_bam_delivery_files_single_sample(
 
 
 @pytest.fixture
+def expected_fohm_delivery_files(
+    delivery_fohm_upload_housekeeper_api: HousekeeperAPI,
+    case_id: str,
+    case_name: str,
+    sample_id: str,
+    sample_name: str,
+    another_sample_id: str,
+    another_sample_name: str,
+    delivery_store_mutant: Store,
+) -> DeliveryFiles:
+    """Return the expected fastq delivery files."""
+    sample_info: list[tuple[str, str]] = [
+        (sample_id, sample_name),
+        (another_sample_id, another_sample_name),
+    ]
+    sample_files: list[SampleFile] = [
+        SampleFile(
+            case_id=case_id,
+            sample_id=sample[0],
+            sample_name=sample[1],
+            file_path=delivery_fohm_upload_housekeeper_api.get_files_from_latest_version(
+                bundle_name=sample[0], tags=[SequencingFileTag.FASTQ]
+            )[0].full_path,
+        )
+        for sample in sample_info
+    ]
+    case_sample_info: list[tuple[str, str, str]] = [
+        (sample_id, sample_name, "consensus-sample"),
+        (sample_id, sample_name, "vcf-report"),
+        (another_sample_id, another_sample_name, "consensus-sample"),
+        (another_sample_id, another_sample_name, "vcf-report"),
+    ]
+    case_sample_files: list[SampleFile] = [
+        SampleFile(
+            case_id=case_id,
+            sample_id=sample[0],
+            sample_name=sample[1],
+            file_path=delivery_fohm_upload_housekeeper_api.get_files_from_latest_version_containing_tags(
+                bundle_name=case_id, tags=[{sample[2], sample[0]}]
+            )[
+                0
+            ].full_path,
+        )
+        for sample in case_sample_info
+    ]
+
+    case: Case = delivery_store_mutant.get_case_by_internal_id(case_id)
+    delivery_meta_data = DeliveryMetaData(
+        case_id=case.internal_id,
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
+    )
+    return DeliveryFiles(
+        delivery_data=delivery_meta_data,
+        case_files=[],
+        sample_files=case_sample_files + sample_files,
+    )
+
+
+@pytest.fixture
 def expected_analysis_delivery_files(
     delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,

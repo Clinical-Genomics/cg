@@ -16,12 +16,15 @@ class FOHMUploadTagsFetcher(FetchDeliveryFileTagsService):
         if workflow is RAW_DATA, return tags for fastq to fetch fastq files from the sample bundle.
         Required since some of the sample specific files are stored on the case bundle, but also fastq files.
         Not separating these would cause fetching of case bundle fastq files if present.
+
+        args:
+            workflow: Workflow: The workflow to fetch tags
         """
         self._validate_workflow(workflow=workflow)
         return (
             DeliveryFileTags(
                 case_tags=None,
-                sample_tags=[{"consensus-sample", "vcf-report"}],
+                sample_tags=[{"consensus-sample"}, {"vcf-report"}],
             )
             if workflow == Workflow.MUTANT
             else DeliveryFileTags(
@@ -35,6 +38,8 @@ class FOHMUploadTagsFetcher(FetchDeliveryFileTagsService):
         """
         Validate the workflow.
         NOTE: workflow raw data here is required to fit the implementation of the raw data delivery file fetcher.
+        args:
+            workflow: Workflow: The workflow to validate.
         """
         if workflow not in [Workflow.MUTANT, Workflow.RAW_DATA]:
             raise ValueError(f"Workflow {workflow} is not supported for FOHM upload file delivery.")

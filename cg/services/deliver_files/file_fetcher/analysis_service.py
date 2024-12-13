@@ -42,7 +42,10 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         """Return a list of analysis files to be delivered for a case."""
         LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(case)
+        analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(
+            case=case, sample_id=sample_id
+        )
+
         analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(
             case=case, sample_id=sample_id
         )
@@ -73,9 +76,11 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile]:
+    ) -> list[SampleFile] | None:
         """Return a list of files from a case bundle with a sample id as tag."""
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
+        if not sample_tags:
+            return []
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
         sample_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case_id, tags=sample_tags_with_sample_id
@@ -105,13 +110,17 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         return delivery_files
 
     @handle_missing_bundle_errors
-    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile]:
+    def _get_analysis_case_delivery_files(
+        self, case: Case, sample_id: str | None
+    ) -> list[CaseFile] | None:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
         files.
         """
         case_tags: list[set[str]] = self.tags_fetcher.fetch_tags(case.data_analysis).case_tags
-        sample_id_tags: list[str] = case.sample_ids
+        if not case_tags:
+            return []
+        sample_id_tags: list[str] = [sample_id] if sample_id else case.sample_ids
         case_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_id_tags
         )

@@ -76,4 +76,4 @@ def test_fohm_upload_tags_fetcher():
 
     # THEN assert that the tags are fetched
     assert tags.case_tags is None
-    assert tags.sample_tags == [{"consensus-sample", "vcf-report"}]
+    assert tags.sample_tags == [{"consensus-sample"}, {"vcf-report"}]
