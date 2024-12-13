@@ -13,8 +13,8 @@ LOG = logging.getLogger(__name__)
 class FastqConcatenationService:
     """Fastq file concatenation service."""
 
-    @staticmethod
     def concatenate(
+        self,
         sample_id: str,
         fastq_directory: Path,
         forward_output_path: Path,
@@ -32,6 +32,9 @@ class FastqConcatenationService:
         """
         LOG.debug(
             f"[Concatenation Service] Concatenating fastq files for {sample_id} in {fastq_directory}"
+        )
+        self._concatenation_paths_exist(
+            forward_output_path=forward_output_path, reverse_output_path=reverse_output_path
         )
         temp_forward: Path | None = concatenate_fastq_reads_for_direction(
             directory=fastq_directory, sample_id=sample_id, direction=ReadDirection.FORWARD
@@ -55,3 +58,11 @@ class FastqConcatenationService:
         if temp_reverse:
             LOG.info(f"Concatenated reverse reads to {reverse_output_path}")
             temp_reverse.rename(reverse_output_path)
+
+    @staticmethod
+    def _concatenation_paths_exist(forward_output_path: Path, reverse_output_path: Path) -> bool:
+        """Check if the concatenation paths exist."""
+        if forward_output_path.exists() or reverse_output_path.exists():
+            raise FileExistsError(
+                "The concatenation paths already exist in the directory. This could cause data loss or duplication issues. Please remove the existing files before concatenating."
+            )
