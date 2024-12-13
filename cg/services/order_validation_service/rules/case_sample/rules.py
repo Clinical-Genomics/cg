@@ -4,11 +4,9 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.case_errors import InvalidGenePanelsError
 from cg.services.order_validation_service.errors.case_sample_errors import (
-    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
-    CaseNameSampleNameSameError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -23,7 +21,9 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     PedigreeError,
     SampleDoesNotExistError,
     SampleNameRepeatedError,
+    SampleNameSameAsCaseNameError,
     SexSubjectIdError,
+    StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     VolumeRequiredError,
@@ -264,6 +264,22 @@ def validate_sample_names_not_repeated(
     ]
 
 
+def validate_sample_names_different_from_case_names(
+    order: OrderWithCases, **kwargs
+) -> list[SampleNameSameAsCaseNameError]:
+    """Return errors with the indexes of samples having the same name as any case in the order."""
+    errors: list[SampleNameSameAsCaseNameError] = []
+    all_case_names: set[str] = {case.name for case in order.cases}
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if sample.name in all_case_names:
+            error = SampleNameSameAsCaseNameError(
+                case_index=case_index,
+                sample_index=sample_index,
+            )
+            errors.append(error)
+    return errors
+
+
 def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for index, case in order.enumerated_cases:
@@ -391,21 +407,6 @@ def validate_tube_container_name_unique(
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
-    return errors
-
-
-def validate_case_names_different_from_sample_names(
-    order: OrderWithCases, **kwargs
-) -> list[CaseNameSampleNameSameError]:
-    errors: list[CaseNameSampleNameSameError] = []
-
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if sample.name == case.name:
-                error = CaseNameSampleNameSameError(
-                    case_index=case_index, sample_index=sample_index
-                )
                 errors.append(error)
     return errors
 

@@ -9,6 +9,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     SampleNameNotAvailableError,
     VolumeRequiredError,
     WellFormatError,
+    WellFormatRmlError,
 )
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_buffer_skip_rc_condition,
@@ -19,9 +20,11 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_tube_container_name_unique,
     validate_volume_required,
     validate_well_position_format,
+    validate_well_position_rml_format,
 )
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -75,6 +78,22 @@ def test_validate_well_position_format(valid_microsalt_order: MicrosaltOrder):
 
     # THEN the error should concern the invalid well position
     assert isinstance(errors[0], WellFormatError)
+    assert errors[0].sample_index == 0
+
+
+def test_validate_well_position_rml_format(valid_rml_order: RmlOrder):
+
+    # GIVEN an order with a sample with an invalid well position
+    valid_rml_order.samples[0].well_position_rml = "J:4"
+
+    # WHEN validating the well position format
+    errors = validate_well_position_rml_format(order=valid_rml_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid well position
+    assert isinstance(errors[0], WellFormatRmlError)
     assert errors[0].sample_index == 0
 
 
