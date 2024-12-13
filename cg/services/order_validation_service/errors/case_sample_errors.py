@@ -1,7 +1,4 @@
-from cg.services.order_validation_service.constants import (
-    MAXIMUM_VOLUME,
-    MINIMUM_VOLUME,
-)
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 
@@ -33,6 +30,11 @@ class ApplicationNotCompatibleError(CaseSampleError):
 class SampleNameRepeatedError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already used"
+
+
+class SampleNameSameAsCaseNameError(CaseSampleError):
+    field: str = "name"
+    message: str = "Sample name can not be the same as any case name in order"
 
 
 class InvalidFatherSexError(CaseSampleError):
@@ -153,11 +155,6 @@ class WellFormatError(CaseSampleError):
 class ContainerNameRepeatedError(CaseSampleError):
     field: str = "container_name"
     message: str = "Tube names must be unique among samples"
-
-
-class CaseNameSampleNameSameError(CaseSampleError):
-    field: str = "name"
-    message: str = "Sample name must be different from case name"
 
 
 class StatusUnknownError(CaseSampleError):
