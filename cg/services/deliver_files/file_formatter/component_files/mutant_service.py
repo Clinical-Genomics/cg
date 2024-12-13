@@ -73,7 +73,7 @@ class MutantFileFormatter(ComponentFormatter):
         """
         appended_formatted_files: list[FormattedFile] = []
         for formatted_file in formatted_files:
-            if self.file_formatter._is_fastq_file(formatted_file.formatted_path):
+            if self.file_formatter._is_lane_fastq_file(formatted_file.formatted_path):
                 sample_id: str = self._get_sample_id_by_original_path(
                     original_path=formatted_file.original_path, sample_files=sample_files
                 )

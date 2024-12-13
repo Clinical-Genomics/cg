@@ -182,7 +182,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
         list_of_files: list[Path] = get_all_files_in_directory_tree(delivery_path)
         for sample_name in sample_names:
             for file in list_of_files:
-                if sample_name in file.as_posix() and self._is_fastq_file(file):
+                if sample_name in file.as_posix() and self._is_lane_fastq_file(file):
                     LOG.debug(
                         f"[CONCATENATION SERVICE] Found fastq file: {file} for sample: {sample_name}"
                     )
@@ -256,7 +256,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
             formatted_files: list[FormattedFile]: List of formatted files.
         """
         for formatted_file in formatted_files:
-            if self._is_fastq_file(formatted_file.formatted_path):
+            if self._is_lane_fastq_file(formatted_file.formatted_path):
                 formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 
     @staticmethod
@@ -280,5 +280,8 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
                     )
 
     @staticmethod
-    def _is_fastq_file(file_path: Path) -> bool:
-        return f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file_path.as_posix()
+    def _is_lane_fastq_file(file_path: Path) -> bool:
+        return (
+            f".*_L[0-9]{3}_R[1-2]_[0-9]+{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+            in file_path.as_posix()
+        )
