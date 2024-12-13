@@ -13,8 +13,8 @@ class FOHMUploadTagsFetcher(FetchDeliveryFileTagsService):
         """Fetch the tags for the bam files to deliver."""
         self._validate_workflow(workflow=workflow)
         return DeliveryFileTags(
-            case_tags=[{"fohm-delivery"}],
-            sample_tags=[{SequencingFileTag.FASTQ}],
+            case_tags=None,
+            sample_tags=[{SequencingFileTag.FASTQ, "consensus-sample", "vcf-report"}],
         )
 
     @staticmethod
