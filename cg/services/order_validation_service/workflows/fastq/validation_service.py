@@ -1,4 +1,5 @@
-from cg.exc import OrderError, OrderFormError
+from cg.exc import OrderSubmissionError
+from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
@@ -48,5 +49,5 @@ class FastqValidationService(OrderValidationService):
         if parsed_order:
             errors: ValidationErrors = self._perform_rule_validation(order=parsed_order)
         if not errors.is_empty:
-            raise OrderFormError(message="Order form contained errors")
+            raise OrderSubmissionError(message="Order contained errors")
         return parsed_order
