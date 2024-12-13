@@ -34,7 +34,7 @@ class SampleNameRepeatedError(CaseSampleError):
 
 class SampleNameSameAsCaseNameError(CaseSampleError):
     field: str = "name"
-    message: str = "Sample name must be different from case name"
+    message: str = "Sample name can not be the same as any case name in order"
 
 
 class InvalidFatherSexError(CaseSampleError):
