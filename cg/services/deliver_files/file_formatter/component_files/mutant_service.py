@@ -65,6 +65,7 @@ class MutantFileFormatter(ComponentFormatter):
         """
         This functions adds the region and lab code to the file name of the formatted files.
         Note: The region and lab code is fetched from LIMS using the sample id. It is required for delivery of the files.
+        This should only be done for concatenated fastq files.
 
         args:
             formatted_files: The formatted files to add the metadata to
@@ -72,19 +73,24 @@ class MutantFileFormatter(ComponentFormatter):
         """
         appended_formatted_files: list[FormattedFile] = []
         for formatted_file in formatted_files:
-            sample_id: str = self._get_sample_id_by_original_path(
-                original_path=formatted_file.original_path, sample_files=sample_files
-            )
-            lims_meta_data = self.lims_api.get_sample_region_and_lab_code(sample_id)
+            if self.file_formatter._is_fastq_file(formatted_file.formatted_path):
+                sample_id: str = self._get_sample_id_by_original_path(
+                    original_path=formatted_file.original_path, sample_files=sample_files
+                )
+                lims_meta_data = self.lims_api.get_sample_region_and_lab_code(sample_id)
 
-            new_original_path: Path = formatted_file.formatted_path
-            new_formatted_path = Path(
-                formatted_file.formatted_path.parent,
-                f"{lims_meta_data}{formatted_file.formatted_path.name}",
-            )
-            appended_formatted_files.append(
-                FormattedFile(original_path=new_original_path, formatted_path=new_formatted_path)
-            )
+                new_original_path: Path = formatted_file.formatted_path
+                new_formatted_path = Path(
+                    formatted_file.formatted_path.parent,
+                    f"{lims_meta_data}{formatted_file.formatted_path.name}",
+                )
+                appended_formatted_files.append(
+                    FormattedFile(
+                        original_path=new_original_path, formatted_path=new_formatted_path
+                    )
+                )
+            else:
+                appended_formatted_files.append(formatted_file)
         return appended_formatted_files
 
     @staticmethod
