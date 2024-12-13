@@ -3,11 +3,9 @@ import pytest
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.models.orders.samples import TomteSample
 from cg.services.order_validation_service.errors.case_sample_errors import (
-    StatusUnknownError,
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
-    CaseNameSampleNameSameError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -17,7 +15,9 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameRepeatedError,
+    SampleNameSameAsCaseNameError,
     SexSubjectIdError,
+    StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
     VolumeRequiredError,
@@ -31,11 +31,11 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_exists,
     validate_application_not_archived,
     validate_buffers_are_allowed,
-    validate_case_names_different_from_sample_names,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
     validate_not_all_samples_unknown_in_case,
+    validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
@@ -402,20 +402,26 @@ def test_validate_sex_subject_id_clash(valid_order: OrderWithCases, sample_store
     assert isinstance(errors[0], SexSubjectIdError)
 
 
-def test_validate_case_names_different_from_sample_names(valid_order: OrderWithCases):
-    # GIVEN an order with a sample with the same name as the case
-    valid_order.cases[0].samples[0].name = valid_order.cases[0].name
+def test_validate_sample_names_different_from_case_names(
+    order_with_samples_having_same_names_as_cases: OrderWithCases,
+):
+    # GIVEN an order with a case holding samples with the same name as cases in the order
 
-    # WHEN validating that the case names are different from the sample names
-    errors: list[CaseNameSampleNameSameError] = validate_case_names_different_from_sample_names(
-        valid_order
+    # WHEN validating that the sample names are different from the case names
+    errors: list[SampleNameSameAsCaseNameError] = validate_sample_names_different_from_case_names(
+        order_with_samples_having_same_names_as_cases
     )
 
-    # THEN an error should be returned
-    assert errors
+    # THEN a list with two errors should be returned
+    assert len(errors) == 2
 
-    # THEN the error should concern the same case and sample name
-    assert isinstance(errors[0], CaseNameSampleNameSameError)
+    # THEN the errors should concern the same case and sample name and hold the correct indices
+    for error in errors:
+        assert isinstance(error, SampleNameSameAsCaseNameError)
+        assert error.case_index == 0
+
+    assert errors[0].sample_index == 0
+    assert errors[1].sample_index == 1
 
 
 def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):

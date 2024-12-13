@@ -157,11 +157,6 @@ class ContainerNameRepeatedError(CaseSampleError):
     message: str = "Tube names must be unique among samples"
 
 
-class CaseNameSampleNameSameError(CaseSampleError):
-    field: str = "name"
-    message: str = "Sample name must be different from case name"
-
-
 class StatusUnknownError(CaseSampleError):
     field: str = "status"
     message: str = "Samples in case cannot all have status unknown"
