@@ -14,4 +14,5 @@ class ValidationErrors(BaseModel):
 
     @property
     def is_empty(self) -> bool:
+        """Return True if there are no errors in any of the attributes."""
         return all(not getattr(self, field) for field in self.model_fields)
