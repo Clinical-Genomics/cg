@@ -33,7 +33,7 @@ class StoreFastqOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-        new_samples = self.store_items_in_status(order=order)
+        new_samples: list[Sample] = self.store_items_in_status(order=order)
         return {"records": new_samples, "project_data": project_data}
 
     def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
