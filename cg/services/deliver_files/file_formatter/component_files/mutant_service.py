@@ -63,9 +63,9 @@ class MutantFileFormatter(ComponentFormatter):
     def _is_concatenated_file(file_path: Path) -> bool:
         """Check if the file is a concatenated file.
         Returns True if the file is a concatenated file, otherwise False.
-        regex pattern: *._R[1,2]_[0-9]+.fastq.gz
+        regex pattern: *._[1,2].fastq.gz
         *. is the sample id
-        _R[1,2] is the read direction
+        _[1,2] is the read direction
         .fastq.gz is the file extension
         args:
             file_path: The file path to check
