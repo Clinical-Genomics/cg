@@ -85,10 +85,10 @@ def expected_concatenated_fastq_formatted_files(
         replaced_sample_file_name: str = sample_file.file_path.name.replace(
             sample_file.sample_id, sample_file.sample_name
         )
-        replaced_sample_file_name = replaced_sample_file_name.replace("1_R1_1", "1")
-        replaced_sample_file_name = replaced_sample_file_name.replace("2_R1_1", "1")
-        replaced_sample_file_name = replaced_sample_file_name.replace("1_R2_1", "2")
-        replaced_sample_file_name = replaced_sample_file_name.replace("2_R2_1", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L001_R1_001", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L002_R1_001", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L001_R2_001", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L002_R2_001", "2")
         formatted_file_path = Path(
             sample_file.file_path.parent, sample_file.sample_name, replaced_sample_file_name
         )
@@ -107,10 +107,10 @@ def expected_concatenated_fastq_flat_formatted_files(
         replaced_sample_file_name: str = sample_file.file_path.name.replace(
             sample_file.sample_id, sample_file.sample_name
         )
-        replaced_sample_file_name = replaced_sample_file_name.replace("1_R1_1", "1")
-        replaced_sample_file_name = replaced_sample_file_name.replace("2_R1_1", "1")
-        replaced_sample_file_name = replaced_sample_file_name.replace("1_R2_1", "2")
-        replaced_sample_file_name = replaced_sample_file_name.replace("2_R2_1", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L001_R1_001", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L002_R1_001", "1")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L001_R2_001", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("L002_R2_001", "2")
         formatted_file_path = Path(sample_file.file_path.parent, replaced_sample_file_name)
         formatted_files.append(
             FormattedFile(original_path=sample_file.file_path, formatted_path=formatted_file_path)

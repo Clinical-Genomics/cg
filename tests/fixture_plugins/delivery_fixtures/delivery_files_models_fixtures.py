@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -100,6 +101,66 @@ def expected_bam_delivery_files_single_sample(
         if sample_file.sample_id == sample_id
     ]
     return expected_bam_delivery_files
+
+
+@pytest.fixture
+def expected_fohm_delivery_files(
+    delivery_fohm_upload_housekeeper_api: HousekeeperAPI,
+    case_id: str,
+    case_name: str,
+    sample_id: str,
+    sample_name: str,
+    another_sample_id: str,
+    another_sample_name: str,
+    delivery_store_mutant: Store,
+) -> DeliveryFiles:
+    """Return the expected fastq delivery files."""
+    sample_info: list[tuple[str, str]] = [
+        (sample_id, sample_name),
+        (another_sample_id, another_sample_name),
+    ]
+    sample_files: list[SampleFile] = [
+        SampleFile(
+            case_id=case_id,
+            sample_id=sample[0],
+            sample_name=sample[1],
+            file_path=delivery_fohm_upload_housekeeper_api.get_files_from_latest_version(
+                bundle_name=sample[0], tags=[SequencingFileTag.FASTQ]
+            )[0].full_path,
+        )
+        for sample in sample_info
+    ]
+    case_sample_info: list[tuple[str, str, str]] = [
+        (sample_id, sample_name, "consensus-sample"),
+        (sample_id, sample_name, "vcf-report"),
+        (another_sample_id, another_sample_name, "consensus-sample"),
+        (another_sample_id, another_sample_name, "vcf-report"),
+    ]
+    case_sample_files: list[SampleFile] = [
+        SampleFile(
+            case_id=case_id,
+            sample_id=sample[0],
+            sample_name=sample[1],
+            file_path=delivery_fohm_upload_housekeeper_api.get_files_from_latest_version_containing_tags(
+                bundle_name=case_id, tags=[{sample[2], sample[0]}]
+            )[
+                0
+            ].full_path,
+        )
+        for sample in case_sample_info
+    ]
+
+    case: Case = delivery_store_mutant.get_case_by_internal_id(case_id)
+    delivery_meta_data = DeliveryMetaData(
+        case_id=case.internal_id,
+        customer_internal_id=case.customer.internal_id,
+        ticket_id=case.latest_ticket,
+    )
+    return DeliveryFiles(
+        delivery_data=delivery_meta_data,
+        case_files=[],
+        sample_files=case_sample_files + sample_files,
+    )
 
 
 @pytest.fixture
@@ -242,10 +303,10 @@ def fastq_concatenation_sample_files(
     sample_files = []
     for sample_id, sample_name in sample_data:
         fastq_paths: list[Path] = [
-            Path(tmp_path, inbox, f"{sample_id}_1_R1_1.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_2_R1_1.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_1_R2_1.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_2_R2_1.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_L001_R1_001.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_L002_R1_001.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_L001_R2_001.fastq.gz"),
+            Path(tmp_path, inbox, f"{sample_id}_L002_R2_001.fastq.gz"),
         ]
 
         sample_files.extend(
@@ -268,10 +329,10 @@ def fastq_concatenation_sample_files_flat(tmp_path: Path) -> list[SampleFile]:
     sample_files = []
     for sample_id, sample_name in sample_data:
         fastq_paths: list[Path] = [
-            Path(tmp_path, f"{sample_id}_1_R1_1.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_2_R1_1.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_1_R2_1.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_2_R2_1.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_L001_R1_001.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_L002_R1_001.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_L001_R2_001.fastq.gz"),
+            Path(tmp_path, f"{sample_id}_L002_R2_001.fastq.gz"),
         ]
 
         sample_files.extend(
@@ -301,20 +362,20 @@ def swap_file_paths_with_inbox_paths(
 
 
 @pytest.fixture
-def lims_naming_matadata() -> str:
+def lims_naming_metadata() -> str:
     return "01_SE100_"
 
 
 @pytest.fixture
 def expected_mutant_formatted_files(
-    expected_concatenated_fastq_formatted_files, lims_naming_matadata
+    expected_concatenated_fastq_formatted_files, lims_naming_metadata
 ) -> list[FormattedFile]:
     unique_combinations = []
     for formatted_file in expected_concatenated_fastq_formatted_files:
         formatted_file.original_path = formatted_file.formatted_path
         formatted_file.formatted_path = Path(
             formatted_file.formatted_path.parent,
-            f"{lims_naming_matadata}{formatted_file.formatted_path.name}",
+            f"{lims_naming_metadata}{formatted_file.formatted_path.name}",
         )
         if formatted_file not in unique_combinations:
             unique_combinations.append(formatted_file)

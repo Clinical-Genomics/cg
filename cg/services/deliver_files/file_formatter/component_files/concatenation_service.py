@@ -1,5 +1,7 @@
 import logging
 from pathlib import Path
+import re
+
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
 from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
 from cg.services.deliver_files.file_formatter.component_files.models import FastqFile
@@ -182,7 +184,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
         list_of_files: list[Path] = get_all_files_in_directory_tree(delivery_path)
         for sample_name in sample_names:
             for file in list_of_files:
-                if sample_name in file.as_posix() and self._is_fastq_file(file):
+                if sample_name in file.as_posix() and self._is_lane_fastq_file(file):
                     LOG.debug(
                         f"[CONCATENATION SERVICE] Found fastq file: {file} for sample: {sample_name}"
                     )
@@ -193,6 +195,10 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
                             read_direction=self._determine_read_direction(file),
                         )
                     )
+        if not sample_paths:
+            raise FileNotFoundError(
+                f"Could not find any fastq files to concatenate in {delivery_path}."
+            )
         return sample_paths
 
     @staticmethod
@@ -256,7 +262,7 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
             formatted_files: list[FormattedFile]: List of formatted files.
         """
         for formatted_file in formatted_files:
-            if self._is_fastq_file(formatted_file.formatted_path):
+            if self._is_lane_fastq_file(formatted_file.formatted_path):
                 formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 
     @staticmethod
@@ -280,5 +286,22 @@ class SampleFileConcatenationFormatter(ComponentFormatter):
                     )
 
     @staticmethod
-    def _is_fastq_file(file_path: Path) -> bool:
-        return f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file_path.as_posix()
+    def _is_lane_fastq_file(file_path: Path) -> bool:
+        """Check if a fastq file is a from a lane and read direction.
+        Note pattern: *_L[0-9]{3}_R[1-2]_[0-9]{3}.fastq.gz
+        *_ is a wildcard for the flow cell id followed by sample name.
+        L[0-9]{3} is the lane number, i.e. L001, L002 etc.
+        R[1-2] is the read direction, i.e. R1 or R2.
+        [0-9]{3} is the trailing three digits after read direction.
+        args:
+            file_path: Path: Path to the fastq file.
+        """
+
+        pattern = f".*_L[0-9]{{3}}_R[1-2]_[0-9]{{3}}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        return (
+            re.fullmatch(
+                pattern=pattern,
+                string=file_path.name,
+            )
+            is not None
+        )

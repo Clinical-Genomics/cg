@@ -104,7 +104,7 @@ def test_component_formatters(
 def test_mutant_file_formatter(
     mutant_moved_files: list[SampleFile],
     expected_mutant_formatted_files: list[FormattedFile],
-    lims_naming_matadata: str,
+    lims_naming_metadata: str,
 ):
     # GIVEN existing ticket directory path and a customer inbox
     ticket_dir_path: Path = mutant_moved_files[0].file_path.parent
@@ -115,7 +115,7 @@ def test_mutant_file_formatter(
         moved_file.file_path.touch()
 
     lims_mock = Mock()
-    lims_mock.get_sample_region_and_lab_code.return_value = lims_naming_matadata
+    lims_mock.get_sample_region_and_lab_code.return_value = lims_naming_metadata
     file_formatter = MutantFileFormatter(
         file_manager=FileManager(),
         file_formatter=SampleFileConcatenationFormatter(

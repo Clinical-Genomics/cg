@@ -1,10 +1,14 @@
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
+    RawDataAndAnalysisDeliveryFileFetcher,
+)
 from cg.services.deliver_files.file_formatter.destination.base_service import BaseDeliveryFormatter
 from cg.services.deliver_files.tag_fetcher.bam_service import (
     BamDeliveryTagsFetcher,
 )
+from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
 )
@@ -79,6 +83,20 @@ def bam_data_delivery_service_no_housekeeper_bundle(
     return RawDataDeliveryFileFetcher(
         hk_api=real_housekeeper_api,
         status_db=delivery_store_microsalt,
+        tags_fetcher=tag_service,
+    )
+
+
+@pytest.fixture
+def fohm_data_delivery_service(
+    delivery_fohm_upload_housekeeper_api: HousekeeperAPI,
+    delivery_store_mutant: Store,
+) -> RawDataAndAnalysisDeliveryFileFetcher:
+    """Fixture to get an instance of FetchFastqDeliveryFilesService."""
+    tag_service = FOHMUploadTagsFetcher()
+    return RawDataAndAnalysisDeliveryFileFetcher(
+        hk_api=delivery_fohm_upload_housekeeper_api,
+        status_db=delivery_store_mutant,
         tags_fetcher=tag_service,
     )
 

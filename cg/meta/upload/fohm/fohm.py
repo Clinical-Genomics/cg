@@ -15,7 +15,7 @@ from cg.io.csv import read_csv, write_csv_from_dict
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
-from cg.services.deliver_files.constants import DeliveryDestination
+from cg.services.deliver_files.constants import DeliveryDestination, DeliveryStructure
 from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
@@ -205,8 +205,9 @@ class FOHMUploadAPI:
             case: Case = sample.links[0].case
             delivery_service = self._delivery_factory.build_delivery_service(
                 case=case,
-                delivery_type=DataDelivery.FASTQ,
-                delivery_destination=DeliveryDestination.BASE,
+                delivery_type=DataDelivery.FASTQ_ANALYSIS,
+                delivery_destination=DeliveryDestination.FOHM,
+                delivery_structure=DeliveryStructure.FLAT,
             )
             delivery_service.deliver_files_for_fohm_upload(
                 case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
