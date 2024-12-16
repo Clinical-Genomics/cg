@@ -17,7 +17,6 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
-    OrderExistsError,
     OrderFormError,
     OrderNotDeliverableError,
     OrderNotFoundError,
@@ -181,9 +180,6 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
-        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
-            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
         result: dict = api.submit(
             project=project,
@@ -194,7 +190,6 @@ def submit_order(order_type):
 
     except (  # user misbehaviour
         OrderError,
-        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
