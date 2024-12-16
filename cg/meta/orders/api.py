@@ -37,7 +37,9 @@ class OrdersAPI:
         self.submitter_registry = submitter_registry
 
     def submit(
-        self, order_type: OrderType, raw_order: dict, user_name: str, user_mail: str
+        self,
+        order_type: OrderType,
+        raw_order: dict,
     ) -> dict:
         """Submit a batch of samples.
 
