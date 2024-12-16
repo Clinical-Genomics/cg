@@ -298,10 +298,6 @@ class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
 
 
-class OrderExistsError(CgError):
-    """Exception raised when cases and samples are added to a pre-existing order."""
-
-
 class OrderMismatchError(CgError):
     """Exception raised when cases expected to belong to the same order are not part of the same order."""
 

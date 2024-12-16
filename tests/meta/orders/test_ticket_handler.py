@@ -1,17 +1,6 @@
 from cg.meta.orders.ticket_handler import TicketHandler
 
 
-def test_parse_ticket_number(ticket_id: str):
-    # GIVEN a string with a ticket number
-    order_name = f"#{ticket_id}"
-
-    # WHEN parsing the string
-    result = TicketHandler.parse_ticket_number(order_name)
-
-    # THEN assert that the correct string was parsed
-    assert result == ticket_id
-
-
 def test_add_user_name_message(ticket_handler: TicketHandler):
     # GIVEN a message string
     message = ""
