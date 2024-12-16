@@ -67,6 +67,7 @@ def test_concatenate_when_output_exists(
     fastq_dir_existing_concatenated_files: Path,
     sample_id: str,
 ):
+    """Test that existing concatenated files are overwritten when already existing."""
     # GIVEN a directory with forward and reverse reads
     forward_output_path = Path(fastq_dir_existing_concatenated_files, "forward.fastq.gz")
     reverse_output_path = Path(fastq_dir_existing_concatenated_files, "reverse.fastq.gz")
