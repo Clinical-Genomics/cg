@@ -57,3 +57,6 @@ class MipDnaValidationService(OrderValidationService):
             case_sample_errors=case_sample_errors,
             order_errors=order_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> MipDnaOrder:
+        pass

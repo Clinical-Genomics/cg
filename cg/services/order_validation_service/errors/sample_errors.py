@@ -1,9 +1,5 @@
-from cg.services.order_validation_service.constants import (
-    MAXIMUM_VOLUME,
-    MINIMUM_VOLUME,
-)
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
 from cg.services.order_validation_service.errors.order_errors import OrderError
-from cg.models.orders.sample_base import ContainerEnum
 
 
 class SampleError(OrderError):
@@ -33,6 +29,11 @@ class OccupiedWellError(SampleError):
 class WellPositionMissingError(SampleError):
     field: str = "well_position"
     message: str = "Well position is required for well plates"
+
+
+class WellPositionRmlMissingError(SampleError):
+    field: str = "well_position_rml"
+    message: str = "Well position is required for RML plates"
 
 
 class SampleNameRepeatedError(SampleError):
@@ -70,6 +71,31 @@ class WellFormatError(SampleError):
     message: str = "Well position must follow the format A-H:1-12"
 
 
+class WellFormatRmlError(SampleError):
+    field: str = "well_position_rml"
+    message: str = "Well position must follow the format A-H:1-12"
+
+
 class ContainerNameMissingError(SampleError):
     field: str = "container_name"
     message: str = "Container must have a name"
+
+
+class BufferInvalidError(SampleError):
+    field: str = "elution_buffer"
+    message: str = "Buffer must be Tris-HCl or Nuclease-free water when skipping reception control."
+
+
+class ConcentrationRequiredError(SampleError):
+    field: str = "concentration_ng_ul"
+    message: str = "Concentration is required when skipping reception control."
+
+
+class ConcentrationInvalidIfSkipRCError(SampleError):
+    def __init__(self, sample_index: int, allowed_interval: tuple[float, float]):
+        field: str = "concentration_ng_ul"
+        message: str = (
+            f"Concentration must be between {allowed_interval[0]} ng/μL and "
+            f"{allowed_interval[1]} ng/μL if reception control should be skipped"
+        )
+        super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)

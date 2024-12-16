@@ -17,7 +17,6 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
-    OrderExistsError,
     OrderFormError,
     OrderNotDeliverableError,
     OrderNotFoundError,
@@ -25,7 +24,7 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
@@ -34,17 +33,23 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
+    balsamic_umi_validation_service,
     balsamic_validation_service,
     db,
     delivery_message_service,
+    fastq_validation_service,
     lims,
+    metagenome_validation_service,
     microbial_fastq_validation_service,
     microsalt_validation_service,
     mip_dna_validation_service,
     mutant_validation_service,
     order_service,
     order_submitter_registry,
+    pacbio_long_read_validation_service,
+    rml_validation_service,
     rna_fusion_validation_service,
+    taxprofiler_validation_service,
     ticket_handler,
     tomte_validation_service,
 )
@@ -156,7 +161,7 @@ def create_order_from_form():
 
 
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
-def submit_order(order_type):
+def submit_order(order_type: OrderType):
     """Submit an order for samples."""
     api = OrdersAPI(
         lims=lims,
@@ -173,22 +178,18 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project = OrderType(order_type)
-        order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
-        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
-            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
+        request_json["project_type"] = order_type
+        request_json["user_id"] = g.current_user.id
 
         result: dict = api.submit(
-            project=project,
-            order_in=order_in,
+            raw_order=request_json,
+            order_type=order_type,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
 
     except (  # user misbehaviour
         OrderError,
-        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -269,21 +270,33 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
 def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["workflow"] = order_type
+    raw_order["project_type"] = order_type
     raw_order["user_id"] = g.current_user.id
     response = {}
     if order_type == OrderType.BALSAMIC:
         response = balsamic_validation_service.validate(raw_order)
-    if order_type == OrderType.MICROBIAL_FASTQ:
+    elif order_type == OrderType.BALSAMIC_UMI:
+        response = balsamic_umi_validation_service.validate(raw_order)
+    elif order_type == OrderType.FASTQ:
+        response = fastq_validation_service.validate(raw_order)
+    elif order_type == OrderType.METAGENOME:
+        response = metagenome_validation_service.validate(raw_order)
+    elif order_type == OrderType.MICROBIAL_FASTQ:
         response = microbial_fastq_validation_service.validate(raw_order)
-    if order_type == OrderType.MICROSALT:
+    elif order_type == OrderType.MICROSALT:
         response = microsalt_validation_service.validate(raw_order)
-    if order_type == OrderType.MIP_DNA:
+    elif order_type == OrderType.MIP_DNA:
         response = mip_dna_validation_service.validate(raw_order)
-    if order_type == OrderType.SARS_COV_2:
+    elif order_type == OrderType.PACBIO_LONG_READ:
+        response = pacbio_long_read_validation_service.validate(raw_order)
+    elif order_type == OrderType.SARS_COV_2:
         response = mutant_validation_service.validate(raw_order)
-    if order_type == OrderType.RNAFUSION:
+    elif order_type == OrderType.RML:
+        response = rml_validation_service.validate(raw_order)
+    elif order_type == OrderType.RNAFUSION:
         response = rna_fusion_validation_service.validate(raw_order)
-    if order_type == OrderType.TOMTE:
+    elif order_type == OrderType.TAXPROFILER:
+        response = taxprofiler_validation_service.validate(raw_order)
+    elif order_type == OrderType.TOMTE:
         response = tomte_validation_service.validate(raw_order)
     return jsonify(response), HTTPStatus.OK

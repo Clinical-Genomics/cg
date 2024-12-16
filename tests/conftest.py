@@ -37,7 +37,7 @@ from cg.constants.priority import SlurmQos
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
-from cg.constants.tb import AnalysisTypes
+from cg.constants.tb import AnalysisType
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
@@ -1220,7 +1220,12 @@ def hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
+    hermes_config = {
+        "hermes": {
+            "binary_path": "/bin/true",
+            "container_mount_volume": "a_str",
+        }
+    }
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -1900,6 +1905,7 @@ def context_config(
     nextflow_binary: Path,
     nf_analysis_platform_config_path: Path,
     nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_config_path: Path,
     nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
@@ -2085,11 +2091,12 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
-            "config_platform": str(nf_analysis_platform_config_path),
-            "config_params": str(nf_analysis_pipeline_params_path),
-            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_path": Path("workflow", "path").as_posix(),
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -2105,10 +2112,11 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_tomte",
-            "config_platform": str(nf_analysis_platform_config_path),
-            "config_params": str(nf_analysis_pipeline_params_path),
-            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
-            "workflow_path": Path("workflow", "path").as_posix(),
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -2124,11 +2132,12 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
-            "config_platform": str(nf_analysis_platform_config_path),
-            "config_params": str(nf_analysis_pipeline_params_path),
-            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_path": Path("workflow", "path").as_posix(),
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -2148,7 +2157,7 @@ def context_config(
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_path": Path("workflow", "path").as_posix(),
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
@@ -2585,14 +2594,13 @@ def raredisease_parameters_default(
     return RarediseaseParameters(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
-        target_bed=bed_version_file_name,
+        target_bed_file=bed_version_file_name,
         skip_germlinecnvcaller=False,
-        analysis_type=AnalysisTypes.WES,
+        analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
         ),
-        local_genomes=Path(raredisease_dir, "references").as_posix(),
         vep_filters_scout_fmt=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.PANELS)
         ),
@@ -3032,7 +3040,13 @@ def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline params file."""
-    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.CONFIG)
+    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_config_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline params file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_config").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="function")

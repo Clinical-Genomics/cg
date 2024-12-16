@@ -223,6 +223,19 @@ def order_with_invalid_concentration(sample_with_invalid_concentration) -> Tomte
 
 
 @pytest.fixture
+def order_with_samples_having_same_names_as_cases() -> TomteOrder:
+    """Return an order with two cases, the first case having two samples named after the cases."""
+    sample_1: TomteSample = create_tomte_sample(1)
+    sample_2: TomteSample = create_tomte_sample(2)
+    sample_3: TomteSample = create_tomte_sample(3)
+    case_1: TomteCase = create_case([sample_1, sample_2])
+    case_1.name = sample_1.name
+    case_2: TomteCase = create_case([sample_3])
+    case_2.name = sample_2.name
+    return create_tomte_order([case_1, case_2])
+
+
+@pytest.fixture
 def sample_with_missing_container_name() -> TomteSample:
     sample: TomteSample = create_tomte_sample(1)
     sample.container_name = None

@@ -3,6 +3,7 @@ from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
+from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.utils import (
@@ -56,3 +57,6 @@ class RnaFusionValidationService(OrderValidationService):
             case_sample_errors=case_sample_errors,
             order_errors=order_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> Order:
+        pass

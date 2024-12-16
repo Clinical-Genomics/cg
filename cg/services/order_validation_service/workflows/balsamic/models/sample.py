@@ -1,12 +1,10 @@
-from pydantic import Field
+from pydantic import BeforeValidator, Field
+from typing_extensions import Annotated
 
-from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.constants import (
-    ElutionBuffer,
-    TissueBlockEnum,
-)
+from cg.services.order_validation_service.constants import ElutionBuffer, TissueBlockEnum
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.utils import parse_buffer
 
 
 class BalsamicSample(Sample):
@@ -15,17 +13,16 @@ class BalsamicSample(Sample):
     comment: str | None = None
     concentration_ng_ul: float | None = None
     control: ControlEnum | None = None
-    elution_buffer: ElutionBuffer | None = None
+    elution_buffer: Annotated[ElutionBuffer | None, BeforeValidator(parse_buffer)] = None
     formalin_fixation_time: int | None = None
-    is_tumour: bool
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
-    reference_genome: GenomeVersion
     require_qc_ok: bool
     sex: SexEnum
     source: str
     status: StatusEnum | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
+    tumour: bool
     tumour_purity: int | None = None

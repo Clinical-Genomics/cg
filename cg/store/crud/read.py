@@ -8,8 +8,13 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, SampleType
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    CaseActions,
+    CustomerId,
+    SampleType,
+)
+from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.constants import OrderType
@@ -1436,7 +1441,8 @@ class ReadHandler(BaseHandler):
                 cases=orders,
                 filter_functions=[CaseFilter.BY_WORKFLOWS],
                 workflows=orders_params.workflows,
-            ).distinct()
+            )
+        orders = orders.distinct()
         orders: Query = apply_order_filters(
             orders=orders,
             filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
@@ -1623,14 +1629,14 @@ class ReadHandler(BaseHandler):
                 return True
         return False
 
-    def get_related_samples(
+    def _get_related_samples_query(
         self,
-        sample_internal_id: str,
+        sample: Sample,
         prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
-    ) -> list[Sample]:
-        """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
-        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+    ) -> Query:
+        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories."""
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1640,7 +1646,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
         )
 
-        sample_application_version_query: Query = apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=sample_application_version_query,
             subject_id=sample.subject_id,
             is_tumour=sample.is_tumour,
@@ -1651,27 +1657,48 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        return samples
 
-        return sample_application_version_query.all()
+    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
+        """Returns all uploaded DNA cases ids related to the given RNA case."""
 
-    def get_related_cases(
-        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
-    ) -> list[Case]:
-        """Return a list of cases linked to the given sample within the given list of workflows and customers in a collaboration."""
+        related_dna_cases: list[Case] = []
+        for rna_sample in rna_case.samples:
 
-        cases_with_samples: Query = self._join_sample_and_case()
-        cases_with_samples: Query = apply_case_sample_filter(
-            case_samples=cases_with_samples,
-            sample_internal_id=sample_internal_id,
-            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
-        )
+            collaborators: set[Customer] = rna_sample.customer.collaborators
 
-        return apply_case_filter(
-            cases=cases_with_samples,
-            workflows=workflows,
-            customer_entry_ids=[customer.id for customer in collaborators],
-            filter_functions=[
-                CaseFilter.BY_WORKFLOWS,
-                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-            ],
-        ).all()
+            related_dna_samples_query: Query = self._get_related_samples_query(
+                sample=rna_sample,
+                prep_categories=DNA_PREP_CATEGORIES,
+                collaborators=collaborators,
+            )
+
+            dna_samples_cases_analysis_query: Query = (
+                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+            )
+
+            dna_samples_cases_analysis_query: Query = apply_case_filter(
+                cases=dna_samples_cases_analysis_query,
+                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+                customer_entry_ids=[customer.id for customer in collaborators],
+                filter_functions=[
+                    CaseFilter.BY_WORKFLOWS,
+                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+                ],
+            )
+
+            uploaded_dna_cases: list[Case] = (
+                apply_analysis_filter(
+                    analyses=dna_samples_cases_analysis_query,
+                    filter_functions=[AnalysisFilter.IS_UPLOADED],
+                )
+                .with_entities(Case)
+                .all()
+            )
+
+            related_dna_cases.extend([case for case in uploaded_dna_cases])
+        if not related_dna_cases:
+            raise CaseNotFoundError(
+                f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
+            )
+        return related_dna_cases

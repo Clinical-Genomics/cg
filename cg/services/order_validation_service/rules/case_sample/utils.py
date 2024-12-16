@@ -1,6 +1,7 @@
 import re
 from collections import Counter
 
+from cg.constants.constants import StatusOptions
 from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
@@ -16,17 +17,20 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
 )
 from cg.services.order_validation_service.models.aliases import (
     CaseContainingRelatives,
+    CaseWithSkipRC,
     HumanSample,
     SampleWithRelatives,
 )
+from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
+    get_concentration_interval,
+    has_sample_invalid_concentration,
     is_in_container,
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.store.models import Application
 from cg.store.store import Store
 
 
@@ -204,69 +208,30 @@ def validate_subject_ids_in_case(
 
 
 def validate_concentration_in_case(
-    case: CaseContainingRelatives, case_index: int, store: Store
+    case: CaseWithSkipRC, case_index: int, store: Store
 ) -> list[InvalidConcentrationIfSkipRCError]:
     errors: list[InvalidConcentrationIfSkipRCError] = []
     for sample_index, sample in case.enumerated_new_samples:
-        if has_sample_invalid_concentration(sample=sample, store=store):
-            error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
-                case_index=case_index,
-                sample=sample,
-                sample_index=sample_index,
-                store=store,
-            )
-            errors.append(error)
+        if application := store.get_application_by_tag(sample.application):
+            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            if has_sample_invalid_concentration(sample=sample, allowed_interval=allowed_interval):
+                error: InvalidConcentrationIfSkipRCError = create_invalid_concentration_error(
+                    case_index=case_index,
+                    sample_index=sample_index,
+                    allowed_interval=allowed_interval,
+                )
+                errors.append(error)
     return errors
 
 
 def create_invalid_concentration_error(
-    case_index: int, sample: SampleWithRelatives, sample_index: int, store: Store
+    case_index: int, sample_index: int, allowed_interval: tuple[float, float]
 ) -> InvalidConcentrationIfSkipRCError:
-    application: Application = store.get_application_by_tag(sample.application)
-    is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application,
-        is_cfdna=is_cfdna,
-    )
     return InvalidConcentrationIfSkipRCError(
         case_index=case_index,
         sample_index=sample_index,
         allowed_interval=allowed_interval,
     )
-
-
-def has_sample_invalid_concentration(sample: SampleWithRelatives, store: Store) -> bool:
-    application: Application | None = store.get_application_by_tag(sample.application)
-    if not application:
-        return False
-    concentration: float | None = sample.concentration_ng_ul
-    is_cfdna: bool = is_sample_cfdna(sample)
-    allowed_interval: tuple[float, float] = get_concentration_interval(
-        application=application, is_cfdna=is_cfdna
-    )
-    return not is_sample_concentration_within_interval(
-        concentration=concentration, interval=allowed_interval
-    )
-
-
-def is_sample_cfdna(sample: SampleWithRelatives) -> bool:
-    source = sample.source
-    return source == SourceType.CELL_FREE_DNA
-
-
-def get_concentration_interval(application: Application, is_cfdna: bool) -> tuple[float, float]:
-    if is_cfdna:
-        return (
-            application.sample_concentration_minimum_cfdna,
-            application.sample_concentration_maximum_cfdna,
-        )
-    return application.sample_concentration_minimum, application.sample_concentration_maximum
-
-
-def is_sample_concentration_within_interval(
-    concentration: float, interval: tuple[float, float]
-) -> bool:
-    return interval[0] <= concentration <= interval[1]
 
 
 def is_invalid_plate_well_format(sample: Sample) -> bool:
@@ -303,3 +268,8 @@ def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[st
             for sample in db_case.samples:
                 existing_sample_names.add(sample.name)
     return existing_sample_names
+
+
+def are_all_samples_unknown(case: Case) -> bool:
+    """Check if all samples in a case are unknown."""
+    return all(sample.status == StatusOptions.UNKNOWN for sample in case.samples)

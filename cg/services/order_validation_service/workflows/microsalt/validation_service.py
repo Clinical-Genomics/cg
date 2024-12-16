@@ -46,3 +46,6 @@ class MicroSaltValidationService(OrderValidationService):
             order_errors=order_errors,
             sample_errors=sample_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> MicrosaltOrder:
+        pass

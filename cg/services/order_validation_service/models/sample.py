@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
@@ -8,6 +8,7 @@ class Sample(BaseModel):
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
+    _generated_lims_id: str | None = PrivateAttr(default=None)  # Will be populated by LIMS
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     volume: int | None = None
     well_position: str | None = None
@@ -29,4 +30,8 @@ class Sample(BaseModel):
                     data[key] = None
         return data
 
-    model_config = ConfigDict(extra="ignore")
+    @model_validator(mode="after")
+    def set_tube_name_default(self):
+        if self.container == ContainerEnum.tube and not self.container_name:
+            self.container_name = self.name
+        return self

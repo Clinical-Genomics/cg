@@ -57,3 +57,6 @@ class BalsamicValidationService(OrderValidationService):
             case_errors=case_errors,
             case_sample_errors=case_sample_errors,
         )
+
+    def parse_and_validate(self, raw_order: dict) -> BalsamicOrder:
+        pass
