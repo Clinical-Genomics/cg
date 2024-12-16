@@ -13,7 +13,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-SAMPLE_RULES: list[callable] = [
+MICROBIAL_FASTQ_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,

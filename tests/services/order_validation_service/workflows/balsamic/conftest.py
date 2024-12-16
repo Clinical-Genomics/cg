@@ -4,13 +4,12 @@ from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
+from cg.services.order_validation_service.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.constants import BalsamicDeliveryType
 from cg.services.order_validation_service.workflows.balsamic.models.case import BalsamicCase
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.order_validation_service.workflows.balsamic.validation_service import (
-    BalsamicValidationService,
-)
 from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
@@ -83,10 +82,15 @@ def balsamic_application(base_store: Store) -> Application:
 def balsamic_validation_service(
     base_store: Store,
     balsamic_application: Application,
-) -> BalsamicValidationService:
+) -> OrderValidationService:
     customer: Customer = base_store.get_customer_by_internal_id("cust000")
     user: User = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
     base_store.session.add(user)
     base_store.session.add(balsamic_application)
     base_store.session.commit()
-    return BalsamicValidationService(base_store)
+    return OrderValidationService(base_store)
+
+
+@pytest.fixture
+def balsamic_rule_set() -> RuleSet:
+    return ORDER_TYPE_RULE_SET_MAP[OrderType.BALSAMIC]

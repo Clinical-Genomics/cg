@@ -13,6 +13,10 @@ from cg.apps.lims import LimsAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderType
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.order_type_maps import (
+    ORDER_TYPE_MODEL_MAP,
+    ORDER_TYPE_RULE_SET_MAP,
+)
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
 from cg.store.store import Store
@@ -46,7 +50,11 @@ class OrdersAPI:
         Main entry point for the class towards interfaces that implements it.
         """
         submit_handler: OrderSubmitter = self.submitter_registry.get_order_submitter(order_type)
-        order: Order = submit_handler.order_validation_service.parse_and_validate(raw_order)
+        order_model = ORDER_TYPE_MODEL_MAP[order_type]
+        rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
+        order: Order = submit_handler.order_validation_service.parse_and_validate(
+            raw_order=raw_order, model=order_model, rule_set=rule_set
+        )
         ticket_number: str | None = self.ticket_handler.parse_ticket_number(order.name)
         order.ticket_number = ticket_number
         return submit_handler.submit_order(order)

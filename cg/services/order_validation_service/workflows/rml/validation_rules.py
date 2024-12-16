@@ -11,7 +11,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_well_positions_required_rml,
 )
 
-SAMPLE_RULES: list[callable] = [
+RML_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
