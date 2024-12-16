@@ -1,4 +1,5 @@
 from cg.exc import OrderError as OrderValidationError
+from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
@@ -7,7 +8,11 @@ from cg.services.order_validation_service.errors.validation_errors import Valida
 from cg.services.order_validation_service.model_validator.model_validator import ModelValidator
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
-from cg.services.order_validation_service.order_type_maps import RuleSet
+from cg.services.order_validation_service.order_type_maps import (
+    ORDER_TYPE_MODEL_MAP,
+    ORDER_TYPE_RULE_SET_MAP,
+    RuleSet,
+)
 from cg.services.order_validation_service.response_mapper import create_order_validation_response
 from cg.services.order_validation_service.utils import (
     apply_case_sample_validation,
@@ -22,9 +27,9 @@ class OrderValidationService:
     def __init__(self, store: Store):
         self.store = store
 
-    def get_validation_response(
-        self, raw_order: dict, model: type[Order], rule_set: RuleSet
-    ) -> dict:
+    def get_validation_response(self, raw_order: dict, order_type: OrderType) -> dict:
+        model = ORDER_TYPE_MODEL_MAP[order_type]
+        rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
         errors = self._get_errors(raw_order=raw_order, model=model, rule_set=rule_set)
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
@@ -73,7 +78,9 @@ class OrderValidationService:
             sample_errors=sample_errors,
         )
 
-    def parse_and_validate(self, raw_order: dict, model: type[Order], rule_set: RuleSet) -> Order:
+    def parse_and_validate(self, raw_order: dict, order_type: OrderType) -> Order:
+        model = ORDER_TYPE_MODEL_MAP[order_type]
+        rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
         parsed_order, errors = ModelValidator.validate(order=raw_order, model=model)
         if parsed_order:
             errors: ValidationErrors = self._get_rule_validation_errors(

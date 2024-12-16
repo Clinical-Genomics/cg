@@ -1,3 +1,4 @@
+from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.order_type_maps import RuleSet
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
@@ -27,7 +28,6 @@ def test_valid_order(
 def test_valid_order_conversion(
     valid_order: BalsamicOrder,
     balsamic_validation_service: OrderValidationService,
-    balsamic_rule_set: RuleSet,
 ):
 
     # GIVEN a valid order
@@ -35,7 +35,7 @@ def test_valid_order_conversion(
 
     # WHEN validating the order
     response = balsamic_validation_service.get_validation_response(
-        raw_order=order, model=BalsamicOrder, rule_set=balsamic_rule_set
+        raw_order=order, order_type=OrderType.BALSAMIC
     )
 
     # THEN a response should be given
@@ -45,7 +45,6 @@ def test_valid_order_conversion(
 def test_order_error_conversion(
     valid_order: BalsamicOrder,
     balsamic_validation_service: OrderValidationService,
-    balsamic_rule_set: RuleSet,
 ):
 
     # GIVEN an order with a missing field on order level
@@ -54,7 +53,7 @@ def test_order_error_conversion(
 
     # WHEN validating the order
     response: dict = balsamic_validation_service.get_validation_response(
-        raw_order=order, model=BalsamicOrder, rule_set=balsamic_rule_set
+        raw_order=order, order_type=OrderType.BALSAMIC
     )
 
     # THEN there should be an error for the missing name
@@ -64,7 +63,6 @@ def test_order_error_conversion(
 def test_case_error_conversion(
     valid_order: BalsamicOrder,
     balsamic_validation_service: OrderValidationService,
-    balsamic_rule_set: RuleSet,
 ):
 
     # GIVEN an order with a faulty case priority
@@ -73,7 +71,7 @@ def test_case_error_conversion(
 
     # WHEN validating the order
     response: dict = balsamic_validation_service.get_validation_response(
-        raw_order=order, model=BalsamicOrder, rule_set=balsamic_rule_set
+        raw_order=order, order_type=OrderType.BALSAMIC
     )
 
     # THEN there should be an error for the faulty priority
@@ -83,7 +81,6 @@ def test_case_error_conversion(
 def test_sample_error_conversion(
     valid_order: BalsamicOrder,
     balsamic_validation_service: OrderValidationService,
-    balsamic_rule_set: RuleSet,
 ):
 
     # GIVEN an order with a sample with an invalid field
@@ -92,7 +89,7 @@ def test_sample_error_conversion(
 
     # WHEN validating the order
     response = balsamic_validation_service.get_validation_response(
-        raw_order=invalid_order, model=BalsamicOrder, rule_set=balsamic_rule_set
+        raw_order=invalid_order, order_type=OrderType.BALSAMIC
     )
 
     # THEN an error should be returned regarding the invalid volume

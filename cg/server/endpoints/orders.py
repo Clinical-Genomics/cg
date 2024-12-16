@@ -41,11 +41,6 @@ from cg.server.ext import (
     order_validation_service,
     ticket_handler,
 )
-from cg.services.order_validation_service.order_type_maps import (
-    ORDER_TYPE_MODEL_MAP,
-    ORDER_TYPE_RULE_SET_MAP,
-    RuleSet,
-)
 from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
@@ -264,11 +259,7 @@ def validate_order(order_type: OrderType):
     raw_order = request.get_json()
     raw_order["project_type"] = order_type
     raw_order["user_id"] = g.current_user.id
-    rule_set: RuleSet = ORDER_TYPE_RULE_SET_MAP[order_type]
-    model: type[Order] = ORDER_TYPE_MODEL_MAP[order_type]
     response = order_validation_service.get_validation_response(
-        raw_order=raw_order,
-        rule_set=rule_set,
-        model=model,
+        raw_order=raw_order, order_type=order_type
     )
     return jsonify(response), HTTPStatus.OK
