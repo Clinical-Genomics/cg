@@ -368,9 +368,13 @@ class FOHMUploadAPI:
         self.create_pangolin_report(sars_cov_pangolin_reports)
         return sars_cov_pangolin_reports
 
-    def aggregate_delivery(self, cases: list[str]) -> None:
-        """Aggregate and hardlink reports."""
-        self.set_cases_to_aggregate(cases)
+    def aggregate_delivery(self, case_ids: list[str]) -> None:
+        """
+        Aggregate and hardlink reports.
+        args:
+            case_ids: The internal ids for cases to aggregate.
+        """
+        self.set_cases_to_aggregate(case_ids)
         self.create_daily_delivery_folders()
         sars_cov_complementary_reports: list[FohmComplementaryReport] = (
             self.parse_and_write_complementary_report()
