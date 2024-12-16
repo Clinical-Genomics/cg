@@ -33,7 +33,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-CASE_RULES: list[callable] = [
+MIP_DNA_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -41,7 +41,7 @@ CASE_RULES: list[callable] = [
     validate_gene_panels_unique,
 ]
 
-CASE_SAMPLE_RULES: list[callable] = [
+MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,

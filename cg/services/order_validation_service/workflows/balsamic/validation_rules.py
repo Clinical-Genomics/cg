@@ -28,13 +28,13 @@ from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.r
     validate_capture_kit_panel_requirement,
 )
 
-CASE_RULES: list[callable] = [
+BALSAMIC_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
 ]
 
-CASE_SAMPLE_RULES: list[callable] = [
+BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
