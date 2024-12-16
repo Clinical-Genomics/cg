@@ -175,7 +175,7 @@ class TicketHandler:
                     obj[key] = cls.replace_empty_string_with_none(item)
         return obj
 
-     def create_case_xml_sample_list(self, order, message: str) -> str:
+    def create_case_xml_sample_list(self, order, message: str) -> str:
         for case in order.cases:
             if not case.is_new:
                 db_case = self.status_db.get_case_by_internal_id(case.internal_id)
