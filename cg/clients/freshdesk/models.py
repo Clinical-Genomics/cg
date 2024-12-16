@@ -15,7 +15,7 @@ class TicketCreate(BaseModel):
     name: str
     priority: int = Priority.LOW
     source: int = Source.EMAIL
-    status: int = Status.OPEN
+    status: int = Status.PENDING
     subject: str
     tags: list[str] = []
     type: str | None = None
