@@ -177,6 +177,7 @@ def submit_order(order_type: OrderType):
         result: dict = api.submit(
             raw_order=request_json,
             order_type=order_type,
+            user=g.current_user,
         )
 
     except (  # user misbehaviour
