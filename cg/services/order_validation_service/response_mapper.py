@@ -11,7 +11,8 @@ from cg.services.order_validation_service.models.order import Order
 def create_order_validation_response(
     raw_order: dict, errors: ValidationErrors, model: type[Order]
 ) -> dict:
-    """Ensures each field in the order looks like: {value: raw value, errors: [errors]}"""
+    """Ensures each field in the order looks like: {value: raw value, errors: [errors]}.
+    Based on the passed model."""
     partially_validated_model: model = model.model_construct(**raw_order)
     response: dict = partially_validated_model.model_dump(by_alias=True)
     wrap_fields(response)
