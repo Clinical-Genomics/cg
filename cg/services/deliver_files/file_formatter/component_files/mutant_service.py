@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-
+import re
 from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
@@ -59,6 +59,20 @@ class MutantFileFormatter(ComponentFormatter):
             )
         return unique_formatted_files
 
+    @staticmethod
+    def _is_concatenated_file(file_path: Path) -> bool:
+        """Check if the file is a concatenated file.
+        Returns True if the file is a concatenated file, otherwise False.
+        regex pattern: *._R[1,2]_[0-9]+.fastq.gz
+        *. is the sample id
+        _R[1,2] is the read direction
+        .fastq.gz is the file extension
+        args:
+            file_path: The file path to check
+        """
+        pattern = ".*_[1,2].fastq.gz"
+        return re.fullmatch(pattern, file_path.name) is not None
+
     def _add_lims_metadata_to_file_name(
         self, formatted_files: list[FormattedFile], sample_files: list[SampleFile]
     ) -> list[FormattedFile]:
@@ -73,7 +87,7 @@ class MutantFileFormatter(ComponentFormatter):
         """
         appended_formatted_files: list[FormattedFile] = []
         for formatted_file in formatted_files:
-            if self.file_formatter._is_lane_fastq_file(formatted_file.formatted_path):
+            if self._is_concatenated_file(formatted_file.formatted_path):
                 sample_id: str = self._get_sample_id_by_original_path(
                     original_path=formatted_file.original_path, sample_files=sample_files
                 )

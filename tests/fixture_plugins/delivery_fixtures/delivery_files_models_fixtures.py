@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -361,20 +362,20 @@ def swap_file_paths_with_inbox_paths(
 
 
 @pytest.fixture
-def lims_naming_matadata() -> str:
+def lims_naming_metadata() -> str:
     return "01_SE100_"
 
 
 @pytest.fixture
 def expected_mutant_formatted_files(
-    expected_concatenated_fastq_formatted_files, lims_naming_matadata
+    expected_concatenated_fastq_formatted_files, lims_naming_metadata
 ) -> list[FormattedFile]:
     unique_combinations = []
     for formatted_file in expected_concatenated_fastq_formatted_files:
         formatted_file.original_path = formatted_file.formatted_path
         formatted_file.formatted_path = Path(
             formatted_file.formatted_path.parent,
-            f"{lims_naming_matadata}{formatted_file.formatted_path.name}",
+            f"{lims_naming_metadata}{formatted_file.formatted_path.name}",
         )
         if formatted_file not in unique_combinations:
             unique_combinations.append(formatted_file)
