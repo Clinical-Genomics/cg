@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.post_process.utils import (
     UnprocessedRunInfo,

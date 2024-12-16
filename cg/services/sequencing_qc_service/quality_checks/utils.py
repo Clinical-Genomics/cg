@@ -1,7 +1,7 @@
 import logging
 
-from cg.constants.constants import PrepCategory
 from cg.constants.priority import Priority
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:
-    return sample.prep_category == PrepCategory.READY_MADE_LIBRARY
+    return sample.prep_category == SeqLibraryPrepCategory.READY_MADE_LIBRARY
 
 
 def is_case_ready_made_library(case: Case) -> bool:

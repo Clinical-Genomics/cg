@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID

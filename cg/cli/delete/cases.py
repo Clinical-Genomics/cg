@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.delete.case import delete_case
 from cg.constants.cli_options import DRY_RUN

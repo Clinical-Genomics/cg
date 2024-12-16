@@ -1,4 +1,4 @@
-import click
+import rich_click as click
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.priority import SlurmQos
@@ -40,7 +40,7 @@ OPTION_OBSERVATIONS = click.option(
     type=click.Path(exists=True),
     multiple=True,
     required=False,
-    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
+    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WHOLE_GENOME_SEQUENCING analysis only). Set this option to "
     "override the latest Loqusdb dump files.",
 )
 

@@ -4,26 +4,19 @@ from pathlib import Path
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
-from cg.constants.tb import AnalysisTypes
+from cg.constants.tb import AnalysisType
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.error_handling import (
     handle_no_delivery_files_error,
 )
-from cg.services.deliver_files.file_fetcher.abstract import (
-    FetchDeliveryFilesService,
-)
+from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.file_filter.abstract import FilterDeliveryFilesService
-from cg.services.deliver_files.file_formatter.abstract import (
-    DeliveryFileFormattingService,
-)
-from cg.services.deliver_files.file_formatter.models import (
-    FormattedFiles,
-)
+from cg.services.deliver_files.file_formatter.abstract import DeliveryFileFormattingService
+from cg.services.deliver_files.file_formatter.models import FormattedFiles
 from cg.services.deliver_files.file_mover.service import DeliveryFilesMover
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import Case
 from cg.store.store import Store
@@ -136,11 +129,11 @@ class DeliverFilesService:
             LOG.debug(f"[TB SERVICE] Adding analysis for case {case.internal_id} to Trailblazer")
             analysis: TrailblazerAnalysis = self.tb_service.add_pending_analysis(
                 case_id=f"{case.internal_id}_rsync",
-                analysis_type=AnalysisTypes.OTHER,
+                analysis_type=AnalysisType.OTHER,
                 config_path=self.rsync_service.trailblazer_config_path.as_posix(),
                 order_id=case.latest_order.id,
                 out_dir=self.rsync_service.log_dir.as_posix(),
-                slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
+                priority=MAP_TO_TRAILBLAZER_PRIORITY[case.priority],
                 workflow=Workflow.RSYNC,
                 ticket=case.latest_ticket,
             )

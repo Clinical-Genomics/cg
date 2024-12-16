@@ -1,0 +1,9 @@
+bind = "0.0.0.0:8000"
+threads = 4
+timeout = 400
+loglevel = "debug"
+protocol = "proxy"
+syslog = True
+forwarded_allow_ips = "10.0.2.100,127.0.0.1"
+accesslog = "-"
+workers = 2
