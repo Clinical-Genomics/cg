@@ -23,10 +23,10 @@ class FastqValidationService(OrderValidationService):
     def validate(self, raw_order: dict) -> dict:
         parsed_order, errors = ModelValidator.validate(order=raw_order, model=FastqOrder)
         if parsed_order:
-            errors: ValidationErrors = self._perform_rule_validation(order=parsed_order)
+            errors: ValidationErrors = self._get_rule_validation_errors(order=parsed_order)
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
-    def _perform_rule_validation(self, order: FastqOrder) -> ValidationErrors:
+    def _get_rule_validation_errors(self, order: FastqOrder) -> ValidationErrors:
 
         order_errors: list[OrderError] = apply_order_validation(
             rules=ORDER_RULES,
@@ -47,7 +47,7 @@ class FastqValidationService(OrderValidationService):
     def parse_and_validate(self, raw_order: dict) -> FastqOrder:
         parsed_order, errors = ModelValidator.validate(order=raw_order, model=FastqOrder)
         if parsed_order:
-            errors: ValidationErrors = self._perform_rule_validation(order=parsed_order)
+            errors: ValidationErrors = self._get_rule_validation_errors(order=parsed_order)
         if not errors.is_empty:
             raise OrderSubmissionError(message="Order contained errors")
         return parsed_order
