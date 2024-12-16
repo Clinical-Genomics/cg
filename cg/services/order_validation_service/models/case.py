@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag, model_validator
+from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
 from typing_extensions import Annotated
 
 from cg.constants.priority import PriorityTerms
@@ -57,5 +57,3 @@ class Case(BaseModel):
                 if value == "":
                     data[key] = None
         return data
-
-    model_config = ConfigDict(extra="ignore")

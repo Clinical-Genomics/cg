@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
@@ -28,5 +28,3 @@ class Sample(BaseModel):
                 if value == "":
                     data[key] = None
         return data
-
-    model_config = ConfigDict(extra="ignore")
