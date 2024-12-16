@@ -4,7 +4,7 @@ from cg.constants import DataDelivery
 
 
 class MutantDeliveryType(Enum):
-    ANALYSIS_FILES = DataDelivery.FASTQ_ANALYSIS
+    ANALYSIS_FILES = DataDelivery.FASTQ
     NO_DELIVERY = DataDelivery.NO_DELIVERY
 
 

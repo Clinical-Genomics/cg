@@ -17,7 +17,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self.lims = lims_service
 
     def store_order(self, order: OrderIn) -> dict:
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
+        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
         status_data: dict = self.order_to_status(order)
         self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
         new_samples: list[Sample] = self.store_items_in_status(

@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 
 
 class TissueBlockEnum(StrEnum):
@@ -20,7 +20,7 @@ ALLOWED_SKIP_RC_BUFFERS = ["Nuclease-free water", "Tris-HCl"]
 MINIMUM_VOLUME, MAXIMUM_VOLUME = 20, 130
 
 
-class ExtractionMethod(Enum):
+class ExtractionMethod(StrEnum):
     EZ1 = "EZ1"
     MAELSTROM = "Maelstrom"
     MAGNAPURE_96 = "MagNaPure 96 (contact Clinical Genomics before submission)"
@@ -29,7 +29,7 @@ class ExtractionMethod(Enum):
     OTHER = 'Other (specify in "Comments")'
 
 
-class IndexEnum(Enum):
+class IndexEnum(StrEnum):
     IDT_DS_B = "IDT DupSeq 10 bp Set B"
     IDT_DS_F = "IDT DupSeq 10 bp Set F"
     DT_XGEN_UDI = "IDT xGen UDI Adapters"

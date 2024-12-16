@@ -8,6 +8,7 @@ from cg.services.order_validation_service.utils import parse_buffer
 
 
 class FastqSample(Sample):
+    capture_kit: str | None = None
     concentration_ng_ul: float | None = None
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     priority: PriorityEnum
