@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 
 
 class TissueBlockEnum(StrEnum):
