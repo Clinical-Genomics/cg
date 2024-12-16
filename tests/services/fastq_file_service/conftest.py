@@ -39,6 +39,19 @@ def fastqs_dir(tmp_path: Path, sample_id: str) -> Path:
 
 
 @pytest.fixture
+def fastq_dir_existing_concatenated_files(tmp_path: Path, sample_id: str) -> Path:
+    fastq_dir: Path = create_fastqs_directory(tmp_path=tmp_path)
+    create_fastq_files(
+        fastq_dir=fastq_dir, number_forward_reads=3, number_reverse_reads=3, sample_id=sample_id
+    )
+    forward_output_path = Path(fastq_dir, "forward.fastq.gz")
+    reverse_output_path = Path(fastq_dir, "reverse.fastq.gz")
+    forward_output_path.write_text("Existing concatenated forward reads")
+    reverse_output_path.write_text("Existing concatenated reverse reads")
+    return fastq_dir
+
+
+@pytest.fixture
 def fastqs_forward(tmp_path: Path, sample_id: str) -> Path:
     """Return a directory with only forward reads."""
     fastq_dir: Path = create_fastqs_directory(tmp_path=tmp_path)
