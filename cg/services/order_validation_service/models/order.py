@@ -8,7 +8,6 @@ TICKET_PATTERN = r"^#\d{4,}"
 
 class Order(BaseModel):
     comment: str | None = None
-    connect_to_ticket: bool = False
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")
