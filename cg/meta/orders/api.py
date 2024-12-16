@@ -45,18 +45,6 @@ class OrdersAPI:
         """
         submit_handler: OrderSubmitter = self.submitter_registry.get_order_submitter(order_type)
         order: Order = submit_handler.order_validation_service.parse_and_validate(raw_order)
-        # detect manual ticket assignment
         ticket_number: str | None = self.ticket_handler.parse_ticket_number(order.name)
-        if not ticket_number:
-            ticket_number = self.ticket_handler.create_ticket(
-                order=order, user_name=user_name, user_mail=user_mail, order_type=order_type
-            )
-        else:
-            self.ticket_handler.connect_to_ticket(
-                order=order,
-                user_name=user_name,
-                order_type=order_type,
-                ticket_number=ticket_number,
-            )
         order.ticket_number = ticket_number
         return submit_handler.submit_order(order)

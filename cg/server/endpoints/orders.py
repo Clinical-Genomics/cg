@@ -17,7 +17,6 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
-    OrderExistsError,
     OrderFormError,
     OrderNotDeliverableError,
     OrderNotFoundError,
@@ -191,7 +190,6 @@ def submit_order(order_type: OrderType):
 
     except (  # user misbehaviour
         OrderError,
-        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
