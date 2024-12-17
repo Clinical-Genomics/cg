@@ -21,7 +21,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self.lims = lims_service
 
     def store_order(self, order: MicrobialFastqOrder) -> dict:
-        """Store a Microbial FASTQ order in the database."""
+        """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
             ticket=order.ticket_number,
