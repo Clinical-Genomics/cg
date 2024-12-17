@@ -6,6 +6,9 @@ from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class MutantUploadAPI(UploadAPI):
@@ -20,8 +23,12 @@ class MutantUploadAPI(UploadAPI):
     def upload(self, ctx: Context, case: Case, restart: bool) -> None:
         latest_analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(latest_analysis)
-        self.upload_files_to_customer_inbox(case)
-        self.gsaid_api.upload(case.internal_id)
-        self.fohm_api.aggregate_delivery(case_ids=[case.internal_id])
+        try:
+            self.upload_files_to_customer_inbox(case)
+            self.gsaid_api.upload(case.internal_id)
+            self.fohm_api.aggregate_delivery(case_ids=[case.internal_id])
+        except Exception as error:
+            LOG.error(f"Error upload of Mutant analysis for case: {case} failed {error}")
+            raise error
         self.fohm_api.sync_files_sftp()
         self.update_uploaded_at(latest_analysis)
