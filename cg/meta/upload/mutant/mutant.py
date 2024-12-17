@@ -23,12 +23,8 @@ class MutantUploadAPI(UploadAPI):
     def upload(self, ctx: Context, case: Case, restart: bool) -> None:
         latest_analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(latest_analysis)
-        try:
-            self.upload_files_to_customer_inbox(case)
-            self.gsaid_api.upload(case.internal_id)
-            self.fohm_api.aggregate_delivery(case_ids=[case.internal_id])
-        except Exception as error:
-            LOG.error(f"Error upload of Mutant analysis for case: {case} failed {error}")
-            raise error
+        self.upload_files_to_customer_inbox(case)
+        self.gsaid_api.upload(case.internal_id)
+        self.fohm_api.aggregate_delivery(case_ids=[case.internal_id])
         self.fohm_api.sync_files_sftp()
         self.update_uploaded_at(latest_analysis)
