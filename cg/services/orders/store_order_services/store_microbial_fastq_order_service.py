@@ -16,18 +16,20 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderIn) -> dict:
-        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
-        status_data: dict = self.order_to_status(order)
-        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
-        new_samples: list[Sample] = self.store_items_in_status(
-            customer_id=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"] if project_data else datetime.now(),
-            ticket_id=order.ticket,
-            items=status_data["samples"],
+    def store_order(self, order: MicrobialFastqOrder) -> dict:
+        """Store a Microbial FASTQ order in the database."""
+
+        project_data, lims_map = self.lims.process_lims(
+            samples=order.samples,
+            ticket=order.ticket_number,
+            order_name=order.name,
+            workflow=Workflow.RAW_DATA,
+            customer=order.customer,
+            delivery_type=DataDelivery(order.delivery_type),
         )
-        return {"project": project_data, "records": new_samples}
+        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
+        return {"records": new_samples, "project_data": project_data}
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
