@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from cg.constants import DataDelivery, SexOptions, Workflow
-from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
     MicrobialFastqOrder,
@@ -23,7 +22,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
 
     def store_order(self, order: MicrobialFastqOrder) -> dict:
         """Store a Microbial FASTQ order in the database."""
-
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
             ticket=order.ticket_number,
@@ -35,30 +33,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
         return {"records": new_samples, "project_data": project_data}
-
-    # TODO: Remove this method and the tests
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
-        """Convert order input for microbial samples."""
-        return {
-            "customer": order.customer,
-            "order": order.name,
-            "comment": order.comment,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "internal_id": sample.internal_id,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "volume": sample.volume,
-                    "control": sample.control,
-                }
-                for sample in order.samples
-            ],
-        }
 
     def store_order_data_in_status_db(self, order: MicrobialFastqOrder) -> list[Sample]:
         """
