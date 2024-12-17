@@ -15,7 +15,11 @@ class FileManager:
 
     @staticmethod
     def create_directories(base_path: Path, directories: set[str]) -> None:
-        """Create directories for given names under the base path."""
+        """Create directories for given names under the base path.
+        args:
+            base_path: The base path to create the directories under.
+            directories: The directories to create within the given base path. Can be a list of one.
+        """
 
         for directory in directories:
             LOG.debug(f"[FileManager] Creating directory or file: {base_path}/{directory}")
@@ -23,7 +27,13 @@ class FileManager:
 
     @staticmethod
     def rename_file(src: Path, dst: Path) -> None:
-        """Rename a file from src to dst."""
+        """
+        Rename a file from src to dst.
+        raise ValueError if src does not exist.
+        args:
+            src: The source file path.
+            dst: The destination file path.
+        """
         if not src or not dst:
             raise ValueError("Source and destination paths cannot be None.")
         LOG.debug(f"[FileManager] Renaming file: {src} -> {dst}")
@@ -33,7 +43,12 @@ class FileManager:
 
     @staticmethod
     def create_hard_link(src: Path, dst: Path) -> None:
-        """Create a hard link from src to dst."""
+        """
+        Create a hard link from src to dst.
+        args:
+            src: The source file path.
+            dst: The destination file path.
+        """
         LOG.debug(f"[FileManager] Creating hard link: {src} -> {dst}")
         os.link(src=src, dst=dst)
 

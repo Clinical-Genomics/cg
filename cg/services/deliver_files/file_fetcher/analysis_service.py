@@ -39,7 +39,11 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.tags_fetcher = tags_fetcher
 
     def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
-        """Return a list of analysis files to be delivered for a case."""
+        """Return a list of analysis files to be delivered for a case.
+        args:
+            case_id: The case id to deliver files for
+            sample_id: The sample id to deliver files for
+        """
         LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(
@@ -65,7 +69,12 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
 
     @staticmethod
     def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
-        """Check if the delivery files has files to deliver."""
+        """
+        Check if the delivery files has files to deliver.
+        raise NoDeliveryFilesError if no files to deliver.
+        args:
+            delivery_files: The delivery files to check
+        """
         if delivery_files.case_files or delivery_files.sample_files:
             return delivery_files
         LOG.info(
@@ -77,7 +86,13 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
     ) -> list[SampleFile] | None:
-        """Return a list of files from a case bundle with a sample id as tag."""
+        """Return a list of files from a case bundle with a sample id as tag.
+        This is to fetch sample specific analysis files that are stored on the case level.
+        args:
+            workflow: The workflow to fetch files for
+            sample_id: The sample id to fetch files for
+            case_id: The case id to fetch files for
+        """
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
         if not sample_tags:
             return []
@@ -99,7 +114,12 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     def _get_analysis_sample_delivery_files(
         self, case: Case, sample_id: str | None
     ) -> list[SampleFile] | None:
-        """Return a all sample files to deliver for a case."""
+        """Return all sample files to deliver for a case.
+        Write a list of sample files to deliver for a case.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample id to deliver files for
+        """
         sample_ids: list[str] = [sample_id] if sample_id else case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
@@ -115,7 +135,10 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     ) -> list[CaseFile] | None:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
-        files.
+        files. This is to ensure that only case level analysis files are delivered.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample id to deliver files for
         """
         case_tags: list[set[str]] = self.tags_fetcher.fetch_tags(case.data_analysis).case_tags
         if not case_tags:

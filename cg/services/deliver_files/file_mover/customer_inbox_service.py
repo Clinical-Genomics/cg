@@ -5,8 +5,6 @@ from cg.constants.delivery import INBOX_NAME
 from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     DeliveryMetaData,
-    CaseFile,
-    SampleFile,
 )
 from cg.services.deliver_files.file_mover.abstract import DestinationFilesMover
 from cg.services.deliver_files.utils import FileMover

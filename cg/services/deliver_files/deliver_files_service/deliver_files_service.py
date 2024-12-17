@@ -60,7 +60,12 @@ class DeliverFilesService:
     def deliver_files_for_case(
         self, case: Case, delivery_base_path: Path, dry_run: bool = False
     ) -> None:
-        """Deliver the files for a case to the customer folder."""
+        """Deliver the files for a case to the customer folder.
+        args:
+            case: The case to deliver files for
+            delivery_base_path: The base path to deliver the files to
+            dry_run: Whether to perform a dry run or not
+        """
         delivery_files: DeliveryFiles = self.file_manager.get_files_to_deliver(
             case_id=case.internal_id
         )
@@ -83,7 +88,12 @@ class DeliverFilesService:
     def deliver_files_for_ticket(
         self, ticket_id: str, delivery_base_path: Path, dry_run: bool = False
     ) -> None:
-        """Deliver the files for all cases in a ticket to the customer folder."""
+        """Deliver the files for all cases in a ticket to the customer folder.
+        args:
+            ticket_id: The ticket id to deliver files for
+            delivery_base_path: The base path to deliver the files to
+            dry_run: Whether to perform a dry run or not
+        """
         cases: list[Case] = self.status_db.get_cases_by_ticket_id(ticket_id)
         if not cases:
             raise EntryNotFoundError(f"No cases found for ticket {ticket_id}")
@@ -130,6 +140,12 @@ class DeliverFilesService:
         self.file_formatter.format_files(delivery_files=moved_files)
 
     def _start_rsync_job(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
+        """Start a rsync job for the case.
+        args:
+            case: The case to start the rsync job for
+            dry_run: Whether to perform a dry run or not
+            folders_to_deliver: The folders to deliver
+        """
         LOG.debug(f"[RSYNC] Starting rsync job for case {case.internal_id}")
         job_id: int = self.rsync_service.run_rsync_for_case(
             case=case,
@@ -144,6 +160,12 @@ class DeliverFilesService:
         return job_id
 
     def _add_trailblazer_tracking(self, case: Case, job_id: int, dry_run: bool) -> None:
+        """Add the rsync job to Trailblazer for tracking.
+        args:
+            case: The case to add the job for
+            job_id: The job id to add for trailblazer tracking
+            dry_run: Whether to perform a dry run or not
+        """
         if dry_run:
             LOG.info(f"Would have added the analysis for case {case.internal_id} to Trailblazer")
         else:

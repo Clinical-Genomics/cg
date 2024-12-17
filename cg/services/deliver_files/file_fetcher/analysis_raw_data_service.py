@@ -29,6 +29,12 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.tags_fetcher = tags_fetcher
 
     def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
+        """
+        Get files to deliver for a case or sample for both analysis and raw data.
+        args:
+            case_id: The case id to deliver files for
+            sample_id: The sample id to deliver files for
+        """
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         fastq_files: DeliveryFiles = self._fetch_files(
             service_class=RawDataDeliveryFileFetcher, case_id=case_id, sample_id=sample_id
@@ -51,6 +57,12 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     def _fetch_files(
         self, service_class: type, case_id: str, sample_id: str | None
     ) -> DeliveryFiles:
-        """Fetch files using the provided service class."""
+        """Fetch files using the provided service class.
+        Wrapper to fetch files using the provided service class this is either the RawDataDeliveryFileFetcher or the AnalysisDeliveryFileFetcher.
+        args:
+            service_class: The service class to use to fetch the files
+            case_id: The case id to fetch files for
+            sample_id: The sample id to fetch files for
+        """
         service = service_class(self.status_db, self.hk_api, tags_fetcher=self.tags_fetcher)
         return service.get_files_to_deliver(case_id=case_id, sample_id=sample_id)

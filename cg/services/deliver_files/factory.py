@@ -65,9 +65,12 @@ from cg.store.store import Store
 
 class DeliveryServiceFactory:
     """
-    Class to build the delivery services based on workflow, delivery type, delivery destination.
+    Class to build the delivery services based on case, workflow, delivery type, delivery destination and delivery structure.
     The delivery destination is used to specify delivery to the customer or for upload.
     It determines how the delivery_base_path is managed and its underlying folder structure.
+    Delivery type is used to specify the type of delivery to perform.
+    Delivery structure is used to specify the structure of the delivery.
+
     """
 
     def __init__(
@@ -88,7 +91,12 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _sanitise_delivery_type(delivery_type: DataDelivery) -> DataDelivery:
-        """Sanitise the delivery type."""
+        """Sanitise the delivery type.
+        We have multiple delivery types that are a combination of other delivery types or uploads.
+        Here we make sure to convert unsupported delivery types to supported ones.
+        args:
+            delivery_type: The type of delivery to perform.
+        """
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
         if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
@@ -104,6 +112,8 @@ class DeliveryServiceFactory:
     def _validate_delivery_type(delivery_type: DataDelivery):
         """
         Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
+        args:
+            delivery_type: The type of delivery to perform.
         """
         if delivery_type in [
             DataDelivery.FASTQ,
@@ -144,7 +154,12 @@ class DeliveryServiceFactory:
     def _get_file_fetcher(
         self, delivery_type: DataDelivery, delivery_destination: DeliveryDestination
     ) -> FetchDeliveryFilesService:
-        """Get the file fetcher based on the delivery type."""
+        """Get the file fetcher based on the delivery type.
+        args:
+            delivery_type: The type of delivery to perform.
+            delivery_destination: The destination of the delivery defaults to customer. See DeliveryDestination enum for explanation.
+
+        """
         service_map: dict[DataDelivery, Type[FetchDeliveryFilesService]] = {
             DataDelivery.FASTQ: RawDataDeliveryFileFetcher,
             DataDelivery.ANALYSIS_FILES: AnalysisDeliveryFileFetcher,

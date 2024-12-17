@@ -17,6 +17,7 @@ class FOHMUploadTagsFetcher(FetchDeliveryFileTagsService):
         Required since some of the sample specific files are stored on the case bundle, but also fastq files.
         Not separating these would cause fetching of case bundle fastq files if present.
 
+        Hardcoded to only return the tags for the files to deliver.
         args:
             workflow: Workflow: The workflow to fetch tags
         """
