@@ -1,11 +1,10 @@
 import logging
-import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store.models import Customer, Sample
@@ -24,18 +23,6 @@ class TicketHandler:
         self.status_db: Store = db
         self.system_email_id: int = system_email_id
         self.env: str = env
-
-    @staticmethod
-    def parse_ticket_number(name: str) -> str | None:
-        """Try to parse a ticket number from a string"""
-        # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#(\d{6,10})", name)
-        if ticket_match:
-            ticket_id = ticket_match.group(1)
-            LOG.info(f"{ticket_id}: detected ticket in order name")
-            return ticket_id
-        LOG.info(f"Could not detected ticket number in name {name}")
-        return None
 
     def create_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str
@@ -104,13 +91,6 @@ class TicketHandler:
     @staticmethod
     def create_new_ticket_header(message: str, order: OrderIn, project: str) -> str:
         return f"New order with {len(order.samples)} {project} samples:" + message
-
-    @staticmethod
-    def add_existing_ticket_header(message: str, order: OrderIn, project: str) -> str:
-        return (
-            f"A new order with {len(order.samples)} {project} samples has been connected to this ticket:"
-            + message
-        )
 
     def add_sample_name_to_message(self, message: str, sample_name: str) -> str:
         message += f"{self.NEW_LINE}{sample_name}"
@@ -188,27 +168,3 @@ class TicketHandler:
                 else:
                     obj[key] = cls.replace_empty_string_with_none(item)
         return obj
-
-    def connect_to_ticket(
-        self, order: OrderIn, user_name: str, project: str, ticket_number: str
-    ) -> None:
-        """Appends a new order message to the ticket selected by the customer"""
-        LOG.info(f"Connecting order to ticket {ticket_number}")
-
-        message: str = self.add_existing_ticket_header(
-            message=self.create_xml_sample_list(order=order, user_name=user_name),
-            order=order,
-            project=project,
-        )
-
-        with TemporaryDirectory() as temp_dir:
-            attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
-
-            reply = ReplyCreate(ticket_number=ticket_number, body=message)
-
-            self.client.reply_to_ticket(
-                reply=reply,
-                attachments=[attachments],
-            )
-
-            LOG.info(f"Connected order to ticket {ticket_number} in Freshdesk")
