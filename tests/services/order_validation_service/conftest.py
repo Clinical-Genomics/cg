@@ -5,13 +5,12 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
+from cg.services.order_validation_service.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.tomte.constants import TomteDeliveryType
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
-from cg.services.order_validation_service.workflows.tomte.validation_service import (
-    TomteValidationService,
-)
 from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
@@ -246,13 +245,13 @@ def sample_with_missing_container_name() -> TomteSample:
 def tomte_validation_service(
     base_store: Store,
     application_with_concentration_interval: Application,
-) -> TomteValidationService:
+) -> OrderValidationService:
     customer: Customer = base_store.get_customer_by_internal_id("cust000")
     user: User = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
-    return TomteValidationService(base_store)
+    return OrderValidationService(base_store)
 
 
 @pytest.fixture
@@ -267,3 +266,8 @@ def application_tgs(base_store: Store) -> Application:
     base_store.session.add(application)
     base_store.commit_to_store()
     return application
+
+
+@pytest.fixture
+def tomte_rule_set() -> RuleSet:
+    return ORDER_TYPE_RULE_SET_MAP[OrderType.TOMTE]

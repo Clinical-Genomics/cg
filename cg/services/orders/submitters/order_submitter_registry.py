@@ -1,23 +1,6 @@
 from cg.apps.lims import LimsAPI
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.workflows.balsamic.validation_service import (
-    BalsamicValidationService,
-)
-from cg.services.order_validation_service.workflows.fastq.validation_service import (
-    FastqValidationService,
-)
-from cg.services.order_validation_service.workflows.microsalt.validation_service import (
-    MicroSaltValidationService,
-)
-from cg.services.order_validation_service.workflows.mip_dna.validation_service import (
-    MipDnaValidationService,
-)
-from cg.services.order_validation_service.workflows.mutant.validation_service import (
-    MutantValidationService,
-)
-from cg.services.order_validation_service.workflows.tomte.validation_service import (
-    TomteValidationService,
-)
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
@@ -64,97 +47,97 @@ class OrderSubmitterRegistry:
 order_service_mapping = {
     OrderType.BALSAMIC: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.BALSAMIC_QC: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.BALSAMIC_UMI: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.FASTQ: (
         OrderLimsService,
-        FastqValidationService,
+        OrderValidationService,
         StoreFastqOrderService,
         FastqOrderSubmitter,
     ),
     OrderType.FLUFFY: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StorePoolOrderService,
         PoolOrderSubmitter,
     ),
     OrderType.METAGENOME: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreMetagenomeOrderService,
         MetagenomeOrderSubmitter,
     ),
     OrderType.MICROBIAL_FASTQ: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreMicrobialFastqOrderService,
         MicrobialOrderSubmitter,
     ),
     OrderType.MICROSALT: (
         OrderLimsService,
-        MicroSaltValidationService,
+        OrderValidationService,
         StoreMicrobialOrderService,
         MicrobialOrderSubmitter,
     ),
     OrderType.MIP_DNA: (
         OrderLimsService,
-        MipDnaValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.MIP_RNA: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.PACBIO_LONG_READ: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StorePacBioOrderService,
         PacbioOrderSubmitter,
     ),
     OrderType.RML: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StorePoolOrderService,
         PoolOrderSubmitter,
     ),
     OrderType.RNAFUSION: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
     OrderType.SARS_COV_2: (
         OrderLimsService,
-        MutantValidationService,
+        OrderValidationService,
         StoreMicrobialOrderService,
         MicrobialOrderSubmitter,
     ),
     OrderType.TAXPROFILER: (
         OrderLimsService,
-        BalsamicValidationService,
+        OrderValidationService,
         StoreMetagenomeOrderService,
         MetagenomeOrderSubmitter,
     ),
     OrderType.TOMTE: (
         OrderLimsService,
-        TomteValidationService,
+        OrderValidationService,
         StoreCaseOrderService,
         CaseOrderSubmitter,
     ),
