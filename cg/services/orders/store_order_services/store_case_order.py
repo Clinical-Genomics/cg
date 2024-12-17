@@ -6,9 +6,16 @@ from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.pedigree import Pedigree
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
+from cg.services.order_validation_service.models.case import Case
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
+from cg.store.models import ApplicationVersion
+from cg.store.models import Case as DbCase
+from cg.store.models import CaseSample, Customer
+from cg.store.models import Order as DbOrder
+from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,31 +41,28 @@ class StoreCaseOrderService(StoreOrderService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderIn) -> dict:
+    def store_order(self, order: OrderWithCases) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         return self._process_case_samples(order=order)
 
-    def _process_case_samples(self, order: OrderIn) -> dict:
+    def _process_case_samples(self, order: OrderWithCases) -> dict:
         """Process samples to be analyzed."""
         project_data = lims_map = None
 
-        # submit new samples to lims
-        new_samples = [sample for sample in order.samples if sample.internal_id is None]
-        if new_samples:
-            project_data, lims_map = self.lims.process_lims(order=order, new_samples=new_samples)
-
-        status_data = self.order_to_status(order=order)
-        samples = [sample for family in status_data["families"] for sample in family["samples"]]
+        if new_samples := [
+            sample for _, _, sample in order.enumerated_new_samples
+        ]:
+            project_data, lims_map = self.lims.process_lims(
+                samples=new_samples, customer=order.customer,
+                ticket=order.ticket_number,
+                order_name=order.name,
+                workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+                delivery_type=order.delivery_type
+            )
         if lims_map:
-            self._fill_in_sample_ids(samples=samples, lims_map=lims_map)
+            self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
 
-        new_cases: list[Case] = self.store_items_in_status(
-            customer_id=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"] if project_data else datetime.now(),
-            ticket_id=order.ticket,
-            items=status_data["families"],
-        )
+        new_cases: list[DbCase] = self.store_items_in_status(order)
         return {"project": project_data, "records": new_cases}
 
     @staticmethod
@@ -144,51 +148,48 @@ class StoreCaseOrderService(StoreOrderService):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
-    ) -> list[Case]:
+        self, order: OrderWithCases
+    ) -> list[DbCase]:
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=customer_id
+            customer_internal_id=order.customer
         )
-        new_cases: list[Case] = []
-        status_db_order = Order(
+        new_cases: list[DbCase] = []
+        status_db_order = DbOrder(
             customer=customer,
             order_date=datetime.now(),
-            ticket_id=int(ticket_id),
+            ticket_id=int(order.ticket_number)
         )
-        for case in items:
-            status_db_case: Case = self.status_db.get_case_by_internal_id(
-                internal_id=case["internal_id"]
-            )
-            if not status_db_case:
-                new_case: Case = self._create_case(
-                    case=case, customer_obj=customer, ticket=ticket_id
+        for case in order.cases:
+            case_samples: dict[str, DbSample] = {}
+            if case.is_new:
+                new_case: DbCase = self._create_case(
+                    case=case, customer_obj=customer, ticket=order.ticket_number
                 )
                 new_cases.append(new_case)
-                self._update_case_panel(panels=case["panels"], case=new_case)
+                self._update_case_panel(panels=case.panels, case=new_case)
                 status_db_case: Case = new_case
+                for sample in case.samples:
+                    if sample.is_new:
+                        new_sample: DbSample = self._create_sample(
+                            case=case,
+                            customer_obj=customer,
+                            order=order,
+                            ordered=datetime.now(),
+                            sample=sample,
+                            ticket=ticket_id,
+                        )
+                        case_samples[sample["name"]] = new_sample
+                    else:
+                        case_samples[sample["name"]] = existing_sample
+
             else:
-                self._append_ticket(ticket_id=ticket_id, case=status_db_case)
+                status_db_case = self.status_db.get_case_by_internal_id(case.internal_id)
+                self._append_ticket(ticket_id=order.ticket_number, case=status_db_case)
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
                 self._update_case_panel(panels=case["panels"], case=status_db_case)
-            case_samples: dict[str, Sample] = {}
+
             status_db_order.cases.append(status_db_case)
-            for sample in case["samples"]:
-                existing_sample: Sample = self.status_db.get_sample_by_internal_id(
-                    internal_id=sample["internal_id"]
-                )
-                if not existing_sample:
-                    new_sample: Sample = self._create_sample(
-                        case=case,
-                        customer_obj=customer,
-                        order=order,
-                        ordered=ordered,
-                        sample=sample,
-                        ticket=ticket_id,
-                    )
-                    case_samples[sample["name"]] = new_sample
-                else:
-                    case_samples[sample["name"]] = existing_sample
 
             for sample in case["samples"]:
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
@@ -250,8 +251,8 @@ class StoreCaseOrderService(StoreOrderService):
         self.status_db.session.add(link_obj)
         return link_obj
 
-    def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
-        sample_obj = self.status_db.add_sample(
+    def _create_sample(self, case, customer_obj, order, ordered, sample: Sample, ticket):
+        db_sample: DbSample = self.status_db.add_sample(
             name=sample["name"],
             comment=sample["comment"],
             control=sample["control"],
@@ -278,9 +279,9 @@ class StoreCaseOrderService(StoreOrderService):
         self.status_db.session.add(sample_obj)
         return sample_obj
 
-    def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
+    def _create_case(self, case: Case, customer_obj: Customer, ticket: str):
         case_obj = self.status_db.add_case(
-            cohorts=case["cohorts"],
+            cohorts=case.cohorts,
             data_analysis=Workflow(case["data_analysis"]),
             data_delivery=DataDelivery(case["data_delivery"]),
             name=case["name"],
