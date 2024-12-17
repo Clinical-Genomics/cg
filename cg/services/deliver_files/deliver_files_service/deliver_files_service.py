@@ -75,8 +75,7 @@ class DeliverFilesService:
         formatted_files: FormattedFiles = self.file_formatter.format_files(
             delivery_files=moved_files
         )
-        for formatted_file in formatted_files.files:
-            assert formatted_file.formatted_path.exists()
+     
         folders_to_deliver: set[Path] = set(
             [formatted_file.formatted_path.parent for formatted_file in formatted_files.files]
         )
