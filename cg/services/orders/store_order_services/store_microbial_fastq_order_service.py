@@ -106,11 +106,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
-        return Order(
-            customer=customer,
-            order_date=datetime.now(),
-            ticket_id=int(ticket_id),
-        )
+        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_sample(
         self,
