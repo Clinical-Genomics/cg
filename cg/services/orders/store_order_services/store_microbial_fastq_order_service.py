@@ -117,7 +117,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
     ) -> Sample:
         """Create a sample in the status database."""
         db_sample: Sample = self.status_db.add_sample(
-            name=sample["name"],
+            name=sample.name,
             customer=customer,
             sex=SexOptions.UNKNOWN,
             comment=sample.comment,
