@@ -6,9 +6,6 @@ from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
-import logging
-
-LOG = logging.getLogger(__name__)
 
 
 class MutantUploadAPI(UploadAPI):
