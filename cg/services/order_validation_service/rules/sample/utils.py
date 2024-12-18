@@ -8,9 +8,9 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OccupiedWellError,
     WellPositionMissingError,
 )
-from cg.services.order_validation_service.models.aliases import IndexedSample
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.models.sample_aliases import IndexedSample
 from cg.services.order_validation_service.rules.utils import (
     get_application_concentration_interval,
     get_concentration_interval,

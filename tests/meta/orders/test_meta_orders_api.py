@@ -11,9 +11,12 @@ from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
+from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
-from cg.store.models import Case, Customer, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample, User
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -111,39 +114,44 @@ def test_submit(
                     assert link_obj.sample.original_ticket == ticket_id
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
+    "order_type, order_name",
+    [
+        (OrderType.MIP_DNA, "mip_dna_order"),
+        (OrderType.MIP_RNA, "mip_rna_order"),
+        (OrderType.BALSAMIC, "balsamic_order"),
+    ],
 )
 def test_submit_ticketexception(
-    all_orders_to_submit,
+    mip_dna_order: MipDnaOrder,
+    mip_rna_order: MipRnaOrder,
+    balsamic_order: BalsamicOrder,
     orders_api: OrdersAPI,
     order_type: OrderType,
+    order_name: str,
     user_mail: str,
-    user_name: str,
 ):
+
+    # GIVEN an order
+    order: Order = locals().get(order_name)
+    raw_order = order.model_dump()
+    raw_order["ticket_number"] = "123456"
+    raw_order["project_type"] = order_type
+    user: User = orders_api.status.get_user_by_email(user_mail)
+
     # GIVEN a mock Freshdesk ticket creation that raises TicketCreationError
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
         side_effect=TicketCreationError("ERROR"),
     ):
         # GIVEN an order that does not have a name (ticket_nr)
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        order_data.name = "dummy_name"
 
         # WHEN the order is submitted and a TicketCreationError raised
         # THEN the TicketCreationError is not excepted
         with pytest.raises(TicketCreationError):
-            orders_api.submit(
-                project=order_type,
-                order_in=order_data,
-                user_name=user_name,
-                user_mail=user_mail,
-            )
+            orders_api.submit(raw_order=raw_order, user=user, order_type=order_type)
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
@@ -187,7 +195,6 @@ def test_submit_illegal_sample_customer(
         )
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
@@ -249,7 +256,6 @@ def test_submit_scout_legal_sample_customer(
         )
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
@@ -334,7 +340,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
             )
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 def test_submit_unique_sample_case_name(
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,

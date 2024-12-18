@@ -10,7 +10,7 @@ from cg.services.order_validation_service.utils import parse_buffer
 class MipRnaSample(Sample):
     age_at_sampling: float | None = None
     concentration_ng_ul: float | None = None
-    control: ControlEnum
+    control: ControlEnum = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer | None, BeforeValidator(parse_buffer)] = None
     formalin_fixation_time: int | None = None
     phenotype_groups: list[str] | None = None

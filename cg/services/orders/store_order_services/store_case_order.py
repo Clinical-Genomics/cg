@@ -1,17 +1,14 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Priority, Workflow
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.pedigree import Pedigree
-from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import Of1508Sample
 from cg.services.order_validation_service.models.case import Case
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer
 from cg.store.models import Order as DbOrder
@@ -49,15 +46,14 @@ class StoreCaseOrderService(StoreOrderService):
         """Process samples to be analyzed."""
         project_data = lims_map = None
 
-        if new_samples := [
-            sample for _, _, sample in order.enumerated_new_samples
-        ]:
+        if new_samples := [sample for _, _, sample in order.enumerated_new_samples]:
             project_data, lims_map = self.lims.process_lims(
-                samples=new_samples, customer=order.customer,
+                samples=new_samples,
+                customer=order.customer,
                 ticket=order.ticket_number,
                 order_name=order.name,
                 workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
-                delivery_type=order.delivery_type
+                delivery_type=order.delivery_type,
             )
         if lims_map:
             self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
@@ -65,233 +61,159 @@ class StoreCaseOrderService(StoreOrderService):
         new_cases: list[DbCase] = self.store_items_in_status(order)
         return {"project": project_data, "records": new_cases}
 
-    @staticmethod
-    def _group_cases(samples: list[Of1508Sample]) -> dict:
-        """Group samples in cases."""
-        cases = {}
-        for sample in samples:
-            case_id = sample.family_name
-            if case_id not in cases:
-                cases[case_id] = []
-            cases[case_id].append(sample)
-        return cases
-
-    @staticmethod
-    def _get_single_value(case_name, case_samples, value_key, value_default=None):
-        values = set(getattr(sample, value_key) or value_default for sample in case_samples)
-        if len(values) > 1:
-            raise ValueError(f"different sample {value_key} values: {case_name} - {values}")
-        single_value = values.pop()
-        return single_value
-
-    def order_to_status(self, order: OrderIn) -> dict:
-        """Converts order input to status interface input for MIP-DNA, MIP-RNA and Balsamic."""
-        status_data = {"customer": order.customer, "order": order.name, "families": []}
-        cases = self._group_cases(order.samples)
-
-        for case_name, case_samples in cases.items():
-            case_internal_id: str = self._get_single_value(
-                case_name, case_samples, "case_internal_id"
-            )
-            cohorts: set[str] = {
-                cohort for sample in case_samples for cohort in sample.cohorts if cohort
-            }
-            data_analysis = self._get_single_value(case_name, case_samples, "data_analysis")
-            data_delivery = self._get_single_value(case_name, case_samples, "data_delivery")
-
-            panels: set[str] = set()
-            if data_analysis in [Workflow.MIP_DNA, Workflow.TOMTE]:
-                panels: set[str] = {
-                    panel for sample in case_samples for panel in sample.panels if panel
-                }
-
-            priority = self._get_single_value(
-                case_name, case_samples, "priority", Priority.standard.name
-            )
-            synopsis: str = self._get_single_value(case_name, case_samples, "synopsis")
-
-            case = {
-                "cohorts": list(cohorts),
-                "data_analysis": data_analysis,
-                "data_delivery": data_delivery,
-                "internal_id": case_internal_id,
-                "name": case_name,
-                "panels": list(panels),
-                "priority": priority,
-                "samples": [
-                    {
-                        "age_at_sampling": sample.age_at_sampling,
-                        "application": sample.application,
-                        "capture_kit": sample.capture_kit,
-                        "comment": sample.comment,
-                        "control": sample.control,
-                        "father": sample.father,
-                        "internal_id": sample.internal_id,
-                        "mother": sample.mother,
-                        "name": sample.name,
-                        "phenotype_groups": list(sample.phenotype_groups),
-                        "phenotype_terms": list(sample.phenotype_terms),
-                        "reference_genome": (
-                            sample.reference_genome if hasattr(sample, "reference_genome") else None
-                        ),
-                        "sex": sample.sex,
-                        "status": sample.status if hasattr(sample, "status") else None,
-                        "subject_id": sample.subject_id,
-                        "tumour": sample.tumour,
-                    }
-                    for sample in case_samples
-                ],
-                "synopsis": synopsis,
-            }
-
-            status_data["families"].append(case)
-        return status_data
-
-    def store_items_in_status(
-        self, order: OrderWithCases
-    ) -> list[DbCase]:
+    def store_items_in_status(self, order: OrderWithCases) -> list[DbCase]:
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
         new_cases: list[DbCase] = []
         status_db_order = DbOrder(
-            customer=customer,
-            order_date=datetime.now(),
-            ticket_id=int(order.ticket_number)
+            customer=customer, order_date=datetime.now(), ticket_id=int(order.ticket_number)
         )
         for case in order.cases:
             case_samples: dict[str, DbSample] = {}
             if case.is_new:
                 new_case: DbCase = self._create_case(
-                    case=case, customer_obj=customer, ticket=order.ticket_number
+                    case=case,
+                    customer=customer,
+                    ticket=order.ticket_number,
+                    workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+                    delivery_type=order.delivery_type,
                 )
                 new_cases.append(new_case)
-                self._update_case_panel(panels=case.panels, case=new_case)
+                self._update_case_panel(panels=getattr(case, "panels", []), case=new_case)
                 status_db_case: Case = new_case
                 for sample in case.samples:
                     if sample.is_new:
                         new_sample: DbSample = self._create_sample(
                             case=case,
-                            customer_obj=customer,
-                            order=order,
+                            customer=customer,
+                            order_name=order.name,
                             ordered=datetime.now(),
                             sample=sample,
-                            ticket=ticket_id,
+                            ticket=order.ticket_number,
                         )
-                        case_samples[sample["name"]] = new_sample
+                        case_samples[sample.name] = new_sample
                     else:
-                        case_samples[sample["name"]] = existing_sample
+                        existing_sample: DbSample = self.status_db.get_sample_by_internal_id(
+                            sample.internal_id
+                        )
+                        case_samples[sample.name] = existing_sample
 
             else:
                 status_db_case = self.status_db.get_case_by_internal_id(case.internal_id)
                 self._append_ticket(ticket_id=order.ticket_number, case=status_db_case)
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
-                self._update_case_panel(panels=case["panels"], case=status_db_case)
+                self._update_case_panel(panels=getattr(case, "panels", []), case=status_db_case)
 
             status_db_order.cases.append(status_db_case)
-
-            for sample in case["samples"]:
-                sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
-                sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
-                with self.status_db.session.no_autoflush:
-                    case_sample: CaseSample = self.status_db.get_case_sample_link(
-                        case_internal_id=status_db_case.internal_id,
-                        sample_internal_id=sample["internal_id"],
+            if case.is_new:
+                for sample in case.samples:
+                    sample_mother: DbSample = case_samples.get(
+                        getattr(sample, Pedigree.MOTHER, None)
                     )
-                if not case_sample:
+                    sample_father: DbSample = case_samples.get(
+                        getattr(sample, Pedigree.FATHER, None)
+                    )
                     case_sample: CaseSample = self._create_link(
-                        case_obj=status_db_case,
+                        case=status_db_case,
                         family_samples=case_samples,
-                        father_obj=sample_father,
-                        mother_obj=sample_mother,
+                        father=sample_father,
+                        mother=sample_mother,
                         sample=sample,
                     )
 
-                self._update_relationship(
-                    father_obj=sample_father,
-                    link_obj=case_sample,
-                    mother_obj=sample_mother,
-                    sample=sample,
-                )
+                    self._update_relationship(
+                        father=sample_father,
+                        link=case_sample,
+                        mother=sample_mother,
+                        sample=sample,
+                    )
             self.status_db.session.add_all(new_cases)
             self.status_db.session.add(status_db_order)
             self.status_db.session.commit()
         return new_cases
 
     @staticmethod
-    def _update_case_panel(panels: list[str], case: Case) -> None:
+    def _update_case_panel(panels: list[str], case: DbCase) -> None:
         """Update case panels."""
         case.panels = panels
 
     @staticmethod
-    def _append_ticket(ticket_id: str, case: Case) -> None:
+    def _append_ticket(ticket_id: str, case: DbCase) -> None:
         """Add a ticket to the case."""
         case.tickets = f"{case.tickets},{ticket_id}"
 
     @staticmethod
-    def _update_action(action: str, case: Case) -> None:
+    def _update_action(action: str, case: DbCase) -> None:
         """Update action of a case."""
         case.action = action
 
     @staticmethod
-    def _update_relationship(father_obj, link_obj, mother_obj, sample):
-        link_obj.status = sample["status"] or link_obj.status
-        link_obj.mother = mother_obj or link_obj.mother
-        link_obj.father = father_obj or link_obj.father
+    def _update_relationship(
+        father: DbSample | None, link: CaseSample, mother: DbSample | None, sample: SampleInCase
+    ) -> None:
+        link.status = getattr(sample, "status", link.status)
+        link.mother = mother or link.mother
+        link.father = father or link.father
 
-    def _create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
-        link_obj = self.status_db.relate_sample(
-            case=case_obj,
-            sample=family_samples[sample["name"]],
-            status=sample["status"],
-            mother=mother_obj,
-            father=father_obj,
+    def _create_link(
+        self,
+        case: DbCase,
+        family_samples: dict,
+        father: DbSample,
+        mother: DbSample,
+        sample: SampleInCase,
+    ) -> CaseSample:
+        link = self.status_db.relate_sample(
+            case=case,
+            sample=family_samples[sample.name],
+            status=getattr(sample, "status", None),
+            mother=mother,
+            father=father,
         )
-        self.status_db.session.add(link_obj)
-        return link_obj
+        self.status_db.session.add(link)
+        return link
 
-    def _create_sample(self, case, customer_obj, order, ordered, sample: Sample, ticket):
+    def _create_sample(
+        self,
+        case: Case,
+        customer: Customer,
+        order_name: str,
+        ordered: datetime,
+        sample: SampleInCase,
+        ticket: str,
+    ):
         db_sample: DbSample = self.status_db.add_sample(
-            name=sample["name"],
-            comment=sample["comment"],
-            control=sample["control"],
-            internal_id=sample["internal_id"],
-            order=order,
+            internal_id=sample._generated_lims_id,
+            order=order_name,
             ordered=ordered,
             original_ticket=ticket,
-            tumour=sample["tumour"],
-            age_at_sampling=sample["age_at_sampling"],
-            capture_kit=sample["capture_kit"],
-            phenotype_groups=sample["phenotype_groups"],
-            phenotype_terms=sample["phenotype_terms"],
-            priority=case["priority"],
-            reference_genome=sample["reference_genome"],
-            sex=sample["sex"],
-            subject_id=sample["subject_id"],
+            priority=case.priority,
+            **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
-        sample_obj.customer = customer_obj
+        db_sample.customer = customer
         with self.status_db.session.no_autoflush:
-            application_tag = sample["application"]
-            sample_obj.application_version: ApplicationVersion = (
-                self.status_db.get_current_application_version_by_tag(tag=application_tag)
+            application_tag = sample.application
+            db_sample.application_version = self.status_db.get_current_application_version_by_tag(
+                tag=application_tag
             )
-        self.status_db.session.add(sample_obj)
-        return sample_obj
+        self.status_db.session.add(db_sample)
+        return db_sample
 
-    def _create_case(self, case: Case, customer_obj: Customer, ticket: str):
-        case_obj = self.status_db.add_case(
-            cohorts=case.cohorts,
-            data_analysis=Workflow(case["data_analysis"]),
-            data_delivery=DataDelivery(case["data_delivery"]),
-            name=case["name"],
-            priority=case["priority"],
-            synopsis=case["synopsis"],
+    def _create_case(
+        self,
+        case: Case,
+        customer: Customer,
+        ticket: str,
+        workflow: Workflow,
+        delivery_type: DataDelivery,
+    ) -> DbCase:
+        db_case: DbCase = self.status_db.add_case(
             ticket=ticket,
+            data_analysis=workflow,
+            data_delivery=delivery_type,
+            **case.model_dump(exclude={"samples"}),
         )
-        case_obj.customer = customer_obj
-        return case_obj
-
-    @staticmethod
-    def _is_rerun_of_existing_case(sample: Of1508Sample) -> bool:
-        return sample.case_internal_id is not None
+        db_case.customer = customer
+        return db_case
