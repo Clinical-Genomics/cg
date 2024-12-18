@@ -557,7 +557,7 @@ class LimsAPI(Lims, OrderHandler):
         return negative_controls
 
     def get_sample_region_and_lab_code(self, sample_id: str) -> str:
-        """Return the reqgion code and lab code for a sample formatted as a suffix string."""
+        """Return the region code and lab code for a sample formatted as a prefix string."""
         region_code: str = self.get_sample_attribute(lims_id=sample_id, key="region_code").split(
             " "
         )[0]
