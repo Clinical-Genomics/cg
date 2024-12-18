@@ -122,9 +122,11 @@ class DeliverFilesService:
         )
         self._add_trailblazer_tracking(case=case, job_id=job_id, dry_run=dry_run)
 
-    def deliver_files_for_fohm_upload(self, case: Case, sample_id: str, delivery_base_path: Path):
+    def deliver_files_for_sample_no_rsync(
+        self, case: Case, sample_id: str, delivery_base_path: Path
+    ):
         """
-        Deliver the files for a sample to the FOHM upload destination. Does not perform rsync.
+        Deliver the files for a sample to the delivery base path. Does not perform rsync.
         args:
             case: The case to deliver files for
             sample_id: The sample to deliver files for

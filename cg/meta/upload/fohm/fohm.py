@@ -209,7 +209,7 @@ class FOHMUploadAPI:
                 delivery_destination=DeliveryDestination.FOHM,
                 delivery_structure=DeliveryStructure.FLAT,
             )
-            delivery_service.deliver_files_for_fohm_upload(
+            delivery_service.deliver_files_for_sample_no_rsync(
                 case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
             )
 
