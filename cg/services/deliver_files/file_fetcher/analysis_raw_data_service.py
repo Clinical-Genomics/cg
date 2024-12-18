@@ -58,7 +58,7 @@ class RawDataAndAnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self, service_class: type, case_id: str, sample_id: str | None
     ) -> DeliveryFiles:
         """Fetch files using the provided service class.
-        Wrapper to fetch files using the provided service class this is either the RawDataDeliveryFileFetcher or the AnalysisDeliveryFileFetcher.
+        Wrapper to fetch files using the provided service class. This is either the RawDataDeliveryFileFetcher or the AnalysisDeliveryFileFetcher.
         args:
             service_class: The service class to use to fetch the files
             case_id: The case id to fetch files for

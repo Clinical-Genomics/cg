@@ -71,7 +71,8 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
         """
         Check if the delivery files has files to deliver.
-        raise NoDeliveryFilesError if no files to deliver.
+        raises:
+            NoDeliveryFilesError if no files to deliver.
         args:
             delivery_files: The delivery files to check
         """

@@ -66,7 +66,7 @@ from cg.store.store import Store
 class DeliveryServiceFactory:
     """
     Class to build the delivery services based on case, workflow, delivery type, delivery destination and delivery structure.
-    The delivery destination is used to specify delivery to the customer or for upload.
+    The delivery destination is used to specify delivery to the customer or for external upload.
     It determines how the delivery_base_path is managed and its underlying folder structure.
     Delivery type is used to specify the type of delivery to perform.
     Delivery structure is used to specify the structure of the delivery.
@@ -176,10 +176,10 @@ class DeliveryServiceFactory:
         )
 
     def _convert_workflow(self, case: Case) -> Workflow:
-        """Converts a workflow with the introduction of the microbial-fastq delivery type an
-        unsupported combination of delivery type and workflow setup is required. This function
-        makes sure that a raw data workflow with microbial fastq delivery type is treated as a
-        microsalt workflow so that the microbial-fastq sample files can be concatenated.
+        """Change the workflow of a Microbial Fastq case to Microsalt to allow the concatenation of fastq files.
+        With the introduction of the microbial-fastq delivery type, an unsupported combination of delivery type and 
+        workflow setup is required. This function makes sure that a raw data workflow with microbial fastq delivery 
+        type is treated as a microsalt workflow so that the microbial-fastq sample files can be concatenated.
         args:
             case: The case to convert the workflow for
         """
@@ -296,7 +296,7 @@ class DeliveryServiceFactory:
         """Build a delivery service based on a case.
         args:
             case: The case to deliver files for.
-            delivery_type: The type of delivery to perform.
+            delivery_type: The type of data delivery to perform. See DataDelivery enum for explanation.
             delivery_destination: The destination of the delivery defaults to customer. See DeliveryDestination enum for explanation.
             delivery_structure: The structure of the delivery defaults to nested. See DeliveryStructure enum for explanation.
         """
