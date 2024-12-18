@@ -3,14 +3,10 @@ from cg.services.order_validation_service.errors.order_errors import (
     CustomerDoesNotExistError,
     OrderError,
     OrderNameRequiredError,
-    TicketNumberRequiredError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.rules.order.utils import (
-    is_order_name_missing,
-    is_ticket_number_missing,
-)
+from cg.services.order_validation_service.rules.order.utils import is_order_name_missing
 from cg.store.store import Store
 
 
@@ -35,17 +31,6 @@ def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> l
     errors: list[OrderError] = []
     if not has_access:
         error = UserNotAssociatedWithCustomerError()
-        errors.append(error)
-    return errors
-
-
-def validate_ticket_number_required_if_connected(
-    order: Order,
-    **kwargs,
-) -> list[TicketNumberRequiredError]:
-    errors: list[TicketNumberRequiredError] = []
-    if is_ticket_number_missing(order):
-        error = TicketNumberRequiredError()
         errors.append(error)
     return errors
 
