@@ -6,7 +6,7 @@ from cg.services.deliver_files.file_formatter.destination.models import Formatte
 
 
 class FileFormatter(ABC):
-    
+
     @abstractmethod
     def format_files(
         self, moved_files: list[CaseFile | SampleFile], delivery_path: Path

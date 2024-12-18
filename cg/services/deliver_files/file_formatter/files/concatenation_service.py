@@ -78,6 +78,17 @@ class SampleFileConcatenationFormatter(FileFormatter):
         """Extract sample names from the sample files."""
         return {sample_file.sample_name for sample_file in sample_files}
 
+    def _create_sample_directories(self, sample_names: set[str], delivery_path: Path) -> None:
+        """Create directories for each sample name only if the file name formatter is the NestedSampleFileFormatter.
+        args:
+            sample_names: set[str]: Set of sample names.
+            delivery_path: Path: Path to the delivery directory.
+        """
+        if not isinstance(self.path_name_formatter, NestedStructurePathFormatter):
+            return
+        for sample_name in sample_names:
+            self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})
+
     def _format_sample_file_paths(self, sample_files: list[SampleFile]) -> list[FormattedFile]:
         """
         Return a list of formatted sample files.
@@ -107,17 +118,6 @@ class SampleFileConcatenationFormatter(FileFormatter):
             self.file_manager.rename_file(
                 src=formatted_file.original_path, dst=formatted_file.formatted_path
             )
-
-    def _create_sample_directories(self, sample_names: set[str], delivery_path: Path) -> None:
-        """Create directories for each sample name only if the file name formatter is the NestedSampleFileFormatter.
-        args:
-            sample_names: set[str]: Set of sample names.
-            delivery_path: Path: Path to the delivery directory.
-        """
-        if not isinstance(self.path_name_formatter, NestedStructurePathFormatter):
-            return
-        for sample_name in sample_names:
-            self.file_manager.create_directories(base_path=delivery_path, directories={sample_name})
 
     def _concatenate_fastq_files(
         self, delivery_path: Path, sample_names: set[str]
@@ -246,7 +246,7 @@ class SampleFileConcatenationFormatter(FileFormatter):
         }
         for fastq_file in fastq_files:
             sample_fastq_files[fastq_file.sample_name].append(fastq_file)
-        self._all_sample_fastq_file_share_same_directory(sample_fastq_files=sample_fastq_files)
+        self._validate_sample_fastq_file_share_same_directory(sample_fastq_files=sample_fastq_files)
         return sample_fastq_files
 
     def _replace_fastq_paths(
@@ -266,12 +266,13 @@ class SampleFileConcatenationFormatter(FileFormatter):
                 formatted_file.formatted_path = concatenation_maps[formatted_file.formatted_path]
 
     @staticmethod
-    def _all_sample_fastq_file_share_same_directory(
+    def _validate_sample_fastq_file_share_same_directory(
         sample_fastq_files: dict[str, list[FastqFile]]
     ) -> None:
         """
         Assert that all fastq files for a sample share the same directory.
         This is to ensure that the files are concatenated within the expected directory path.
+        raises: ValueError if the fastq files are not in the same directory.
         args:
             sample_fastq_files: dict[str, list[FastqFile]]: Dictionary of sample names and their fastq files.
         """

@@ -44,7 +44,9 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             case_id: The case id to deliver files for
             sample_id: The sample id to deliver files for
         """
-        LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}, sample: {sample_id}")
+        LOG.debug(
+            f"[FETCH SERVICE] Fetching analysis files for case: {case_id}, sample: {sample_id}"
+        )
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(
             case=case, sample_id=sample_id

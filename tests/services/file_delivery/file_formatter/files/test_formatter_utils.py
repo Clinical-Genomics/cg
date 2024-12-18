@@ -70,7 +70,7 @@ from cg.services.deliver_files.file_formatter.path_name.nested_structure import 
         ),
     ],
 )
-def test_component_formatters(
+def test_file_formatters(
     moved_files: list[CaseFile | SampleFile],
     expected_formatted_files: list[FormattedFile],
     file_formatter: FileFormatter,

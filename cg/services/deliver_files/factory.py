@@ -67,10 +67,9 @@ class DeliveryServiceFactory:
     """
     Class to build the delivery services based on case, workflow, delivery type, delivery destination and delivery structure.
     The delivery destination is used to specify delivery to the customer or for external upload.
-    It determines how the delivery_base_path is managed and its underlying folder structure.
+    Workflow is used to specify the workflow of the case and is required for the tag fetcher.
     Delivery type is used to specify the type of delivery to perform.
     Delivery structure is used to specify the structure of the delivery.
-
     """
 
     def __init__(
@@ -177,8 +176,8 @@ class DeliveryServiceFactory:
 
     def _convert_workflow(self, case: Case) -> Workflow:
         """Change the workflow of a Microbial Fastq case to Microsalt to allow the concatenation of fastq files.
-        With the introduction of the microbial-fastq delivery type, an unsupported combination of delivery type and 
-        workflow setup is required. This function makes sure that a raw data workflow with microbial fastq delivery 
+        With the introduction of the microbial-fastq delivery type, an unsupported combination of delivery type and
+        workflow setup is required. This function makes sure that a raw data workflow with microbial fastq delivery
         type is treated as a microsalt workflow so that the microbial-fastq sample files can be concatenated.
         args:
             case: The case to convert the workflow for
