@@ -3,17 +3,17 @@ from pathlib import Path
 import re
 from cg.apps.lims import LimsAPI
 from cg.services.deliver_files.file_fetcher.models import SampleFile
-from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
+from cg.services.deliver_files.file_formatter.files.abstract import FileFormatter
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
+from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.sample_service import FileManager
+from cg.services.deliver_files.file_formatter.files.sample_service import FileManager
 
 LOG = logging.getLogger(__name__)
 
 
-class MutantFileFormatter(ComponentFormatter):
+class MutantFileFormatter(FileFormatter):
     """
     Formatter for file to deliver or upload for the Mutant workflow.
     Args:
@@ -127,7 +127,7 @@ class MutantFileFormatter(ComponentFormatter):
         Filter out duplicates from the formatted files list.
 
         note:
-            During fastq concatenation Sample_R1 and Sample_R2 files are concatenated
+            During fastq concatenation Sample_L1_R1 and Sample_L2_R1 files are concatenated
             and moved to the same file Concat_Sample. This mean that there can be multiple entries
             for the same concatenated file in the formatted_files list
             coming from the SampleFileConcatenationService.

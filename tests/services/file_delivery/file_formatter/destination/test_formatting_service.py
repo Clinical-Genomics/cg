@@ -70,10 +70,10 @@ def test_reformat_files(
 
     expected_formatted_files = FormattedFiles(files=files)
     with mock.patch(
-        "cg.services.deliver_files.file_formatter.component_files.sample_service.SampleFileFormatter.format_files",
+        "cg.services.deliver_files.file_formatter.files.sample_service.SampleFileFormatter.format_files",
         return_value=formatted_sample_files,
     ), mock.patch(
-        "cg.services.deliver_files.file_formatter.component_files.case_service.CaseFileFormatter.format_files",
+        "cg.services.deliver_files.file_formatter.files.case_service.CaseFileFormatter.format_files",
         return_value=formatted_case_files,
     ):
         # WHEN reformatting the delivery files

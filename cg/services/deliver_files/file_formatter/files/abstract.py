@@ -5,8 +5,8 @@ from cg.services.deliver_files.file_fetcher.models import SampleFile, CaseFile
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 
 
-class ComponentFormatter(ABC):
-
+class FileFormatter(ABC):
+    # rename to file formatter
     @abstractmethod
     def format_files(
         self, moved_files: list[CaseFile | SampleFile], delivery_path: Path

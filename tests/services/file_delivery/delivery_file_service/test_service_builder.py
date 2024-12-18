@@ -18,13 +18,13 @@ from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+from cg.services.deliver_files.file_formatter.files.mutant_service import (
     MutantFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
+from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+from cg.services.deliver_files.file_formatter.files.sample_service import (
     SampleFileFormatter,
 )
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter

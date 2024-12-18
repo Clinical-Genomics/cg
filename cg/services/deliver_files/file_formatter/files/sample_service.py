@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.services.deliver_files.file_fetcher.models import SampleFile
-from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
+from cg.services.deliver_files.file_formatter.files.abstract import FileFormatter
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.utils import FileManager
@@ -10,7 +10,7 @@ from cg.services.deliver_files.utils import FileManager
 LOG = logging.getLogger(__name__)
 
 
-class SampleFileFormatter(ComponentFormatter):
+class SampleFileFormatter(FileFormatter):
     """
     Format the sample files to deliver.
     Used for all workflows except Microsalt and Mutant.

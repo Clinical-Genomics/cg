@@ -9,14 +9,14 @@ from cg.services.deliver_files.file_formatter.destination.models import (
     FormattedFile,
     FormattedFiles,
 )
-from cg.services.deliver_files.file_formatter.component_files.case_service import CaseFileFormatter
-from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+from cg.services.deliver_files.file_formatter.files.case_service import CaseFileFormatter
+from cg.services.deliver_files.file_formatter.files.mutant_service import (
     MutantFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
+from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+from cg.services.deliver_files.file_formatter.files.sample_service import (
     SampleFileFormatter,
 )
 

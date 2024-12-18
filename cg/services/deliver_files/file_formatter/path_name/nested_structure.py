@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.services.deliver_files.file_formatter.component_files.sample_service import LOG
+from cg.services.deliver_files.file_formatter.files.sample_service import LOG
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 
 

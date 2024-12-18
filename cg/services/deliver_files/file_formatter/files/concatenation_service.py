@@ -3,8 +3,8 @@ from pathlib import Path
 import re
 
 from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
-from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
-from cg.services.deliver_files.file_formatter.component_files.models import FastqFile
+from cg.services.deliver_files.file_formatter.files.abstract import FileFormatter
+from cg.services.deliver_files.file_formatter.files.models import FastqFile
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -13,7 +13,7 @@ from cg.services.fastq_concatenation_service.fastq_concatenation_service import 
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
 from cg.services.deliver_files.file_fetcher.models import SampleFile
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+from cg.services.deliver_files.file_formatter.files.sample_service import (
     FileManager,
 )
 from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
@@ -24,7 +24,7 @@ from cg.utils.files import get_all_files_in_directory_tree
 LOG = logging.getLogger(__name__)
 
 
-class SampleFileConcatenationFormatter(ComponentFormatter):
+class SampleFileConcatenationFormatter(FileFormatter):
     """
     Format the sample files to deliver, concatenate fastq files and return the formatted files.
     Used for workflows: Microsalt.

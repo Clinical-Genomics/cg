@@ -3,8 +3,8 @@ from unittest.mock import Mock
 import pytest
 from pathlib import Path
 
-from cg.services.deliver_files.file_formatter.component_files.abstract import ComponentFormatter
-from cg.services.deliver_files.file_formatter.component_files.mutant_service import (
+from cg.services.deliver_files.file_formatter.files.abstract import FileFormatter
+from cg.services.deliver_files.file_formatter.files.mutant_service import (
     MutantFileFormatter,
 )
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -15,13 +15,13 @@ from cg.services.deliver_files.file_fetcher.models import (
     SampleFile,
 )
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.component_files.case_service import (
+from cg.services.deliver_files.file_formatter.files.case_service import (
     CaseFileFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.concatenation_service import (
+from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.component_files.sample_service import (
+from cg.services.deliver_files.file_formatter.files.sample_service import (
     SampleFileFormatter,
     FileManager,
 )
@@ -73,7 +73,7 @@ from cg.services.deliver_files.file_formatter.path_name.nested_structure import 
 def test_component_formatters(
     moved_files: list[CaseFile | SampleFile],
     expected_formatted_files: list[FormattedFile],
-    file_formatter: ComponentFormatter,
+    file_formatter: FileFormatter,
     request,
 ):
     # GIVEN existing case files, a case file formatter and a ticket directory path and a customer inbox
