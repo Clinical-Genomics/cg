@@ -113,7 +113,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
 
     def _get_analysis_sample_delivery_files(
         self, case: Case, sample_id: str | None
-    ) -> list[SampleFile] | None:
+    ) -> list[SampleFile]:
         """Return all sample files to deliver for a case.
         Write a list of sample files to deliver for a case.
         args:
@@ -132,7 +132,7 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_analysis_case_delivery_files(
         self, case: Case, sample_id: str | None
-    ) -> list[CaseFile] | None:
+    ) -> list[CaseFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
         files. This is to ensure that only case level analysis files are delivered.
