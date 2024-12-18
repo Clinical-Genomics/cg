@@ -144,7 +144,6 @@ MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
