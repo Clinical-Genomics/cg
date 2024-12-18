@@ -138,7 +138,6 @@ class SampleFileConcatenationFormatter(FileFormatter):
         )
         concatenation_maps: dict[Path, Path] = {}
         for sample in grouped_fastq_files.keys():
-            # The parent is dependent on the nested or flat structure within the delivery path.
             fastq_directory: Path = grouped_fastq_files[sample][0].fastq_file_path.parent
             forward_path: Path = generate_concatenated_fastq_delivery_path(
                 fastq_directory=fastq_directory,
