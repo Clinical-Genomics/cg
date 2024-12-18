@@ -97,7 +97,7 @@ class FileMover:
             file_model.file_path = Path(target_dir, file_model.file_path.name)
         return file_models
 
-    def move_and_update_files(self, file_models: list[CaseFile | SampleFile], target_dir):
+    def move_and_update_files(self, file_models: list[CaseFile | SampleFile], target_dir: Path) -> list[CaseFile | SampleFile]:
         """Move files to the target directory and update the file paths.
         args:
             file_models: The file models that contain the files to move.
