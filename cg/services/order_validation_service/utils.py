@@ -1,5 +1,6 @@
 from typing import Callable
 
+from cg.models.orders.sample_base import ControlEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
@@ -45,3 +46,7 @@ def apply_sample_validation(rules: list[Callable], order: Order, store: Store) -
 
 def parse_buffer(buffer: str | None) -> ElutionBuffer | None:
     return ElutionBuffer.OTHER if buffer and buffer.startswith("Other") else buffer
+
+
+def parse_control(control: ControlEnum | None) -> ControlEnum:
+    return control or ControlEnum.not_control
