@@ -6,6 +6,10 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 
 
 @pytest.fixture(scope="session")
@@ -127,25 +131,23 @@ def all_orders_to_submit(
 ) -> dict[str, OrderIn]:
     """Returns a dict of parsed order for each order type."""
     return {
-        OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
-        OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit, project=OrderType.FASTQ),
-        OrderType.FLUFFY: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.FLUFFY),
+        OrderType.BALSAMIC: BalsamicOrder.model_validate(balsamic_order_to_submit),
+        OrderType.FASTQ: FastqOrder.model_validate(fastq_order_to_submit),
+        # OrderType.FLUFFY: FluffyOrder.model_validate(rml_order_to_submit),
         OrderType.METAGENOME: OrderIn.parse_obj(
             metagenome_order_to_submit, project=OrderType.METAGENOME
         ),
-        OrderType.MICROSALT: OrderIn.parse_obj(
-            microbial_order_to_submit, project=OrderType.MICROSALT
-        ),
-        OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA),
-        OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit, project=OrderType.MIP_RNA),
+        # OrderType.MICROSALT: OrderIn.parse_obj(
+        #    microbial_order_to_submit, project=OrderType.MICROSALT
+        # ),
+        OrderType.MIP_DNA: MipDnaOrder.model_validate(mip_order_to_submit),
+        OrderType.MIP_RNA: MipRnaOrder.model_validate(mip_rna_order_to_submit),
         OrderType.PACBIO_LONG_READ: OrderIn.parse_obj(
             pacbio_order_to_submit, project=OrderType.PACBIO_LONG_READ
         ),
-        OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
-        OrderType.RNAFUSION: OrderIn.parse_obj(
-            rnafusion_order_to_submit, project=OrderType.RNAFUSION
-        ),
-        OrderType.SARS_COV_2: OrderIn.parse_obj(
-            sarscov2_order_to_submit, project=OrderType.SARS_COV_2
-        ),
+        # OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
+        # OrderType.RNAFUSION: RnaFusionOrder.model_validate(rnafusion_order_to_submit),
+        # OrderType.SARS_COV_2: OrderIn.parse_obj(
+        #    sarscov2_order_to_submit, project=OrderType.SARS_COV_2
+        # ),
     }

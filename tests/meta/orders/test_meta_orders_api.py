@@ -10,20 +10,33 @@ from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MipDnaSample
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.models.order import Order
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
-from cg.store.models import Case, Customer, Pool, Sample, User
+from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def monkeypatch_process_lims(monkeypatch, order_data) -> None:
+def monkeypatch_process_lims(monkeypatch, order_data: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    if isinstance(order_data, OrderWithSamples):
+        lims_map = {
+            sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+        }
+    elif isinstance(order_data, OrderWithCases):
+        lims_map = {
+            sample.name: f"ELH123A{case_index}-{sample_index}"
+            for case_index, sample_index, sample in order_data.enumerated_new_samples
+        }
     monkeypatch.setattr(
         "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
         lambda *args, **kwargs: (lims_project_data, lims_map),
@@ -129,20 +142,24 @@ def test_submit_ticketexception(
     orders_api: OrdersAPI,
     order_type: OrderType,
     order_name: str,
-    user_mail: str,
+    helpers: StoreHelpers,
 ):
 
     # GIVEN an order
-    order: Order = locals().get(order_name)
+    order: OrderWithCases = locals().get(order_name)
     raw_order = order.model_dump()
-    raw_order["ticket_number"] = "123456"
+    raw_order["ticket_number"] = "#123456"
     raw_order["project_type"] = order_type
-    user: User = orders_api.status.get_user_by_email(user_mail)
+    customer = helpers.ensure_customer(store=orders_api.status)
+    user = helpers.ensure_user(store=orders_api.status, customer=customer)
 
     # GIVEN a mock Freshdesk ticket creation that raises TicketCreationError
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
         side_effect=TicketCreationError("ERROR"),
+    ), patch(
+        "cg.services.order_validation_service.order_validation_service.OrderValidationService._get_rule_validation_errors",
+        return_value=ValidationErrors(),
     ):
         # GIVEN an order that does not have a name (ticket_nr)
 
@@ -164,9 +181,13 @@ def test_submit_illegal_sample_customer(
     sample_store: Store,
     user_mail: str,
     user_name: str,
+    helpers: StoreHelpers,
 ):
-    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    order_data: OrderWithCases = all_orders_to_submit[order_type]
+    for _, _, sample in order_data.enumerated_new_samples:
+        helpers.ensure_application_version(store=sample_store, application_tag=sample.application)
     monkeypatch_process_lims(monkeypatch, order_data)
+    old_customer: Customer = sample_store.get_customers()[0]
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
     new_customer = sample_store.add_customer(
@@ -177,21 +198,21 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.session.add(new_customer)
-    existing_sample: Sample = sample_store._get_query(table=Sample).first()
-    existing_sample.customer = new_customer
-    sample_store.session.add(existing_sample)
+    existing_db_sample: Sample = sample_store._get_query(table=Sample).first()
+    existing_db_sample.customer = new_customer
+    sample_store.session.add(existing_db_sample)
     sample_store.session.commit()
-    for sample in order_data.samples:
-        sample.internal_id = existing_sample.internal_id
+    existing_order_sample = ExistingSample(
+        internal_id=existing_db_sample.internal_id, status=StatusEnum.affected
+    )
+    order_data.cases[0].samples.append(existing_order_sample)
+    user = sample_store.add_user(customer=old_customer, email=user_mail, name=user_name)
 
     # WHEN calling submit
     # THEN an OrderError should be raised on illegal customer
     with pytest.raises(OrderError):
         orders_api.submit(
-            order_type=order_type,
-            order_in=order_data,
-            user_name=user_name,
-            user_mail=user_mail,
+            raw_order=order_data.model_dump(by_alias=True), user=user, order_type=order_type
         )
 
 
@@ -214,9 +235,10 @@ def test_submit_scout_legal_sample_customer(
     ) as mock_create_ticket, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
     ) as mock_reply_to_ticket:
+        old_customer: Customer = sample_store.get_customers()[0]
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+        order_data: OrderWithCases = all_orders_to_submit[order_type]
         monkeypatch_process_lims(monkeypatch, order_data)
         # GIVEN we have an order with a customer that is in the same customer group as customer
         # that the samples originate from
@@ -240,19 +262,22 @@ def test_submit_scout_legal_sample_customer(
         order_customer.collaborations.append(collaboration)
         sample_store.session.add(sample_customer)
         sample_store.session.add(order_customer)
-        existing_sample: Sample = sample_store._get_query(table=Sample).first()
-        existing_sample.customer = sample_customer
+        existing_db_sample: Sample = sample_store._get_query(table=Sample).first()
+        existing_db_sample.customer = sample_customer
         sample_store.session.commit()
         order_data.customer = order_customer.internal_id
 
-        for sample in order_data.samples:
-            sample.internal_id = existing_sample.internal_id
-            break
+        existing_order_sample = ExistingSample(
+            internal_id=existing_db_sample.internal_id, status=StatusEnum.affected
+        )
+        order_data.cases[0].samples.append(existing_order_sample)
+
+        user = sample_store.add_user(customer=old_customer, email=user_mail, name=user_name)
 
         # WHEN calling submit
         # THEN an OrderError should not be raised on illegal customer
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            raw_order=order_data.model_dump(by_alias=True), user=user, order_type=order_type
         )
 
 

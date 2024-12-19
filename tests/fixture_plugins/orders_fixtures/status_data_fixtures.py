@@ -87,7 +87,7 @@ def rml_status_data(
 @pytest.fixture
 def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
     fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
-    fastq_order.ticket_number = 123456
+    fastq_order.ticket_number = "#123456"
     return fastq_order
 
 
@@ -97,7 +97,7 @@ def mip_rna_order(mip_rna_order_to_submit: dict) -> MipRnaOrder:
     mip_rna_order = MipRnaOrder.model_validate(mip_rna_order_to_submit)
     for case_index, sample_index, sample in mip_rna_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
-    mip_rna_order.ticket_number = 123456
+    mip_rna_order.ticket_number = "#123456"
     return mip_rna_order
 
 
@@ -107,7 +107,7 @@ def mip_dna_order(mip_dna_order_to_submit: dict) -> MipDnaOrder:
     mip_dna_order = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     for case_index, sample_index, sample in mip_dna_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
-    mip_dna_order.ticket_number = 123456
+    mip_dna_order.ticket_number = "#123456"
     return mip_dna_order
 
 
@@ -129,7 +129,7 @@ def mip_dna_submit_store(
 def balsamic_order(balsamic_order_to_submit: dict) -> BalsamicOrder:
     balsamic_order_to_submit["user_id"] = 1
     balsamic_order = BalsamicOrder.model_validate(balsamic_order_to_submit)
-    balsamic_order.ticket_number = 123456
+    balsamic_order.ticket_number = "123456"
     for case_index, sample_index, sample in balsamic_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
     return balsamic_order
