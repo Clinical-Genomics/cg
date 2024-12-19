@@ -17,7 +17,7 @@ def test_store_samples(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
+    new_samples = store_fastq_order_service.store_order_data_in_status_db(fastq_order)
 
     # THEN it should store the samples and create one raw-data case and one maf case
     assert len(new_samples) == 2
@@ -40,7 +40,7 @@ def test_store_samples_sex_stored(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
+    new_samples = store_fastq_order_service.store_order_data_in_status_db(fastq_order)
 
     # THEN the sample sex should be stored
     assert new_samples[0].sex == "male"
@@ -58,7 +58,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(
     fastq_order.samples[0].tumour = False
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
+    new_samples = store_fastq_order_service.store_order_data_in_status_db(fastq_order)
 
     # THEN the analysis for the case should be MAF
     assert new_samples[0].links[0].case.data_analysis == Workflow.MIP_DNA
@@ -79,7 +79,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     fastq_order.samples[1].tumour = True
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
+    new_samples = store_fastq_order_service.store_order_data_in_status_db(fastq_order)
 
     # THEN the analysis for the case should be RAW_DATA
     assert new_samples[1].links[0].case.data_analysis == Workflow.RAW_DATA
@@ -106,7 +106,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         sample.application = non_wgs_applications[0].tag
 
     # WHEN storing the order
-    new_samples = store_fastq_order_service.store_items_in_status(fastq_order)
+    new_samples = store_fastq_order_service.store_order_data_in_status_db(fastq_order)
 
     # THEN the analysis for the case should be RAW_DATA (none)
     assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
