@@ -94,7 +94,7 @@ def valid_microbial_fastq_order(ticket_id: str) -> MicrobialFastqOrder:
         samples=[sample_1, sample_2, sample_3],
         name="MicrobialFastqOrder",
     )
-    order.ticket_number = ticket_id
+    order._generated_ticket_id = ticket_id
     return order
 
 
