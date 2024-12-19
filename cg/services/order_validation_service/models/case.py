@@ -46,7 +46,7 @@ class Case(BaseModel):
         return samples
 
     def get_sample(self, sample_name: str) -> Sample | None:
-        for sample in self.samples:
+        for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample
 

@@ -142,12 +142,13 @@ def test_existing_samples_in_tree(
 def test_existing_sample_cycle_not_allowed(
     order_with_existing_sample_cycle: TomteOrder, base_store: Store, helpers: StoreHelpers
 ):
-    # GIVEN an order containing an existing sample
-    for sample in order_with_existing_sample_cycle.cases[0].samples:
-        if not sample.is_new:
-            helpers.add_sample(
-                store=base_store, name="ExistingSampleName", internal_id=sample.internal_id
-            )
+
+    # GIVEN an order containing an existing sample and a cycle
+    existing_sample = order_with_existing_sample_cycle.cases[0].samples[1]
+    assert not existing_sample.is_new
+    helpers.add_sample(
+        store=base_store, name="ExistingSampleName", internal_id=existing_sample.internal_id
+    )
 
     # WHEN validating the order
     errors: list[PedigreeError] = validate_pedigree(
