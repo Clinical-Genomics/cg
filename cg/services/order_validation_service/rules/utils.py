@@ -2,8 +2,8 @@ from cg.constants.sample_sources import SourceType
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
-from cg.services.order_validation_service.models.aliases import SampleWithSkipRC
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.models.sample_aliases import SampleWithSkipRC
 from cg.store.models import Application
 from cg.store.store import Store
 
