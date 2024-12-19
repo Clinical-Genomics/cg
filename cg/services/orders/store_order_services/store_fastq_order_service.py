@@ -57,7 +57,7 @@ class StoreFastqOrderService(StoreOrderService):
 
     def store_items_in_status(self, order: FastqOrder) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        ticket_id: str | None = order.ticket_number
+        ticket_id: str | None = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )

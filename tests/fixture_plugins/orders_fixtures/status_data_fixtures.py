@@ -10,9 +10,6 @@ from cg.services.orders.store_order_services.store_case_order import StoreCaseOr
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.store_microbial_fastq_order_service import (
-    StoreMicrobialFastqOrderService,
-)
 from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pacbio_order_service import (
     StorePacBioOrderService,
@@ -63,15 +60,36 @@ def microbial_status_data(
     return store_microbial_order_service.order_to_status(order=order)
 
 
+def create_microbial_fastq_sample(id: int) -> MicrobialFastqSample:
+    return MicrobialFastqSample(
+        application="MWRNXTR003",
+        comment="",
+        container=ContainerEnum.tube,
+        container_name="Fastq tube",
+        name=f"microfastq-sample-{id}",
+        volume=54,
+        elution_buffer=ElutionBuffer.WATER,
+        priority=PriorityEnum.priority,
+        quantity=54,
+        require_qc_ok=True,
+    )
+
+
 @pytest.fixture
-def microbial_fastq_status_data(
-    microbial_fastq_order_to_submit: dict,
-    store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
-) -> dict:
-    """Parse microbial order example."""
-    project: OrderType = OrderType.MICROBIAL_FASTQ
-    order: OrderIn = OrderIn.parse_obj(obj=microbial_fastq_order_to_submit, project=project)
-    return store_microbial_fastq_order_service.order_to_status(order=order)
+def valid_microbial_fastq_order(ticket_id: str) -> MicrobialFastqOrder:
+    sample_1: MicrobialFastqSample = create_microbial_fastq_sample(1)
+    sample_2: MicrobialFastqSample = create_microbial_fastq_sample(2)
+    sample_3: MicrobialFastqSample = create_microbial_fastq_sample(3)
+    order = MicrobialFastqOrder(
+        customer="cust000",
+        project_type=OrderType.MICROBIAL_FASTQ,
+        user_id=0,
+        delivery_type=MicrobialFastqDeliveryType.FASTQ,
+        samples=[sample_1, sample_2, sample_3],
+        name="MicrobialFastqOrder",
+    )
+    order._generated_ticket_id = ticket_id
+    return order
 
 
 @pytest.fixture
@@ -87,7 +105,7 @@ def rml_status_data(
 @pytest.fixture
 def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
     fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
-    fastq_order.ticket_number = "#123456"
+    fastq_order._generated_ticket_id = 123456
     return fastq_order
 
 
