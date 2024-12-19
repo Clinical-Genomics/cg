@@ -49,4 +49,5 @@ def parse_buffer(buffer: str | None) -> ElutionBuffer | None:
 
 
 def parse_control(control: ControlEnum | None) -> ControlEnum:
+    """Convert the control value into one of the Enum values if it's None."""
     return control or ControlEnum.not_control
