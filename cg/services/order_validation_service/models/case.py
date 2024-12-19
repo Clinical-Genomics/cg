@@ -26,7 +26,7 @@ class Case(BaseModel):
         return True
 
     @property
-    def enumerated_samples(self):
+    def enumerated_samples(self) -> enumerate[NewSample | ExistingSampleType]:
         return enumerate(self.samples)
 
     @property

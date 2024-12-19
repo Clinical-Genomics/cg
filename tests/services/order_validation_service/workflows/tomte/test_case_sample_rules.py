@@ -1,3 +1,4 @@
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.order_validation_service.errors.case_errors import (
     InvalidGenePanelsError,
     RepeatedGenePanelsError,
@@ -9,9 +10,8 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     PedigreeError,
     SampleIsOwnFatherError,
 )
-from cg.services.order_validation_service.rules.case.rules import (
-    validate_gene_panels_unique,
-)
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
+from cg.services.order_validation_service.rules.case.rules import validate_gene_panels_unique
 from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
@@ -20,6 +20,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
 )
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
@@ -83,13 +84,13 @@ def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
     assert isinstance(errors[0], FatherNotInCaseError)
 
 
-def test_sample_cannot_be_its_own_father(valid_order: TomteOrder):
+def test_sample_cannot_be_its_own_father(valid_order: TomteOrder, base_store: Store):
     # GIVEN an order with a sample which has itself as a parent
     sample = valid_order.cases[0].samples[0]
     sample.father = sample.name
 
     # WHEN validating the order
-    errors: list[PedigreeError] = validate_pedigree(valid_order)
+    errors: list[PedigreeError] = validate_pedigree(order=valid_order, store=base_store)
 
     # THEN an error is returned
     assert errors
@@ -98,11 +99,11 @@ def test_sample_cannot_be_its_own_father(valid_order: TomteOrder):
     assert isinstance(errors[0], SampleIsOwnFatherError)
 
 
-def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
+def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder, base_store: Store):
     # GIVEN an order where a sample is a descendant of itself
 
     # WHEN validating the order
-    errors: list[PedigreeError] = validate_pedigree(order_with_sample_cycle)
+    errors: list[PedigreeError] = validate_pedigree(order=order_with_sample_cycle, store=base_store)
 
     # THEN an error is returned
     assert errors
@@ -111,11 +112,50 @@ def test_sample_cycle_not_allowed(order_with_sample_cycle: TomteOrder):
     assert isinstance(errors[0], DescendantAsFatherError)
 
 
-def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder):
+def test_incest_is_allowed(order_with_siblings_as_parents: TomteOrder, base_store: Store):
     # GIVEN an order where parents are siblings
 
     # WHEN validating the order
-    errors: list[PedigreeError] = validate_pedigree(order_with_siblings_as_parents)
+    errors: list[PedigreeError] = validate_pedigree(
+        order=order_with_siblings_as_parents, store=base_store
+    )
 
     # THEN no error is returned
     assert not errors
+
+
+def test_existing_samples_in_tree(
+    valid_order: TomteOrder, base_store: Store, helpers: StoreHelpers
+):
+    # GIVEN a valid order where an existing sample is added
+    sample = helpers.add_sample(store=base_store)
+    existing_sample = ExistingSample(internal_id=sample.internal_id, status=StatusEnum.affected)
+    valid_order.cases[0].samples.append(existing_sample)
+
+    # WHEN validating the order
+    errors: list[PedigreeError] = validate_pedigree(order=valid_order, store=base_store)
+
+    # THEN no error is returned
+    assert not errors
+
+
+def test_existing_sample_cycle_not_allowed(
+    order_with_existing_sample_cycle: TomteOrder, base_store: Store, helpers: StoreHelpers
+):
+    # GIVEN an order containing an existing sample
+    for sample in order_with_existing_sample_cycle.cases[0].samples:
+        if not sample.is_new:
+            helpers.add_sample(
+                store=base_store, name="ExistingSampleName", internal_id=sample.internal_id
+            )
+
+    # WHEN validating the order
+    errors: list[PedigreeError] = validate_pedigree(
+        order=order_with_existing_sample_cycle, store=base_store
+    )
+
+    # THEN an error is returned
+    assert errors
+
+    # THEN the error is about the sample being a descendant of itself
+    assert isinstance(errors[0], DescendantAsFatherError)
