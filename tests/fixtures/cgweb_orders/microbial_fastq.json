@@ -4,11 +4,11 @@
     "comment": "",
     "samples": [
         {
-            "application": "WGSPCFC060",
+            "application": "MWRNXTR003",
             "comment": "sample comment",
             "container": "Tube",
             "container_name": "prov1",
-            "data_analysis": "microsalt",
+            "data_analysis": "raw-data",
             "data_delivery": "fastq",
             "elution_buffer": "Nuclease-free water",
             "name": "prov1",
@@ -17,9 +17,9 @@
             "well_position": ""
         },
         {
-            "application": "WGSPCFC060",
+            "application": "MWRNXTR003",
             "comment": "sample comment",
-            "container": "Tube",
+            "container": "96 well plate",
             "container_name": "prov2",
             "data_analysis": "raw-data",
             "data_delivery": "fastq",
@@ -27,7 +27,7 @@
             "name": "prov2",
             "priority": "priority",
             "volume": "2",
-            "well_position": ""
+            "well_position": "A:1"
         }
     ]
 }

@@ -1,12 +1,16 @@
 from datetime import datetime
 
 from cg.constants import DataDelivery, SexOptions, Workflow
-from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
+from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
+    MicrobialFastqOrder,
+)
+from cg.services.order_validation_service.workflows.microbial_fastq.models.sample import (
+    MicrobialFastqSample,
+)
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.exc import EntryNotFoundError
-from cg.store.models import Case, CaseSample, Customer, Order, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 
@@ -16,122 +20,89 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderIn) -> dict:
-        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
-        status_data: dict = self.order_to_status(order)
-        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
-        new_samples: list[Sample] = self.store_items_in_status(
-            customer_id=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"] if project_data else datetime.now(),
-            ticket_id=order.ticket,
-            items=status_data["samples"],
+    def store_order(self, order: MicrobialFastqOrder) -> dict:
+        """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
+        project_data, lims_map = self.lims.process_lims(
+            samples=order.samples,
+            ticket=order.ticket_number,
+            order_name=order.name,
+            workflow=Workflow.RAW_DATA,
+            customer=order.customer,
+            delivery_type=DataDelivery(order.delivery_type),
         )
-        return {"project": project_data, "records": new_samples}
+        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
+        return {"records": new_samples, "project_data": project_data}
 
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
-        """Convert order input for microbial samples."""
-        return {
-            "customer": order.customer,
-            "order": order.name,
-            "comment": order.comment,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "internal_id": sample.internal_id,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "volume": sample.volume,
-                    "control": sample.control,
-                }
-                for sample in order.samples
-            ],
-        }
-
-    def store_items_in_status(
-        self,
-        customer_id: str,
-        order: str,
-        ordered: datetime,
-        ticket_id: str,
-        items: list[dict],
-    ) -> list[Sample]:
-        customer: Customer = self._get_customer(customer_id)
-        new_samples: list[Sample] = []
-        status_db_order = Order(
-            customer=customer,
-            order_date=datetime.now(),
-            ticket_id=int(ticket_id),
-        )
-        for sample in items:
-            case_name: str = f'{sample["name"]}-case'
-            case: Case = self._create_case_for_sample(
-                sample=sample, customer=customer, case_name=case_name, ticket_id=ticket_id
-            )
-            db_sample: Sample = self._create_sample(
-                sample_dict=sample,
-                order=order,
-                ordered=ordered,
-                ticket_id=ticket_id,
-                customer=customer,
-            )
-            db_sample = self._add_application_to_sample(
-                sample=db_sample, application_tag=sample["application"]
-            )
-            case_sample: CaseSample = self.status_db.relate_sample(
-                case=case, sample=db_sample, status=StatusEnum.unknown
-            )
-            status_db_order.cases.append(case)
-            self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
-            new_samples.append(db_sample)
-        self.status_db.session.add(status_db_order)
+    def store_order_data_in_status_db(self, order: MicrobialFastqOrder) -> list[Sample]:
+        """
+        Store order, cases, samples and relationships in the status database. Return the samples.
+        """
+        db_order = self._create_db_order(order=order)
+        new_samples = []
+        with self.status_db.session.no_autoflush:
+            for sample in order.samples:
+                case: Case = self._create_db_case_for_sample(
+                    sample=sample, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
+                )
+                db_sample: Sample = self._create_db_sample(
+                    sample=sample,
+                    order_name=order.name,
+                    ticket_id=str(db_order.ticket_id),
+                    customer=db_order.customer,
+                )
+                case_sample: CaseSample = self.status_db.relate_sample(
+                    case=case, sample=db_sample, status=StatusEnum.unknown
+                )
+                db_order.cases.append(case)
+                self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
+                new_samples.append(db_sample)
+        self.status_db.add_item_to_store(db_order)
         self.status_db.commit_to_store()
         return new_samples
 
-    def _get_customer(self, customer_id: str) -> Customer:
-        if customer := self.status_db.get_customer_by_internal_id(customer_id):
-            return customer
-        raise EntryNotFoundError(f"could not find customer: {customer_id}")
-
-    def _create_case_for_sample(
-        self, sample: dict, customer: Customer, case_name: str, ticket_id: str
+    def _create_db_case_for_sample(
+        self, sample: MicrobialFastqSample, customer: Customer, ticket_id: str
     ) -> Case:
-        if self.status_db.get_case_by_name_and_customer(case_name=case_name, customer=customer):
-            raise ValueError(f"Case already exists: {case_name}.")
+        case_name: str = f"{sample.name}-case"
         case: Case = self.status_db.add_case(
             data_analysis=Workflow.RAW_DATA,
             data_delivery=DataDelivery.FASTQ,
             name=case_name,
-            priority=sample["priority"],
+            priority=sample.priority,
             ticket=ticket_id,
         )
         case.customer = customer
         return case
 
-    def _create_sample(
-        self, sample_dict: dict, order, ordered, ticket_id: str, customer: Customer
-    ) -> Sample:
+    def _create_db_order(self, order: MicrobialFastqOrder) -> Order:
+        ticket_id: str = order.ticket_number
+        customer: Customer = self.status_db.get_customer_by_internal_id(
+            customer_internal_id=order.customer
+        )
+        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
-        return self.status_db.add_sample(
-            name=sample_dict["name"],
+    def _create_db_sample(
+        self,
+        sample: MicrobialFastqSample,
+        order_name: str,
+        ticket_id: str,
+        customer: Customer,
+    ) -> Sample:
+        """Create a sample in the status database."""
+        db_sample: Sample = self.status_db.add_sample(
+            name=sample.name,
             customer=customer,
             sex=SexOptions.UNKNOWN,
-            comment=sample_dict["comment"],
-            internal_id=sample_dict["internal_id"],
-            order=order,
-            ordered=ordered,
+            comment=sample.comment,
+            internal_id=sample._generated_lims_id,
+            order=order_name,
+            ordered=datetime.now(),
             original_ticket=ticket_id,
-            priority=sample_dict["priority"],
+            priority=sample.priority,
         )
-
-    def _add_application_to_sample(self, sample: Sample, application_tag: str) -> Sample:
-        if application_version := self.status_db.get_current_application_version_by_tag(
-            tag=application_tag
-        ):
-            sample.application_version = application_version
-            return sample
-        raise EntryNotFoundError(f"Invalid application: {application_tag}")
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(tag=sample.application)
+        )
+        db_sample.application_version = application_version
+        return db_sample
