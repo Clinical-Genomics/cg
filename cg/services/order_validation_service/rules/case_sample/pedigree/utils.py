@@ -6,13 +6,10 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     SampleIsOwnFatherError,
     SampleIsOwnMotherError,
 )
-from cg.services.order_validation_service.workflows.tomte.models.sample import (
-    TomteSample,
-)
-from cg.services.order_validation_service.rules.case_sample.pedigree.models import (
-    FamilyTree,
-    Node,
-)
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
+from cg.services.order_validation_service.rules.case_sample.pedigree.models import FamilyTree, Node
+from cg.services.order_validation_service.workflows.mip_dna.models.sample import MipDnaSample
+from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 
 
 def validate_tree(pedigree: FamilyTree) -> list[PedigreeError]:
@@ -47,14 +44,14 @@ def get_error(node: Node, parent_type: str) -> PedigreeError:
 
 
 def get_mother_error(node: Node) -> PedigreeError:
-    sample: TomteSample = node.sample
-    if sample.name == sample.mother:
+    sample: TomteSample | MipDnaSample | ExistingSample = node.sample
+    if node.sample_name == sample.mother:
         return SampleIsOwnMotherError(sample_index=node.sample_index, case_index=node.case_index)
     return DescendantAsMotherError(sample_index=node.sample_index, case_index=node.case_index)
 
 
 def get_father_error(node: Node) -> PedigreeError:
     sample: TomteSample = node.sample
-    if sample.name == sample.father:
+    if node.sample_name == sample.father:
         return SampleIsOwnFatherError(sample_index=node.sample_index, case_index=node.case_index)
     return DescendantAsFatherError(sample_index=node.sample_index, case_index=node.case_index)
