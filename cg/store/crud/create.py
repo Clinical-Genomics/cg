@@ -398,12 +398,12 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_order(self, customer: Customer, ticket_id: str | int) -> Order:
+    def add_order(self, customer: Customer, ticket_id: int) -> Order:
         """Build a new Order record."""
         order = Order(
             customer=customer,
             order_date=datetime.now(),
-            ticket_id=int(ticket_id),
+            ticket_id=ticket_id,
         )
         return order
 

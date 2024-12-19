@@ -24,7 +24,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
-            ticket=order.ticket_number,
+            ticket=order._generated_ticket_id,
             order_name=order.name,
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
@@ -76,7 +76,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return case
 
     def _create_db_order(self, order: MicrobialFastqOrder) -> Order:
-        ticket_id: str = order._generated_ticket_id
+        ticket_id: int = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )

@@ -26,7 +26,7 @@ class StoreFastqOrderService(StoreOrderService):
 
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
-            ticket=order.ticket_number,
+            ticket=order._generated_ticket_id,
             order_name=order.name,
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
@@ -57,18 +57,18 @@ class StoreFastqOrderService(StoreOrderService):
 
     def store_items_in_status(self, order: FastqOrder) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        ticket_id: str | None = order._generated_ticket_id
+        ticket_id: int = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
         new_samples = []
         case: Case = self.status_db.get_case_by_name_and_customer(
-            customer=customer, case_name=ticket_id
+            customer=customer, case_name=str(ticket_id)
         )
         status_db_order = Order(
             customer=customer,
             order_date=datetime.now(),
-            ticket_id=int(ticket_id),
+            ticket_id=ticket_id,
         )
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
@@ -79,7 +79,7 @@ class StoreFastqOrderService(StoreOrderService):
                     internal_id=sample._generated_lims_id,
                     order=order.name,
                     ordered=datetime.now(),
-                    original_ticket=ticket_id,
+                    original_ticket=str(ticket_id),
                     priority=sample.priority,
                     tumour=sample.tumour,
                     capture_kit=sample.capture_kit,
@@ -96,9 +96,9 @@ class StoreFastqOrderService(StoreOrderService):
                     case = self.status_db.add_case(
                         data_analysis=Workflow.RAW_DATA,
                         data_delivery=DataDelivery.FASTQ,
-                        name=ticket_id,
+                        name=str(ticket_id),
                         priority=sample.priority,
-                        ticket=ticket_id,
+                        ticket=str(ticket_id),
                     )
                 if (
                     not new_sample.is_tumour
