@@ -11,8 +11,11 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.order import OrderType
+from cg.services.order_validation_service.models.order import Order
+from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.submitters.order_submitter_registry import OrderSubmitterRegistry
+from cg.store.models import User
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,15 +37,17 @@ class OrdersAPI:
         self.ticket_handler = ticket_handler
         self.submitter_registry = submitter_registry
 
-    def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
+    def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
-        submit_handler = self.submitter_registry.get_order_submitter(project)
-        submit_handler.order_validation_service.validate_order(order_in)
-        ticket_number = self.ticket_handler.create_ticket(
-            order=order_in, user_name=user_name, user_mail=user_mail, project=project
+        submit_handler: OrderSubmitter = self.submitter_registry.get_order_submitter(order_type)
+        order: Order = submit_handler.order_validation_service.parse_and_validate(
+            raw_order=raw_order, order_type=order_type
         )
-        order_in.ticket = ticket_number
-        return submit_handler.submit_order(order_in=order_in)
+        ticket_number: int = self.ticket_handler.create_ticket(
+            order=order, user_name=user.name, user_mail=user.email, order_type=order_type
+        )
+        order.ticket_number = ticket_number
+        return submit_handler.submit_order(order)

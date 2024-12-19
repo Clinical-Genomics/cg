@@ -12,6 +12,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.submitters.order_submitter_registry import (
@@ -96,6 +97,8 @@ order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registr
     lims=lims,
     status_db=db,
 )
+
+order_validation_service = OrderValidationService(store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
