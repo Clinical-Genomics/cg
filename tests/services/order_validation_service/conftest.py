@@ -51,7 +51,7 @@ def create_tomte_order(cases: list[TomteCase]) -> TomteOrder:
         customer="cust000",
         cases=cases,
     )
-    order._ticket_number = 123456
+    order._generated_ticket_id = 123456
     return order
 
 

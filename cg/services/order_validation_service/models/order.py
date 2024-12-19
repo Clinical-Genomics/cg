@@ -3,8 +3,6 @@ from pydantic import BaseModel, Field, PrivateAttr, model_validator
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 
-TICKET_PATTERN = r"^#\d{4,}"
-
 
 class Order(BaseModel):
     comment: str | None = None
@@ -14,7 +12,7 @@ class Order(BaseModel):
     order_type: OrderType = Field(alias="project_type")
     name: str = Field(min_length=1)
     skip_reception_control: bool = False
-    _ticket_number: int | None = PrivateAttr(default=None)
+    _generated_ticket_id: int | None = PrivateAttr(default=None)
     user_id: int
 
     @model_validator(mode="before")
