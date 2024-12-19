@@ -65,9 +65,8 @@ class StoreFastqOrderService(StoreOrderService):
         case: Case = self.status_db.get_case_by_name_and_customer(
             customer=customer, case_name=str(ticket_id)
         )
-        status_db_order = Order(
+        status_db_order: Order = self.status_db.add_order(
             customer=customer,
-            order_date=datetime.now(),
             ticket_id=ticket_id,
         )
         with self.status_db.session.no_autoflush:
