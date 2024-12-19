@@ -90,5 +90,6 @@
 	"delivery_type": "analysis-scout",
 	"name": "MipRnaOrder",
 	"project_type": "mip-rna",
-	"ticket": null
+	"ticket": null,
+	"user_id": 1
 }

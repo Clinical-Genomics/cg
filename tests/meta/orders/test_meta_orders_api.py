@@ -229,6 +229,7 @@ def test_submit_scout_legal_sample_customer(
     user_mail: str,
     user_name: str,
     ticket_id: str,
+    helpers: StoreHelpers,
 ):
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
@@ -239,6 +240,10 @@ def test_submit_scout_legal_sample_customer(
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         order_data: OrderWithCases = all_orders_to_submit[order_type]
+        for _, _, sample in order_data.enumerated_new_samples:
+            helpers.ensure_application_version(
+                store=sample_store, application_tag=sample.application
+            )
         monkeypatch_process_lims(monkeypatch, order_data)
         # GIVEN we have an order with a customer that is in the same customer group as customer
         # that the samples originate from
