@@ -2,8 +2,19 @@ import pytest
 
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
+from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.microbial_fastq.constants import (
+    MicrobialFastqDeliveryType,
+)
+from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
+    MicrobialFastqOrder,
+)
+from cg.services.order_validation_service.workflows.microbial_fastq.models.sample import (
+    MicrobialFastqSample,
+)
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
