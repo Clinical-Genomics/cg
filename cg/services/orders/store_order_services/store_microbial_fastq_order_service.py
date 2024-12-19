@@ -76,7 +76,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return case
 
     def _create_db_order(self, order: MicrobialFastqOrder) -> Order:
-        ticket_id: str = order.ticket_number
+        ticket_id: str = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )

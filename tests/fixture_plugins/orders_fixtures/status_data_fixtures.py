@@ -94,7 +94,7 @@ def valid_microbial_fastq_order(ticket_id: str) -> MicrobialFastqOrder:
         samples=[sample_1, sample_2, sample_3],
         name="MicrobialFastqOrder",
     )
-    order.ticket_number = ticket_id
+    order._generated_ticket_id = ticket_id
     return order
 
 
@@ -141,5 +141,5 @@ def tomte_status_data(
 @pytest.fixture
 def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
     fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
-    fastq_order.ticket_number = 123456
+    fastq_order._generated_ticket_id = 123456
     return fastq_order

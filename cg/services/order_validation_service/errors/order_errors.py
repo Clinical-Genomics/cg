@@ -11,11 +11,6 @@ class UserNotAssociatedWithCustomerError(OrderError):
     message: str = "User does not belong to customer"
 
 
-class TicketNumberRequiredError(OrderError):
-    field: str = "ticket_number"
-    message: str = "Ticket number is required"
-
-
 class CustomerCannotSkipReceptionControlError(OrderError):
     field: str = "skip_reception_control"
     message: str = "Customer cannot skip reception control"
