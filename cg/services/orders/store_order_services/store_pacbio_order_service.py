@@ -46,7 +46,6 @@ class StorePacBioOrderService(StoreOrderService):
         - For each Sample, a Case
         - For each Sample, a relationship between the Sample and its Case
         """
-        # Add order
         status_db_order: Order = self._create_db_order(order=order)
         new_samples = []
         with self.status_db.session.no_autoflush:
