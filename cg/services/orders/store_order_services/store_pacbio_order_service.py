@@ -48,7 +48,7 @@ class StorePacBioOrderService(StoreOrderService):
         """
         status_db_order: Order = self._create_db_order(order=order)
         new_samples = []
-        with self.status_db.session.no_autoflush:
+        with self.status_db.no_autoflush_context():
             for sample in order.samples:
                 case: Case = self._create_db_case_for_sample(
                     sample=sample,

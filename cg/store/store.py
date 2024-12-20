@@ -36,6 +36,10 @@ class Store(
         """Add multiple items to the store."""
         self.session.add_all(items)
 
+    def no_autoflush_context(self):
+        """Return a context manager that disables autoflush for the session."""
+        return self.session.no_autoflush
+
     def rollback(self):
         """Rollback any pending change to the store."""
         self.session.rollback()
