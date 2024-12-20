@@ -29,7 +29,7 @@ def test_store_order(
     )
 
     # WHEN storing the order
-    new_samples: list[Sample] = store_pacbio_order_service._store_samples_in_statusdb(
+    new_samples: list[Sample] = store_pacbio_order_service.store_order_data_in_status_db(
         order=valid_pacbio_order
     )
 

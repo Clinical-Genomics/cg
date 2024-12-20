@@ -34,10 +34,10 @@ class StorePacBioOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-        new_samples = self._store_samples_in_statusdb(order=order)
+        new_samples = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_samples}
 
-    def _store_samples_in_statusdb(self, order: PacbioOrder) -> list[Sample]:
+    def store_order_data_in_status_db(self, order: PacbioOrder) -> list[Sample]:
         """
         Store all order data in the Status database for a Pacbio order. Return the samples.
         The stored data objects are:
