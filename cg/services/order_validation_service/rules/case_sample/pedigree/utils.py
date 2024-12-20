@@ -57,7 +57,7 @@ def get_mother_error(node: Node) -> PedigreeError:
 
 def get_father_error(node: Node) -> PedigreeError:
     """Called when the node's 'father' creates a cycle in the family tree. For clearer feedback
-    we distinguish between the sample being its own mother, and other more complex situations."""
+    we distinguish between the sample being its own father, and other more complex situations."""
     sample: TomteSample = node.sample
     if node.sample_name == sample.father:
         return SampleIsOwnFatherError(sample_index=node.sample_index, case_index=node.case_index)
