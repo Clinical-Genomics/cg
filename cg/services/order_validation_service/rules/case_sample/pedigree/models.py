@@ -11,7 +11,7 @@ class Node:
     """
     This class is used to represent the samples in the family tree graph. The variables 'mother' and
     'father' refer to other nodes in the family tree, and can be thought of as an edge in the graph.
-    Because the 'mother' and 'father' is tracked using the sample's _name_ in the order, and
+    Because the 'mother' and 'father' are tracked using the sample's _name_ in the order, and
     because said name is not set in the ExistingSample model, we require the sample name as a
     separate input.
     """
