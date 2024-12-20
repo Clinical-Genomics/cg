@@ -54,10 +54,10 @@ class StoreCaseOrderService(StoreOrderService):
         if lims_map:
             self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
 
-        new_cases: list[DbCase] = self.store_items_in_status(order)
+        new_cases: list[DbCase] = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_cases}
 
-    def store_items_in_status(self, order: OrderWithCases) -> list[DbCase]:
+    def store_order_data_in_status_db(self, order: OrderWithCases) -> list[DbCase]:
         """Store cases, samples and their relationship in the Status database."""
         new_cases: list[DbCase] = []
         db_order = self._create_db_order(order)

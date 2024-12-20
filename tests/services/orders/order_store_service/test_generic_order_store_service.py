@@ -20,7 +20,7 @@ def test_store_mip(
     assert not mip_dna_submit_store.get_cases()
 
     # WHEN storing the order
-    new_families = store_generic_order_service.store_items_in_status(mip_dna_order)
+    new_families = store_generic_order_service.store_order_data_in_status_db(mip_dna_order)
 
     # THEN it should create and link samples and the case
     assert len(new_families) == 2
@@ -62,7 +62,7 @@ def test_store_mip_rna(
     assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     # WHEN storing a MIP-RNA order containing 1 case with 2 samples and 1 case with only 1 sample
-    new_cases = store_generic_order_service.store_items_in_status(mip_rna_order)
+    new_cases = store_generic_order_service.store_order_data_in_status_db(mip_rna_order)
 
     # THEN it should create and link samples and the casing
     assert len(new_cases) == 2
@@ -88,7 +88,7 @@ def test_store_cancer_samples(
     assert not balsamic_submit_store.get_cases()
 
     # WHEN storing the order
-    new_families = store_generic_order_service.store_items_in_status(balsamic_order)
+    new_families = store_generic_order_service.store_order_data_in_status_db(balsamic_order)
 
     # THEN it should create and link samples and the case
     assert len(new_families) == 1
