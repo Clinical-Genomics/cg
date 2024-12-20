@@ -11,19 +11,18 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.priority import SlurmAccount, SlurmQos
-from cg.constants.tb import AnalysisTypes
+from cg.constants.priority import SlurmAccount, SlurmQos, TrailblazerPriority
+from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.controller import WriteFile
+from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.sbatch import (
+    COVID_REPORT_RSYNC,
     COVID_RSYNC,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
-    COVID_REPORT_RSYNC,
 )
-
-from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -52,6 +51,15 @@ class DeliveryRsyncService:
     def slurm_quality_of_service(self) -> str:
         """Return the slurm quality of service depending on the slurm account."""
         return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
+
+    @property
+    def trailblazer_priority(self) -> TrailblazerPriority:
+        """Return the trailblazer priority depending on the slurm account."""
+        return (
+            TrailblazerPriority.HIGH
+            if self.account == SlurmAccount.PRODUCTION
+            else TrailblazerPriority.LOW
+        )
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -159,10 +167,10 @@ class DeliveryRsyncService:
         )
         tb_api.add_pending_analysis(
             case_id=ticket,
-            analysis_type=AnalysisTypes.OTHER,
+            analysis_type=AnalysisType.OTHER,
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
-            slurm_quality_of_service=self.slurm_quality_of_service,
+            priority=self.trailblazer_priority,
             email=self.mail_user,
             workflow=Workflow.RSYNC,
             ticket=ticket,

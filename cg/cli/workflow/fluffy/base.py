@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
