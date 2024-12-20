@@ -1,8 +1,6 @@
 from cg.services.order_validation_service.models.aliases import CaseContainingRelatives
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
-from cg.services.order_validation_service.workflows.mip_dna.models.case import MipDnaCase
 from cg.services.order_validation_service.workflows.mip_dna.models.sample import MipDnaSample
-from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.store.store import Store
 
@@ -45,7 +43,7 @@ class FamilyTree:
 
     def __init__(self, case: CaseContainingRelatives, case_index: int, store: Store):
         self.graph: dict[str, Node] = {}
-        self.case: TomteCase | MipDnaCase = case
+        self.case: CaseContainingRelatives = case
         self.case_index: int = case_index
         self.store = store
         self._add_nodes()
