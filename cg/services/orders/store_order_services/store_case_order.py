@@ -4,6 +4,7 @@ from datetime import datetime
 from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.services.order_validation_service.models.case import Case
+from cg.services.order_validation_service.models.existing_case import ExistingCase
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
@@ -45,7 +46,6 @@ class StoreCaseOrderService(StoreOrderService):
     def _process_case_samples(self, order: OrderWithCases) -> dict:
         """Process samples to be analyzed."""
         project_data = lims_map = None
-
         if new_samples := [sample for _, _, sample in order.enumerated_new_samples]:
             project_data, lims_map = self.lims.process_lims(
                 samples=new_samples,
@@ -63,61 +63,43 @@ class StoreCaseOrderService(StoreOrderService):
 
     def store_items_in_status(self, order: OrderWithCases) -> list[DbCase]:
         """Store cases, samples and their relationship in the Status database."""
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=order.customer
-        )
         new_cases: list[DbCase] = []
-        status_db_order = DbOrder(
-            customer=customer, order_date=datetime.now(), ticket_id=order._generated_ticket_id
-        )
+        db_order = self._create_db_order(order)
         for case in order.cases:
-            case_samples: dict[str, DbSample] = {}
             if case.is_new:
-                new_case: DbCase = self._create_case(
+                db_case: DbCase = self._create_db_case(
                     case=case,
-                    customer=customer,
+                    customer=db_order.customer,
                     ticket=str(order._generated_ticket_id),
                     workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
                     delivery_type=order.delivery_type,
                 )
-                new_cases.append(new_case)
-                self._update_case_panel(panels=getattr(case, "panels", []), case=new_case)
-                status_db_case: Case = new_case
+                new_cases.append(db_case)
+                self._update_case_panel(panels=getattr(case, "panels", []), case=db_case)
                 for sample in case.samples:
                     if sample.is_new:
-                        new_sample: DbSample = self._create_sample(
+                        db_sample: DbSample = self._create_db_sample(
                             case=case,
-                            customer=customer,
+                            customer=db_order.customer,
                             order_name=order.name,
                             ordered=datetime.now(),
                             sample=sample,
                             ticket=str(order._generated_ticket_id),
                         )
-                        case_samples[sample.name] = new_sample
                     else:
-                        existing_sample: DbSample = self.status_db.get_sample_by_internal_id(
+                        db_sample: DbSample = self.status_db.get_sample_by_internal_id(
                             sample.internal_id
                         )
-                        case_samples[sample.name] = existing_sample
 
-            else:
-                status_db_case = self.status_db.get_case_by_internal_id(case.internal_id)
-                self._append_ticket(ticket_id=str(order._generated_ticket_id), case=status_db_case)
-                self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
-                self._update_case_panel(panels=getattr(case, "panels", []), case=status_db_case)
-
-            status_db_order.cases.append(status_db_case)
-            if case.is_new:
-                for sample in case.samples:
-                    sample_mother: DbSample = case_samples.get(
+                    sample_mother: SampleInCase = case.get_sample(
                         getattr(sample, Pedigree.MOTHER, None)
                     )
-                    sample_father: DbSample = case_samples.get(
+                    sample_father: SampleInCase = case.get_sample(
                         getattr(sample, Pedigree.FATHER, None)
                     )
                     case_sample: CaseSample = self._create_link(
-                        case=status_db_case,
-                        family_samples=case_samples,
+                        case=db_case,
+                        db_sample=db_sample,
                         father=sample_father,
                         mother=sample_mother,
                         sample=sample,
@@ -129,8 +111,15 @@ class StoreCaseOrderService(StoreOrderService):
                         mother=sample_mother,
                         sample=sample,
                     )
+
+            else:
+                db_case: DbCase = self._update_existing_case(
+                    existing_case=case, ticket_id=order._generated_ticket_id
+                )
+
+            db_order.cases.append(db_case)
             self.status_db.session.add_all(new_cases)
-            self.status_db.session.add(status_db_order)
+            self.status_db.session.add(db_order)
             self.status_db.session.commit()
         return new_cases
 
@@ -160,14 +149,14 @@ class StoreCaseOrderService(StoreOrderService):
     def _create_link(
         self,
         case: DbCase,
-        family_samples: dict,
+        db_sample: DbSample,
         father: DbSample,
         mother: DbSample,
         sample: SampleInCase,
     ) -> CaseSample:
         link = self.status_db.relate_sample(
             case=case,
-            sample=family_samples[sample.name],
+            sample=db_sample,
             status=getattr(sample, "status", None),
             mother=mother,
             father=father,
@@ -175,7 +164,7 @@ class StoreCaseOrderService(StoreOrderService):
         self.status_db.session.add(link)
         return link
 
-    def _create_sample(
+    def _create_db_sample(
         self,
         case: Case,
         customer: Customer,
@@ -201,7 +190,7 @@ class StoreCaseOrderService(StoreOrderService):
         self.status_db.session.add(db_sample)
         return db_sample
 
-    def _create_case(
+    def _create_db_case(
         self,
         case: Case,
         customer: Customer,
@@ -217,3 +206,20 @@ class StoreCaseOrderService(StoreOrderService):
         )
         db_case.customer = customer
         return db_case
+
+    def _create_db_order(self, order: OrderWithCases) -> DbOrder:
+        customer: Customer = self.status_db.get_customer_by_internal_id(
+            customer_internal_id=order.customer
+        )
+        return DbOrder(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=order._generated_ticket_id,
+        )
+
+    def _update_existing_case(self, existing_case: ExistingCase, ticket_id: int) -> DbCase:
+        status_db_case = self.status_db.get_case_by_internal_id(existing_case.internal_id)
+        self._append_ticket(ticket_id=ticket_id, case=status_db_case)
+        self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
+        self._update_case_panel(panels=getattr(existing_case, "panels", []), case=status_db_case)
+        return status_db_case
