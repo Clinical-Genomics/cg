@@ -2,7 +2,6 @@ import re
 from collections import Counter
 
 from cg.constants.constants import StatusOptions
-from cg.constants.sample_sources import SourceType
 from cg.constants.subject import Sex
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.order_validation_service.errors.case_errors import RepeatedCaseNameError
@@ -15,15 +14,17 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     OccupiedWellError,
     SubjectIdSameAsCaseNameError,
 )
-from cg.services.order_validation_service.models.aliases import (
+from cg.services.order_validation_service.models.case import Case
+from cg.services.order_validation_service.models.case_aliases import (
     CaseContainingRelatives,
     CaseWithSkipRC,
+)
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.models.sample_aliases import (
     HumanSample,
     SampleWithRelatives,
 )
-from cg.services.order_validation_service.models.case import Case
-from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
-from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.rules.utils import (
     get_concentration_interval,
     has_sample_invalid_concentration,

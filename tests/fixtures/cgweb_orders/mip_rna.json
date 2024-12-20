@@ -1,60 +1,95 @@
 {
-  "name": "#123456",
-  "customer": "cust003",
-  "comment": "",
-  "samples": [
-    {
-      "application": "RNAPOAR025",
-      "cohorts": [
-        ""
-      ],
-      "container": "96 well plate",
-      "container_name": "CMMS",
-      "data_analysis": "mip-rna",
-      "data_delivery": "scout",
-      "family_name": "family1",
-      "name": "sample1-rna-t1",
-      "phenotype_groups": [
-        ""
-      ],
-      "phenotype_terms": [
-        ""
-      ],
-      "priority": "standard",
-      "quantity": "220",
-      "sex": "female",
-      "source": "tissue (fresh frozen)",
-      "synopsis": "",
-      "subject_id": "subject-sample1-rna-t1",
-      "volume": "1",
-      "well_position": "A:1"
-    },
-    {
-      "application": "RNAPOAR025",
-      "cohorts": [
-        ""
-      ],
-      "comment": "this is a sample comment",
-      "container": "96 well plate",
-      "container_name": "CMMS",
-      "data_analysis": "mip-rna",
-      "data_delivery": "scout",
-      "family_name": "family1",
-      "name": "sample1-rna-t2",
-      "phenotype_groups": [
-        ""
-      ],
-      "phenotype_terms": [
-        ""
-      ],
-      "priority": "standard",
-      "quantity": "220",
-      "sex": "female",
-      "source": "tissue (fresh frozen)",
-      "synopsis": "",
-      "subject_id": "subject-sample1-rna-t2",
-      "volume": "2",
-      "well_position": "B:1"
-    }
-  ]
+	"cases": [
+		{
+			"cohorts": [
+				"Cohort1",
+				"Cohort2"
+			],
+			"name": "MipRNACase",
+			"panels": null,
+			"priority": "research",
+			"samples": [
+				{
+					"age_at_sampling": "29",
+					"application": "RNAPOAR025",
+					"comment": "This is a sample comment",
+					"container": "96 well plate",
+					"container_name": "MipRNAContainer",
+					"control": "negative",
+					"elution_buffer": "Nuclease-free water",
+					"name": "MipRNASample1",
+					"phenotype_groups": [
+						"phengroup1",
+						"phengroup2"
+					],
+					"phenotype_terms": [
+						"phenterm1",
+						"phenterm2"
+					],
+					"processedAt": "2024-12-18T09:59:27.336Z",
+					"require_qc_ok": true,
+					"sex": "female",
+					"source": "buccal swab",
+					"subject_id": "miprnasubject1",
+					"volume": 54,
+					"well_position": "A:1"
+				},
+				{
+					"age_at_sampling": "43",
+					"application": "RNAPOAR025",
+					"comment": "This is another sample comment",
+					"container": "96 well plate",
+					"container_name": "MipRNAContainer",
+					"elution_buffer": "Tris-HCl",
+					"name": "MipRNASample2",
+					"phenotype_groups": [
+						"phengroup3"
+					],
+					"phenotype_terms": [
+						"phenterm4"
+					],
+					"processedAt": "2024-12-18T09:59:27.337Z",
+					"require_qc_ok": true,
+					"sex": "female",
+					"source": "blood",
+					"subject_id": "miprnasubject2",
+					"volume": 54,
+					"well_position": "B:1"
+				}
+			],
+			"synopsis": "This is a synopsis"
+		},
+		{
+			"cohorts": null,
+			"name": "MipRNACase2",
+			"panels": null,
+			"priority": "research",
+			"samples": [
+				{
+					"age_at_sampling": "66",
+					"application": "RNAPOAR025",
+					"container": "96 well plate",
+					"container_name": "MipRNAContainer",
+					"name": "MipRNASample3",
+					"processedAt": "2024-12-18T09:59:27.337Z",
+					"require_qc_ok": true,
+					"sex": "female",
+					"source": "blood",
+					"subject_id": "miprnasubject3",
+					"volume": 54,
+					"well_position": "C:1"
+				}
+			],
+			"synopsis": null
+		}
+	],
+	"comment": "This is an order comment",
+	"customer": "cust000",
+	"data_delivery": "analysis-scout",
+	"dataAnalysis": "mip-rna",
+	"delivery_type": "analysis-scout",
+	"name": "MipRnaOrder",
+	"project_type": "mip-rna",
+	"ticket": null,
+	"user_id": 1
 }
