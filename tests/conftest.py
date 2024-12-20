@@ -120,6 +120,7 @@ pytest_plugins = [
     "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
+    "tests.fixture_plugins.orders_fixtures.orders_fixtures",
     "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.dto_fixtures",
@@ -1602,7 +1603,7 @@ def base_store(
         ),
         store.add_application(
             tag=apptag_rna,
-            prep_category="tgs",
+            prep_category="wts",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             percent_reads_guaranteed=75,
@@ -2363,6 +2364,16 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, No
     store.session.commit()
 
     yield store
+
+
+@pytest.fixture
+def customer_without_users(store_with_users: Store):
+    return store_with_users.add_customer(
+        internal_id="internal_id",
+        name="some_name",
+        invoice_address="some_address",
+        invoice_reference="some_reference",
+    )
 
 
 @pytest.fixture

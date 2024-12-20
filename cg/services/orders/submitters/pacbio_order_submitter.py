@@ -1,4 +1,4 @@
-from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.orders.store_order_services.store_pacbio_order_service import (
     StorePacBioOrderService,
 )
@@ -19,8 +19,7 @@ class PacbioOrderSubmitter(OrderSubmitter):
         self.order_validation_service = order_validation_service
         self.order_store_service = order_store_service
 
-    def submit_order(self, order_in: OrderIn) -> dict:
+    def submit_order(self, order: PacbioOrder) -> dict:
         """Submit a fastq order."""
-        self.order_validation_service.validate_order(order_in)
-        result: dict = self.order_store_service.store_order(order_in)
+        result: dict = self.order_store_service.store_order(order=order)
         return result
