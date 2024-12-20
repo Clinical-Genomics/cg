@@ -68,7 +68,7 @@ class StoreCaseOrderService(StoreOrderService):
         )
         new_cases: list[DbCase] = []
         status_db_order = DbOrder(
-            customer=customer, order_date=datetime.now(), ticket_id=int(order._generated_ticket_id)
+            customer=customer, order_date=datetime.now(), ticket_id=order._generated_ticket_id
         )
         for case in order.cases:
             case_samples: dict[str, DbSample] = {}
