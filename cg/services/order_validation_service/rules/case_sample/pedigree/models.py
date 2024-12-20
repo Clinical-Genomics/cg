@@ -1,9 +1,12 @@
+from cg.services.order_validation_service.models.aliases import CaseContainingRelatives
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.workflows.mip_dna.models.case import MipDnaCase
 from cg.services.order_validation_service.workflows.mip_dna.models.sample import MipDnaSample
 from cg.services.order_validation_service.workflows.tomte.models.case import TomteCase
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.store.store import Store
+
+SampleWithParents = TomteSample | MipDnaSample | ExistingSample
 
 
 class Node:
@@ -17,12 +20,12 @@ class Node:
 
     def __init__(
         self,
-        sample: TomteSample | MipDnaSample | ExistingSample,
+        sample: SampleWithParents,
         case_index: int,
         sample_index: int,
         sample_name: str,
     ):
-        self.sample: TomteSample | MipDnaSample | ExistingSample = sample
+        self.sample: SampleWithParents = sample
         self.sample_name: str = sample_name
         self.sample_index: int = sample_index
         self.case_index: int = case_index
@@ -40,7 +43,7 @@ class FamilyTree:
     graph's edges.
     """
 
-    def __init__(self, case: TomteCase | MipDnaCase, case_index: int, store: Store):
+    def __init__(self, case: CaseContainingRelatives, case_index: int, store: Store):
         self.graph: dict[str, Node] = {}
         self.case: TomteCase | MipDnaCase = case
         self.case_index: int = case_index
