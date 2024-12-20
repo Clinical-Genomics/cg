@@ -68,7 +68,7 @@ class StoreCaseOrderService(StoreOrderService):
         )
         new_cases: list[DbCase] = []
         status_db_order = DbOrder(
-            customer=customer, order_date=datetime.now(), ticket_id=int(order.ticket_number)
+            customer=customer, order_date=datetime.now(), ticket_id=int(order._generated_ticket_id)
         )
         for case in order.cases:
             case_samples: dict[str, DbSample] = {}
@@ -76,7 +76,7 @@ class StoreCaseOrderService(StoreOrderService):
                 new_case: DbCase = self._create_case(
                     case=case,
                     customer=customer,
-                    ticket=order.ticket_number,
+                    ticket=str(order._generated_ticket_id),
                     workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
                     delivery_type=order.delivery_type,
                 )
@@ -91,7 +91,7 @@ class StoreCaseOrderService(StoreOrderService):
                             order_name=order.name,
                             ordered=datetime.now(),
                             sample=sample,
-                            ticket=order.ticket_number,
+                            ticket=str(order._generated_ticket_id),
                         )
                         case_samples[sample.name] = new_sample
                     else:
@@ -102,7 +102,7 @@ class StoreCaseOrderService(StoreOrderService):
 
             else:
                 status_db_case = self.status_db.get_case_by_internal_id(case.internal_id)
-                self._append_ticket(ticket_id=order.ticket_number, case=status_db_case)
+                self._append_ticket(ticket_id=str(order._generated_ticket_id), case=status_db_case)
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
                 self._update_case_panel(panels=getattr(case, "panels", []), case=status_db_case)
 
