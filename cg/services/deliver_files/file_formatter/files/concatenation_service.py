@@ -183,7 +183,9 @@ class SampleFileConcatenationFormatter(FileFormatter):
         list_of_files: list[Path] = get_all_files_in_directory_tree(delivery_path)
         for sample_name in sample_names:
             for file in list_of_files:
-                if sample_name in file.as_posix() and self._is_lane_fastq_file(file):
+                if self._has_expected_sample_name_format_match(
+                    sample_name=sample_name, file_path=file
+                ) and self._is_lane_fastq_file(file):
                     LOG.debug(
                         f"[CONCATENATION SERVICE] Found fastq file: {file} for sample: {sample_name}"
                     )
@@ -199,6 +201,17 @@ class SampleFileConcatenationFormatter(FileFormatter):
                 f"Could not find any fastq files to concatenate in {delivery_path}."
             )
         return sample_paths
+
+    @staticmethod
+    def _has_expected_sample_name_format_match(sample_name: str, file_path: Path) -> bool:
+        """
+        Check if the sample name is an exact match in the file path.
+        Fastq files are expected to have the sample name in the file path formatted as such: _{sample_name}_
+        args:
+            sample_name: str: The sample name to match.
+            file_path: Path: The file path to check.
+        """
+        return f"_{sample_name}_" in file_path.as_posix()
 
     @staticmethod
     def _get_concatenation_map(

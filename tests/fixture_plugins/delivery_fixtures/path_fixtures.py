@@ -9,7 +9,7 @@ from cg.constants import FileExtensions
 
 @pytest.fixture
 def delivery_fastq_file(tmp_path: Path, sample_id: str) -> Path:
-    file = Path(tmp_path, f"{sample_id}_L001_R1_001{FileExtensions.FASTQ_GZ}")
+    file = Path(tmp_path, f"FC_{sample_id}_L001_R1_001{FileExtensions.FASTQ_GZ}")
     file.touch()
     return file
 
@@ -34,7 +34,7 @@ def delivery_bam_file(tmp_path: Path, sample_id: str) -> Path:
 
 @pytest.fixture
 def delivery_another_fastq_file(tmp_path: Path, another_sample_id: str) -> Path:
-    file = Path(tmp_path, f"{another_sample_id}L001_R1_001{FileExtensions.FASTQ_GZ}")
+    file = Path(tmp_path, f"FC_{another_sample_id}L001_R1_001{FileExtensions.FASTQ_GZ}")
     file.touch()
     return file
 
