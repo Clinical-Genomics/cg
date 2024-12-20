@@ -41,10 +41,6 @@ class StoreCaseOrderService(StoreOrderService):
 
     def store_order(self, order: OrderWithCases) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self._process_case_samples(order=order)
-
-    def _process_case_samples(self, order: OrderWithCases) -> dict:
-        """Process samples to be analyzed."""
         project_data = lims_map = None
         if new_samples := [sample for _, _, sample in order.enumerated_new_samples]:
             project_data, lims_map = self.lims.process_lims(
@@ -76,6 +72,7 @@ class StoreCaseOrderService(StoreOrderService):
                 )
                 new_cases.append(db_case)
                 self._update_case_panel(panels=getattr(case, "panels", []), case=db_case)
+                case_samples: dict[str, DbSample] = {}
                 for sample in case.samples:
                     if sample.is_new:
                         db_sample: DbSample = self._create_db_sample(
@@ -90,27 +87,9 @@ class StoreCaseOrderService(StoreOrderService):
                         db_sample: DbSample = self.status_db.get_sample_by_internal_id(
                             sample.internal_id
                         )
+                    case_samples[db_sample.name] = db_sample
 
-                    sample_mother: SampleInCase = case.get_sample(
-                        getattr(sample, Pedigree.MOTHER, None)
-                    )
-                    sample_father: SampleInCase = case.get_sample(
-                        getattr(sample, Pedigree.FATHER, None)
-                    )
-                    case_sample: CaseSample = self._create_link(
-                        case=db_case,
-                        db_sample=db_sample,
-                        father=sample_father,
-                        mother=sample_mother,
-                        sample=sample,
-                    )
-
-                    self._update_relationship(
-                        father=sample_father,
-                        link=case_sample,
-                        mother=sample_mother,
-                        sample=sample,
-                    )
+                self._create_links(case=case, db_case=db_case, case_samples=case_samples)
 
             else:
                 db_case: DbCase = self._update_existing_case(
@@ -219,7 +198,33 @@ class StoreCaseOrderService(StoreOrderService):
 
     def _update_existing_case(self, existing_case: ExistingCase, ticket_id: int) -> DbCase:
         status_db_case = self.status_db.get_case_by_internal_id(existing_case.internal_id)
-        self._append_ticket(ticket_id=ticket_id, case=status_db_case)
+        self._append_ticket(ticket_id=str(ticket_id), case=status_db_case)
         self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
         self._update_case_panel(panels=getattr(existing_case, "panels", []), case=status_db_case)
         return status_db_case
+
+    def _create_links(self, case: Case, db_case: DbCase, case_samples: dict[str, DbSample]) -> None:
+        for sample in case.samples:
+            if sample.is_new:
+                db_sample: DbSample = case_samples.get(sample.name)
+            else:
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+            sample_mother_name: str | None = getattr(sample, Pedigree.MOTHER, None)
+            db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
+            sample_father_name: str = getattr(sample, Pedigree.FATHER, None)
+            db_sample_father = case_samples.get(sample_father_name)
+
+            case_sample: CaseSample = self._create_link(
+                case=db_case,
+                db_sample=db_sample,
+                father=db_sample_father,
+                mother=db_sample_mother,
+                sample=sample,
+            )
+
+            self._update_relationship(
+                father=db_sample_father,
+                link=case_sample,
+                mother=db_sample_mother,
+                sample=sample,
+            )
