@@ -37,30 +37,6 @@ class StorePacBioOrderService(StoreOrderService):
         new_samples = self._store_samples_in_statusdb(order=order)
         return {"project": project_data, "records": new_samples}
 
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
-        """Convert order input to status for PacBio-only orders."""
-        status_data = {
-            "customer": order.customer,
-            "order": order.name,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "sex": sample.sex,
-                    "tumour": sample.tumour,
-                    "volume": sample.volume,
-                    "subject_id": sample.subject_id,
-                }
-                for sample in order.samples
-            ],
-        }
-        return status_data
-
     def _store_samples_in_statusdb(self, order: PacbioOrder) -> list[Sample]:
         """
         Store all order data in the Status database for a Pacbio order. Return the samples.
