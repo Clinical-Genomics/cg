@@ -51,6 +51,17 @@ Provide a qualitative or quantitative assessment of the severity:
 
 ---
 
+### **Proposed Resolution**
+<!--
+Suggest how to resolve the technical debt:
+-->
+- **Refactoring:** Rewrite the affected code  
+- **Tooling:** Add or update tools to mitigate the debt  
+- **Documentation:** Update or add documentation
+
+
+---
+
 ### **Estimated Effort**
 <!--
 Provide an estimate of the effort needed for resolution:
