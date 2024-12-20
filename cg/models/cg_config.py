@@ -27,7 +27,7 @@ from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.decompression_service.decompressor import Decompressor
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
@@ -748,6 +748,7 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating delivery service factory")
             factory = DeliveryServiceFactory(
                 store=self.status_db,
+                lims_api=self.lims_api,
                 hk_api=self.housekeeper_api,
                 tb_service=self.trailblazer_api,
                 rsync_service=self.delivery_rsync_service,

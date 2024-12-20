@@ -14,7 +14,12 @@ class BamDeliveryTagsFetcher(FetchDeliveryFileTagsService):
 
     @handle_tag_errors
     def fetch_tags(self, workflow: Workflow) -> DeliveryFileTags:
-        """Fetch the tags for the bam files to deliver."""
+        """
+        Fetch the tags for the bam files to deliver.
+        Hardcoded to only return the BAM tag.
+        args:
+            workflow: The workflow to fetch tags for
+        """
         self._validate_workflow(workflow=workflow)
         return DeliveryFileTags(
             case_tags=None,

@@ -4065,7 +4065,6 @@ def store_with_case_and_sample_with_reads(
         customer_id=case.customer_id,
         ticket_id=case.latest_ticket,
         order_date=case.ordered_at,
-        workflow=case.data_analysis,
     )
     case.orders.append(order)
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
