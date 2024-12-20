@@ -49,5 +49,5 @@ class OrdersAPI:
         ticket_number: int = self.ticket_handler.create_ticket(
             order=order, user_name=user.name, user_mail=user.email, order_type=order_type
         )
-        order.ticket_number = ticket_number
+        order._generated_ticket_id = ticket_number
         return submit_handler.submit_order(order)
