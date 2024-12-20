@@ -137,3 +137,45 @@ def test_mutant_file_formatter(
     for file in formatted_files:
         assert file.formatted_path.exists()
         assert not file.original_path.exists()
+
+
+def test_concatenation_sample_name_match():
+    # GIVEN a concatenation service and a list of file paths and a sample name that is a number
+    sample_name = "12"
+    concatentation_formatter = SampleFileConcatenationFormatter(
+        file_manager=Mock(),
+        path_name_formatter=Mock(),
+        concatenation_service=Mock(),
+    )
+    # GIVEN two sets of file paths that should match and not match the sample name
+    should_match_file_paths = [
+        Path("path/to/FC_12_L001_R1_001.fastq.gz"),
+        Path("path/to/FC_12_L002_R1_001.fastq.gz"),
+        Path("path/to/FC_12_L001_R2_001.fastq.gz"),
+        Path("path/to/FC_12_L002_R2_001.fastq.gz"),
+    ]
+    should_not_match_file_paths = [
+        Path("path/to/FC_123_L001_R1_001.fastq.gz"),
+        Path("path/to/FC_123_L002_R1_001.fastq.gz"),
+        Path("path/to/FC_123_L001_R2_001.fastq.gz"),
+        Path("path/to/FC_123_L002_R2_001.fastq.gz"),
+    ]
+
+    # WHEN checking if the file paths match the sample name
+
+    # THEN the file paths that should match should return True and the file paths that should not match should return False
+    for file_path in should_match_file_paths:
+        assert (
+            concatentation_formatter._has_expected_sample_name_format_match(
+                file_path=file_path, sample_name=sample_name
+            )
+            is True
+        )
+
+    for file_path in should_not_match_file_paths:
+        assert (
+            concatentation_formatter._has_expected_sample_name_format_match(
+                file_path=file_path, sample_name=sample_name
+            )
+            is False
+        )

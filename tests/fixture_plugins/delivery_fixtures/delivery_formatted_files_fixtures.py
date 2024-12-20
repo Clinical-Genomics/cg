@@ -1,9 +1,13 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
+from cg.services.deliver_files.file_formatter.files.concatenation_service import (
+    SampleFileConcatenationFormatter,
+)
 
 
 @pytest.fixture
@@ -89,6 +93,7 @@ def expected_concatenated_fastq_formatted_files(
         replaced_sample_file_name = replaced_sample_file_name.replace("L002_R1_001", "1")
         replaced_sample_file_name = replaced_sample_file_name.replace("L001_R2_001", "2")
         replaced_sample_file_name = replaced_sample_file_name.replace("L002_R2_001", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("FC_", "")
         formatted_file_path = Path(
             sample_file.file_path.parent, sample_file.sample_name, replaced_sample_file_name
         )
@@ -111,6 +116,7 @@ def expected_concatenated_fastq_flat_formatted_files(
         replaced_sample_file_name = replaced_sample_file_name.replace("L002_R1_001", "1")
         replaced_sample_file_name = replaced_sample_file_name.replace("L001_R2_001", "2")
         replaced_sample_file_name = replaced_sample_file_name.replace("L002_R2_001", "2")
+        replaced_sample_file_name = replaced_sample_file_name.replace("FC_", "")
         formatted_file_path = Path(sample_file.file_path.parent, replaced_sample_file_name)
         formatted_files.append(
             FormattedFile(original_path=sample_file.file_path, formatted_path=formatted_file_path)

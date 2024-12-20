@@ -303,10 +303,10 @@ def fastq_concatenation_sample_files(
     sample_files = []
     for sample_id, sample_name in sample_data:
         fastq_paths: list[Path] = [
-            Path(tmp_path, inbox, f"{sample_id}_L001_R1_001.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_L002_R1_001.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_L001_R2_001.fastq.gz"),
-            Path(tmp_path, inbox, f"{sample_id}_L002_R2_001.fastq.gz"),
+            Path(tmp_path, inbox, f"FC_{sample_id}_L001_R1_001.fastq.gz"),
+            Path(tmp_path, inbox, f"FC_{sample_id}_L002_R1_001.fastq.gz"),
+            Path(tmp_path, inbox, f"FC_{sample_id}_L001_R2_001.fastq.gz"),
+            Path(tmp_path, inbox, f"FC_{sample_id}_L002_R2_001.fastq.gz"),
         ]
 
         sample_files.extend(
@@ -329,10 +329,10 @@ def fastq_concatenation_sample_files_flat(tmp_path: Path) -> list[SampleFile]:
     sample_files = []
     for sample_id, sample_name in sample_data:
         fastq_paths: list[Path] = [
-            Path(tmp_path, f"{sample_id}_L001_R1_001.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_L002_R1_001.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_L001_R2_001.fastq.gz"),
-            Path(tmp_path, f"{sample_id}_L002_R2_001.fastq.gz"),
+            Path(tmp_path, f"FC_{sample_id}_L001_R1_001.fastq.gz"),
+            Path(tmp_path, f"FC_{sample_id}_L002_R1_001.fastq.gz"),
+            Path(tmp_path, f"FC_{sample_id}_L001_R2_001.fastq.gz"),
+            Path(tmp_path, f"FC_{sample_id}_L002_R2_001.fastq.gz"),
         ]
 
         sample_files.extend(
