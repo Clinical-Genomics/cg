@@ -7,6 +7,14 @@ from cg.store.store import Store
 
 
 class Node:
+    """
+    This class is used to represent the samples in the family tree graph. The variables 'mother' and
+    'father' refer to other nodes in the family tree, and can be thought of as an edge in the graph.
+    Because the 'mother' and 'father' is tracked using the sample's _name_ in the order, and
+    because said name is not set in the ExistingSample model, we require the sample name as a
+    separate input.
+    """
+
     def __init__(
         self,
         sample: TomteSample | MipDnaSample | ExistingSample,
@@ -25,15 +33,24 @@ class Node:
 
 
 class FamilyTree:
+    """
+    This class is a directed graph representing a family tree from a submitted order with specified
+    mothers and fathers. Each node represents a sample, and each node has a property 'mother' and
+    a property 'father' referring to other nodes in the graph. These may be thought of as the
+    graph's edges.
+    """
+
     def __init__(self, case: TomteCase | MipDnaCase, case_index: int, store: Store):
         self.graph: dict[str, Node] = {}
-        self.case: TomteCase = case
+        self.case: TomteCase | MipDnaCase = case
         self.case_index: int = case_index
         self.store = store
         self._add_nodes()
         self._add_edges()
 
     def _add_nodes(self) -> None:
+        """Add a node to the graph for each sample in the graph. For existing samples, the name
+        is fetched from StatusDB."""
         for sample_index, sample in self.case.enumerated_samples:
             if sample.is_new:
                 sample_name = sample.name
@@ -48,6 +65,7 @@ class FamilyTree:
             self.graph[sample_name] = node
 
     def _add_edges(self) -> None:
+        """Add edges to the graph by populating each node's 'mother' and 'father' property."""
         for node in self.graph.values():
             sample: TomteSample = node.sample
             if sample.mother:
