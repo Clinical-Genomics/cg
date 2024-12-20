@@ -68,7 +68,7 @@ class FamilyTree:
     def _add_edges(self) -> None:
         """Add edges to the graph by populating each node's 'mother' and 'father' property."""
         for node in self.graph.values():
-            sample: TomteSample = node.sample
+            sample: SampleWithParents = node.sample
             if sample.mother:
                 node.mother = self.graph.get(sample.mother)
             if sample.father:
