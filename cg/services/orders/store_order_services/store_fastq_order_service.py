@@ -4,7 +4,7 @@ from datetime import datetime
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
@@ -99,7 +99,7 @@ class StoreFastqOrderService(StoreOrderService):
         )
         return self.status_db.add_sample(
             name=sample.name,
-            sex=sample.sex or "unknown",
+            sex=sample.sex or SexEnum.unknown,
             comment=sample.comment,
             internal_id=sample._generated_lims_id,
             ordered=datetime.now(),
@@ -115,8 +115,8 @@ class StoreFastqOrderService(StoreOrderService):
 
     def _create_maf_case(self, db_sample: Sample, db_order: Order) -> None:
         """
-        Add a MAF case to the current Status database transaction only if the given sample is
-        non-tumour and  WGS. Return None otherwise without adding anything to the transaction.
+        Add a MAF case and a relationship with the given sample to the current Status database
+        transaction. This is done only if the given sample is non-tumour and  WGS.
         This function does not commit to the database.
         """
         if (
