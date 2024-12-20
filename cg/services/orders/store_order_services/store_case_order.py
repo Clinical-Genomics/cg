@@ -10,6 +10,7 @@ from cg.services.order_validation_service.models.sample_aliases import SampleInC
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer
 from cg.store.models import Order as DbOrder
@@ -72,23 +73,9 @@ class StoreCaseOrderService(StoreOrderService):
                 )
                 new_cases.append(db_case)
                 self._update_case_panel(panels=getattr(case, "panels", []), case=db_case)
-                case_samples: dict[str, DbSample] = {}
-                for sample in case.samples:
-                    if sample.is_new:
-                        db_sample: DbSample = self._create_db_sample(
-                            case=case,
-                            customer=db_order.customer,
-                            order_name=order.name,
-                            ordered=datetime.now(),
-                            sample=sample,
-                            ticket=str(order._generated_ticket_id),
-                        )
-                    else:
-                        db_sample: DbSample = self.status_db.get_sample_by_internal_id(
-                            sample.internal_id
-                        )
-                    case_samples[db_sample.name] = db_sample
-
+                case_samples: dict[str, DbSample] = self._create_db_sample_dict(
+                    case=case, order=order, customer=db_order.customer
+                )
                 self._create_links(case=case, db_case=db_case, case_samples=case_samples)
 
             else:
@@ -152,7 +139,12 @@ class StoreCaseOrderService(StoreOrderService):
         sample: SampleInCase,
         ticket: str,
     ):
+        application_tag = sample.application
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(tag=application_tag)
+        )
         db_sample: DbSample = self.status_db.add_sample(
+            application_version=application_version,
             internal_id=sample._generated_lims_id,
             order=order_name,
             ordered=ordered,
@@ -161,11 +153,6 @@ class StoreCaseOrderService(StoreOrderService):
             **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
         db_sample.customer = customer
-        with self.status_db.session.no_autoflush:
-            application_tag = sample.application
-            db_sample.application_version = self.status_db.get_current_application_version_by_tag(
-                tag=application_tag
-            )
         self.status_db.session.add(db_sample)
         return db_sample
 
@@ -212,7 +199,7 @@ class StoreCaseOrderService(StoreOrderService):
             sample_mother_name: str | None = getattr(sample, Pedigree.MOTHER, None)
             db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
             sample_father_name: str = getattr(sample, Pedigree.FATHER, None)
-            db_sample_father = case_samples.get(sample_father_name)
+            db_sample_father: DbSample | None = case_samples.get(sample_father_name)
 
             case_sample: CaseSample = self._create_link(
                 case=db_case,
@@ -228,3 +215,25 @@ class StoreCaseOrderService(StoreOrderService):
                 mother=db_sample_mother,
                 sample=sample,
             )
+
+    def _create_db_sample_dict(
+        self, case: Case, order: OrderWithCases, customer: Customer
+    ) -> dict[str, DbSample]:
+        """Constructs a dict containing all the samples in the case. Keys are sample names
+        and the values are the database entries for the samples."""
+        case_samples: dict[str, DbSample] = {}
+        for sample in case.samples:
+            if sample.is_new:
+                with self.status_db.session.no_autoflush:
+                    db_sample: DbSample = self._create_db_sample(
+                        case=case,
+                        customer=customer,
+                        order_name=order.name,
+                        ordered=datetime.now(),
+                        sample=sample,
+                        ticket=str(order._generated_ticket_id),
+                    )
+            else:
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+            case_samples[db_sample.name] = db_sample
+        return case_samples
