@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.constants import OrderType
-from cg.models.orders.order import OrderIn
 from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
@@ -398,12 +397,13 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_order(self, customer: Customer, ticket_id: int) -> Order:
+    def add_order(self, customer: Customer, ticket_id: int, **kwargs) -> Order:
         """Build a new Order record."""
         order = Order(
             customer=customer,
             order_date=datetime.now(),
             ticket_id=ticket_id,
+            **kwargs,
         )
         return order
 
