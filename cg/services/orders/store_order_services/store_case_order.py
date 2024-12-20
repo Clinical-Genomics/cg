@@ -50,7 +50,7 @@ class StoreCaseOrderService(StoreOrderService):
             project_data, lims_map = self.lims.process_lims(
                 samples=new_samples,
                 customer=order.customer,
-                ticket=order.ticket_number,
+                ticket=order._generated_ticket_id,
                 order_name=order.name,
                 workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
                 delivery_type=order.delivery_type,
