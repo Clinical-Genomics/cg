@@ -282,7 +282,7 @@ def validate_sample_names_different_from_case_names(
 
 def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
             case=case, case_index=index
         )
@@ -294,7 +294,7 @@ def validate_fathers_in_same_case_as_children(
     order: OrderWithCases, **kwargs
 ) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
             case=case,
             case_index=index,
@@ -305,7 +305,7 @@ def validate_fathers_in_same_case_as_children(
 
 def validate_mothers_are_female(order: OrderWithCases, **kwargs) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
             case=case,
             case_index=index,
@@ -318,7 +318,7 @@ def validate_mothers_in_same_case_as_children(
     order: OrderWithCases, **kwargs
 ) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
-    for index, case in order.enumerated_cases:
+    for index, case in order.enumerated_new_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
             case=case,
             case_index=index,
