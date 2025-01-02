@@ -327,10 +327,12 @@ def validate_mothers_in_same_case_as_children(
     return errors
 
 
-def validate_pedigree(order: OrderWithCases, **kwargs) -> list[PedigreeError]:
+def validate_pedigree(order: OrderWithCases, store: Store, **kwargs) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
     for case_index, case in order.enumerated_cases:
-        case_errors: list[PedigreeError] = get_pedigree_errors(case=case, case_index=case_index)
+        case_errors: list[PedigreeError] = get_pedigree_errors(
+            case=case, case_index=case_index, store=store
+        )
         errors.extend(case_errors)
     return errors
 
