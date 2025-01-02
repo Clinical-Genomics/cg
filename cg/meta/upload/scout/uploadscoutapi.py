@@ -398,7 +398,10 @@ class UploadScoutAPI:
                 )
 
     def upload_rna_fraser_outrider_to_scout(
-        self, dry_run: bool, case_id: str, rna_dna_collections: list[RNADNACollection]
+        self,
+        dry_run: bool,
+        case_id: str,
+        rna_dna_collections: list[RNADNACollection],
     ) -> None:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
@@ -437,7 +440,10 @@ class UploadScoutAPI:
         LOG.info("Upload RNA fraser and outrider file finished!")
 
     def upload_rna_genome_build_to_scout(
-        self, dry_run: bool, rna_case: str, rna_dna_collections: list[RNADNACollection]
+        self,
+        dry_run: bool,
+        rna_case: str,
+        rna_dna_collections: list[RNADNACollection],
     ) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         status_db: Store = self.status_db
