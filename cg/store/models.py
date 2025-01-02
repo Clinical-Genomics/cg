@@ -816,7 +816,6 @@ class Sample(Base, PriorityMixin):
     )
 
     def __init__(self, **kwargs):
-        # Assign known attributes
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
