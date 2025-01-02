@@ -105,14 +105,6 @@ class StoreCaseOrderService(StoreOrderService):
         """Update action of a case."""
         case.action = action
 
-    @staticmethod
-    def _update_relationship(
-        father: DbSample | None, link: CaseSample, mother: DbSample | None, sample: SampleInCase
-    ) -> None:
-        link.status = getattr(sample, "status", link.status)
-        link.mother = mother or link.mother
-        link.father = father or link.father
-
     def _create_link(
         self,
         case: DbCase,
@@ -121,15 +113,13 @@ class StoreCaseOrderService(StoreOrderService):
         mother: DbSample,
         sample: SampleInCase,
     ) -> CaseSample:
-        link = self.status_db.relate_sample(
+        return self.status_db.relate_sample(
             case=case,
             sample=db_sample,
             status=getattr(sample, "status", None),
             mother=mother,
             father=father,
         )
-        self.status_db.session.add(link)
-        return link
 
     def _create_db_sample(
         self,
@@ -192,6 +182,12 @@ class StoreCaseOrderService(StoreOrderService):
         return status_db_case
 
     def _create_links(self, case: Case, db_case: DbCase, case_samples: dict[str, DbSample]) -> None:
+        """Creates entries in the CaseSample table.
+        Input:
+        - case: Case, a case within the customer submitted order.
+        - db_case: DbCase, Database case entry corresponding to the 'case' parameter.
+        - case_samples: dict with keys being sample names in the provided 'case' and values being
+        the corresponding database entries in the Sample table."""
         for sample in case.samples:
             if sample.is_new:
                 db_sample: DbSample = case_samples.get(sample.name)
@@ -201,7 +197,6 @@ class StoreCaseOrderService(StoreOrderService):
             db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
             sample_father_name: str = getattr(sample, Pedigree.FATHER, None)
             db_sample_father: DbSample | None = case_samples.get(sample_father_name)
-
             case_sample: CaseSample = self._create_link(
                 case=db_case,
                 db_sample=db_sample,
@@ -209,13 +204,7 @@ class StoreCaseOrderService(StoreOrderService):
                 mother=db_sample_mother,
                 sample=sample,
             )
-
-            self._update_relationship(
-                father=db_sample_father,
-                link=case_sample,
-                mother=db_sample_mother,
-                sample=sample,
-            )
+            self.status_db.add_item_to_store(case_sample)
 
     def _create_db_sample_dict(
         self, case: Case, order: OrderWithCases, customer: Customer
