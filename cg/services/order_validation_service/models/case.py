@@ -5,9 +5,9 @@ from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
 from cg.services.order_validation_service.models.discriminators import has_internal_id
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
-from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 
-NewSample = Annotated[Sample, Tag("new")]
+NewSample = Annotated[SampleInCase, Tag("new")]
 ExistingSampleType = Annotated[ExistingSample, Tag("existing")]
 
 
@@ -30,8 +30,8 @@ class Case(BaseModel):
         return enumerate(self.samples)
 
     @property
-    def enumerated_new_samples(self):
-        samples: list[tuple[int, Sample]] = []
+    def enumerated_new_samples(self) -> list[tuple[int, SampleInCase]]:
+        samples: list[tuple[int, SampleInCase]] = []
         for sample_index, sample in self.enumerated_samples:
             if sample.is_new:
                 samples.append((sample_index, sample))
@@ -45,7 +45,7 @@ class Case(BaseModel):
                 samples.append((sample_index, sample))
         return samples
 
-    def get_sample(self, sample_name: str) -> Sample | None:
+    def get_sample(self, sample_name: str) -> SampleInCase | None:
         for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample

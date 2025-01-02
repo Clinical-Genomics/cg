@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from cg.constants.constants import DataDelivery
 
 
-class RnaFusionDeliveryType(Enum):
+class RnaFusionDeliveryType(StrEnum):
     ANALYSIS_FILES = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     SCOUT = DataDelivery.SCOUT

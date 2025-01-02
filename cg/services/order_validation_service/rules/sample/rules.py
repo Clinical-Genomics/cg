@@ -20,7 +20,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellPositionMissingError,
     WellPositionRmlMissingError,
 )
-from cg.services.order_validation_service.models.aliases import OrderWithIndexedSamples
+from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
