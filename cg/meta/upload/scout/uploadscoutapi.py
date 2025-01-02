@@ -620,10 +620,14 @@ class UploadScoutAPI:
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
         self.upload_rna_fraser_outrider_to_scout(
-            dry_run=dry_run, case_id=case_id, rna_dna_collections=rna_dna_collections
+            dry_run=dry_run,
+            case_id=case_id,
+            rna_dna_collections=rna_dna_collections,
         )
         self.upload_rna_genome_build_to_scout(
-            dry_run=dry_run, rna_case=rna_case, rna_dna_collections=rna_dna_collections
+            dry_run=dry_run,
+            rna_case=rna_case,
+            rna_dna_collections=rna_dna_collections,
         )
         self.load_rna_variant_outlier_to_scout(
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
