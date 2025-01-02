@@ -9,7 +9,6 @@ from cg.store.store import Store
 def get_pedigree_errors(
     case: TomteCase | MipDnaCase, case_index: int, store: Store
 ) -> list[PedigreeError]:
-    """This method finds errors within the order's family tree. These are errors of the kind
-    where a sample is marked as its own ancestor."""
+    """Return a list of errors if any sample is labelled as its own ancestor in the family tree."""
     pedigree = FamilyTree(case=case, case_index=case_index, store=store)
     return validate_tree(pedigree)
