@@ -29,6 +29,7 @@ class StoreCaseOrderService(StoreOrderService):
     - Balsamic UMI
     - MIP DNA
     - MIP RNA
+    - RNAFusion
     - Tomte
     """
 
