@@ -26,7 +26,7 @@ class Case(BaseModel):
         return True
 
     @property
-    def enumerated_samples(self):
+    def enumerated_samples(self) -> enumerate[NewSample | ExistingSampleType]:
         return enumerate(self.samples)
 
     @property
@@ -46,7 +46,7 @@ class Case(BaseModel):
         return samples
 
     def get_sample(self, sample_name: str) -> Sample | None:
-        for sample in self.samples:
+        for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample
 

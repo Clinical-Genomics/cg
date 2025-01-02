@@ -5,6 +5,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.constants import MINIMUM_VOLUME
+from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.tomte.constants import TomteDeliveryType
@@ -152,6 +153,24 @@ def order_with_sample_cycle():
 
     child.mother = mother.name
     child.father = father.name
+
+    father.mother = grandmother.name
+    father.father = child.name  # Cycle introduced here
+
+    case = create_case([child, father, mother, grandfather, grandmother])
+    return create_tomte_order([case])
+
+
+@pytest.fixture
+def order_with_existing_sample_cycle():
+    child: TomteSample = create_tomte_sample(1)
+    father = ExistingSample(internal_id="ExistingSampleInternalId", status=StatusEnum.unaffected)
+    mother: TomteSample = create_tomte_sample(3)
+    grandfather: TomteSample = create_tomte_sample(4)
+    grandmother: TomteSample = create_tomte_sample(5)
+
+    child.mother = mother.name
+    child.father = "ExistingSampleName"
 
     father.mother = grandmother.name
     father.father = child.name  # Cycle introduced here
