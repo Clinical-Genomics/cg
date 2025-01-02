@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from cg.constants import DataDelivery
 
 
-class BalsamicUmiDeliveryType(Enum):
+class BalsamicUmiDeliveryType(StrEnum):
     ANALYSIS = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     FASTQ_ANALYSIS = DataDelivery.FASTQ_ANALYSIS
