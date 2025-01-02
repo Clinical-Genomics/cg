@@ -45,8 +45,7 @@ class Case(BaseModel):
                 samples.append((sample_index, sample))
         return samples
 
-
-    def get_sample(self, sample_name: str) -> Sample | None:
+    def get_sample(self, sample_name: str) -> SampleInCase | None:
         for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample
