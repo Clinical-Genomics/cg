@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from cg.constants.constants import DataDelivery
 
 
-class TomteDeliveryType(Enum):
+class TomteDeliveryType(StrEnum):
     ANALYSIS_FILES = DataDelivery.ANALYSIS_FILES
     FASTQ = DataDelivery.FASTQ
     FASTQ_ANALYSIS = DataDelivery.FASTQ_ANALYSIS
