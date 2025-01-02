@@ -1,4 +1,4 @@
-from cg.services.order_validation_service.models.aliases import CaseContainingRelatives
+from cg.services.order_validation_service.models.case_aliases import CaseContainingRelatives
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.workflows.mip_dna.models.sample import MipDnaSample
 from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
