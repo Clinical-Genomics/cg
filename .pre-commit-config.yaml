@@ -1,18 +1,14 @@
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-
-    hooks:
-      - id: isort
-        name: isort
-        language_version: python3.11
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.4
-    hooks:
-      - id: ruff
-        language_version: python3.11
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.11
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
