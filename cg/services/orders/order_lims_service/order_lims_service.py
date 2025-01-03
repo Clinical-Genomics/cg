@@ -25,6 +25,7 @@ class OrderLimsService:
             dict_sample["customer"] = customer
             dict_sample["data_analysis"] = workflow
             dict_sample["data_delivery"] = delivery_type
+            dict_sample["family_name"] = sample._case_name
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims

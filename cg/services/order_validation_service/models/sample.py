@@ -5,6 +5,7 @@ from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
 
 class Sample(BaseModel):
     application: str = Field(min_length=1)
+    _case_name: str = PrivateAttr(default="")
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = None
