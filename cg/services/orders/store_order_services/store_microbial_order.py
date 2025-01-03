@@ -3,14 +3,25 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, Sex, Workflow
 from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import MicrobialSample
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
+from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
+from cg.services.order_validation_service.workflows.mutant.models.sample import MutantSample
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Organism, Sample
+from cg.store.models import ApplicationVersion
+from cg.store.models import Case as DbCase
+from cg.store.models import CaseSample, Customer
+from cg.store.models import Order as DbOrder
+from cg.store.models import Organism
+from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
+MicrobialOrder = MicrosaltOrder | MutantOrder
+MicrobialSample = MicrosaltSample | MutantSample
 
 class StoreMicrobialOrderService(StoreOrderService):
     """
@@ -18,20 +29,24 @@ class StoreMicrobialOrderService(StoreOrderService):
     These include:
     - Mutant samples
     - Microsalt samples
-    - Sars-Cov-2 samples
     """
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderIn) -> dict:
+    def store_order(self, order: MicrobialOrder) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
         # submit samples to LIMS
-        project_data, lims_map = self.lims.process_lims(order=order, new_samples=order.samples)
-        # prepare order for status database
-        status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
+        project_data, lims_map = self.lims.process_lims(
+            samples=order.samples,
+            customer=order.customer,
+            ticket=order._generated_ticket_id,
+            order_name=order.name,
+            workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            delivery_type=DataDelivery(order.delivery_type),
+        )
+        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
 
         # submit samples to Status
         samples = self.store_items_in_status(
@@ -46,65 +61,27 @@ class StoreMicrobialOrderService(StoreOrderService):
         )
         return {"project": project_data, "records": samples}
 
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
-        """Convert order input for microbial samples."""
-
-        status_data = {
-            "customer": order.customer,
-            "order": order.name,
-            "comment": order.comment,
-            "data_analysis": order.samples[0].data_analysis,
-            "data_delivery": order.samples[0].data_delivery,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "control": sample.control,
-                    "name": sample.name,
-                    "organism_id": sample.organism,
-                    "priority": sample.priority,
-                    "reference_genome": sample.reference_genome,
-                    "volume": sample.volume,
-                }
-                for sample in order.samples
-            ],
-        }
-        return status_data
-
-    def store_items_in_status(
-        self,
-        comment: str,
-        customer_id: str,
-        data_analysis: Workflow,
-        data_delivery: DataDelivery,
-        order: str,
-        ordered: datetime,
-        items: list[dict],
-        ticket_id: str,
-    ) -> [Sample]:
+    def store_items_in_status(self, order: MicrobialOrder) -> list[DbSample]:
         """Store microbial samples in the status database."""
 
         sample_objs = []
 
-        customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
+        customer: Customer = self.status.get_customer_by_internal_id(order.customer)
         new_samples = []
-        status_db_order = Order(
+        db_order = DbOrder(
             customer=customer,
             order_date=datetime.now(),
-            ticket_id=int(ticket_id),
+            ticket_id=order._generated_ticket_id,
         )
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Case = self.status.get_case_by_name_and_customer(
+                case: DbCase = self.status.get_case_by_name_and_customer(
                     customer=customer, case_name=ticket_id
                 )
 
                 if not case:
-                    case: Case = self.status.add_case(
+                    case: DbCase = self.status.add_case(
                         data_analysis=data_analysis,
                         data_delivery=data_delivery,
                         name=ticket_id,
