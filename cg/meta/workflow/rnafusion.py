@@ -35,7 +35,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.conda_binary: str = config.rnafusion.conda_binary
         self.platform: str = config.rnafusion.platform
         self.params: str = config.rnafusion.params
-        self.config: str = config.rnafusion.config
+        self.workflow_config_path: str = config.rnafusion.config
         self.resources: str = config.rnafusion.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.rnafusion.tower_workflow

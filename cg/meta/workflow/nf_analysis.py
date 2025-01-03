@@ -63,7 +63,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.conda_binary: str | None = None
         self.platform: str | None = None
         self.params: str | None = None
-        self.config: str | None = None
+        self.workflow_config_path: str | None = None
         self.resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
@@ -136,7 +136,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return nextflow config content."""
         config_files_list: list[str] = [
             self.platform,
-            self.config,
+            self.workflow_config_path,
             self.resources,
         ]
         extra_parameters_str: list[str] = [
