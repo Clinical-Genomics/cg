@@ -1,4 +1,4 @@
-from pydantic import BeforeValidator, Field, PrivateAttr
+from pydantic import BeforeValidator, Field
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
@@ -10,7 +10,6 @@ from cg.services.order_validation_service.utils import parse_buffer, parse_contr
 class BalsamicSample(Sample):
     age_at_sampling: float | None = None
     capture_kit: str | None = None
-    _case_name: str = PrivateAttr(default="")
     comment: str | None = None
     concentration_ng_ul: float | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control

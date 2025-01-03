@@ -1,4 +1,4 @@
-from pydantic import BeforeValidator, Field, PrivateAttr
+from pydantic import BeforeValidator, Field
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
@@ -9,7 +9,6 @@ from cg.services.order_validation_service.utils import parse_buffer, parse_contr
 
 class MipDnaSample(Sample):
     age_at_sampling: float | None = None
-    _case_name: str = PrivateAttr(default="")
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer | None, BeforeValidator(parse_buffer)] = None
     father: str | None = Field(None, pattern=NAME_PATTERN)
