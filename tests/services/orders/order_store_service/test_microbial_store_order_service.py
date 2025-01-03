@@ -1,5 +1,3 @@
-import datetime as dt
-
 import pytest
 
 from cg.constants import DataDelivery
@@ -86,15 +84,8 @@ def test_store_microbial_samples(
     assert base_store.get_all_organisms().count() == 1
 
     # WHEN storing the order
-    new_samples = store_microbial_order_service.store_items_in_status(
-        customer_id=microbial_status_data["customer"],
-        order=microbial_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=microbial_status_data["samples"],
-        comment="",
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.FASTQ_QC,
+    new_samples = store_microbial_order_service.store_order_data_in_status_db(
+        order=microbial_status_data["order"]
     )
 
     # THEN it should store the samples under a case (case) and the used previously unknown
@@ -118,15 +109,8 @@ def test_store_microbial_case_data_analysis_stored(
     assert base_store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    store_microbial_order_service.store_items_in_status(
-        customer_id=microbial_status_data["customer"],
-        order=microbial_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=microbial_status_data["samples"],
-        comment="",
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.FASTQ_QC,
+    store_microbial_order_service.store_order_data_in_status_db(
+        order=microbial_status_data["order"]
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level
@@ -149,15 +133,8 @@ def test_store_microbial_sample_priority(
     assert not base_store._get_query(table=Sample).first()
 
     # WHEN storing the order
-    store_microbial_order_service.store_items_in_status(
-        customer_id=microbial_status_data["customer"],
-        order=microbial_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=microbial_status_data["samples"],
-        comment="",
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.FASTQ_QC,
+    store_microbial_order_service.store_order_data_in_status_db(
+        order=microbial_status_data["order"]
     )
 
     # THEN it should store the sample priority
@@ -234,19 +211,8 @@ def test_store_items_in_status_control_has_stored_value(
     for sample in order.samples:
         sample.control: ControlEnum = control_value
 
-    status_data = store_microbial_order_service.order_to_status(order=order)
-
     # WHEN storing the order
-    store_microbial_order_service.store_items_in_status(
-        comment="",
-        customer_id=order.customer,
-        data_analysis=Workflow.MUTANT,
-        data_delivery=DataDelivery.FASTQ,
-        order="",
-        ordered=dt.datetime.now(),
-        ticket_id=123456,
-        items=status_data.get("samples"),
-    )
+    store_microbial_order_service.store_order_data_in_status_db(order="")
 
     # THEN control should exist on the sample in the store
     customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=order.customer)
