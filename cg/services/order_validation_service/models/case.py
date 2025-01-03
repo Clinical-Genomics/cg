@@ -57,3 +57,9 @@ class Case(BaseModel):
                 if value == "":
                     data[key] = None
         return data
+
+    @model_validator(mode="after")
+    def set_case_name_on_samples(self):
+        for _, sample in self.enumerated_new_samples:
+            sample._case_name = self.name
+        return self
