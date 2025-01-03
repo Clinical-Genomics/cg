@@ -11,7 +11,6 @@ class MetagenomeSample(Sample):
     concentration_ng_ul: float | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
-    organism: str
     priority: PriorityEnum
     quantity: int | None = None
     require_qc_ok: bool

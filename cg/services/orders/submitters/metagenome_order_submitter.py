@@ -1,3 +1,5 @@
+from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
+from cg.services.order_validation_service.workflows.taxprofiler.models.order import TaxprofilerOrder
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
@@ -18,7 +20,6 @@ class MetagenomeOrderSubmitter(OrderSubmitter):
         self.order_validation_service = order_validation_service
         self.order_store_service = order_store_service
 
-    def submit_order(self, order_in) -> dict:
+    def submit_order(self, order: MetagenomeOrder | TaxprofilerOrder) -> dict:
         """Submit a metagenome order."""
-        self.order_validation_service.validate_order(order_in)
-        return self.order_store_service.store_order(order_in)
+        return self.order_store_service.store_order(order)
