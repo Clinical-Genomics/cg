@@ -4,6 +4,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Workflow
 from cg.models.lims.sample import LimsSample
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +26,8 @@ class OrderLimsService:
             dict_sample["customer"] = customer
             dict_sample["data_analysis"] = workflow
             dict_sample["data_delivery"] = delivery_type
-            dict_sample["family_name"] = sample._case_name
+            if isinstance(sample, SampleInCase):
+                dict_sample["family_name"] = sample._case_name
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims
