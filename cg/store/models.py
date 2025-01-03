@@ -815,6 +815,11 @@ class Sample(Base, PriorityMixin):
         back_populates="sample", cascade="all, delete"
     )
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 

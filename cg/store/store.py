@@ -28,9 +28,17 @@ class Store(
         """Commit pending changes to the store."""
         self.session.commit()
 
+    def add_item_to_store(self, item: ModelBase):
+        """Add an item to the store."""
+        self.session.add(item)
+
     def add_multiple_items_to_store(self, items: list[ModelBase]):
         """Add multiple items to the store."""
         self.session.add_all(items)
+
+    def no_autoflush_context(self):
+        """Return a context manager that disables autoflush for the session."""
+        return self.session.no_autoflush
 
     def rollback(self):
         """Rollback any pending change to the store."""

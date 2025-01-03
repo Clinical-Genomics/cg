@@ -1,11 +1,9 @@
 """Module for a generic order submitter."""
 
-from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
-from cg.services.orders.validate_order_services.validate_case_order import (
-    ValidateCaseOrderService,
-)
+from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
 
 
 class CaseOrderSubmitter(OrderSubmitter):
@@ -28,7 +26,6 @@ class CaseOrderSubmitter(OrderSubmitter):
         self.order_validation_service = order_validation_service
         self.order_store_service = order_store_service
 
-    def submit_order(self, order_in: OrderIn) -> dict:
+    def submit_order(self, order: OrderWithCases) -> dict:
         """Submit a generic order."""
-        self.order_validation_service.validate_order(order_in)
-        return self.order_store_service.store_order(order_in)
+        return self.order_store_service.store_order(order)

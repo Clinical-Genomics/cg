@@ -4,9 +4,9 @@ from datetime import datetime
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import OrderError
-from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.sample_base import SexEnum, StatusEnum
+from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
@@ -22,129 +22,120 @@ class StoreFastqOrderService(StoreOrderService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderIn) -> dict:
+    def store_order(self, order: FastqOrder) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
+        project_data, lims_map = self.lims.process_lims(
+            samples=order.samples,
+            ticket=order._generated_ticket_id,
+            order_name=order.name,
+            workflow=Workflow.RAW_DATA,
+            customer=order.customer,
+            delivery_type=DataDelivery(order.delivery_type),
+        )
+        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
+        return {"records": new_samples, "project": project_data}
 
-        project_data, lims_map = self.lims.process_lims(lims_order=order, new_samples=order.samples)
-        status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
-        new_samples = self.store_items_in_status(
-            customer_id=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"],
-            ticket_id=order.ticket,
-            items=status_data["samples"],
-        )
-        return {"project": project_data, "records": new_samples}
-
-    @staticmethod
-    def order_to_status(order: OrderIn) -> dict:
-        """Convert order input to status for fastq-only orders."""
-        status_data = {
-            "customer": order.customer,
-            "order": order.name,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "capture_kit": sample.capture_kit,
-                    "comment": sample.comment,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "sex": sample.sex,
-                    "subject_id": sample.subject_id,
-                    "tumour": sample.tumour,
-                    "volume": sample.volume,
-                }
-                for sample in order.samples
-            ],
-        }
-        return status_data
-
-    def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
-        """Add a MAF case to the Status database."""
-        case: Case = self.status_db.add_case(
-            data_analysis=Workflow(Workflow.MIP_DNA),
-            data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
-            name="_".join([sample_obj.name, "MAF"]),
-            panels=[GenePanelMasterList.OMIM_AUTO],
-            priority=Priority.research,
-            ticket=sample_obj.original_ticket,
-        )
-        case.customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
-        )
-        relationship: CaseSample = self.status_db.relate_sample(
-            case=case, sample=sample_obj, status=StatusEnum.unknown
-        )
-        order.cases.append(case)
-        self.status_db.session.add_all([case, relationship])
-
-    def store_items_in_status(
-        self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
-    ) -> list[Sample]:
-        """Store fastq samples in the status database including family connection and delivery"""
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
-        if not customer:
-            raise OrderError(f"Unknown customer: {customer_id}")
+    def store_order_data_in_status_db(self, order: FastqOrder) -> list[Sample]:
+        """
+        Store all order data in the Status database for a FASTQ order. Return the samples.
+        The stored data objects are:
+        - Order
+        - Samples
+        - One Case containing all samples
+        - For each Sample, a relationship between the sample and the Case
+        - For each non-tumour WGS Sample, a MAF Case and a relationship between the Sample and the
+        MAF Case
+        """
+        db_order: Order = self._create_db_order(order=order)
+        db_case: Case = self._create_db_case(order=order, db_order=db_order)
         new_samples = []
-        case: Case = self.status_db.get_case_by_name_and_customer(
-            customer=customer, case_name=ticket_id
-        )
-        submitted_case: dict = items[0]
-        status_db_order = Order(
-            customer=customer,
-            order_date=datetime.now(),
-            ticket_id=int(ticket_id),
-        )
         with self.status_db.session.no_autoflush:
-            for sample in items:
-                new_sample = self.status_db.add_sample(
-                    name=sample["name"],
-                    sex=sample["sex"] or "unknown",
-                    comment=sample["comment"],
-                    internal_id=sample.get("internal_id"),
-                    order=order,
-                    ordered=ordered,
-                    original_ticket=ticket_id,
-                    priority=sample["priority"],
-                    tumour=sample["tumour"],
-                    capture_kit=sample["capture_kit"],
-                    subject_id=sample["subject_id"],
+            for sample in order.samples:
+                db_sample: Sample = self._create_db_sample(
+                    sample=sample,
+                    order_name=order.name,
+                    ticket_id=str(db_order.ticket_id),
+                    customer=db_order.customer,
                 )
-                new_sample.customer: Customer = customer
-                application_tag: str = sample["application"]
-                application_version: ApplicationVersion = (
-                    self.status_db.get_current_application_version_by_tag(tag=application_tag)
+                self._create_maf_case(db_sample=db_sample, db_order=db_order)
+                case_sample: CaseSample = self.status_db.relate_sample(
+                    case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
-                if application_version is None:
-                    raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version: ApplicationVersion = application_version
-                new_samples.append(new_sample)
-                if not case:
-                    case = self.status_db.add_case(
-                        data_analysis=Workflow(submitted_case["data_analysis"]),
-                        data_delivery=DataDelivery(submitted_case["data_delivery"]),
-                        name=ticket_id,
-                        panels=None,
-                        priority=submitted_case["priority"],
-                        ticket=ticket_id,
-                    )
-                if (
-                    not new_sample.is_tumour
-                    and new_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-                ):
-                    self.create_maf_case(sample_obj=new_sample, order=status_db_order)
-                case.customer = customer
-                new_relationship = self.status_db.relate_sample(
-                    case=case, sample=new_sample, status=StatusEnum.unknown
-                )
-                self.status_db.session.add_all([case, new_relationship])
-        status_db_order.cases.append(case)
-        self.status_db.session.add(status_db_order)
-        self.status_db.session.add_all(new_samples)
-        self.status_db.session.commit()
+                self.status_db.add_multiple_items_to_store([db_sample, case_sample])
+                new_samples.append(db_sample)
+        db_order.cases.append(db_case)
+        self.status_db.add_multiple_items_to_store([db_order, db_case])
+        self.status_db.commit_to_store()
         return new_samples
+
+    def _create_db_order(self, order: FastqOrder) -> Order:
+        """Return an Order database object."""
+        ticket_id: int = order._generated_ticket_id
+        customer: Customer = self.status_db.get_customer_by_internal_id(
+            customer_internal_id=order.customer
+        )
+        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+
+    def _create_db_case(self, order: FastqOrder, db_order: Order) -> Case:
+        """Return a Case database object."""
+        priority: str = order.samples[0].priority
+        case: Case = self.status_db.add_case(
+            data_analysis=Workflow.RAW_DATA,
+            data_delivery=DataDelivery.FASTQ,
+            name=str(db_order.ticket_id),
+            priority=priority,
+            ticket=str(db_order.ticket_id),
+        )
+        case.customer = db_order.customer
+        return case
+
+    def _create_db_sample(
+        self, sample: FastqSample, order_name: str, customer: Customer, ticket_id: str
+    ) -> Sample:
+        """Return a Sample database object."""
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(tag=sample.application)
+        )
+        return self.status_db.add_sample(
+            name=sample.name,
+            sex=sample.sex or SexEnum.unknown,
+            comment=sample.comment,
+            internal_id=sample._generated_lims_id,
+            ordered=datetime.now(),
+            original_ticket=str(ticket_id),
+            priority=sample.priority,
+            tumour=sample.tumour,
+            capture_kit=sample.capture_kit,
+            subject_id=sample.subject_id,
+            customer=customer,
+            application_version=application_version,
+            order=order_name,
+        )
+
+    def _create_maf_case(self, db_sample: Sample, db_order: Order) -> None:
+        """
+        Add a MAF case and a relationship with the given sample to the current Status database
+        transaction. This is done only if the given sample is non-tumour and  WGS.
+        This function does not commit to the database.
+        """
+        if (
+            not db_sample.is_tumour
+            and db_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            case: Case = self.status_db.add_case(
+                data_analysis=Workflow.MIP_DNA,
+                data_delivery=DataDelivery.NO_DELIVERY,
+                name="_".join([db_sample.name, "MAF"]),
+                panels=[GenePanelMasterList.OMIM_AUTO],
+                priority=Priority.research,
+                ticket=db_sample.original_ticket,
+            )
+            case.customer = self.status_db.get_customer_by_internal_id(
+                customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
+            )
+            case_sample: CaseSample = self.status_db.relate_sample(
+                case=case, sample=db_sample, status=StatusEnum.unknown
+            )
+            db_order.cases.append(case)
+            self.status_db.add_multiple_items_to_store([case, case_sample])
