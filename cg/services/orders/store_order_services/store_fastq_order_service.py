@@ -62,8 +62,11 @@ class StoreFastqOrderService(StoreOrderService):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
+    def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
+        # Hardcoded constant for special order to assign MAF cases to
+        MAF_ORDER_ID: int = 12377
+        maf_order = self.status_db.get_order_by_id(MAF_ORDER_ID)
         case: Case = self.status_db.add_case(
             data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
@@ -78,7 +81,7 @@ class StoreFastqOrderService(StoreOrderService):
         relationship: CaseSample = self.status_db.relate_sample(
             case=case, sample=sample_obj, status=StatusEnum.unknown
         )
-        order.cases.append(case)
+        maf_order.cases.append(case)
         self.status_db.session.add_all([case, relationship])
 
     def store_items_in_status(
