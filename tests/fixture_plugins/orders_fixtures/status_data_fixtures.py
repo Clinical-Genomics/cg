@@ -4,13 +4,13 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -35,16 +35,6 @@ def metagenome_status_data(
     order: OrderIn = OrderIn.parse_obj(obj=metagenome_order_to_submit, project=project)
 
     return store_metagenome_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
-def microbial_status_data(
-    microbial_order_to_submit: dict, store_microbial_order_service: StoreMicrobialOrderService
-) -> dict:
-    """Parse microbial order example."""
-    project: OrderType = OrderType.MICROSALT
-    order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
-    return store_microbial_order_service.order_to_status(order=order)
 
 
 @pytest.fixture
@@ -120,3 +110,10 @@ def balsamic_submit_store(
             base_store.session.add(application_version)
     base_store.session.commit()
     return base_store
+
+
+@pytest.fixture
+def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
+    order = MicrosaltOrder.model_validate(microbial_order_to_submit)
+    order._generated_ticket_id = 123456
+    return order

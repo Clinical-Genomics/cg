@@ -1,16 +1,16 @@
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from cg.constants import DataDelivery
 
 
-class MutantDeliveryType(Enum):
+class MutantDeliveryType(StrEnum):
     ANALYSIS_FILES = DataDelivery.FASTQ
     NO_DELIVERY = DataDelivery.NO_DELIVERY
 
 
 class PreProcessingMethod(StrEnum):
     COVID_PRIMER = "Qiagen SARS-CoV-2 Primer Panel"
-    COVID_SEQUENCING = "COVIDSEQ"
+    COVID_SEQUENCING = "COVIDSeq"
     OTHER = 'Other (specify in "Comments")'
 
 

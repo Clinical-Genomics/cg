@@ -23,7 +23,7 @@ MINIMUM_VOLUME, MAXIMUM_VOLUME = 20, 130
 class ExtractionMethod(StrEnum):
     EZ1 = "EZ1"
     MAELSTROM = "Maelstrom"
-    MAGNAPURE_96 = "MagNaPure 96 (contact Clinical Genomics before submission)"
+    MAGNAPURE_96 = "MagNaPure 96"
     QIAGEN_MAGATTRACT = "Qiagen MagAttract"
     QIASYMPHONE = "QIAsymphony"
     OTHER = 'Other (specify in "Comments")'

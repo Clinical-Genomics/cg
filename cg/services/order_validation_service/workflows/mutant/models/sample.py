@@ -6,7 +6,11 @@ from typing_extensions import Annotated
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer, ExtractionMethod
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.utils import parse_buffer, parse_control
+from cg.services.order_validation_service.utils import (
+    parse_buffer,
+    parse_control,
+    parse_extraction_method,
+)
 from cg.services.order_validation_service.workflows.mutant.constants import (
     OriginalLab,
     PreProcessingMethod,
@@ -21,7 +25,7 @@ class MutantSample(Sample):
     concentration_sample: float | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
-    extraction_method: ExtractionMethod
+    extraction_method: Annotated[ExtractionMethod, BeforeValidator(parse_extraction_method)]
     organism: str
     original_lab: OriginalLab
     pre_processing_method: PreProcessingMethod

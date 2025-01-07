@@ -138,7 +138,7 @@ class StoreMicrobialOrderService(StoreOrderService):
             sex=Sex.UNKNOWN,
             comment=sample.comment,
             control=sample.control,
-            internal_id=sample._generated_ticket_id,
+            internal_id=sample._generated_lims_id,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=str(ticket_id),

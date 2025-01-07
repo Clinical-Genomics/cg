@@ -1,7 +1,7 @@
 from typing import Callable
 
 from cg.models.orders.sample_base import ControlEnum
-from cg.services.order_validation_service.constants import ElutionBuffer
+from cg.services.order_validation_service.constants import ElutionBuffer, ExtractionMethod
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
@@ -51,3 +51,11 @@ def parse_buffer(buffer: str | None) -> ElutionBuffer | None:
 def parse_control(control: ControlEnum | None) -> ControlEnum:
     """Convert the control value into one of the Enum values if it's None."""
     return control or ControlEnum.not_control
+
+
+def parse_extraction_method(extraction_method: str | None) -> ExtractionMethod:
+    return (
+        ExtractionMethod.MAGNAPURE_96
+        if extraction_method and extraction_method.startswith(ExtractionMethod.MAGNAPURE_96)
+        else extraction_method
+    )
