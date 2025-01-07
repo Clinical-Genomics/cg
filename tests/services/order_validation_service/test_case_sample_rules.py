@@ -6,6 +6,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    BufferMissingError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -30,6 +31,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
+    validate_buffer_required,
     validate_buffers_are_allowed,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
@@ -48,6 +50,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
+from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Application, Sample
 from cg.store.store import Store
@@ -438,3 +441,24 @@ def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):
 
     # THEN the error should concern the case with all samples unknown
     assert isinstance(errors[0], StatusUnknownError)
+
+
+def test_validate_buffer_required(mip_dna_order: MipDnaOrder, application_tag_required_buffer: str):
+
+    # GIVEN an order for which the buffer is only required for samples running certain applications
+
+    # GIVEN that one of its samples has an app tag which makes the elution buffer mandatory
+    sample = mip_dna_order.cases[0].samples[0]
+    sample.application = application_tag_required_buffer
+
+    # GIVEN that the sample has no buffer set
+    sample.elution_buffer = None
+
+    # WHEN validating that required buffers are set
+    errors: list[BufferMissingError] = validate_buffer_required(mip_dna_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the missing buffer
+    assert isinstance(errors[0], BufferMissingError)

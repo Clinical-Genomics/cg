@@ -7,6 +7,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
+    BufferMissingError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -31,6 +32,7 @@ from cg.services.order_validation_service.errors.case_sample_errors import (
     WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
+from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 from cg.services.order_validation_service.rules.case_sample.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
@@ -46,6 +48,7 @@ from cg.services.order_validation_service.rules.case_sample.utils import (
     get_occupied_well_errors,
     get_well_sample_map,
     has_sex_and_subject,
+    is_buffer_missing,
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
@@ -59,7 +62,7 @@ from cg.services.order_validation_service.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.store.models import Sample
+from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
 
@@ -230,7 +233,7 @@ def validate_samples_exist(
     errors: list[SampleDoesNotExistError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_existing_samples:
-            sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
+            sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
             if not sample:
                 error = SampleDoesNotExistError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
@@ -255,7 +258,7 @@ def validate_sample_names_not_repeated(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
     old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
-    new_samples: list[tuple[int, int, Sample]] = order.enumerated_new_samples
+    new_samples: list[tuple[int, int, SampleInCase]] = order.enumerated_new_samples
     sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
     return [
         SampleNameRepeatedError(case_index=case_index, sample_index=sample_index)
@@ -423,4 +426,15 @@ def validate_not_all_samples_unknown_in_case(
             for sample_index, _ in case.enumerated_samples:
                 error = StatusUnknownError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
+    return errors
+
+
+def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMissingError]:
+    """Certain applications require buffer specification, hence we return errors for any missed."""
+
+    errors: list[BufferMissingError] = []
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if is_buffer_missing(sample):
+            error = BufferMissingError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors

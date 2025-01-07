@@ -23,6 +23,7 @@ from cg.services.order_validation_service.models.order_with_cases import OrderWi
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.models.sample_aliases import (
     HumanSample,
+    SampleInCase,
     SampleWithRelatives,
 )
 from cg.services.order_validation_service.rules.utils import (
@@ -274,3 +275,11 @@ def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[st
 def are_all_samples_unknown(case: Case) -> bool:
     """Check if all samples in a case are unknown."""
     return all(sample.status == StatusOptions.UNKNOWN for sample in case.samples)
+
+
+def is_buffer_missing(sample: SampleInCase) -> bool:
+    applications_requiring_buffer: tuple = ("PAN", "EX", "WGSWPF", "METWPF")
+    return bool(
+        sample.application.startswith(tuple(applications_requiring_buffer))
+        and not sample.elution_buffer
+    )

@@ -160,3 +160,8 @@ class ContainerNameRepeatedError(CaseSampleError):
 class StatusUnknownError(CaseSampleError):
     field: str = "status"
     message: str = "Samples in case cannot all have status unknown"
+
+
+class BufferMissingError(CaseSampleError):
+    field: str = "elution_buffer"
+    message: str = "Buffer must be specified with this application"
