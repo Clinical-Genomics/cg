@@ -31,7 +31,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         self.conda_binary: str = config.tomte.conda_binary
         self.platform: str = config.tomte.platform
         self.params: str = config.tomte.params
-        self.config: str = config.tomte.config
+        self.workflow_config_path: str = config.tomte.config
         self.resources: str = config.tomte.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.tomte.tower_workflow

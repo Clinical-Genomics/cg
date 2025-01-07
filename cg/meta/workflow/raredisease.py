@@ -56,7 +56,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.conda_binary: str = config.raredisease.conda_binary
         self.platform: str = config.raredisease.platform
         self.params: str = config.raredisease.params
-        self.config: str = config.raredisease.config
+        self.workflow_config_path: str = config.raredisease.config
         self.resources: str = config.raredisease.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
