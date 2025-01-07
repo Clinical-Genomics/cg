@@ -27,9 +27,11 @@ COPY pyproject.toml poetry.lock gunicorn.conf.py README.md ./
 
 RUN pip install --no-cache-dir poetry \
     && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi --no-root
 
 COPY cg ./cg
+
+RUN poetry install --no-interaction --no-ansi
 
 CMD gunicorn \
     --config gunicorn.conf.py \
