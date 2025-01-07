@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class HousekeeperAPI:
-    """API to decouple cg code from Housekeeper"""
+    """API to decouple cg code from Housekeeper."""
 
     def __init__(self, config: dict) -> None:
         initialize_database(config["housekeeper"]["database"])
