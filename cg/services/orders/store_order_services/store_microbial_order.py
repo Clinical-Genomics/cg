@@ -57,7 +57,6 @@ class StoreMicrobialOrderService(StoreOrderService):
         new_samples = []
         db_order: DbOrder = self.status.add_order(
             customer=customer,
-            order_date=datetime.now(),
             ticket_id=order._generated_ticket_id,
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
@@ -116,6 +115,7 @@ class StoreMicrobialOrderService(StoreOrderService):
                 reference_genome=sample.reference_genome,
             )
             self.status.add_item_to_store(organism)
+            self.status.commit_to_store()
         return organism
 
     def _create_db_sample(
