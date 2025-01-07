@@ -1,7 +1,6 @@
 import pytest
 
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.store_order_services.constants import MAF_ORDER_TICKET_ID
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
@@ -15,7 +14,6 @@ from cg.services.orders.store_order_services.store_pacbio_order_service import (
     StorePacBioOrderService,
 )
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
-from cg.store.models import Order
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 
@@ -32,8 +30,6 @@ def store_pool_order_service(base_store: Store, lims_api: MockLimsAPI) -> StoreP
 
 @pytest.fixture
 def store_fastq_order_service(base_store: Store, lims_api: MockLimsAPI) -> StoreFastqOrderService:
-    order: Order = Order(customer_id=1, ticket_id=MAF_ORDER_TICKET_ID)
-    base_store.add_multiple_items_to_store([order])
     return StoreFastqOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
 
 

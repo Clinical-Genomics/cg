@@ -8,7 +8,7 @@ from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.store_order_services.constants import MAF_ORDER_TICKET_ID
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
@@ -65,7 +65,7 @@ class StoreFastqOrderService(StoreOrderService):
 
     def create_maf_case(self, sample_obj: Sample, order: Order, case: Case) -> None:
         """Add a MAF case to the Status database."""
-        maf_order = self.status_db.get_order_by_ticket_id(MAF_ORDER_TICKET_ID)
+        maf_order = self.status_db.get_order_by_id(MAF_ORDER_ID)
         case: Case = self.status_db.add_case(
             comment=f"MAF case for {case.internal_id} original order id {order.id}",
             data_analysis=Workflow(Workflow.MIP_DNA),
