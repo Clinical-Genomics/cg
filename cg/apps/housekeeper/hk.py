@@ -7,11 +7,7 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Tag, Version
 from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
@@ -27,16 +23,12 @@ LOG = logging.getLogger(__name__)
 
 
 class HousekeeperAPI:
-    """API to decouple cg code from Housekeeper"""
+    """API to decouple cg code from Housekeeper."""
 
     def __init__(self, config: dict) -> None:
         initialize_database(config["housekeeper"]["database"])
         self._store = Store(config["housekeeper"]["root"])
         self.root_dir: str = config["housekeeper"]["root"]
-
-    def __getattr__(self, name):
-        LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
-        return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: datetime = None) -> Bundle:
         """Create a new file bundle."""
