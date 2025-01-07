@@ -37,7 +37,6 @@ class StoreMicrobialOrderService(StoreOrderService):
 
     def store_order(self, order: MicrobialOrder) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
-        # submit samples to LIMS
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
@@ -48,7 +47,6 @@ class StoreMicrobialOrderService(StoreOrderService):
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
 
-        # submit samples to Status
         samples = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": samples}
 
@@ -57,14 +55,13 @@ class StoreMicrobialOrderService(StoreOrderService):
 
         customer: Customer = self.status.get_customer_by_internal_id(order.customer)
         new_samples = []
-        db_order = DbOrder(
+        db_order: DbOrder = self.status.add_order(
             customer=customer,
             order_date=datetime.now(),
             ticket_id=order._generated_ticket_id,
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
-        self.status.session.add(db_case)
-        self.status.session.commit()
+
         with self.status.session.no_autoflush:
             for sample in order.samples:
                 organism: Organism = self._ensure_organism(sample)
@@ -78,13 +75,14 @@ class StoreMicrobialOrderService(StoreOrderService):
                 link: CaseSample = self.status.relate_sample(
                     case=db_case, sample=db_sample, status="unknown"
                 )
-                self.status.session.add(link)
+                self.status.add_item_to_store(link)
                 new_samples.append(db_sample)
-
             db_order.cases.append(db_case)
-            self.status.session.add(db_order)
-            self.status.session.add_all(new_samples)
-            self.status.session.commit()
+
+        self.status.add_item_to_store(db_case)
+        self.status.add_item_to_store(db_order)
+        self.status.add_multiple_items_to_store(new_samples)
+        self.status.commit_to_store()
         return new_samples
 
     def _fill_in_sample_verified_organism(self, samples: list[MicrobialSample]):
@@ -117,8 +115,7 @@ class StoreMicrobialOrderService(StoreOrderService):
                 name=sample.organism,
                 reference_genome=sample.reference_genome,
             )
-            self.status.session.add(organism)
-            self.status.session.commit()
+            self.status.add_item_to_store(organism)
         return organism
 
     def _create_db_sample(
