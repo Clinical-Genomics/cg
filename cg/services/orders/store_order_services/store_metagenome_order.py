@@ -50,7 +50,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         self,
         order: OrderMetagenome,
     ) -> list[DbSample]:
-        """Store samples in the status database."""
+        """Store samples in the StatusDB database."""
         customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         new_samples = []
         db_order: DbOrder = self.status_db.add_order(
