@@ -53,7 +53,9 @@ class StoreMetagenomeOrderService(StoreOrderService):
         """Store samples in the status database."""
         customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         new_samples = []
-        db_order: DbOrder = self._create_db_order(order)
+        db_order: DbOrder = self.status_db.add_order(
+            customer=customer, ticket_id=order._generated_ticket_id
+        )
         priority: PriorityEnum = order.samples[0].priority
         db_case = self._create_db_case(order=order, customer=customer, priority=priority)
         db_order.cases.append(db_case)
@@ -70,14 +72,6 @@ class StoreMetagenomeOrderService(StoreOrderService):
         self.status_db.add_multiple_items_to_store(new_samples)
         self.status_db.commit_to_store()
         return new_samples
-
-    def _create_db_order(self, order: OrderMetagenome) -> DbOrder:
-        """Return an Order database object."""
-        ticket_id: int = order._generated_ticket_id
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=order.customer
-        )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_case(
         self, order: OrderMetagenome, customer: Customer, priority: PriorityEnum
