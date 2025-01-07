@@ -26,7 +26,7 @@ SampleMetagenome = MetagenomeSample | TaxprofilerSample
 
 
 class StoreMetagenomeOrderService(StoreOrderService):
-    """Storing service for metagenome or Taxprofiler orders."""
+    """Storing service for Metagenome or Taxprofiler orders."""
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status_db = status_db
@@ -56,18 +56,19 @@ class StoreMetagenomeOrderService(StoreOrderService):
         db_order: DbOrder = self._create_db_order(order)
         priority: PriorityEnum = order.samples[0].priority
         db_case = self._create_db_case(order=order, customer=customer, priority=priority)
+        db_order.cases.append(db_case)
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
                 db_sample = self._create_db_sample(order=order, sample=sample, customer=customer)
                 new_relationship: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
-                self.status_db.session.add(new_relationship)
+                self.status_db.add_item_to_store(new_relationship)
                 new_samples.append(db_sample)
-        db_order.cases.append(db_case)
-        self.status_db.session.add(db_order)
-        self.status_db.session.add_all(new_samples)
-        self.status_db.session.commit()
+        self.status_db.add_item_to_store(db_case)
+        self.status_db.add_item_to_store(db_order)
+        self.status_db.add_multiple_items_to_store(new_samples)
+        self.status_db.commit_to_store()
         return new_samples
 
     def _create_db_order(self, order: OrderMetagenome) -> DbOrder:
@@ -89,8 +90,6 @@ class StoreMetagenomeOrderService(StoreOrderService):
             ticket=str(order._generated_ticket_id),
         )
         db_case.customer = customer
-        self.status_db.session.add(db_case)
-        self.status_db.session.commit()
         return db_case
 
     def _create_db_sample(

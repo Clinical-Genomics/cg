@@ -42,9 +42,7 @@ def store_pacbio_order_service(base_store: Store, lims_api: MockLimsAPI) -> Stor
 
 
 @pytest.fixture
-def store_metagenome_order_service(
-    base_store: Store, lims_api: MockLimsAPI, helpers: StoreHelpers
-) -> StoreMetagenomeOrderService:
+def metagenome_storing_store(base_store: Store, helpers: StoreHelpers):
     metagenome_application: Application = helpers.ensure_application_version(
         store=base_store, application_tag="METPCFR030"
     ).application
@@ -55,8 +53,15 @@ def store_metagenome_order_service(
     metagenome_application.order_types = [OrderType.METAGENOME]
     customer = base_store.get_customer_by_internal_id("cust000")
     helpers.ensure_user(store=base_store, customer=customer)
+    return base_store
+
+
+@pytest.fixture
+def store_metagenome_order_service(
+    metagenome_storing_store: Store, lims_api: MockLimsAPI, helpers: StoreHelpers
+) -> StoreMetagenomeOrderService:
     return StoreMetagenomeOrderService(
-        status_db=base_store, lims_service=OrderLimsService(lims_api)
+        status_db=metagenome_storing_store, lims_service=OrderLimsService(lims_api)
     )
 
 
