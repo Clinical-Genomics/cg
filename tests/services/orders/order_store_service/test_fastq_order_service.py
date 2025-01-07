@@ -6,8 +6,9 @@ from cg.constants import DataDelivery, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn, OrderType
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.store.models import Application, Case, Sample
+from cg.store.models import Application, Case, Sample, Order
 from cg.store.store import Store
 
 
@@ -62,6 +63,10 @@ def test_store_samples(
     assert family_link.case in base_store.get_cases()
     assert family_link.case.data_analysis
     assert family_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
+
+    # THEN a MAF case should be added to the MAF orders
+    maf_order: Order = base_store.get_order_by_id(MAF_ORDER_ID)
+    assert len(maf_order.cases) == 1
 
 
 def test_store_samples_sex_stored(
