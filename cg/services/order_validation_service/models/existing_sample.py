@@ -7,7 +7,7 @@ class ExistingSample(BaseModel):
     father: str | None = Field(None, pattern=NAME_PATTERN)
     internal_id: str
     mother: str | None = Field(None, pattern=NAME_PATTERN)
-    status: StatusEnum
+    status: StatusEnum | None = None
 
     @property
     def is_new(self) -> bool:
