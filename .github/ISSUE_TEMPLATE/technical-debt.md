@@ -1,7 +1,7 @@
 ---
 name: Technical debt
 about: File a technical debt report
-title: "Technical debt:"
+title: "Technical debt"
 labels: technical-debt
 assignees: ""
 ---
