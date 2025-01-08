@@ -430,7 +430,7 @@ def validate_not_all_samples_unknown_in_case(
 
 
 def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMissingError]:
-    """Certain applications require buffer specification, hence we return errors for any missed."""
+    """Return an error for each sample missing a buffer, if its application requires one."""
 
     errors: list[BufferMissingError] = []
     for case_index, sample_index, sample in order.enumerated_new_samples:

@@ -461,4 +461,6 @@ def test_validate_buffer_required(mip_dna_order: MipDnaOrder, application_tag_re
     assert errors
 
     # THEN the error should concern the missing buffer
-    assert isinstance(errors[0], BufferMissingError)
+    error = errors[0]
+    assert isinstance(error, BufferMissingError)
+    assert error.sample_index == 0 and error.case_index == 0
