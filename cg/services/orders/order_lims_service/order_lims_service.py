@@ -4,6 +4,8 @@ from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Workflow
 from cg.models.lims.sample import LimsSample
 from cg.services.order_validation_service.models.sample import Sample
+from cg.services.order_validation_service.workflows.microsalt.models.sample import MicrosaltSample
+from cg.services.order_validation_service.workflows.mutant.models.sample import MutantSample
 
 LOG = logging.getLogger(__name__)
 
@@ -26,6 +28,8 @@ class OrderLimsService:
             dict_sample["data_analysis"] = workflow
             dict_sample["data_delivery"] = delivery_type
             dict_sample["family_name"] = sample._case_name
+            if isinstance(sample, MutantSample | MicrosaltSample):
+                dict_sample["verified_organism"] = sample._verified_organism
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims

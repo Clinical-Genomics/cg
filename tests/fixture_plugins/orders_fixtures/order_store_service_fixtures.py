@@ -67,8 +67,12 @@ def store_metagenome_order_service(
 
 @pytest.fixture
 def store_microbial_order_service(
-    base_store: Store, lims_api: MockLimsAPI
+    base_store: Store, lims_api: MockLimsAPI, helpers: StoreHelpers
 ) -> StoreMicrobialOrderService:
+    helpers.ensure_application_version(store=base_store, application_tag="MWRNXTR003")
+    helpers.ensure_application_version(store=base_store, application_tag="MWXNXTR003")
+    helpers.ensure_application_version(store=base_store, application_tag="VWGNXTR001")
+
     return StoreMicrobialOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
 
 
