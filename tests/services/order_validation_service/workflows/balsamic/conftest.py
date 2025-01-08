@@ -3,7 +3,7 @@ import pytest
 from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.constants import MINIMUM_VOLUME
+from cg.services.order_validation_service.constants import MINIMUM_VOLUME, ElutionBuffer
 from cg.services.order_validation_service.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.constants import BalsamicDeliveryType
@@ -22,6 +22,7 @@ def create_sample(id: int) -> BalsamicSample:
         container=ContainerEnum.plate,
         container_name="ContainerName",
         control=ControlEnum.not_control,
+        elution_buffer=ElutionBuffer.WATER,
         require_qc_ok=True,
         reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,

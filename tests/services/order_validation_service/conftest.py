@@ -83,6 +83,11 @@ def archived_application(base_store: Store) -> Application:
 
 
 @pytest.fixture
+def application_tag_required_buffer() -> str:
+    return "WGSWPFR400"
+
+
+@pytest.fixture
 def valid_order() -> TomteOrder:
     child: TomteSample = create_tomte_sample(1)
     father: TomteSample = create_tomte_sample(2)
