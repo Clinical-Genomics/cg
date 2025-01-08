@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BeforeValidator, PrivateAttr
+from pydantic import BeforeValidator, PrivateAttr, field_serializer
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
@@ -36,3 +36,7 @@ class MutantSample(Sample):
     region: Region
     selection_criteria: SelectionCriteria
     _verified_organism: str | None = PrivateAttr(default=None)
+
+    @field_serializer("collection_date")
+    def serialize_collection_date(self, value: date) -> str:
+        return value.isoformat()
