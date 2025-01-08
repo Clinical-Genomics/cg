@@ -53,7 +53,7 @@ class TrailblazerAPI:
     def auth_header(self) -> dict:
         credentials = service_account.IDTokenCredentials.from_service_account_file(
             self.service_account_auth_file,
-            target_audience=self.google_client_id,
+            target_audience="https://trailblazer-api.scilifelab.se/api/v1",
         )
         credentials.refresh(Request())
         return {"Authorization": f"Bearer {credentials.token}"}
