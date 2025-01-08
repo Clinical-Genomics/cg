@@ -5,7 +5,7 @@ import logging
 from typing import Any
 
 from google.auth.transport.requests import Request
-from google.oauth2.service_account import Credentials
+from google.oauth2 import service_account
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
@@ -51,11 +51,12 @@ class TrailblazerAPI:
 
     @property
     def auth_header(self) -> dict:
-        credentials = Credentials.from_service_account_file(self.service_account_auth_file)
-        auth_request = Request()
-        id_token_credentials = credentials.with_target_audience(self.google_client_id)
-        id_token_credentials.refresh(auth_request)
-        return {"Authorization": f"Bearer {id_token_credentials.token}"}
+        credentials = service_account.IDTokenCredentials.from_service_account_file(
+            self.service_account_auth_file,
+            target_audience=self.google_client_id,
+        )
+        credentials.refresh(Request())
+        return {"Authorization": f"Bearer {credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
