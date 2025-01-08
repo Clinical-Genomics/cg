@@ -37,8 +37,8 @@ from cg.server.ext import (
     delivery_message_service,
     lims,
     order_service,
-    order_submitter_registry,
     order_validation_service,
+    storing_service_registry,
     ticket_handler,
 )
 from cg.store.models import Application, Customer
@@ -154,7 +154,7 @@ def submit_order(order_type: OrderType):
     api = OrdersAPI(
         lims=lims,
         ticket_handler=ticket_handler,
-        storing_registry=order_submitter_registry,
+        storing_registry=storing_service_registry,
         validation_service=order_validation_service,
     )
     error_message: str
