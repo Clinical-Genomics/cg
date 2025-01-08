@@ -52,10 +52,13 @@ class TrailblazerAPI:
     def auth_header(self) -> dict:
         credentials = Credentials.from_service_account_file(
             self.service_account_auth_file,
-            scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            scopes=[
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/userinfo.email",
+            ],
         )
         credentials.refresh(Request())
-        return {"Authorization": f"Bearer {credentials.token}"}
+        return {"Authorization": f"Bearer {credentials.id_token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
