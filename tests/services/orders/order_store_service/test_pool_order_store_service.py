@@ -52,7 +52,7 @@ def test_store_rml(
     assert not base_store._get_query(table=Sample).first()
 
     # WHEN storing the order
-    new_pools = store_pool_order_service.store_items_in_status(
+    new_pools = store_pool_order_service.store_order_data_in_status_db(
         customer_id=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
