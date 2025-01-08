@@ -21,16 +21,6 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def balsamic_status_data(
-    balsamic_order_to_submit: dict, store_generic_order_service: StoreCaseOrderService
-) -> dict:
-    """Parse balsamic order example."""
-    project: OrderType = OrderType.BALSAMIC
-    order: OrderIn = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=project)
-    return store_generic_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
 def metagenome_order(
     metagenome_order_to_submit: dict, store_metagenome_order_service: StoreMetagenomeOrderService
 ) -> MetagenomeOrder:
@@ -54,23 +44,18 @@ def microbial_status_data(
 
 
 @pytest.fixture
-def fake_ticket_id() -> int:
-    return 123456
-
-
-@pytest.fixture
-def valid_rml_order(rml_order_to_submit: dict, fake_ticket_id: int) -> RmlOrder:
+def valid_rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrder:
     """Parse rml order example."""
     rml_order = RmlOrder.model_validate(rml_order_to_submit)
-    rml_order._generated_ticket_id = fake_ticket_id
+    rml_order._generated_ticket_id = ticket_id_as_int
     return rml_order
 
 
 @pytest.fixture
-def valid_fluffy_order(fluffy_order_to_submit: dict, fake_ticket_id: int) -> FluffyOrder:
+def valid_fluffy_order(fluffy_order_to_submit: dict, ticket_id_as_int: int) -> FluffyOrder:
     """Parse rml order example."""
     fluffy_order = FluffyOrder.model_validate(fluffy_order_to_submit)
-    fluffy_order._generated_ticket_id = fake_ticket_id
+    fluffy_order._generated_ticket_id = ticket_id_as_int
     return fluffy_order
 
 

@@ -658,9 +658,14 @@ def madeline_api(madeline_output: Path) -> MockMadelineAPI:
 
 
 @pytest.fixture(scope="session")
-def ticket_id() -> str:
+def ticket_id_as_int() -> int:
+    return 123456
+
+
+@pytest.fixture(scope="session")
+def ticket_id(ticket_id_as_int: int) -> str:
     """Return a ticket number for testing."""
-    return "123456"
+    return str(ticket_id_as_int)
 
 
 @pytest.fixture
