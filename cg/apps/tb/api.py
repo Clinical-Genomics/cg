@@ -46,19 +46,16 @@ class TrailblazerAPI:
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
+        self.google_client_id = config["trailblazer"]["google_client_id"]
         self.host = config["trailblazer"]["host"]
 
     @property
     def auth_header(self) -> dict:
-        credentials = Credentials.from_service_account_file(
-            self.service_account_auth_file,
-            scopes=[
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/userinfo.email",
-            ],
-        )
-        credentials.refresh(Request())
-        return {"Authorization": f"Bearer {credentials.id_token}"}
+        credentials = Credentials.from_service_account_file(self.service_account_auth_file)
+        auth_request = Request()
+        id_token_credentials = credentials.with_target_audience(self.google_client_id)
+        id_token_credentials.refresh(auth_request)
+        return {"Authorization": f"Bearer {id_token_credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
