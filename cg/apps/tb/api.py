@@ -52,7 +52,6 @@ class TrailblazerAPI:
     def auth_header(self) -> dict:
         credentials = Credentials.from_service_account_file(
             self.service_account_auth_file,
-            target_principal=self.service_account,
             scopes=["https://www.googleapis.com/auth/cloud-platform"],
         )
         credentials.refresh(Request())
