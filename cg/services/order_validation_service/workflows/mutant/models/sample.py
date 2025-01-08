@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, PrivateAttr
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
@@ -35,3 +35,4 @@ class MutantSample(Sample):
     reference_genome: str
     region: Region
     selection_criteria: SelectionCriteria
+    _verified_organism: str | None = PrivateAttr(default=None)

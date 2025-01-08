@@ -1,4 +1,4 @@
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, PrivateAttr
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
@@ -18,3 +18,4 @@ class MicrosaltSample(Sample):
     organism: str
     priority: PriorityEnum
     reference_genome: str = Field(max_length=255)
+    _verified_organism: str | None = PrivateAttr(default=None)

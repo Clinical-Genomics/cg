@@ -92,7 +92,7 @@ class StoreMicrobialOrderService(StoreOrderService):
             is_verified = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )
-            sample.verified_organism = is_verified
+            sample._verified_organism = is_verified
 
     def _create_case(self, customer: Customer, order: MicrobialOrder) -> DbCase:
         case: DbCase = self.status.add_case(
