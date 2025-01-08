@@ -5,7 +5,10 @@ from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
-from cg.models.orders.samples import RmlSample
+from cg.services.order_validation_service.models.sample_aliases import (
+    IndexedSample,
+    OrderWithIndexedSamples,
+)
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Pool, Sample
@@ -16,8 +19,8 @@ LOG = logging.getLogger(__name__)
 
 class StorePoolOrderService(StoreOrderService):
     """
-    Storing service for pool orders.
-    These include:
+    Service for storing generic orders in StatusDB and Lims.
+    This class is used to store orders for the following workflows:
     - Fluffy / NIPT samples
     - RML samples
     """
@@ -113,10 +116,11 @@ class StorePoolOrderService(StoreOrderService):
         self, customer_id: str, order: str, ordered: datetime, ticket_id: str, items: list[dict]
     ) -> list[Pool]:
         """Store pools in the status database."""
+        # Create order
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
-        status_db_order = Order(
+        db_order = Order(
             customer=customer,
             order_date=datetime.now(),
             ticket_id=int(ticket_id),
@@ -128,10 +132,11 @@ class StorePoolOrderService(StoreOrderService):
                 application_version: ApplicationVersion = (
                     self.status_db.get_current_application_version_by_tag(tag=pool["application"])
                 )
+            # Create case
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
             case: Case = self.status_db.get_case_by_name_and_customer(
-                customer=customer, case_name=case_name
+                customer=db_order.customer, case_name=case_name
             )
             if not case:
                 data_analysis: Workflow = Workflow(pool["data_analysis"])
@@ -144,17 +149,18 @@ class StorePoolOrderService(StoreOrderService):
                     priority=priority,
                     ticket=ticket_id,
                 )
-                case.customer = customer
+                case.customer = db_order.customer
                 self.status_db.session.add(case)
-
+            # Create Pool
             new_pool: Pool = self.status_db.add_pool(
                 application_version=application_version,
-                customer=customer,
+                customer=db_order.customer,
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
                 ticket=ticket_id,
             )
+            # Create samples
             sex: SexEnum = SexEnum.unknown
             for sample in pool["samples"]:
                 new_sample = self.status_db.add_sample(
@@ -168,34 +174,84 @@ class StorePoolOrderService(StoreOrderService):
                     original_ticket=ticket_id,
                     priority=priority,
                     application_version=application_version,
-                    customer=customer,
+                    customer=db_order.customer,
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)
+                # Create relationships
                 link: CaseSample = self.status_db.relate_sample(
                     case=case, sample=new_sample, status="unknown"
                 )
                 self.status_db.session.add(link)
-            status_db_order.cases.append(case)
+            db_order.cases.append(case)
             new_pools.append(new_pool)
-        self.status_db.session.add(status_db_order)
+        self.status_db.session.add(db_order)
         self.status_db.session.add_all(new_pools)
         self.status_db.session.commit()
         return new_pools
 
-    def _validate_case_names_are_available(
-        self, customer_id: str, samples: list[RmlSample], ticket: str
-    ):
-        """Validate names of all samples are not already in use."""
+    def _create_db_order(self, order: OrderWithIndexedSamples) -> Order:
+        """Return an Order database object."""
+        ticket_id: int = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=customer_id
+            customer_internal_id=order.customer
         )
-        for sample in samples:
-            case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
-            if self.status_db.get_case_by_name_and_customer(customer=customer, case_name=case_name):
-                raise OrderError(
-                    f"Case name {case_name} already in use for customer {customer.name}"
-                )
+        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+
+    def _create_db_case_for_pool(self, pool: dict, customer: Customer, ticket_id: str) -> Case:
+        """Return a Case database object for a pool."""
+        case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
+        case: Case = self.status_db.get_case_by_name_and_customer(
+            customer=customer, case_name=case_name
+        )
+        if not case:
+            case = self.status_db.add_case(
+                data_analysis=pool["data_analysis"],
+                data_delivery=pool["data_delivery"],
+                name=case_name,
+                priority=pool["priority"],
+                ticket=ticket_id,
+            )
+            case.customer = customer
+        return case
+
+    def _create_pool(self, pool: dict, order_name: str, ticket_id: str, customer: Customer) -> Pool:
+        """Return a Pool database object."""
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(tag=pool["application"])
+        )
+        return self.status_db.add_pool(
+            application_version=application_version,
+            customer=customer,
+            name=pool["name"],
+            order=order_name,
+            ordered=datetime.now(),
+            ticket=ticket_id,
+        )
+
+    def _create_db_sample(
+        self,
+        sample: IndexedSample,
+        order_name: str,
+        ticket_id: str,
+        customer: Customer,
+        application_version: ApplicationVersion,
+    ) -> Sample:
+        """Return a Sample database object."""
+        return self.status_db.add_sample(
+            name=sample.name,
+            customer=customer,
+            application_version=application_version,
+            sex=SexEnum.unknown,
+            comment=sample.comment,
+            control=sample.control,
+            internal_id=sample._generated_lims_id,
+            order=order_name,
+            ordered=datetime.now(),
+            original_ticket=ticket_id,
+            priority=sample.priority,
+            no_invoice=True,
+        )
 
     @staticmethod
     def create_case_name(ticket: str, pool_name: str) -> str:
