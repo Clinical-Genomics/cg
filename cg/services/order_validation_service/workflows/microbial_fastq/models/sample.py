@@ -12,5 +12,4 @@ class MicrobialFastqSample(Sample):
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     priority: PriorityEnum
     quantity: int | None = None
-    require_qc_ok: bool
     volume: int
