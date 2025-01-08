@@ -4,7 +4,9 @@ import pytest
 
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.order import OrderIn, OrderType
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
+from cg.services.orders.store_order_services.instantiations.store_pool_order import (
+    StorePoolOrderService,
+)
 from cg.store.models import Case, Pool, Sample
 from cg.store.store import Store
 

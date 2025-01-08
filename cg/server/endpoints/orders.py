@@ -156,6 +156,7 @@ def submit_order(order_type: OrderType):
         status=db,
         ticket_handler=ticket_handler,
         submitter_registry=order_submitter_registry,
+        validation_service=order_validation_service,
     )
     error_message: str
     try:

@@ -2,8 +2,8 @@ from cg.exc import OrderError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.services.orders.submitters.order_submitter import ValidateOrderService
-from cg.store.models import Sample, Customer
+from cg.services.orders.store_order_services.store_order_service import ValidateOrderService
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 

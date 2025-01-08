@@ -7,7 +7,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Pool, Sample
 from cg.store.store import Store
 

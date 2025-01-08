@@ -8,7 +8,7 @@ from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 

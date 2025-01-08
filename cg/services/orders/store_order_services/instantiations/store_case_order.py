@@ -9,7 +9,7 @@ from cg.services.order_validation_service.models.order_with_cases import OrderWi
 from cg.services.order_validation_service.models.sample_aliases import SampleInCase
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer

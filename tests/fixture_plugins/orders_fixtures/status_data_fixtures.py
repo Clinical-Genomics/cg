@@ -9,11 +9,15 @@ from cg.services.order_validation_service.workflows.metagenome.models.order impo
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
-from cg.services.orders.store_order_services.store_metagenome_order import (
+from cg.services.orders.store_order_services.instantiations.store_case_order import (
+    StoreCaseOrderService,
+)
+from cg.services.orders.store_order_services.instantiations.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
+from cg.services.orders.store_order_services.instantiations.store_pool_order import (
+    StorePoolOrderService,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 

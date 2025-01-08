@@ -4,7 +4,9 @@ from cg.constants import DataDelivery, Priority, Workflow
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
+from cg.services.orders.store_order_services.instantiations.store_case_order import (
+    StoreCaseOrderService,
+)
 from cg.store.models import Sample
 from cg.store.store import Store
 
