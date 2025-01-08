@@ -54,16 +54,6 @@ def microbial_status_data(
 
 
 @pytest.fixture
-def rml_status_data(
-    rml_order_to_submit: dict, store_pool_order_service: StorePoolOrderService
-) -> dict:
-    """Parse rml order example."""
-    project: OrderType = OrderType.RML
-    order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
-    return store_pool_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
 def fake_ticket_id() -> int:
     return 123456
 
@@ -77,9 +67,9 @@ def valid_rml_order(rml_order_to_submit: dict, fake_ticket_id: int) -> RmlOrder:
 
 
 @pytest.fixture
-def valid_fluffy_order(rml_order_to_submit: dict, fake_ticket_id: int) -> FluffyOrder:
+def valid_fluffy_order(fluffy_order_to_submit: dict, fake_ticket_id: int) -> FluffyOrder:
     """Parse rml order example."""
-    fluffy_order = FluffyOrder.model_validate(rml_order_to_submit)
+    fluffy_order = FluffyOrder.model_validate(fluffy_order_to_submit)
     fluffy_order._generated_ticket_id = fake_ticket_id
     return fluffy_order
 

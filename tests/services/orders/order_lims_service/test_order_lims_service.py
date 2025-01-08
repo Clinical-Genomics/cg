@@ -69,9 +69,9 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
 
 @pytest.mark.xfail(reason="RML sample container validation not working")
-def test_to_lims_rml(rml_order_to_submit: dict):
-    # GIVEN a rml order for four samples
-    order_data = RmlOrder.model_validate(rml_order_to_submit)
+def test_to_lims_fluffy(fluffy_order_to_submit: dict):
+    # GIVEN a Fluffy order for four samples
+    order_data = RmlOrder.model_validate(fluffy_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(

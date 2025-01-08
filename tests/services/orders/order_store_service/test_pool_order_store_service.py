@@ -1,26 +1,30 @@
-import datetime as dt
-
 import pytest
 
-from cg.constants import DataDelivery, Workflow
+from cg.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.models.orders.order import OrderType
-from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
-from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
+from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Order, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.mark.parametrize(
+    "order_fixture, workflow",
+    [("valid_rml_order", Workflow.RAW_DATA), ("valid_fluffy_order", Workflow.FLUFFY)],
+    ids=["RML", "Fluffy"],
+)
 def test_store_fluffy(
     store_with_rml_applications: Store,
-    valid_fluffy_order: FluffyOrder,
+    order_fixture: str,
     ticket_id: str,
     store_pool_order_service: StorePoolOrderService,
+    workflow: Workflow,
     helpers: StoreHelpers,
+    request: pytest.FixtureRequest,
 ):
-    # GIVEN a valid Fluffy order
+    # GIVEN a valid Fluffy or RML order
+    order: OrderWithIndexedSamples = request.getfixturevalue(order_fixture)
 
     # GIVEN a store with no samples, pools, cases nor orders
     assert store_with_rml_applications._get_query(table=Sample).count() == 0
@@ -38,9 +42,7 @@ def test_store_fluffy(
         assert app.application.prep_category == SeqLibraryPrepCategory.READY_MADE_LIBRARY
 
     # WHEN storing the order
-    new_pools: list[Pool] = store_pool_order_service.store_order_data_in_status_db(
-        order=valid_fluffy_order
-    )
+    new_pools: list[Pool] = store_pool_order_service.store_order_data_in_status_db(order=order)
 
     # THEN it should return the pools
     assert len(new_pools) == 4
@@ -74,4 +76,4 @@ def test_store_fluffy(
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:
-        assert case.data_analysis == Workflow.FLUFFY
+        assert case.data_analysis == workflow
