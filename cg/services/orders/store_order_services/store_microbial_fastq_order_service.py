@@ -32,7 +32,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
-        return {"records": new_samples, "project_data": project_data}
+        return {"records": new_samples, "project": project_data}
 
     def store_order_data_in_status_db(self, order: MicrobialFastqOrder) -> list[Sample]:
         """
