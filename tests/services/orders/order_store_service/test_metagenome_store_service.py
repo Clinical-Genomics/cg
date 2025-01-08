@@ -1,7 +1,4 @@
-import datetime as dt
-import pytest
-from cg.exc import OrderError
-from cg.models.orders.order import OrderIn, OrderType
+from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
@@ -9,43 +6,18 @@ from cg.store.models import Sample
 from cg.store.store import Store
 
 
-def test_metagenome_to_status(
-    metagenome_order_to_submit: dict, store_metagenome_order_service: StoreMetagenomeOrderService
-):
-    # GIVEN metagenome order with two samples
-    order = OrderIn.parse_obj(metagenome_order_to_submit, OrderType.METAGENOME)
-
-    # WHEN parsing for status
-    data = store_metagenome_order_service.order_to_status(order=order)
-    case = data["families"][0]
-    # THEN it should pick out samples and relevant information
-    assert len(case["samples"]) == 2
-    first_sample = case["samples"][0]
-    assert first_sample["name"] == "Bristol"
-    assert first_sample["application"] == "METLIFR020"
-    assert first_sample["priority"] == "standard"
-    assert first_sample["volume"] == "1.0"
-
-
-def test_store_metagenome_samples_bad_apptag(
+def test_store_metagenome_samples(
     base_store: Store,
-    metagenome_status_data: dict,
+    metagenome_order: MetagenomeOrder,
     ticket_id: str,
     store_metagenome_order_service: StoreMetagenomeOrderService,
 ):
-    # GIVEN a basic store with no samples and a metagenome order
-    assert not base_store._get_query(table=Sample).first()
+    # GIVEN a basic store with no samples and a valid metagenome order with two samples
 
-    for sample in metagenome_status_data["families"][0]["samples"]:
-        sample["application"] = "nonexistingtag"
+    # WHEN storing the order
+    response: list[Sample] = store_metagenome_order_service.store_order_data_in_status_db(
+        metagenome_order
+    )
 
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        store_metagenome_order_service.store_items_in_status(
-            customer_id=metagenome_status_data["customer"],
-            order=metagenome_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket_id=ticket_id,
-            items=metagenome_status_data["families"],
-        )
+    # THEN the response should contain the two samples
+    assert len(response) == 2

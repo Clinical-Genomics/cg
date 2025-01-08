@@ -2,8 +2,10 @@ import pytest
 
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
@@ -27,14 +29,16 @@ def balsamic_status_data(
 
 
 @pytest.fixture
-def metagenome_status_data(
+def metagenome_order(
     metagenome_order_to_submit: dict, store_metagenome_order_service: StoreMetagenomeOrderService
-) -> dict:
+) -> MetagenomeOrder:
     """Parse metagenome order example."""
-    project: OrderType = OrderType.METAGENOME
-    order: OrderIn = OrderIn.parse_obj(obj=metagenome_order_to_submit, project=project)
-
-    return store_metagenome_order_service.order_to_status(order=order)
+    order_validation_service = OrderValidationService(store_metagenome_order_service.status_db)
+    order: MetagenomeOrder = order_validation_service.parse_and_validate(
+        raw_order=metagenome_order_to_submit, order_type=OrderType.METAGENOME
+    )
+    order._generated_ticket_id = 123456
+    return order
 
 
 @pytest.fixture
