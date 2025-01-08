@@ -153,9 +153,8 @@ def submit_order(order_type: OrderType):
     """Submit an order for samples."""
     api = OrdersAPI(
         lims=lims,
-        status=db,
         ticket_handler=ticket_handler,
-        submitter_registry=order_submitter_registry,
+        storing_registry=order_submitter_registry,
         validation_service=order_validation_service,
     )
     error_message: str

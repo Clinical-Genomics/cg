@@ -28,13 +28,13 @@ class OrdersAPI:
         self,
         lims: LimsAPI,
         ticket_handler: TicketHandler,
-        submitter_registry: StoringServiceRegistry,
+        storing_registry: StoringServiceRegistry,
         validation_service: OrderValidationService,
     ):
         super().__init__()
         self.lims = lims
         self.ticket_handler = ticket_handler
-        self.submitter_registry = submitter_registry
+        self.storing_registry = storing_registry
         self.validation_service = validation_service
 
     def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
@@ -42,7 +42,7 @@ class OrdersAPI:
 
         Main entry point for the class towards interfaces that implements it.
         """
-        storing_service: StoreOrderService = self.submitter_registry.get_storing_service(order_type)
+        storing_service: StoreOrderService = self.storing_registry.get_storing_service(order_type)
         order: Order = self.validation_service.parse_and_validate(
             raw_order=raw_order, order_type=order_type
         )

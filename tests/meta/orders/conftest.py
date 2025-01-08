@@ -6,7 +6,7 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.store_order_services.storing_service_registry import (
     StoringServiceRegistry,
-    setup_order_submitter_registry,
+    setup_storing_service_registry,
 )
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
@@ -27,13 +27,13 @@ def orders_api(
     base_store: Store,
     ticket_handler: TicketHandler,
     lims_api: MockLimsAPI,
-    order_submitter_registry: StoringServiceRegistry,
+    storing_service_registry: StoringServiceRegistry,
     order_validation_service: OrderValidationService,
 ) -> OrdersAPI:
     return OrdersAPI(
         lims=lims_api,
         ticket_handler=ticket_handler,
-        submitter_registry=order_submitter_registry,
+        storing_registry=storing_service_registry,
         validation_service=order_validation_service,
     )
 
@@ -44,5 +44,5 @@ def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHan
 
 
 @pytest.fixture
-def order_submitter_registry(base_store: Store, lims_api: MockLimsAPI) -> StoringServiceRegistry:
-    return setup_order_submitter_registry(lims=lims_api, status_db=base_store)
+def storing_service_registry(base_store: Store, lims_api: MockLimsAPI) -> StoringServiceRegistry:
+    return setup_storing_service_registry(lims=lims_api, status_db=base_store)

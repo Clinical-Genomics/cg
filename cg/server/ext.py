@@ -17,7 +17,7 @@ from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.store_order_services.storing_service_registry import (
     StoringServiceRegistry,
-    setup_order_submitter_registry,
+    setup_storing_service_registry,
 )
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
@@ -93,7 +93,7 @@ summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
 flow_cell_service = SampleRunMetricsService(db)
-order_submitter_registry: StoringServiceRegistry = setup_order_submitter_registry(
+order_submitter_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,
     status_db=db,
 )
