@@ -7,6 +7,7 @@ from cg.services.order_validation_service.workflows.balsamic.models.order import
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
 from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
+from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
@@ -14,7 +15,6 @@ from cg.services.orders.store_order_services.store_case_order import StoreCaseOr
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.store_microbial_order import StoreMicrobialOrderService
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -34,16 +34,6 @@ def metagenome_order(
 
 
 @pytest.fixture
-def microbial_status_data(
-    microbial_order_to_submit: dict, store_microbial_order_service: StoreMicrobialOrderService
-) -> dict:
-    """Parse microbial order example."""
-    project: OrderType = OrderType.MICROSALT
-    order: OrderIn = OrderIn.parse_obj(obj=microbial_order_to_submit, project=project)
-    return store_microbial_order_service.order_to_status(order=order)
-
-
-@pytest.fixture
 def valid_rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrder:
     """Parse rml order example."""
     rml_order = RmlOrder.model_validate(rml_order_to_submit)
@@ -53,7 +43,7 @@ def valid_rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrde
 
 @pytest.fixture
 def valid_fluffy_order(fluffy_order_to_submit: dict, ticket_id_as_int: int) -> FluffyOrder:
-    """Parse rml order example."""
+    """Parse Fluffy order example."""
     fluffy_order = FluffyOrder.model_validate(fluffy_order_to_submit)
     fluffy_order._generated_ticket_id = ticket_id_as_int
     return fluffy_order
@@ -122,3 +112,10 @@ def balsamic_submit_store(
             base_store.session.add(application_version)
     base_store.session.commit()
     return base_store
+
+
+@pytest.fixture
+def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
+    order = MicrosaltOrder.model_validate(microbial_order_to_submit)
+    order._generated_ticket_id = 123456
+    return order

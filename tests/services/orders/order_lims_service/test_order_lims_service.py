@@ -111,10 +111,7 @@ def test_to_lims_microbial(microbial_order_to_submit: dict):
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["organism"] == "C. jejuni"
     assert first_sample["udfs"]["reference_genome"] == "NC_000001"
-    assert (
-        first_sample["udfs"]["extraction_method"] == "MagNaPure 96 (contact Clinical Genomics "
-        "before submission)"
-    )
+    assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
     assert first_sample["udfs"]["volume"] == "20"
 
 

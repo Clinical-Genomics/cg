@@ -4,7 +4,7 @@
 	"customer": "cust000",
 	"data_analysis": null,
 	"data_delivery": null,
-	"delivery_type": "fastq",
+	"delivery_type": "fastq-analysis",
 	"name": "2184.9.sarscov2",
 	"project_type": "sars-cov-2",
 	"samples": [
@@ -320,7 +320,7 @@
 			"data_analysis": "Mutant",
 			"data_delivery": "fastq",
 			"elution_buffer": "Tris-HCl",
-			"extraction_method": "MagNaPure 97",
+			"extraction_method": "MagNaPure 96",
 			"family_name": null,
 			"father": null,
 			"formalin_fixation_time": null,
