@@ -61,7 +61,7 @@ class StoreMicrobialOrderService(StoreOrderService):
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
 
-        with self.status.session.no_autoflush:
+        with self.status.no_autoflush_context():
             for sample in order.samples:
                 organism: Organism = self._ensure_organism(sample)
                 db_sample = self._create_db_sample(
