@@ -20,6 +20,7 @@ class RmlOrder(OrderWithSamples):
         for sample in self.samples:
             if sample.pool not in pools:
                 pool: dict = {
+                    "name": sample.pool,
                     "application": sample.application,
                     "data_analysis": Workflow.RAW_DATA,
                     "data_delivery": self.delivery_type,

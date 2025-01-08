@@ -5,9 +5,11 @@ from cg.models.orders.order import OrderIn
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
 from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
+from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
@@ -59,6 +61,27 @@ def rml_status_data(
     project: OrderType = OrderType.RML
     order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
     return store_pool_order_service.order_to_status(order=order)
+
+
+@pytest.fixture
+def fake_ticket_id() -> int:
+    return 123456
+
+
+@pytest.fixture
+def valid_rml_order(rml_order_to_submit: dict, fake_ticket_id: int) -> RmlOrder:
+    """Parse rml order example."""
+    rml_order = RmlOrder.model_validate(rml_order_to_submit)
+    rml_order._generated_ticket_id = fake_ticket_id
+    return rml_order
+
+
+@pytest.fixture
+def valid_fluffy_order(rml_order_to_submit: dict, fake_ticket_id: int) -> FluffyOrder:
+    """Parse rml order example."""
+    fluffy_order = FluffyOrder.model_validate(rml_order_to_submit)
+    fluffy_order._generated_ticket_id = fake_ticket_id
+    return fluffy_order
 
 
 @pytest.fixture
