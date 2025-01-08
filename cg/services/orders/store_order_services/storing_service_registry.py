@@ -35,13 +35,13 @@ class StoringServiceRegistry:
         self._registry = {}
 
     def register(self, order_type: OrderType, storing_service: StoreOrderService):
-        """Register an OrderSubmitter instance for a given OrderType."""
+        """Register a StoreOrderService instance for a given OrderType."""
         self._registry[order_type] = storing_service
 
     def get_storing_service(self, order_type: OrderType) -> StoreOrderService:
         """Fetch the registered StoreOrderService for the given OrderType."""
-        if order_submitter := self._registry.get(order_type):
-            return order_submitter
+        if storing_service := self._registry.get(order_type):
+            return storing_service
         raise ValueError(f"No StoreOrderService registered for order type: {order_type}")
 
 
@@ -122,7 +122,7 @@ def build_storing_service(
 
 
 def setup_storing_service_registry(lims: LimsAPI, status_db: Store) -> StoringServiceRegistry:
-    """Set up the StoringServiceRegistry with all OrderSubmitter instances."""
+    """Set up the StoringServiceRegistry with all StoreOrderService instances."""
     registry = StoringServiceRegistry()
     for order_type in order_service_mapping.keys():
         registry.register(
