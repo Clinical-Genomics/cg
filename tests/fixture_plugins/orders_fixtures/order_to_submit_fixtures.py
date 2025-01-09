@@ -30,7 +30,7 @@ def fastq_order_to_submit(cgweb_orders_dir) -> dict:
 
 @pytest.fixture(scope="session")
 def fluffy_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RML order."""
+    """Load an example Fluffy order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fluffy.json")
     )
