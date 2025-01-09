@@ -1,13 +1,11 @@
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.orders.orders_response import Order as OrderResponse, Order
+from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
-from cg.services.orders.order_summary_service.order_summary_service import (
-    OrderSummaryService,
-)
-from cg.store.store import Store
+from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.store.models import Order as DatabaseOrder
+from cg.store.store import Store
 
 
 class OrderService:
@@ -16,7 +14,7 @@ class OrderService:
         self.summary_service = status_service
 
     def get_order(self, order_id: int) -> OrderResponse:
-        order: Order = self.store.get_order_by_id(order_id)
+        order: DatabaseOrder = self.store.get_order_by_id(order_id)
         summary: OrderSummary = self.summary_service.get_summary(order_id)
         return self._create_order_response(order=order, summary=summary)
 
@@ -30,12 +28,12 @@ class OrderService:
         return self._create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
     def set_open(self, order_id: int, open: bool) -> OrderResponse:
-        order: Order = self.store.update_order_status(order_id=order_id, open=open)
+        order: DatabaseOrder = self.store.update_order_status(order_id=order_id, open=open)
         return self._create_order_response(order)
 
     def update_is_open(self, order_id: int, delivered_analyses: int) -> None:
         """Update the is_open parameter of an order based on the number of delivered analyses."""
-        order: Order = self.store.get_order_by_id(order_id)
+        order: DatabaseOrder = self.store.get_order_by_id(order_id)
         case_count: int = len(order.cases)
         if self._is_order_closed(case_count=case_count, delivered_analyses=delivered_analyses):
             self.set_open(order_id=order_id, open=False)
@@ -55,8 +53,10 @@ class OrderService:
         )
 
     @staticmethod
-    def _create_order_response(order: DatabaseOrder, summary: OrderSummary | None = None) -> Order:
-        return Order(
+    def _create_order_response(
+        order: DatabaseOrder, summary: OrderSummary | None = None
+    ) -> OrderResponse:
+        return OrderResponse(
             customer_id=order.customer.internal_id,
             ticket_id=order.ticket_id,
             order_date=str(order.order_date.date()),
@@ -69,12 +69,14 @@ class OrderService:
     def _create_orders_response(
         self, orders: list[DatabaseOrder], summaries: list[OrderSummary], total: int
     ) -> OrdersResponse:
-        orders: list[Order] = [self._create_order_response(order) for order in orders]
+        orders: list[OrderResponse] = [self._create_order_response(order) for order in orders]
         self._add_summaries(orders=orders, summaries=summaries)
         return OrdersResponse(orders=orders, total_count=total)
 
     @staticmethod
-    def _add_summaries(orders: list[Order], summaries: list[OrderSummary]) -> list[Order]:
+    def _add_summaries(
+        orders: list[OrderResponse], summaries: list[OrderSummary]
+    ) -> list[OrderResponse]:
         order_map = {order.id: order for order in orders}
         for summary in summaries:
             order = order_map[summary.order_id]

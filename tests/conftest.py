@@ -122,6 +122,7 @@ pytest_plugins = [
     "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
     "tests.fixture_plugins.orders_fixtures.orders_fixtures",
     "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
+    "tests.fixture_plugins.orders_fixtures.store_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.dto_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.file_data_fixtures",
@@ -657,9 +658,14 @@ def madeline_api(madeline_output: Path) -> MockMadelineAPI:
 
 
 @pytest.fixture(scope="session")
-def ticket_id() -> str:
+def ticket_id_as_int() -> int:
+    return 123456
+
+
+@pytest.fixture(scope="session")
+def ticket_id(ticket_id_as_int: int) -> str:
     """Return a ticket number for testing."""
-    return "123456"
+    return str(ticket_id_as_int)
 
 
 @pytest.fixture
@@ -2186,6 +2192,7 @@ def context_config(
             "host": "https://trailblazer.scilifelab.se/",
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
+            "google_client_id": "client_id",
         },
         "arnold": {"api_url": "https://arnold.scilifelab.se/"},
         "janus": {"host": "https://janus.sys.scilifelab.se/"},
