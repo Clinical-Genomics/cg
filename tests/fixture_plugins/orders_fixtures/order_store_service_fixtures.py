@@ -2,25 +2,25 @@ import pytest
 
 from cg.models.orders.constants import OrderType
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.store_order_services.instantiations.store_case_order import (
+from cg.services.orders.store_order_services.implementations.store_case_order import (
     StoreCaseOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_fastq_order_service import (
+from cg.services.orders.store_order_services.implementations.store_fastq_order_service import (
     StoreFastqOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_metagenome_order import (
+from cg.services.orders.store_order_services.implementations.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_microbial_fastq_order_service import (
+from cg.services.orders.store_order_services.implementations.store_microbial_fastq_order_service import (
     StoreMicrobialFastqOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_microbial_order import (
+from cg.services.orders.store_order_services.implementations.store_microbial_order import (
     StoreMicrobialOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_pacbio_order_service import (
+from cg.services.orders.store_order_services.implementations.store_pacbio_order_service import (
     StorePacBioOrderService,
 )
-from cg.services.orders.store_order_services.instantiations.store_pool_order import (
+from cg.services.orders.store_order_services.implementations.store_pool_order import (
     StorePoolOrderService,
 )
 from cg.store.models import Application

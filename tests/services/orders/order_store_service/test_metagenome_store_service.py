@@ -1,5 +1,5 @@
 from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
-from cg.services.orders.store_order_services.instantiations.store_metagenome_order import (
+from cg.services.orders.store_order_services.implementations.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
 from cg.store.models import Sample

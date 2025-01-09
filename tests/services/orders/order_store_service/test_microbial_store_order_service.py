@@ -4,7 +4,7 @@ from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.store_order_services.instantiations.store_microbial_order import (
+from cg.services.orders.store_order_services.implementations.store_microbial_order import (
     StoreMicrobialOrderService,
 )
 from cg.store.models import Case, Customer, Sample

@@ -12,7 +12,7 @@ from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
-from cg.services.orders.store_order_services.instantiations.store_pool_order import (
+from cg.services.orders.store_order_services.implementations.store_pool_order import (
     StorePoolOrderService,
 )
 from cg.store.models import Analysis, Application, Case, CaseSample, IlluminaFlowCell, Sample
