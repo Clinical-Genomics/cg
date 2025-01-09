@@ -7,6 +7,7 @@ from cg.services.order_validation_service.utils import parse_control
 
 
 class RmlSample(Sample):
+    container: None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     index: str
     index_number: int
