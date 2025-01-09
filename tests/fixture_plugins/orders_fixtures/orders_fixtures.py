@@ -3,7 +3,6 @@ import pytest
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum, SexEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
-from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.microbial_fastq.constants import (
     MicrobialFastqDeliveryType,
 )
@@ -58,13 +57,6 @@ def valid_pacbio_order(ticket_id: str) -> PacbioOrder:
     )
     order._generated_ticket_id = int(ticket_id)
     return order
-
-
-@pytest.fixture
-def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
-    fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
-    fastq_order._generated_ticket_id = 123456
-    return fastq_order
 
 
 def create_microbial_fastq_sample(id: int) -> MicrobialFastqSample:
