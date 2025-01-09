@@ -1,4 +1,4 @@
-from cg.constants import DataDelivery, Workflow
+from cg.constants import Workflow
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.workflows.fluffy.constants import FluffyDeliveryType
 from cg.services.order_validation_service.workflows.fluffy.models.sample import FluffySample
