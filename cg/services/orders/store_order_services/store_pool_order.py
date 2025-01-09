@@ -45,7 +45,7 @@ class StorePoolOrderService(StoreOrderService):
         db_order: Order = self._create_db_order(order=order)
         new_pools: list[Pool] = []
         with self.status_db.no_autoflush_context():
-            for pool in order.pools.values():
+            for pool in order.pools.items():
                 db_case: Case = self._create_db_case_for_pool(
                     order=order,
                     pool=pool,
@@ -58,7 +58,7 @@ class StorePoolOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
-                for sample in pool["samples"]:
+                for sample in pool[1]:
                     db_sample: Sample = self._create_db_sample(
                         sample=sample,
                         order_name=order.name,
@@ -81,24 +81,26 @@ class StorePoolOrderService(StoreOrderService):
     def create_case_name(ticket: str, pool_name: str) -> str:
         return f"{ticket}-{pool_name}"
 
-    def _get_application_version_from_pool(self, pool: dict) -> ApplicationVersion:
+    def _get_application_version_from_pool_samples(
+        self, pool_samples: list[IndexedSample]
+    ) -> ApplicationVersion:
         """
         Return the application version for a pool by taking the app tag of the first sample of
         the pool. The validation guarantees that all samples in a pool have the same application.
         """
-        app_tag: str = pool["samples"][0].application
+        app_tag: str = pool_samples[0].application
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=app_tag)
         )
         return application_version
 
     @staticmethod
-    def _get_priority_from_pool(pool: dict) -> PriorityEnum:
+    def _get_priority_from_pool_samples(pool_samples: list[IndexedSample]) -> PriorityEnum:
         """
         Return the priority of the pool by taking the priority of the first sample of the pool.
         The validation guarantees that all samples in a pool have the same priority.
         """
-        return pool["samples"][0].priority
+        return pool_samples[0].priority
 
     def _create_db_order(self, order: OrderWithIndexedSamples) -> Order:
         """Return an Order database object."""
@@ -111,31 +113,37 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_case_for_pool(
         self,
         order: OrderWithIndexedSamples,
-        pool: dict,
+        pool: tuple[str, list[IndexedSample]],
         customer: Customer,
         ticket_id: str,
     ) -> Case:
         """Return a Case database object for a pool."""
-        case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
+        case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool[0])
         case = self.status_db.add_case(
             data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             data_delivery=order.delivery_type,
             name=case_name,
-            priority=self._get_priority_from_pool(pool=pool),
+            priority=self._get_priority_from_pool_samples(pool_samples=pool[1]),
             ticket=ticket_id,
         )
         case.customer = customer
         return case
 
     def _create_db_pool(
-        self, pool: dict, order_name: str, ticket_id: str, customer: Customer
+        self,
+        pool: tuple[str, list[IndexedSample]],
+        order_name: str,
+        ticket_id: str,
+        customer: Customer,
     ) -> Pool:
         """Return a Pool database object."""
-        application_version: ApplicationVersion = self._get_application_version_from_pool(pool)
+        application_version: ApplicationVersion = self._get_application_version_from_pool_samples(
+            pool_samples=pool[1]
+        )
         return self.status_db.add_pool(
             application_version=application_version,
             customer=customer,
-            name=pool["name"],
+            name=pool[0],
             order=order_name,
             ordered=datetime.now(),
             ticket=ticket_id,

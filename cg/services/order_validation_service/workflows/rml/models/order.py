@@ -13,17 +13,12 @@ class RmlOrder(OrderWithSamples):
         return enumerate(self.samples)
 
     @property
-    def pools(self) -> dict[str, dict]:
-        """Return a dictionary representation of the order pools, where the dictionary key is the
-        pool name and the values are relevant pool attributes."""
-        pools: dict[str, dict] = {}
+    def pools(self) -> dict[str, list[RmlSample]]:
+        """Return a dictionary matching pool names and their respective samples."""
+        pools: dict[str, list[RmlSample]] = {}
         for sample in self.samples:
             if sample.pool not in pools:
-                pool: dict = {
-                    "name": sample.pool,
-                    "samples": [sample],
-                }
-                pools[sample.pool] = pool
+                pools[sample.pool] = [sample]
             else:
-                pools[sample.pool]["samples"].append(sample)
+                pools[sample.pool].append(sample)
         return pools
