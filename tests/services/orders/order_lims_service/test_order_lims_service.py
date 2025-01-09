@@ -12,9 +12,9 @@ from cg.services.order_validation_service.workflows.rml.models.order import RmlO
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 
 
-def test_to_lims_mip(mip_order_to_submit):
+def test_to_lims_mip(mip_dna_order_to_submit):
     # GIVEN a scout order for a trio
-    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
+    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     # WHEN parsing the order to format for LIMS import
     new_samples = [sample for _, _, sample in order_data.enumerated_new_samples]
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(

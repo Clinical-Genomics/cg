@@ -376,7 +376,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
 @pytest.mark.xfail(reason="Change in order validation")
 def test_submit_unique_sample_case_name(
     orders_api: OrdersAPI,
-    mip_order_to_submit: dict,
+    mip_dna_order_to_submit: dict,
     user_name: str,
     user_mail: str,
     monkeypatch: pytest.MonkeyPatch,
@@ -391,7 +391,7 @@ def test_submit_unique_sample_case_name(
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN we have an order with a case that is not existing in the database
-        order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
+        order_data = OrderIn.parse_obj(obj=mip_dna_order_to_submit, project=OrderType.MIP_DNA)
 
         store = orders_api.status
 
@@ -417,10 +417,10 @@ def test_submit_unique_sample_case_name(
 
 
 def test_validate_sex_inconsistent_sex(
-    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
 ):
     # GIVEN we have an order with a sample that is already in the database but with different sex
-    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
+    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
@@ -447,10 +447,10 @@ def test_validate_sex_inconsistent_sex(
 
 
 def test_validate_sex_consistent_sex(
-    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
 ):
     # GIVEN we have an order with a sample that is already in the database and with same gender
-    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
+    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
@@ -477,11 +477,11 @@ def test_validate_sex_consistent_sex(
 
 
 def test_validate_sex_unknown_existing_sex(
-    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
 ):
     # GIVEN we have an order with a sample that is already in the database and with different gender but the existing is
     # of type "unknown"
-    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
+    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
@@ -508,11 +508,11 @@ def test_validate_sex_unknown_existing_sex(
 
 
 def test_validate_sex_unknown_new_sex(
-    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
 ):
     # GIVEN we have an order with a sample that is already in the database and with different gender but the new is of
     # type "unknown"
-    order_data = MipDnaOrder.model_validate(mip_order_to_submit)
+    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     store = orders_api.status
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
