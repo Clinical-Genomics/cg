@@ -1,4 +1,3 @@
-from cg.constants import Workflow
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.workflows.fluffy.constants import FluffyDeliveryType
 from cg.services.order_validation_service.workflows.fluffy.models.sample import FluffySample
@@ -21,10 +20,6 @@ class FluffyOrder(OrderWithSamples):
             if sample.pool not in pools:
                 pool: dict = {
                     "name": sample.pool,
-                    "application": sample.application,
-                    "data_analysis": Workflow.FLUFFY,
-                    "data_delivery": self.delivery_type,
-                    "priority": sample.priority,
                     "samples": [sample],
                 }
                 pools[sample.pool] = pool

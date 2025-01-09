@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from cg.models.orders.sample_base import SexEnum, StatusEnum
+from cg.models.orders.sample_base import PriorityEnum, SexEnum, StatusEnum
 from cg.services.order_validation_service.models.sample_aliases import (
     IndexedSample,
     OrderWithIndexedSamples,
@@ -47,7 +47,10 @@ class StorePoolOrderService(StoreOrderService):
         with self.status_db.no_autoflush_context():
             for pool in order.pools.values():
                 db_case: Case = self._create_db_case_for_pool(
-                    pool=pool, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
+                    order=order,
+                    pool=pool,
+                    customer=db_order.customer,
+                    ticket_id=str(db_order.ticket_id),
                 )
                 db_pool: Pool = self._create_db_pool(
                     pool=pool,
@@ -78,6 +81,25 @@ class StorePoolOrderService(StoreOrderService):
     def create_case_name(ticket: str, pool_name: str) -> str:
         return f"{ticket}-{pool_name}"
 
+    def _get_application_version_from_pool(self, pool: dict) -> ApplicationVersion:
+        """
+        Return the application version for a pool by taking the app tag of the first sample of
+        the pool. The validation guarantees that all samples in a pool have the same application.
+        """
+        app_tag: str = pool["samples"][0].application
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(tag=app_tag)
+        )
+        return application_version
+
+    @staticmethod
+    def _get_priority_from_pool(pool: dict) -> PriorityEnum:
+        """
+        Return the priority of the pool by taking the priority of the first sample of the pool.
+        The validation guarantees that all samples in a pool have the same priority.
+        """
+        return pool["samples"][0].priority
+
     def _create_db_order(self, order: OrderWithIndexedSamples) -> Order:
         """Return an Order database object."""
         ticket_id: int = order._generated_ticket_id
@@ -86,14 +108,20 @@ class StorePoolOrderService(StoreOrderService):
         )
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
-    def _create_db_case_for_pool(self, pool: dict, customer: Customer, ticket_id: str) -> Case:
+    def _create_db_case_for_pool(
+        self,
+        order: OrderWithIndexedSamples,
+        pool: dict,
+        customer: Customer,
+        ticket_id: str,
+    ) -> Case:
         """Return a Case database object for a pool."""
         case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
         case = self.status_db.add_case(
-            data_analysis=pool["data_analysis"],
-            data_delivery=pool["data_delivery"],
+            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_delivery=order.delivery_type,
             name=case_name,
-            priority=pool["priority"],
+            priority=self._get_priority_from_pool(pool=pool),
             ticket=ticket_id,
         )
         case.customer = customer
@@ -103,9 +131,7 @@ class StorePoolOrderService(StoreOrderService):
         self, pool: dict, order_name: str, ticket_id: str, customer: Customer
     ) -> Pool:
         """Return a Pool database object."""
-        application_version: ApplicationVersion = (
-            self.status_db.get_current_application_version_by_tag(tag=pool["application"])
-        )
+        application_version: ApplicationVersion = self._get_application_version_from_pool(pool)
         return self.status_db.add_pool(
             application_version=application_version,
             customer=customer,
