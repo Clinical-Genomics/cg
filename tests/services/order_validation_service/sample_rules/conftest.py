@@ -122,7 +122,6 @@ def valid_fastq_order() -> FastqOrder:
 def create_rml_sample(id: int) -> RmlSample:
     return RmlSample(
         application="RMLCUSR800",
-        container=ContainerEnum.plate,
         index_number=4,
         index="Kapa UDI NIPT",
         rml_plate_name="Rml-plate",
