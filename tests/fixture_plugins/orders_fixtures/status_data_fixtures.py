@@ -1,7 +1,6 @@
 import pytest
 
 from cg.models.orders.constants import OrderType
-from cg.models.orders.order import OrderIn
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
@@ -11,11 +10,9 @@ from cg.services.order_validation_service.workflows.microsalt.models.order impor
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
-from cg.services.orders.store_order_services.store_case_order import StoreCaseOrderService
 from cg.services.orders.store_order_services.store_metagenome_order import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 

@@ -4,6 +4,7 @@ from cg.constants import Workflow
 from cg.models.lims.sample import LimsSample
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
@@ -68,14 +69,13 @@ def test_to_lims_fastq(fastq_order_to_submit):
     assert normal_sample.udfs.volume == "54"
 
 
-@pytest.mark.xfail(reason="RML sample container validation not working")
-def test_to_lims_fluffy(fluffy_order_to_submit: dict):
-    # GIVEN a Fluffy order for four samples
-    order_data = RmlOrder.model_validate(fluffy_order_to_submit)
+def test_to_lims_rml(rml_order_to_submit: dict):
+    # GIVEN a rml order for four samples
+    order_data = RmlOrder.model_validate(rml_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
-        customer="dummyCust",
+        customer="cust000",
         samples=order_data.samples,
         workflow=Workflow.RAW_DATA,
         delivery_type=order_data.delivery_type,
@@ -83,13 +83,40 @@ def test_to_lims_fluffy(fluffy_order_to_submit: dict):
 
     # THEN it should have found the same number of samples
     assert len(samples) == 4
-    # ... and pick out relevant UDFs
+
+    # THEN the relevant UDFs are parsed
     first_sample = samples[0]
-    assert first_sample.udfs.pool == "pool-1"
-    assert first_sample.udfs.volume == "30"
-    assert first_sample.udfs.concentration == "5.0"
+    assert first_sample.udfs.pool == "pool1"
+    assert first_sample.udfs.application.startswith("RML")
     assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
-    assert first_sample.udfs.index_number == "1"
+    assert first_sample.udfs.index_number == "3"
+    assert first_sample.udfs.rml_plate_name == "plate1"
+    assert first_sample.udfs.well_position_rml == "A:1"
+
+
+def test_to_lims_fluffy(fluffy_order_to_submit: dict):
+    # GIVEN a Fluffy order for four samples
+    order_data = FluffyOrder.model_validate(fluffy_order_to_submit)
+
+    # WHEN parsing for LIMS
+    samples: list[LimsSample] = OrderLimsService._build_lims_sample(
+        customer="cust000",
+        samples=order_data.samples,
+        workflow=Workflow.FLUFFY,
+        delivery_type=order_data.delivery_type,
+    )
+
+    # THEN it should have found the same number of samples
+    assert len(samples) == 4
+
+    # THEN the relevant UDFs are parsed
+    first_sample = samples[0]
+    assert first_sample.udfs.pool == "pool1"
+    assert first_sample.udfs.application.startswith("RML")
+    assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
+    assert first_sample.udfs.index_number == "3"
+    assert first_sample.udfs.rml_plate_name == "plate1"
+    assert first_sample.udfs.well_position_rml == "A:1"
 
 
 def test_to_lims_microbial(microbial_order_to_submit: dict):
