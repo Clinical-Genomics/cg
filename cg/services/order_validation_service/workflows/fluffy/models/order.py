@@ -13,7 +13,7 @@ class FluffyOrder(OrderWithSamples):
         return enumerate(self.samples)
 
     @property
-    def pools_with_samples(self) -> dict[str, dict]:
+    def pools(self) -> dict[str, dict]:
         """Return a dictionary representation of the order pools, where the dictionary key is the
         pool name and the values are relevant pool attributes."""
         pools: dict[str, dict] = {}

@@ -45,7 +45,7 @@ class StorePoolOrderService(StoreOrderService):
         db_order: Order = self._create_db_order(order=order)
         new_pools: list[Pool] = []
         with self.status_db.session.no_autoflush:
-            for pool in order.pools_with_samples.values():
+            for pool in order.pools.values():
                 db_case: Case = self._create_db_case_for_pool(
                     pool=pool, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
                 )
