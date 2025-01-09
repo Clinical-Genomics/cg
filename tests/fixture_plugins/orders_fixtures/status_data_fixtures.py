@@ -74,20 +74,6 @@ def mip_dna_order(mip_dna_order_to_submit: dict) -> MipDnaOrder:
 
 
 @pytest.fixture
-def mip_dna_submit_store(
-    base_store: Store, mip_dna_order: MipDnaOrder, helpers: StoreHelpers
-) -> Store:
-    for _, _, sample in mip_dna_order.enumerated_new_samples:
-        if not base_store.get_application_by_tag(sample.application):
-            application_version = helpers.ensure_application_version(
-                store=base_store, application_tag=sample.application
-            )
-            base_store.session.add(application_version)
-    base_store.session.commit()
-    return base_store
-
-
-@pytest.fixture
 def balsamic_order(balsamic_order_to_submit: dict) -> BalsamicOrder:
     balsamic_order_to_submit["user_id"] = 1
     balsamic_order = BalsamicOrder.model_validate(balsamic_order_to_submit)
@@ -95,20 +81,6 @@ def balsamic_order(balsamic_order_to_submit: dict) -> BalsamicOrder:
     for case_index, sample_index, sample in balsamic_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
     return balsamic_order
-
-
-@pytest.fixture
-def balsamic_submit_store(
-    base_store: Store, balsamic_order: BalsamicOrder, helpers: StoreHelpers
-) -> Store:
-    for _, _, sample in balsamic_order.enumerated_new_samples:
-        if not base_store.get_application_by_tag(sample.application):
-            application_version = helpers.ensure_application_version(
-                store=base_store, application_tag=sample.application
-            )
-            base_store.session.add(application_version)
-    base_store.session.commit()
-    return base_store
 
 
 @pytest.fixture
