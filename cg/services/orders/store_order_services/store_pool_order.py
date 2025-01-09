@@ -44,7 +44,7 @@ class StorePoolOrderService(StoreOrderService):
         """Store pools in the status database."""
         db_order: Order = self._create_db_order(order=order)
         new_pools: list[Pool] = []
-        with self.status_db.session.no_autoflush:
+        with self.status_db.no_autoflush_context():
             for pool in order.pools.values():
                 db_case: Case = self._create_db_case_for_pool(
                     pool=pool, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
