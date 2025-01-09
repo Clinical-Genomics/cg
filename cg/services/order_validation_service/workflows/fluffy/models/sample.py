@@ -9,6 +9,7 @@ from cg.services.order_validation_service.utils import parse_control
 
 class FluffySample(Sample):
     concentration_sample: float | None = None
+    container: None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     priority: PriorityEnum
     index: IndexEnum

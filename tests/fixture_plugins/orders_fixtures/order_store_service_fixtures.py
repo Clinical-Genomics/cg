@@ -27,8 +27,12 @@ def store_generic_order_service(base_store: Store, lims_api: MockLimsAPI) -> Sto
 
 
 @pytest.fixture
-def store_pool_order_service(base_store: Store, lims_api: MockLimsAPI) -> StorePoolOrderService:
-    return StorePoolOrderService(status_db=base_store, lims_service=OrderLimsService(lims_api))
+def store_pool_order_service(
+    store_with_rml_applications: Store, lims_api: MockLimsAPI
+) -> StorePoolOrderService:
+    return StorePoolOrderService(
+        status_db=store_with_rml_applications, lims_service=OrderLimsService(lims_api)
+    )
 
 
 @pytest.fixture

@@ -30,4 +30,4 @@ SampleInCase = (
 SampleWithSkipRC = TomteSample | MipDnaSample | FastqSample
 
 IndexedSample = FluffySample | RmlSample
-OrderWithIndexedSamples = RmlOrder | FluffyOrder
+OrderWithIndexedSamples = FluffyOrder | RmlOrder

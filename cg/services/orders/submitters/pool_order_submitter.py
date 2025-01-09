@@ -1,4 +1,4 @@
-from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
 from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
 from cg.services.orders.submitters.order_submitter import OrderSubmitter
 from cg.services.orders.validate_order_services.validate_pool_order import ValidatePoolOrderService
@@ -21,6 +21,5 @@ class PoolOrderSubmitter(OrderSubmitter):
         self.order_validation_service = order_validation_service
         self.order_store_service = order_store_service
 
-    def submit_order(self, order_in: OrderIn) -> dict:
-        self.order_validation_service.validate_order(order_in)
-        return self.order_store_service.store_order(order_in)
+    def submit_order(self, order: OrderWithIndexedSamples) -> dict:
+        return self.order_store_service.store_order(order)
