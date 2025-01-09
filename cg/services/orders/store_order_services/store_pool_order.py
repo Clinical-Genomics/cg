@@ -89,18 +89,14 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_case_for_pool(self, pool: dict, customer: Customer, ticket_id: str) -> Case:
         """Return a Case database object for a pool."""
         case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
-        case: Case | None = self.status_db.get_case_by_name_and_customer(
-            customer=customer, case_name=case_name
+        case = self.status_db.add_case(
+            data_analysis=pool["data_analysis"],
+            data_delivery=pool["data_delivery"],
+            name=case_name,
+            priority=pool["priority"],
+            ticket=ticket_id,
         )
-        if not case:
-            case = self.status_db.add_case(
-                data_analysis=pool["data_analysis"],
-                data_delivery=pool["data_delivery"],
-                name=case_name,
-                priority=pool["priority"],
-                ticket=ticket_id,
-            )
-            case.customer = customer
+        case.customer = customer
         return case
 
     def _create_db_pool(
