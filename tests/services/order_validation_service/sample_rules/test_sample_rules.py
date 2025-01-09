@@ -1,4 +1,4 @@
-from cg.models.orders.sample_base import ContainerEnum
+from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
@@ -6,6 +6,8 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ConcentrationRequiredError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    PoolApplicationError,
+    PoolPriorityError,
     SampleNameNotAvailableError,
     VolumeRequiredError,
     WellFormatError,
@@ -16,6 +18,8 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_pools_contain_one_application,
+    validate_pools_contain_one_priority,
     validate_sample_names_available,
     validate_tube_container_name_unique,
     validate_volume_required,
@@ -242,3 +246,38 @@ def test_validate_buffer_skip_rc_condition(valid_fastq_order: FastqOrder):
 
     # THEN the error should concern the buffer
     assert isinstance(errors[0], BufferInvalidError)
+
+
+def test_validate_pools_contain_multiple_applications(valid_rml_order: RmlOrder):
+
+    # GIVEN a pooled order with the same pool containing multiple applications
+    bad_pool, samples = next(iter(valid_rml_order.pools.items()))
+    samples[1].application = f"Not {samples[0].application}"
+
+    # WHEN validating that the pools contain a single application
+    errors: list[PoolApplicationError] = validate_pools_contain_one_application(valid_rml_order)
+
+    # THEN errors should be returned
+    assert errors
+
+    # THEN the errors should concern the pool with repeated applications
+    assert isinstance(errors[0], PoolApplicationError)
+    assert len(errors) == len(samples)
+
+
+def test_validate_pools_contain_multiple_priorities(valid_rml_order: RmlOrder):
+
+    # GIVEN a pooled order with the same pool containing multiple priorities
+    bad_pool, samples = next(iter(valid_rml_order.pools.items()))
+    samples[0].priority = PriorityEnum.research
+    samples[1].priority = PriorityEnum.priority
+
+    # WHEN validating that the pools contain a single application
+    errors: list[PoolPriorityError] = validate_pools_contain_one_priority(valid_rml_order)
+
+    # THEN errors should be returned
+    assert errors
+
+    # THEN the errors should concern the pool with repeated applications
+    assert isinstance(errors[0], PoolPriorityError)
+    assert len(errors) == len(samples)

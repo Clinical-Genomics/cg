@@ -152,3 +152,11 @@ def validate_concentration_required(order: FastqOrder) -> list[ConcentrationRequ
             error = ConcentrationRequiredError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def does_contain_multiple_applications(samples: list[IndexedSample]) -> bool:
+    return len({sample.application for sample in samples}) > 1
+
+
+def does_contain_multiple_priorities(samples: list[IndexedSample]) -> bool:
+    return len({sample.priority for sample in samples}) > 1

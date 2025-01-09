@@ -99,3 +99,17 @@ class ConcentrationInvalidIfSkipRCError(SampleError):
             f"{allowed_interval[1]} ng/μL if reception control should be skipped"
         )
         super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
+
+
+class PoolApplicationError(SampleError):
+    def __init__(self, sample_index: int, pool_name: str):
+        field: str = "application"
+        message: str = f"Multiple applications detected in pool {pool_name}"
+        super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
+
+
+class PoolPriorityError(SampleError):
+    def __init__(self, sample_index: int, pool_name: str):
+        field: str = "priority"
+        message: str = f"Multiple priorities detected in pool {pool_name}"
+        super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
