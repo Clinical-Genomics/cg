@@ -251,7 +251,7 @@ def test_validate_buffer_skip_rc_condition(valid_fastq_order: FastqOrder):
 def test_validate_pools_contain_multiple_applications(valid_rml_order: RmlOrder):
 
     # GIVEN a pooled order with the same pool containing multiple applications
-    bad_pool, samples = next(iter(valid_rml_order.pools.items()))
+    _, samples = next(iter(valid_rml_order.pools.items()))
     samples[1].application = f"Not {samples[0].application}"
 
     # WHEN validating that the pools contain a single application
@@ -268,7 +268,7 @@ def test_validate_pools_contain_multiple_applications(valid_rml_order: RmlOrder)
 def test_validate_pools_contain_multiple_priorities(valid_rml_order: RmlOrder):
 
     # GIVEN a pooled order with the same pool containing multiple priorities
-    bad_pool, samples = next(iter(valid_rml_order.pools.items()))
+    _, samples = next(iter(valid_rml_order.pools.items()))
     samples[0].priority = PriorityEnum.research
     samples[1].priority = PriorityEnum.priority
 
