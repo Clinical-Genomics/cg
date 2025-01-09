@@ -2192,6 +2192,7 @@ def context_config(
             "host": "https://trailblazer.scilifelab.se/",
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
+            "google_client_id": "client_id",
         },
         "arnold": {"api_url": "https://arnold.scilifelab.se/"},
         "janus": {"host": "https://janus.sys.scilifelab.se/"},

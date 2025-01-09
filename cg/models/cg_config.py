@@ -129,6 +129,7 @@ class ClientConfig(BaseModel):
 class TrailblazerConfig(BaseModel):
     service_account: str
     service_account_auth_file: str
+    google_client_id: str
     host: str
 
 
