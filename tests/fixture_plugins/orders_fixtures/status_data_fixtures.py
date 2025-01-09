@@ -80,3 +80,10 @@ def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
     order = MicrosaltOrder.model_validate(microbial_order_to_submit)
     order._generated_ticket_id = 123456
     return order
+
+
+@pytest.fixture
+def pacbio_order(pacbio_order_to_submit: dict, ticket_id_as_int: int) -> PacbioOrder:
+    order = PacbioOrder.model_validate(pacbio_order_to_submit)
+    order._generated_ticket_id = ticket_id_as_int
+    return order

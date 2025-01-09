@@ -4,7 +4,7 @@
     "comment": "",
     "samples": [
         {
-            "application": "WGSPCFC060",
+            "application": "LWPBELB070",
             "comment": "",
             "container": "Tube",
             "container_name": "prov1",
@@ -22,7 +22,7 @@
             "subject_id": "subject2"
         },
         {
-            "application": "WGSPCFC060",
+            "application": "LWPBELB070",
             "comment": "",
             "container": "Tube",
             "container_name": "prov2",
@@ -38,6 +38,24 @@
             "well_position": "",
             "buffer": "Nuclease-free water",
             "subject_id": "subject1"
+        },
+        {
+            "application": "LWPBELB070",
+            "comment": "",
+            "container": "96 well plate",
+            "container_name": "plate1",
+            "data_analysis": "raw-data",
+            "data_delivery": "bam",
+            "elution_buffer": "Nuclease-free water",
+            "name": "prov3",
+            "priority": "priority",
+            "sex": "male",
+            "source": "blood",
+            "tumour": false,
+            "volume": "35",
+            "well_position": "A:1",
+            "buffer": "Nuclease-free water",
+            "subject_id": "subject3"
         }
     ]
 }
