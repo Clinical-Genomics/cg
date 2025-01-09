@@ -421,7 +421,7 @@ def test_validate_sex_inconsistent_sex(
 ):
     # GIVEN we have an order with a sample that is already in the database but with different sex
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -451,7 +451,7 @@ def test_validate_sex_consistent_sex(
 ):
     # GIVEN we have an order with a sample that is already in the database and with same gender
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -482,7 +482,7 @@ def test_validate_sex_unknown_existing_sex(
     # GIVEN we have an order with a sample that is already in the database and with different gender but the existing is
     # of type "unknown"
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -513,7 +513,7 @@ def test_validate_sex_unknown_new_sex(
     # GIVEN we have an order with a sample that is already in the database and with different gender but the new is of
     # type "unknown"
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -574,7 +574,7 @@ def test_submit_unique_sample_name(
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         # GIVEN we have an order with a sample that is not existing in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        store = orders_api.status
+        store = orders_api.validation_service.store
         assert not store._get_query(table=Sample).first()
 
         monkeypatch_process_lims(monkeypatch, order_data)
