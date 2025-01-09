@@ -14,7 +14,7 @@ from tests.store_helpers import StoreHelpers
     [("valid_rml_order", Workflow.RAW_DATA), ("valid_fluffy_order", Workflow.FLUFFY)],
     ids=["RML", "Fluffy"],
 )
-def test_store_fluffy(
+def test_store_order_data_in_status_db(
     store_with_rml_applications: Store,
     order_fixture: str,
     ticket_id: str,
@@ -23,6 +23,7 @@ def test_store_fluffy(
     helpers: StoreHelpers,
     request: pytest.FixtureRequest,
 ):
+    """Test that a Fluffy or RML order is stored in the database."""
     # GIVEN a valid Fluffy or RML order
     order: OrderWithIndexedSamples = request.getfixturevalue(order_fixture)
 

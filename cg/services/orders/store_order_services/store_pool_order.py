@@ -1,9 +1,6 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, Workflow
-from cg.exc import OrderError
-from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.order_validation_service.models.sample_aliases import (
     IndexedSample,

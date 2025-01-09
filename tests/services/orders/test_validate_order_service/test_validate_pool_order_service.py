@@ -12,7 +12,6 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-# TODO: Fix these tests
 @pytest.mark.xfail(reason="New validation to be implemented")
 def test_validate_normal_order(rml_order_to_submit: dict, base_store: Store):
     # GIVEN pool order with three samples, none in the database
