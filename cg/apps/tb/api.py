@@ -62,19 +62,18 @@ class TrailblazerAPI:
         self, command: str, request_body: dict, method: str = APIMethods.POST
     ) -> Any:
         url = f"{self.host}/{command}"
-        LOG.debug(f"REQUEST HEADER {self.auth_header}")
-        LOG.debug(f"{method}: URL={url}; JSON={request_body}")
-
+        LOG.info(f"REQUEST HEADER {self.auth_header}")
+        LOG.info(f"{method}: URL={url}; JSON={request_body}")
         response = APIRequest.api_request_from_content(
             api_method=method, url=url, headers=self.auth_header, json=request_body
         )
 
-        LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
+        LOG.info(f"RESPONSE STATUS CODE {response.status_code}")
         if not response.ok:
             raise TrailblazerAPIHTTPError(
                 f"Request {command} failed with status code {response.status_code}: {response.text}"
             )
-        LOG.debug(f"RESPONSE BODY {response.text}")
+        LOG.info(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
     def get_latest_completed_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
