@@ -13,7 +13,8 @@ class FluffySample(Sample):
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     priority: PriorityEnum
     index: IndexEnum
-    index_number: str | None
+    index_number: int | None = None
+    index_sequence: str | None = None
     pool: str
     pool_concentration: float
     rml_plate_name: str | None = None

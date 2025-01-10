@@ -2,6 +2,7 @@ import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
+from cg.services.order_validation_service.constants import INDEX_SEQUENCES, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
@@ -160,3 +161,24 @@ def has_multiple_applications(samples: list[IndexedSample]) -> bool:
 
 def has_multiple_priorities(samples: list[IndexedSample]) -> bool:
     return len({sample.priority for sample in samples}) > 1
+
+
+def is_index_number_missing(sample: IndexedSample) -> bool:
+    return sample.index != IndexEnum.NO_INDEX and not sample.index_number
+
+
+def is_index_number_out_of_range(sample: IndexedSample) -> bool:
+    return sample.index_number and not (
+        1 <= sample.index_number <= len(INDEX_SEQUENCES[sample.index])
+    )
+
+
+def is_index_sequence_missing(sample: IndexedSample) -> bool:
+    return sample.index != IndexEnum.NO_INDEX and not sample.index_sequence
+
+
+def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
+    return (
+        sample.index != IndexEnum.NO_INDEX
+        and INDEX_SEQUENCES[sample.index][sample.index_number] != sample.index_sequence
+    )

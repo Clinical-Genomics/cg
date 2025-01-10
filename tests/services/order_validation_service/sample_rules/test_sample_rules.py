@@ -1,11 +1,15 @@
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
-from cg.services.order_validation_service.constants import ElutionBuffer
+from cg.services.order_validation_service.constants import INDEX_SEQUENCES, ElutionBuffer, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    IndexNumberMissingError,
+    IndexNumberOutOfRangeError,
+    IndexSequenceMismatchError,
+    IndexSequenceMissingError,
     PoolApplicationError,
     PoolPriorityError,
     SampleNameNotAvailableError,
@@ -18,6 +22,10 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_index_number_in_range,
+    validate_index_number_required,
+    validate_index_sequence_mismatch,
+    validate_index_sequence_required,
     validate_pools_contain_one_application,
     validate_pools_contain_one_priority,
     validate_sample_names_available,
@@ -29,6 +37,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
+from cg.services.order_validation_service.workflows.rml.models.sample import RmlSample
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -283,3 +292,76 @@ def test_validate_pools_contain_multiple_priorities(rml_order: RmlOrder):
     # THEN the errors should concern the pool with repeated applications
     assert isinstance(errors[0], PoolPriorityError)
     assert len(errors) == len(samples)
+
+
+def test_validate_missing_index_number(rml_order: RmlOrder):
+
+    # GIVEN an indexed order with a missing index number
+    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
+    erroneous_sample.index_number = None
+
+    # WHEN validating that no index numbers are missing
+    errors: list[IndexNumberMissingError] = validate_index_number_required(rml_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the sample's missing index number
+    assert isinstance(errors[0], IndexNumberMissingError)
+    assert errors[0].sample_index == 0
+
+
+def test_validate_index_number_out_of_range(rml_order: RmlOrder):
+
+    # GIVEN an indexed order with an index number out of range
+    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
+    erroneous_sample.index_number = len(INDEX_SEQUENCES[erroneous_sample.index]) + 1
+
+    # WHEN validating that the index numbers are in range
+    errors: list[IndexNumberOutOfRangeError] = validate_index_number_in_range(rml_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the sample's index number being out of range
+    assert isinstance(errors[0], IndexNumberOutOfRangeError)
+    assert errors[0].sample_index == 0
+
+
+def test_validate_missing_index_sequence(rml_order: RmlOrder):
+
+    # GIVEN an indexed order with a missing index sequence
+    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
+    erroneous_sample.index_sequence = None
+
+    # WHEN validating that no index sequences are missing
+    errors: list[IndexSequenceMissingError] = validate_index_sequence_required(rml_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the sample's missing index sequence
+    assert isinstance(errors[0], IndexSequenceMissingError)
+    assert errors[0].sample_index == 0
+
+
+def test_validate_index_sequence_mismatch(rml_order: RmlOrder):
+
+    # GIVEN an indexed order with a mismatched index sequence
+    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
+    erroneous_sample.index_number = 1
+    erroneous_sample.index_sequence = INDEX_SEQUENCES[erroneous_sample.index][10]
+
+    # WHEN validating that the index sequences match
+    errors: list[IndexSequenceMismatchError] = validate_index_sequence_mismatch(rml_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the sample's mismatched index sequence
+    assert isinstance(errors[0], IndexSequenceMismatchError)
+    assert errors[0].sample_index == 0

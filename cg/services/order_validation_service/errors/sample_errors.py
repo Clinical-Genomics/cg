@@ -1,4 +1,9 @@
-from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
+from cg.services.order_validation_service.constants import (
+    INDEX_SEQUENCES,
+    MAXIMUM_VOLUME,
+    MINIMUM_VOLUME,
+    IndexEnum,
+)
 from cg.services.order_validation_service.errors.order_errors import OrderError
 
 
@@ -112,4 +117,30 @@ class PoolPriorityError(SampleError):
     def __init__(self, sample_index: int, pool_name: str):
         field: str = "priority"
         message: str = f"Multiple priorities detected in pool {pool_name}"
+        super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
+
+
+class IndexNumberMissingError(SampleError):
+    field: str = "index_number"
+    message: str = "Index number is required"
+
+
+class IndexNumberOutOfRangeError(SampleError):
+    def __init__(self, sample_index: int, index: IndexEnum):
+        field: str = "index_number"
+        maximum: int = len(INDEX_SEQUENCES[index]) + 1
+        message: str = f"Index number must be a number between 1 and {maximum}"
+        super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
+
+
+class IndexSequenceMissingError(SampleError):
+    field: str = "index_sequence"
+    message: str = "Index sequence is required"
+
+
+class IndexSequenceMismatchError(SampleError):
+    def __init__(self, sample_index: int, index: IndexEnum, index_number):
+        field: str = "index_number"
+        allowed_sequence: str = INDEX_SEQUENCES[index][index_number - 1]
+        message: str = f"Index and index number indicate sequence {allowed_sequence}"
         super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
