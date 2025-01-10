@@ -2,7 +2,7 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "cg"
 version = "65.0.7"
 description = "Clinical Genomics command center"
