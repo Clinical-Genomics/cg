@@ -81,13 +81,13 @@ def test_validate_well_position_format(valid_microsalt_order: MicrosaltOrder):
     assert errors[0].sample_index == 0
 
 
-def test_validate_well_position_rml_format(valid_rml_order: RmlOrder):
+def test_validate_well_position_rml_format(rml_order: RmlOrder):
 
-    # GIVEN an order with a sample with an invalid well position
-    valid_rml_order.samples[0].well_position_rml = "J:4"
+    # GIVEN a RML order with a sample with an invalid well position
+    rml_order.samples[0].well_position_rml = "J:4"
 
     # WHEN validating the well position format
-    errors = validate_well_position_rml_format(order=valid_rml_order)
+    errors = validate_well_position_rml_format(order=rml_order)
 
     # THEN an error should be returned
     assert errors
@@ -179,17 +179,17 @@ def test_non_required_sample_volume(valid_microsalt_order: MicrosaltOrder):
     assert not errors
 
 
-def test_validate_concentration_required_if_skip_rc(valid_fastq_order: FastqOrder):
+def test_validate_concentration_required_if_skip_rc(fastq_order: FastqOrder):
 
     # GIVEN a fastq order trying to skip reception control
-    valid_fastq_order.skip_reception_control = True
+    fastq_order.skip_reception_control = True
 
     # GIVEN that one of its samples has no concentration set
-    valid_fastq_order.samples[0].concentration_ng_ul = None
+    fastq_order.samples[0].concentration_ng_ul = None
 
     # WHEN validating that the concentration is not missing
     errors: list[ConcentrationRequiredError] = validate_concentration_required_if_skip_rc(
-        order=valid_fastq_order
+        order=fastq_order
     )
 
     # THEN an error should be returned
@@ -199,16 +199,14 @@ def test_validate_concentration_required_if_skip_rc(valid_fastq_order: FastqOrde
     assert isinstance(errors[0], ConcentrationRequiredError)
 
 
-def test_validate_concentration_interval_if_skip_rc(
-    valid_fastq_order: FastqOrder, base_store: Store
-):
+def test_validate_concentration_interval_if_skip_rc(fastq_order: FastqOrder, base_store: Store):
 
     # GIVEN a Fastq order trying to skip reception control
-    valid_fastq_order.skip_reception_control = True
+    fastq_order.skip_reception_control = True
 
     # GIVEN that one of the samples has a concentration outside the allowed interval for its
     # application
-    sample = valid_fastq_order.samples[0]
+    sample = fastq_order.samples[0]
     application = base_store.get_application_by_tag(sample.application)
     application.sample_concentration_minimum = sample.concentration_ng_ul + 1
     base_store.session.add(application)
@@ -216,7 +214,7 @@ def test_validate_concentration_interval_if_skip_rc(
 
     # WHEN validating that the order's samples' concentrations are within allowed intervals
     errors: list[ConcentrationInvalidIfSkipRCError] = validate_concentration_interval_if_skip_rc(
-        order=valid_fastq_order, store=base_store
+        order=fastq_order, store=base_store
     )
 
     # THEN an error should be returned
@@ -226,16 +224,16 @@ def test_validate_concentration_interval_if_skip_rc(
     assert isinstance(errors[0], ConcentrationInvalidIfSkipRCError)
 
 
-def test_validate_buffer_skip_rc_condition(valid_fastq_order: FastqOrder):
+def test_validate_buffer_skip_rc_condition(fastq_order: FastqOrder):
 
     # GIVEN a Fastq order trying to skip reception control
-    valid_fastq_order.skip_reception_control = True
+    fastq_order.skip_reception_control = True
 
     # GIVEN that one of the samples has buffer specified as 'other'
-    valid_fastq_order.samples[0].elution_buffer = ElutionBuffer.OTHER
+    fastq_order.samples[0].elution_buffer = ElutionBuffer.OTHER
 
     # WHEN validating that the buffers follow the 'skip reception control' requirements
-    errors: list[BufferInvalidError] = validate_buffer_skip_rc_condition(order=valid_fastq_order)
+    errors: list[BufferInvalidError] = validate_buffer_skip_rc_condition(order=fastq_order)
 
     # THEN an error should be returned
     assert errors
