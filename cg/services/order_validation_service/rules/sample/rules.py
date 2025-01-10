@@ -28,10 +28,10 @@ from cg.services.order_validation_service.models.sample_aliases import (
 )
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
-    does_contain_multiple_applications,
-    does_contain_multiple_priorities,
     get_indices_for_repeated_sample_names,
     get_indices_for_tube_repeated_container_name,
+    has_multiple_applications,
+    has_multiple_priorities,
     is_container_name_missing,
     is_invalid_well_format,
     is_invalid_well_format_rml,
@@ -256,7 +256,7 @@ def validate_pools_contain_one_application(
     errors: list[PoolApplicationError] = []
     for pool, enumerated_samples in order.enumerated_pools.items():
         samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
-        if does_contain_multiple_applications(samples):
+        if has_multiple_applications(samples):
             for sample_index, _ in enumerated_samples:
                 error = PoolApplicationError(sample_index=sample_index, pool_name=pool)
                 errors.append(error)
@@ -269,7 +269,7 @@ def validate_pools_contain_one_priority(
     errors: list[PoolPriorityError] = []
     for pool, enumerated_samples in order.enumerated_pools.items():
         samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
-        if does_contain_multiple_priorities(samples):
+        if has_multiple_priorities(samples):
             for sample_index, _ in enumerated_samples:
                 error = PoolPriorityError(sample_index=sample_index, pool_name=pool)
                 errors.append(error)
