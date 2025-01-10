@@ -24,7 +24,7 @@ class FluffyOrder(OrderWithSamples):
 
     @property
     def enumerated_pools(self) -> dict[str, list[tuple[int, FluffySample]]]:
-        """Same as pools but with indexes for the samples, so that we can map validation errors."""
+        """Return the pool dictionary with indexes for the samples to map them to validation errors."""
         pools: dict[str, list[tuple[int, FluffySample]]] = {}
         for sample_index, sample in self.enumerated_samples:
             if sample.pool not in pools:
