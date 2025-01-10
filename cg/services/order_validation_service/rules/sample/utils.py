@@ -2,7 +2,9 @@ import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
+from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.sample_errors import (
+    BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     OccupiedWellError,
@@ -132,7 +134,9 @@ def validate_concentration_interval(
     errors: list[ConcentrationInvalidIfSkipRCError] = []
     for sample_index, sample in order.enumerated_samples:
         if application := store.get_application_by_tag(sample.application):
-            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            allowed_interval: tuple[float, float] = get_concentration_interval(
+                sample=sample, application=application
+            )
             if allowed_interval and has_sample_invalid_concentration(
                 sample=sample, allowed_interval=allowed_interval
             ):
@@ -160,3 +164,17 @@ def has_multiple_applications(samples: list[IndexedSample]) -> bool:
 
 def has_multiple_priorities(samples: list[IndexedSample]) -> bool:
     return len({sample.priority for sample in samples}) > 1
+
+
+def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
+    """
+    Validate that the order has only samples with buffers that allow to skip reception control.
+    We can only allow skipping reception control if there is no need to exchange buffer,
+    so if the sample has nuclease-free water or Tris-HCL as buffer.
+    """
+    errors: list[BufferInvalidError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
+            error = BufferInvalidError(sample_index=sample_index)
+            errors.append(error)
+    return errors
