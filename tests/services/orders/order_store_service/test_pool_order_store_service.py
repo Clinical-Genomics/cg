@@ -11,7 +11,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.mark.parametrize(
     "order_fixture, workflow",
-    [("valid_rml_order", Workflow.RAW_DATA), ("valid_fluffy_order", Workflow.FLUFFY)],
+    [("rml_order", Workflow.RAW_DATA), ("fluffy_order", Workflow.FLUFFY)],
     ids=["RML", "Fluffy"],
 )
 def test_store_order_data_in_status_db(
