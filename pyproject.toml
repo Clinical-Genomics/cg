@@ -6,11 +6,12 @@ build-backend = "poetry.core.masonry.api"
 name = "cg"
 version = "65.0.7"
 description = "Clinical Genomics command center"
-authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
+authors = [  {name = "Clinical Genomics <support@clinicalgenomics.se>},
+]
 readme = "README.md"
 homepage = "https://github.com/Clinical-Genomics/cg"
 repository = "https://github.com/Clinical-Genomics/cg"
-classifiers = [
+classifiers = [                                                                                <
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
