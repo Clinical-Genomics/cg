@@ -12,7 +12,7 @@ from tests.store_helpers import StoreHelpers
 
 def test_store_order_data_in_status_db(
     base_store: Store,
-    valid_pacbio_order: PacbioOrder,
+    pacbio_order: PacbioOrder,
     store_pacbio_order_service: StorePacBioOrderService,
     helpers: StoreHelpers,
 ):
@@ -33,7 +33,7 @@ def test_store_order_data_in_status_db(
 
     # WHEN storing the order
     new_samples: list[Sample] = store_pacbio_order_service.store_order_data_in_status_db(
-        order=valid_pacbio_order
+        order=pacbio_order
     )
 
     # THEN it should store the order

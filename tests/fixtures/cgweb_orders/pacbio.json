@@ -1,6 +1,9 @@
 {
     "name": "PacbioOrder",
     "customer": "cust000",
+    "delivery_type": "bam",
+    "project_type": "pacbio-long-read",
+    "user_id": 0,
     "comment": "",
     "samples": [
         {
@@ -13,10 +16,11 @@
             "elution_buffer": "Nuclease-free water",
             "name": "prov1",
             "priority": "priority",
-            "sex": "female",
+            "sex": "male",
             "source": "blood",
             "tumour": false,
             "volume": "25",
+            "require_qc_ok": false,
             "well_position": "",
             "buffer": "Nuclease-free water",
             "subject_id": "subject2"
@@ -35,6 +39,7 @@
             "source": "cell line",
             "tumour": true,
             "volume": "35",
+            "require_qc_ok": false,
             "well_position": "",
             "buffer": "Nuclease-free water",
             "subject_id": "subject1"
@@ -53,6 +58,7 @@
             "source": "blood",
             "tumour": false,
             "volume": "35",
+            "require_qc_ok": false,
             "well_position": "A:1",
             "buffer": "Nuclease-free water",
             "subject_id": "subject3"

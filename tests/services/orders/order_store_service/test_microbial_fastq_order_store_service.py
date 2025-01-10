@@ -10,7 +10,7 @@ from cg.store.store import Store
 
 
 def test_store_samples(
-    valid_microbial_fastq_order: MicrobialFastqOrder,
+    microbial_fastq_order: MicrobialFastqOrder,
     store_microbial_fastq_order_service: StoreMicrobialFastqOrderService,
 ):
     # GIVEN a microbial fastq order with microbial samples
@@ -22,13 +22,13 @@ def test_store_samples(
 
     # WHEN storing the order
     new_samples = store_microbial_fastq_order_service.store_order_data_in_status_db(
-        order=valid_microbial_fastq_order
+        order=microbial_fastq_order
     )
 
     # THEN it should store the samples and create a case for each sample
-    assert len(new_samples) == 3
-    assert len(store._get_query(table=Sample).all()) == 3
-    assert store._get_query(table=Case).count() == 3
+    assert len(new_samples) == 2
+    assert len(store._get_query(table=Sample).all()) == 2
+    assert store._get_query(table=Case).count() == 2
     first_sample = new_samples[0]
     assert len(first_sample.links) == 1
     case_link = first_sample.links[0]

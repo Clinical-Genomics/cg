@@ -4,6 +4,9 @@ from cg.services.order_validation_service.workflows.balsamic.models.order import
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
 from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
+from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
+    MicrobialFastqOrder,
+)
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
@@ -85,5 +88,14 @@ def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
 @pytest.fixture
 def pacbio_order(pacbio_order_to_submit: dict, ticket_id_as_int: int) -> PacbioOrder:
     order = PacbioOrder.model_validate(pacbio_order_to_submit)
+    order._generated_ticket_id = ticket_id_as_int
+    return order
+
+
+@pytest.fixture
+def microbial_fastq_order(
+    microbial_fastq_order_to_submit: dict, ticket_id_as_int: int
+) -> MicrobialFastqOrder:
+    order = MicrobialFastqOrder.model_validate(microbial_fastq_order_to_submit)
     order._generated_ticket_id = ticket_id_as_int
     return order
