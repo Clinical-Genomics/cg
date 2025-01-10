@@ -1,3 +1,5 @@
+"""Fixtures for orders parsed from JSON files into dictionaries."""
+
 from pathlib import Path
 
 import pytest

@@ -1,6 +1,9 @@
 {
     "name": "Microbial Fastq order",
-    "customer": "cust002",
+    "customer": "cust000",
+    "delivery_type": "fastq",
+    "project_type": "microbial-fastq",
+    "user_id": 0,
     "comment": "",
     "samples": [
         {
