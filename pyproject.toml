@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "cg"
 version = "65.0.8"
 description = "Clinical Genomics command center"
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
 repository = "https://github.com/Clinical-Genomics/cg"
 classifiers = [
