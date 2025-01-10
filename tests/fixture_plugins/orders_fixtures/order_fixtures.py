@@ -1,3 +1,5 @@
+"""Fixtures for orders parsed into their respective models."""
+
 import pytest
 
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
@@ -15,6 +17,31 @@ from cg.services.order_validation_service.workflows.rml.models.order import RmlO
 
 
 @pytest.fixture
+def balsamic_order(balsamic_order_to_submit: dict) -> BalsamicOrder:
+    balsamic_order_to_submit["user_id"] = 1
+    balsamic_order = BalsamicOrder.model_validate(balsamic_order_to_submit)
+    balsamic_order._generated_ticket_id = 123456
+    for case_index, sample_index, sample in balsamic_order.enumerated_new_samples:
+        sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
+    return balsamic_order
+
+
+@pytest.fixture
+def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
+    fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
+    fastq_order._generated_ticket_id = 123456
+    return fastq_order
+
+
+@pytest.fixture
+def fluffy_order(fluffy_order_to_submit: dict, ticket_id_as_int: int) -> FluffyOrder:
+    """Parse Fluffy order example."""
+    fluffy_order = FluffyOrder.model_validate(fluffy_order_to_submit)
+    fluffy_order._generated_ticket_id = ticket_id_as_int
+    return fluffy_order
+
+
+@pytest.fixture
 def metagenome_order(
     metagenome_order_to_submit: dict,
     ticket_id_as_int: int,
@@ -26,36 +53,19 @@ def metagenome_order(
 
 
 @pytest.fixture
-def valid_rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrder:
-    """Parse rml order example."""
-    rml_order = RmlOrder.model_validate(rml_order_to_submit)
-    rml_order._generated_ticket_id = ticket_id_as_int
-    return rml_order
+def microbial_fastq_order(
+    microbial_fastq_order_to_submit: dict, ticket_id_as_int: int
+) -> MicrobialFastqOrder:
+    order = MicrobialFastqOrder.model_validate(microbial_fastq_order_to_submit)
+    order._generated_ticket_id = ticket_id_as_int
+    return order
 
 
 @pytest.fixture
-def valid_fluffy_order(fluffy_order_to_submit: dict, ticket_id_as_int: int) -> FluffyOrder:
-    """Parse Fluffy order example."""
-    fluffy_order = FluffyOrder.model_validate(fluffy_order_to_submit)
-    fluffy_order._generated_ticket_id = ticket_id_as_int
-    return fluffy_order
-
-
-@pytest.fixture
-def fastq_order(fastq_order_to_submit: dict) -> FastqOrder:
-    fastq_order = FastqOrder.model_validate(fastq_order_to_submit)
-    fastq_order._generated_ticket_id = 123456
-    return fastq_order
-
-
-@pytest.fixture
-def mip_rna_order(mip_rna_order_to_submit: dict) -> MipRnaOrder:
-    mip_rna_order_to_submit["user_id"] = 1
-    mip_rna_order = MipRnaOrder.model_validate(mip_rna_order_to_submit)
-    for case_index, sample_index, sample in mip_rna_order.enumerated_new_samples:
-        sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
-    mip_rna_order._generated_ticket_id = 123456
-    return mip_rna_order
+def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
+    order = MicrosaltOrder.model_validate(microbial_order_to_submit)
+    order._generated_ticket_id = 123456
+    return order
 
 
 @pytest.fixture
@@ -69,20 +79,13 @@ def mip_dna_order(mip_dna_order_to_submit: dict) -> MipDnaOrder:
 
 
 @pytest.fixture
-def balsamic_order(balsamic_order_to_submit: dict) -> BalsamicOrder:
-    balsamic_order_to_submit["user_id"] = 1
-    balsamic_order = BalsamicOrder.model_validate(balsamic_order_to_submit)
-    balsamic_order._generated_ticket_id = 123456
-    for case_index, sample_index, sample in balsamic_order.enumerated_new_samples:
+def mip_rna_order(mip_rna_order_to_submit: dict) -> MipRnaOrder:
+    mip_rna_order_to_submit["user_id"] = 1
+    mip_rna_order = MipRnaOrder.model_validate(mip_rna_order_to_submit)
+    for case_index, sample_index, sample in mip_rna_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
-    return balsamic_order
-
-
-@pytest.fixture
-def microsalt_order(microbial_order_to_submit: dict) -> MicrosaltOrder:
-    order = MicrosaltOrder.model_validate(microbial_order_to_submit)
-    order._generated_ticket_id = 123456
-    return order
+    mip_rna_order._generated_ticket_id = 123456
+    return mip_rna_order
 
 
 @pytest.fixture
@@ -93,9 +96,8 @@ def pacbio_order(pacbio_order_to_submit: dict, ticket_id_as_int: int) -> PacbioO
 
 
 @pytest.fixture
-def microbial_fastq_order(
-    microbial_fastq_order_to_submit: dict, ticket_id_as_int: int
-) -> MicrobialFastqOrder:
-    order = MicrobialFastqOrder.model_validate(microbial_fastq_order_to_submit)
-    order._generated_ticket_id = ticket_id_as_int
-    return order
+def rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrder:
+    """Parse rml order example."""
+    rml_order = RmlOrder.model_validate(rml_order_to_submit)
+    rml_order._generated_ticket_id = ticket_id_as_int
+    return rml_order
