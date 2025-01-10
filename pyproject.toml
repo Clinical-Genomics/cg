@@ -20,7 +20,7 @@ include = [
   "tests/**/*"
 ]
 
-[tool.poetry.dependencies]
+[project.dependencies]
 python = ">=3.9,<3.13"
 
 # Database
