@@ -15,9 +15,9 @@ from cg.services.delivery_message.delivery_message_service import DeliveryMessag
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
-from cg.services.orders.submitters.order_submitter_registry import (
-    OrderSubmitterRegistry,
-    setup_order_submitter_registry,
+from cg.services.orders.store_order_services.storing_service_registry import (
+    StoringServiceRegistry,
+    setup_storing_service_registry,
 )
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
@@ -95,7 +95,7 @@ summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
 flow_cell_service = SampleRunMetricsService(db)
-order_submitter_registry: OrderSubmitterRegistry = setup_order_submitter_registry(
+storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,
     status_db=db,
 )

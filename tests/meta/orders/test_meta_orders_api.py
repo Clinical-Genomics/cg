@@ -150,8 +150,8 @@ def test_submit_ticketexception(
     raw_order = order.model_dump()
     raw_order["ticket_number"] = "#123456"
     raw_order["project_type"] = order_type
-    customer = helpers.ensure_customer(store=orders_api.status)
-    user = helpers.ensure_user(store=orders_api.status, customer=customer)
+    customer = helpers.ensure_customer(store=orders_api.validation_service.store)
+    user = helpers.ensure_user(store=orders_api.validation_service.store, customer=customer)
 
     # GIVEN a mock Freshdesk ticket creation that raises TicketCreationError
     with patch(
@@ -421,7 +421,7 @@ def test_validate_sex_inconsistent_sex(
 ):
     # GIVEN we have an order with a sample that is already in the database but with different sex
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -438,7 +438,7 @@ def test_validate_sex_inconsistent_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    validator = ValidateCaseOrderService(status_db=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=store)
 
     # WHEN calling _validate_sex
     # THEN an OrderError should be raised on non-matching sex
@@ -451,7 +451,7 @@ def test_validate_sex_consistent_sex(
 ):
     # GIVEN we have an order with a sample that is already in the database and with same gender
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -468,7 +468,7 @@ def test_validate_sex_consistent_sex(
         store.session.commit()
         assert sample_obj.sex == sample.sex
 
-    validator = ValidateCaseOrderService(status_db=orders_api.status)
+    validator = ValidateCaseOrderService(status_db=store)
 
     # WHEN calling _validate_sex
     validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
@@ -482,7 +482,7 @@ def test_validate_sex_unknown_existing_sex(
     # GIVEN we have an order with a sample that is already in the database and with different gender but the existing is
     # of type "unknown"
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -499,7 +499,7 @@ def test_validate_sex_unknown_existing_sex(
         store.session.commit()
         assert sample_obj.sex != sample.sex
 
-    validator = ValidateCaseOrderService(status_db=orders_api.status)
+    validator = ValidateCaseOrderService(store)
 
     # WHEN calling _validate_sex
     validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
@@ -513,7 +513,7 @@ def test_validate_sex_unknown_new_sex(
     # GIVEN we have an order with a sample that is already in the database and with different gender but the new is of
     # type "unknown"
     order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.status
+    store = orders_api.validation_service.store
     customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
@@ -533,7 +533,7 @@ def test_validate_sex_unknown_new_sex(
     for sample in samples:
         assert sample_obj.sex != sample.sex
 
-    validator = ValidateCaseOrderService(status_db=orders_api.status)
+    validator = ValidateCaseOrderService(store)
 
     # WHEN calling _validate_sex
     validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
@@ -574,7 +574,7 @@ def test_submit_unique_sample_name(
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         # GIVEN we have an order with a sample that is not existing in the database
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        store = orders_api.status
+        store = orders_api.validation_service.store
         assert not store._get_query(table=Sample).first()
 
         monkeypatch_process_lims(monkeypatch, order_data)

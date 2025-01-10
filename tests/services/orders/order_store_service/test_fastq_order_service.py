@@ -1,7 +1,9 @@
 from cg.constants import DataDelivery, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
+from cg.services.orders.store_order_services.implementations.store_fastq_order_service import (
+    StoreFastqOrderService,
+)
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
 

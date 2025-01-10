@@ -8,7 +8,7 @@ from cg.services.order_validation_service.models.sample_aliases import (
 )
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Pool, Sample
 from cg.store.store import Store
 

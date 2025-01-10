@@ -3,7 +3,9 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
+from cg.services.orders.store_order_services.implementations.store_pool_order import (
+    StorePoolOrderService,
+)
 from cg.store.models import ApplicationVersion, Case, CaseSample, Order, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

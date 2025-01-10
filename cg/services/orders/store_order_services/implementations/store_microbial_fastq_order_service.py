@@ -1,29 +1,26 @@
-import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, Workflow
-from cg.models.orders.order import OrderIn
+from cg.constants import DataDelivery, SexOptions, Workflow
 from cg.models.orders.sample_base import StatusEnum
-from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
-from cg.services.order_validation_service.workflows.pacbio_long_read.models.sample import (
-    PacbioSample,
+from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
+    MicrobialFastqOrder,
+)
+from cg.services.order_validation_service.workflows.microbial_fastq.models.sample import (
+    MicrobialFastqSample,
 )
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
-from cg.services.orders.submitters.order_submitter import StoreOrderService
+from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
-LOG = logging.getLogger(__name__)
 
-
-class StorePacBioOrderService(StoreOrderService):
-    """Storing service for PacBio Long Read orders."""
+class StoreMicrobialFastqOrderService(StoreOrderService):
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: PacbioOrder) -> dict:
+    def store_order(self, order: MicrobialFastqOrder) -> dict:
         """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
@@ -34,44 +31,42 @@ class StorePacBioOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-        new_samples = self.store_order_data_in_status_db(order=order)
-        return {"project": project_data, "records": new_samples}
+        new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
+        return {"records": new_samples, "project": project_data}
 
-    def store_order_data_in_status_db(self, order: PacbioOrder) -> list[Sample]:
+    def store_order_data_in_status_db(self, order: MicrobialFastqOrder) -> list[Sample]:
         """
-        Store all order data in the Status database for a Pacbio order. Return the samples.
+        Store all order data in the Status database for a Microbial FASTQ order. Return the samples.
         The stored data objects are:
         - Order
         - Samples
         - For each Sample, a Case
         - For each Sample, a relationship between the Sample and its Case
         """
-        status_db_order: Order = self._create_db_order(order=order)
+        db_order = self._create_db_order(order=order)
         new_samples = []
-        with self.status_db.no_autoflush_context():
+        with self.status_db.session.no_autoflush:
             for sample in order.samples:
                 case: Case = self._create_db_case_for_sample(
-                    sample=sample,
-                    customer=status_db_order.customer,
-                    ticket_id=str(status_db_order.ticket_id),
+                    sample=sample, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
                     order_name=order.name,
-                    customer=status_db_order.customer,
-                    ticket_id=str(status_db_order.ticket_id),
+                    ticket_id=str(db_order.ticket_id),
+                    customer=db_order.customer,
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=case, sample=db_sample, status=StatusEnum.unknown
                 )
-                self.status_db.add_multiple_items_to_store([case, case_sample, db_sample])
-                status_db_order.cases.append(case)
+                self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
+                db_order.cases.append(case)
                 new_samples.append(db_sample)
-        self.status_db.add_item_to_store(status_db_order)
+        self.status_db.add_item_to_store(db_order)
         self.status_db.commit_to_store()
         return new_samples
 
-    def _create_db_order(self, order: PacbioOrder) -> Order:
+    def _create_db_order(self, order: MicrobialFastqOrder) -> Order:
         """Return an Order database object."""
         ticket_id: int = order._generated_ticket_id
         customer: Customer = self.status_db.get_customer_by_internal_id(
@@ -80,13 +75,13 @@ class StorePacBioOrderService(StoreOrderService):
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
-        self, sample: PacbioSample, customer: Customer, ticket_id: str
+        self, sample: MicrobialFastqSample, customer: Customer, ticket_id: str
     ) -> Case:
-        """Return a Case database object for a PacbioSample."""
+        """Return a Case database object for a MicrobialFastqSample."""
         case_name: str = f"{sample.name}-case"
         case: Case = self.status_db.add_case(
             data_analysis=Workflow.RAW_DATA,
-            data_delivery=DataDelivery.BAM,
+            data_delivery=DataDelivery.FASTQ,
             name=case_name,
             priority=sample.priority,
             ticket=ticket_id,
@@ -95,7 +90,11 @@ class StorePacBioOrderService(StoreOrderService):
         return case
 
     def _create_db_sample(
-        self, sample: PacbioSample, order_name: str, customer: Customer, ticket_id: str
+        self,
+        sample: MicrobialFastqSample,
+        order_name: str,
+        ticket_id: str,
+        customer: Customer,
     ) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
@@ -105,13 +104,11 @@ class StorePacBioOrderService(StoreOrderService):
             name=sample.name,
             customer=customer,
             application_version=application_version,
-            sex=sample.sex,
+            sex=SexOptions.UNKNOWN,
             comment=sample.comment,
             internal_id=sample._generated_lims_id,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
-            tumour=sample.tumour,
-            subject_id=sample.subject_id,
         )
