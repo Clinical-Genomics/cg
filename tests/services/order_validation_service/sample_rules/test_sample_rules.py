@@ -246,14 +246,16 @@ def test_validate_buffer_skip_rc_condition(fastq_order: FastqOrder):
     assert isinstance(errors[0], BufferInvalidError)
 
 
-def test_validate_pools_contain_multiple_applications(valid_rml_order: RmlOrder):
+def test_validate_pools_contain_multiple_applications(rml_order: RmlOrder):
 
     # GIVEN a pooled order with the same pool containing multiple applications
-    _, samples = next(iter(valid_rml_order.pools.items()))
+    rml_order.samples[0].pool = "pool"
+    rml_order.samples[1].pool = "pool"
+    _, samples = next(iter(rml_order.pools.items()))
     samples[1].application = f"Not {samples[0].application}"
 
     # WHEN validating that the pools contain a single application
-    errors: list[PoolApplicationError] = validate_pools_contain_one_application(valid_rml_order)
+    errors: list[PoolApplicationError] = validate_pools_contain_one_application(rml_order)
 
     # THEN errors should be returned
     assert errors
@@ -263,15 +265,17 @@ def test_validate_pools_contain_multiple_applications(valid_rml_order: RmlOrder)
     assert len(errors) == len(samples)
 
 
-def test_validate_pools_contain_multiple_priorities(valid_rml_order: RmlOrder):
+def test_validate_pools_contain_multiple_priorities(rml_order: RmlOrder):
 
     # GIVEN a pooled order with the same pool containing multiple priorities
-    _, samples = next(iter(valid_rml_order.pools.items()))
+    rml_order.samples[0].pool = "pool"
+    rml_order.samples[1].pool = "pool"
+    _, samples = next(iter(rml_order.pools.items()))
     samples[0].priority = PriorityEnum.research
     samples[1].priority = PriorityEnum.priority
 
     # WHEN validating that the pools contain a single application
-    errors: list[PoolPriorityError] = validate_pools_contain_one_priority(valid_rml_order)
+    errors: list[PoolPriorityError] = validate_pools_contain_one_priority(rml_order)
 
     # THEN errors should be returned
     assert errors
