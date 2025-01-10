@@ -4,8 +4,8 @@ import datetime
 import logging
 from typing import Any
 
-from google.auth.transport.requests import Request
-from google.oauth2 import service_account
+from google.auth import jwt
+from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
@@ -46,17 +46,14 @@ class TrailblazerAPI:
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
-        self.google_client_id = config["trailblazer"]["google_client_id"]
         self.host = config["trailblazer"]["host"]
 
     @property
     def auth_header(self) -> dict:
-        credentials = service_account.IDTokenCredentials.from_service_account_file(
-            self.service_account_auth_file,
-            target_audience=self.google_client_id,
-        )
-        credentials.refresh(Request())
-        return {"Authorization": f"Bearer {credentials.token}"}
+        signer = RSASigner.from_service_account_file(self.service_account_auth_file)
+        payload = {"email": self.service_account}
+        jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
+        return {"Authorization": f"Bearer {jwt_token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
