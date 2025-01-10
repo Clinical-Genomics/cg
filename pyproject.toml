@@ -86,6 +86,7 @@ ruff = "*"
 pytest-xdist = "*"
 
 [project.scripts]
+name = "cg"
 cg = "cg.cli.base:base"
 
 
