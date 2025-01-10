@@ -12,6 +12,8 @@ from cg.services.order_validation_service.errors.sample_errors import (
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
+    PoolApplicationError,
+    PoolPriorityError,
     SampleNameNotAvailableError,
     SampleNameRepeatedError,
     VolumeRequiredError,
@@ -20,11 +22,16 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellPositionMissingError,
     WellPositionRmlMissingError,
 )
-from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
+from cg.services.order_validation_service.models.sample_aliases import (
+    IndexedSample,
+    OrderWithIndexedSamples,
+)
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
     get_indices_for_tube_repeated_container_name,
+    has_multiple_applications,
+    has_multiple_priorities,
     is_container_name_missing,
     is_invalid_well_format,
     is_invalid_well_format_rml,
@@ -239,4 +246,31 @@ def validate_well_positions_required_rml(
         if sample.is_on_plate and not sample.well_position_rml:
             error = WellPositionRmlMissingError(sample_index=sample_index)
             errors.append(error)
+    return errors
+
+
+def validate_pools_contain_one_application(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[PoolApplicationError]:
+    """Returns a list of errors for each sample in a pool containing multiple applications."""
+    errors: list[PoolApplicationError] = []
+    for pool, enumerated_samples in order.enumerated_pools.items():
+        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
+        if has_multiple_applications(samples):
+            for sample_index, _ in enumerated_samples:
+                error = PoolApplicationError(sample_index=sample_index, pool_name=pool)
+                errors.append(error)
+    return errors
+
+
+def validate_pools_contain_one_priority(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[PoolPriorityError]:
+    errors: list[PoolPriorityError] = []
+    for pool, enumerated_samples in order.enumerated_pools.items():
+        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
+        if has_multiple_priorities(samples):
+            for sample_index, _ in enumerated_samples:
+                error = PoolPriorityError(sample_index=sample_index, pool_name=pool)
+                errors.append(error)
     return errors
