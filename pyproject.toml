@@ -74,7 +74,7 @@ email-validator = "^2.2.0"
 rich-click = "^1.8.4"
 
 
-[tool.poetry.dev-dependencies]
+[tool.oetry.group.dev.dependencies]
 coveralls = "*"
 mock = "*"
 pre-commit = "*"
