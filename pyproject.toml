@@ -85,7 +85,7 @@ pytest = "*"
 ruff = "*"
 pytest-xdist = "*"
 
-[tool.poetry.scripts]
+[project.scripts]
 cg = "cg.cli.base:base"
 
 
