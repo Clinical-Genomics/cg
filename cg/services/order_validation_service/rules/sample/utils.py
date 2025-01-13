@@ -3,9 +3,9 @@ from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.constants import (
+    ALLOWED_SKIP_RC_BUFFERS,
     INDEX_SEQUENCES,
     IndexEnum,
-    ALLOWED_SKIP_RC_BUFFERS,
 )
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
@@ -185,9 +185,11 @@ def is_index_sequence_missing(sample: IndexedSample) -> bool:
 
 
 def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
+    """Validates if the given index sequence matches the given index and index number.
+    The index numbers start at 1, creating an offset."""
     return (
         sample.index != IndexEnum.NO_INDEX
-        and INDEX_SEQUENCES[sample.index][sample.index_number] != sample.index_sequence
+        and INDEX_SEQUENCES[sample.index][sample.index_number - 1] != sample.index_sequence
     )
 
 
