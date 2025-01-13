@@ -43,6 +43,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
+from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
@@ -926,6 +927,10 @@ class NfAnalysisAPI(AnalysisAPI):
         for metric in qc_metrics_raw:
             try:
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+                if self.tower_workflow == "rnafusion":
+                    sample_metrics[metric.id].update(
+                        {metric.name.lower(): RnafusionQCMetrics(metric.value)}
+                    )
             except KeyError:
                 sample_metrics[metric.id] = {metric.name.lower(): metric.value}
         return NextflowAnalysis(sample_metrics=sample_metrics)
