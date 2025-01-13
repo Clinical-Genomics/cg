@@ -162,6 +162,52 @@ def validate_concentration_required_if_skip_rc(
     return errors
 
 
+def validate_index_number_in_range(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexNumberOutOfRangeError]:
+    errors: list[IndexNumberOutOfRangeError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_number_out_of_range(sample):
+            error = IndexNumberOutOfRangeError(sample_index=sample_index, index=sample.index)
+            errors.append(error)
+    return errors
+
+
+def validate_index_number_required(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexNumberMissingError]:
+    errors: list[IndexNumberMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_number_missing(sample):
+            error = IndexNumberMissingError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_index_sequence_mismatch(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexSequenceMismatchError]:
+    errors: list[IndexSequenceMismatchError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_sequence_mismatched(sample):
+            error = IndexSequenceMismatchError(
+                sample_index=sample_index, index=sample.index, index_number=sample.index_number
+            )
+            errors.append(error)
+    return errors
+
+
+def validate_index_sequence_required(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexSequenceMissingError]:
+    errors: list[IndexSequenceMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_sequence_missing(sample):
+            error = IndexSequenceMissingError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
 def validate_organism_exists(
     order: OrderWithNonHumanSamples, store: Store, **kwargs
 ) -> list[OrganismDoesNotExistError]:
@@ -345,51 +391,5 @@ def validate_well_positions_required_rml(
     for sample_index, sample in order.enumerated_samples:
         if sample.is_on_plate and not sample.well_position_rml:
             error = WellPositionRmlMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_index_number_required(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexNumberMissingError]:
-    errors: list[IndexNumberMissingError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_number_missing(sample):
-            error = IndexNumberMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_index_number_in_range(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexNumberOutOfRangeError]:
-    errors: list[IndexNumberOutOfRangeError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_number_out_of_range(sample):
-            error = IndexNumberOutOfRangeError(sample_index=sample_index, index=sample.index)
-            errors.append(error)
-    return errors
-
-
-def validate_index_sequence_required(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexSequenceMissingError]:
-    errors: list[IndexSequenceMissingError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_sequence_missing(sample):
-            error = IndexSequenceMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_index_sequence_mismatch(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexSequenceMismatchError]:
-    errors: list[IndexSequenceMismatchError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_sequence_mismatched(sample):
-            error = IndexSequenceMismatchError(
-                sample_index=sample_index, index=sample.index, index_number=sample.index_number
-            )
             errors.append(error)
     return errors
