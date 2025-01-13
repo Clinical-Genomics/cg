@@ -464,7 +464,7 @@ def test_get_unique_applications(request: FixtureRequest, workflow: Workflow):
     )
 
     # WHEN filtering unique applications
-    unique_applications: list[ApplicationModel] = delivery_report_api.get_unique_applications(
+    unique_applications: list[ApplicationModel] = delivery_report_api.get_unique_application_tags(
         samples
     )
 

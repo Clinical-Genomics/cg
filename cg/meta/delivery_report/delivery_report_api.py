@@ -240,13 +240,13 @@ class DeliveryReportAPI:
         samples: list[SampleModel] = self.get_samples_data(
             case=case, analysis_metadata=analysis_metadata
         )
-        unique_applications: list[ApplicationModel] = self.get_unique_applications(samples=samples)
+        unique_application_tags: list[str] = self.get_unique_application_tags(samples=samples)
         return CaseModel(
             name=case.name,
             id=case.internal_id,
             data_analysis=self.get_case_analysis_data(case=case, analysis=analysis),
             samples=samples,
-            applications=unique_applications,
+            applications=unique_application_tags,
         )
 
     def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
@@ -324,12 +324,12 @@ class DeliveryReportAPI:
         )
 
     @staticmethod
-    def get_unique_applications(samples: list[SampleModel]) -> list[ApplicationModel]:
+    def get_unique_application_tags(samples: list[SampleModel]) -> list[ApplicationModel]:
         """Returns the unique case associated applications."""
         applications = list()
         for sample in samples:
             if sample.application not in applications:
-                applications.append(sample.application)
+                applications.append(sample.application.tag)
         return applications
 
     def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
