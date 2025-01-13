@@ -4,7 +4,7 @@ from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
 
 from cg.constants import NA_FIELD, REPORT_SUPPORTED_WORKFLOW
-from cg.models.delivery_report.sample import ApplicationModel, SampleModel
+from cg.models.delivery_report.sample import SampleModel
 from cg.models.delivery_report.validators import (
     get_analysis_type_as_string,
     get_date_as_string,
@@ -115,14 +115,14 @@ class CaseModel(BaseModel):
         id: case ID; source: StatusDB/family/internal_id
         samples: list of samples associated to a case/family
         data_analysis: workflow attributes
-        applications: case associated unique application tags
+        application_tags: case associated unique application tags
     """
 
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     samples: list[SampleModel]
     data_analysis: DataAnalysisModel
-    applications: list[ApplicationModel]
+    applications: list[str]
 
 
 class ReportModel(BaseModel):
