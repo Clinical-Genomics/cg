@@ -2,7 +2,11 @@ import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum
-from cg.services.order_validation_service.constants import INDEX_SEQUENCES, IndexEnum
+from cg.services.order_validation_service.constants import (
+    INDEX_SEQUENCES,
+    IndexEnum,
+    ALLOWED_SKIP_RC_BUFFERS,
+)
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
@@ -185,3 +189,17 @@ def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
         sample.index != IndexEnum.NO_INDEX
         and INDEX_SEQUENCES[sample.index][sample.index_number] != sample.index_sequence
     )
+
+
+def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
+    """
+    Validate that the order has only samples with buffers that allow to skip reception control.
+    We can only allow skipping reception control if there is no need to exchange buffer,
+    so if the sample has nuclease-free water or Tris-HCL as buffer.
+    """
+    errors: list[BufferInvalidError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
+            error = BufferInvalidError(sample_index=sample_index)
+            errors.append(error)
+    return errors
