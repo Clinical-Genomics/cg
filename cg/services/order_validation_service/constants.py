@@ -15,7 +15,7 @@ class ElutionBuffer(StrEnum):
     WATER = "Nuclease-free water"
 
 
-ALLOWED_SKIP_RC_BUFFERS = ["Nuclease-free water", "Tris-HCl"]
+ALLOWED_SKIP_RC_BUFFERS = [ElutionBuffer.TRIS_HCL, ElutionBuffer.WATER]
 
 MINIMUM_VOLUME, MAXIMUM_VOLUME = 20, 130
 

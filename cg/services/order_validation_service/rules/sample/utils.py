@@ -4,6 +4,7 @@ from collections import Counter
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.order_validation_service.constants import INDEX_SEQUENCES, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
+    BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     OccupiedWellError,
@@ -133,7 +134,9 @@ def validate_concentration_interval(
     errors: list[ConcentrationInvalidIfSkipRCError] = []
     for sample_index, sample in order.enumerated_samples:
         if application := store.get_application_by_tag(sample.application):
-            allowed_interval = get_concentration_interval(sample=sample, application=application)
+            allowed_interval: tuple[float, float] = get_concentration_interval(
+                sample=sample, application=application
+            )
             if allowed_interval and has_sample_invalid_concentration(
                 sample=sample, allowed_interval=allowed_interval
             ):

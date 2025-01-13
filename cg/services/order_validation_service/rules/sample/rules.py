@@ -1,5 +1,4 @@
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -26,10 +25,11 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellPositionMissingError,
     WellPositionRmlMissingError,
 )
-from cg.services.order_validation_service.models.sample_aliases import (
-    IndexedSample,
+from cg.services.order_validation_service.models.order_aliases import (
     OrderWithIndexedSamples,
+    OrderWithNonHumanSamples,
 )
+from cg.services.order_validation_service.models.sample_aliases import IndexedSample
 from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
@@ -43,6 +43,7 @@ from cg.services.order_validation_service.rules.sample.utils import (
     is_index_sequence_missing,
     is_invalid_well_format,
     is_invalid_well_format_rml,
+    validate_buffers_are_allowed,
     validate_concentration_interval,
     validate_concentration_required,
 )
@@ -63,6 +64,7 @@ def validate_application_compatibility(
 ) -> list[ApplicationNotCompatibleError]:
     """
     Validate that the applications of all samples in the order are compatible with the order type.
+    Applicable to all order types.
     """
     errors: list[ApplicationNotCompatibleError] = []
     order_type: OrderType = order.order_type
@@ -81,7 +83,10 @@ def validate_application_compatibility(
 def validate_application_exists(
     order: OrderWithSamples, store: Store, **kwargs
 ) -> list[ApplicationNotValidError]:
-    """Validate that the applications of all samples in the order exist in the database."""
+    """
+    Validate that the applications of all samples in the order exist in the database.
+    Applicable to all order types.
+    """
     errors: list[ApplicationNotValidError] = []
     for sample_index, sample in order.enumerated_samples:
         if not store.get_application_by_tag(sample.application):
@@ -93,6 +98,10 @@ def validate_application_exists(
 def validate_applications_not_archived(
     order: OrderWithSamples, store: Store, **kwargs
 ) -> list[ApplicationArchivedError]:
+    """
+    Validate that none of the applications of the samples in the order are archived.
+    Applicable to all order types.
+    """
     errors: list[ApplicationArchivedError] = []
     for sample_index, sample in order.enumerated_samples:
         if store.is_application_archived(sample.application):
@@ -102,24 +111,23 @@ def validate_applications_not_archived(
 
 
 def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[BufferInvalidError]:
+    """
+    Validate that the sample buffers allow skipping reception control if that option is true.
+    Only applicable to order types that have targeted sequencing applications (TGS).
+    """
     errors: list[BufferInvalidError] = []
     if order.skip_reception_control:
         errors.extend(validate_buffers_are_allowed(order))
     return errors
 
 
-def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
-    errors: list[BufferInvalidError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
-            error = BufferInvalidError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
 def validate_concentration_interval_if_skip_rc(
     order: FastqOrder, store: Store, **kwargs
 ) -> list[ConcentrationInvalidIfSkipRCError]:
+    """
+    Validate that all samples have an allowed concentration if the order skips reception control.
+    Only applicable to order types that have targeted sequencing applications (TGS).
+    """
     errors: list[ConcentrationInvalidIfSkipRCError] = []
     if order.skip_reception_control:
         errors.extend(validate_concentration_interval(order=order, store=store))
@@ -129,6 +137,10 @@ def validate_concentration_interval_if_skip_rc(
 def validate_container_name_required(
     order: OrderWithSamples, **kwargs
 ) -> list[ContainerNameMissingError]:
+    """
+    Validate that the container names are present for all samples sent on plates.
+    Applicable to all order types.
+    """
     errors: list[ContainerNameMissingError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_container_name_missing(sample=sample):
@@ -140,6 +152,10 @@ def validate_container_name_required(
 def validate_concentration_required_if_skip_rc(
     order: FastqOrder, **kwargs
 ) -> list[ConcentrationRequiredError]:
+    """
+    Validate that all samples have a concentration if the order skips reception control.
+    Only applicable to order types that have targeted sequencing applications (TGS).
+    """
     errors: list[ConcentrationRequiredError] = []
     if order.skip_reception_control:
         errors.extend(validate_concentration_required(order))
@@ -147,8 +163,12 @@ def validate_concentration_required_if_skip_rc(
 
 
 def validate_organism_exists(
-    order: OrderWithSamples, store: Store, **kwargs
+    order: OrderWithNonHumanSamples, store: Store, **kwargs
 ) -> list[OrganismDoesNotExistError]:
+    """
+    Validate that the organisms of all samples in the order exist in the database.
+    Only applicable to order types with non-human samples.
+    """
     errors: list[OrganismDoesNotExistError] = []
     for sample_index, sample in order.enumerated_samples:
         if not store.get_organism_by_internal_id(sample.organism):
@@ -157,10 +177,47 @@ def validate_organism_exists(
     return errors
 
 
+def validate_pools_contain_one_application(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[PoolApplicationError]:
+    """
+    Validate that the pools in the order contain only samples with the same application.
+    Only applicable to order types with indexed samples (RML and Fluffy).
+    """
+    errors: list[PoolApplicationError] = []
+    for pool, enumerated_samples in order.enumerated_pools.items():
+        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
+        if has_multiple_applications(samples):
+            for sample_index, _ in enumerated_samples:
+                error = PoolApplicationError(sample_index=sample_index, pool_name=pool)
+                errors.append(error)
+    return errors
+
+
+def validate_pools_contain_one_priority(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[PoolPriorityError]:
+    """
+    Validate that the pools in the order contain only samples with the same priority.
+    Only applicable to order types with indexed samples (RML and Fluffy).
+    """
+    errors: list[PoolPriorityError] = []
+    for pool, enumerated_samples in order.enumerated_pools.items():
+        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
+        if has_multiple_priorities(samples):
+            for sample_index, _ in enumerated_samples:
+                error = PoolPriorityError(sample_index=sample_index, pool_name=pool)
+                errors.append(error)
+    return errors
+
+
 def validate_sample_names_available(
     order: OrderWithSamples, store: Store, **kwargs
 ) -> list[SampleNameNotAvailableError]:
-    """Validate that the sample names do not exists in the database under the same customer."""
+    """
+    Validate that the sample names do not exists in the database under the same customer.
+    Applicable to all order types.
+    """
     errors: list[SampleNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
     for sample_index, sample in order.enumerated_samples:
@@ -175,6 +232,10 @@ def validate_sample_names_available(
 def validate_sample_names_unique(
     order: OrderWithSamples, **kwargs
 ) -> list[SampleNameRepeatedError]:
+    """
+    Validate that all the sample names are unique within the order.
+    Applicable to all order types except Mutant orders.
+    """
     sample_indices: list[int] = get_indices_for_repeated_sample_names(order)
     return [SampleNameRepeatedError(sample_index=sample_index) for sample_index in sample_indices]
 
@@ -183,7 +244,10 @@ def validate_tube_container_name_unique(
     order: OrderWithSamples,
     **kwargs,
 ) -> list[ContainerNameRepeatedError]:
-    """Validate that the container names are unique for tube samples."""
+    """
+    Validate that the container names are unique for tube samples within the order.
+    Applicable to all order types.
+    """
     errors: list[ContainerNameRepeatedError] = []
     repeated_container_name_indices: list = get_indices_for_tube_repeated_container_name(order)
     for sample_index in repeated_container_name_indices:
@@ -193,6 +257,10 @@ def validate_tube_container_name_unique(
 
 
 def validate_volume_interval(order: OrderWithSamples, **kwargs) -> list[InvalidVolumeError]:
+    """
+    Validate that the volume of all samples is within the allowed interval.
+    Applicable to all order types.
+    """
     errors: list[InvalidVolumeError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_volume_invalid(sample):
@@ -202,6 +270,10 @@ def validate_volume_interval(order: OrderWithSamples, **kwargs) -> list[InvalidV
 
 
 def validate_volume_required(order: OrderWithSamples, **kwargs) -> list[VolumeRequiredError]:
+    """
+    Validate that all samples have a volume if they are in a container.
+    Applicable to all order types.
+    """
     errors: list[VolumeRequiredError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_volume_missing(sample):
@@ -214,11 +286,19 @@ def validate_wells_contain_at_most_one_sample(
     order: OrderWithSamples,
     **kwargs,
 ) -> list[OccupiedWellError]:
+    """
+    Validate that the wells in the order contain at most one sample.
+    Applicable to all order types with non-indexed samples.
+    """
     plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_occupied_well_errors()
 
 
 def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[WellFormatError]:
+    """
+    Validate that the well positions of all samples sent in plates have the correct format.
+    Applicable to all order types with non-indexed samples.
+    """
     errors: list[WellFormatError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_invalid_well_format(sample=sample):
@@ -230,6 +310,10 @@ def validate_well_position_format(order: OrderWithSamples, **kwargs) -> list[Wel
 def validate_well_position_rml_format(
     order: OrderWithIndexedSamples, **kwargs
 ) -> list[WellFormatRmlError]:
+    """
+    Validate that the well positions of all indexed samples have the correct format.
+    Applicable to all order types with indexed samples.
+    """
     errors: list[WellFormatRmlError] = []
     for sample_index, sample in order.enumerated_samples:
         if is_invalid_well_format_rml(sample=sample):
@@ -242,6 +326,10 @@ def validate_well_positions_required(
     order: OrderWithSamples,
     **kwargs,
 ) -> list[WellPositionMissingError]:
+    """
+    Validate that all samples sent in plates have well positions.
+    Applicable to all order types with non-indexed samples
+    """
     plate_samples = PlateSamplesValidator(order)
     return plate_samples.get_well_position_missing_errors()
 
@@ -249,38 +337,15 @@ def validate_well_positions_required(
 def validate_well_positions_required_rml(
     order: OrderWithIndexedSamples, **kwargs
 ) -> list[WellPositionRmlMissingError]:
+    """
+    Validate that all indexed samples have well positions.
+    Applicable to all order types with indexed samples.
+    """
     errors: list[WellPositionRmlMissingError] = []
     for sample_index, sample in order.enumerated_samples:
         if sample.is_on_plate and not sample.well_position_rml:
             error = WellPositionRmlMissingError(sample_index=sample_index)
             errors.append(error)
-    return errors
-
-
-def validate_pools_contain_one_application(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[PoolApplicationError]:
-    """Returns a list of errors for each sample in a pool containing multiple applications."""
-    errors: list[PoolApplicationError] = []
-    for pool, enumerated_samples in order.enumerated_pools.items():
-        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
-        if has_multiple_applications(samples):
-            for sample_index, _ in enumerated_samples:
-                error = PoolApplicationError(sample_index=sample_index, pool_name=pool)
-                errors.append(error)
-    return errors
-
-
-def validate_pools_contain_one_priority(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[PoolPriorityError]:
-    errors: list[PoolPriorityError] = []
-    for pool, enumerated_samples in order.enumerated_pools.items():
-        samples: list[IndexedSample] = [sample for _, sample in enumerated_samples]
-        if has_multiple_priorities(samples):
-            for sample_index, _ in enumerated_samples:
-                error = PoolPriorityError(sample_index=sample_index, pool_name=pool)
-                errors.append(error)
     return errors
 
 

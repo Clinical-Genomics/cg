@@ -2,10 +2,8 @@ import logging
 from datetime import datetime
 
 from cg.models.orders.sample_base import PriorityEnum, SexEnum, StatusEnum
-from cg.services.order_validation_service.models.sample_aliases import (
-    IndexedSample,
-    OrderWithIndexedSamples,
-)
+from cg.services.order_validation_service.models.order_aliases import OrderWithIndexedSamples
+from cg.services.order_validation_service.models.sample_aliases import IndexedSample
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.store_order_services.store_order_service import StoreOrderService

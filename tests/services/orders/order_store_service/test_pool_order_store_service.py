@@ -2,7 +2,7 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.services.order_validation_service.models.sample_aliases import OrderWithIndexedSamples
+from cg.services.order_validation_service.models.order_aliases import OrderWithIndexedSamples
 from cg.services.orders.store_order_services.implementations.store_pool_order import (
     StorePoolOrderService,
 )
