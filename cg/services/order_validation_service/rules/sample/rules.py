@@ -1,4 +1,5 @@
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import ControlEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -22,8 +23,9 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellPositionRmlMissingError,
 )
 from cg.services.order_validation_service.models.order_aliases import (
+    OrderWithControlSamples,
     OrderWithIndexedSamples,
-    OrderWithNonHumanSamples,
+    OrderWithSamplesFromOrganism,
 )
 from cg.services.order_validation_service.models.sample_aliases import IndexedSample
 from cg.services.order_validation_service.rules.sample.utils import (
@@ -155,11 +157,11 @@ def validate_concentration_required_if_skip_rc(
 
 
 def validate_organism_exists(
-    order: OrderWithNonHumanSamples, store: Store, **kwargs
+    order: OrderWithSamplesFromOrganism, store: Store, **kwargs
 ) -> list[OrganismDoesNotExistError]:
     """
     Validate that the organisms of all samples in the order exist in the database.
-    Only applicable to order types with non-human samples.
+    Only applicable to Microsalt and Mutant orders.
     """
     errors: list[OrganismDoesNotExistError] = []
     for sample_index, sample in order.enumerated_samples:
@@ -208,13 +210,34 @@ def validate_sample_names_available(
 ) -> list[SampleNameNotAvailableError]:
     """
     Validate that the sample names do not exists in the database under the same customer.
-    Applicable to all order types with human samples.
+    Applicable to all orders without control samples.
     """
     errors: list[SampleNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
     for sample_index, sample in order.enumerated_samples:
         if store.get_sample_by_customer_and_name(
             sample_name=sample.name, customer_entry_id=[customer.id]
+        ):
+            error = SampleNameNotAvailableError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_non_control_sample_names_available(
+    order: OrderWithControlSamples, store: Store, **kwargs
+) -> list[SampleNameNotAvailableError]:
+    """
+    Validate that non-control sample names do not exists in the database under the same customer.
+    Applicable to all orders with control samples.
+    """
+    errors: list[SampleNameNotAvailableError] = []
+    customer = store.get_customer_by_internal_id(order.customer)
+    for sample_index, sample in order.enumerated_samples:
+        if (
+            store.get_sample_by_customer_and_name(
+                sample_name=sample.name, customer_entry_id=[customer.id]
+            )
+            and sample.control == ControlEnum.not_control
         ):
             error = SampleNameNotAvailableError(sample_index=sample_index)
             errors.append(error)
