@@ -1,6 +1,6 @@
 from cg.services.order_validation_service.errors.case_sample_errors import CaptureKitMissingError
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.rules import (
+from cg.services.order_validation_service.workflows.balsamic.rules import (
     validate_capture_kit_panel_requirement,
 )
 from cg.store.models import Application
