@@ -8,13 +8,13 @@ from cg.services.order_validation_service.utils import parse_control
 
 
 class RmlSample(Sample):
+    concentration: float
     container: ContainerEnum | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     index: IndexEnum
     index_number: int | None = None
     index_sequence: str | None = None
     pool: str
-    pool_concentration: float
     priority: PriorityEnum
     rml_plate_name: str | None = None
     sample_concentration: float | None = None
