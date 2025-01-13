@@ -70,7 +70,7 @@ class StoreFastqOrderService(StoreOrderService):
             comment=f"MAF case for {case.internal_id} original order id {order.id}",
             data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
-            name="_".join([sample_obj.name, "MAF"]),
+            name="_".join([case.name, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
