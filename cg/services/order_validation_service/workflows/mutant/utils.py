@@ -10,6 +10,6 @@ def get_indices_for_repeated_non_control_sample_names(order: MutantOrder) -> lis
     )
     indices: list[int] = []
     for index, sample in order.enumerated_samples:
-        if counter.get(sample.name) > 1:
+        if counter.get(sample.name) > 1 and sample.control == ControlEnum.not_control:
             indices.append(index)
     return indices
