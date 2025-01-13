@@ -101,11 +101,6 @@ class ConcentrationInvalidIfSkipRCError(SampleError):
         super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
 
 
-class MutantSampleNameNotUniqueError(SampleError):
-    field: str = "name"
-    message: str = "Non-control sample name must be unique"
-
-
 class PoolApplicationError(SampleError):
     def __init__(self, sample_index: int, pool_name: str):
         field: str = "application"
