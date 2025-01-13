@@ -246,11 +246,13 @@ class CreateHandler(BaseHandler):
         priority: Priority | None = Priority.standard,
         synopsis: str | None = None,
         customer_id: int | None = None,
+        comment: str | None = None,
     ) -> Case:
         """Build a new Case record."""
 
         internal_id: str = self.generate_readable_case_id()
         return Case(
+            comment=comment,
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),

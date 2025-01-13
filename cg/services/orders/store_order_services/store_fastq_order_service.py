@@ -8,6 +8,7 @@ from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.submitters.order_submitter import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
@@ -62,12 +63,14 @@ class StoreFastqOrderService(StoreOrderService):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: Sample, order: Order) -> None:
+    def create_maf_case(self, sample_obj: Sample, order: Order, case: Case) -> None:
         """Add a MAF case to the Status database."""
+        maf_order = self.status_db.get_order_by_id(MAF_ORDER_ID)
         case: Case = self.status_db.add_case(
+            comment=f"MAF case for {case.internal_id} original order id {order.id}",
             data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
-            name="_".join([sample_obj.name, "MAF"]),
+            name="_".join([sample_obj.internal_id, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
@@ -78,7 +81,7 @@ class StoreFastqOrderService(StoreOrderService):
         relationship: CaseSample = self.status_db.relate_sample(
             case=case, sample=sample_obj, status=StatusEnum.unknown
         )
-        order.cases.append(case)
+        maf_order.cases.append(case)
         self.status_db.session.add_all([case, relationship])
 
     def store_items_in_status(
@@ -137,7 +140,7 @@ class StoreFastqOrderService(StoreOrderService):
                     not new_sample.is_tumour
                     and new_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
-                    self.create_maf_case(sample_obj=new_sample, order=status_db_order)
+                    self.create_maf_case(sample_obj=new_sample, order=status_db_order, case=case)
                 case.customer = customer
                 new_relationship = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
