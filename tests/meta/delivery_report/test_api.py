@@ -13,18 +13,18 @@ from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
-    ReportModel,
-    CustomerModel,
     CaseModel,
+    CustomerModel,
     DataAnalysisModel,
+    ReportModel,
 )
 from cg.models.delivery_report.sample import (
-    SampleModel,
     ApplicationModel,
     MethodsModel,
+    SampleModel,
     TimestampModel,
 )
-from cg.store.models import Case, Analysis, Sample
+from cg.store.models import Analysis, Case, Sample
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -464,7 +464,7 @@ def test_get_unique_applications(request: FixtureRequest, workflow: Workflow):
     )
 
     # WHEN filtering unique applications
-    unique_applications: list[ApplicationModel] = delivery_report_api.get_unique_applications(
+    unique_applications: list[ApplicationModel] = delivery_report_api.get_unique_application_tags(
         samples
     )
 

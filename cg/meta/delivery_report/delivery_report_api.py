@@ -37,14 +37,7 @@ from cg.models.delivery_report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -247,7 +240,9 @@ class DeliveryReportAPI:
         samples: list[SampleModel] = self.get_samples_data(
             case=case, analysis_metadata=analysis_metadata
         )
-        unique_applications: list[ApplicationModel] = self.get_unique_applications(samples=samples)
+        unique_applications: list[ApplicationModel] = self.get_unique_application_tags(
+            samples=samples
+        )
         return CaseModel(
             name=case.name,
             id=case.internal_id,
@@ -331,12 +326,12 @@ class DeliveryReportAPI:
         )
 
     @staticmethod
-    def get_unique_applications(samples: list[SampleModel]) -> list[ApplicationModel]:
+    def get_unique_application_tags(samples: list[SampleModel]) -> list[ApplicationModel]:
         """Returns the unique case associated applications."""
         applications = list()
         for sample in samples:
             if sample.application not in applications:
-                applications.append(sample.application)
+                applications.append(sample.application.tag)
         return applications
 
     def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
