@@ -52,7 +52,7 @@ class TrailblazerAPI:
     def auth_header(self) -> dict:
         credentials = service_account.IDTokenCredentials.from_service_account_file(
             filename=self.service_account_auth_file,
-            target_audience="CG-TB-CLIENT",
+            target_audience="trailblazer",
         )
         credentials.refresh(Request())
         return {"Authorization": f"Bearer {credentials.token}"}
