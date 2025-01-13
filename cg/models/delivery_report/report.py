@@ -115,7 +115,7 @@ class CaseModel(BaseModel):
         id: case ID; source: StatusDB/family/internal_id
         samples: list of samples associated to a case/family
         data_analysis: workflow attributes
-        applications: case associated unique application tags
+        applications: case associated unique applications
     """
 
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
