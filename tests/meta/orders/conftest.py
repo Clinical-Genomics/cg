@@ -9,6 +9,7 @@ from cg.services.orders.submitters.order_submitter_registry import (
     OrderSubmitterRegistry,
     setup_order_submitter_registry,
 )
+from cg.store.models import Order
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 

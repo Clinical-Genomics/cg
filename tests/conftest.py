@@ -59,6 +59,7 @@ from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -1648,6 +1649,9 @@ def base_store(
     organism = store.add_organism("C. jejuni", "C. jejuni")
     store.session.add(organism)
     store.session.commit()
+
+    order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
+    store.add_multiple_items_to_store([order])
 
     yield store
 
