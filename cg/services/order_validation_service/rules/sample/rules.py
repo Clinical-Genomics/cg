@@ -208,7 +208,7 @@ def validate_sample_names_available(
 ) -> list[SampleNameNotAvailableError]:
     """
     Validate that the sample names do not exists in the database under the same customer.
-    Applicable to all order types.
+    Applicable to all order types with human samples.
     """
     errors: list[SampleNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
@@ -226,7 +226,7 @@ def validate_sample_names_unique(
 ) -> list[SampleNameRepeatedError]:
     """
     Validate that all the sample names are unique within the order.
-    Applicable to all order types except Mutant orders.
+    Applicable to all order types.
     """
     sample_indices: list[int] = get_indices_for_repeated_sample_names(order)
     return [SampleNameRepeatedError(sample_index=sample_index) for sample_index in sample_indices]
