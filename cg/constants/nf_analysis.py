@@ -51,7 +51,7 @@ MULTIQC_NEXFLOW_CONFIG = """process {
         memory = { 4.GB * task.attempt }
         time   = { 4.h  * task.attempt }
         cpus = 2
-        ext.args = ' --data-format json '
+        ext.args = ' --data-format json --cl-config "max_table_rows: 10000" '
     }
 }
 """

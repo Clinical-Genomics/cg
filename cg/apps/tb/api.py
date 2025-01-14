@@ -4,8 +4,8 @@ import datetime
 import logging
 from typing import Any
 
-from google.auth import jwt
-from google.auth.crypt import RSASigner
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
@@ -50,10 +50,12 @@ class TrailblazerAPI:
 
     @property
     def auth_header(self) -> dict:
-        signer = RSASigner.from_service_account_file(self.service_account_auth_file)
-        payload = {"email": self.service_account}
-        jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        return {"Authorization": f"Bearer {jwt_token}"}
+        credentials = service_account.IDTokenCredentials.from_service_account_file(
+            filename=self.service_account_auth_file,
+            target_audience="trailblazer",
+        )
+        credentials.refresh(Request())
+        return {"Authorization": f"Bearer {credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST

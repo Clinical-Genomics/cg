@@ -44,6 +44,7 @@ from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -59,6 +60,7 @@ from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -1649,6 +1651,9 @@ def base_store(
     store.session.add(organism)
     store.session.commit()
 
+    order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
+    store.add_multiple_items_to_store([order])
+
     yield store
 
 
@@ -2475,6 +2480,16 @@ def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Pat
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
+
+
+# Nallo fixtures
+@pytest.fixture(scope="function")
+def nallo_context(
+    cg_context: CGConfig,
+) -> CGConfig:
+    """Context to use in cli."""
+    cg_context.meta_apis["analysis_api"] = NalloAnalysisAPI(config=cg_context)
+    return cg_context
 
 
 # Raredisease fixtures
