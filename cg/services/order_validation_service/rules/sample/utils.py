@@ -1,13 +1,14 @@
 import re
 from collections import Counter
 
-from cg.models.orders.sample_base import ContainerEnum
+from cg.models.orders.sample_base import ContainerEnum, ControlEnum
 from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     OccupiedWellError,
+    SampleNameNotAvailableError,
     WellPositionMissingError,
 )
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
@@ -77,6 +78,23 @@ def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
         if counter.get(sample.name) > 1:
             indices.append(index)
     return indices
+
+
+def get_sample_name_not_available_errors(
+    order: OrderWithSamples, store: Store, has_order_control: bool
+) -> list[SampleNameNotAvailableError]:
+    """Return errors for non-control samples with names already used in the database."""
+    errors: list[SampleNameNotAvailableError] = []
+    customer = store.get_customer_by_internal_id(order.customer)
+    for sample_index, sample in order.enumerated_samples:
+        if store.get_sample_by_customer_and_name(
+            sample_name=sample.name, customer_entry_id=[customer.id]
+        ):
+            if has_order_control and sample.control in [ControlEnum.positive, ControlEnum.negative]:
+                continue
+            error = SampleNameNotAvailableError(sample_index=sample_index)
+            errors.append(error)
+    return errors
 
 
 def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:

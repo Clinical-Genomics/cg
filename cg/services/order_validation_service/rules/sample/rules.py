@@ -32,6 +32,7 @@ from cg.services.order_validation_service.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
     get_indices_for_tube_repeated_container_name,
+    get_sample_name_not_available_errors,
     has_multiple_applications,
     has_multiple_priorities,
     is_container_name_missing,
@@ -212,14 +213,9 @@ def validate_sample_names_available(
     Validate that the sample names do not exists in the database under the same customer.
     Applicable to all orders without control samples.
     """
-    errors: list[SampleNameNotAvailableError] = []
-    customer = store.get_customer_by_internal_id(order.customer)
-    for sample_index, sample in order.enumerated_samples:
-        if store.get_sample_by_customer_and_name(
-            sample_name=sample.name, customer_entry_id=[customer.id]
-        ):
-            error = SampleNameNotAvailableError(sample_index=sample_index)
-            errors.append(error)
+    errors: list[SampleNameNotAvailableError] = get_sample_name_not_available_errors(
+        order=order, store=store, has_order_control=False
+    )
     return errors
 
 
@@ -230,17 +226,9 @@ def validate_non_control_sample_names_available(
     Validate that non-control sample names do not exists in the database under the same customer.
     Applicable to all orders with control samples.
     """
-    errors: list[SampleNameNotAvailableError] = []
-    customer = store.get_customer_by_internal_id(order.customer)
-    for sample_index, sample in order.enumerated_samples:
-        if (
-            store.get_sample_by_customer_and_name(
-                sample_name=sample.name, customer_entry_id=[customer.id]
-            )
-            and sample.control == ControlEnum.not_control
-        ):
-            error = SampleNameNotAvailableError(sample_index=sample_index)
-            errors.append(error)
+    errors: list[SampleNameNotAvailableError] = get_sample_name_not_available_errors(
+        order=order, store=store, has_order_control=True
+    )
     return errors
 
 
