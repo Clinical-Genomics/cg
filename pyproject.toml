@@ -50,7 +50,7 @@ dependencies = [
 "paramiko",
 "petname",
 "psutil",
-"pydantic",
+"pydantic == 2.7.4",
 "python-dateutil",
 "PyYAML",
 "tabulate",
