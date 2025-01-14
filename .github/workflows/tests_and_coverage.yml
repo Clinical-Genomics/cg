@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction  --all-extras
 
       - name: Test with Pytest & Coveralls
         run: |
