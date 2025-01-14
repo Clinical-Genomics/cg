@@ -1,6 +1,6 @@
 from typing import Callable
 
-from cg.models.orders.sample_base import ContainerEnum, ControlEnum
+from cg.models.orders.sample_base import ControlEnum
 from cg.services.order_validation_service.constants import ElutionBuffer, ExtractionMethod
 from cg.services.order_validation_service.errors.case_errors import CaseError
 from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
@@ -59,7 +59,3 @@ def parse_extraction_method(extraction_method: str | None) -> ExtractionMethod:
         if extraction_method and extraction_method.startswith(ExtractionMethod.MAGNAPURE_96)
         else extraction_method
     )
-
-
-def set_to_none(container: ContainerEnum | None) -> None:
-    return None
