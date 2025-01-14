@@ -43,16 +43,16 @@ def create_case(samples: list[BalsamicSample]) -> BalsamicCase:
 
 
 def create_order(cases: list[BalsamicCase]) -> BalsamicOrder:
-    return BalsamicOrder(
-        connect_to_ticket=True,
+    order = BalsamicOrder(
         delivery_type=BalsamicDeliveryType.FASTQ_ANALYSIS,
         name="order_name",
-        ticket_number="#12345",
         project_type=OrderType.BALSAMIC,
-        user_id=1,
         customer="cust000",
         cases=cases,
     )
+    order._user_id = 1
+    order._generated_ticket_id = 12345
+    return order
 
 
 @pytest.fixture

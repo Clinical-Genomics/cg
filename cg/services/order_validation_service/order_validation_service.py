@@ -27,17 +27,20 @@ class OrderValidationService:
     def __init__(self, store: Store):
         self.store = store
 
-    def get_validation_response(self, raw_order: dict, order_type: OrderType) -> dict:
+    def get_validation_response(self, raw_order: dict, order_type: OrderType, user_id: int) -> dict:
         model = ORDER_TYPE_MODEL_MAP[order_type]
         rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
-        errors = self._get_errors(raw_order=raw_order, model=model, rule_set=rule_set)
+        errors: ValidationErrors = self._get_errors(
+            raw_order=raw_order, model=model, rule_set=rule_set, user_id=user_id
+        )
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(
-        self, raw_order: dict, model: type[Order], rule_set: RuleSet
+        self, raw_order: dict, model: type[Order], rule_set: RuleSet, user_id: int
     ) -> ValidationErrors:
         parsed_order, errors = ModelValidator.validate(order=raw_order, model=model)
         if parsed_order:
+            parsed_order._user_id = user_id
             errors: ValidationErrors = self._get_rule_validation_errors(
                 order=parsed_order, rule_set=rule_set
             )
@@ -78,11 +81,12 @@ class OrderValidationService:
             sample_errors=sample_errors,
         )
 
-    def parse_and_validate(self, raw_order: dict, order_type: OrderType) -> Order:
+    def parse_and_validate(self, raw_order: dict, order_type: OrderType, user_id: int) -> Order:
         model = ORDER_TYPE_MODEL_MAP[order_type]
         rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
         parsed_order, errors = ModelValidator.validate(order=raw_order, model=model)
         if parsed_order:
+            parsed_order._user_id = user_id
             errors: ValidationErrors = self._get_rule_validation_errors(
                 order=parsed_order,
                 rule_set=rule_set,

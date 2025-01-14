@@ -6,14 +6,13 @@ from cg.models.orders.constants import OrderType
 
 class Order(BaseModel):
     comment: str | None = None
-    connect_to_ticket: bool = False
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")
     name: str = Field(min_length=1)
     skip_reception_control: bool = False
     _generated_ticket_id: int | None = PrivateAttr(default=None)
-    user_id: int
+    _user_id: int = PrivateAttr(default=None)
 
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):

@@ -1,21 +1,64 @@
-from cg.services.order_validation_service.errors.order_errors import OrderNameRequiredError
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.rules.order.rules import (
-    validate_name_required_for_new_order,
+from cg.services.order_validation_service.errors.order_errors import (
+    CustomerCannotSkipReceptionControlError,
+    CustomerDoesNotExistError,
+    UserNotAssociatedWithCustomerError,
 )
+from cg.services.order_validation_service.rules.order.rules import (
+    validate_customer_can_skip_reception_control,
+    validate_customer_exists,
+    validate_user_belongs_to_customer,
+)
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.store.models import Customer
+from cg.store.store import Store
 
 
-def test_order_name_is_required(valid_order: Order):
+def test_validate_customer_can_skip_reception_control(base_store: Store, valid_order: TomteOrder):
+    # GIVEN an order attempting to skip reception control from a not trusted customer
+    customer: Customer = base_store.get_customer_by_internal_id(valid_order.customer)
+    customer.is_trusted = False
+    valid_order.skip_reception_control = True
 
-    # GIVEN an order that needs a name but is missing one
-    valid_order.name = None
-    valid_order.connect_to_ticket = False
-
-    # WHEN validating the order
-    errors: list[OrderNameRequiredError] = validate_name_required_for_new_order(valid_order)
+    # WHEN validating that the customer can skip reception control
+    errors: list[CustomerCannotSkipReceptionControlError] = (
+        validate_customer_can_skip_reception_control(order=valid_order, store=base_store)
+    )
 
     # THEN an error should be returned
     assert errors
 
-    # THEN the error should be about the name
-    assert isinstance(errors[0], OrderNameRequiredError)
+    # THEN the error should concern the customer not being allowed to skip reception control
+    assert isinstance(errors[0], CustomerCannotSkipReceptionControlError)
+
+
+def test_validate_customer_does_not_exist(base_store: Store, valid_order: TomteOrder):
+    # GIVEN an order from an unknown customer
+    valid_order.customer = "Unknown customer"
+
+    # WHEN validating that the customer exists
+    errors: list[CustomerDoesNotExistError] = validate_customer_exists(
+        order=valid_order, store=base_store
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the unknown customer
+    assert isinstance(errors[0], CustomerDoesNotExistError)
+
+
+def test_validate_user_belongs_to_customer(base_store: Store, valid_order: TomteOrder):
+    # GIVEN an order for a customer which the logged-in user does not have access to
+    customer: Customer = base_store.get_customer_by_internal_id(valid_order.customer)
+    customer.users = []
+
+    # WHEN validating that the user belongs to the customer account
+    errors: list[UserNotAssociatedWithCustomerError] = validate_user_belongs_to_customer(
+        order=valid_order, store=base_store
+    )
+
+    # THEN an error should be raised
+    assert errors
+
+    # THEN the error should concern the user not belonging to the customer
+    assert isinstance(errors[0], UserNotAssociatedWithCustomerError)

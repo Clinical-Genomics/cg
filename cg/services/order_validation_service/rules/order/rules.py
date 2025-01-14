@@ -1,12 +1,9 @@
 from cg.services.order_validation_service.errors.order_errors import (
     CustomerCannotSkipReceptionControlError,
     CustomerDoesNotExistError,
-    OrderError,
-    OrderNameRequiredError,
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.rules.order.utils import is_order_name_missing
 from cg.store.store import Store
 
 
@@ -22,23 +19,17 @@ def validate_customer_exists(
     return errors
 
 
-def validate_user_belongs_to_customer(order: Order, store: Store, **kwargs) -> list[OrderError]:
+def validate_user_belongs_to_customer(
+    order: Order, store: Store, **kwargs
+) -> list[UserNotAssociatedWithCustomerError]:
     has_access: bool = store.is_user_associated_with_customer(
-        user_id=order.user_id,
+        user_id=order._user_id,
         customer_internal_id=order.customer,
     )
 
-    errors: list[OrderError] = []
+    errors: list[UserNotAssociatedWithCustomerError] = []
     if not has_access:
         error = UserNotAssociatedWithCustomerError()
-        errors.append(error)
-    return errors
-
-
-def validate_name_required_for_new_order(order: Order, **kwargs) -> list[OrderNameRequiredError]:
-    errors: list[OrderNameRequiredError] = []
-    if is_order_name_missing(order):
-        error = OrderNameRequiredError()
         errors.append(error)
     return errors
 
