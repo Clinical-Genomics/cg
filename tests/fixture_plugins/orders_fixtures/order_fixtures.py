@@ -12,6 +12,7 @@ from cg.services.order_validation_service.workflows.microbial_fastq.models.order
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
+from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 
@@ -86,6 +87,14 @@ def mip_rna_order(mip_rna_order_to_submit: dict) -> MipRnaOrder:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
     mip_rna_order._generated_ticket_id = 123456
     return mip_rna_order
+
+
+@pytest.fixture
+def mutant_order(sarscov2_order_to_submit: dict, ticket_id_as_int: int) -> MutantOrder:
+    """Parse mutant order example."""
+    order = MutantOrder.model_validate(sarscov2_order_to_submit)
+    order._generated_ticket_id = ticket_id_as_int
+    return order
 
 
 @pytest.fixture

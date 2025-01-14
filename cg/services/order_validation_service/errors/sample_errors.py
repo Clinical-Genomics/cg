@@ -61,6 +61,11 @@ class SampleNameNotAvailableError(SampleError):
     message: str = "Sample name already used in previous order"
 
 
+class SampleNameNotAvailableControlError(SampleError):
+    field: str = "name"
+    message: str = "Sample name already in use. Only control samples are allowed repeated names"
+
+
 class ContainerNameRepeatedError(SampleError):
     field: str = "container_name"
     message: str = "Tube names must be unique among samples"
