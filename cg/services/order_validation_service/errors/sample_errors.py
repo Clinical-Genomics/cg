@@ -1,10 +1,6 @@
-from cg.services.order_validation_service.constants import (
-    INDEX_SEQUENCES,
-    MAXIMUM_VOLUME,
-    MINIMUM_VOLUME,
-    IndexEnum,
-)
+from cg.services.order_validation_service.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME, IndexEnum
 from cg.services.order_validation_service.errors.order_errors import OrderError
+from cg.services.order_validation_service.index_sequences import INDEX_SEQUENCES
 
 
 class SampleError(OrderError):

@@ -2,11 +2,7 @@ import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum
-from cg.services.order_validation_service.constants import (
-    ALLOWED_SKIP_RC_BUFFERS,
-    INDEX_SEQUENCES,
-    IndexEnum,
-)
+from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
@@ -17,6 +13,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     SampleNameNotAvailableError,
     WellPositionMissingError,
 )
+from cg.services.order_validation_service.index_sequences import INDEX_SEQUENCES
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.models.sample_aliases import IndexedSample

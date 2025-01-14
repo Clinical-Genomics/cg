@@ -1,5 +1,5 @@
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
-from cg.services.order_validation_service.constants import INDEX_SEQUENCES, ElutionBuffer, IndexEnum
+from cg.services.order_validation_service.constants import ElutionBuffer, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
@@ -18,6 +18,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     WellFormatError,
     WellFormatRmlError,
 )
+from cg.services.order_validation_service.index_sequences import INDEX_SEQUENCES
 from cg.services.order_validation_service.rules.sample.rules import (
     validate_buffer_skip_rc_condition,
     validate_concentration_interval_if_skip_rc,
