@@ -9,6 +9,7 @@ from cg.services.order_validation_service.utils import parse_control
 
 class FluffySample(Sample):
     concentration: float
+    concentration_sample: float | None = None
     container: ContainerEnum | None = Field(default=None, exclude=True)
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     priority: PriorityEnum
@@ -17,6 +18,5 @@ class FluffySample(Sample):
     index_sequence: str | None = None
     pool: str
     rml_plate_name: str | None = None
-    sample_concentration: float | None = None
     volume: int
     well_position_rml: str | None = None

@@ -128,7 +128,7 @@ class IndexNumberMissingError(SampleError):
 class IndexNumberOutOfRangeError(SampleError):
     def __init__(self, sample_index: int, index: IndexEnum):
         field: str = "index_number"
-        maximum: int = len(INDEX_SEQUENCES[index]) + 1
+        maximum: int = len(INDEX_SEQUENCES[index])
         message: str = f"Index number must be a number between 1 and {maximum}"
         super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
 
