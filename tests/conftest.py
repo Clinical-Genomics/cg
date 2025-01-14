@@ -2483,8 +2483,8 @@ def sequencing_platform() -> str:
 
 
 # Nallo fixtures
-@pytest.fixture(scope="function", name="nallo_context")
-def fixture_nallo_context(
+@pytest.fixture(scope="function")
+def nallo_context(
     cg_context: CGConfig,
 ) -> CGConfig:
     """Context to use in cli."""

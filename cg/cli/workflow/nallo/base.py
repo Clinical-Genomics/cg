@@ -15,6 +15,6 @@ LOG = logging.getLogger(__name__)
 @click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def nallo(context: click.Context) -> None:
-    """gms/nallo analysis workflow."""
+    """GMS/Nallo analysis workflow."""
     AnalysisAPI.get_help(context)
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = NalloAnalysisAPI(config=context.obj)

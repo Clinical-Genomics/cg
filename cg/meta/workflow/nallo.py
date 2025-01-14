@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 
 class NalloAnalysisAPI(NfAnalysisAPI):
-    """Handles communication between NALLO processes
+    """Handles communication between Nallo processes
     and the rest of CG infrastructure."""
 
     def __init__(
