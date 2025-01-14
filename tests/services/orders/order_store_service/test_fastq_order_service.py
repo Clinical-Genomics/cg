@@ -40,11 +40,8 @@ def test_store_order_data_in_status_db(
     # THEN the sample sex should be stored
     assert new_samples[0].sex == "male"
 
-    # THEN a MAF order should have been created with the MAF order id
-    maf_order: Order = base_store.get_order_by_id(MAF_ORDER_ID)
-    assert maf_order
-
     # THEN the MAF order should have one case linked to the tumour negative sample
+    maf_order: Order = base_store.get_order_by_id(MAF_ORDER_ID)
     maf_cases: list[Case] = maf_order.cases
     assert len(maf_cases) == 1
     assert not maf_cases[0].samples[0].is_tumour
