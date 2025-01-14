@@ -258,6 +258,6 @@ def get_options():
 def validate_order(order_type: OrderType):
     raw_order = request.get_json()
     response = order_validation_service.get_validation_response(
-        raw_order=raw_order, order_type=order_type
+        raw_order=raw_order, order_type=order_type, user_id=g.current_user.id
     )
     return jsonify(response), HTTPStatus.OK
