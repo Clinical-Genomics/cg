@@ -13,19 +13,18 @@ from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
-    CaseModel,
-    CustomerModel,
-    DataAnalysisModel,
     ReportModel,
+    CustomerModel,
+    CaseModel,
+    DataAnalysisModel,
 )
 from cg.models.delivery_report.sample import (
+    SampleModel,
     ApplicationModel,
     MethodsModel,
-    SampleModel,
     TimestampModel,
 )
-from cg.store.models import Analysis, Case, Sample
-
+from cg.store.models import Case, Analysis, Sample
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
