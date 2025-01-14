@@ -230,7 +230,7 @@ def is_index_sequence_missing(sample: IndexedSample) -> bool:
 
 
 def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
-    """Validates if the given index sequence matches the given index and index number.
+    """Validates if the sample's index sequence matches the given index and index number.
     The index numbers start at 1, creating an offset."""
     return (
         sample.index != IndexEnum.NO_INDEX
