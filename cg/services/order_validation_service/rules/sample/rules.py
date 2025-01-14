@@ -9,6 +9,10 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ConcentrationRequiredError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    IndexNumberMissingError,
+    IndexNumberOutOfRangeError,
+    IndexSequenceMismatchError,
+    IndexSequenceMissingError,
     InvalidVolumeError,
     OccupiedWellError,
     OrganismDoesNotExistError,
@@ -36,6 +40,10 @@ from cg.services.order_validation_service.rules.sample.utils import (
     has_multiple_applications,
     has_multiple_priorities,
     is_container_name_missing,
+    is_index_number_missing,
+    is_index_number_out_of_range,
+    is_index_sequence_mismatched,
+    is_index_sequence_missing,
     is_invalid_well_format,
     is_invalid_well_format_rml,
     validate_buffers_are_allowed,
@@ -154,6 +162,52 @@ def validate_concentration_required_if_skip_rc(
     errors: list[ConcentrationRequiredError] = []
     if order.skip_reception_control:
         errors.extend(validate_concentration_required(order))
+    return errors
+
+
+def validate_index_number_in_range(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexNumberOutOfRangeError]:
+    errors: list[IndexNumberOutOfRangeError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_number_out_of_range(sample):
+            error = IndexNumberOutOfRangeError(sample_index=sample_index, index=sample.index)
+            errors.append(error)
+    return errors
+
+
+def validate_index_number_required(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexNumberMissingError]:
+    errors: list[IndexNumberMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_number_missing(sample):
+            error = IndexNumberMissingError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_index_sequence_mismatch(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexSequenceMismatchError]:
+    errors: list[IndexSequenceMismatchError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_sequence_mismatched(sample):
+            error = IndexSequenceMismatchError(
+                sample_index=sample_index, index=sample.index, index_number=sample.index_number
+            )
+            errors.append(error)
+    return errors
+
+
+def validate_index_sequence_required(
+    order: OrderWithIndexedSamples, **kwargs
+) -> list[IndexSequenceMissingError]:
+    errors: list[IndexSequenceMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_index_sequence_missing(sample):
+            error = IndexSequenceMissingError(sample_index=sample_index)
+            errors.append(error)
     return errors
 
 
@@ -319,7 +373,7 @@ def validate_well_position_rml_format(
     """
     errors: list[WellFormatRmlError] = []
     for sample_index, sample in order.enumerated_samples:
-        if is_invalid_well_format_rml(sample=sample):
+        if sample.well_position_rml and is_invalid_well_format_rml(sample=sample):
             error = WellFormatRmlError(sample_index=sample_index)
             errors.append(error)
     return errors

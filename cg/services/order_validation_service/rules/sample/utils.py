@@ -2,7 +2,7 @@ import re
 from collections import Counter
 
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum
-from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS
+from cg.services.order_validation_service.constants import ALLOWED_SKIP_RC_BUFFERS, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
     ConcentrationInvalidIfSkipRCError,
@@ -13,6 +13,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     SampleNameNotAvailableError,
     WellPositionMissingError,
 )
+from cg.services.order_validation_service.index_sequences import INDEX_SEQUENCES
 from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.order_validation_service.models.sample_aliases import IndexedSample
@@ -206,6 +207,36 @@ def has_multiple_applications(samples: list[IndexedSample]) -> bool:
 
 def has_multiple_priorities(samples: list[IndexedSample]) -> bool:
     return len({sample.priority for sample in samples}) > 1
+
+
+def is_index_number_missing(sample: IndexedSample) -> bool:
+    """Checks if a sample is missing its index number.
+    Note: Index is an attribute on the sample, not its position in the list of samples."""
+    return sample.index != IndexEnum.NO_INDEX and not sample.index_number
+
+
+def is_index_number_out_of_range(sample: IndexedSample) -> bool:
+    """Validates that the sample's index number is in range for its specified index.
+    Note: Index number is an attribute on the sample, not its position in the list of samples."""
+    return sample.index_number and not (
+        1 <= sample.index_number <= len(INDEX_SEQUENCES[sample.index])
+    )
+
+
+def is_index_sequence_missing(sample: IndexedSample) -> bool:
+    """Checks if a sample is missing its index number.
+    Note: Index sequence is an attribute on the sample, not its position in the list of samples."""
+    return sample.index != IndexEnum.NO_INDEX and not sample.index_sequence
+
+
+def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
+    """Validates if the sample's index sequence matches the given index and index number.
+    The index numbers start at 1, creating an offset."""
+    return (
+        sample.index != IndexEnum.NO_INDEX
+        and not is_index_number_out_of_range(sample)
+        and INDEX_SEQUENCES[sample.index][sample.index_number - 1] != sample.index_sequence
+    )
 
 
 def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
