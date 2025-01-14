@@ -19,10 +19,10 @@ def test_store_order_data_in_status_db(
     """Test that a PacBio order is stored in the database."""
     # GIVEN a valid Pacbio order and a Pacbio store service
 
-    # GIVEN a basic store with no samples, cases nor orders
+    # GIVEN a basic store with no samples, cases and only a MAF order
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
-    assert base_store._get_query(table=Order).count() == 0
+    assert base_store._get_query(table=Order).count() == 1
 
     # GIVEN that a Pacbio application exists in the store
     helpers.ensure_application_version(
@@ -37,7 +37,7 @@ def test_store_order_data_in_status_db(
     )
 
     # THEN it should store the order
-    assert base_store._get_query(table=Order).count() == 1
+    assert base_store._get_query(table=Order).count() == 2
 
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 3
