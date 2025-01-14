@@ -25,7 +25,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.services.order_validation_service.workflows.balsamic.rules.case_sample.rules import (
+from cg.services.order_validation_service.workflows.balsamic.rules import (
     validate_capture_kit_panel_requirement,
 )
 

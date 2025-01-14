@@ -1,4 +1,4 @@
-from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
+from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import INDEX_SEQUENCES, ElutionBuffer, IndexEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     BufferInvalidError,
@@ -12,6 +12,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     IndexSequenceMissingError,
     PoolApplicationError,
     PoolPriorityError,
+    SampleNameNotAvailableControlError,
     SampleNameNotAvailableError,
     VolumeRequiredError,
     WellFormatError,
@@ -26,6 +27,7 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_index_number_required,
     validate_index_sequence_mismatch,
     validate_index_sequence_required,
+    validate_non_control_sample_names_available,
     validate_pools_contain_one_application,
     validate_pools_contain_one_priority,
     validate_sample_names_available,
@@ -35,11 +37,14 @@ from cg.services.order_validation_service.rules.sample.rules import (
     validate_well_position_rml_format,
 )
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.services.order_validation_service.workflows.rml.models.sample import RmlSample
 from cg.store.models import Sample
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_sample_names_available(valid_microsalt_order: MicrosaltOrder, sample_store: Store):
@@ -76,6 +81,86 @@ def test_validate_tube_container_name_unique(valid_microsalt_order: MicrosaltOrd
     assert isinstance(errors[0], ContainerNameRepeatedError)
     assert errors[0].sample_index == 0
     assert errors[1].sample_index == 1
+
+
+def test_validate_sample_names_available(
+    fluffy_order: FluffyOrder, store: Store, helpers: StoreHelpers
+):
+    """
+    Test that an order without any control sample that has a sample name already existing in the
+    database returns an error.
+    """
+
+    # GIVEN an order without control with a sample name already in the database
+    sample_name: str = fluffy_order.samples[0].name
+    helpers.add_sample(
+        store=store,
+        name=sample_name,
+        customer_id=fluffy_order.customer,
+    )
+
+    # WHEN validating that the sample names are available to the customer
+    errors = validate_sample_names_available(order=fluffy_order, store=store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the reused sample name
+    assert isinstance(errors[0], SampleNameNotAvailableError)
+
+
+def test_validate_non_control_sample_names_available(
+    mutant_order: MutantOrder, store: Store, helpers: StoreHelpers
+):
+    """
+    Test that an order with a control sample name already existing in the database returns no error.
+    """
+
+    # GIVEN an order with a control sample
+    sample = mutant_order.samples[0]
+    assert sample.control == ControlEnum.positive
+
+    # GIVEN that there is a sample in the database with the same name
+    helpers.add_sample(
+        store=store,
+        name=sample.name,
+        customer_id=mutant_order.customer,
+    )
+
+    # WHEN validating that the sample names are available to the customer
+    errors = validate_non_control_sample_names_available(order=mutant_order, store=store)
+
+    # THEN no error should be returned because it is a control sample
+    assert not errors
+
+
+def test_validate_non_control_sample_names_available_non_control_sample_name(
+    mutant_order: MutantOrder, store: Store, helpers: StoreHelpers
+):
+    """
+    Test that an order with a non-control sample name already existing in the database returns an
+    error.
+    """
+
+    # GIVEN an order with a non-control sample
+    sample = mutant_order.samples[2]
+    assert sample.control == ControlEnum.not_control
+
+    # GIVEN that there is a sample in the database with the same name
+    helpers.add_sample(
+        store=store,
+        name=sample.name,
+        customer_id=mutant_order.customer,
+    )
+
+    # WHEN validating that the sample names are available to the customer
+    errors = validate_non_control_sample_names_available(order=mutant_order, store=store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the reused sample name
+    assert isinstance(errors[0], SampleNameNotAvailableControlError)
 
 
 def test_validate_well_position_format(valid_microsalt_order: MicrosaltOrder):
