@@ -2778,4 +2778,4 @@ ruff = ["ruff"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "aa01dcf16a0c95340482ea22d1e07e209521d35d72702d679d932649f0448ecb"
+content-hash = "99f7a42a96372684512f6561342bc4b290205f333b53913b3ae512e4392b3924"
