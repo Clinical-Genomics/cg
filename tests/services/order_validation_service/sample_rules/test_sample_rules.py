@@ -8,6 +8,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ContainerNameRepeatedError,
     PoolApplicationError,
     PoolPriorityError,
+    SampleNameNotAvailableControlError,
     SampleNameNotAvailableError,
     VolumeRequiredError,
     WellFormatError,
@@ -150,7 +151,7 @@ def test_validate_non_control_sample_names_available_non_control_sample_name(
     assert errors
 
     # THEN the error should concern the reused sample name
-    assert isinstance(errors[0], SampleNameNotAvailableError)
+    assert isinstance(errors[0], SampleNameNotAvailableControlError)
 
 
 def test_validate_well_position_format(valid_microsalt_order: MicrosaltOrder):
