@@ -23,7 +23,7 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: false
-    K
+
       - name: Install Dependencies
         run: poetry install --no-interaction --all-extras
 
