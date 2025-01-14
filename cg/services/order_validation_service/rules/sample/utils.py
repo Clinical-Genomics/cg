@@ -90,11 +90,19 @@ def get_sample_name_not_available_errors(
         if store.get_sample_by_customer_and_name(
             sample_name=sample.name, customer_entry_id=[customer.id]
         ):
-            if has_order_control and sample.control in [ControlEnum.positive, ControlEnum.negative]:
+            if is_sample_name_allowed_to_be_repeated(has_control=has_order_control, sample=sample):
                 continue
             error = SampleNameNotAvailableError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def is_sample_name_allowed_to_be_repeated(has_control: bool, sample: Sample) -> bool:
+    """
+    Return whether a sample name can be used if it is already in the database.
+    This is the case when the order has control samples and the sample is a control.
+    """
+    return has_control and sample.control in [ControlEnum.positive, ControlEnum.negative]
 
 
 def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
