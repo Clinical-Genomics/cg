@@ -362,7 +362,7 @@ def validate_well_position_rml_format(
     """
     errors: list[WellFormatRmlError] = []
     for sample_index, sample in order.enumerated_samples:
-        if is_invalid_well_format_rml(sample=sample):
+        if sample.well_position_rml and is_invalid_well_format_rml(sample=sample):
             error = WellFormatRmlError(sample_index=sample_index)
             errors.append(error)
     return errors
