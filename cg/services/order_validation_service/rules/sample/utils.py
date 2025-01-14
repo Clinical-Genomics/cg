@@ -195,6 +195,7 @@ def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
     The index numbers start at 1, creating an offset."""
     return (
         sample.index != IndexEnum.NO_INDEX
+        and not is_index_number_out_of_range(sample)
         and INDEX_SEQUENCES[sample.index][sample.index_number - 1] != sample.index_sequence
     )
 
