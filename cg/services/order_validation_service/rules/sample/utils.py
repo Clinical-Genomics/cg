@@ -8,6 +8,8 @@ from cg.services.order_validation_service.errors.sample_errors import (
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     OccupiedWellError,
+    SampleError,
+    SampleNameNotAvailableControlError,
     SampleNameNotAvailableError,
     WellPositionMissingError,
 )
@@ -82,9 +84,9 @@ def get_indices_for_repeated_sample_names(order: OrderWithSamples) -> list[int]:
 
 def get_sample_name_not_available_errors(
     order: OrderWithSamples, store: Store, has_order_control: bool
-) -> list[SampleNameNotAvailableError]:
+) -> list[SampleError]:
     """Return errors for non-control samples with names already used in the database."""
-    errors: list[SampleNameNotAvailableError] = []
+    errors: list[SampleError] = []
     customer = store.get_customer_by_internal_id(order.customer)
     for sample_index, sample in order.enumerated_samples:
         if store.get_sample_by_customer_and_name(
@@ -92,7 +94,9 @@ def get_sample_name_not_available_errors(
         ):
             if is_sample_name_allowed_to_be_repeated(has_control=has_order_control, sample=sample):
                 continue
-            error = SampleNameNotAvailableError(sample_index=sample_index)
+            error = get_appropriate_sample_name_available_error(
+                has_control=has_order_control, sample_index=sample_index
+            )
             errors.append(error)
     return errors
 
@@ -103,6 +107,18 @@ def is_sample_name_allowed_to_be_repeated(has_control: bool, sample: Sample) -> 
     This is the case when the order has control samples and the sample is a control.
     """
     return has_control and sample.control in [ControlEnum.positive, ControlEnum.negative]
+
+
+def get_appropriate_sample_name_available_error(
+    has_control: bool, sample_index: int
+) -> SampleError:
+    """
+    Return the appropriate error for a sample name that is not available based on whether the
+    order has control samples or not.
+    """
+    if has_control:
+        return SampleNameNotAvailableControlError(sample_index=sample_index)
+    return SampleNameNotAvailableError(sample_index=sample_index)
 
 
 def is_tube_container_name_redundant(sample: Sample, counter: Counter) -> bool:
