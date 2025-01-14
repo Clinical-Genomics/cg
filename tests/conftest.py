@@ -1655,10 +1655,10 @@ def base_store(
 
     organism = store.add_organism("C. jejuni", "C. jejuni")
     store.session.add(organism)
-    store.session.commit()
 
     order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
     store.add_multiple_items_to_store([order])
+    store.session.commit()
 
     yield store
 
