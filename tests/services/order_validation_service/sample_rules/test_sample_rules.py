@@ -1,5 +1,3 @@
-from store_helpers import StoreHelpers
-
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer
 from cg.services.order_validation_service.errors.sample_errors import (
@@ -36,6 +34,7 @@ from cg.services.order_validation_service.workflows.mutant.models.order import M
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.store.models import Sample
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_sample_names_available(valid_microsalt_order: MicrosaltOrder, sample_store: Store):
