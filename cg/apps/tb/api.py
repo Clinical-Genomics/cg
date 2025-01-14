@@ -46,14 +46,13 @@ class TrailblazerAPI:
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
-        self.google_client_id = config["trailblazer"]["google_client_id"]
         self.host = config["trailblazer"]["host"]
 
     @property
     def auth_header(self) -> dict:
         credentials = service_account.IDTokenCredentials.from_service_account_file(
-            self.service_account_auth_file,
-            target_audience=self.google_client_id,
+            filename=self.service_account_auth_file,
+            target_audience="trailblazer",
         )
         credentials.refresh(Request())
         return {"Authorization": f"Bearer {credentials.token}"}
