@@ -1,4 +1,4 @@
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, Field
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
@@ -9,7 +9,7 @@ from cg.services.order_validation_service.utils import parse_control, set_to_non
 
 class FluffySample(Sample):
     concentration: float
-    container: Annotated[None, BeforeValidator(set_to_none)] = None
+    container: Annotated[None, BeforeValidator(set_to_none)] = Field(default=None, exclude=True)
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     priority: PriorityEnum
     index: IndexEnum

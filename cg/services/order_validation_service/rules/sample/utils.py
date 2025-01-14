@@ -171,16 +171,22 @@ def has_multiple_priorities(samples: list[IndexedSample]) -> bool:
 
 
 def is_index_number_missing(sample: IndexedSample) -> bool:
+    """Checks if a sample is missing its index number.
+    Note: Index is an attribute on the sample, not its position in the list of samples."""
     return sample.index != IndexEnum.NO_INDEX and not sample.index_number
 
 
 def is_index_number_out_of_range(sample: IndexedSample) -> bool:
+    """Validates that the sample's index number is in range for its specified index.
+    Note: Index number is an attribute on the sample, not its position in the list of samples."""
     return sample.index_number and not (
         1 <= sample.index_number <= len(INDEX_SEQUENCES[sample.index])
     )
 
 
 def is_index_sequence_missing(sample: IndexedSample) -> bool:
+    """Checks if a sample is missing its index number.
+    Note: Index sequence is an attribute on the sample, not its position in the list of samples."""
     return sample.index != IndexEnum.NO_INDEX and not sample.index_sequence
 
 
