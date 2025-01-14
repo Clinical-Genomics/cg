@@ -44,6 +44,7 @@ from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -2479,6 +2480,16 @@ def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Pat
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
+
+
+# Nallo fixtures
+@pytest.fixture(scope="function")
+def nallo_context(
+    cg_context: CGConfig,
+) -> CGConfig:
+    """Context to use in cli."""
+    cg_context.meta_apis["analysis_api"] = NalloAnalysisAPI(config=cg_context)
+    return cg_context
 
 
 # Raredisease fixtures
