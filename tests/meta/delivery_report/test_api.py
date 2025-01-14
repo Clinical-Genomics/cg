@@ -26,6 +26,7 @@ from cg.models.delivery_report.sample import (
 )
 from cg.store.models import Case, Analysis, Sample
 
+
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     """Test rendering of the delivery report for different workflows."""
