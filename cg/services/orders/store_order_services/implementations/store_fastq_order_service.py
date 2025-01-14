@@ -8,6 +8,7 @@ from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
 from cg.services.order_validation_service.workflows.fastq.models.sample import FastqSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.store_order_services.store_order_service import StoreOrderService
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
@@ -58,7 +59,7 @@ class StoreFastqOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
-                self._create_maf_case(db_sample=db_sample, db_order=db_order)
+                self._create_maf_case(db_sample=db_sample, db_order=db_order, db_case=db_case)
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
@@ -113,7 +114,7 @@ class StoreFastqOrderService(StoreOrderService):
             order=order_name,
         )
 
-    def _create_maf_case(self, db_sample: Sample, db_order: Order) -> None:
+    def _create_maf_case(self, db_sample: Sample, db_order: Order, db_case: Case) -> None:
         """
         Add a MAF case and a relationship with the given sample to the current Status database
         transaction. This is done only if the given sample is non-tumour and  WGS.
@@ -123,7 +124,9 @@ class StoreFastqOrderService(StoreOrderService):
             not db_sample.is_tumour
             and db_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
-            case: Case = self.status_db.add_case(
+            maf_order: Order = self.status_db.get_order_by_id(MAF_ORDER_ID)
+            maf_case: Case = self.status_db.add_case(
+                comment=f"MAF case for {db_case.internal_id} original order id {db_order.id}",
                 data_analysis=Workflow.MIP_DNA,
                 data_delivery=DataDelivery.NO_DELIVERY,
                 name="_".join([db_sample.name, "MAF"]),
@@ -131,11 +134,11 @@ class StoreFastqOrderService(StoreOrderService):
                 priority=Priority.research,
                 ticket=db_sample.original_ticket,
             )
-            case.customer = self.status_db.get_customer_by_internal_id(
+            maf_case.customer = self.status_db.get_customer_by_internal_id(
                 customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
             )
-            case_sample: CaseSample = self.status_db.relate_sample(
-                case=case, sample=db_sample, status=StatusEnum.unknown
+            maf_case_sample: CaseSample = self.status_db.relate_sample(
+                case=maf_case, sample=db_sample, status=StatusEnum.unknown
             )
-            db_order.cases.append(case)
-            self.status_db.add_multiple_items_to_store([case, case_sample])
+            maf_order.cases.append(maf_case)
+            self.status_db.add_multiple_items_to_store([maf_case, maf_case_sample])
