@@ -69,13 +69,11 @@ class AnalysisClient(TrailblazerAPI):
     def init_app(self, app):
         service_account: str = app.config["trailblazer_service_account"]
         service_account_auth_file: str = app.config["trailblazer_service_account_auth_file"]
-        google_client_id: str = app.config["trailblazer_google_client_id"]
         host: str = app.config["trailblazer_host"]
         config = {
             "trailblazer": {
                 "service_account": service_account,
                 "service_account_auth_file": service_account_auth_file,
-                "google_client_id": google_client_id,
                 "host": host,
             }
         }
