@@ -107,7 +107,9 @@ def is_invalid_well_format(sample: Sample) -> bool:
 def is_invalid_well_format_rml(sample: IndexedSample) -> bool:
     """Check if an indexed sample has an invalid well format."""
     correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
-    return not bool(re.match(correct_well_position_pattern, sample.well_position_rml))
+    return sample.well_position_rml and not bool(
+        re.match(correct_well_position_pattern, sample.well_position_rml)
+    )
 
 
 def is_container_name_missing(sample: Sample) -> bool:
