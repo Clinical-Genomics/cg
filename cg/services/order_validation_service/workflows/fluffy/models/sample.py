@@ -1,15 +1,15 @@
 from pydantic import BeforeValidator
 from typing_extensions import Annotated
 
-from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
+from cg.models.orders.sample_base import ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import IndexEnum
 from cg.services.order_validation_service.models.sample import Sample
-from cg.services.order_validation_service.utils import parse_control
+from cg.services.order_validation_service.utils import parse_control, set_to_none
 
 
 class FluffySample(Sample):
     concentration: float
-    container: ContainerEnum | None = None
+    container: Annotated[None, BeforeValidator(set_to_none)] = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     priority: PriorityEnum
     index: IndexEnum
