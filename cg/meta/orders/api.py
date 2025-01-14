@@ -44,7 +44,7 @@ class OrdersAPI:
         """
         storing_service: StoreOrderService = self.storing_registry.get_storing_service(order_type)
         order: Order = self.validation_service.parse_and_validate(
-            raw_order=raw_order, order_type=order_type
+            raw_order=raw_order, order_type=order_type, user_id=user.id
         )
         ticket_number: int = self.ticket_handler.create_ticket(
             order=order, user_name=user.name, user_mail=user.email, order_type=order_type

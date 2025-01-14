@@ -14,7 +14,10 @@ def test_valid_order(
 
     # WHEN validating the order
     errors = tomte_validation_service._get_errors(
-        raw_order=valid_order.model_dump(by_alias=True), model=TomteOrder, rule_set=tomte_rule_set
+        raw_order=valid_order.model_dump(by_alias=True),
+        model=TomteOrder,
+        rule_set=tomte_rule_set,
+        user_id=valid_order._user_id,
     )
 
     # THEN no errors should be raised
@@ -33,7 +36,7 @@ def test_valid_order_conversion(
 
     # WHEN validating the order
     response = tomte_validation_service.get_validation_response(
-        raw_order=order, order_type=OrderType.TOMTE
+        raw_order=order, order_type=OrderType.TOMTE, user_id=valid_order._user_id
     )
 
     # THEN a response should be given
@@ -51,7 +54,7 @@ def test_order_error_conversion(
 
     # WHEN validating the order
     response: dict = tomte_validation_service.get_validation_response(
-        raw_order=order, order_type=OrderType.TOMTE
+        raw_order=order, order_type=OrderType.TOMTE, user_id=valid_order._user_id
     )
 
     # THEN there should be an error for the missing name
@@ -66,7 +69,7 @@ def test_case_error_conversion(valid_order, tomte_validation_service: OrderValid
 
     # WHEN validating the order
     response: dict = tomte_validation_service.get_validation_response(
-        raw_order=order, order_type=OrderType.TOMTE
+        raw_order=order, order_type=OrderType.TOMTE, user_id=valid_order._user_id
     )
 
     # THEN there should be an error for the faulty priority
@@ -84,7 +87,7 @@ def test_sample_error_conversion(
 
     # WHEN validating the order
     response = tomte_validation_service.get_validation_response(
-        raw_order=invalid_order, order_type=OrderType.TOMTE
+        raw_order=invalid_order, order_type=OrderType.TOMTE, user_id=valid_order._user_id
     )
 
     # THEN an error should be returned regarding the invalid volume

@@ -166,8 +166,6 @@ def submit_order(order_type: OrderType):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        request_json["project_type"] = order_type
-        request_json["user_id"] = g.current_user.id
 
         result: dict = api.submit(
             raw_order=request_json,
@@ -257,9 +255,7 @@ def get_options():
 @ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
 def validate_order(order_type: OrderType):
     raw_order = request.get_json()
-    raw_order["project_type"] = order_type
-    raw_order["user_id"] = g.current_user.id
     response = order_validation_service.get_validation_response(
-        raw_order=raw_order, order_type=order_type
+        raw_order=raw_order, order_type=order_type, user_id=g.current_user.id
     )
     return jsonify(response), HTTPStatus.OK

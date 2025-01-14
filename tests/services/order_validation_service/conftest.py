@@ -44,14 +44,13 @@ def create_case(samples: list[TomteSample]) -> TomteCase:
 
 def create_tomte_order(cases: list[TomteCase]) -> TomteOrder:
     order = TomteOrder(
-        connect_to_ticket=True,
         delivery_type=TomteDeliveryType.FASTQ,
         name="order_name",
         project_type=OrderType.TOMTE,
-        user_id=1,
         customer="cust000",
         cases=cases,
     )
+    order._user_id = 1
     order._generated_ticket_id = 123456
     return order
 
