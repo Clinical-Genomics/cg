@@ -20,7 +20,6 @@ from cg.services.order_validation_service.models.order_with_samples import Order
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
 from cg.store.models import Case, Customer, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -414,131 +413,6 @@ def test_submit_unique_sample_case_name(
         )
 
         # Then no exception about duplicate names should be thrown
-
-
-def test_validate_sex_inconsistent_sex(
-    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
-):
-    # GIVEN we have an order with a sample that is already in the database but with different sex
-    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.validation_service.store
-    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
-    # add sample with different sex than in order
-    samples: list[Sample] = [sample for _, _, sample in order_data.enumerated_new_samples]
-    for sample in samples:
-        sample_obj: Sample = helpers.add_sample(
-            store=store,
-            customer_id=customer.internal_id,
-            sex=Sex.MALE if sample.sex == Sex.FEMALE else Sex.FEMALE,
-            name=sample.name,
-            subject_id=sample.subject_id,
-        )
-        store.session.add(sample_obj)
-        store.session.commit()
-        assert sample_obj.sex != sample.sex
-
-    validator = ValidateCaseOrderService(status_db=store)
-
-    # WHEN calling _validate_sex
-    # THEN an OrderError should be raised on non-matching sex
-    with pytest.raises(OrderError):
-        validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
-
-
-def test_validate_sex_consistent_sex(
-    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
-):
-    # GIVEN we have an order with a sample that is already in the database and with same gender
-    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.validation_service.store
-    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
-    # add sample with different sex than in order
-    samples: list[Sample] = [sample for _, _, sample in order_data.enumerated_new_samples]
-    for sample in samples:
-        sample_obj: Sample = helpers.add_sample(
-            store=store,
-            customer_id=customer.internal_id,
-            sex=sample.sex,
-            name=sample.name,
-            subject_id=sample.subject_id,
-        )
-        store.session.add(sample_obj)
-        store.session.commit()
-        assert sample_obj.sex == sample.sex
-
-    validator = ValidateCaseOrderService(status_db=store)
-
-    # WHEN calling _validate_sex
-    validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
-
-    # THEN no OrderError should be raised on non-matching sex
-
-
-def test_validate_sex_unknown_existing_sex(
-    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
-):
-    # GIVEN we have an order with a sample that is already in the database and with different gender but the existing is
-    # of type "unknown"
-    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.validation_service.store
-    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
-    # add sample with different sex than in order
-    samples: list[Sample] = [sample for _, _, sample in order_data.enumerated_new_samples]
-    for sample in samples:
-        sample_obj: Sample = helpers.add_sample(
-            store=store,
-            customer_id=customer.internal_id,
-            sex=Sex.UNKNOWN,
-            name=sample.name,
-            subject_id=sample.subject_id,
-        )
-        store.session.add(sample_obj)
-        store.session.commit()
-        assert sample_obj.sex != sample.sex
-
-    validator = ValidateCaseOrderService(store)
-
-    # WHEN calling _validate_sex
-    validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
-
-    # THEN no OrderError should be raised on non-matching sex
-
-
-def test_validate_sex_unknown_new_sex(
-    orders_api: OrdersAPI, mip_dna_order_to_submit: dict, helpers: StoreHelpers
-):
-    # GIVEN we have an order with a sample that is already in the database and with different gender but the new is of
-    # type "unknown"
-    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
-    store = orders_api.validation_service.store
-    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
-
-    # add sample with different sex than in order
-    samples: list[Sample] = [sample for _, _, sample in order_data.enumerated_new_samples]
-    for sample in samples:
-        sample_obj: Sample = helpers.add_sample(
-            store=store,
-            customer_id=customer.internal_id,
-            sex=sample.sex,
-            name=sample.name,
-            subject_id=sample.subject_id,
-        )
-        sample.sex = "unknown"
-        store.session.add(sample_obj)
-        store.session.commit()
-
-    for sample in samples:
-        assert sample_obj.sex != sample.sex
-
-    validator = ValidateCaseOrderService(store)
-
-    # WHEN calling _validate_sex
-    validator._validate_subject_sex(samples=samples, customer_id=order_data.customer)
-
-    # THEN no OrderError should be raised on non-matching sex
 
 
 @pytest.mark.xfail(reason="Change in order validation")
