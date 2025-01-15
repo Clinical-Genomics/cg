@@ -1,5 +1,4 @@
 from cg.models.orders.constants import OrderType
-from cg.models.orders.sample_base import ControlEnum
 from cg.services.order_validation_service.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -18,6 +17,7 @@ from cg.services.order_validation_service.errors.sample_errors import (
     OrganismDoesNotExistError,
     PoolApplicationError,
     PoolPriorityError,
+    SampleNameNotAvailableControlError,
     SampleNameNotAvailableError,
     SampleNameRepeatedError,
     VolumeRequiredError,
@@ -275,12 +275,12 @@ def validate_sample_names_available(
 
 def validate_non_control_sample_names_available(
     order: OrderWithControlSamples, store: Store, **kwargs
-) -> list[SampleNameNotAvailableError]:
+) -> list[SampleNameNotAvailableControlError]:
     """
     Validate that non-control sample names do not exists in the database under the same customer.
     Applicable to all orders with control samples.
     """
-    errors: list[SampleNameNotAvailableError] = get_sample_name_not_available_errors(
+    errors: list[SampleNameNotAvailableControlError] = get_sample_name_not_available_errors(
         order=order, store=store, has_order_control=True
     )
     return errors
