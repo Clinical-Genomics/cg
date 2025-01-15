@@ -3,9 +3,6 @@ import pytest
 from cg.exc import OrderError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
-from cg.services.orders.validate_order_services.validate_case_order import (
-    ValidateCaseOrderService,
-)
 from cg.store.store import Store
 
 
