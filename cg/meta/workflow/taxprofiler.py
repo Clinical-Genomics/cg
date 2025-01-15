@@ -38,8 +38,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.taxprofiler.revision
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.taxprofiler.tower_workflow
-        self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
-        self.databases: Path = Path(config.taxprofiler.databases)
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
@@ -86,8 +84,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         return TaxprofilerParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
-            databases=self.databases,
-            hostremoval_reference=self.hostremoval_reference,
         )
 
     def get_multiqc_search_patterns(self, case_id: str) -> dict:

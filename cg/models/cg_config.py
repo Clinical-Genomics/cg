@@ -273,8 +273,6 @@ class TaxprofilerConfig(CommonAppConfig):
     params: str
     config: str
     resources: str
-    databases: str
-    hostremoval_reference: str
     workflow_bin_path: str
     profile: str
     revision: str

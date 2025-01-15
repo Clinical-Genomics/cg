@@ -2167,9 +2167,7 @@ def context_config(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
-            "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
-            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
             "revision": "2.2.0",
             "slurm": {
                 "account": "development",

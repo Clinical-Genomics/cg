@@ -20,10 +20,7 @@ class TaxprofilerQCMetrics(BaseModel):
 
 
 class TaxprofilerParameters(WorkflowParameters):
-    """Model for Taxprofiler parameters."""
-
-    databases: Path
-    hostremoval_reference: Path
+    """Taxprofiler parameters."""
 
 
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
