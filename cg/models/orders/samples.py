@@ -2,7 +2,6 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.constants.orderforms import ORIGINAL_LAB_ADDRESSES, REGION_CODES
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -12,7 +11,7 @@ from cg.models.orders.sample_base import (
     SexEnum,
     StatusEnum,
 )
-from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
+from cg.store.models import Application, Case, Panel, Sample
 
 
 class OptionalIntValidator:
@@ -142,181 +141,9 @@ class MipDnaSample(Of1508Sample):
     status: StatusEnum
 
 
-class BalsamicSample(Of1508Sample):
-    _suitable_project = OrderType.BALSAMIC
-
-
-class BalsamicQCSample(Of1508Sample):
-    _suitable_project = OrderType.BALSAMIC_QC
-    reference_genome: GenomeVersion | None
-
-
-class BalsamicUmiSample(Of1508Sample):
-    _suitable_project = OrderType.BALSAMIC_UMI
-
-
-class MipRnaSample(Of1508Sample):
-    _suitable_project = OrderType.MIP_RNA
-
-
-class RnafusionSample(Of1508Sample):
-    _suitable_project = OrderType.RNAFUSION
-
-
 class TomteSample(MipDnaSample):
     _suitable_project = OrderType.TOMTE
     reference_genome: GenomeVersion | None
-
-
-class FastqSample(OrderInSample):
-    _suitable_project = OrderType.FASTQ
-
-    # Orderform 1508
-    # "required"
-    container: ContainerEnum | None
-    sex: SexEnum = SexEnum.unknown
-    source: str
-    tumour: bool
-    # "required if plate"
-    container_name: str | None
-    well_position: str | None
-    elution_buffer: str
-    # This information is required for panel analysis
-    capture_kit: str | None
-    # "Not Required"
-    quantity: int | None
-    subject_id: str | None
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
-
-
-class PacBioSample(OrderInSample):
-    _suitable_project = OrderType.PACBIO_LONG_READ
-
-    container: ContainerEnum
-    container_name: str | None = None
-    sex: SexEnum = SexEnum.unknown
-    source: str
-    subject_id: str
-    tumour: bool
-    well_position: str | None = None
-
-
-class RmlSample(OrderInSample):
-    _suitable_project = OrderType.RML
-
-    # 1604 Orderform Ready made libraries (RML)
-    # Order portal specific
-    # "This information is required"
-    pool: constr(max_length=Pool.name.property.columns[0].type.length)
-    concentration: float
-    concentration_sample: float | None
-    index: str
-    index_number: str | None
-    # "Required if Plate"
-    rml_plate_name: str | None
-    well_position_rml: str | None
-    # "Automatically generated (if not custom) or custom"
-    index_sequence: str | None
-    # "Not required"
-    control: str | None
-
-    @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> float | None:
-        return OptionalFloatValidator.str_to_float(v=v)
-
-
-class FluffySample(RmlSample):
-    _suitable_project = OrderType.FLUFFY
-    # 1604 Orderform Ready made libraries (RML)
-
-
-class MetagenomeSample(Of1508Sample):
-    _suitable_project = OrderType.METAGENOME
-    # "This information is required"
-    source: str
-    # "This information is not required"
-    concentration_sample: float | None
-    family_name: None = None
-    subject_id: None = None
-
-    @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> float | None:
-        return OptionalFloatValidator.str_to_float(v=v)
-
-    @validator("subject_id", pre=True)
-    def required_for_new_samples(cls, v: str) -> None:
-        """Overrides the parent validator since subject_id is optional for these samples."""
-        return None
-
-
-class TaxprofilerSample(MetagenomeSample):
-    _suitable_project = OrderType.TAXPROFILER
-
-
-class MicrobialSample(OrderInSample):
-    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
-    # "These fields are required"
-    organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
-    reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
-    elution_buffer: str
-    extraction_method: str | None
-    container: ContainerEnum
-    # "Required if Plate"
-    container_name: str | None
-    well_position: str | None
-    # "Required if "Other" is chosen in column "Species""
-    organism_other: constr(max_length=Organism.internal_id.property.columns[0].type.length) | None
-    verified_organism: bool | None  # sent to LIMS
-    control: str | None
-
-
-class MicrobialFastqSample(OrderInSample):
-    _suitable_project = OrderType.MICROBIAL_FASTQ
-
-    elution_buffer: str
-    container: ContainerEnum
-    # "Required if Plate"
-    container_name: str | None
-    well_position: str | None
-    # "These fields are not required"
-    control: str | None
-
-
-class MicrosaltSample(MicrobialSample):
-    _suitable_project = OrderType.MICROSALT
-    # 1603 Orderform Microbial WHOLE_GENOME_SEQUENCING
-
-
-class SarsCov2Sample(MicrobialSample):
-    _suitable_project = OrderType.SARS_COV_2
-
-    # 2184 Orderform SARS-COV-2
-    # "These fields are required"
-    collection_date: str
-    lab_code: str = None
-    primer: str
-    original_lab: str
-    original_lab_address: str = None
-    pre_processing_method: str
-    region: str
-    region_code: str = None
-    selection_criteria: str
-    volume: str | None
-
-    @validator("lab_code", pre=True, always=True)
-    def set_lab_code(cls, value):
-        return "SE100 Karolinska"
-
-    @validator("region_code", pre=True, always=True)
-    def set_region_code(cls, value, values):
-        return value if value else REGION_CODES[values["region"]]
-
-    @validator("original_lab_address", pre=True, always=True)
-    def set_original_lab_address(cls, value, values):
-        return value if value else ORIGINAL_LAB_ADDRESSES[values["original_lab"]]
 
 
 def sample_class_for(project: OrderType):

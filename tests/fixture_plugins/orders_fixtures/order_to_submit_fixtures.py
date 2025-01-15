@@ -141,6 +141,7 @@ def all_orders_to_submit(
     rml_order_to_submit: dict,
     rnafusion_order_to_submit: dict,
     sarscov2_order_to_submit: dict,
+    tomte_order_to_submit: dict,
 ) -> dict[OrderType, Order]:
     """Returns a dict of parsed order for each order type."""
     return {
