@@ -21,6 +21,7 @@ from cg.services.order_validation_service.workflows.mip_rna.models.order import 
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
+from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
 
 
 @pytest.fixture(scope="session")
@@ -156,6 +157,6 @@ def all_orders_to_submit(
         OrderType.MIP_RNA: MipRnaOrder.model_validate(mip_rna_order_to_submit),
         OrderType.PACBIO_LONG_READ: PacbioOrder.model_validate(pacbio_order_to_submit),
         OrderType.RML: RmlOrder.model_validate(rml_order_to_submit),
-        # OrderType.RNAFUSION: RnaFusionOrder.model_validate(rnafusion_order_to_submit),
+        OrderType.RNAFUSION: RnaFusionOrder.model_validate(rnafusion_order_to_submit),
         OrderType.SARS_COV_2: MutantOrder.model_validate(sarscov2_order_to_submit),
     }

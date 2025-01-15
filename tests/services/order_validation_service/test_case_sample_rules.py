@@ -405,6 +405,77 @@ def test_validate_sex_subject_id_clash(valid_order: OrderWithCases, sample_store
     assert isinstance(errors[0], SexSubjectIdError)
 
 
+def test_validate_sex_subject_id_no_clash(valid_order: OrderWithCases, sample_store: Store):
+    # GIVEN an existing sample
+    sample = sample_store.session.query(Sample).first()
+
+    # GIVEN an order and sample with the same customer and subject id
+    valid_order.customer = sample.customer.internal_id
+    valid_order.cases[0].samples[0].subject_id = "subject"
+    sample.subject_id = "subject"
+
+    # GIVEN that the order's sample has a matching sex to the one in StatusDB
+    valid_order.cases[0].samples[0].sex = SexEnum.female
+    sample.sex = SexEnum.female
+
+    # WHEN validating the order
+    errors: list[SexSubjectIdError] = validate_subject_sex_consistency(
+        order=valid_order,
+        store=sample_store,
+    )
+
+    # THEN no error should be returned
+    assert not errors
+
+
+def test_validate_sex_subject_id_existing_sex_unknown(
+    valid_order: OrderWithCases, sample_store: Store
+):
+    # GIVEN an existing sample
+    sample = sample_store.session.query(Sample).first()
+
+    # GIVEN an order and sample with the same customer and subject id
+    valid_order.customer = sample.customer.internal_id
+    valid_order.cases[0].samples[0].subject_id = "subject"
+    sample.subject_id = "subject"
+
+    # GIVEN a sample in the order that has a known sex and the existing sample's sex is unknown
+    valid_order.cases[0].samples[0].sex = SexEnum.female
+    sample.sex = SexEnum.unknown
+
+    # WHEN validating the order
+    errors: list[SexSubjectIdError] = validate_subject_sex_consistency(
+        order=valid_order,
+        store=sample_store,
+    )
+
+    # THEN no error should be returned
+    assert not errors
+
+
+def test_validate_sex_subject_id_new_sex_unknown(valid_order: OrderWithCases, sample_store: Store):
+    # GIVEN an existing sample
+    sample = sample_store.session.query(Sample).first()
+
+    # GIVEN an order and sample with the same customer and subject id
+    valid_order.customer = sample.customer.internal_id
+    valid_order.cases[0].samples[0].subject_id = "subject"
+    sample.subject_id = "subject"
+
+    # GIVEN a sample in the order that has an unknown sex and the existing sample's sex is known
+    valid_order.cases[0].samples[0].sex = SexEnum.unknown
+    sample.sex = SexEnum.female
+
+    # WHEN validating the order
+    errors: list[SexSubjectIdError] = validate_subject_sex_consistency(
+        order=valid_order,
+        store=sample_store,
+    )
+
+    # THEN no error should be returned
+    assert not errors
+
+
 def test_validate_sample_names_different_from_case_names(
     order_with_samples_having_same_names_as_cases: OrderWithCases,
 ):
