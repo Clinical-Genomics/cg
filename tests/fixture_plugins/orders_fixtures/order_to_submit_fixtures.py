@@ -7,9 +7,10 @@ import pytest
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
-from cg.models.orders.order import OrderIn
+from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
+from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
@@ -132,15 +133,13 @@ def all_orders_to_submit(
     rml_order_to_submit: dict,
     rnafusion_order_to_submit: dict,
     sarscov2_order_to_submit: dict,
-) -> dict[str, OrderIn]:
+) -> dict[OrderType, Order]:
     """Returns a dict of parsed order for each order type."""
     return {
         OrderType.BALSAMIC: BalsamicOrder.model_validate(balsamic_order_to_submit),
         OrderType.FASTQ: FastqOrder.model_validate(fastq_order_to_submit),
         # OrderType.FLUFFY: FluffyOrder.model_validate(rml_order_to_submit),
-        OrderType.METAGENOME: OrderIn.parse_obj(
-            metagenome_order_to_submit, project=OrderType.METAGENOME
-        ),
+        OrderType.METAGENOME: MetagenomeOrder.model_validate(metagenome_order_to_submit),
         # OrderType.MICROSALT: OrderIn.parse_obj(
         #    microbial_order_to_submit, project=OrderType.MICROSALT
         # ),
