@@ -28,18 +28,18 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
         self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
+        self.profile: str = config.taxprofiler.profile
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
-        self.conda_binary: str = config.taxprofiler.conda_binary
-        self.config_platform: str = config.taxprofiler.config_platform
-        self.config_params: str = config.taxprofiler.config_params
-        self.config_resources: str = config.taxprofiler.config_resources
-        self.profile: str = config.taxprofiler.profile
+        self.platform: str = config.taxprofiler.platform
+        self.params: str = config.taxprofiler.params
+        self.workflow_config_path: str = config.taxprofiler.config
+        self.resources: str = config.taxprofiler.resources
         self.revision: str = config.taxprofiler.revision
-        self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
-        self.databases: Path = Path(config.taxprofiler.databases)
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.taxprofiler.tower_workflow
+        self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
+        self.databases: Path = Path(config.taxprofiler.databases)
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
