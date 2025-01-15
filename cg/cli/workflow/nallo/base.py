@@ -6,7 +6,6 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
-from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.nf_analysis import config_case
 
 from cg.constants.constants import MetaApis
@@ -24,5 +23,4 @@ def nallo(context: click.Context) -> None:
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = NalloAnalysisAPI(config=context.obj)
 
 
-nallo.add_command(resolve_compression)
 nallo.add_command(config_case)

@@ -18,7 +18,7 @@ def test_get_sample_sheet_content(
     patterns = [
         "ADM1",
         "m00000_000000_000000_s4.hifi_reads.bc2021.bam",
-        "nallo_case_enough_reads",
+        "nallo_case_two_samples",
     ]
 
     contains_pattern = any(

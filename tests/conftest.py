@@ -2118,7 +2118,7 @@ def context_config(
                 "account": "development",
                 "mail_user": email_address,
             },
-            "tower_workflow": "raredisease",
+            "tower_workflow": "nallo",
         },
         "raredisease": {
             "binary_path": nextflow_binary.as_posix(),
