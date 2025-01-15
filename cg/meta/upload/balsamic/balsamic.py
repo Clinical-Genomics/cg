@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.gens import GensAPI
 from cg.cli.generate.delivery_report.base import generate_delivery_report
@@ -12,7 +12,7 @@ from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -61,7 +61,7 @@ class BalsamicUploadAPI(UploadAPI):
         # Observations upload
         if (
             self.analysis_api.get_case_application_type(case_id=case.internal_id)
-            == SequencingMethod.WGS
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
             ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         else:

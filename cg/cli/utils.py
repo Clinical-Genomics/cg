@@ -1,7 +1,7 @@
 import re
 import shutil
 
-import click
+import rich_click as click
 
 from cg.constants import Workflow
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI

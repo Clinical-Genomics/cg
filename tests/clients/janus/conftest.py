@@ -10,7 +10,8 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
     FilePathAndTag,
     WorkflowInfo,
 )
-from cg.constants import PrepCategory, Workflow
+from cg.constants import Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 
 
 @pytest.fixture
@@ -52,7 +53,7 @@ def collect_qc_request_balsamic_wgs(
         sample_ids=["test_sample"],
         files=balsamic_files_wgs,
         workflow_info=workflow_info,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
 
 

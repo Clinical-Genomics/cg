@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.environ import environ_email
 from cg.cli.utils import echo_lines

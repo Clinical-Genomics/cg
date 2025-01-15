@@ -1,31 +1,22 @@
-from cg.constants import Workflow
-from cg.store.models import Case, Customer, Sample
+from cg.store.models import Case
 from cg.store.store import Store
 
 
-def test_get_related_cases(
+def test_get_uploaded_related_dna_case(
     store_with_rna_and_dna_samples_and_cases: Store,
-    related_dna_sample_1: Sample,
-    rna_sample_collaborators: set[Customer],
+    rna_case: Case,
+    uploaded_related_dna_case: list[Case],
     related_dna_cases: list[Case],
 ):
-    # GIVEN a database with a sample in several cases
-    # GIVEN a list of workflows
+    # GIVEN a database with an RNA case and several related DNA cases
+    # GIVEN that some of the DNA cases are uploaded and others not
+    store: Store = store_with_rna_and_dna_samples_and_cases
 
-    workflows = [
-        Workflow.MIP_DNA,
-        Workflow.BALSAMIC,
-        Workflow.BALSAMIC_UMI,
-    ]
-
-    # WHEN getting the cases from the given sample by the given workflows and within the given collaborators
-    fetched_related_dna_cases: list[Case] = (
-        store_with_rna_and_dna_samples_and_cases.get_related_cases(
-            sample_internal_id=related_dna_sample_1.internal_id,
-            workflows=workflows,
-            collaborators=rna_sample_collaborators,
-        )
+    # WHEN getting the related DNA cases that are uploaded
+    fetched_uploaded_related_dna_case: list[Case] = store.get_uploaded_related_dna_cases(
+        rna_case=rna_case,
     )
 
     # THEN the correct set of cases is returned
-    assert set(related_dna_cases) == set(fetched_related_dna_cases)
+    assert set(fetched_uploaded_related_dna_case) == set(uploaded_related_dna_case)
+    assert set(fetched_uploaded_related_dna_case) != set(related_dna_cases)
