@@ -11,7 +11,7 @@ class NalloSampleSheetEntry(BaseModel):
 
     project: str
     sample: str
-    bam_unmapped_read_paths: conlist(Path, min_length=1)
+    bam_unmapped_read_paths: conlist(Path)
     family_id: str
     paternal_id: str
     maternal_id: str
