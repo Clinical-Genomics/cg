@@ -1,4 +1,4 @@
-from pydantic import Discriminator, Field, Tag
+from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
 from cg.services.order_validation_service.models.case import Case
@@ -13,6 +13,4 @@ OldSample = Annotated[ExistingSample, Tag("existing")]
 class RnaFusionCase(Case):
     cohorts: list[str] | None = None
     synopsis: str | None = None
-    samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]] = Field(
-        max_length=1
-    )
+    samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]
