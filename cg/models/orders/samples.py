@@ -14,18 +14,6 @@ from cg.models.orders.sample_base import (
 from cg.store.models import Application, Case, Panel, Sample
 
 
-class OptionalIntValidator:
-    @classmethod
-    def str_to_int(cls, v: str) -> int | None:
-        return int(v) if v else None
-
-
-class OptionalFloatValidator:
-    @classmethod
-    def str_to_float(cls, v: str) -> float | None:
-        return float(v) if v else None
-
-
 class OrderInSample(BaseModel):
     # Order portal specific
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
@@ -48,102 +36,6 @@ class OrderInSample(BaseModel):
     @classmethod
     def is_sample_for(cls, project: OrderType):
         return project == cls._suitable_project
-
-
-class Of1508Sample(OrderInSample):
-    # Orderform 1508
-    # Order portal specific
-    internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
-    # "required for new samples"
-    name: (
-        constr(
-            regex=NAME_PATTERN,
-            min_length=2,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-        | None
-    )
-
-    # customer
-    age_at_sampling: float | None
-    family_name: constr(
-        regex=NAME_PATTERN,
-        min_length=2,
-        max_length=Case.name.property.columns[0].type.length,
-    )
-    case_internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
-    sex: SexEnum = SexEnum.unknown
-    tumour: bool = False
-    source: str | None
-    control: ControlEnum | None
-    volume: str | None
-    container: ContainerEnum | None
-    # "required if plate for new samples"
-    container_name: str | None
-    well_position: str | None
-    # "Required if samples are part of trio/family"
-    mother: (
-        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
-    )
-    father: (
-        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
-    )
-    # This information is required for panel analysis
-    capture_kit: str | None
-    # This information is required for panel- or exome analysis
-    elution_buffer: str | None
-    tumour_purity: int | None
-    # "This information is optional for FFPE-samples for new samples"
-    formalin_fixation_time: int | None
-    post_formalin_fixation_time: int | None
-    tissue_block_size: str | None
-    # "Not Required"
-    cohorts: list[str] | None
-    phenotype_groups: list[str] | None
-    phenotype_terms: list[str] | None
-    require_qc_ok: bool = False
-    quantity: int | None
-    subject_id: (
-        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
-        | None
-    )
-    synopsis: str | None
-
-    @validator("container", "container_name", "name", "source", "subject_id", "volume")
-    def required_for_new_samples(cls, value, values, **kwargs):
-        if not value and not values.get("internal_id"):
-            raise ValueError(f"required for new sample {values.get('name')}")
-        return value
-
-    @validator(
-        "tumour_purity",
-        "formalin_fixation_time",
-        "post_formalin_fixation_time",
-        "quantity",
-        pre=True,
-    )
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
-
-    @validator(
-        "age_at_sampling",
-        "volume",
-        pre=True,
-    )
-    def str_to_float(cls, v: str) -> float | None:
-        return OptionalFloatValidator.str_to_float(v=v)
-
-
-class MipDnaSample(Of1508Sample):
-    _suitable_project = OrderType.MIP_DNA
-    # "Required if data analysis in Scout or vcf delivery"
-    panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
-    status: StatusEnum
-
-
-class TomteSample(MipDnaSample):
-    _suitable_project = OrderType.TOMTE
-    reference_genome: GenomeVersion | None
 
 
 def sample_class_for(project: OrderType):

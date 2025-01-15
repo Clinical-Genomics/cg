@@ -3,23 +3,12 @@
 import logging
 from abc import ABC, abstractmethod
 
-from cg.models.orders.order import OrderIn
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.models.sample import Sample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
-
-
-class ValidateOrderService(ABC):
-    @abstractmethod
-    def __init__(self, status_db: Store):
-        self.status_db = status_db
-
-    @abstractmethod
-    def validate_order(self, order_in: OrderIn):
-        pass
 
 
 class StoreOrderService(ABC):

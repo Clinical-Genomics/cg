@@ -6,12 +6,10 @@ import pytest
 from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
-from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.orders.samples import MipDnaSample
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.models.order import Order
@@ -393,8 +391,6 @@ def test_submit_unique_sample_case_name(
         order_data = OrderIn.parse_obj(obj=mip_dna_order_to_submit, project=OrderType.MIP_DNA)
 
         store = orders_api.status
-
-        sample: MipDnaSample
         for sample in order_data.samples:
             case_id = sample.family_name
             customer: Customer = store.get_customer_by_internal_id(
