@@ -428,7 +428,9 @@ def test_validate_sex_subject_id_no_clash(valid_order: OrderWithCases, sample_st
     assert not errors
 
 
-def test_validate_sex_subject_id_existing_sex_unknown(valid_order: OrderWithCases, sample_store: Store):
+def test_validate_sex_subject_id_existing_sex_unknown(
+    valid_order: OrderWithCases, sample_store: Store
+):
     # GIVEN an existing sample
     sample = sample_store.session.query(Sample).first()
 
