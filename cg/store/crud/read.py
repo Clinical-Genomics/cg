@@ -16,8 +16,8 @@ from cg.constants.constants import (
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
-from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler

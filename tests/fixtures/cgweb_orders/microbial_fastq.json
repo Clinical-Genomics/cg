@@ -16,7 +16,7 @@
             "elution_buffer": "Nuclease-free water",
             "name": "prov1",
             "priority": "priority",
-            "volume": "1",
+            "volume": "100",
             "well_position": ""
         },
         {
@@ -29,7 +29,7 @@
             "elution_buffer": "Nuclease-free water",
             "name": "prov2",
             "priority": "priority",
-            "volume": "2",
+            "volume": "20",
             "well_position": "A:1"
         }
     ]
