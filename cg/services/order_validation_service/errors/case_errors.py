@@ -31,6 +31,6 @@ class CaseDoesNotExistError(CaseError):
     message: str = "The case does not exist"
 
 
-class MultipleSamplesError(CaseError):
-    field: str = "samples"
+class MultipleSamplesInCaseError(CaseError):
+    field: str = "sample_errors"
     message: str = "Multiple samples in the same case not allowed"

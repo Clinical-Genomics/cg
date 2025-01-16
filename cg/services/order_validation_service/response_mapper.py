@@ -46,13 +46,9 @@ def map_sample_errors(order: dict, errors: list[SampleError]) -> None:
 
 
 def add_error(entity: dict, field: str, message: str) -> None:
-    if field == "samples":
-        entity["sample_errors"]["value"] = True
-        entity["sample_errors"]["errors"].append(message)
-    else:
-        if not entity.get(field):
-            set_field(entity=entity, field=field, value=None)
-        entity[field]["errors"].append(message)
+    if not entity.get(field):
+        set_field(entity=entity, field=field, value=None)
+    entity[field]["errors"].append(message)
 
 
 def get_case(order: dict, index: int) -> dict:
