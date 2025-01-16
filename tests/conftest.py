@@ -2604,6 +2604,15 @@ def nallo_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(scope="function")
+def nallo_mock_config(nallo_dir: Path, nallo_case_id: str) -> None:
+    """Create nallo samplesheet.csv file for testing"""
+    Path.mkdir(Path(nallo_dir, nallo_case_id), parents=True, exist_ok=True)
+    Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
 def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
     """Path to config file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
