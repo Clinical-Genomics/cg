@@ -1,6 +1,7 @@
 from cg.services.order_validation_service.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
+    MultipleSamplesInCaseError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
 )
@@ -55,3 +56,16 @@ def validate_case_names_not_repeated(
     **kwargs,
 ) -> list[RepeatedCaseNameError]:
     return get_repeated_case_name_errors(order)
+
+
+def validate_one_sample_per_case(
+    order: OrderWithCases, **kwargs
+) -> list[MultipleSamplesInCaseError]:
+    """Validates that there is only one sample in each case.
+    Only applicable to RNAFusion."""
+    errors: list[MultipleSamplesInCaseError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if len(case.samples) > 1:
+            error = MultipleSamplesInCaseError(case_index=case_index)
+            errors.append(error)
+    return errors

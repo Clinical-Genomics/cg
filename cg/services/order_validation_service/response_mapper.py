@@ -1,14 +1,10 @@
 from typing import Any
 
 from cg.services.order_validation_service.errors.case_errors import CaseError
-from cg.services.order_validation_service.errors.case_sample_errors import (
-    CaseSampleError,
-)
+from cg.services.order_validation_service.errors.case_sample_errors import CaseSampleError
 from cg.services.order_validation_service.errors.order_errors import OrderError
 from cg.services.order_validation_service.errors.sample_errors import SampleError
-from cg.services.order_validation_service.errors.validation_errors import (
-    ValidationErrors,
-)
+from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 
 
 def create_order_validation_response(raw_order: dict, errors: ValidationErrors) -> dict:
@@ -52,6 +48,9 @@ def map_sample_errors(order: dict, errors: list[SampleError]) -> None:
 def add_error(entity: dict, field: str, message: str) -> None:
     if not entity.get(field):
         set_field(entity=entity, field=field, value=None)
+    if field == "sample_errors":
+        # Special handling for sample errors since the 'value' corresponds to whether it is set
+        entity[field]["value"] = True
     entity[field]["errors"].append(message)
 
 
@@ -91,6 +90,7 @@ def wrap_case_fields(case: dict) -> None:
     for field, value in case.items():
         if field != "samples":
             set_field(entity=case, field=field, value=value)
+    set_field(entity=case, field="sample_errors", value=False)
 
 
 def wrap_sample_fields(samples: list[dict]) -> None:
