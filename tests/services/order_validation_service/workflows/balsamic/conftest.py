@@ -95,3 +95,13 @@ def balsamic_validation_service(
 @pytest.fixture
 def balsamic_rule_set() -> RuleSet:
     return ORDER_TYPE_RULE_SET_MAP[OrderType.BALSAMIC]
+
+
+@pytest.fixture
+def another_balsamic_sample() -> BalsamicSample:
+    return create_sample(2)
+
+
+@pytest.fixture
+def a_third_balsamic_sample() -> BalsamicSample:
+    return create_sample(3)
