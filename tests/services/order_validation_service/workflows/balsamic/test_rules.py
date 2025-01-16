@@ -85,7 +85,7 @@ def test_double_tumour_samples_in_case(
 def test_double_normal_samples_in_case(
     valid_order: BalsamicOrder, another_balsamic_sample: BalsamicSample, base_store: Store
 ):
-    # GIVEN a Balsamic order with two samples in a cas
+    # GIVEN a Balsamic order with two samples in a case
     valid_order.cases[0].samples.append(another_balsamic_sample)
 
     # GIVEN that both samples are tumours
