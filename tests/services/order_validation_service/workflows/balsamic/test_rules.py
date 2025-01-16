@@ -1,4 +1,3 @@
-from cg.models.orders.samples import BalsamicSample
 from cg.services.order_validation_service.errors.case_errors import (
     DoubleNormalError,
     DoubleTumourError,
@@ -11,6 +10,7 @@ from cg.services.order_validation_service.rules.case.rules import (
     validate_number_of_normal_samples,
 )
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.order_validation_service.workflows.balsamic.models.sample import BalsamicSample
 from cg.services.order_validation_service.workflows.balsamic.rules import (
     validate_capture_kit_panel_requirement,
 )
