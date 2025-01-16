@@ -11,7 +11,6 @@ from cg.services.order_validation_service.workflows.taxprofiler.models.sample im
 )
 
 OrderWithIndexedSamples = FluffyOrder | RmlOrder
-OrderWithSamplesFromOrganism = MutantOrder | MicrosaltOrder
 OrderWithControlSamples = (
     MetagenomeSample | MicrobialFastqOrder | MicrosaltOrder | MutantOrder | TaxprofilerSample
 )

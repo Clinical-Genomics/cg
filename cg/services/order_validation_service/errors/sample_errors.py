@@ -52,11 +52,6 @@ class VolumeRequiredError(SampleError):
     message: str = "Volume is required"
 
 
-class OrganismDoesNotExistError(SampleError):
-    field: str = "organism"
-    message: str = "Organism does not exist"
-
-
 class SampleNameNotAvailableError(SampleError):
     field: str = "name"
     message: str = "Sample name already used in previous order"

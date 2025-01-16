@@ -14,7 +14,6 @@ from cg.services.order_validation_service.errors.sample_errors import (
     IndexSequenceMissingError,
     InvalidVolumeError,
     OccupiedWellError,
-    OrganismDoesNotExistError,
     PoolApplicationError,
     PoolPriorityError,
     SampleNameNotAvailableControlError,
@@ -29,7 +28,6 @@ from cg.services.order_validation_service.errors.sample_errors import (
 from cg.services.order_validation_service.models.order_aliases import (
     OrderWithControlSamples,
     OrderWithIndexedSamples,
-    OrderWithSamplesFromOrganism,
 )
 from cg.services.order_validation_service.models.sample_aliases import IndexedSample
 from cg.services.order_validation_service.rules.sample.utils import (
@@ -207,21 +205,6 @@ def validate_index_sequence_required(
     for sample_index, sample in order.enumerated_samples:
         if is_index_sequence_missing(sample):
             error = IndexSequenceMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_organism_exists(
-    order: OrderWithSamplesFromOrganism, store: Store, **kwargs
-) -> list[OrganismDoesNotExistError]:
-    """
-    Validate that the organisms of all samples in the order exist in the database.
-    Only applicable to Microsalt and Mutant orders.
-    """
-    errors: list[OrganismDoesNotExistError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if not store.get_organism_by_internal_id(sample.organism):
-            error = OrganismDoesNotExistError(sample_index=sample_index)
             errors.append(error)
     return errors
 
