@@ -12,7 +12,7 @@ class NalloSampleSheetEntry(BaseModel):
 
     project: str
     sample: str
-    bam_unmapped_read_path: Path
+    read_file: Path
     family_id: str
     paternal_id: str
     maternal_id: str
@@ -26,7 +26,7 @@ class NalloSampleSheetEntry(BaseModel):
             [
                 self.project,
                 self.sample,
-                self.bam_unmapped_read_path,
+                self.read_file,
                 self.family_id,
                 self.paternal_id,
                 self.maternal_id,
@@ -35,9 +35,9 @@ class NalloSampleSheetEntry(BaseModel):
             ]
         ]
 
-    @field_validator("bam_unmapped_read_path")
+    @field_validator("read_file")
     @classmethod
-    def unmapped_bam_file_exists(cls, bam_path: Path) -> Path:
+    def read_file_exists(cls, bam_path: Path) -> Path:
         """Verify that bam files exist."""
         if not bam_path.is_file():
             raise NfSampleSheetError(f"Bam file does not exist: {str(bam_path)}")

@@ -253,10 +253,10 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
 
-    def get_unmapped_bam_read_paths(self, sample=Sample) -> list[str]:
+    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
         """Gather BAM file path for a sample based on the BAM tag."""
         return [
-            hk_file.full_path
+            Path(hk_file.full_path)
             for hk_file in self.housekeeper_api.files(
                 bundle=sample.internal_id, tags={AlignmentFileTag.BAM}
             )
