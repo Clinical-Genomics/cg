@@ -4,7 +4,7 @@
 	"customer": "cust000",
 	"data_analysis": null,
 	"data_delivery": null,
-	"delivery_type": "fastq_qc-analysis",
+	"delivery_type": "fastq-analysis",
 	"name": "taxprofiler-order",
 	"project_type": "taxprofiler",
 	"samples": [
@@ -184,7 +184,7 @@
 			"volume": 22,
 			"well_position": "A:1",
 			"well_position_rml": null
-		},
+		}
 	],
 	"ticket": null,
 	"user_id": 1

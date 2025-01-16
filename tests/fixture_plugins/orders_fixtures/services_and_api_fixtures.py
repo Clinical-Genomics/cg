@@ -13,18 +13,17 @@ from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
-def freshdesk_client():
+def freshdesk_client() -> FreshdeskClient:
     return FreshdeskClient(base_url="https://mock.freshdesk.com", api_key="mock_api_key")
 
 
 @pytest.fixture
-def order_validation_service(base_store: Store) -> OrderValidationService:
-    return OrderValidationService(base_store)
+def order_validation_service(store_with_all_test_applications: Store) -> OrderValidationService:
+    return OrderValidationService(store_with_all_test_applications)
 
 
 @pytest.fixture(scope="function")
 def orders_api(
-    base_store: Store,
     ticket_handler: TicketHandler,
     lims_api: MockLimsAPI,
     storing_service_registry: StoringServiceRegistry,
@@ -44,5 +43,7 @@ def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHan
 
 
 @pytest.fixture
-def storing_service_registry(base_store: Store, lims_api: MockLimsAPI) -> StoringServiceRegistry:
-    return setup_storing_service_registry(lims=lims_api, status_db=base_store)
+def storing_service_registry(
+    store_with_all_test_applications: Store, lims_api: MockLimsAPI
+) -> StoringServiceRegistry:
+    return setup_storing_service_registry(lims=lims_api, status_db=store_with_all_test_applications)

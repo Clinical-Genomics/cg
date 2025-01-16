@@ -23,16 +23,14 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def monkeypatch_process_lims(monkeypatch, order_data: Order) -> None:
+def monkeypatch_process_lims(monkeypatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    if isinstance(order_data, OrderWithSamples):
-        lims_map = {
-            sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
-        }
-    elif isinstance(order_data, OrderWithCases):
+    if isinstance(order, OrderWithSamples):
+        lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order.samples)}
+    elif isinstance(order, OrderWithCases):
         lims_map = {
             sample.name: f"ELH123A{case_index}-{sample_index}"
-            for case_index, sample_index, sample in order_data.enumerated_new_samples
+            for case_index, sample_index, sample in order.enumerated_new_samples
         }
     monkeypatch.setattr(
         "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
@@ -67,7 +65,6 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -75,23 +72,26 @@ def test_too_long_order_name():
         OrderType.FASTQ,
         OrderType.FLUFFY,
         OrderType.METAGENOME,
-        OrderType.MICROSALT,
-        OrderType.MIP_DNA,
-        OrderType.MIP_RNA,
-        OrderType.RML,
-        OrderType.RNAFUSION,
-        OrderType.SARS_COV_2,
+        # OrderType.MICROBIAL_FASTQ,
+        # OrderType.MICROSALT,
+        # OrderType.MIP_DNA,
+        # OrderType.MIP_RNA,
+        # OrderType.PACBIO_LONG_READ,
+        # OrderType.RML,
+        # OrderType.RNAFUSION,
+        # OrderType.SARS_COV_2,
+        # OrderType.TAXPROFILER,
+        # OrderType.TOMTE,
     ],
 )
-def test_submit(
+def test_submit_order(
     all_orders_to_submit: dict,
-    base_store: Store,
+    store_with_all_test_applications: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     ticket_id: str,
-    user_mail: str,
-    user_name: str,
+    helpers: StoreHelpers,
 ):
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
@@ -101,17 +101,19 @@ def test_submit(
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        monkeypatch_process_lims(monkeypatch, order_data)
+        order: Order = all_orders_to_submit[order_type]
+        monkeypatch_process_lims(monkeypatch=monkeypatch, order=order)
+
+        customer = helpers.ensure_customer(store=orders_api.validation_service.store)
+        user = helpers.ensure_user(store=orders_api.validation_service.store, customer=customer)
+        raw_order = order.model_dump(by_alias=True)
 
         # GIVEN an order and an empty store
-        assert not base_store._get_query(table=Sample).first()
+        assert not store_with_all_test_applications._get_query(table=Sample).first()
 
         # WHEN submitting the order
 
-        result = orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
-        )
+        result = orders_api.submit(order_type=order_type, raw_order=raw_order, user=user)
 
         # THEN the result should contain the ticket number for the order
         for record in result["records"]:

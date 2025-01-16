@@ -6,7 +6,8 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
-from cg.store.models import Application
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
+from cg.store.models import Application, ApplicationVersion, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -65,3 +66,32 @@ def mip_dna_submit_store(
             base_store.session.add(application_version)
     base_store.session.commit()
     return base_store
+
+
+@pytest.fixture
+def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Store:
+    app_tags: dict[str, list[OrderType]] = {
+        "PANKTTR100": [OrderType.BALSAMIC],
+        "WGSPCFC030": [OrderType.FASTQ, OrderType.MIP_DNA],
+        "RMLP15R100": [OrderType.FLUFFY, OrderType.RML],
+        "RMLP15R200": [OrderType.FLUFFY, OrderType.RML],
+        "RMLP15R400": [OrderType.FLUFFY, OrderType.RML],
+        "RMLP15R500": [OrderType.FLUFFY, OrderType.RML],
+        "METPCFR030": [OrderType.METAGENOME],
+        "METWPFR030": [OrderType.METAGENOME, OrderType.TAXPROFILER],
+        "MWRNXTR003": [OrderType.MICROBIAL_FASTQ, OrderType.MICROSALT],
+        "MWXNXTR003": [OrderType.MICROSALT],
+        "VWGNXTR001": [OrderType.MICROSALT],
+        "RNAPOAR025": [OrderType.MIP_RNA, OrderType.RNAFUSION, OrderType.TOMTE],
+        "LWPBELB070": [OrderType.PACBIO_LONG_READ],
+        "VWGDPTR001": [OrderType.SARS_COV_2],
+    }
+    for tag, orders in app_tags.items():
+        application_version: ApplicationVersion = helpers.ensure_application_version(
+            store=store, application_tag=tag
+        )
+        application_version.application.order_types = orders
+    order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id=100000000)
+    store.add_item_to_store(order)
+    store.commit_to_store()
+    return store
