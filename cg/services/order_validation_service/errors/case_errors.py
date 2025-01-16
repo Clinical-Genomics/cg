@@ -34,3 +34,20 @@ class CaseDoesNotExistError(CaseError):
 class MultipleSamplesInCaseError(CaseError):
     field: str = "sample_errors"
     message: str = "Multiple samples in the same case not allowed"
+
+
+class MoreThanTwoSamplesInCaseError(CaseError):
+    field: str = "sample_errors"
+    message: str = "More than two samples in the same case not allowed"
+
+
+class NumberOfNormalSamplesError(CaseError):
+    field: str = "sample_errors"
+
+
+class DoubleNormalError(NumberOfNormalSamplesError):
+    message: str = "Only one non-tumour sample is allowed per case"
+
+
+class DoubleTumourError(NumberOfNormalSamplesError):
+    message: str = "Only one tumour sample is allowed per case"

@@ -1,4 +1,5 @@
 from cg.services.order_validation_service.rules.case.rules import (
+    validate_at_most_two_samples_per_case,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -33,6 +34,7 @@ BALSAMIC_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_at_most_two_samples_per_case,
 ]
 
 BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
