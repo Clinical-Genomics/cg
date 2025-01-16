@@ -14,7 +14,7 @@ from cg.models.orders.samples import MipDnaSample
 from cg.services.orders.validate_order_services.validate_case_order import (
     ValidateCaseOrderService,
 )
-from cg.store.models import Case, Customer, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 

@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -20,6 +20,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -88,11 +89,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     except SyntaxError as error:
         LOG.warning(repr(error))
         raise click.Abort from error
-    LOG.info(f"Found load config {scout_load_config}")
+    LOG.info(f"Found load config: {scout_load_config}")
+
     root_dir: str = context.meta_apis["upload_api"].analysis_api.root
     LOG.info(f"Set root dir to {root_dir}")
     file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
-
     if print_console:
         click.echo(
             WriteStream.write_stream_from_content(
@@ -166,7 +167,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.pass_obj
 def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    are_all_samples_rna: bool = scout_upload_api.mip_analysis_api.are_case_samples_rna(case_id)
+    are_all_samples_rna: bool = scout_upload_api.analysis_api.are_case_samples_rna(case_id)
     if not are_all_samples_rna:
         LOG.error(f"{case_id} has non-RNA samples - aborting.")
         raise click.Abort
@@ -315,6 +316,7 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
         Workflow.TOMTE: TomteAnalysisAPI,
     }

@@ -1,14 +1,16 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Workflow, DataDelivery, GenePanelMasterList, Priority
-from cg.constants.constants import CustomerId, PrepCategory
+from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
+from cg.constants.constants import CustomerId
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import Case, CaseSample, Sample, Customer, ApplicationVersion
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -61,12 +63,14 @@ class StoreFastqOrderService(StoreOrderService):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: Sample) -> None:
+    def create_maf_case(self, sample_obj: Sample, order: Order, case: Case) -> None:
         """Add a MAF case to the Status database."""
+        maf_order = self.status_db.get_order_by_id(MAF_ORDER_ID)
         case: Case = self.status_db.add_case(
+            comment=f"MAF case for {case.internal_id} original order id {order.id}",
             data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
-            name="_".join([sample_obj.name, "MAF"]),
+            name="_".join([sample_obj.internal_id, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
@@ -77,6 +81,7 @@ class StoreFastqOrderService(StoreOrderService):
         relationship: CaseSample = self.status_db.relate_sample(
             case=case, sample=sample_obj, status=StatusEnum.unknown
         )
+        maf_order.cases.append(case)
         self.status_db.session.add_all([case, relationship])
 
     def store_items_in_status(
@@ -93,6 +98,11 @@ class StoreFastqOrderService(StoreOrderService):
             customer=customer, case_name=ticket_id
         )
         submitted_case: dict = items[0]
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+        )
         with self.status_db.session.no_autoflush:
             for sample in items:
                 new_sample = self.status_db.add_sample(
@@ -128,15 +138,16 @@ class StoreFastqOrderService(StoreOrderService):
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
+                    and new_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
-                    self.create_maf_case(sample_obj=new_sample)
+                    self.create_maf_case(sample_obj=new_sample, order=status_db_order, case=case)
                 case.customer = customer
                 new_relationship = self.status_db.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status_db.session.add_all([case, new_relationship])
-
+        status_db_order.cases.append(case)
+        self.status_db.session.add(status_db_order)
         self.status_db.session.add_all(new_samples)
         self.status_db.session.commit()
         return new_samples

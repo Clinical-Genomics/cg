@@ -17,8 +17,8 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Workflow,
 )
-from cg.constants.constants import AnalysisType
 from cg.constants.scout import ScoutUploadKey
+from cg.constants.tb import AnalysisType
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -52,9 +52,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         passed_initial_qc: bool | None = self.lims_api.has_sample_passed_initial_qc(
             sample.internal_id
         )
-        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
-            case.internal_id
-        ):
+        if AnalysisType.WGS in self.analysis_api.get_data_analysis_type(case.internal_id):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs,
                 passed_initial_qc=passed_initial_qc,
@@ -74,14 +72,14 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
-        """Return report metadata for Balsamic TGS analysis."""
+        """Return report metadata for Balsamic TARGETED_GENOME_SEQUENCING analysis."""
         bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
-            analysis_metadata.config.panel.capture_kit
+            analysis_metadata.balsamic_config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
-            bait_set_version=analysis_metadata.config.panel.capture_kit_version,
+            bait_set_version=analysis_metadata.balsamic_config.panel.capture_kit_version,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
@@ -101,7 +99,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         passed_initial_qc: bool | None,
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
-        """Return report metadata for Balsamic WGS analysis."""
+        """Return report metadata for Balsamic WHOLE_GENOME_SEQUENCING analysis."""
         return BalsamicWGSSampleMetadataModel(
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
@@ -120,11 +118,11 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Return whether the Balsamic delivery report is accredited."""
-        if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
+        if analysis_metadata.balsamic_config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
                 for panel in BALSAMIC_REPORT_ACCREDITED_PANELS
-                if panel in str(analysis_metadata.config.panel.capture_kit)
+                if panel in str(analysis_metadata.balsamic_config.panel.capture_kit)
             ),
             None,
         ):

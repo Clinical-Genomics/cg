@@ -4,15 +4,15 @@ import datetime
 import logging
 from typing import Any
 
-from google.auth import jwt
-from google.auth.crypt import RSASigner
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
 from cg.exc import (
     AnalysisNotCompletedError,
@@ -20,6 +20,7 @@ from cg.exc import (
     TrailblazerAPIHTTPError,
 )
 from cg.io.controller import APIRequest, ReadStream
+
 
 LOG = logging.getLogger(__name__)
 
@@ -49,10 +50,12 @@ class TrailblazerAPI:
 
     @property
     def auth_header(self) -> dict:
-        signer = RSASigner.from_service_account_file(self.service_account_auth_file)
-        payload = {"email": self.service_account}
-        jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        return {"Authorization": f"Bearer {jwt_token}"}
+        credentials = service_account.IDTokenCredentials.from_service_account_file(
+            filename=self.service_account_auth_file,
+            target_audience="trailblazer",
+        )
+        credentials.refresh(Request())
+        return {"Authorization": f"Bearer {credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -112,7 +115,7 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        slurm_quality_of_service: SlurmQos,
+        priority: TrailblazerPriority,
         email: str = None,
         order_id: int | None = None,
         workflow: Workflow = None,
@@ -128,7 +131,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "order_id": order_id,
             "out_dir": out_dir,
-            "priority": slurm_quality_of_service,
+            "priority": priority,
             "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,

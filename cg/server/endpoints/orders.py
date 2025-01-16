@@ -17,7 +17,6 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
-    OrderExistsError,
     OrderFormError,
     OrderNotDeliverableError,
     OrderNotFoundError,
@@ -27,9 +26,7 @@ from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -170,9 +167,6 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
-        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
-            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
         result: dict = api.submit(
             project=project,
@@ -180,11 +174,9 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service.create_order(order_in)
 
     except (  # user misbehaviour
         OrderError,
-        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,

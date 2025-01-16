@@ -5,7 +5,7 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SampleType
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS, UploadTrack
+from cg.constants.scout import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS, GenomeBuild, UploadTrack
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -19,25 +19,21 @@ LOG = logging.getLogger(__name__)
 class BalsamicConfigBuilder(ScoutConfigBuilder):
     def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj,
+            analysis_obj=analysis_obj,
+            lims_api=lims_api,
         )
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)
-        self.load_config: BalsamicLoadConfig = BalsamicLoadConfig(
-            track=UploadTrack.CANCER.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
-        )
 
-    def include_case_files(self):
+    def include_case_files(self, load_config: BalsamicLoadConfig) -> None:
         LOG.info("Including BALSAMIC specific case level files")
-        self.load_config.vcf_cancer = self.get_file_from_hk(
-            hk_tags=self.case_tags.snv_vcf, latest=True
-        )
-        self.load_config.vcf_cancer_sv = self.get_file_from_hk(
+        load_config.vcf_cancer = self.get_file_from_hk(hk_tags=self.case_tags.snv_vcf, latest=True)
+        load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, latest=True
         )
-        self.include_cnv_report()
-        self.include_multiqc_report()
+        self.include_cnv_report(load_config)
+        self.include_multiqc_report(load_config)
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
@@ -70,7 +66,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type"""
 
-        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=sample)
+        analysis_type: str = BalsamicAnalysisAPI.get_analysis_type(sample=sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":
@@ -78,16 +74,21 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         return analysis_type
 
-    def build_load_config(self) -> None:
+    def build_load_config(self) -> BalsamicLoadConfig:
         LOG.info("Build load config for balsamic case")
-        self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = "37"
-        self.load_config.rank_score_threshold = -100
-
-        self.include_case_files()
+        load_config: BalsamicLoadConfig = BalsamicLoadConfig(
+            track=UploadTrack.CANCER.value,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+        )
+        self.add_common_info_to_load_config(load_config)
+        load_config.human_genome_build = GenomeBuild.hg19
+        load_config.rank_score_threshold = -100
+        self.include_case_files(load_config)
 
         LOG.info("Building samples")
         db_sample: CaseSample
 
         for db_sample in self.analysis_obj.case.links:
-            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+
+        return load_config

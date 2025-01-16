@@ -3,7 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 
-import click
+import rich_click as click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -26,7 +26,7 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
+from cg.services.deliver_files.rsync.service import (
     DeliveryRsyncService,
 )
 from cg.store.store import Store

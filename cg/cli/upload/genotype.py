@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -31,15 +31,14 @@ def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     genotype_api: GenotypeAPI = context.genotype_api
-
     click.echo(click.style("----------------- GENOTYPES -------------------"))
 
     if not family_id:
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=family_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
-    results: dict = upload_genotypes_api.data(case_obj.analyses[0])
+    results: dict = upload_genotypes_api.get_genotype_data(case.analyses[0])
 
     if not results:
         LOG.warning("Could not find any results to upload")

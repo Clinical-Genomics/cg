@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "63.5.8"
+version = "65.0.15"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -44,7 +44,6 @@ WTForms = "*"
 google-auth = "*"
 gunicorn = "*"
 requests = "*"
-sendmail-container = "*"
 werkzeug = "*"
 
 # Utils
@@ -73,6 +72,7 @@ genologics = "*"
 housekeeper = ">=4.11.3"
 pydantic-settings = "^2.3.3"
 email-validator = "^2.2.0"
+rich-click = "^1.8.4"
 
 
 [tool.poetry.dev-dependencies]
@@ -96,6 +96,10 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+include_trailing_comma = "true"
+line_length=100
+multi_line_output=3
+ensure_newline_before_comments = "true"
 
 [tool.ruff]
 line-length = 100

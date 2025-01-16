@@ -3,11 +3,12 @@ import datetime as dt
 import pytest
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import PrepCategory
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn, OrderType
+from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
 from cg.services.orders.store_order_services.store_fastq_order_service import StoreFastqOrderService
-from cg.store.models import Application, Case, Sample
+from cg.store.models import Application, Case, Sample, Order
 from cg.store.store import Store
 
 
@@ -63,6 +64,10 @@ def test_store_samples(
     assert family_link.case.data_analysis
     assert family_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
+    # THEN a MAF case should be added to the MAF orders
+    maf_order: Order = base_store.get_order_by_id(MAF_ORDER_ID)
+    assert len(maf_order.cases) == 1
+
 
 def test_store_samples_sex_stored(
     base_store: Store,
@@ -95,7 +100,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
-    ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
+    ).prep_category = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = False
 
     # WHEN storing the order
@@ -122,7 +127,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     assert base_store._get_query(table=Case).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
-    ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
+    ).prep_category = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = True
 
     # WHEN storing the order
@@ -147,7 +152,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     # GIVEN a basic store with no samples and a fastq order as non wgs
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Case).count() == 0
-    non_wgs_prep_category = PrepCategory.WHOLE_EXOME_SEQUENCING
+    non_wgs_prep_category = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
 
     non_wgs_applications = base_store._get_query(table=Application).filter(
         Application.prep_category == non_wgs_prep_category

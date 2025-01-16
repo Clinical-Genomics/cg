@@ -1,7 +1,3 @@
-from pathlib import Path
-
-from pydantic import Field
-
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
@@ -27,17 +23,6 @@ class RnafusionQCMetrics(QCMetrics):
 
 class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
-
-    genomes_base: Path
-    all: bool = False
-    arriba: bool = True
-    cram: str = "arriba,starfusion"
-    fastp_trim: bool = True
-    fusioncatcher: bool = True
-    starfusion: bool = True
-    trim_tail: int = 50
-    clusterOptions: str = Field(str, alias="cluster_options")
-    priority: str
 
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):

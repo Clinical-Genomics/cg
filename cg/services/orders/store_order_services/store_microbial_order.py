@@ -1,12 +1,20 @@
 import logging
 from datetime import datetime
 
-from cg.constants import Workflow, DataDelivery, Sex
+from cg.constants import DataDelivery, Sex, Workflow
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
 from cg.services.orders.order_lims_service.order_lims_service import OrderLimsService
 from cg.services.orders.submitters.order_submitter import StoreOrderService
-from cg.store.models import Sample, Customer, Case, ApplicationVersion, Organism, CaseSample
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Order,
+    Organism,
+    Sample,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -39,7 +47,7 @@ class StoreMicrobialOrderService(StoreOrderService):
         samples = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
-            ordered=project_data["date"] if project_data else dt.datetime.now(),
+            ordered=project_data["date"] if project_data else datetime.now(),
             ticket_id=order.ticket,
             items=status_data["samples"],
             comment=status_data["comment"],
@@ -93,6 +101,11 @@ class StoreMicrobialOrderService(StoreOrderService):
             customer_internal_id=customer_id
         )
         new_samples = []
+        status_db_order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=int(ticket_id),
+        )
 
         with self.status.session.no_autoflush:
             for sample_data in items:
@@ -157,6 +170,8 @@ class StoreMicrobialOrderService(StoreOrderService):
                 new_samples.append(new_sample)
 
             case.priority = priority
+            status_db_order.cases.append(case)
+            self.status.session.add(status_db_order)
             self.status.session.add_all(new_samples)
             self.status.session.commit()
         return sample_objs

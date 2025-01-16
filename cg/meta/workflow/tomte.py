@@ -25,14 +25,14 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.tomte.root
-        self.nfcore_workflow_path: str = config.tomte.workflow_path
-        self.references: str = config.tomte.references
+        self.workflow_bin_path: str = config.tomte.workflow_bin_path
         self.profile: str = config.tomte.profile
         self.conda_env: str = config.tomte.conda_env
         self.conda_binary: str = config.tomte.conda_binary
-        self.config_platform: str = config.tomte.config_platform
-        self.config_params: str = config.tomte.config_params
-        self.config_resources: str = config.tomte.config_resources
+        self.platform: str = config.tomte.platform
+        self.params: str = config.tomte.params
+        self.workflow_config_path: str = config.tomte.config
+        self.resources: str = config.tomte.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.tomte.tower_workflow
         self.account: str = config.tomte.slurm.account
@@ -70,7 +70,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_workflow_parameters(self, case_id: str) -> TomteParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> TomteParameters:
         """Return parameters."""
         return TomteParameters(
             input=self.get_sample_sheet_path(case_id=case_id),

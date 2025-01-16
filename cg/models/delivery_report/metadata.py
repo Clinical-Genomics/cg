@@ -122,7 +122,7 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
 
 
 class WTSSampleMetadataModel(SequencingSampleMetadataModel):
-    """Metrics and trending data model associated to a WTS sample.
+    """Metrics and trending data model associated to a WHOLE_TRANSCRIPTOME_SEQUENCING sample.
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
@@ -151,6 +151,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
     @field_validator("rin")
+    @classmethod
     def ensure_rin_thresholds(cls, rin: str) -> str:
         if rin != NA_FIELD:
             rin_number = float(rin)

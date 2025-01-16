@@ -9,6 +9,10 @@ from cg.constants.symbols import SPACE
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
 SIMPLE_DATE_FORMAT = "%Y-%m-%d"
+VALID_DATE_TIME_FORMAT = [
+    "%m/%d/%Y %H:%M:%S",
+]
+
 
 LOG = logging.getLogger(__name__)
 
@@ -59,3 +63,13 @@ def get_timedelta_from_date(date: datetime) -> timedelta:
 def get_date_days_ago(days_ago: int) -> datetime:
     """Return the date that was number of 'days_ago'."""
     return datetime.now() - timedelta(days=days_ago)
+
+
+def convert_string_to_datetime_object(date_time: str) -> datetime:
+    for datetime_format in VALID_DATE_TIME_FORMAT:
+        try:
+            return datetime.strptime(date_time, datetime_format)
+        except ValueError:
+            continue
+
+    raise ValueError(f"Could not convert '{date_time}' to a datetime object.")

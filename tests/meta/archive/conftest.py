@@ -286,7 +286,6 @@ def archive_store(
     order = Order(
         customer_id=customer_ddn.id,
         ticket_id=new_samples[0].original_ticket,
-        workflow=case.data_analysis,
     )
     base_store.session.add(order)
     base_store.session.add(case)

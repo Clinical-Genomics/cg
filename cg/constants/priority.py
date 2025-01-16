@@ -11,6 +11,13 @@ class SlurmQos(StrEnum):
     EXPRESS: str = "express"
 
 
+class TrailblazerPriority(StrEnum):
+    LOW: str = "low"
+    NORMAL: str = "normal"
+    HIGH: str = "high"
+    EXPRESS: str = "express"
+
+
 class PriorityTerms(StrEnum):
     EXPRESS: str = "express"
     PRIORITY: str = "priority"
