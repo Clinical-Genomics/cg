@@ -23,6 +23,7 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -172,6 +173,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         if "-" not in sample_id:
             metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
             self.set_order_sex_for_sample(sample, metric_conditions)
+            self.set_dropout_cutoff_by_analysis_type(sample, metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
@@ -229,6 +231,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
+
+    @staticmethod
+    def set_dropout_cutoff_by_analysis_type(sample: Sample, metric_conditions: dict) -> None:
+        if (
+            sample.application_version.application.analysis_type
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            metric_conditions["AT_DROPOUT"]["threshold"] = 5
+            metric_conditions["GC_DROPOUT"]["threshold"] = 5
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""

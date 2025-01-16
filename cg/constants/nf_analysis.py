@@ -23,8 +23,8 @@ RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "PCT_EXC_ADAPTER": {"norm": "lt", "threshold": 0.0005},
-    "AT_DROPOUT": {"norm": "lt", "threshold": 5.5},
-    "GC_DROPOUT": {"norm": "lt", "threshold": 8.4},
+    "AT_DROPOUT": {"norm": "lt", "threshold": 10},
+    "GC_DROPOUT": {"norm": "lt", "threshold": 10},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
     "gender": {"norm": "eq", "threshold": None},
 }

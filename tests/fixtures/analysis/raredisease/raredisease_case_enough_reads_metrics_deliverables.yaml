@@ -481,7 +481,7 @@ metrics:
   value: 0.0
 - condition:
     norm: lt
-    threshold: 5.5
+    threshold: 5.0
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -490,7 +490,7 @@ metrics:
   value: 0.061814
 - condition:
     norm: lt
-    threshold: 8.4
+    threshold: 5.0
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1605,7 +1605,7 @@ metrics:
   value: 0.0
 - condition:
     norm: lt
-    threshold: 5.5
+    threshold: 5.0
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -1614,7 +1614,7 @@ metrics:
   value: 0.061814
 - condition:
     norm: lt
-    threshold: 8.4
+    threshold: 5.0
   header: null
   id: ADM2
   input: multiqc_data.json
