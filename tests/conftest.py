@@ -2508,11 +2508,13 @@ def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Pat
 @pytest.fixture(scope="session")
 def bam_unmapped_read_paths(housekeeper_dir: Path) -> Path:
     """Path to existing bam read file."""
-    bam_unmapped_read_path = Path(housekeeper_dir, "m00000_000000_000000_s4.hifi_reads.bc2021").with_suffix(
-        f"{AlignmentFileTag.BAM}"
-    )
+    bam_unmapped_read_path = Path(
+        housekeeper_dir, "m00000_000000_000000_s4.hifi_reads.bc2021"
+    ).with_suffix(f"{AlignmentFileTag.BAM}")
     with open(bam_unmapped_read_path, "wb") as wh:
-        wh.write(b"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00")
+        wh.write(
+            b"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"
+        )
     return bam_unmapped_read_path
 
 
@@ -2612,9 +2614,9 @@ def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
 @pytest.fixture(scope="function")
 def nallo_params_file_path(nallo_dir, nallo_case_id) -> Path:
     """Path to parameters file."""
-    return Path(
-        nallo_dir, nallo_case_id, f"{nallo_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
 
 
 @pytest.fixture(scope="function")
@@ -2622,7 +2624,6 @@ def nallo_sample_sheet_content(
     sample_id: str,
     nallo_case_id: str,
     bam_unmapped_read_paths: Path,
-
 ) -> str:
     """Return the expected sample sheet content for Nallo."""
     headers: str = ",".join(NalloSampleSheetHeaders.list())
@@ -2644,9 +2645,9 @@ def nallo_sample_sheet_content(
 @pytest.fixture(scope="function")
 def nallo_sample_sheet_path(nallo_dir, nallo_case_id) -> Path:
     """Path to sample sheet."""
-    return Path(
-        nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet"
-    ).with_suffix(FileExtensions.CSV)
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
 
 
 # Raredisease fixtures

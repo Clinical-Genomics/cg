@@ -45,9 +45,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
-        bam_unmapped_read_paths = self.get_unmapped_bam_read_paths(
-            sample=case_sample.sample
-        )
+        bam_unmapped_read_paths = self.get_unmapped_bam_read_paths(sample=case_sample.sample)
         sample_sheet_entry = NalloSampleSheetEntry(
             project=case_sample.case.internal_id,
             sample=case_sample.sample.internal_id,
