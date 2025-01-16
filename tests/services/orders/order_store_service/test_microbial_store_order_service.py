@@ -1,7 +1,6 @@
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
 from cg.models.orders.sample_base import ControlEnum
-from cg.models.orders.samples import SarsCov2Sample
 from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
 from cg.services.orders.store_order_services.implementations.store_microbial_order import (
@@ -65,7 +64,6 @@ def test_store_items_in_status_control_has_stored_value(
     order = MutantOrder.model_validate(sarscov2_order_to_submit)
     order._generated_ticket_id = 123456
     control_value = ControlEnum.positive
-    sample: SarsCov2Sample
     for sample in order.samples:
         sample.control = control_value
 
@@ -74,7 +72,6 @@ def test_store_items_in_status_control_has_stored_value(
 
     # THEN control should exist on the sample in the store
     customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=order.customer)
-    sample: SarsCov2Sample
     for sample in order.samples:
         stored_sample: Sample = base_store.get_sample_by_customer_and_name(
             customer_entry_id=[customer.id], sample_name=sample.name

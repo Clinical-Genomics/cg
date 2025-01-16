@@ -122,6 +122,7 @@ pytest_plugins = [
     "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_fixtures",
+    "tests.fixture_plugins.orders_fixtures.services_and_api_fixtures",
     "tests.fixture_plugins.orders_fixtures.store_fixtures",
     "tests.fixture_plugins.orders_fixtures.store_service_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
