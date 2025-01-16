@@ -140,7 +140,7 @@
 					"control": null,
 					"data_analysis": null,
 					"data_delivery": null,
-					"elution_buffer": null,
+					"elution_buffer": "Nuclease-free water",
 					"family_name": null,
 					"father": null,
 					"formalin_fixation_time": null,

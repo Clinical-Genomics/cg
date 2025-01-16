@@ -82,6 +82,7 @@ def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Sto
         "MWRNXTR003": [OrderType.MICROBIAL_FASTQ, OrderType.MICROSALT],
         "MWXNXTR003": [OrderType.MICROSALT],
         "VWGNXTR001": [OrderType.MICROSALT],
+        "WGSWPFC030": [OrderType.MIP_DNA],
         "RNAPOAR025": [OrderType.MIP_RNA, OrderType.RNAFUSION, OrderType.TOMTE],
         "LWPBELB070": [OrderType.PACBIO_LONG_READ],
         "VWGDPTR001": [OrderType.SARS_COV_2],
@@ -93,6 +94,8 @@ def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Sto
         application_version.application.order_types = orders
     customer: Customer = helpers.ensure_customer(store=store, customer_id="cust000")
     helpers.ensure_user(store=store, customer=customer)
+    helpers.ensure_panel(store=store, panel_abbreviation="AID")
+    helpers.ensure_panel(store=store, panel_abbreviation="Ataxi")
     order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id=100000000)
     store.add_item_to_store(order)
     store.commit_to_store()
