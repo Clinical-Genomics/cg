@@ -1,8 +1,9 @@
 from datetime import date
 
-from pydantic import BeforeValidator, PrivateAttr, field_serializer
+from pydantic import BeforeValidator, PrivateAttr, field_serializer, model_validator
 from typing_extensions import Annotated
 
+from cg.constants.orderforms import ORIGINAL_LAB_ADDRESSES, REGION_CODES
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
 from cg.services.order_validation_service.constants import ElutionBuffer, ExtractionMethod
 from cg.services.order_validation_service.models.sample import Sample
@@ -26,17 +27,45 @@ class MutantSample(Sample):
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     extraction_method: Annotated[ExtractionMethod, BeforeValidator(parse_extraction_method)]
+    _lab_code: str = PrivateAttr(default="SE100 Karolinska")
     organism: str
     original_lab: OriginalLab
+    original_lab_address: str
     pre_processing_method: PreProcessingMethod
     primer: Primer
     priority: PriorityEnum
     quantity: int | None = None
     reference_genome: str
     region: Region
+    region_code: str
     selection_criteria: SelectionCriteria
     _verified_organism: str | None = PrivateAttr(default=None)
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_original_lab_address(cls, data: any):
+        if isinstance(data, dict):
+            is_set = bool(data["original_lab_address"])
+            data["original_lab_address"] = (
+                data["original_lab_address"]
+                if is_set
+                else ORIGINAL_LAB_ADDRESSES[data["original_lab"]]
+            )
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_region_code(cls, data: any):
+        if isinstance(data, dict):
+            is_set = bool(data["region_code"])
+            data["region_code"] = data["region_code"] if is_set else REGION_CODES[data["region"]]
+        return data
 
     @field_serializer("collection_date")
     def serialize_collection_date(self, value: date) -> str:
         return value.isoformat()
+
+    def model_dump(self, **kwargs) -> dict:
+        data = super().model_dump(**kwargs)
+        data["lab_code"] = self._lab_code
+        return data
