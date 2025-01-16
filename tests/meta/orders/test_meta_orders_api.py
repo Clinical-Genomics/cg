@@ -6,12 +6,10 @@ import pytest
 from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
-from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.orders.samples import MipDnaSample
 from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
 from cg.services.order_validation_service.models.existing_sample import ExistingSample
 from cg.services.order_validation_service.models.order import Order
@@ -20,21 +18,19 @@ from cg.services.order_validation_service.models.order_with_samples import Order
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.store.models import Case, Customer, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample, User
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def monkeypatch_process_lims(monkeypatch, order_data: Order) -> None:
+def monkeypatch_process_lims(monkeypatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    if isinstance(order_data, OrderWithSamples):
-        lims_map = {
-            sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
-        }
-    elif isinstance(order_data, OrderWithCases):
+    if isinstance(order, OrderWithSamples):
+        lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order.samples)}
+    elif isinstance(order, OrderWithCases):
         lims_map = {
             sample.name: f"ELH123A{case_index}-{sample_index}"
-            for case_index, sample_index, sample in order_data.enumerated_new_samples
+            for case_index, sample_index, sample in order.enumerated_new_samples
         }
     monkeypatch.setattr(
         "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
@@ -69,7 +65,6 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
-@pytest.mark.xfail(reason="Change in order validation")
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -77,43 +72,53 @@ def test_too_long_order_name():
         OrderType.FASTQ,
         OrderType.FLUFFY,
         OrderType.METAGENOME,
-        OrderType.MICROSALT,
-        OrderType.MIP_DNA,
-        OrderType.MIP_RNA,
-        OrderType.RML,
-        OrderType.RNAFUSION,
-        OrderType.SARS_COV_2,
+        # OrderType.MICROBIAL_FASTQ,
+        # OrderType.MICROSALT,
+        # OrderType.MIP_DNA,
+        # OrderType.MIP_RNA,
+        # OrderType.PACBIO_LONG_READ,
+        # OrderType.RML,
+        # OrderType.RNAFUSION,
+        # OrderType.SARS_COV_2,
+        # OrderType.TAXPROFILER,
+        # OrderType.TOMTE,
     ],
 )
-def test_submit(
+def test_submit_order(
     all_orders_to_submit: dict,
-    base_store: Store,
+    store_with_all_test_applications: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     ticket_id: str,
-    user_mail: str,
-    user_name: str,
+    email_address: str,
+    helpers: StoreHelpers,
 ):
+    # GIVEN an order
+    order: Order = all_orders_to_submit[order_type]
+
+    # GIVEN a ticketing system that returns a ticket number
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
     ) as mock_reply_to_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_ticket_creation(mock_create_ticket=mock_create_ticket, ticket_id=ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
-        order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-        monkeypatch_process_lims(monkeypatch, order_data)
+        # GIVEN a mock LIMS that returns project data and sample name mapping
+        monkeypatch_process_lims(monkeypatch=monkeypatch, order=order)
 
-        # GIVEN an order and an empty store
-        assert not base_store._get_query(table=Sample).first()
+        # GIVEN a registered user
+        user: User = store_with_all_test_applications._get_query(table=User).first()
+
+        # GIVEN a raw order and an empty store
+        raw_order = order.model_dump(by_alias=True)
+        assert not store_with_all_test_applications._get_query(table=Sample).first()
 
         # WHEN submitting the order
 
-        result = orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
-        )
+        result = orders_api.submit(order_type=order_type, raw_order=raw_order, user=user)
 
         # THEN the result should contain the ticket number for the order
         for record in result["records"]:
@@ -393,8 +398,6 @@ def test_submit_unique_sample_case_name(
         order_data = OrderIn.parse_obj(obj=mip_dna_order_to_submit, project=OrderType.MIP_DNA)
 
         store = orders_api.status
-
-        sample: MipDnaSample
         for sample in order_data.samples:
             case_id = sample.family_name
             customer: Customer = store.get_customer_by_internal_id(

@@ -1,35 +1,61 @@
 {
-	"cases": [
-		{
-			"cohorts": null,
-			"internal_id": null,
-			"name": "TestCase",
-			"panels": null,
-			"priority": "research",
-			"samples": [
-				{
-					"application": "WGSWPFR400",
-					"father": null,
-					"internal_id": "ACC16411A7DS800C0M",
-					"mother": null,
-					"name": "ACC16411A7DS800C0M",
-					"processedAt": "2025-01-16T08:18:42.329Z",
-					"reference_genome": null,
-					"sex": "male",
-					"status": null,
-					"subject_id": null,
-					"tumour": false
-				}
-			],
-			"synopsis": null
-		}
-	],
-	"comment": null,
-	"customer": "cust000",
-	"data_delivery": "analysis",
-	"dataAnalysis": "rnafusion",
-	"delivery_type": "analysis",
-	"name": "Test",
-	"project_type": "rnafusion",
-	"ticket": null
+    "name": "RNAfusion-order",
+    "customer": "cust000",
+    "delivery_type": "fastq-analysis",
+    "project_type": "rnafusion",
+    "comment": "",
+    "cases": [
+        {
+            "cohorts": null,
+            "name": "RnaFusionCase",
+            "panels": null,
+            "priority": "standard",
+            "samples": [
+                {
+                    "application": "RNAPOAR025",
+                    "cohorts": [""],
+                    "container": "96 well plate",
+                    "container_name": "CMMS",
+                    "data_analysis": null,
+                    "data_delivery": null,
+                    "family_name": "family1",
+                    "name": "sample1-rna-t1",
+                    "phenotype_groups": [""],
+                    "phenotype_terms": [""],
+                    "priority": "standard",
+                    "quantity": "220",
+                    "require_qc_ok": false,
+                    "sex": "female",
+                    "source": "tissue (fresh frozen)",
+                    "synopsis": "",
+                    "subject_id": "subject-sample1-rna-t1",
+                    "volume": "1",
+                    "well_position": "A:1"
+                },
+                {
+                    "application": "RNAPOAR025",
+                    "cohorts": [""],
+                    "comment": "this is a sample comment",
+                    "container": "96 well plate",
+                    "container_name": "CMMS",
+                    "data_analysis": null,
+                    "data_delivery": null,
+                    "family_name": "family2",
+                    "name": "sample1-rna-t2",
+                    "phenotype_groups": [""],
+                    "phenotype_terms": [""],
+                    "priority": "standard",
+                    "quantity": "220",
+                    "require_qc_ok": false,
+                    "sex": "female",
+                    "source": "tissue (fresh frozen)",
+                    "synopsis": "",
+                    "subject_id": "subject-sample1-rna-t2",
+                    "volume": "2",
+                    "well_position": "B:1"
+                }
+            ],
+            "synopsis": "A synopsis"
+        }
+    ]
 }

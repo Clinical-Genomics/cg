@@ -22,6 +22,8 @@ from cg.services.order_validation_service.workflows.mutant.models.order import M
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.order_validation_service.workflows.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 
 
 @pytest.fixture(scope="session")
@@ -56,7 +58,7 @@ def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def microbial_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example microbial order."""
     return ReadFile.get_content_from_file(
@@ -121,6 +123,14 @@ def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
+def taxprofiler_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example Taxprofiler order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "taxprofiler.json")
+    )
+
+
+@pytest.fixture(scope="session")
 def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example TOMTE order."""
     return ReadFile.get_content_from_file(
@@ -142,6 +152,8 @@ def all_orders_to_submit(
     rml_order_to_submit: dict,
     rnafusion_order_to_submit: dict,
     sarscov2_order_to_submit: dict,
+    taxprofiler_order_to_submit: dict,
+    tomte_order_to_submit: dict,
 ) -> dict[OrderType, Order]:
     """Returns a dict of parsed order for each order type."""
     return {
@@ -159,4 +171,6 @@ def all_orders_to_submit(
         OrderType.RML: RmlOrder.model_validate(rml_order_to_submit),
         OrderType.RNAFUSION: RnaFusionOrder.model_validate(rnafusion_order_to_submit),
         OrderType.SARS_COV_2: MutantOrder.model_validate(sarscov2_order_to_submit),
+        OrderType.TAXPROFILER: TaxprofilerOrder.model_validate(taxprofiler_order_to_submit),
+        OrderType.TOMTE: TomteOrder.model_validate(tomte_order_to_submit),
     }

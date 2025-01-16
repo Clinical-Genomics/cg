@@ -1,7 +1,6 @@
 import pytest
 
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
-from cg.models.orders.samples import TomteSample
 from cg.services.order_validation_service.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -52,6 +51,7 @@ from cg.services.order_validation_service.rules.case_sample.rules import (
 )
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.order_validation_service.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application, Sample
 from cg.store.store import Store
 

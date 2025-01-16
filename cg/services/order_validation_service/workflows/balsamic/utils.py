@@ -5,8 +5,9 @@ from cg.store.store import Store
 
 
 def is_sample_missing_capture_kit(sample: BalsamicSample, store: Store) -> bool:
-    application: Application = store.get_application_by_tag(sample.application)
+    application: Application | None = store.get_application_by_tag(sample.application)
     return (
-        application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+        application
+        and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
         and not sample.capture_kit
     )
