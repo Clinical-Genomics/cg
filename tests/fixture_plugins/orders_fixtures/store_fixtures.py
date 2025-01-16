@@ -96,6 +96,8 @@ def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Sto
     helpers.ensure_user(store=store, customer=customer)
     helpers.ensure_panel(store=store, panel_abbreviation="AID")
     helpers.ensure_panel(store=store, panel_abbreviation="Ataxi")
+    helpers.ensure_panel(store=store, panel_abbreviation="IEM")
+    helpers.ensure_panel(store=store, panel_abbreviation="OMIM-AUTO")
     order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id=100000000)
     store.add_item_to_store(order)
     store.commit_to_store()

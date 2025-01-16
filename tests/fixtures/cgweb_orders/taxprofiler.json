@@ -123,7 +123,7 @@
 			"tumour_purity": null,
 			"verified_organism": null,
 			"volume": 25,
-			"well_position": "A:1",
+			"well_position": "B:2",
 			"well_position_rml": null
 		},
 		{
@@ -182,7 +182,7 @@
 			"tumour_purity": null,
 			"verified_organism": null,
 			"volume": 22,
-			"well_position": "A:1",
+			"well_position": "C:3",
 			"well_position_rml": null
 		}
 	],

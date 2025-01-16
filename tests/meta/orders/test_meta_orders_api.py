@@ -78,10 +78,10 @@ def test_too_long_order_name():
         OrderType.MIP_RNA,
         OrderType.PACBIO_LONG_READ,
         OrderType.RML,
-        # OrderType.RNAFUSION,
-        # OrderType.SARS_COV_2,
-        # OrderType.TAXPROFILER,
-        # OrderType.TOMTE,
+        OrderType.RNAFUSION,
+        OrderType.SARS_COV_2,
+        OrderType.TAXPROFILER,
+        OrderType.TOMTE,
     ],
 )
 def test_submit_order(
@@ -94,6 +94,7 @@ def test_submit_order(
     email_address: str,
     helpers: StoreHelpers,
 ):
+    """Test submitting a valid order of each ordertype."""
     # GIVEN an order
     order: Order = all_orders_to_submit[order_type]
 

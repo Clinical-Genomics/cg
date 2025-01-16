@@ -8,7 +8,7 @@
     {
       "cohorts": null,
       "name": "TomteCase",
-      "panels": [""],
+      "panels": ["OMIM-AUTO"],
       "priority": "standard",
       "samples": [
         {
@@ -26,9 +26,7 @@
           "father": "sample3",
           "mother": "sample2",
           "name": "sample1",
-          "panels": [
-            "IEM"
-          ],
+          "panels": ["IEM"],
           "phenotype_groups": [
             "Phenotype-group"
           ],
@@ -46,7 +44,7 @@
           "subject_id": "subject1",
           "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
           "tumour": true,
-          "volume": "1",
+          "volume": "110",
           "well_position": "A:1"
         },
         {
@@ -62,9 +60,7 @@
           "data_delivery": "scout",
           "family_name": "family1",
           "name": "sample2",
-          "panels": [
-            "IEM"
-          ],
+          "panels": ["IEM"],
           "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
           "phenotype_groups": [
             ""
@@ -81,7 +77,7 @@
           "status": "affected",
           "subject_id": "subject2",
           "tumour": false,
-          "volume": "2",
+          "volume": "25",
           "well_position": "B:1"
         },
         {
@@ -96,9 +92,7 @@
           "data_delivery": "scout",
           "family_name": "family1",
           "name": "sample3",
-          "panels": [
-            "IEM"
-          ],
+          "panels": ["OMIM-AUTO"],
           "phenotype_groups": [
             ""
           ],
@@ -115,7 +109,7 @@
           "subject_id": "subject3",
           "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
           "tumour": false,
-          "volume": "3",
+          "volume": "30",
           "well_position": "C:1"
         },
         {
@@ -130,9 +124,7 @@
           "data_delivery": "scout",
           "family_name": "family2",
           "name": "sample4",
-          "panels": [
-            "IEM"
-          ],
+          "panels": ["OMIM-AUTO"],
           "phenotype_groups": [
             ""
           ],
@@ -149,7 +141,7 @@
           "subject_id": "subjectsample4",
           "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
           "tumour": false,
-          "volume": "4",
+          "volume": "45",
           "well_position": "D:1"
         }
       ]
