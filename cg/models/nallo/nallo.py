@@ -1,7 +1,7 @@
 from enum import StrEnum
 from pathlib import Path
 
-from pydantic import BaseModel, conlist, field_validator
+from pydantic import BaseModel, field_validator
 
 from cg.exc import NfSampleSheetError
 from cg.models.nf_analysis import WorkflowParameters
@@ -12,7 +12,7 @@ class NalloSampleSheetEntry(BaseModel):
 
     project: str
     sample: str
-    bam_unmapped_read_paths: conlist(Path)
+    bam_unmapped_read_path: Path
     family_id: str
     paternal_id: str
     maternal_id: str
@@ -26,7 +26,7 @@ class NalloSampleSheetEntry(BaseModel):
             [
                 self.project,
                 self.sample,
-                self.bam_unmapped_read_paths,
+                self.bam_unmapped_read_path,
                 self.family_id,
                 self.paternal_id,
                 self.maternal_id,
@@ -35,14 +35,13 @@ class NalloSampleSheetEntry(BaseModel):
             ]
         ]
 
-    @field_validator("bam_unmapped_read_paths")
+    @field_validator("bam_unmapped_read_path")
     @classmethod
-    def unmapped_bam_file_exists(cls, bam_paths: list[Path]) -> list[Path]:
+    def unmapped_bam_file_exists(cls, bam_path: Path) -> Path:
         """Verify that bam files exist."""
-        for bam_path in bam_paths:
-            if not bam_path.is_file():
-                raise NfSampleSheetError(f"Bam file does not exist: {str(bam_path)}")
-        return bam_paths
+        if not bam_path.is_file():
+            raise NfSampleSheetError(f"Bam file does not exist: {str(bam_path)}")
+        return bam_path
 
 
 class NalloSampleSheetHeaders(StrEnum):

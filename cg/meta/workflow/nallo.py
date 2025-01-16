@@ -3,11 +3,11 @@
 import logging
 from cg.constants import Workflow
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
 from cg.store.models import CaseSample
+from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -47,17 +47,21 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         bam_unmapped_read_paths = self.get_unmapped_bam_read_paths(sample=case_sample.sample)
-        sample_sheet_entry = NalloSampleSheetEntry(
-            project=case_sample.case.internal_id,
-            sample=case_sample.sample.internal_id,
-            bam_unmapped_read_paths=bam_unmapped_read_paths,
-            family_id=case_sample.case.internal_id,
-            paternal_id=case_sample.get_paternal_sample_id,
-            maternal_id=case_sample.get_maternal_sample_id,
-            sex=self.get_sex_code(case_sample.sample.sex),
-            phenotype=self.get_phenotype_code(case_sample.status),
-        )
-        return sample_sheet_entry.reformat_sample_content
+        sample_sheet_entries = []
+
+        for bam_path in bam_unmapped_read_paths:
+            sample_sheet_entry = NalloSampleSheetEntry(
+                project=case_sample.case.internal_id,
+                sample=case_sample.sample.internal_id,
+                bam_unmapped_read_path=Path(bam_path),
+                family_id=case_sample.case.internal_id,
+                paternal_id=case_sample.get_paternal_sample_id or "0",
+                maternal_id=case_sample.get_maternal_sample_id or "0",
+                sex=self.get_sex_code(case_sample.sample.sex),
+                phenotype=self.get_phenotype_code(case_sample.status),
+            )
+            sample_sheet_entries.extend(sample_sheet_entry.reformat_sample_content)
+        return sample_sheet_entries
 
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
