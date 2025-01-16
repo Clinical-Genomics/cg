@@ -3,6 +3,7 @@ from cg.services.order_validation_service.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_number_of_normal_samples,
 )
 from cg.services.order_validation_service.rules.case_sample.rules import (
     validate_application_compatibility,
@@ -31,10 +32,11 @@ from cg.services.order_validation_service.workflows.balsamic.rules import (
 )
 
 BALSAMIC_CASE_RULES: list[callable] = [
+    validate_at_most_two_samples_per_case,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
-    validate_at_most_two_samples_per_case,
+    validate_number_of_normal_samples,
 ]
 
 BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
