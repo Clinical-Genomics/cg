@@ -15,6 +15,7 @@ from cg.services.order_validation_service.workflows.mip_rna.models.order import 
 from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
+from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
 
 
 @pytest.fixture
@@ -110,3 +111,11 @@ def rml_order(rml_order_to_submit: dict, ticket_id_as_int: int) -> RmlOrder:
     rml_order = RmlOrder.model_validate(rml_order_to_submit)
     rml_order._generated_ticket_id = ticket_id_as_int
     return rml_order
+
+
+@pytest.fixture
+def rnafusion_order(rnafusion_order_to_submit: dict) -> RnaFusionOrder:
+    """Parse RNAFusion order example."""
+    rnafusion_order = RnaFusionOrder.model_validate(rnafusion_order_to_submit)
+    rnafusion_order._generated_ticket_id = 123456
+    return rnafusion_order

@@ -1,7 +1,9 @@
 from cg.constants import GenePanelMasterList
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.order_validation_service.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
+    MultipleSamplesInCaseError,
     RepeatedCaseNameError,
 )
 from cg.services.order_validation_service.models.existing_case import ExistingCase
@@ -10,7 +12,10 @@ from cg.services.order_validation_service.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_one_sample_per_case,
 )
+from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.order_validation_service.workflows.rna_fusion.models.sample import RnaFusionSample
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -72,3 +77,28 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWi
 
     # THEN the errors are about the case names
     assert isinstance(errors[0], RepeatedCaseNameError)
+
+
+def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
+    # GIVEN an RNAFusion order with multiple samples in the same case
+    rnafusion_sample = RnaFusionSample(
+        container=ContainerEnum.tube,
+        container_name="container_name",
+        application="DummyAppTag",
+        name="ExtraSample",
+        require_qc_ok=False,
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="subject",
+    )
+    rnafusion_order.cases[0].samples.append(rnafusion_sample)
+
+    # WHEN validating that the order has at most one sample per case
+    errors: list[MultipleSamplesInCaseError] = validate_one_sample_per_case(rnafusion_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the multiple samples in the first case
+    assert isinstance(errors[0], MultipleSamplesInCaseError)
+    assert errors[0].case_index == 0
