@@ -18,7 +18,7 @@ from cg.services.order_validation_service.models.order_with_samples import Order
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.store.models import Case, Customer, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample, User
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -91,24 +91,29 @@ def test_submit_order(
     order_type: OrderType,
     orders_api: OrdersAPI,
     ticket_id: str,
+    email_address: str,
     helpers: StoreHelpers,
 ):
+    # GIVEN an order
+    order: Order = all_orders_to_submit[order_type]
+
+    # GIVEN a ticketing system that returns a ticket number
     with patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
     ) as mock_create_ticket, patch(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
     ) as mock_reply_to_ticket:
-        mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
+        mock_freshdesk_ticket_creation(mock_create_ticket=mock_create_ticket, ticket_id=ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
-        order: Order = all_orders_to_submit[order_type]
+        # GIVEN a mock LIMS that returns project data and sample name mapping
         monkeypatch_process_lims(monkeypatch=monkeypatch, order=order)
 
-        customer = helpers.ensure_customer(store=orders_api.validation_service.store)
-        user = helpers.ensure_user(store=orders_api.validation_service.store, customer=customer)
-        raw_order = order.model_dump(by_alias=True)
+        # GIVEN a registered user
+        user: User = store_with_all_test_applications._get_query(table=User).first()
 
-        # GIVEN an order and an empty store
+        # GIVEN a raw order and an empty store
+        raw_order = order.model_dump(by_alias=True)
         assert not store_with_all_test_applications._get_query(table=Sample).first()
 
         # WHEN submitting the order

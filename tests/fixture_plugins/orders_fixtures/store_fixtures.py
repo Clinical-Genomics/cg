@@ -7,7 +7,7 @@ from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
-from cg.store.models import Application, ApplicationVersion, Order
+from cg.store.models import Application, ApplicationVersion, Customer, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -91,6 +91,8 @@ def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Sto
             store=store, application_tag=tag
         )
         application_version.application.order_types = orders
+    customer: Customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    helpers.ensure_user(store=store, customer=customer)
     order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id=100000000)
     store.add_item_to_store(order)
     store.commit_to_store()
