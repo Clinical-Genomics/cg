@@ -4,6 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, conlist, field_validator
 
 from cg.exc import NfSampleSheetError
+from cg.models.nf_analysis import WorkflowParameters
 
 
 class NalloSampleSheetEntry(BaseModel):
@@ -57,3 +58,7 @@ class NalloSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class NalloParameters(WorkflowParameters):
+    """Model for Nallo parameters."""

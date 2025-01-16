@@ -3,9 +3,10 @@
 import logging
 from cg.constants import Workflow
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry
+from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
 from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -77,3 +78,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         except KeyError:
             raise ValueError(f"{sex} is not a valid sex")
         return code
+
+    def get_built_workflow_parameters(self, case_id: str) -> NalloParameters:
+        """Return parameters."""
+        outdir = self.get_case_path(case_id=case_id)
+
+        return NalloParameters(
+            input=self.get_sample_sheet_path(case_id=case_id),
+            outdir=outdir,
+        )
