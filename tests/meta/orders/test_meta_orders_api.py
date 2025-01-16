@@ -78,10 +78,10 @@ def test_too_long_order_name():
         OrderType.MIP_RNA,
         OrderType.PACBIO_LONG_READ,
         OrderType.RML,
-        # OrderType.RNAFUSION,
-        # OrderType.SARS_COV_2,
-        # OrderType.TAXPROFILER,
-        # OrderType.TOMTE,
+        OrderType.RNAFUSION,
+        OrderType.SARS_COV_2,
+        OrderType.TAXPROFILER,
+        OrderType.TOMTE,
     ],
 )
 def test_submit_order(

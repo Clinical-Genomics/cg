@@ -29,9 +29,18 @@
                     "source": "tissue (fresh frozen)",
                     "synopsis": "",
                     "subject_id": "subject-sample1-rna-t1",
-                    "volume": "1",
+                    "volume": "120",
                     "well_position": "A:1"
-                },
+                }
+            ],
+            "synopsis": "A synopsis"
+        },
+        {
+            "cohorts": null,
+            "name": "RnaFusionCase2",
+            "panels": null,
+            "priority": "standard",
+            "samples": [
                 {
                     "application": "RNAPOAR025",
                     "cohorts": [""],
@@ -51,7 +60,7 @@
                     "source": "tissue (fresh frozen)",
                     "synopsis": "",
                     "subject_id": "subject-sample1-rna-t2",
-                    "volume": "2",
+                    "volume": "20",
                     "well_position": "B:1"
                 }
             ],
