@@ -11,7 +11,7 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.models.orders.order import OrderType
+from cg.models.orders.constants import OrderType
 from cg.services.order_validation_service.models.order import Order
 from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.store_order_services.store_order_service import StoreOrderService
