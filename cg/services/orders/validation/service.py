@@ -37,8 +37,6 @@ class OrderValidationService:
         errors: ValidationErrors = self._get_errors(
             raw_order=raw_order, model=model, rule_set=rule_set, user_id=user_id
         )
-        if not errors.is_empty:
-            LOG.info(errors.get_error_message())
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(
