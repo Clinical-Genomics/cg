@@ -45,20 +45,18 @@ class MutantSample(Sample):
     @classmethod
     def set_original_lab_address(cls, data: any):
         if isinstance(data, dict):
-            is_set = bool(data["original_lab_address"])
-            data["original_lab_address"] = (
-                data["original_lab_address"]
-                if is_set
-                else ORIGINAL_LAB_ADDRESSES[data["original_lab"]]
-            )
+            is_set = bool(data.get("original_lab_address"))
+            if not is_set:
+                data["original_lab_address"] = ORIGINAL_LAB_ADDRESSES[data["original_lab"]]
         return data
 
     @model_validator(mode="before")
     @classmethod
     def set_region_code(cls, data: any):
         if isinstance(data, dict):
-            is_set = bool(data["region_code"])
-            data["region_code"] = data["region_code"] if is_set else REGION_CODES[data["region"]]
+            is_set = bool(data.get("region_code"))
+            if not is_set:
+                data["region_code"] = REGION_CODES[data["region"]]
         return data
 
     @field_serializer("collection_date")
