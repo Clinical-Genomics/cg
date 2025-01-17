@@ -12,13 +12,13 @@ from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
-from cg.services.orders.store_order_services.storing_service_registry import (
+from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
     setup_storing_service_registry,
 )
+from cg.services.orders.validation.service import OrderValidationService
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )

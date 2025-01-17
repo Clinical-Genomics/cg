@@ -6,10 +6,10 @@ from typing import Any
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
-from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
+from cg.services.orders.validation.models.order import Order
+from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 

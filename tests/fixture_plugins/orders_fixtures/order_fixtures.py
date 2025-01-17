@@ -2,22 +2,20 @@
 
 import pytest
 
-from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.order_validation_service.workflows.fastq.models.order import FastqOrder
-from cg.services.order_validation_service.workflows.fluffy.models.order import FluffyOrder
-from cg.services.order_validation_service.workflows.metagenome.models.order import MetagenomeOrder
-from cg.services.order_validation_service.workflows.microbial_fastq.models.order import (
-    MicrobialFastqOrder,
-)
-from cg.services.order_validation_service.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.order_validation_service.workflows.mip_rna.models.order import MipRnaOrder
-from cg.services.order_validation_service.workflows.mutant.models.order import MutantOrder
-from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
-from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
-from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
-from cg.services.order_validation_service.workflows.taxprofiler.models.order import TaxprofilerOrder
-from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
+from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
+from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
+from cg.services.orders.validation.workflows.metagenome.models.order import MetagenomeOrder
+from cg.services.orders.validation.workflows.microbial_fastq.models.order import MicrobialFastqOrder
+from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.workflows.mip_rna.models.order import MipRnaOrder
+from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
+from cg.services.orders.validation.workflows.pacbio_long_read.models.order import PacbioOrder
+from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
+from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.orders.validation.workflows.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
 
 
 @pytest.fixture
