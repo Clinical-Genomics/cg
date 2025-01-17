@@ -137,7 +137,7 @@ def test_run_case_from_start_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN mocked config files
-    request.getfixturevalue(f"{workflow}_mock_config")
+    request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(
@@ -171,7 +171,7 @@ def test_run_case_with_revision_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
-    request.getfixturevalue(f"{workflow}_mock_config")
+    request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run and revision specified
     result = cli_runner.invoke(
