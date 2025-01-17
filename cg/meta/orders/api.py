@@ -12,10 +12,10 @@ import logging
 from cg.apps.lims import LimsAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.orders.store_order_services.store_order_service import StoreOrderService
-from cg.services.orders.store_order_services.storing_service_registry import StoringServiceRegistry
+from cg.services.orders.storing.service import StoreOrderService
+from cg.services.orders.storing.service_registry import StoringServiceRegistry
+from cg.services.orders.validation.models.order import Order
+from cg.services.orders.validation.service import OrderValidationService
 from cg.store.models import User
 
 LOG = logging.getLogger(__name__)

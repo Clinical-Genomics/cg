@@ -3,11 +3,11 @@ import pytest
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
-from cg.services.order_validation_service.order_validation_service import OrderValidationService
-from cg.services.orders.store_order_services.storing_service_registry import (
+from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
     setup_storing_service_registry,
 )
+from cg.services.orders.validation.service import OrderValidationService
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 

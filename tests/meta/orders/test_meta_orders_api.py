@@ -7,10 +7,10 @@ from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.errors.validation_errors import ValidationErrors
-from cg.services.order_validation_service.models.order import Order
-from cg.services.order_validation_service.models.order_with_cases import OrderWithCases
-from cg.services.order_validation_service.models.order_with_samples import OrderWithSamples
+from cg.services.orders.validation.errors.validation_errors import ValidationErrors
+from cg.services.orders.validation.models.order import Order
+from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
 from cg.store.models import Case, Pool, Sample, User
 from cg.store.store import Store
 
@@ -25,7 +25,7 @@ def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> N
             for case_index, sample_index, sample in order.enumerated_new_samples
         }
     monkeypatch.setattr(
-        "cg.services.orders.order_lims_service.order_lims_service.OrderLimsService.process_lims",
+        "cg.services.orders.lims_service.service.OrderLimsService.process_lims",
         lambda *args, **kwargs: (lims_project_data, lims_map),
     )
 
@@ -140,7 +140,7 @@ def test_submit_ticketexception(
         "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
         side_effect=TicketCreationError("ERROR"),
     ), patch(
-        "cg.services.order_validation_service.order_validation_service.OrderValidationService._get_rule_validation_errors",
+        "cg.services.orders.validation.service.OrderValidationService._get_rule_validation_errors",
         return_value=ValidationErrors(),
     ):
         # GIVEN an order that does not have a name (ticket_nr)

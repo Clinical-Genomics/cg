@@ -4,9 +4,9 @@ import pytest
 
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
-from cg.services.order_validation_service.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.order_validation_service.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
+from cg.services.orders.storing.constants import MAF_ORDER_ID
+from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
 from cg.store.models import Application, ApplicationVersion, Customer, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
