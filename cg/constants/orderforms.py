@@ -71,4 +71,5 @@ ORIGINAL_LAB_ADDRESSES: dict[str, str] = {
     "LaboratorieMedicinskt Centrum Gotland": "621 84 Visby",
     "Unilabs Eskilstuna Laboratorium": "631 88 Eskilstuna",
     "Norrland University Hospital": "901 85 Umeå",
+    "Länssjukhuset Sundsvall": "856 43 Sundsvall",
 }
