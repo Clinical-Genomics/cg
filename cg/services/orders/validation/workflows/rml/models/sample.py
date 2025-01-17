@@ -33,7 +33,6 @@ class RmlSample(Sample):
             try:
                 self.index_sequence = INDEX_SEQUENCES[self.index][self.index_number - 1]
             except Exception:
-                # Could be that the index is not known or that the index number is out of range
                 LOG.warning(
                     f"No index sequence set and no suitable sequence found for index {self.index}, number {self.index_number}"
                 )
