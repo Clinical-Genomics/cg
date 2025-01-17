@@ -144,17 +144,15 @@ def test_to_lims_microbial(microbial_order_to_submit: dict):
     assert first_sample["udfs"]["volume"] == "20"
 
 
-@pytest.mark.xfail(reason="Mutant extraction methods need a new enum")
-def test_to_lims_sarscov2(sarscov2_order_to_submit: dict):
+def test_to_lims_sarscov2(mutant_order: MutantOrder):
     # GIVEN a sarscov2 order for samples
-    order_data = MutantOrder.model_validate(sarscov2_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust000",
-        samples=order_data.samples,
+        samples=mutant_order.samples,
         workflow=Workflow.MUTANT,
-        delivery_type=order_data.delivery_type,
+        delivery_type=mutant_order.delivery_type,
     )
 
     # THEN it should have found the same number of samples
@@ -164,16 +162,16 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit: dict):
     assert first_sample["udfs"]["collection_date"] == "2021-05-05"
     assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
     assert first_sample["udfs"]["lab_code"] == "SE100 Karolinska"
-    assert first_sample["udfs"]["organism"] == "SARS CoV-2"
+    assert first_sample["udfs"]["organism"] == "SARS-CoV-2"
     assert first_sample["udfs"]["original_lab"] == "Karolinska University Hospital Solna"
-    assert first_sample["udfs"]["original_lab_address"] == "171 76 Stockholm"
+    assert first_sample["udfs"]["original_lab_address"] == "171 76 Solna"
     assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["reference_genome"] == "NC_111"
     assert first_sample["udfs"]["region"] == "Stockholm"
     assert first_sample["udfs"]["region_code"] == "01"
-    assert first_sample["udfs"]["selection_criteria"] == "1. Allmän övervakning"
-    assert first_sample["udfs"]["volume"] == "1"
+    assert first_sample["udfs"]["selection_criteria"] == "Allmän övervakning"
+    assert first_sample["udfs"]["volume"] == "20"
 
 
 def test_to_lims_balsamic(balsamic_order_to_submit: dict):
