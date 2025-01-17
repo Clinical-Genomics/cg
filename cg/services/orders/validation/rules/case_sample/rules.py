@@ -8,6 +8,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
     BufferMissingError,
+    CaptureKitMissingError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -52,6 +53,7 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
+    is_sample_missing_capture_kit,
     is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
@@ -62,6 +64,7 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
+from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -437,4 +440,20 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
         if is_buffer_missing(sample):
             error = BufferMissingError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
+    return errors
+
+
+def validate_capture_kit_panel_requirement(
+    order: BalsamicOrder, store: Store
+) -> list[CaptureKitMissingError]:
+    """
+    Return an error for each new sample missing a capture kit, if its application requires one.
+    Applicable to Balsamic orders only.
+    """
+    errors: list[CaptureKitMissingError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if is_sample_missing_capture_kit(sample=sample, store=store):
+                error = CaptureKitMissingError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
     return errors
