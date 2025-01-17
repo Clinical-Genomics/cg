@@ -1,10 +1,15 @@
-from pydantic import BeforeValidator, Field
+import logging
+
+from pydantic import BeforeValidator, Field, model_validator
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
 from cg.services.orders.validation.constants import IndexEnum
+from cg.services.orders.validation.index_sequences import INDEX_SEQUENCES
 from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.utils import parse_control
+
+LOG = logging.getLogger(__name__)
 
 
 class FluffySample(Sample):
@@ -20,3 +25,15 @@ class FluffySample(Sample):
     rml_plate_name: str | None = None
     volume: int
     well_position_rml: str | None = None
+
+    @model_validator(mode="after")
+    def set_default_index_sequence(self):
+        """Set a default index_sequence from the index and index_number."""
+        if not self.index_sequence and (self.index and self.index_number):
+            try:
+                self.index_sequence = INDEX_SEQUENCES[self.index][self.index_number - 1]
+            except Exception:
+                LOG.warning(
+                    f"No index sequence set and no suitable sequence found for index {self.index}, number {self.index_number}"
+                )
+        return self
