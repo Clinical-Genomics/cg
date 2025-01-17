@@ -1,3 +1,5 @@
+import logging
+
 from cg.exc import OrderError as OrderValidationError
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.errors.case_errors import CaseError
@@ -21,6 +23,8 @@ from cg.services.orders.validation.utils import (
     apply_sample_validation,
 )
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class OrderValidationService:
@@ -92,5 +96,6 @@ class OrderValidationService:
                 rule_set=rule_set,
             )
         if not errors.is_empty:
+            LOG.error(errors.get_error_message())
             raise OrderValidationError(message="Order contained errors")
         return parsed_order
