@@ -1,3 +1,5 @@
+import logging
+
 from cg.exc import OrderError as OrderValidationError
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.errors.case_errors import CaseError
@@ -22,6 +24,8 @@ from cg.services.orders.validation.utils import (
 )
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class OrderValidationService:
     def __init__(self, store: Store):
@@ -33,6 +37,8 @@ class OrderValidationService:
         errors: ValidationErrors = self._get_errors(
             raw_order=raw_order, model=model, rule_set=rule_set, user_id=user_id
         )
+        if not errors.is_empty:
+            LOG.info(errors.get_error_message())
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
     def _get_errors(
@@ -92,5 +98,6 @@ class OrderValidationService:
                 rule_set=rule_set,
             )
         if not errors.is_empty:
+            LOG.error(errors.get_error_message())
             raise OrderValidationError(message="Order contained errors")
         return parsed_order

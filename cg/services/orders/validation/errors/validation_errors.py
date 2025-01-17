@@ -16,3 +16,20 @@ class ValidationErrors(BaseModel):
     def is_empty(self) -> bool:
         """Return True if there are no errors in any of the attributes."""
         return all(not getattr(self, field) for field in self.model_fields)
+
+    def get_error_message(self) -> str:
+        """Gets a string documenting all errors."""
+        error_string = ""
+        for error in self.order_errors:
+            error_string += f"Problem with {error.field}: {error.message} \n"
+        for error in self.case_errors:
+            error_string += (
+                f"Problem with {error.field} in case {error.case_index}: {error.message} \n"
+            )
+        for error in self.case_sample_errors:
+            error_string += f"Problem with {error.field} in case {error.case_index} sample {error.sample_index}: {error.message} \n"
+        for error in self.sample_errors:
+            error_string += (
+                f"Problem with {error.field} in sample {error.sample_index}: {error.message} \n"
+            )
+        return error_string
