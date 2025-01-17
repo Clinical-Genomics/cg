@@ -125,7 +125,7 @@ def rnafusion_order(rnafusion_order_to_submit: dict) -> RnaFusionOrder:
 
 @pytest.fixture
 def taxprofiler_order(taxprofiler_order_to_submit: dict, ticket_id_as_int: int) -> TaxprofilerOrder:
-    """Parse taxprofiler order example."""
+    """Parse Taxprofiler order example."""
     taxprofiler_order = TaxprofilerOrder.model_validate(taxprofiler_order_to_submit)
     taxprofiler_order._generated_ticket_id = ticket_id_as_int
     return taxprofiler_order
@@ -133,7 +133,7 @@ def taxprofiler_order(taxprofiler_order_to_submit: dict, ticket_id_as_int: int) 
 
 @pytest.fixture
 def tomte_order(tomte_order_to_submit: dict, ticket_id_as_int: int) -> TomteOrder:
-    """Parse tomte order example."""
+    """Parse Tomte order example."""
     tomte_order = TomteOrder.model_validate(tomte_order_to_submit)
     tomte_order._generated_ticket_id = ticket_id_as_int
     return tomte_order
