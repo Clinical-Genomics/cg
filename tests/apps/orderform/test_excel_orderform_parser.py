@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 
 

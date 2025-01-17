@@ -16,6 +16,8 @@ from cg.services.order_validation_service.workflows.mutant.models.order import M
 from cg.services.order_validation_service.workflows.pacbio_long_read.models.order import PacbioOrder
 from cg.services.order_validation_service.workflows.rml.models.order import RmlOrder
 from cg.services.order_validation_service.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.order_validation_service.workflows.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.order_validation_service.workflows.tomte.models.order import TomteOrder
 
 
 @pytest.fixture
@@ -119,3 +121,19 @@ def rnafusion_order(rnafusion_order_to_submit: dict) -> RnaFusionOrder:
     rnafusion_order = RnaFusionOrder.model_validate(rnafusion_order_to_submit)
     rnafusion_order._generated_ticket_id = 123456
     return rnafusion_order
+
+
+@pytest.fixture
+def taxprofiler_order(taxprofiler_order_to_submit: dict, ticket_id_as_int: int) -> TaxprofilerOrder:
+    """Parse taxprofiler order example."""
+    taxprofiler_order = TaxprofilerOrder.model_validate(taxprofiler_order_to_submit)
+    taxprofiler_order._generated_ticket_id = ticket_id_as_int
+    return taxprofiler_order
+
+
+@pytest.fixture
+def tomte_order(tomte_order_to_submit: dict, ticket_id_as_int: int) -> TomteOrder:
+    """Parse tomte order example."""
+    tomte_order = TomteOrder.model_validate(tomte_order_to_submit)
+    tomte_order._generated_ticket_id = ticket_id_as_int
+    return tomte_order
