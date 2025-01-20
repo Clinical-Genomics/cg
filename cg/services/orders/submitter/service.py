@@ -7,7 +7,6 @@ document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
 
-from cg.apps.lims import LimsAPI
 from cg.models.orders.constants import OrderType
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
@@ -22,13 +21,11 @@ class OrderSubmitter:
 
     def __init__(
         self,
-        lims: LimsAPI,
         ticket_handler: TicketHandler,
         storing_registry: StoringServiceRegistry,
         validation_service: OrderValidationService,
     ):
         super().__init__()
-        self.lims = lims
         self.ticket_handler = ticket_handler
         self.storing_registry = storing_registry
         self.validation_service = validation_service

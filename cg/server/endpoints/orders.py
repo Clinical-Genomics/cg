@@ -34,7 +34,6 @@ from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
-    lims,
     order_service,
     order_validation_service,
     storing_service_registry,
@@ -152,7 +151,6 @@ def create_order_from_form():
 def submit_order(order_type: OrderType):
     """Submit an order for samples."""
     submitter = OrderSubmitter(
-        lims=lims,
         ticket_handler=ticket_handler,
         storing_registry=storing_service_registry,
         validation_service=order_validation_service,

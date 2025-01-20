@@ -25,12 +25,10 @@ def order_validation_service(store_with_all_test_applications: Store) -> OrderVa
 @pytest.fixture(scope="function")
 def order_submitter(
     ticket_handler: TicketHandler,
-    lims_api: MockLimsAPI,
     storing_service_registry: StoringServiceRegistry,
     order_validation_service: OrderValidationService,
 ) -> OrderSubmitter:
     return OrderSubmitter(
-        lims=lims_api,
         ticket_handler=ticket_handler,
         storing_registry=storing_service_registry,
         validation_service=order_validation_service,
