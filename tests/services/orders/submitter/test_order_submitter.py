@@ -5,8 +5,8 @@ import pytest
 
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
-from cg.meta.orders import OrdersAPI
 from cg.models.orders.constants import OrderType
+from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
@@ -70,7 +70,7 @@ def test_submit_order(
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     order_fixture: str,
-    orders_api: OrdersAPI,
+    order_submitter: OrderSubmitter,
     ticket_id: str,
     request: pytest.FixtureRequest,
 ):
@@ -98,7 +98,7 @@ def test_submit_order(
         assert not store_with_all_test_applications._get_query(table=Sample).first()
 
         # WHEN submitting the order
-        result = orders_api.submit(order_type=order_type, raw_order=raw_order, user=user)
+        result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
 
         # THEN the result should contain the ticket number for the order
         for record in result["records"]:
@@ -120,7 +120,7 @@ def test_submit_order(
     ],
 )
 def test_submit_ticketexception(
-    orders_api: OrdersAPI,
+    order_submitter: OrderSubmitter,
     order_type: OrderType,
     order_fixture: str,
     request: pytest.FixtureRequest,
@@ -133,7 +133,7 @@ def test_submit_ticketexception(
     raw_order["project_type"] = order_type
 
     # GIVEN a registered user
-    user: User = orders_api.validation_service.store._get_query(table=User).first()
+    user: User = order_submitter.validation_service.store._get_query(table=User).first()
 
     # GIVEN a mock Freshdesk ticket creation that raises TicketCreationError
     with patch(
@@ -148,4 +148,4 @@ def test_submit_ticketexception(
         # WHEN the order is submitted and a TicketCreationError raised
         # THEN the TicketCreationError is not excepted
         with pytest.raises(TicketCreationError):
-            orders_api.submit(raw_order=raw_order, user=user, order_type=order_type)
+            order_submitter.submit(raw_order=raw_order, user=user, order_type=order_type)
