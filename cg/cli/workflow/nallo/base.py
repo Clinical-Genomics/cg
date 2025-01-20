@@ -6,7 +6,7 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
-from cg.cli.workflow.nf_analysis import config_case, run
+from cg.cli.workflow.nf_analysis import config_case, run, start
 
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -25,3 +25,4 @@ def nallo(context: click.Context) -> None:
 
 nallo.add_command(config_case)
 nallo.add_command(run)
+nallo.add_command(start)
