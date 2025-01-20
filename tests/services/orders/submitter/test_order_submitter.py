@@ -79,11 +79,14 @@ def test_submit_order(
     order: Order = request.getfixturevalue(order_fixture)
 
     # GIVEN a ticketing system that returns a ticket number
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket=mock_create_ticket, ticket_id=ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
@@ -136,12 +139,15 @@ def test_submit_ticketexception(
     user: User = order_submitter.validation_service.store._get_query(table=User).first()
 
     # GIVEN a mock Freshdesk ticket creation that raises TicketCreationError
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
-        side_effect=TicketCreationError("ERROR"),
-    ), patch(
-        "cg.services.orders.validation.service.OrderValidationService._get_rule_validation_errors",
-        return_value=ValidationErrors(),
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket",
+            side_effect=TicketCreationError("ERROR"),
+        ),
+        patch(
+            "cg.services.orders.validation.service.OrderValidationService._get_rule_validation_errors",
+            return_value=ValidationErrors(),
+        ),
     ):
         # GIVEN an order that does not have a name (ticket_nr)
 
