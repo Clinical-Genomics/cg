@@ -183,14 +183,26 @@ def test_submit_ticketexception(
             )
 
 
-def test_get_ticket_tags(order_fixture: str, order_type: OrderType, request: pytest.FixtureRequest):
+@pytest.mark.parametrize(
+    "order_fixture, order_type, expected_tags",
+    [
+        ("mip_dna_order_with_existing_samples", OrderType.MIP_DNA, ["mip-dna", "existing-data"]),
+        ("mip_dna_order", OrderType.MIP_DNA, ["mip-dna"]),
+    ],
+)
+def test_get_ticket_tags(
+    request: pytest.FixtureRequest,
+    order_fixture: str,
+    order_type: OrderType,
+    expected_tags: list[str],
+):
     """Test that the correct tags are generated based on the order and order type."""
+
     # GIVEN an order with existing data
     order: OrderWithCases = request.getfixturevalue(order_fixture)
-    order.cases[0].samples[0].existing_sample = True
 
     # WHEN getting the ticket tags
     tags = get_ticket_tags(order=order, order_type=order_type)
 
     # THEN the tags should be correct
-    assert tags == [ORDER_TYPE_WORKFLOW_MAP[order_type]]
+    assert tags == expected_tags
