@@ -69,7 +69,9 @@ def mip_dna_submit_store(
 
 
 @pytest.fixture
-def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_all_test_applications(
+    store: Store, helpers: StoreHelpers, customer_id: str
+) -> Store:
     app_tags: dict[str, list[OrderType]] = {
         "PANKTTR100": [OrderType.BALSAMIC],
         "WGSPCFC030": [OrderType.FASTQ, OrderType.MIP_DNA],
@@ -92,7 +94,7 @@ def store_with_all_test_applications(store: Store, helpers: StoreHelpers) -> Sto
             store=store, application_tag=tag
         )
         application_version.application.order_types = orders
-    customer: Customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    customer: Customer = helpers.ensure_customer(store=store, customer_id=customer_id)
     helpers.ensure_user(store=store, customer=customer)
     helpers.ensure_panel(store=store, panel_abbreviation="AID")
     helpers.ensure_panel(store=store, panel_abbreviation="Ataxi")
