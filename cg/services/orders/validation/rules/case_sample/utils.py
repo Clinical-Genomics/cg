@@ -35,6 +35,7 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_within_allowed_interval,
 )
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
+from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -288,7 +289,7 @@ def is_buffer_missing(sample: SampleInCase) -> bool:
     )
 
 
-def is_sample_missing_capture_kit(sample: BalsamicSample, store: Store) -> bool:
+def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
     """Returns whether a TGS sample has an application and is missing a capture kit."""
     application: Application | None = store.get_application_by_tag(sample.application)
     return (

@@ -65,6 +65,7 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_missing,
 )
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -444,11 +445,11 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
 
 
 def validate_capture_kit_panel_requirement(
-    order: BalsamicOrder, store: Store
+    order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[CaptureKitMissingError]:
     """
     Return an error for each new sample missing a capture kit, if its application requires one.
-    Applicable to Balsamic orders only.
+    Applicable to Balsamic and Balsamic-UMI orders only.
     """
     errors: list[CaptureKitMissingError] = []
     for case_index, case in order.enumerated_new_cases:
