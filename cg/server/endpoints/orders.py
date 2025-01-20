@@ -23,7 +23,6 @@ from cg.exc import (
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
-from cg.meta.orders import OrdersAPI
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
@@ -41,6 +40,7 @@ from cg.server.ext import (
     storing_service_registry,
     ticket_handler,
 )
+from cg.services.orders.submitter.service import OrderSubmitter
 from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
@@ -151,7 +151,7 @@ def create_order_from_form():
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type: OrderType):
     """Submit an order for samples."""
-    api = OrdersAPI(
+    submitter = OrderSubmitter(
         lims=lims,
         ticket_handler=ticket_handler,
         storing_registry=storing_service_registry,
@@ -167,7 +167,7 @@ def submit_order(order_type: OrderType):
             ),
         )
 
-        result: dict = api.submit(
+        result: dict = submitter.submit(
             raw_order=request_json,
             order_type=order_type,
             user=g.current_user,

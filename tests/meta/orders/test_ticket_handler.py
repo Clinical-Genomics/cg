@@ -1,4 +1,4 @@
-from cg.meta.orders.ticket_handler import TicketHandler
+from cg.services.orders.submitter.ticket_handler import TicketHandler
 
 
 def test_add_user_name_message(ticket_handler: TicketHandler):

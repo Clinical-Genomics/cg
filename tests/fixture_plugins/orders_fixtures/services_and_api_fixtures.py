@@ -1,12 +1,12 @@
 import pytest
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.meta.orders import OrdersAPI
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
     setup_storing_service_registry,
 )
+from cg.services.orders.submitter.service import OrderSubmitter
+from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.service import OrderValidationService
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
@@ -23,13 +23,13 @@ def order_validation_service(store_with_all_test_applications: Store) -> OrderVa
 
 
 @pytest.fixture(scope="function")
-def orders_api(
+def order_submitter(
     ticket_handler: TicketHandler,
     lims_api: MockLimsAPI,
     storing_service_registry: StoringServiceRegistry,
     order_validation_service: OrderValidationService,
-) -> OrdersAPI:
-    return OrdersAPI(
+) -> OrderSubmitter:
+    return OrderSubmitter(
         lims=lims_api,
         ticket_handler=ticket_handler,
         storing_registry=storing_service_registry,

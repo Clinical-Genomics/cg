@@ -1,27 +1,23 @@
 """Unified interface to handle sample submissions.
 
-This interface will update information in Status and/or LIMS as required.
+This service will update information in Status and/or LIMS as required.
 
 The normal entry for information is through the REST API which will pass a JSON
 document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
 
-import logging
-
 from cg.apps.lims import LimsAPI
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.constants import OrderType
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
+from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.service import OrderValidationService
 from cg.store.models import User
 
-LOG = logging.getLogger(__name__)
 
-
-class OrdersAPI:
+class OrderSubmitter:
     """Orders API for accepting new samples into the system."""
 
     def __init__(
