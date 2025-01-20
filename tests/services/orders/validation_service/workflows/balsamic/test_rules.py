@@ -9,11 +9,11 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_at_most_two_samples_per_case,
     validate_number_of_normal_samples,
 )
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.workflows.balsamic.rules import (
+from cg.services.orders.validation.rules.case_sample.rules import (
     validate_capture_kit_panel_requirement,
 )
+from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.store.models import Application
 from cg.store.store import Store
 
