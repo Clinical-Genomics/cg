@@ -2,6 +2,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_unique,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
@@ -13,6 +14,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_existing_samples_belong_to_collaboration,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_gene_panels_exist,
@@ -38,6 +40,7 @@ MIP_DNA_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
 ]
@@ -51,6 +54,7 @@ MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_existing_samples_belong_to_collaboration,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_mothers_are_female,

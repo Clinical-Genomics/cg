@@ -20,6 +20,7 @@ from cg.services.orders.validation.models.case_aliases import (
     CaseContainingRelatives,
     CaseWithSkipRC,
 )
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.models.sample_aliases import (
@@ -36,7 +37,8 @@ from cg.services.orders.validation.rules.utils import (
 )
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
-from cg.store.models import Application
+from cg.store.models import Application, Customer
+from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
 
@@ -297,3 +299,11 @@ def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, st
         and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
         and not sample.capture_kit
     )
+
+
+def is_sample_not_from_collaboration(
+    customer_id: str, sample: ExistingSample, store: Store
+) -> bool:
+    db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
+    customer: Customer | None = store.get_customer_by_internal_id(customer_id)
+    return db_sample and customer and db_sample.customer not in customer.collaborators
