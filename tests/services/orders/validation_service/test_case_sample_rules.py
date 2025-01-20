@@ -16,6 +16,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleDoesNotExistError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
+    SampleOutsideOfCollaborationError,
     SexSubjectIdError,
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
@@ -35,6 +36,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
+    validate_existing_samples_belong_to_collaboration,
     validate_not_all_samples_unknown_in_case,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
@@ -535,3 +537,41 @@ def test_validate_buffer_required(mip_dna_order: MipDnaOrder, application_tag_re
     error = errors[0]
     assert isinstance(error, BufferMissingError)
     assert error.sample_index == 0 and error.case_index == 0
+
+
+def test_existing_sample_from_outside_of_collaboration(
+    mip_dna_order: MipDnaOrder,
+    store_with_multiple_cases_and_samples: Store,
+    sample_id_in_single_case: str,
+):
+
+    # GIVEN a customer from outside the order's customer's collaboration
+    new_customer = store_with_multiple_cases_and_samples.add_customer(
+        internal_id="NewCustomer",
+        name="New customer",
+        invoice_address="Test street",
+        invoice_reference="Invoice reference",
+    )
+    store_with_multiple_cases_and_samples.add_item_to_store(new_customer)
+    store_with_multiple_cases_and_samples.commit_to_store()
+
+    # GIVEN a sample belonging to the customer is added to the order
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
+        sample_id_in_single_case
+    )
+    sample.customer = new_customer
+    existing_sample = ExistingSample(internal_id=sample.internal_id)
+    mip_dna_order.cases[0].samples.append(existing_sample)
+
+    # WHEN validating that the order does not contain samples from outside the customer's collaboration
+    errors: list[SampleOutsideOfCollaborationError] = (
+        validate_existing_samples_belong_to_collaboration(
+            order=mip_dna_order, store=store_with_multiple_cases_and_samples
+        )
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the added existing case
+    assert isinstance(errors[0], SampleOutsideOfCollaborationError)

@@ -165,3 +165,8 @@ class StatusUnknownError(CaseSampleError):
 class BufferMissingError(CaseSampleError):
     field: str = "elution_buffer"
     message: str = "Buffer must be specified with this application"
+
+
+class SampleOutsideOfCollaborationError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "Sample cannot be outside of collaboration"
