@@ -71,7 +71,7 @@ def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
     ],
 )
 def test_submit_order(
-    store_with_all_test_applications: Store,
+    store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     order_fixture: str,
@@ -85,12 +85,12 @@ def test_submit_order(
     order: Order = request.getfixturevalue(order_fixture)
 
     # GIVEN a store without samples, cases, or pools
-    assert not store_with_all_test_applications._get_query(table=Sample).first()
-    assert not store_with_all_test_applications._get_query(table=Case).first()
-    assert not store_with_all_test_applications._get_query(table=Pool).first()
+    assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
+    assert not store_to_submit_and_validate_orders._get_query(table=Case).first()
+    assert not store_to_submit_and_validate_orders._get_query(table=Pool).first()
 
     # GIVEN that the only order in store is a MAF order
-    orders: list[DbOrder] = store_with_all_test_applications._get_query(table=DbOrder).all()
+    orders: list[DbOrder] = store_to_submit_and_validate_orders._get_query(table=DbOrder).all()
     assert len(orders) == 1
     assert orders[0].id == MAF_ORDER_ID
 
@@ -110,11 +110,11 @@ def test_submit_order(
         monkeypatch_process_lims(monkeypatch=monkeypatch, order=order)
 
         # GIVEN a registered user
-        user: User = store_with_all_test_applications._get_query(table=User).first()
+        user: User = store_to_submit_and_validate_orders._get_query(table=User).first()
 
         # GIVEN the dict representation of the order and a store without samples
         raw_order = order.model_dump(by_alias=True)
-        assert not store_with_all_test_applications._get_query(table=Sample).first()
+        assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
 
         # WHEN submitting the order
         result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
@@ -137,17 +137,17 @@ def test_submit_order(
                     assert link_obj.sample.original_ticket == ticket_id
 
         # THEN the order should be stored in the database
-        assert store_with_all_test_applications.get_order_by_ticket_id(ticket_id=int(ticket_id))
+        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id=int(ticket_id))
 
         # THEN the samples should be stored in the database
-        assert store_with_all_test_applications._get_query(table=Sample).first()
+        assert store_to_submit_and_validate_orders._get_query(table=Sample).first()
 
         # THEN the cases should be stored in the database
-        assert store_with_all_test_applications._get_query(table=Case).first()
+        assert store_to_submit_and_validate_orders._get_query(table=Case).first()
 
         # THEN the pools should be stored in the database if applicable
         if is_pool_order:
-            assert store_with_all_test_applications._get_query(table=Pool).first()
+            assert store_to_submit_and_validate_orders._get_query(table=Pool).first()
 
 
 def test_submit_ticketexception(
