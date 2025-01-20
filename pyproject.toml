@@ -35,7 +35,7 @@ dependencies = [
 "WTForms",
 "google-auth",
 "gunicorn",
-"requests",
+"requests>=2.20.0",
 "werkzeug",
 "cachetools",
 "cryptography",
