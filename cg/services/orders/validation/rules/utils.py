@@ -19,7 +19,7 @@ def is_in_container(container: ContainerEnum) -> bool:
 
 
 def is_volume_within_allowed_interval(volume: int) -> bool:
-    return MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME
+    return volume and (MINIMUM_VOLUME <= volume <= MAXIMUM_VOLUME)
 
 
 def is_sample_on_plate(sample: Sample) -> bool:
