@@ -60,7 +60,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_start_available(
     cli_runner: CliRunner,
