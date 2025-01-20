@@ -31,7 +31,7 @@
             <td>{{ sample.name }} ({{ sample.id }})</td>
             <td>{{ sample.timestamps.ordered_at }}</td>
             <td>{{ sample.ticket }}</td>
-            <td>{{ sample.application.tag }} (v{{ sample.application.version }})</td>
+            <td>{{ sample.application.tag }}</td>
             <td>{% if customer_workflow != "taxprofiler" %} {{ sample.sex }} {% endif %}</td>
             <td>{{ sample.source }}</td>
             <!-- Sample status value -->
