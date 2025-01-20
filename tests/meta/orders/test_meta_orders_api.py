@@ -11,10 +11,8 @@ from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
-from cg.services.orders.validate_order_services.validate_case_order import (
-    ValidateCaseOrderService,
-)
-from cg.store.models import Case, Customer, Pool, Sample, Order
+from cg.services.orders.validate_order_services.validate_case_order import ValidateCaseOrderService
+from cg.store.models import Case, Customer, Order, Pool, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -80,11 +78,14 @@ def test_submit(
     user_mail: str,
     user_name: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
@@ -199,11 +200,14 @@ def test_submit_scout_legal_sample_customer(
     user_name: str,
     ticket_id: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -303,11 +307,14 @@ def test_submit_fluffy_duplicate_sample_case_name(
     user_name: str,
     ticket_id: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         # GIVEN we have an order with a case that is already in the database
@@ -337,11 +344,14 @@ def test_submit_unique_sample_case_name(
     monkeypatch: pytest.MonkeyPatch,
     ticket_id: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
@@ -518,11 +528,14 @@ def test_submit_unique_sample_name(
     user_name: str,
     ticket_id: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         # GIVEN we have an order with a sample that is not existing in the database
@@ -604,11 +617,14 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     user_name: str,
     ticket_id: str,
 ):
-    with patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
-    ) as mock_create_ticket, patch(
-        "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
-    ) as mock_reply_to_ticket:
+    with (
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.create_ticket"
+        ) as mock_create_ticket,
+        patch(
+            "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
+        ) as mock_reply_to_ticket,
+    ):
         mock_freshdesk_ticket_creation(mock_create_ticket, ticket_id)
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
         # GIVEN we have an order with samples that is already in the database
