@@ -5,6 +5,7 @@ import pytest
 
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
+from cg.meta.orders.utils import get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.constants import MAF_ORDER_ID
@@ -180,3 +181,16 @@ def test_submit_ticketexception(
             order_submitter.submit(
                 raw_order=raw_order, user=user, order_type=mip_dna_order.order_type
             )
+
+
+def test_get_ticket_tags(order_fixture: str, order_type: OrderType, request: pytest.FixtureRequest):
+    """Test that the correct tags are generated based on the order and order type."""
+    # GIVEN an order with existing data
+    order: OrderWithCases = request.getfixturevalue(order_fixture)
+    order.cases[0].samples[0].existing_sample = True
+
+    # WHEN getting the ticket tags
+    tags = get_ticket_tags(order=order, order_type=order_type)
+
+    # THEN the tags should be correct
+    assert tags == [ORDER_TYPE_WORKFLOW_MAP[order_type]]
