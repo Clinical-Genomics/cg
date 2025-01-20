@@ -1,6 +1,8 @@
+from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.workflows.balsamic_umi.models.case import BalsamicUmiCase
-from cg.store.models import Sample
+from cg.store.models import Case as DbCase
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 
@@ -26,3 +28,9 @@ def get_number_of_tumours(case: BalsamicCase | BalsamicUmiCase, store: Store) ->
             if db_sample.is_tumour:
                 number_of_tumours += 1
     return number_of_tumours
+
+
+def is_case_not_from_collaboration(case: ExistingCase, customer_id: str, store: Store) -> bool:
+    db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+    customer: Customer | None = store.get_customer_by_internal_id(customer_id)
+    return db_case and customer and db_case.customer not in customer.collaborators

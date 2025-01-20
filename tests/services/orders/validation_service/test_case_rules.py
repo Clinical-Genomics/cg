@@ -3,6 +3,7 @@ from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
+    CaseOutsideOfCollaborationError,
     MultipleSamplesInCaseError,
     RepeatedCaseNameError,
 )
@@ -12,8 +13,10 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_existing_cases_belong_to_collaboration,
     validate_one_sample_per_case,
 )
+from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
 from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
 from cg.services.orders.validation.workflows.rna_fusion.models.sample import RnaFusionSample
 from cg.store.models import Case
@@ -102,3 +105,36 @@ def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
     # THEN the error should concern the multiple samples in the first case
     assert isinstance(errors[0], MultipleSamplesInCaseError)
     assert errors[0].case_index == 0
+
+
+def test_case_outside_of_collaboration(
+    mip_dna_order: MipDnaOrder, store_with_multiple_cases_and_samples: Store
+):
+
+    # GIVEN a customer from outside the order's customer's collaboration
+    new_customer = store_with_multiple_cases_and_samples.add_customer(
+        internal_id="NewCustomer",
+        name="New customer",
+        invoice_address="Test street",
+        invoice_reference="Invoice reference",
+    )
+    store_with_multiple_cases_and_samples.add_item_to_store(new_customer)
+    store_with_multiple_cases_and_samples.commit_to_store()
+
+    # GIVEN a case belonging to the customer is added to the order
+    existing_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
+    case = existing_cases[0]
+    case.customer = new_customer
+    existing_case = ExistingCase(internal_id=case.internal_id, panels=case.panels)
+    mip_dna_order.cases.append(existing_case)
+
+    # WHEN validating that the order does not contain cases from outside the customer's collaboration
+    errors: list[CaseOutsideOfCollaborationError] = validate_existing_cases_belong_to_collaboration(
+        order=mip_dna_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the added existing case
+    assert isinstance(errors[0], CaseOutsideOfCollaborationError)
