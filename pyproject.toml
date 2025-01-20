@@ -32,7 +32,7 @@ dependencies = [
 "Flask-Dance",
 "Flask",
 "Flask-WTF",
-"WTForms",
+"WTForms == 3.0.0",
 "google-auth",
 "gunicorn",
 "requests",

@@ -2705,19 +2705,19 @@ watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "wtforms"
-version = "3.2.1"
+version = "3.0.0"
 description = "Form validation and rendering for Python web development."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.6"
 groups = ["main"]
 markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
-    {file = "wtforms-3.2.1-py3-none-any.whl", hash = "sha256:583bad77ba1dd7286463f21e11aa3043ca4869d03575921d1a1698d0715e0fd4"},
-    {file = "wtforms-3.2.1.tar.gz", hash = "sha256:df3e6b70f3192e92623128123ec8dca3067df9cfadd43d59681e210cfb8d4682"},
+    {file = "WTForms-3.0.0-py3-none-any.whl", hash = "sha256:232dbb0094847dca2f45c72136b5ca1d5dca2a3e24ccd2229823b8b74b3c6698"},
+    {file = "WTForms-3.0.0.tar.gz", hash = "sha256:4abfbaa1d529a1d0ac927d44af8dbb9833afd910e56448a103f1893b0b176886"},
 ]
 
 [package.dependencies]
-markupsafe = "*"
+MarkupSafe = "*"
 
 [package.extras]
 email = ["email-validator"]
@@ -2756,4 +2756,4 @@ ruff = ["ruff"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "b63b203bf74a57a9f56333ace8f34758f7f9c1bca64b5241868154b22b3317f0"
+content-hash = "5fe4fc06f95ac9872370b1a56a363a59902ba5eb3e28dd99885bfbca1780fd7e"
