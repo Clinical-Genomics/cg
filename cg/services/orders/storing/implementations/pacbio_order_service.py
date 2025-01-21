@@ -3,6 +3,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.sample_base import StatusEnum
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.workflows.pacbio_long_read.models.order import PacbioOrder
@@ -28,7 +29,7 @@ class StorePacBioOrderService(StoreOrderService):
             order_name=order.name,
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
-            delivery_type=order.delivery_type,
+            delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples = self.store_order_data_in_status_db(order=order)
@@ -50,7 +51,7 @@ class StorePacBioOrderService(StoreOrderService):
                 case: Case = self._create_db_case_for_sample(
                     sample=sample,
                     customer=status_db_order.customer,
-                    ticket_id=str(status_db_order.ticket_id),
+                    order=order,
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
@@ -77,16 +78,16 @@ class StorePacBioOrderService(StoreOrderService):
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
-        self, sample: PacbioSample, customer: Customer, ticket_id: str
+        self, sample: PacbioSample, customer: Customer, order: PacbioOrder
     ) -> Case:
         """Return a Case database object for a PacbioSample."""
         case_name: str = f"{sample.name}-case"
         case: Case = self.status_db.add_case(
-            data_analysis=Workflow.RAW_DATA,
-            data_delivery=DataDelivery.BAM,
+            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_delivery=DataDelivery(order.delivery_type),
             name=case_name,
             priority=sample.priority,
-            ticket=ticket_id,
+            ticket=str(order._generated_ticket_id),
         )
         case.customer = customer
         return case

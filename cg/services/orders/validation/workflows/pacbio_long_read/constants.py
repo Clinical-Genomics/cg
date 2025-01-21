@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 
 from cg.constants import DataDelivery
 
 
-class PacbioDeliveryType(Enum):
+class PacbioDeliveryType(StrEnum):
     BAM = DataDelivery.BAM
     NO_DELIVERY = DataDelivery.NO_DELIVERY
