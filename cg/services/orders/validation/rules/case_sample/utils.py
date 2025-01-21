@@ -37,9 +37,7 @@ from cg.services.orders.validation.rules.utils import (
 )
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
-from cg.store.models import Application
-from cg.store.models import Case as DbCase
-from cg.store.models import Customer
+from cg.store.models import Application, Customer
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -314,6 +312,6 @@ def is_sample_not_from_collaboration(
 def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]:
     existing_case_names: set[str] = set()
     for _, case in order.enumerated_existing_cases:
-        db_case: DbCase | None = status_db.get_case_by_internal_id(case.internal_id)
-        existing_case_names.add(db_case.name)
+        if db_case := status_db.get_case_by_internal_id(case.internal_id):
+            existing_case_names.add(db_case.name)
     return existing_case_names
