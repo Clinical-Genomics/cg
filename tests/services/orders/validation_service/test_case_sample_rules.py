@@ -25,6 +25,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     WellFormatError,
     WellPositionMissingError,
 )
+from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.rules.case_sample.rules import (
@@ -498,6 +499,30 @@ def test_validate_sample_names_different_from_case_names(
 
     assert errors[0].sample_index == 0
     assert errors[1].sample_index == 1
+
+
+def test_validate_sample_names_different_from_existing_case_names(
+    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+):
+    # GIVEN an order with a case holding samples with the same name as an existing case in the order
+    case = store_with_multiple_cases_and_samples.get_cases()[0]
+    existing_case = ExistingCase(internal_id=case.internal_id, panels=case.panels)
+    valid_order.cases.append(existing_case)
+    valid_order.cases[0].samples[0].name = case.name
+
+    # WHEN validating that the sample names are different from the case names
+    errors: list[SampleNameSameAsCaseNameError] = validate_sample_names_different_from_case_names(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN a list with one error should be returned
+    assert len(errors) == 1
+
+    # THEN the errors should concern the same case and sample name and hold the correct indices
+    error = errors[0]
+    assert isinstance(error, SampleNameSameAsCaseNameError)
+    assert error.case_index == 0
+    assert error.sample_index == 0
 
 
 def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):
