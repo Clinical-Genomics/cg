@@ -39,6 +39,21 @@ class OrderValidationService:
         )
         return create_order_validation_response(raw_order=raw_order, errors=errors)
 
+    def parse_and_validate(self, raw_order: dict, order_type: OrderType, user_id: int) -> Order:
+        model = ORDER_TYPE_MODEL_MAP[order_type]
+        rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
+        parsed_order, errors = ModelValidator.validate(order=raw_order, model=model)
+        if parsed_order:
+            parsed_order._user_id = user_id
+            errors: ValidationErrors = self._get_rule_validation_errors(
+                order=parsed_order,
+                rule_set=rule_set,
+            )
+        if not errors.is_empty:
+            LOG.error(errors.get_error_message())
+            raise OrderValidationError(message="Order contained errors")
+        return parsed_order
+
     def _get_errors(
         self, raw_order: dict, model: type[Order], rule_set: RuleSet, user_id: int
     ) -> ValidationErrors:
@@ -84,18 +99,3 @@ class OrderValidationService:
             order_errors=order_errors,
             sample_errors=sample_errors,
         )
-
-    def parse_and_validate(self, raw_order: dict, order_type: OrderType, user_id: int) -> Order:
-        model = ORDER_TYPE_MODEL_MAP[order_type]
-        rule_set = ORDER_TYPE_RULE_SET_MAP[order_type]
-        parsed_order, errors = ModelValidator.validate(order=raw_order, model=model)
-        if parsed_order:
-            parsed_order._user_id = user_id
-            errors: ValidationErrors = self._get_rule_validation_errors(
-                order=parsed_order,
-                rule_set=rule_set,
-            )
-        if not errors.is_empty:
-            LOG.error(errors.get_error_message())
-            raise OrderValidationError(message="Order contained errors")
-        return parsed_order

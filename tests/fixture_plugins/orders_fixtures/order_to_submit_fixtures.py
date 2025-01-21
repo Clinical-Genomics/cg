@@ -98,7 +98,7 @@ def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example Mutant order."""
     return ReadFile.get_content_from_file(

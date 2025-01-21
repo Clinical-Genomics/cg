@@ -50,7 +50,6 @@ def test_store_microsalt_order_data_in_status_db(
 
 def test_store_mutant_order_data_control_has_stored_value(
     mutant_order: MutantOrder,
-    sarscov2_order_to_submit: dict,
     store_to_submit_and_validate_orders: Store,
     store_microbial_order_service: StoreMicrobialOrderService,
 ):
