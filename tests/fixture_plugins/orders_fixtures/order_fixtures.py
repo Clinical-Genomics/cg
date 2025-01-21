@@ -144,6 +144,6 @@ def mip_dna_order_with_existing_samples(mip_dna_order_to_submit: dict) -> MipDna
     mip_dna_order_to_submit["user_id"] = 1
     mip_dna_order_with_existing_samples = MipDnaOrder.model_validate(mip_dna_order_to_submit)
     mip_dna_order_with_existing_samples.cases[0].samples.append(
-        ExistingSample(internal_id="ABC123")
+        ExistingSample(internal_id="ACC1234")
     )
     return mip_dna_order_with_existing_samples
