@@ -25,7 +25,6 @@ class StoreCaseOrderService(StoreOrderService):
     Service for storing generic orders in StatusDB and Lims.
     This class is used to store orders for the following workflows:
     - Balsamic
-    - Balsamic QC
     - Balsamic UMI
     - MIP DNA
     - MIP RNA

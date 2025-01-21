@@ -3,7 +3,6 @@ from cg.models.orders.constants import OrderType
 
 ORDER_TYPE_WORKFLOW_MAP: dict[OrderType, Workflow] = {
     OrderType.BALSAMIC: Workflow.BALSAMIC,
-    OrderType.BALSAMIC_QC: Workflow.BALSAMIC_QC,
     OrderType.BALSAMIC_UMI: Workflow.BALSAMIC_UMI,
     OrderType.FASTQ: Workflow.RAW_DATA,
     OrderType.FLUFFY: Workflow.FLUFFY,
