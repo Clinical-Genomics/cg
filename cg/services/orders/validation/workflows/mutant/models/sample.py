@@ -39,7 +39,7 @@ class MutantSample(Sample):
 
     @model_validator(mode="before")
     @classmethod
-    def set_original_lab_address(cls, data: any):
+    def set_original_lab_address(cls, data: any) -> any:
         if isinstance(data, dict):
             is_set = bool(data.get("original_lab_address"))
             if not is_set:
@@ -48,7 +48,7 @@ class MutantSample(Sample):
 
     @model_validator(mode="before")
     @classmethod
-    def set_region_code(cls, data: any):
+    def set_region_code(cls, data: any) -> any:
         if isinstance(data, dict):
             is_set = bool(data.get("region_code"))
             if not is_set:
