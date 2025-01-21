@@ -27,7 +27,7 @@ class FluffySample(Sample):
     well_position_rml: str | None = None
 
     @model_validator(mode="after")
-    def set_default_index_sequence(self):
+    def set_default_index_sequence(self) -> "FluffySample":
         """Set a default index_sequence from the index and index_number."""
         if not self.index_sequence and (self.index and self.index_number):
             try:
