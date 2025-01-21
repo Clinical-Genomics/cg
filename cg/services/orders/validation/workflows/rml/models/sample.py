@@ -23,11 +23,12 @@ class RmlSample(Sample):
     pool: str
     priority: PriorityEnum
     rml_plate_name: str | None = None
+
     volume: int
     well_position_rml: str | None = None
 
     @model_validator(mode="after")
-    def set_default_index_sequence(self):
+    def set_default_index_sequence(self) -> "RmlSample":
         """Set a default index_sequence from the index and index_number."""
         if not self.index_sequence and (self.index and self.index_number):
             try:
