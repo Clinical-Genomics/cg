@@ -35,7 +35,7 @@ def test_validate_pool_sample_default_index(
     assert order.samples[0].index_sequence == expected_index_sequence
 
 
-def test_validate_mutant_sample_gets_lab_adn_region(
+def test_validate_mutant_sample_gets_lab_and_region(
     sarscov2_order_to_submit: dict, model_validator: ModelValidator
 ):
     """Test the lab address and region code are set for a mutant sample without these fields."""
@@ -57,7 +57,7 @@ def test_order_field_error(valid_order: TomteOrder, model_validator: ModelValida
     raw_order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
-    order, errors = model_validator.validate(order=raw_order, model=TomteOrder)
+    _, errors = model_validator.validate(order=raw_order, model=TomteOrder)
 
     # THEN there should be an order error
     assert errors.order_errors
@@ -72,7 +72,7 @@ def test_case_field_error(valid_order: TomteOrder, model_validator: ModelValidat
     raw_order: dict = valid_order.model_dump()
 
     # WHEN validating the order
-    order, errors = model_validator.validate(order=raw_order, model=TomteOrder)
+    _, errors = model_validator.validate(order=raw_order, model=TomteOrder)
 
     # THEN there should be a case error
     assert errors.case_errors
@@ -88,7 +88,7 @@ def test_case_sample_field_error(valid_order: TomteOrder, model_validator: Model
     raw_order: dict = valid_order.model_dump()
 
     # WHEN validating the order
-    order, errors = model_validator.validate(order=raw_order, model=TomteOrder)
+    _, errors = model_validator.validate(order=raw_order, model=TomteOrder)
 
     # THEN a case sample error should be returned
     assert errors.case_sample_errors
@@ -104,10 +104,10 @@ def test_order_case_and_case_sample_field_error(
     valid_order.name = None
     valid_order.cases[0].priority = None
     valid_order.cases[0].samples[0].well_position = 1.8
-    order = valid_order.model_dump(by_alias=True)
+    raw_order: dict = valid_order.model_dump(by_alias=True)
 
     # WHEN validating the order
-    order, errors = model_validator.validate(order=order, model=TomteOrder)
+    _, errors = model_validator.validate(order=raw_order, model=TomteOrder)
 
     # THEN all errors should be returned
     assert errors.order_errors
