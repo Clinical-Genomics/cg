@@ -129,5 +129,23 @@ def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
 def invalid_balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an invalid example Balsamic order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "FAIL_balsamic.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic_FAIL.json")
+    )
+
+
+@pytest.fixture(scope="session")
+def fluffy_order_to_submit_without_index_sequence(invalid_cgweb_orders_dir) -> dict:
+    """Load an invalid example Fluffy order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON,
+        file_path=Path(invalid_cgweb_orders_dir, "fluffy_no_index_sequence.json"),
+    )
+
+
+@pytest.fixture(scope="session")
+def rml_order_to_submit_without_index_sequence(invalid_cgweb_orders_dir) -> dict:
+    """Load an invalid example RML order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON,
+        file_path=Path(invalid_cgweb_orders_dir, "rml_no_index_sequence.json"),
     )
