@@ -2,6 +2,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, SexOptions, Workflow
 from cg.models.orders.sample_base import StatusEnum
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.workflows.microbial_fastq.models.order import MicrobialFastqOrder
@@ -46,7 +47,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
                 case: Case = self._create_db_case_for_sample(
-                    sample=sample, customer=db_order.customer, ticket_id=str(db_order.ticket_id)
+                    sample=sample, customer=db_order.customer, order=order
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
@@ -73,16 +74,16 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
-        self, sample: MicrobialFastqSample, customer: Customer, ticket_id: str
+        self, sample: MicrobialFastqSample, customer: Customer, order: MicrobialFastqOrder
     ) -> Case:
         """Return a Case database object for a MicrobialFastqSample."""
         case_name: str = f"{sample.name}-case"
         case: Case = self.status_db.add_case(
-            data_analysis=Workflow.RAW_DATA,
-            data_delivery=DataDelivery.FASTQ,
+            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_delivery=DataDelivery(order.delivery_type),
             name=case_name,
             priority=sample.priority,
-            ticket=ticket_id,
+            ticket=str(order._generated_ticket_id),
         )
         case.customer = customer
         return case

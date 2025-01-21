@@ -1,6 +1,7 @@
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
+    CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
     MoreThanTwoSamplesInCaseError,
@@ -13,6 +14,7 @@ from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
 )
@@ -55,6 +57,21 @@ def validate_case_internal_ids_exist(
         case: Case | None = store.get_case_by_internal_id(case.internal_id)
         if not case:
             error = CaseDoesNotExistError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_existing_cases_belong_to_collaboration(
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
+) -> list[CaseOutsideOfCollaborationError]:
+    """Validates that all existing cases within the order belong to a customer
+    within the order's customer's collaboration."""
+    errors: list[CaseOutsideOfCollaborationError] = []
+    for case_index, case in order.enumerated_existing_cases:
+        if is_case_not_from_collaboration(case=case, customer_id=order.customer, store=store):
+            error = CaseOutsideOfCollaborationError(case_index=case_index)
             errors.append(error)
     return errors
 

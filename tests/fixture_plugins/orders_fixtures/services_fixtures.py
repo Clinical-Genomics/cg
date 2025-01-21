@@ -7,6 +7,7 @@ from cg.services.orders.storing.service_registry import (
 )
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.submitter.ticket_handler import TicketHandler
+from cg.services.orders.validation.model_validator.model_validator import ModelValidator
 from cg.services.orders.validation.service import OrderValidationService
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
@@ -18,8 +19,13 @@ def freshdesk_client() -> FreshdeskClient:
 
 
 @pytest.fixture
-def order_validation_service(store_with_all_test_applications: Store) -> OrderValidationService:
-    return OrderValidationService(store_with_all_test_applications)
+def model_validator() -> ModelValidator:
+    return ModelValidator()
+
+
+@pytest.fixture
+def order_validation_service(store_to_submit_and_validate_orders: Store) -> OrderValidationService:
+    return OrderValidationService(store_to_submit_and_validate_orders)
 
 
 @pytest.fixture(scope="function")
@@ -36,12 +42,14 @@ def order_submitter(
 
 
 @pytest.fixture
-def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHandler:
-    return TicketHandler(db=store, client=freshdesk_client, system_email_id=12345, env="production")
+def storing_service_registry(
+    store_to_submit_and_validate_orders: Store, lims_api: MockLimsAPI
+) -> StoringServiceRegistry:
+    return setup_storing_service_registry(
+        lims=lims_api, status_db=store_to_submit_and_validate_orders
+    )
 
 
 @pytest.fixture
-def storing_service_registry(
-    store_with_all_test_applications: Store, lims_api: MockLimsAPI
-) -> StoringServiceRegistry:
-    return setup_storing_service_registry(lims=lims_api, status_db=store_with_all_test_applications)
+def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHandler:
+    return TicketHandler(db=store, client=freshdesk_client, system_email_id=12345, env="production")

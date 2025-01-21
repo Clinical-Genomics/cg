@@ -164,7 +164,7 @@ def test_to_lims_sarscov2(mutant_order: MutantOrder):
     assert first_sample["udfs"]["lab_code"] == "SE100 Karolinska"
     assert first_sample["udfs"]["organism"] == "SARS-CoV-2"
     assert first_sample["udfs"]["original_lab"] == "Karolinska University Hospital Solna"
-    assert first_sample["udfs"]["original_lab_address"] == "171 76 Solna"
+    assert first_sample["udfs"]["original_lab_address"] == "171 76 Stockholm"
     assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["reference_genome"] == "NC_111"

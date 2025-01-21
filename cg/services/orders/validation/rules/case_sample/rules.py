@@ -24,6 +24,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleDoesNotExistError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
+    SampleOutsideOfCollaborationError,
     SexSubjectIdError,
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
@@ -54,6 +55,7 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_container_name_missing,
     is_invalid_plate_well_format,
     is_sample_missing_capture_kit,
+    is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
     validate_concentration_in_case,
@@ -456,5 +458,22 @@ def validate_capture_kit_panel_requirement(
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_missing_capture_kit(sample=sample, store=store):
                 error = CaptureKitMissingError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_existing_samples_belong_to_collaboration(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[SampleOutsideOfCollaborationError]:
+    """Validates that existing samples belong to the same collaboration as the order's customer."""
+    errors: list[SampleOutsideOfCollaborationError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_existing_samples:
+            if is_sample_not_from_collaboration(
+                customer_id=order.customer, sample=sample, store=store
+            ):
+                error = SampleOutsideOfCollaborationError(
+                    sample_index=sample_index, case_index=case_index
+                )
                 errors.append(error)
     return errors

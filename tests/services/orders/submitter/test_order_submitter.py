@@ -8,12 +8,16 @@ from cg.exc import TicketCreationError
 from cg.meta.orders.utils import get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
+from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
-from cg.store.models import Case, Pool, Sample, User
+from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.store.models import Case
+from cg.store.models import Order as DbOrder
+from cg.store.models import Pool, Sample, User
 from cg.store.store import Store
 
 
@@ -68,17 +72,28 @@ def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
     ],
 )
 def test_submit_order(
-    store_with_all_test_applications: Store,
+    store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     order_fixture: str,
     order_submitter: OrderSubmitter,
     ticket_id: str,
+    customer_id: str,
     request: pytest.FixtureRequest,
 ):
     """Test submitting a valid order of each ordertype."""
     # GIVEN an order
     order: Order = request.getfixturevalue(order_fixture)
+
+    # GIVEN a store without samples, cases, or pools
+    assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
+    assert not store_to_submit_and_validate_orders._get_query(table=Case).first()
+    assert not store_to_submit_and_validate_orders._get_query(table=Pool).first()
+
+    # GIVEN that the only order in store is a MAF order
+    orders: list[DbOrder] = store_to_submit_and_validate_orders._get_query(table=DbOrder).all()
+    assert len(orders) == 1
+    assert orders[0].id == MAF_ORDER_ID
 
     # GIVEN a ticketing system that returns a ticket number
     with (
@@ -96,46 +111,54 @@ def test_submit_order(
         monkeypatch_process_lims(monkeypatch=monkeypatch, order=order)
 
         # GIVEN a registered user
-        user: User = store_with_all_test_applications._get_query(table=User).first()
+        user: User = store_to_submit_and_validate_orders._get_query(table=User).first()
 
         # GIVEN the dict representation of the order and a store without samples
         raw_order = order.model_dump(by_alias=True)
-        assert not store_with_all_test_applications._get_query(table=Sample).first()
+        assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
 
         # WHEN submitting the order
         result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
 
-        # THEN the result should contain the ticket number for the order
+        # THEN the result should contain the project data
+        assert result["project"]["id"] == "ADM1234"
+
+        # THEN the records should contain the appropriate ticket id, customer id and data analysis
+        is_pool_order: bool = False
         for record in result["records"]:
+            assert record.customer.internal_id == customer_id
             if isinstance(record, Pool):
                 assert record.ticket == ticket_id
+                is_pool_order = True
             elif isinstance(record, Sample):
                 assert record.original_ticket == ticket_id
             elif isinstance(record, Case):
+                assert record.data_analysis == ORDER_TYPE_WORKFLOW_MAP[order_type]
                 for link_obj in record.links:
                     assert link_obj.sample.original_ticket == ticket_id
 
+        # THEN the order should be stored in the database
+        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id=int(ticket_id))
 
-@pytest.mark.parametrize(
-    "order_type, order_fixture",
-    [
-        (OrderType.MIP_DNA, "mip_dna_order"),
-        (OrderType.MIP_RNA, "mip_rna_order"),
-        (OrderType.BALSAMIC, "balsamic_order"),
-    ],
-)
+        # THEN the samples should be stored in the database
+        assert store_to_submit_and_validate_orders._get_query(table=Sample).first()
+
+        # THEN the cases should be stored in the database
+        assert store_to_submit_and_validate_orders._get_query(table=Case).first()
+
+        # THEN the pools should be stored in the database if applicable
+        if is_pool_order:
+            assert store_to_submit_and_validate_orders._get_query(table=Pool).first()
+
+
 def test_submit_ticketexception(
     order_submitter: OrderSubmitter,
-    order_type: OrderType,
-    order_fixture: str,
-    request: pytest.FixtureRequest,
+    mip_dna_order: MipDnaOrder,
 ):
 
     # GIVEN an order
-    order: OrderWithCases = request.getfixturevalue(order_fixture)
-    raw_order = order.model_dump()
-    raw_order["ticket_number"] = "#123456"
-    raw_order["project_type"] = order_type
+    raw_order = mip_dna_order.model_dump()
+    raw_order["project_type"] = mip_dna_order.order_type
 
     # GIVEN a registered user
     user: User = order_submitter.validation_service.store._get_query(table=User).first()
@@ -151,12 +174,13 @@ def test_submit_ticketexception(
             return_value=ValidationErrors(),
         ),
     ):
-        # GIVEN an order that does not have a name (ticket_nr)
 
         # WHEN the order is submitted and a TicketCreationError raised
         # THEN the TicketCreationError is not excepted
         with pytest.raises(TicketCreationError):
-            order_submitter.submit(raw_order=raw_order, user=user, order_type=order_type)
+            order_submitter.submit(
+                raw_order=raw_order, user=user, order_type=mip_dna_order.order_type
+            )
 
 
 @pytest.mark.parametrize(

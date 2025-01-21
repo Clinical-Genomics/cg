@@ -5,6 +5,7 @@ from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
+from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.service import StoreOrderService
@@ -82,8 +83,8 @@ class StoreFastqOrderService(StoreOrderService):
         """Return a Case database object."""
         priority: str = order.samples[0].priority
         case: Case = self.status_db.add_case(
-            data_analysis=Workflow.RAW_DATA,
-            data_delivery=DataDelivery.FASTQ,
+            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_delivery=DataDelivery(order.delivery_type),
             name=str(db_order.ticket_id),
             priority=priority,
             ticket=str(db_order.ticket_id),
@@ -104,7 +105,7 @@ class StoreFastqOrderService(StoreOrderService):
             comment=sample.comment,
             internal_id=sample._generated_lims_id,
             ordered=datetime.now(),
-            original_ticket=str(ticket_id),
+            original_ticket=ticket_id,
             priority=sample.priority,
             tumour=sample.tumour,
             capture_kit=sample.capture_kit,

@@ -123,7 +123,8 @@ pytest_plugins = [
     "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_fixtures",
-    "tests.fixture_plugins.orders_fixtures.services_and_api_fixtures",
+    "tests.fixture_plugins.orders_fixtures.path_fixtures",
+    "tests.fixture_plugins.orders_fixtures.services_fixtures",
     "tests.fixture_plugins.orders_fixtures.store_fixtures",
     "tests.fixture_plugins.orders_fixtures.store_service_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
@@ -743,12 +744,6 @@ def mutant_analysis_dir(analysis_dir: Path) -> Path:
 def apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
     return Path(fixtures_dir, "apps")
-
-
-@pytest.fixture(scope="session")
-def cgweb_orders_dir(fixtures_dir: Path) -> Path:
-    """Return the path to the cgweb_orders dir."""
-    return Path(fixtures_dir, "cgweb_orders")
 
 
 @pytest.fixture(scope="session")

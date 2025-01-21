@@ -22,7 +22,7 @@ class StoreOrderService(ABC):
         pass
 
     @staticmethod
-    def _fill_in_sample_ids(samples: list[Sample], lims_map: dict):
+    def _fill_in_sample_ids(samples: list[Sample], lims_map: dict) -> None:
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample.name}: link sample to LIMS")

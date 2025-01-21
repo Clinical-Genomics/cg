@@ -31,6 +31,11 @@ class CaseDoesNotExistError(CaseError):
     message: str = "The case does not exist"
 
 
+class CaseOutsideOfCollaborationError(CaseError):
+    field: str = "internal_id"
+    message: str = "Case does not belong to collaboration"
+
+
 class MultipleSamplesInCaseError(CaseError):
     field: str = "sample_errors"
     message: str = "Multiple samples in the same case not allowed"

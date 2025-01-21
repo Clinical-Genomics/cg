@@ -14,4 +14,9 @@ class MicrosaltSample(Sample):
     organism: str
     priority: PriorityEnum
     reference_genome: str = Field(max_length=255)
-    _verified_organism: str | None = PrivateAttr(default=None)
+    _verified_organism: bool | None = PrivateAttr(default=None)
+
+    def model_dump(self, **kwargs) -> dict:
+        data = super().model_dump(**kwargs)
+        data["verified_organism"] = self._verified_organism
+        return data
