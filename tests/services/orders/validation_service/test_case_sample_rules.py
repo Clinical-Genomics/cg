@@ -479,13 +479,13 @@ def test_validate_sex_subject_id_new_sex_unknown(valid_order: OrderWithCases, sa
 
 
 def test_validate_sample_names_different_from_case_names(
-    order_with_samples_having_same_names_as_cases: OrderWithCases,
+    order_with_samples_having_same_names_as_cases: OrderWithCases, base_store: Store
 ):
     # GIVEN an order with a case holding samples with the same name as cases in the order
 
     # WHEN validating that the sample names are different from the case names
     errors: list[SampleNameSameAsCaseNameError] = validate_sample_names_different_from_case_names(
-        order_with_samples_having_same_names_as_cases
+        order=order_with_samples_having_same_names_as_cases, store=base_store
     )
 
     # THEN a list with two errors should be returned
