@@ -96,7 +96,7 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
 
 
 def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
-    counter = Counter([case.name for case in order.cases])
+    counter = Counter([case.name for _, case in order.enumerated_new_cases])
     indices: list[int] = []
 
     for index, case in order.enumerated_new_cases:
