@@ -157,7 +157,6 @@ def test_submit_ticketexception(
 
     # GIVEN an order
     raw_order = mip_dna_order.model_dump()
-    raw_order["ticket_number"] = "#123456"
     raw_order["project_type"] = mip_dna_order.order_type
 
     # GIVEN a registered user
