@@ -89,7 +89,7 @@ class StoreMicrobialOrderService(StoreOrderService):
             organism_id = sample.organism
             reference_genome = sample.reference_genome
             organism: Organism = self.status.get_organism_by_internal_id(internal_id=organism_id)
-            is_verified = (
+            is_verified: bool = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )
             sample._verified_organism = is_verified

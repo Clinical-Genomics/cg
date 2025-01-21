@@ -35,7 +35,7 @@ class MutantSample(Sample):
     region: Region
     region_code: str
     selection_criteria: SelectionCriteria
-    _verified_organism: str | None = PrivateAttr(default=None)
+    _verified_organism: bool | None = PrivateAttr(default=None)
 
     @model_validator(mode="before")
     @classmethod
@@ -62,4 +62,5 @@ class MutantSample(Sample):
     def model_dump(self, **kwargs) -> dict:
         data = super().model_dump(**kwargs)
         data["lab_code"] = self._lab_code
+        data["verified_organism"] = self._verified_organism
         return data
