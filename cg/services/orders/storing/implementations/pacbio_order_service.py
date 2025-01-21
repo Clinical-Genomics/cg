@@ -29,7 +29,7 @@ class StorePacBioOrderService(StoreOrderService):
             order_name=order.name,
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
-            delivery_type=order.delivery_type,
+            delivery_type=DataDelivery(order.delivery_type),
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples = self.store_order_data_in_status_db(order=order)
@@ -51,7 +51,7 @@ class StorePacBioOrderService(StoreOrderService):
                 case: Case = self._create_db_case_for_sample(
                     sample=sample,
                     customer=status_db_order.customer,
-                    ticket_id=str(status_db_order.ticket_id),
+                    order=order,
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,

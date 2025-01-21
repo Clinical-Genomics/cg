@@ -105,7 +105,7 @@ class StoreFastqOrderService(StoreOrderService):
             comment=sample.comment,
             internal_id=sample._generated_lims_id,
             ordered=datetime.now(),
-            original_ticket=str(ticket_id),
+            original_ticket=ticket_id,
             priority=sample.priority,
             tumour=sample.tumour,
             capture_kit=sample.capture_kit,
