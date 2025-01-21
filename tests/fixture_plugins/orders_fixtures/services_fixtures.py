@@ -18,8 +18,8 @@ def freshdesk_client() -> FreshdeskClient:
 
 
 @pytest.fixture
-def order_validation_service(store_with_all_test_applications: Store) -> OrderValidationService:
-    return OrderValidationService(store_with_all_test_applications)
+def order_validation_service(store_to_submit_and_validate_orders: Store) -> OrderValidationService:
+    return OrderValidationService(store_to_submit_and_validate_orders)
 
 
 @pytest.fixture(scope="function")
@@ -42,6 +42,8 @@ def ticket_handler(store: Store, freshdesk_client: FreshdeskClient) -> TicketHan
 
 @pytest.fixture
 def storing_service_registry(
-    store_with_all_test_applications: Store, lims_api: MockLimsAPI
+    store_to_submit_and_validate_orders: Store, lims_api: MockLimsAPI
 ) -> StoringServiceRegistry:
-    return setup_storing_service_registry(lims=lims_api, status_db=store_with_all_test_applications)
+    return setup_storing_service_registry(
+        lims=lims_api, status_db=store_to_submit_and_validate_orders
+    )

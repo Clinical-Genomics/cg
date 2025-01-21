@@ -7,10 +7,12 @@ import pytest
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 
+# Valid orders
+
 
 @pytest.fixture(scope="session")
 def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example cancer order."""
+    """Load an example Balsamic order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
     )
@@ -18,7 +20,7 @@ def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def fastq_order_to_submit(cgweb_orders_dir) -> dict:
-    """Load an example FASTQ order."""
+    """Load an example Fastq order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
     )
@@ -34,7 +36,7 @@ def fluffy_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example metagenome order."""
+    """Load an example Metagenome order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
     )
@@ -42,7 +44,7 @@ def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def microbial_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example microbial order."""
+    """Load an example Microbial fastq order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microbial_fastq.json")
     )
@@ -50,7 +52,7 @@ def microbial_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example microbial order."""
+    """Load an example Microsalt order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
     )
@@ -66,7 +68,7 @@ def mip_dna_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RNA order."""
+    """Load an example MIP-RNA order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
     )
@@ -90,7 +92,7 @@ def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RNA order."""
+    """Load an example RNA Fusion order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rnafusion.json")
     )
@@ -98,7 +100,7 @@ def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example sarscov2 order."""
+    """Load an example Mutant order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
     )
@@ -114,7 +116,18 @@ def taxprofiler_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 @pytest.fixture(scope="session")
 def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example TOMTE order."""
+    """Load an example Tomte order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "tomte.json")
+    )
+
+
+# Invalid orders
+
+
+@pytest.fixture(scope="session")
+def invalid_balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an invalid example Balsamic order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "FAIL_balsamic.json")
     )
