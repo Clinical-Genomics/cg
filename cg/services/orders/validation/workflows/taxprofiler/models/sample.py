@@ -13,5 +13,5 @@ class TaxprofilerSample(Sample):
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     priority: PriorityEnum
     quantity: int | None = None
-    require_qc_ok: bool
+    require_qc_ok: bool = False
     source: str

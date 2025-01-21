@@ -23,7 +23,6 @@ class RmlSample(Sample):
     pool: str
     priority: PriorityEnum
     rml_plate_name: str | None = None
-
     volume: int
     well_position_rml: str | None = None
 

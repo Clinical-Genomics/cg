@@ -17,7 +17,7 @@ class MipDnaSample(Sample):
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
-    require_qc_ok: bool
+    require_qc_ok: bool = False
     sex: SexEnum
     source: str
     status: StatusEnum
