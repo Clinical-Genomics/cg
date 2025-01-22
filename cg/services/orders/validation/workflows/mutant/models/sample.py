@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BeforeValidator, Field, PrivateAttr, field_serializer, model_validator
+from pydantic import BeforeValidator, PrivateAttr, field_serializer, model_validator
 from typing_extensions import Annotated
 
 from cg.constants.orderforms import ORIGINAL_LAB_ADDRESSES, REGION_CODES
@@ -25,7 +25,7 @@ class MutantSample(Sample):
     extraction_method: Annotated[ExtractionMethod, BeforeValidator(parse_extraction_method)]
     _lab_code: str = PrivateAttr(default="SE100 Karolinska")
     organism: str
-    other_organism: str | None = Field(alias="organism_other", default=None)
+    organism_other: str | None = None
     original_lab: OriginalLab
     original_lab_address: str
     pre_processing_method: PreProcessingMethod
