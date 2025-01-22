@@ -211,6 +211,24 @@ class MipConfig(BaseModel):
     script: str
 
 
+class NalloConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    launch_directory: str
+    workflow_bin_path: str
+    profile: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     compute_env: str
@@ -444,6 +462,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
+    nallo: NalloConfig | None = None
     raredisease: RarediseaseConfig | None = None
     rnafusion: RnafusionConfig | None = None
     statina: StatinaConfig | None = None

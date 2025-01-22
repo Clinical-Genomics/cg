@@ -32,7 +32,7 @@ from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
@@ -52,6 +52,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
+from cg.models.nallo.nallo import NalloSampleSheetHeaders
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -1435,6 +1436,12 @@ def metagenomics_application_tag() -> str:
 
 
 @pytest.fixture
+def wgs_long_read_application_tag() -> str:
+    """Return the raw data bam application tag."""
+    return "LWPBELB070"
+
+
+@pytest.fixture
 def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
@@ -1899,6 +1906,7 @@ def context_config(
     conda_binary: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    nallo_dir: Path,
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
@@ -2090,6 +2098,27 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
+        },
+        "nallo": {
+            "binary_path": nextflow_binary.as_posix(),
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": conda_binary.as_posix(),
+            "conda_env": "S_nallo",
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "profile": "myprofile",
+            "references": Path("path", "to", "references").as_posix(),
+            "revision": "dev",
+            "root": str(nallo_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": email_address,
+            },
+            "tower_workflow": "nallo",
         },
         "raredisease": {
             "binary_path": nextflow_binary.as_posix(),
@@ -2479,19 +2508,157 @@ def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Pat
 
 
 @pytest.fixture(scope="session")
+def bam_unmapped_read_paths(housekeeper_dir: Path) -> Path:
+    """Path to existing bam read file."""
+    bam_unmapped_read_path = Path(
+        housekeeper_dir, "m00000_000000_000000_s4.hifi_reads.bc2021"
+    ).with_suffix(f"{AlignmentFileTag.BAM}")
+    with open(bam_unmapped_read_path, "wb") as wh:
+        wh.write(
+            b"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"
+        )
+    return bam_unmapped_read_path
+
+
+@pytest.fixture(scope="session")
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
 
 
 # Nallo fixtures
+@pytest.fixture(scope="session")
+def nallo_case_id() -> str:
+    """Returns a nallo case id."""
+    return "nallo_case_two_samples"
+
+
 @pytest.fixture(scope="function")
 def nallo_context(
     cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
+    nallo_case_id: str,
+    sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
+    father_sample_id: str,
+    no_sample_case_id: str,
+    wgs_long_read_application_tag: str,
 ) -> CGConfig:
-    """Context to use in cli."""
+    """Context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = NalloAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create textbook case with two samples
+    nallo_case_two_samples: Case = helpers.add_case(
+        store=status_db,
+        internal_id=nallo_case_id,
+        name=nallo_case_id,
+        data_analysis=Workflow.NALLO,
+    )
+
+    nallo_sample_one: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
+        application_tag=wgs_long_read_application_tag,
+        reference_genome=GenomeVersion.HG38,
+    )
+
+    another_nallo_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        name=another_sample_name,
+        last_sequenced_at=datetime.now(),
+        application_tag=wgs_long_read_application_tag,
+        reference_genome=GenomeVersion.HG38,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=nallo_case_two_samples,
+        sample=nallo_sample_one,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=nallo_case_two_samples,
+        sample=another_nallo_sample,
+    )
     return cg_context
+
+
+@pytest.fixture(scope="function")
+def nallo_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the nallo apps dir."""
+    nallo_dir = tmpdir_factory.mktemp("nallo")
+    return Path(nallo_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="function")
+def nallo_config(nallo_dir: Path, nallo_case_id: str) -> None:
+    """Create Nallo samplesheet.csv file for testing"""
+    Path.mkdir(Path(nallo_dir, nallo_case_id), parents=True, exist_ok=True)
+    Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
+def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
+    """Path to config file."""
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
+        FileExtensions.JSON
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_params_file_path(nallo_dir, nallo_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_sample_sheet_content(
+    sample_id: str,
+    nallo_case_id: str,
+    bam_unmapped_read_paths: Path,
+) -> str:
+    """Return the expected sample sheet content for Nallo."""
+    headers: str = ",".join(NalloSampleSheetHeaders.list())
+    row: str = ",".join(
+        [
+            nallo_case_id,
+            sample_id,
+            bam_unmapped_read_paths.as_posix(),
+            nallo_case_id,
+            "0",
+            "0",
+            "2",
+            "2",
+        ]
+    )
+    return "\n".join([headers, row])
+
+
+@pytest.fixture(scope="function")
+def nallo_sample_sheet_path(nallo_dir, nallo_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
 
 
 # Raredisease fixtures
@@ -2756,7 +2923,7 @@ def mock_deliverable(
 
 
 @pytest.fixture(scope="function")
-def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
+def raredisease_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
@@ -3278,7 +3445,7 @@ def rnafusion_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def rnafusion_mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+def rnafusion_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
@@ -3331,7 +3498,7 @@ def tomte_gene_panel_path(tomte_dir, tomte_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
+def tomte_config(tomte_dir: Path, tomte_case_id: str) -> None:
     """Create Tomte samplesheet.csv file for testing."""
     Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
     Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
@@ -3937,7 +4104,7 @@ def taxprofiler_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
