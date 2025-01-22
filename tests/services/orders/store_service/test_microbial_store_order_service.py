@@ -12,7 +12,7 @@ from cg.services.orders.storing.implementations.microbial_order_service import (
 )
 from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Organism, Sample
 from cg.store.store import Store
 
 
@@ -46,6 +46,33 @@ def test_store_microsalt_order_data_in_status_db(
     # THEN the case should have the correct data analysis and data delivery
     assert db_case.data_analysis == Workflow.MICROSALT
     assert db_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS)
+
+
+def test_store_microbial_new_organism_in_status_db(
+    store_to_submit_and_validate_orders: Store,
+    microsalt_order: MicrosaltOrder,
+    store_microbial_order_service: StoreMicrobialOrderService,
+):
+    """Test that a new organism in a Microsalt order is stored in the status db."""
+    # GIVEN a store with no organisms
+    assert store_to_submit_and_validate_orders.get_all_organisms().count() == 0
+
+    # GIVEN a Microsalt order with a new organism
+    microsalt_order.samples[0].organism = "Canis lupus familiaris"
+    microsalt_order.samples[0].reference_genome = "UU_Cfam_GSD_1.0"
+
+    # WHEN storing the order
+    store_microbial_order_service.store_order_data_in_status_db(microsalt_order)
+
+    # THEN the organism should be stored in the status db
+    organisms: list[Organism] = store_to_submit_and_validate_orders.get_all_organisms().all()
+    dog: Organism = [
+        organism for organism in organisms if organism.name == "Canis lupus familiaris"
+    ][0]
+    assert dog.reference_genome == "UU_Cfam_GSD_1.0"
+
+    # THEN the organism should not be verified
+    assert not dog.verified
 
 
 def test_store_mutant_order_data_control_has_stored_value(
