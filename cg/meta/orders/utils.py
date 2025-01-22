@@ -29,7 +29,7 @@ def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
     return tags
 
 
-def contains_only_existing_samples(order: Order) -> bool:
+def contains_only_existing_samples(order: OrderWithCases) -> bool:
     """Check if the order contains only existing samples"""
 
     for enumerated_case in order.enumerated_cases:
@@ -41,7 +41,7 @@ def contains_only_existing_samples(order: Order) -> bool:
 
 def get_ticket_status(order: Order) -> int:
     """Get the ticket status based on the order"""
-
-    if contains_only_existing_samples(order=order):
-        return Status.OPEN
+    if isinstance(order, OrderWithCases):
+        if contains_only_existing_samples(order=order):
+            return Status.OPEN
     return Status.PENDING
