@@ -867,6 +867,12 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
+def nallo_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with nallo analysis files."""
+    return Path(analysis_dir, "nallo")
+
+
+@pytest.fixture
 def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the directory with nf-analysis files."""
     return Path(fixtures_dir, "analysis", "nf-analysis")
@@ -2528,7 +2534,7 @@ def sequencing_platform() -> str:
 @pytest.fixture(scope="session")
 def nallo_case_id() -> str:
     """Returns a nallo case id."""
-    return "nallo_case_two_samples"
+    return "nallo_case_enough_reads"
 
 
 @pytest.fixture(scope="function")
@@ -2557,7 +2563,7 @@ def nallo_context(
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with two samples
-    nallo_case_two_samples: Case = helpers.add_case(
+    nallo_case_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=nallo_case_id,
         name=nallo_case_id,
@@ -2584,13 +2590,13 @@ def nallo_context(
 
     helpers.add_relationship(
         status_db,
-        case=nallo_case_two_samples,
+        case=nallo_case_enough_reads,
         sample=nallo_sample_one,
     )
 
     helpers.add_relationship(
         status_db,
-        case=nallo_case_two_samples,
+        case=nallo_case_enough_reads,
         sample=another_nallo_sample,
     )
     return cg_context
@@ -2610,6 +2616,114 @@ def nallo_config(nallo_dir: Path, nallo_case_id: str) -> None:
     Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
+def nallo_deliverable_data(
+        nallo_dir: Path, nallo_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{nallo_dir}/{nallo_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html"],
+                "id": nallo_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def nallo_metrics_deliverables(nallo_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(nallo_analysis_dir, "nallo_case_enough_reads_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_metrics_deliverables_path(nallo_dir: Path, nallo_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_metrics_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_mock_analysis_finish(
+    nallo_dir: Path,
+    nallo_case_id: str,
+    nallo_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis finish file for testing."""
+    Path.mkdir(Path(nallo_dir, nallo_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(nallo_dir, nallo_case_id, "pipeline_info", software_version_file).touch(exist_ok=True)
+    Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet.csv").touch(exist_ok=True)
+    Path.mkdir(
+        Path(nallo_dir, nallo_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=nallo_multiqc_json_metrics,
+        file_path=Path(
+            nallo_dir,
+            nallo_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={nallo_case_id: [tower_id]},
+        file_path=Path(
+            nallo_dir,
+            nallo_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_mock_deliverable_dir(
+    nallo_dir: Path, nallo_deliverable_data: dict, nallo_case_id: str
+) -> Path:
+    """Create raredisease deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(nallo_dir, nallo_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(nallo_dir, nallo_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in nallo_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=nallo_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(nallo_dir, nallo_case_id, nallo_case_id + deliverables_yaml),
+    )
+    return nallo_dir
+
+
+@pytest.fixture
+def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
+    """Return Multiqc JSON file path for nallo."""
+    return Path(nallo_analysis_dir, multiqc_json_file)
+
+
+@pytest.fixture
+def nallo_multiqc_json_metrics(nallo_multiqc_json_metrics_path: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=nallo_multiqc_json_metrics_path)
 
 
 @pytest.fixture(scope="function")
