@@ -5,7 +5,7 @@ import pytest
 
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
-from cg.meta.orders.utils import get_ticket_tags
+from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.constants import MAF_ORDER_ID
@@ -206,3 +206,26 @@ def test_get_ticket_tags(
 
     # THEN the tags should be correct
     assert tags == expected_tags
+
+
+@pytest.mark.parametrize(
+    "order_fixture, expected_status",
+    [
+        ("mip_dna_order", 3),
+        ("mip_dna_order_with_existing_samples", 3),
+        ("mip_dna_order_with_only_existing_samples", 2),
+    ],
+)
+def test_get_ticket_status(
+    request: pytest.FixtureRequest, order_fixture: str, expected_status: int
+):
+    """Test that the correct ticket status is returned based on the order samples."""
+
+    # GIVEN an order
+    order: Order = request.getfixturevalue(order_fixture)
+
+    # WHEN getting the ticket status
+    status = get_ticket_status(order=order)
+
+    # THEN the status should be correct
+    assert status == expected_status
