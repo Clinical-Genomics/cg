@@ -307,3 +307,11 @@ def is_sample_not_from_collaboration(
     db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
     customer: Customer | None = store.get_customer_by_internal_id(customer_id)
     return db_sample and customer and db_sample.customer not in customer.collaborators
+
+
+def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]:
+    existing_case_names: set[str] = set()
+    for _, case in order.enumerated_existing_cases:
+        if db_case := status_db.get_case_by_internal_id(case.internal_id):
+            existing_case_names.add(db_case.name)
+    return existing_case_names
