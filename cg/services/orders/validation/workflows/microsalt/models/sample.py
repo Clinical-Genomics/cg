@@ -12,6 +12,7 @@ class MicrosaltSample(Sample):
     elution_buffer: Annotated[ElutionBuffer, BeforeValidator(parse_buffer)]
     extraction_method: Annotated[ExtractionMethod, BeforeValidator(parse_extraction_method)]
     organism: str
+    organism_other: str | None = None
     priority: PriorityEnum
     reference_genome: str = Field(max_length=255)
     _verified_organism: bool | None = PrivateAttr(default=None)

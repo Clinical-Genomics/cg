@@ -948,7 +948,7 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_organisms(self) -> list[Organism]:
+    def get_all_organisms(self) -> Query[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_query(table=Organism).order_by(Organism.internal_id)
 

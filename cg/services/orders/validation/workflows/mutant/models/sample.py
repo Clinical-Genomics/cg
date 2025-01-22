@@ -25,6 +25,7 @@ class MutantSample(Sample):
     extraction_method: Annotated[ExtractionMethod, BeforeValidator(parse_extraction_method)]
     _lab_code: str = PrivateAttr(default="SE100 Karolinska")
     organism: str
+    organism_other: str | None = None
     original_lab: OriginalLab
     original_lab_address: str
     pre_processing_method: PreProcessingMethod
