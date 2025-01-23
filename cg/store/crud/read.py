@@ -346,7 +346,7 @@ class ReadHandler(BaseHandler):
             yield link.sample.internal_id
 
     def get_original_sample_ids_by_case_id(self, case_id: str = None) -> Iterator[str]:
-        """Return original sample ids (go to original sample id for downloaded samples) from case id."""
+        """Return original sample id from case id."""
         case: Case = self.get_case_by_internal_id(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         for link in case.links:
