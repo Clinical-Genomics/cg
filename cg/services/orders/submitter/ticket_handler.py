@@ -126,7 +126,7 @@ class TicketHandler:
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id
 
-        message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority}"
+        message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority.name}"
         return message
 
     @staticmethod
@@ -208,7 +208,7 @@ class TicketHandler:
                             message=message, case_name=case.name
                         )
                         message = self.add_sample_priority_to_message(
-                            message=message, priority=case.priority
+                            message=message, priority=case.priority.name
                         )
                         message = self.add_sample_comment_to_message(
                             message=message, comment=sample.comment
