@@ -45,8 +45,8 @@ def is_volume_missing(sample: Sample) -> bool:
 def has_sample_invalid_concentration(
     sample: SampleWithSkipRC, allowed_interval: tuple[float, float]
 ) -> bool:
-    concentration: float = sample.concentration_ng_ul
-    return not is_sample_concentration_within_interval(
+    concentration: float | None = sample.concentration_ng_ul
+    return concentration and not is_sample_concentration_within_interval(
         concentration=concentration, interval=allowed_interval
     )
 

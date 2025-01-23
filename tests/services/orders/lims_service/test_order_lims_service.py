@@ -22,6 +22,7 @@ def test_to_lims_mip(mip_dna_order_to_submit):
         samples=new_samples,
         workflow=Workflow.MIP_DNA,
         delivery_type=order_data.delivery_type,
+        skip_reception_control=order_data.skip_reception_control,
     )
 
     # THEN it should list all samples
@@ -57,6 +58,7 @@ def test_to_lims_fastq(fastq_order_to_submit):
         samples=order_data.samples,
         workflow=Workflow.RAW_DATA,
         delivery_type=order_data.delivery_type,
+        skip_reception_control=order_data.skip_reception_control,
     )
 
     # THEN should "work"
@@ -131,6 +133,7 @@ def test_to_lims_microbial(microbial_order_to_submit: dict):
         samples=order_data.samples,
         workflow=Workflow.MICROSALT,
         delivery_type=order_data.delivery_type,
+        skip_reception_control=order_data.skip_reception_control,
     )
     # THEN it should "work"
 
@@ -153,6 +156,7 @@ def test_to_lims_sarscov2(mutant_order: MutantOrder):
         samples=mutant_order.samples,
         workflow=Workflow.MUTANT,
         delivery_type=mutant_order.delivery_type,
+        skip_reception_control=mutant_order.skip_reception_control,
     )
 
     # THEN it should have found the same number of samples
@@ -185,6 +189,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit: dict):
         samples=new_samples,
         workflow=Workflow.BALSAMIC,
         delivery_type=order_data.delivery_type,
+        skip_reception_control=order_data.skip_reception_control,
     )
     # THEN it should list all samples
 
