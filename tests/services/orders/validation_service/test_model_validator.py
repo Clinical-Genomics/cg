@@ -130,3 +130,15 @@ def test_null_conversion(valid_order: TomteOrder, model_validator: ModelValidato
 
     # THEN the empty concentration should be converted to None
     assert order.cases[0].samples[0].concentration_ng_ul is None
+
+
+def test_skip_rc_default_conversion(valid_order: TomteOrder, model_validator: ModelValidator):
+    # GIVEN a Tomte order with skip_reception_control set to None
+    valid_order.skip_reception_control = None
+    raw_order: dict = valid_order.model_dump(by_alias=True)
+
+    # WHEN validating the order
+    order, _ = model_validator.validate(order=raw_order, model=TomteOrder)
+
+    # THEN the skip_reception_control value should be converted to None
+    assert order.skip_reception_control is False
