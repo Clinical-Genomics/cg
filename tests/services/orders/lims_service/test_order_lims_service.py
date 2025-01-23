@@ -214,3 +214,23 @@ def test_to_lims_balsamic(balsamic_order: BalsamicOrder):
     assert first_sample["udfs"]["post_formalin_fixation_time"] == "3"
     assert first_sample["udfs"]["tissue_block_size"] == "large"
     assert first_sample["udfs"]["comment"] == "This is a sample comment"
+
+
+def test_order_with_skip_reception_control(balsamic_order: BalsamicOrder):
+    """Test that an order set to skip reception control can be parsed correctly by LIMS."""
+    # GIVEN a Balsamic order with one case and one sample set to skip reception control
+    balsamic_order.skip_reception_control = True
+
+    # WHEN parsing the order to format for LIMS import
+    new_samples = [sample for _, _, sample in balsamic_order.enumerated_new_samples]
+    samples: list[LimsSample] = OrderLimsService._build_lims_sample(
+        customer="cust000",
+        samples=new_samples,
+        workflow=Workflow.BALSAMIC,
+        delivery_type=balsamic_order.delivery_type,
+        skip_reception_control=balsamic_order.skip_reception_control,
+    )
+
+    # THEN the parsed samples should have the skip reception control flag set
+    first_sample = samples[0].dict()
+    assert first_sample["udfs"]["skip_reception_control"] is True
