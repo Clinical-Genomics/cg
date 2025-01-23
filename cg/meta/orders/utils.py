@@ -22,7 +22,7 @@ def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
     tags.append(ORDER_TYPE_WORKFLOW_MAP[order_type])
 
     if isinstance(order, OrderWithCases):
-        if contains_existing_data(order=order):
+        if contains_existing_data(order):
             tags.append("existing-data")
 
     return tags
