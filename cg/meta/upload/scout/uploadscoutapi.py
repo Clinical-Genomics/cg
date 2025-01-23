@@ -676,9 +676,12 @@ class UploadScoutAPI:
         return config_builders[analysis.workflow]
 
     def create_rna_dna_collections(self, rna_case: Case) -> list[RNADNACollection]:
-        return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]
+        return [
+            self.create_rna_dna_collection(rna_sample=link.sample, customer=rna_case.customer)
+            for link in rna_case.links
+        ]
 
-    def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
+    def create_rna_dna_collection(self, rna_sample: Sample, customer: Customer) -> RNADNACollection:
         """Creates a collection containing the given RNA sample id, its related DNA sample name, and
         a list of ids for the DNA cases connected to the DNA sample."""
         if not rna_sample.subject_id:
@@ -686,7 +689,7 @@ class UploadScoutAPI:
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
             )
 
-        collaborators: set[Customer] = rna_sample.customer.collaborators
+        collaborators: set[Customer] = customer.collaborators
         subject_id_samples: list[Sample] = (
             self.status_db.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
                 customer_ids=[customer.id for customer in collaborators],
