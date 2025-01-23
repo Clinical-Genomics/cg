@@ -180,6 +180,7 @@ class TicketHandler:
             if not case.is_new:
                 db_case = self.status_db.get_case_by_internal_id(case.internal_id)
                 for sample in db_case.samples:
+                    message += self.NEW_LINE
                     message = self.add_existing_sample_info_to_message(
                         message=message,
                         customer_id=sample.customer.internal_id,
@@ -188,6 +189,7 @@ class TicketHandler:
                     )
             else:
                 for sample in case.samples:
+                    message += self.NEW_LINE
                     if not sample.is_new:
                         message = self.add_existing_sample_info_to_message(
                             message=message,
