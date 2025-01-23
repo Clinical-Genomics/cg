@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, PrivateAttr, model_validator
+from typing_extensions import Annotated
 
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
+from cg.services.orders.validation.models.utils import set_null_to_false
 
 
 class Order(BaseModel):
@@ -10,7 +12,7 @@ class Order(BaseModel):
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")
     name: str = Field(min_length=1)
-    skip_reception_control: bool = False
+    skip_reception_control: Annotated[bool, BeforeValidator(set_null_to_false)] = False
     _generated_ticket_id: int | None = PrivateAttr(default=None)
     _user_id: int = PrivateAttr(default=None)
 
