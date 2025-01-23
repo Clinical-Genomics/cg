@@ -1,0 +1,61 @@
+{
+	"cases": [
+		{
+			"cohorts": null,
+			"name": "B",
+			"panels": null,
+			"priority": "FAIL",
+			"samples": [
+				{
+					"age_at_sampling": "17.2",
+					"application": "PANKTTR100",
+					"capture_kit": "GMCKsolid",
+					"comment": "This is a sample comment",
+					"concentration_ng_ul": null,
+					"container": "96 well plate",
+					"container_name": "BalsamicPlate",
+					"control": "FAIL",
+					"data_analysis": null,
+					"data_delivery": null,
+					"elution_buffer": "Tris-HCl",
+					"family_name": null,
+					"father": null,
+					"formalin_fixation_time": "15",
+					"mother": null,
+					"name": "BalsamicSample",
+					"phenotype_groups": [
+						"PhGroup"
+					],
+					"phenotype_terms": [
+						"PhTerm"
+					],
+					"post_formalin_fixation_time": "3",
+					"priority": null,
+					"quantity": null,
+					"reference_genome": null,
+					"require_qc_ok": false,
+					"sex": "male",
+					"source": "cytology (FFPE)",
+					"source_comment": null,
+					"status": null,
+					"subject_id": "Subject1",
+					"tissue_block_size": "large",
+					"tumour": true,
+					"tumour_purity": "13",
+					"volume": 42,
+					"well_position": "A:1"
+				}
+			],
+			"synopsis": "A synopsis"
+		}
+	],
+	"comment": null,
+	"customer": "cust000",
+	"data_analysis": "balsamic",
+	"data_delivery": null,
+	"delivery_type": "analysis-scout",
+	"name": "BalsamicOrder",
+	"project_type": "balsamic",
+	"ticket": null,
+	"user_id": 1
+}

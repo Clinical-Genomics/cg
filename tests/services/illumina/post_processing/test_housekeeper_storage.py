@@ -36,16 +36,19 @@ def test_add_fastq_files_to_housekeeper(
         assert hk_api.get_files(tags=[SequencingFileTag.FASTQ], bundle=sample_id).count() == 0
 
     # GIVEN a demultiplexed run dir data with a sample sheet and samples
-    with patch.object(
-        target=IlluminaRunDirectoryData,
-        attribute="sample_sheet",
-        new_callable=PropertyMock(
-            return_value=novaseq_6000_post_1_5_kits_sample_sheet_with_selected_samples
+    with (
+        patch.object(
+            target=IlluminaRunDirectoryData,
+            attribute="sample_sheet",
+            new_callable=PropertyMock(
+                return_value=novaseq_6000_post_1_5_kits_sample_sheet_with_selected_samples
+            ),
         ),
-    ), patch.object(
-        target=IlluminaRunDirectoryData,
-        attribute="get_demultiplexed_runs_dir",
-        return_value=tmp_demultiplexed_novaseq_6000_post_1_5_kits_path,
+        patch.object(
+            target=IlluminaRunDirectoryData,
+            attribute="get_demultiplexed_runs_dir",
+            return_value=tmp_demultiplexed_novaseq_6000_post_1_5_kits_path,
+        ),
     ):
         # WHEN adding the sample fastq files to Housekeeper
         add_sample_fastq_files_to_housekeeper(

@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import click
+import rich_click as click
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI

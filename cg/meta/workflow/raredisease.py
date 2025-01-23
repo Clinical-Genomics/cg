@@ -14,7 +14,7 @@ from cg.clients.chanjo2.models import (
     CoverageSample,
 )
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
@@ -24,6 +24,7 @@ from cg.constants.nf_analysis import (
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -55,7 +56,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.conda_binary: str = config.raredisease.conda_binary
         self.platform: str = config.raredisease.platform
         self.params: str = config.raredisease.params
-        self.config: str = config.raredisease.config
+        self.workflow_config_path: str = config.raredisease.config
         self.resources: str = config.raredisease.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
@@ -98,13 +99,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """
         target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
         if not target_bed_file:
-            if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            if analysis_type == AnalysisType.WGS:
                 return DEFAULT_CAPTURE_KIT
             raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
 
     def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
-        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+        if analysis_type == AnalysisType.WGS:
             return True
         return False
 

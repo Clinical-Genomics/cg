@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest

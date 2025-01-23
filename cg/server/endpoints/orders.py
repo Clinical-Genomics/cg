@@ -17,19 +17,15 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     OrderError,
-    OrderExistsError,
     OrderFormError,
     OrderNotDeliverableError,
     OrderNotFoundError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
-from cg.meta.orders import OrdersAPI
-from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message.delivery_message_response import (
-    DeliveryMessageResponse,
-)
+from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRequest
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
@@ -38,11 +34,12 @@ from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
-    lims,
     order_service,
-    order_submitter_registry,
+    order_validation_service,
+    storing_service_registry,
     ticket_handler,
 )
+from cg.services.orders.submitter.service import OrderSubmitter
 from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
@@ -151,13 +148,12 @@ def create_order_from_form():
 
 
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
-def submit_order(order_type):
+def submit_order(order_type: OrderType):
     """Submit an order for samples."""
-    api = OrdersAPI(
-        lims=lims,
-        status=db,
+    submitter = OrderSubmitter(
         ticket_handler=ticket_handler,
-        submitter_registry=order_submitter_registry,
+        storing_registry=storing_service_registry,
+        validation_service=order_validation_service,
     )
     error_message: str
     try:
@@ -168,22 +164,15 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project = OrderType(order_type)
-        order_in = OrderIn.parse_obj(request_json, project=project)
-        existing_ticket: str | None = ticket_handler.parse_ticket_number(order_in.name)
-        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
-            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
-        result: dict = api.submit(
-            project=project,
-            order_in=order_in,
-            user_name=g.current_user.name,
-            user_mail=g.current_user.email,
+        result: dict = submitter.submit(
+            raw_order=request_json,
+            order_type=order_type,
+            user=g.current_user,
         )
 
     except (  # user misbehaviour
         OrderError,
-        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -259,3 +248,12 @@ def get_options():
         panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
     )
+
+
+@ORDERS_BLUEPRINT.route("/validate_order/<order_type>", methods=["POST"])
+def validate_order(order_type: OrderType):
+    raw_order = request.get_json()
+    response = order_validation_service.get_validation_response(
+        raw_order=raw_order, order_type=order_type, user_id=g.current_user.id
+    )
+    return jsonify(response), HTTPStatus.OK

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-import click
+import rich_click as click
 from housekeeper.store.models import File
 
 from cg.apps.crunchy.files import update_metadata_paths

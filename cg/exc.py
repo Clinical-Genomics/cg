@@ -174,6 +174,12 @@ class OrderError(CgError):
     """
 
 
+class OrderSubmissionError(CgError):
+    """
+    Exception related to order submission.
+    """
+
+
 class OrderFormError(CgError):
     """
     Exception related to the order form.
@@ -296,10 +302,6 @@ class XMLError(CgError):
 
 class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
-
-
-class OrderExistsError(CgError):
-    """Exception raised when cases and samples are added to a pre-existing order."""
 
 
 class OrderMismatchError(CgError):

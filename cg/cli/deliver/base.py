@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.deliver.utils import deliver_raw_data_for_analyses
@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
@@ -88,8 +88,7 @@ def deliver_case(
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        case=case,
-        delivery_type=delivery_type,
+        case=case, delivery_type=delivery_type
     )
     delivery_service.deliver_files_for_case(
         case=case, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -124,8 +123,7 @@ def deliver_ticket(
         LOG.error(f"Could not find case connected to ticket {ticket}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        case=cases[0],
-        delivery_type=delivery_type,
+        case=cases[0], delivery_type=delivery_type
     )
     delivery_service.deliver_files_for_ticket(
         ticket_id=ticket, delivery_base_path=Path(inbox), dry_run=dry_run
@@ -172,8 +170,7 @@ def deliver_sample_raw_data(
         LOG.error(f"Could not find case with id {case_id}")
         return
     delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-        case=case,
-        delivery_type=delivery_type,
+        case=case, delivery_type=delivery_type
     )
     delivery_service.deliver_files_for_sample(
         case=case, sample_id=sample_id, delivery_base_path=Path(inbox), dry_run=dry_run
