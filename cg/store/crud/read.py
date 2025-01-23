@@ -1663,9 +1663,8 @@ class ReadHandler(BaseHandler):
         """Returns all uploaded DNA cases ids related to the given RNA case."""
 
         related_dna_cases: list[Case] = []
+        collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
-
-            collaborators: set[Customer] = rna_case.customer.collaborators
 
             related_dna_samples_query: Query = self._get_related_samples_query(
                 sample=rna_sample,
