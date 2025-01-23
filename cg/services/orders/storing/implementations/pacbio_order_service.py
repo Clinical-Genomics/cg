@@ -30,6 +30,7 @@ class StorePacBioOrderService(StoreOrderService):
             workflow=Workflow.RAW_DATA,
             customer=order.customer,
             delivery_type=DataDelivery(order.delivery_type),
+            skip_reception_control=order.skip_reception_control,
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
         new_samples = self.store_order_data_in_status_db(order=order)

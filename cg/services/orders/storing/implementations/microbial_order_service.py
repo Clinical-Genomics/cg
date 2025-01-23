@@ -44,6 +44,7 @@ class StoreMicrobialOrderService(StoreOrderService):
             order_name=order.name,
             workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             delivery_type=DataDelivery(order.delivery_type),
+            skip_reception_control=order.skip_reception_control,
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
 

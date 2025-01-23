@@ -15,7 +15,11 @@ class OrderLimsService:
 
     @staticmethod
     def _build_lims_sample(
-        customer: str, samples: list[Sample], workflow: Workflow, delivery_type: DataDelivery
+        customer: str,
+        samples: list[Sample],
+        workflow: Workflow,
+        delivery_type: DataDelivery,
+        skip_reception_control: bool,
     ) -> list[LimsSample]:
         """Convert order input to LIMS interface input."""
         samples_lims = []
@@ -26,6 +30,8 @@ class OrderLimsService:
             dict_sample["data_analysis"] = workflow
             dict_sample["data_delivery"] = delivery_type
             dict_sample["family_name"] = sample._case_name
+            if skip_reception_control:
+                dict_sample["skip_reception_control"] = True
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims
@@ -38,10 +44,15 @@ class OrderLimsService:
         order_name: str,
         workflow: Workflow,
         delivery_type: DataDelivery,
+        skip_reception_control: bool,
     ) -> tuple[any, dict]:
         """Process samples to add them to LIMS."""
         samples_lims: list[LimsSample] = self._build_lims_sample(
-            customer=customer, samples=samples, workflow=workflow, delivery_type=delivery_type
+            customer=customer,
+            samples=samples,
+            workflow=workflow,
+            delivery_type=delivery_type,
+            skip_reception_control=skip_reception_control,
         )
         project_name: str = str(ticket) or order_name
         # Create new lims project

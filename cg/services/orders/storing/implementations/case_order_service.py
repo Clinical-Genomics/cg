@@ -51,6 +51,7 @@ class StoreCaseOrderService(StoreOrderService):
                 order_name=order.name,
                 workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
                 delivery_type=order.delivery_type,
+                skip_reception_control=order.skip_reception_control,
             )
         if lims_map:
             self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
