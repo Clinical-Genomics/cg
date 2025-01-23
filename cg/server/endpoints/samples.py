@@ -2,9 +2,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.server.dto.samples.collaborator_samples_request import (
-    CollaboratorSamplesRequest,
-)
+from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service

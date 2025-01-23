@@ -61,7 +61,7 @@ from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
-from cg.services.orders.store_order_services.constants import MAF_ORDER_ID
+from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -121,9 +121,12 @@ pytest_plugins = [
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_form_fixtures",
-    "tests.fixture_plugins.orders_fixtures.order_store_service_fixtures",
     "tests.fixture_plugins.orders_fixtures.order_to_submit_fixtures",
-    "tests.fixture_plugins.orders_fixtures.status_data_fixtures",
+    "tests.fixture_plugins.orders_fixtures.order_fixtures",
+    "tests.fixture_plugins.orders_fixtures.path_fixtures",
+    "tests.fixture_plugins.orders_fixtures.services_fixtures",
+    "tests.fixture_plugins.orders_fixtures.store_fixtures",
+    "tests.fixture_plugins.orders_fixtures.store_service_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.context_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.dto_fixtures",
     "tests.fixture_plugins.pacbio_fixtures.file_data_fixtures",
@@ -659,9 +662,14 @@ def madeline_api(madeline_output: Path) -> MockMadelineAPI:
 
 
 @pytest.fixture(scope="session")
-def ticket_id() -> str:
+def ticket_id_as_int() -> int:
+    return 123456
+
+
+@pytest.fixture(scope="session")
+def ticket_id(ticket_id_as_int: int) -> str:
     """Return a ticket number for testing."""
-    return "123456"
+    return str(ticket_id_as_int)
 
 
 @pytest.fixture
@@ -736,12 +744,6 @@ def mutant_analysis_dir(analysis_dir: Path) -> Path:
 def apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
     return Path(fixtures_dir, "apps")
-
-
-@pytest.fixture(scope="session")
-def cgweb_orders_dir(fixtures_dir: Path) -> Path:
-    """Return the path to the cgweb_orders dir."""
-    return Path(fixtures_dir, "cgweb_orders")
 
 
 @pytest.fixture(scope="session")
@@ -1233,6 +1235,7 @@ def hermes_api(hermes_process: ProcessMock) -> HermesApi:
         "hermes": {
             "binary_path": "/bin/true",
             "container_mount_volume": "a_str",
+            "container_path": "/singularity_cache",
         }
     }
     hermes_api = HermesApi(config=hermes_config)
@@ -1617,7 +1620,7 @@ def base_store(
         ),
         store.add_application(
             tag=apptag_rna,
-            prep_category="tgs",
+            prep_category="wts",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             percent_reads_guaranteed=75,
@@ -1662,10 +1665,10 @@ def base_store(
 
     organism = store.add_organism("C. jejuni", "C. jejuni")
     store.session.add(organism)
-    store.session.commit()
 
     order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
     store.add_multiple_items_to_store([order])
+    store.session.commit()
 
     yield store
 
@@ -2057,7 +2060,7 @@ def context_config(
             "upload_password": "pass",
             "submitter": "s.submitter",
         },
-        "hermes": {"binary_path": "hermes"},
+        "hermes": {"binary_path": "hermes", "container_path": "/singularity_cache"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "lims": {
             "host": "https://lims.scilifelab.se",
@@ -2403,6 +2406,16 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, No
     store.session.commit()
 
     yield store
+
+
+@pytest.fixture
+def customer_without_users(store_with_users: Store):
+    return store_with_users.add_customer(
+        internal_id="internal_id",
+        name="some_name",
+        invoice_address="some_address",
+        invoice_reference="some_reference",
+    )
 
 
 @pytest.fixture
@@ -4238,15 +4251,6 @@ def taxprofiler_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
-    """Create CSV sample sheet file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
