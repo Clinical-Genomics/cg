@@ -1227,6 +1227,7 @@ def hermes_api(hermes_process: ProcessMock) -> HermesApi:
         "hermes": {
             "binary_path": "/bin/true",
             "container_mount_volume": "a_str",
+            "container_path": "/singularity_cache",
         }
     }
     hermes_api = HermesApi(config=hermes_config)
@@ -2051,7 +2052,7 @@ def context_config(
             "upload_password": "pass",
             "submitter": "s.submitter",
         },
-        "hermes": {"binary_path": "hermes"},
+        "hermes": {"binary_path": "hermes", "container_path": "/singularity_cache"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "lims": {
             "host": "https://lims.scilifelab.se",
