@@ -119,13 +119,12 @@ class TicketHandler:
     def add_existing_sample_info_to_message(
         self, message: str, customer_id: str, internal_id: str, case_name: str
     ) -> str:
-
         existing_sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=internal_id)
 
         sample_customer = ""
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id
-
+        message += self.NEW_LINE
         message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority.name}"
         return message
 
@@ -189,7 +188,6 @@ class TicketHandler:
                     )
             else:
                 for sample in case.samples:
-                    message += self.NEW_LINE
                     if not sample.is_new:
                         message = self.add_existing_sample_info_to_message(
                             message=message,
