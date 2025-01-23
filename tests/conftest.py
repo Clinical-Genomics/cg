@@ -2118,7 +2118,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
-            "revision": "dev",
+            "revision": "2.2.0",
             "root": str(nallo_dir),
             "slurm": {
                 "account": "development",
@@ -2516,7 +2516,7 @@ def bam_unmapped_read_paths(housekeeper_dir: Path) -> Path:
     """Path to existing bam read file."""
     bam_unmapped_read_path = Path(
         housekeeper_dir, "m00000_000000_000000_s4.hifi_reads.bc2021"
-    ).with_suffix(f"{AlignmentFileTag.BAM}")
+    ).with_suffix(f".{AlignmentFileTag.BAM}")
     with open(bam_unmapped_read_path, "wb") as wh:
         wh.write(
             b"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"
@@ -2543,62 +2543,89 @@ def nallo_context(
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    hermes_api: HermesApi,
-    cg_dir: Path,
     nallo_case_id: str,
     sample_id: str,
+    father_sample_id: str,
     sample_name: str,
     another_sample_name: str,
-    father_sample_id: str,
     no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
     wgs_long_read_application_tag: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+    mocker: MockFixture,
 ) -> CGConfig:
-    """Context to use in CLI."""
+    """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = NalloAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
+    # NB: the order in which the cases are added matters for the tests of store_available
+
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # Create textbook case with two samples
-    nallo_case_enough_reads: Case = helpers.add_case(
+    # Create textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=nallo_case_id,
         name=nallo_case_id,
         data_analysis=Workflow.NALLO,
     )
 
-    nallo_sample_one: Sample = helpers.add_sample(
+    sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
         name=sample_name,
         last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
         application_tag=wgs_long_read_application_tag,
         reference_genome=GenomeVersion.HG38,
     )
 
-    another_nallo_sample: Sample = helpers.add_sample(
+    another_sample_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=father_sample_id,
         name=another_sample_name,
         last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
         application_tag=wgs_long_read_application_tag,
         reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(
         status_db,
-        case=nallo_case_enough_reads,
-        sample=nallo_sample_one,
+        case=case_enough_reads,
+        sample=sample_enough_reads,
     )
 
     helpers.add_relationship(
         status_db,
-        case=nallo_case_enough_reads,
-        sample=another_nallo_sample,
+        case=case_enough_reads,
+        sample=another_sample_enough_reads,
     )
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.NALLO,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=wgs_long_read_application_tag,
+        reference_genome=GenomeVersion.HG38,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
     return cg_context
 
 
@@ -2619,9 +2646,7 @@ def nallo_config(nallo_dir: Path, nallo_case_id: str) -> None:
 
 
 @pytest.fixture(scope="function")
-def nallo_deliverable_data(
-        nallo_dir: Path, nallo_case_id: str, sample_id: str
-) -> dict:
+def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -2693,7 +2718,7 @@ def nallo_mock_analysis_finish(
 def nallo_mock_deliverable_dir(
     nallo_dir: Path, nallo_deliverable_data: dict, nallo_case_id: str
 ) -> Path:
-    """Create raredisease deliverable file with dummy data and files to deliver."""
+    """Create nallo deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(nallo_dir, nallo_case_id),
         parents=True,
@@ -2720,10 +2745,10 @@ def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
     return Path(nallo_analysis_dir, multiqc_json_file)
 
 
-@pytest.fixture
-def nallo_multiqc_json_metrics(nallo_multiqc_json_metrics_path: Path) -> list[dict]:
+@pytest.fixture(scope="function")
+def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=nallo_multiqc_json_metrics_path)
+    return read_json(file_path=Path(nallo_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
