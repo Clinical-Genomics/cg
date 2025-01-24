@@ -2678,7 +2678,7 @@ def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) 
 def nallo_metrics_deliverables(nallo_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
-        file_path=Path(nallo_analysis_dir, "nallo_case_enough_reads_metrics_deliverables.yaml")
+        file_path=Path(nallo_analysis_dir, "nallo_fixture_for_metrics_deliverables.yaml")
     )
 
 
