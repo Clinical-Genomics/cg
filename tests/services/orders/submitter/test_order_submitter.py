@@ -211,9 +211,9 @@ def test_get_ticket_tags(
 @pytest.mark.parametrize(
     "order_fixture, expected_status",
     [
-        ("mip_dna_order", 3),
-        ("mip_dna_order_with_existing_samples", 3),
-        ("mip_dna_order_with_only_existing_samples", 2),
+        ("mip_dna_order", Status.PENDING),
+        ("mip_dna_order_with_existing_samples", Status.PENDING),
+        ("mip_dna_order_with_only_existing_samples", Status.OPEN),
     ],
 )
 def test_get_ticket_status(
