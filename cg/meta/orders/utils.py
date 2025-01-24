@@ -39,7 +39,7 @@ def contains_only_existing_samples(order: OrderWithCases) -> bool:
     return True
 
 
-def get_ticket_status(order: Order) -> int:
+def get_ticket_status(order: Order) -> Status:
     """Get the ticket status based on the order"""
     if isinstance(order, OrderWithCases):
         if contains_only_existing_samples(order=order):
