@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
 from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
