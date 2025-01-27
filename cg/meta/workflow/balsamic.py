@@ -423,7 +423,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return swegen_file
 
     def should_soft_filter_normal(
-        self, config_case: dict, verified_panel_bed: bool
+        self, config_case: dict, verified_panel_bed: str | None
     ) -> dict[str, bool]:
         """Sets soft_filter_normal to True for all TGA tumor normal paired analyses."""
         return {
