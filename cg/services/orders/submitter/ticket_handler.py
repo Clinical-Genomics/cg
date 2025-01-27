@@ -124,7 +124,7 @@ class TicketHandler:
         sample_customer = ""
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id
-        message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority}"
+        message += f"{existing_sample.name}, application: {existing_sample.application_version.application.tag}, case: {case_name} (already existing sample{sample_customer}), priority: {existing_sample.priority.name.lower()}"
         return message
 
     @staticmethod
