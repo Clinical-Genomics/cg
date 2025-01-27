@@ -15,11 +15,12 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
+from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
@@ -1671,33 +1672,63 @@ class ReadHandler(BaseHandler):
                 prep_categories=DNA_PREP_CATEGORIES,
                 collaborators=collaborators,
             )
-
-            dna_samples_cases_analysis_query: Query = (
-                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+            customer_ids: list[int] = [customer.id for customer in collaborators]
+            uploaded_dna_cases: list[Case] = self._get_uploaded_dna_cases(
+                sample_query=related_dna_samples_query, customer_ids=customer_ids
             )
-
-            dna_samples_cases_analysis_query: Query = apply_case_filter(
-                cases=dna_samples_cases_analysis_query,
-                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-                customer_entry_ids=[customer.id for customer in collaborators],
-                filter_functions=[
-                    CaseFilter.BY_WORKFLOWS,
-                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-                ],
-            )
-
-            uploaded_dna_cases: list[Case] = (
-                apply_analysis_filter(
-                    analyses=dna_samples_cases_analysis_query,
-                    filter_functions=[AnalysisFilter.IS_UPLOADED],
-                )
-                .with_entities(Case)
-                .all()
-            )
-
-            related_dna_cases.extend([case for case in uploaded_dna_cases])
+            related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
             raise CaseNotFoundError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
             )
         return related_dna_cases
+
+    def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+        dna_samples_cases_analysis_query: Query = (
+            sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+        )
+        dna_samples_cases_analysis_query: Query = apply_case_filter(
+            cases=dna_samples_cases_analysis_query,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+            customer_entry_ids=customer_ids,
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+        uploaded_dna_cases: list[Case] = (
+            apply_analysis_filter(
+                analyses=dna_samples_cases_analysis_query,
+                filter_functions=[AnalysisFilter.IS_UPLOADED],
+            )
+            .with_entities(Case)
+            .all()
+        )
+        return uploaded_dna_cases
+
+    def get_related_dna_cases_with_samples(self, rna_case: Case) -> list[RNADNACollection]:
+        collaborators = rna_case.customer.collaborators
+        collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
+        rna_dna_collections: list[RNADNACollection] = []
+        for sample in rna_case.samples:
+            related_dna_samples: Query = self._get_related_samples_query(
+                sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
+            )
+            nr_of_related_samples: int = related_dna_samples.count()
+            if nr_of_related_samples != 1:
+                raise CgDataError(
+                    f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
+                    f"{sample.subject_id}. Number of matches: {nr_of_related_samples} "
+                )
+            dna_sample_name: str = related_dna_samples.first().name
+            dna_cases: list[Case] = self._get_uploaded_dna_cases(
+                sample_query=related_dna_samples, customer_ids=collaborator_ids
+            )
+            dna_case_ids: list[str] = [case.internal_id for case in dna_cases]
+            collection = RNADNACollection(
+                rna_sample_id=sample.internal_id,
+                dna_sample_name=dna_sample_name,
+                dna_case_ids=dna_case_ids,
+            )
+            rna_dna_collections.append(collection)
+        return rna_dna_collections
