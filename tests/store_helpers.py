@@ -353,7 +353,9 @@ class StoreHelpers:
         """Utility function to add an analysis for tests."""
 
         if not case:
-            case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
+            case = StoreHelpers.add_case(
+                store=store, data_analysis=workflow, data_delivery=data_delivery
+            )
 
         analysis = store.add_analysis(workflow=workflow, version=workflow_version, case_id=case.id)
 
@@ -513,7 +515,6 @@ class StoreHelpers:
         customer_id: int,
         ticket_id: int,
         order_date: datetime = datetime(year=2023, month=12, day=24),
-        workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
             customer_id=customer_id,
@@ -964,9 +965,9 @@ class StoreHelpers:
         """Utility function to add many cases with two samples to use in tests."""
 
         cases: list[Case] = []
-        for i in range(nr_cases):
-            case: list[Case] = cls.add_case_with_samples(
-                base_store, f"f{i}", 2, sequenced_at=sequenced_at
+        for index in range(nr_cases):
+            case: Case = cls.add_case_with_samples(
+                base_store=base_store, case_id=f"f{index}", nr_samples=2, sequenced_at=sequenced_at
             )
             cases.append(case)
         return cases

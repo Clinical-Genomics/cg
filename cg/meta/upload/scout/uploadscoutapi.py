@@ -11,13 +11,10 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    AlignmentFileTag,
-    AnalysisTag,
-)
+from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
 from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -27,10 +24,7 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.genome_build_helpers import (
-    genome_to_scout_format,
-    get_genome_build,
-)
+from cg.meta.workflow.utils.genome_build_helpers import genome_to_scout_format, get_genome_build
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
@@ -404,7 +398,10 @@ class UploadScoutAPI:
                 )
 
     def upload_rna_fraser_outrider_to_scout(
-        self, dry_run: bool, case_id: str, rna_dna_collections: list[RNADNACollection], cust_id: str
+        self,
+        dry_run: bool,
+        case_id: str,
+        rna_dna_collections: list[RNADNACollection],
     ) -> None:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
@@ -436,7 +433,7 @@ class UploadScoutAPI:
                     outrider_file_path=rna_outrider.full_path,
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
-                    cust_id=cust_id,
+                    cust_id=customer_case.customer.internal_id,
                 )
         for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
@@ -447,7 +444,6 @@ class UploadScoutAPI:
         dry_run: bool,
         rna_case: str,
         rna_dna_collections: list[RNADNACollection],
-        cust_id: str,
     ) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         status_db: Store = self.status_db
@@ -469,7 +465,7 @@ class UploadScoutAPI:
                 self.scout_api.upload_rna_genome_build(
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
-                    cust_id=cust_id,
+                    cust_id=customer_case.customer.internal_id,
                     rna_genome_build=rna_genome_build,
                 )
 
@@ -620,7 +616,6 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
-        cust_id: str = rna_case.customer.internal_id
         self.upload_omics_sample_id_to_scout(
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
@@ -628,13 +623,11 @@ class UploadScoutAPI:
             dry_run=dry_run,
             case_id=case_id,
             rna_dna_collections=rna_dna_collections,
-            cust_id=cust_id,
         )
         self.upload_rna_genome_build_to_scout(
             dry_run=dry_run,
             rna_case=rna_case,
             rna_dna_collections=rna_dna_collections,
-            cust_id=cust_id,
         )
         self.load_rna_variant_outlier_to_scout(
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
@@ -765,9 +758,9 @@ class UploadScoutAPI:
             for sample in subject_id_samples
             if sample.prep_category
             in [
-                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
-                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
-                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
             ]
         ]
 

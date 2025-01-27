@@ -29,14 +29,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_workflow_path: str = config.rnafusion.workflow_path
-        self.references: str = config.rnafusion.references
+        self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
-        self.config_platform: str = config.rnafusion.config_platform
-        self.config_params: str = config.rnafusion.config_params
-        self.config_resources: str = config.rnafusion.config_resources
+        self.platform: str = config.rnafusion.platform
+        self.params: str = config.rnafusion.params
+        self.workflow_config_path: str = config.rnafusion.config
+        self.resources: str = config.rnafusion.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
@@ -49,11 +49,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
         return RnafusionSampleSheetEntry.headers()
-
-    @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
 
     @property
     def is_multiple_samples_allowed(self) -> bool:
@@ -82,20 +77,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_workflow_parameters(
+    def get_built_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         return RnafusionParameters(
-            genomes_base=genomes_base or self.get_references_path(),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
-
-    def get_references_path(self, genomes_base: Path | None = None) -> Path:
-        if genomes_base:
-            return genomes_base.absolute()
-        return Path(self.references).absolute()
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

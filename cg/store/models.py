@@ -25,13 +25,13 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
-    PrepCategory,
     SequencingQCStatus,
     SexOptions,
     StatusOptions,
 )
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -146,7 +146,7 @@ class Application(Base):
 
     tag: Mapped[UniqueStr]
     prep_category: Mapped[str] = mapped_column(
-        types.Enum(*(category.value for category in PrepCategory))
+        types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -211,13 +211,13 @@ class Application(Base):
 
     @property
     def analysis_type(self) -> str:
-        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
+            return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
-            PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
     def to_dict(self):
@@ -814,6 +814,11 @@ class Sample(Base, PriorityMixin):
     _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"
     )
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

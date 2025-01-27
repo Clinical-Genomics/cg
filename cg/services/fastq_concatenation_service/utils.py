@@ -8,8 +8,12 @@ from cg.constants.constants import ReadDirection, FileFormat
 from cg.constants import FileExtensions
 
 
-def concatenate_forward_reads(directory: Path) -> Path | None:
-    fastqs: list[Path] = get_forward_read_fastqs(directory)
+def concatenate_fastq_reads_for_direction(
+    directory: Path, sample_id: str, direction: ReadDirection
+) -> Path | None:
+    fastqs: list[Path] = get_fastqs_by_direction(
+        fastq_directory=directory, direction=direction, sample_id=sample_id
+    )
     if not fastqs:
         return
     output_file: Path = get_new_unique_file(directory)
@@ -18,31 +22,19 @@ def concatenate_forward_reads(directory: Path) -> Path | None:
     return output_file
 
 
-def concatenate_reverse_reads(directory: Path) -> Path | None:
-    fastqs: list[Path] = get_reverse_read_fastqs(directory)
-    if not fastqs:
-        return
-    file: Path = get_new_unique_file(directory)
-    concatenate(input_files=fastqs, output_file=file)
-    validate_concatenation(input_files=fastqs, output_file=file)
-    return file
-
-
 def get_new_unique_file(directory: Path) -> Path:
     unique_id = uuid.uuid4()
     return Path(directory, f"{unique_id}{FileExtensions.FASTQ}{FileExtensions.GZIP}")
 
 
-def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
-    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=ReadDirection.FORWARD)
-
-
-def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
-    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=ReadDirection.REVERSE)
-
-
-def get_fastqs_by_direction(fastq_directory: Path, direction: int) -> list[Path]:
-    pattern = f".+_R{direction}_[0-9]+{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+def get_fastqs_by_direction(fastq_directory: Path, direction: int, sample_id: str) -> list[Path]:
+    """Get fastq files by direction and sample id in a given directory.
+    args:
+    fastq_directory: Path: The directory containing the fastq files.
+    direction: int: The direction of the reads.
+    sample_id: str: The identifier to identify the samples by it should be a unique identifier in the file name.
+    """
+    pattern = f".*{sample_id}.*_R{direction}_[0-9]+{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     fastqs: list[Path] = []
     for file in fastq_directory.iterdir():
         if re.match(pattern, file.name):
@@ -72,17 +64,30 @@ def sort_files_by_name(files: list[Path]) -> list[Path]:
     return sorted(files, key=lambda file: file.name)
 
 
-def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path) -> bool:
+def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path, sample_id: str) -> bool:
+    """
+    Check if a file can be removed.
+    args:
+        file: Path: The file to check.
+        forward_file: Path: The forward file.
+        reverse_file: Path: The reverse file.
+        sample_id: str: The identifier to identify the samples by it should be a unique identifier in the file name.
+    """
     return (
         f"{FileFormat.FASTQ}{FileExtensions.GZIP}" in file.name
+        and sample_id in file.name
         and file != forward_file
         and file != reverse_file
     )
 
 
-def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: Path) -> None:
+def remove_raw_fastqs(
+    fastq_directory: Path, forward_file: Path, reverse_file: Path, sample_id: str
+) -> None:
     for file in fastq_directory.iterdir():
-        if file_can_be_removed(file=file, forward_file=forward_file, reverse_file=reverse_file):
+        if file_can_be_removed(
+            file=file, forward_file=forward_file, reverse_file=reverse_file, sample_id=sample_id
+        ):
             file.unlink()
 
 
@@ -91,24 +96,4 @@ def generate_concatenated_fastq_delivery_path(
 ) -> Path:
     return Path(
         fastq_directory, f"{sample_name}_{direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-
-
-def generate_forward_concatenated_fastq_delivery_path(
-    fastq_directory: Path, sample_name: str
-) -> Path:
-    return generate_concatenated_fastq_delivery_path(
-        fastq_directory=fastq_directory,
-        sample_name=sample_name,
-        direction=ReadDirection.FORWARD,
-    )
-
-
-def generate_reverse_concatenated_fastq_delivery_path(
-    fastq_directory: Path, sample_name: str
-) -> Path:
-    return generate_concatenated_fastq_delivery_path(
-        fastq_directory=fastq_directory,
-        sample_name=sample_name,
-        direction=ReadDirection.REVERSE,
     )

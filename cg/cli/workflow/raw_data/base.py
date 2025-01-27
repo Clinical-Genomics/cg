@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
@@ -44,7 +44,7 @@ def store_raw_data_analysis(context: click.Context, case_id: str, dry_run: bool 
 def store_available_raw_data_analysis(context: click.Context, dry_run: bool = False):
     """Creates an analysis object in status-db for all raw data cases to be delivered."""
     status_db: Store = context.obj.status_db
-    for case in status_db.cases_to_analyse(workflow=Workflow.RAW_DATA):
+    for case in status_db.get_cases_to_analyze(workflow=Workflow.RAW_DATA):
         LOG.info(f"Creating an analysis for case {case.internal_id}")
         if SequencingQCService.case_pass_sequencing_qc(case):
             if dry_run:
