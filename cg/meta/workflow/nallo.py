@@ -2,6 +2,7 @@
 
 import logging
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -91,3 +92,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
         )
+
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel needs to be created using information in StatusDB and exporting it from Scout."""
+        return True
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a Nallo case. Currently fixed for hg38."""
+        return GenomeVersion.HG38
