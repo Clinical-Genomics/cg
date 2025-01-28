@@ -45,4 +45,4 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
     if dry_run:
         echo_lines(lines=bed_lines)
         return
-    analysis_api.write_panel(case_id=case_id, content=bed_lines)
+    analysis_api.write_panel_as_tsv(case_id=case_id, content=bed_lines)
