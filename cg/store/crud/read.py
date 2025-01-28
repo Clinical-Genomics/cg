@@ -678,24 +678,6 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_customer_ids_and_subject_id_and_is_tumour(
-        self, customer_ids: list[int], subject_id: str, is_tumour: bool
-    ) -> list[Sample]:
-        """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
-        samples = self._get_query(table=Sample)
-        filter_functions = [
-            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
-            SampleFilter.BY_SUBJECT_ID,
-            SampleFilter.BY_TUMOUR,
-        ]
-        return apply_sample_filter(
-            samples=samples,
-            customer_entry_ids=customer_ids,
-            subject_id=subject_id,
-            is_tumour=is_tumour,
-            filter_functions=filter_functions,
-        ).all()
-
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
