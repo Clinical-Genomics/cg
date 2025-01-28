@@ -12,8 +12,8 @@ from cg.apps.orderform.utils import are_all_samples_metagenome
 from cg.constants import DataDelivery
 from cg.constants.orderforms import Orderform
 from cg.exc import OrderFormError
+from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.order import OrderType
 
 LOG = logging.getLogger(__name__)
 

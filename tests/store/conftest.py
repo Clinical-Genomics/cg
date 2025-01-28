@@ -10,19 +10,10 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
-from cg.constants.subject import PhenotypeStatus, Sex
+from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
-from cg.services.orders.store_order_services.store_pool_order import StorePoolOrderService
-from cg.store.models import (
-    Analysis,
-    Application,
-    Case,
-    CaseSample,
-    Customer,
-    IlluminaFlowCell,
-    Organism,
-    Sample,
-)
+from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
+from cg.store.models import Analysis, Application, Case, CaseSample, IlluminaFlowCell, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
