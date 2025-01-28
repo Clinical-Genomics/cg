@@ -1,3 +1,4 @@
+from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.workflows.balsamic_umi.models.case import BalsamicUmiCase
@@ -34,3 +35,11 @@ def is_case_not_from_collaboration(case: ExistingCase, customer_id: str, store: 
     db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
     customer: Customer | None = store.get_customer_by_internal_id(customer_id)
     return db_case and customer and db_case.customer not in customer.collaborators
+
+
+def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
+    if case.get_new_sample(sample_name):
+        return True
+    elif case.get_existing_sample_from_db(sample_name=sample_name, store=store):
+        return True
+    return False
