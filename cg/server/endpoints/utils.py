@@ -18,11 +18,6 @@ session = requests.session()
 cached_session = cachecontrol.CacheControl(session)
 
 
-def verify_google_token(token):
-    request = google_requests.Request(session=cached_session)
-    return id_token.verify_oauth2_token(id_token=token, request=request)
-
-
 def is_public(route_function):
     @wraps(route_function)
     def public_endpoint(*args, **kwargs):
@@ -53,6 +48,7 @@ def before_request():
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
+    # replace
     try:
         user_data = verify_google_token(jwt_token)
     except (exceptions.OAuthError, ValueError) as e:
