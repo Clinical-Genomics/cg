@@ -1618,8 +1618,12 @@ class ReadHandler(BaseHandler):
         prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> Query:
-        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
-        sample and within the given list of prep categories."""
+        """
+        Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories.
+        Raises:
+            CgDataError if the number of samples matching the criteria is not 1
+        """
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1658,6 +1662,9 @@ class ReadHandler(BaseHandler):
         4. The DNA sample found in 3. should also:
             1. Have an application within a DNA prep category
             2. Belong to a customer within the provided collaboration
+
+        Raises:
+            CgDataError if no related DNA cases are found
         """
 
         related_dna_cases: list[Case] = []
@@ -1730,7 +1737,7 @@ class ReadHandler(BaseHandler):
 
         The cases are bundled by the DNA sample found in 3.
         """
-        collaborators = rna_case.customer.collaborators
+        collaborators: set[Customer] = rna_case.customer.collaborators
         collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
         rna_dna_collections: list[RNADNACollection] = []
         for sample in rna_case.samples:
