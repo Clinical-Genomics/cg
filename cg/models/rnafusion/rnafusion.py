@@ -1,4 +1,6 @@
-from cg.constants.constants import Strandedness
+from typing import Literal
+
+from cg.constants.constants import Strandedness, Workflow
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
 
@@ -19,6 +21,7 @@ class RnafusionQCMetrics(QCMetrics):
     pct_duplication: float
     read_pairs_examined: float
     uniquely_mapped_percent: float
+    type: Literal[Workflow.RNAFUSION]
 
 
 class RnafusionParameters(WorkflowParameters):

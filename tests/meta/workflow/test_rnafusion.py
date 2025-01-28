@@ -1,5 +1,6 @@
 """Module for Rnafusion analysis API tests."""
 
+from cg.constants import Workflow
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -21,7 +22,9 @@ def test_parse_analysis(
     qc_metrics: list[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id)
 
     # WHEN extracting the analysis model
-    analysis_model: NextflowAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)
+    analysis_model: NextflowAnalysis = analysis_api.parse_analysis(
+        qc_metrics_raw=qc_metrics, workflow=Workflow.RNAFUSION
+    )
 
     # THEN the analysis model and its content should have been correctly extracted
     assert analysis_model.sample_metrics[sample_id].model_dump() == rnafusion_metrics

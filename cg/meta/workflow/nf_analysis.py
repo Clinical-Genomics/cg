@@ -930,7 +930,9 @@ class NfAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+    def parse_analysis(
+        self, qc_metrics_raw: list[MetricsBase], workflow: str, **kwargs
+    ) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
@@ -938,12 +940,15 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:
                 sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+            sample_metrics[metric.id]["type"] = workflow
         return NextflowAnalysis(sample_metrics=sample_metrics)
 
     def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
-        return self.parse_analysis(qc_metrics_raw=qc_metrics)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        workflow: str = case.data_analysis
+        return self.parse_analysis(qc_metrics_raw=qc_metrics, workflow=workflow)
 
     def clean_past_run_dirs(self, before_date: str, skip_confirmation: bool = False) -> None:
         """Clean past run directories"""

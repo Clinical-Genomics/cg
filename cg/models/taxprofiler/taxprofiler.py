@@ -1,12 +1,15 @@
 from pathlib import Path
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from cg.constants import Workflow
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
 
-class TaxprofilerQCMetrics(BaseModel):
+class TaxprofilerQCMetrics(QCMetrics):
     """Taxprofiler QC metrics."""
 
     after_filtering_gc_content: float
@@ -17,6 +20,7 @@ class TaxprofilerQCMetrics(BaseModel):
     pct_duplication: float
     raw_total_sequences: float
     reads_mapped: float
+    type: Literal[Workflow.TAXPROFILER]
 
 
 class TaxprofilerParameters(WorkflowParameters):
