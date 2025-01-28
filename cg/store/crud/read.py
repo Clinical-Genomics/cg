@@ -1666,24 +1666,23 @@ class ReadHandler(BaseHandler):
         return samples
 
     def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
-        """Returns all uploaded DNA cases ids related to the given RNA case."""
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+        """
 
         related_dna_cases: list[Case] = []
         collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
-            if not rna_sample.subject_id:
-                raise CgDataError(
-                    f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
-                )
-
-            related_dna_samples_query: Query = self._get_related_samples_query(
-                sample=rna_sample,
-                prep_categories=DNA_PREP_CATEGORIES,
-                collaborators=collaborators,
-            )
-            customer_ids: list[int] = [customer.id for customer in collaborators]
-            uploaded_dna_cases: list[Case] = self._get_uploaded_dna_cases(
-                sample_query=related_dna_samples_query, customer_ids=customer_ids
+            uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
+                rna_sample=rna_sample, collaborators=collaborators
             )
             related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
@@ -1692,7 +1691,27 @@ class ReadHandler(BaseHandler):
             )
         return related_dna_cases
 
+    def _get_related_uploaded_cases_for_rna_sample(
+        self, rna_sample: Sample, collaborators: set[Customer]
+    ) -> list[Case]:
+        if not rna_sample.subject_id:
+            raise CgDataError(
+                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+            )
+
+        related_dna_samples_query: Query = self._get_related_samples_query(
+            sample=rna_sample,
+            prep_categories=DNA_PREP_CATEGORIES,
+            collaborators=collaborators,
+        )
+        customer_ids: list[int] = [customer.id for customer in collaborators]
+        return self._get_uploaded_dna_cases(
+            sample_query=related_dna_samples_query, customer_ids=customer_ids
+        )
+
     def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+        """Filters the provided sample_query on the customer_ids, DNA workflows supporting
+        Scout uploads and on cases having an uploaded analysis. Returns the matching cases."""
         dna_samples_cases_analysis_query: Query = (
             sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
         )
@@ -1716,6 +1735,19 @@ class ReadHandler(BaseHandler):
         return uploaded_dna_cases
 
     def get_related_dna_cases_with_samples(self, rna_case: Case) -> list[RNADNACollection]:
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+
+        The cases are bundled by the DNA sample found in 3.
+        """
         collaborators = rna_case.customer.collaborators
         collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
         rna_dna_collections: list[RNADNACollection] = []
@@ -1723,12 +1755,6 @@ class ReadHandler(BaseHandler):
             related_dna_samples: Query = self._get_related_samples_query(
                 sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
             )
-            nr_of_related_samples: int = related_dna_samples.count()
-            if nr_of_related_samples != 1:
-                raise CgDataError(
-                    f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
-                    f"{sample.subject_id}. Number of matches: {nr_of_related_samples} "
-                )
             dna_sample_name: str = related_dna_samples.first().name
             dna_cases: list[Case] = self._get_uploaded_dna_cases(
                 sample_query=related_dna_samples, customer_ids=collaborator_ids
