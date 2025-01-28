@@ -245,7 +245,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if not workflow_config:
             workflow_config = self.fluffy_config.as_posix()
         batch_ref_flag = "" if external_ref else "--batch-ref"
-        use_bwa_mem_flag = "--use-bwa-mem" if use_bwa_mem else ""
+        use_bwa_mem_flag = "--bwa-mem" if use_bwa_mem else ""
         command_args = [
             "--config",
             workflow_config,
