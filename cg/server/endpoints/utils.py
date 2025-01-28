@@ -8,6 +8,8 @@ from flask import abort, current_app, g, jsonify, make_response, request
 
 from cg.server.ext import db
 from cg.store.models import User
+from cg.server.ext import keycloak_openid_client
+
 
 LOG = logging.getLogger(__name__)
 
@@ -22,6 +24,11 @@ def is_public(route_function):
 
     public_endpoint.is_public = True
     return public_endpoint
+
+
+def test_keycloak_auth():
+    token = keycloak_openid_client.token("christian.oertlin@scilifelab.se", "password")
+    print(f"keycloak token {token}")
 
 
 def before_request():
@@ -45,6 +52,7 @@ def before_request():
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
+    test_keycloak_auth()
     # # replace
     # try:
     #     user_data = verify_google_token(jwt_token)
