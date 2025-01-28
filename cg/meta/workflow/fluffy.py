@@ -227,7 +227,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
             fluffy_sample_sheet.write_sample_sheet(sample_sheet_out_path)
 
     def run_fluffy(
-        self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool, use_bwa_mem: bool
+        self,
+        case_id: str,
+        dry_run: bool,
+        workflow_config: str,
+        external_ref: bool,
+        use_bwa_mem: bool,
     ) -> None:
         """
         Call fluffy with the configured command-line arguments
