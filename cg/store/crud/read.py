@@ -959,6 +959,14 @@ class ReadHandler(BaseHandler):
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
 
+    def get_user_by_entry_id(self, id: int) -> User | None:
+        """Return a user by its entry id."""
+        return apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=id,
+            filter_functions=[UserFilter.BY_ID],
+        ).first()
+
     def is_user_associated_with_customer(self, user_id: int, customer_internal_id: str) -> bool:
         user: User | None = apply_user_filter(
             users=self._get_query(table=User),
