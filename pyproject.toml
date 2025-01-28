@@ -61,6 +61,7 @@ dependencies = [
 "pydantic-settings>=2.3.3",
 "email-validator>=2.2.0",
 "rich-click>=1.8.4",
+"python-keycloak (>=5.1.2,<6.0.0)",
   ]
 [project.optional-dependencies]
 coveralls = ["coveralls"]
