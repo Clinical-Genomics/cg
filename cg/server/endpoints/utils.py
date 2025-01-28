@@ -5,9 +5,6 @@ from http import HTTPStatus
 import cachecontrol
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
-from google.auth import exceptions
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token
 
 from cg.server.ext import db
 from cg.store.models import User
@@ -48,15 +45,15 @@ def before_request():
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
-    # replace
-    try:
-        user_data = verify_google_token(jwt_token)
-    except (exceptions.OAuthError, ValueError) as e:
-        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
-        return abort(
-            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
-        )
-
+    # # replace
+    # try:
+    #     user_data = verify_google_token(jwt_token)
+    # except (exceptions.OAuthError, ValueError) as e:
+    #     LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
+    #     return abort(
+    #         make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
+    #     )
+    user_data = {"email": "ahmed.amin@scilifelab.se"}
     user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"

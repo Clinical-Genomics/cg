@@ -25,6 +25,10 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
+    keycloak_client_url: str = "http://localhost:8081"
+    keycloak_realm_name = "orderportal"
+    keycloak_client_id = "cg-backend-client"
+    keycloak_client_secret_key = "cg-very-secret-password"
 
 
 app_config = AppConfig()

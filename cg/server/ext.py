@@ -4,6 +4,7 @@ from json import JSONEncoder
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
+from keycloak import KeycloakOpenID
 
 from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
@@ -107,4 +108,11 @@ ticket_handler = TicketHandler(
     client=freshdesk_client,
     system_email_id=app_config.freshdesk_order_email_id,
     env=app_config.freshdesk_environment,
+)
+
+keycloak_openid_client = KeycloakOpenID(
+    server_url=app_config.keycloak_client_url,
+    client_id=app_config.keycloak_client_id,
+    realm_name=app_config.keycloak_realm_name,
+    client_secret_key=app_config.keycloak_client_secret_key,
 )
