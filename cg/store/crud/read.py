@@ -1658,6 +1658,11 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        if samples.count() != 1:
+            samples: list[Sample] = samples.all()
+            raise CgDataError(
+                f"No unique DNA sample could be found: found {len(samples)} samples: {[sample.internal_id for sample in samples]}"
+            )
         return samples
 
     def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
@@ -1666,6 +1671,10 @@ class ReadHandler(BaseHandler):
         related_dna_cases: list[Case] = []
         collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
+            if not rna_sample.subject_id:
+                raise CgDataError(
+                    f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+                )
 
             related_dna_samples_query: Query = self._get_related_samples_query(
                 sample=rna_sample,
@@ -1678,7 +1687,7 @@ class ReadHandler(BaseHandler):
             )
             related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
-            raise CaseNotFoundError(
+            raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
             )
         return related_dna_cases
