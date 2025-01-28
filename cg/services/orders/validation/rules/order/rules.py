@@ -29,7 +29,7 @@ def validate_user_belongs_to_customer(
         customer_internal_id=order.customer,
     )
     errors: list[UserNotAssociatedWithCustomerError] = []
-    if not user.is_admin or has_access:
+    if not (user.is_admin or has_access):
         error = UserNotAssociatedWithCustomerError()
         errors.append(error)
     return errors
