@@ -130,7 +130,7 @@ def test_existing_mother_must_be_female(
     # THEN errors are returned
     assert errors
 
-    # THEN the errors are about the father's sex
+    # THEN the errors are about the mother's sex
     assert isinstance(errors[0], InvalidMotherSexError)
 
 
