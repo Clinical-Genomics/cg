@@ -1,5 +1,5 @@
 from cg.store.filters.status_user_filters import filter_user_by_email
-from cg.store.models import User
+from cg.store.models import Customer, User
 from cg.store.store import Store
 
 
@@ -51,3 +51,36 @@ def test_filter_user_by_email_none_returns_none(store_with_users: Store):
 
     # THEN no user should be returned
     assert filtered_user is None
+
+
+def test_filter_user_by_customer(store_with_users: Store):
+
+    # GIVEN a store with a user belonging to a customer
+    user: User = store_with_users._get_query(table=User).first()
+    customer: Customer = user.customers[0]
+
+    # WHEN filtering the user by customer
+    user_is_associated: bool = store_with_users.is_user_associated_with_customer(
+        user_id=user.id,
+        customer_internal_id=customer.internal_id,
+    )
+
+    # THEN the user should be associated with the customer
+    assert user_is_associated
+
+
+def test_filter_user_not_associated_with_customer(
+    store_with_users: Store, customer_without_users: Customer
+):
+
+    # GIVEN a store with a user not belonging to a specific customer
+    user: User = store_with_users._get_query(table=User).first()
+
+    # WHEN filtering the user by customer
+    user_is_associated: bool = store_with_users.is_user_associated_with_customer(
+        user_id=user.id,
+        customer_internal_id=customer_without_users.internal_id,
+    )
+
+    # THEN the user should not be associated with the customer
+    assert not user_is_associated

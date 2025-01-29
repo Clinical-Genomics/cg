@@ -178,6 +178,12 @@ class OrderError(CgError):
     """
 
 
+class OrderSubmissionError(CgError):
+    """
+    Exception related to order submission.
+    """
+
+
 class OrderFormError(CgError):
     """
     Exception related to the order form.

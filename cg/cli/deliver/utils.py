@@ -5,7 +5,7 @@ from pathlib import Path
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Analysis, Case
@@ -26,8 +26,7 @@ def deliver_raw_data_for_analyses(
         try:
             case: Case = analysis.case
             delivery_service: DeliverFilesService = service_builder.build_delivery_service(
-                case=case,
-                delivery_type=case.data_delivery,
+                case=case, delivery_type=case.data_delivery
             )
 
             delivery_service.deliver_files_for_case(
