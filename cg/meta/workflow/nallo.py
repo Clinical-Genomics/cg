@@ -1,8 +1,10 @@
 """Module for Nallo Analysis API."""
 
 import logging
+
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
+from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -101,3 +103,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
         return GenomeVersion.HG38
+
+    def get_workflow_metrics(self, metric_id: str) -> dict:
+        return NALLO_METRIC_CONDITIONS

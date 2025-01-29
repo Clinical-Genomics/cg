@@ -1,0 +1,20 @@
+{
+    "report_data_sources": {},
+    "report_general_stats_data": [
+        {
+            "ADM1": {
+                "mean_coverage": 32.18,
+                "min_coverage": 0.0,
+                "max_coverage": 63906.0,
+                "coverage_bases": 99366056494,
+                "length": 3088286377,
+                "1_x_pc": 94.0,
+                "5_x_pc": 94.0,
+                "10_x_pc": 93.0,
+                "30_x_pc": 65.0,
+                "50_x_pc": 2.0,
+                "median_coverage": 33
+            }
+        }
+    ]
+}
