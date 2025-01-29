@@ -15,7 +15,13 @@ from tests.cli.workflow.conftest import deliverables_template_content
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.NALLO,
+    ],
 )
 def test_create_metrics_deliverables_content(
     workflow: Workflow,
