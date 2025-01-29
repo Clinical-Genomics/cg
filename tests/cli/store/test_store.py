@@ -133,9 +133,10 @@ def test_store_flow_cell(
     assert sample
 
     # GIVEN samples objects on a flow cell
-    with mocker.patch.object(
-        Store, "get_samples_by_illumina_flow_cell", return_value=[sample]
-    ), mocker.patch.object(CompressAPI, "add_decompressed_fastq", return_value=True):
+    with (
+        mocker.patch.object(Store, "get_samples_by_illumina_flow_cell", return_value=[sample]),
+        mocker.patch.object(CompressAPI, "add_decompressed_fastq", return_value=True),
+    ):
         # WHEN running the store flow cell command
         res = cli_runner.invoke(
             store_illumina_run,

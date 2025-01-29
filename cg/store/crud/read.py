@@ -8,9 +8,16 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    CaseActions,
+    CustomerId,
+    SampleType,
+)
+from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.base import BaseHandler
@@ -226,9 +233,9 @@ class ReadHandler(BaseHandler):
             limit (int | None, default=30): The maximum number of cases to return.
             offset (int, default=0): The offset to start returning cases by.
         Returns:
-            list[Case]: A list of filtered cases sorted by creation time and limited by the
-                        specified limit.
-            int: the total number of cases returned by this query
+            list[Case]: A list of filtered cases sorted by creation time and truncated
+                        by the limit parameter
+            int: The total number of cases returned before truncation
         """
         filter_functions: list[Callable] = [
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
@@ -616,7 +623,7 @@ class ReadHandler(BaseHandler):
 
         application: Application = self.get_application_by_case(case_id=case_id)
 
-        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+        if application.prep_category != SeqLibraryPrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -627,7 +634,7 @@ class ReadHandler(BaseHandler):
         self,
         *,
         customers: list[Customer] | None = None,
-        pattern: str = None,
+        pattern: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Sample], int]:
@@ -635,6 +642,15 @@ class ReadHandler(BaseHandler):
         Return the samples by customer and internal id or name pattern, plus the total number of
         samples matching the filter criteria. A limit and offset can be applied to the query for
         pagination purposes.
+
+        Args:
+            customers (list[Customer] | None): A list of customer objects to filter cases by.
+            pattern (str | None): The sample internal id or name pattern to search for.
+            limit (int | None, default=30): The maximum number of cases to return.
+            offset (int, default=0): The offset to start returning cases by.
+        Returns:
+            list[Sample]: A list of filtered samples truncated by the limit parameter.
+            int: The total number of samples returned before truncation
         """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
@@ -888,6 +904,19 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
+    def get_active_applications_by_prep_category(
+        self, prep_category: SeqLibraryPrepCategory
+    ) -> list[Application]:
+        """Return all active applications by prep category."""
+        return apply_application_filter(
+            applications=self._get_query(table=Application),
+            filter_functions=[
+                ApplicationFilter.BY_PREP_CATEGORIES,
+                ApplicationFilter.IS_NOT_ARCHIVED,
+            ],
+            prep_categories=[prep_category],
+        ).all()
+
     def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
         """Return bed version with file name."""
         return apply_bed_version_filter(
@@ -954,7 +983,7 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_organisms(self) -> list[Organism]:
+    def get_all_organisms(self) -> Query[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_query(table=Organism).order_by(Organism.internal_id)
 
@@ -974,13 +1003,38 @@ class ReadHandler(BaseHandler):
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_user_by_email(self, email: str) -> User | None:
         """Return a user by email from the database."""
         return apply_user_filter(
             users=self._get_query(table=User),
             email=email,
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
+
+    def get_user_by_entry_id(self, id: int) -> User | None:
+        """Return a user by its entry id."""
+        return apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=id,
+            filter_functions=[UserFilter.BY_ID],
+        ).first()
+
+    def is_user_associated_with_customer(self, user_id: int, customer_internal_id: str) -> bool:
+        user: User | None = apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=user_id,
+            customer_internal_id=customer_internal_id,
+            filter_functions=[UserFilter.BY_ID, UserFilter.BY_CUSTOMER_INTERNAL_ID],
+        ).first()
+        return bool(user)
+
+    def is_customer_trusted(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer and customer.is_trusted)
+
+    def customer_exists(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer)
 
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
         """Return samples to receive."""
@@ -1430,7 +1484,8 @@ class ReadHandler(BaseHandler):
                 cases=orders,
                 filter_functions=[CaseFilter.BY_WORKFLOWS],
                 workflows=orders_params.workflows,
-            ).distinct()
+            )
+        orders = orders.distinct()
         orders: Query = apply_order_filters(
             orders=orders,
             filters=[OrderFilter.BY_SEARCH, OrderFilter.BY_OPEN],
@@ -1575,6 +1630,13 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
+    def is_application_archived(self, application_tag: str) -> bool:
+        application: Application | None = self.get_application_by_tag(application_tag)
+        return application and application.is_archived
+
+    def does_gene_panel_exist(self, abbreviation: str) -> bool:
+        return bool(self.get_panel_by_abbreviation(abbreviation))
+
     def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
@@ -1593,14 +1655,31 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
-    def get_related_samples(
+    def sample_exists_with_different_sex(
         self,
-        sample_internal_id: str,
-        prep_categories: list[PrepCategory],
+        customer_internal_id: str,
+        subject_id: str,
+        sex: SexEnum,
+    ) -> bool:
+        samples: list[Sample] = self.get_samples_by_customer_and_subject_id(
+            customer_internal_id=customer_internal_id,
+            subject_id=subject_id,
+        )
+        for sample in samples:
+            if sample.sex == SexEnum.unknown:
+                continue
+            if sample.sex != sex:
+                return True
+        return False
+
+    def _get_related_samples_query(
+        self,
+        sample: Sample,
+        prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
-    ) -> list[Sample]:
-        """Returns a list of samples with the same subject_id, tumour status and within the collaborators of a given sample and within the given list of prep categories."""
-        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_internal_id)
+    ) -> Query:
+        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories."""
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1610,7 +1689,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
         )
 
-        sample_application_version_query: Query = apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=sample_application_version_query,
             subject_id=sample.subject_id,
             is_tumour=sample.is_tumour,
@@ -1621,27 +1700,48 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        return samples
 
-        return sample_application_version_query.all()
+    def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
+        """Returns all uploaded DNA cases ids related to the given RNA case."""
 
-    def get_related_cases(
-        self, sample_internal_id: str, workflows: list[Workflow], collaborators: set[Customer]
-    ) -> list[Case]:
-        """Return a list of cases linked to the given sample within the given list of workflows and customers in a collaboration."""
+        related_dna_cases: list[Case] = []
+        for rna_sample in rna_case.samples:
 
-        cases_with_samples: Query = self._join_sample_and_case()
-        cases_with_samples: Query = apply_case_sample_filter(
-            case_samples=cases_with_samples,
-            sample_internal_id=sample_internal_id,
-            filter_functions=[CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID],
-        )
+            collaborators: set[Customer] = rna_sample.customer.collaborators
 
-        return apply_case_filter(
-            cases=cases_with_samples,
-            workflows=workflows,
-            customer_entry_ids=[customer.id for customer in collaborators],
-            filter_functions=[
-                CaseFilter.BY_WORKFLOWS,
-                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-            ],
-        ).all()
+            related_dna_samples_query: Query = self._get_related_samples_query(
+                sample=rna_sample,
+                prep_categories=DNA_PREP_CATEGORIES,
+                collaborators=collaborators,
+            )
+
+            dna_samples_cases_analysis_query: Query = (
+                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+            )
+
+            dna_samples_cases_analysis_query: Query = apply_case_filter(
+                cases=dna_samples_cases_analysis_query,
+                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+                customer_entry_ids=[customer.id for customer in collaborators],
+                filter_functions=[
+                    CaseFilter.BY_WORKFLOWS,
+                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+                ],
+            )
+
+            uploaded_dna_cases: list[Case] = (
+                apply_analysis_filter(
+                    analyses=dna_samples_cases_analysis_query,
+                    filter_functions=[AnalysisFilter.IS_UPLOADED],
+                )
+                .with_entities(Case)
+                .all()
+            )
+
+            related_dna_cases.extend([case for case in uploaded_dna_cases])
+        if not related_dna_cases:
+            raise CaseNotFoundError(
+                f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
+            )
+        return related_dna_cases

@@ -6,10 +6,10 @@ from cg.constants.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
     STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
-    PrepCategory,
     SequencingRunDataAvailability,
     SexOptions,
 )

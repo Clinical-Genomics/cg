@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
@@ -25,8 +23,6 @@ class RnafusionQCMetrics(QCMetrics):
 
 class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
-
-    genomes_base: Path
 
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):

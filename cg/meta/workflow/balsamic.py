@@ -134,7 +134,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             self.status_db.get_case_by_internal_id(internal_id=case_id).links
         )
 
-        application_type: str = self.get_application_type(
+        application_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
         )
         sample_type = "tumor"
@@ -207,7 +207,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError("Multiple application types found in LIMS")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             if panel_bed:
-                raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
+                raise BalsamicStartError("Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample!")
             return None
         if panel_bed:
             return panel_bed.as_posix()
@@ -500,7 +500,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             link_object.sample.internal_id: {
                 "sex": link_object.sample.sex,
                 "tissue_type": self.get_sample_type(link_object.sample).value,
-                "application_type": self.get_application_type(link_object.sample),
+                "application_type": self.get_analysis_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
             for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
@@ -512,7 +512,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
             return panel_bed
-        if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
+        if self.get_analysis_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
         return self.get_target_bed_from_lims(link_object.case.internal_id)
 

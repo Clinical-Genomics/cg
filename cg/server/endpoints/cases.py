@@ -5,6 +5,7 @@ from flask import Blueprint, abort, g, jsonify, request
 
 from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.server.dto.cases.requests import CasesRequest
+from cg.exc import CaseNotFoundError, CgDataError, OrderMismatchError
 from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.endpoints.utils import before_request
@@ -39,7 +40,7 @@ def _get_cases(request: CasesRequest, customers: list[Customer] | None) -> tuple
         action=request.action,
         case_search=request.enquiry,
         customers=customers,
-        offset=request.page * request.page_size,
+        offset=(request.page - 1) * request.page_size,
         limit=request.page_size,
     )
 
@@ -63,7 +64,7 @@ def get_cases_delivery_message():
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except (CaseNotFoundError, OrderMismatchError) as error:
+    except (CaseNotFoundError, OrderMismatchError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
@@ -75,7 +76,7 @@ def get_case_delivery_message(case_id: str):
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except CaseNotFoundError as error:
+    except (CaseNotFoundError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 

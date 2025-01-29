@@ -9,7 +9,7 @@ import pytest
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import ControlOptions
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -17,9 +17,9 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.meta.workflow.utils.utils import are_all_samples_control
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY, are_all_samples_control
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Case, Sample, IlluminaSequencingRun
+from cg.store.models import Case, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -53,6 +53,39 @@ def test_get_slurm_qos_for_case(
 
     # THEN the expected slurm QOS should be returned
     assert slurm_qos is expected_slurm_qos
+
+
+@pytest.mark.parametrize(
+    "priority,expected_trailblazer_priority",
+    [
+        (Priority.clinical_trials, TrailblazerPriority.NORMAL),
+        (Priority.research, TrailblazerPriority.LOW),
+        (Priority.standard, TrailblazerPriority.NORMAL),
+        (Priority.priority, TrailblazerPriority.HIGH),
+        (Priority.express, TrailblazerPriority.EXPRESS),
+    ],
+)
+def test_get_trailblazer_priority(
+    case_id: str,
+    priority,
+    expected_trailblazer_priority,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+):
+    """Test get Trailblazer priority from the case priority"""
+
+    # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.priority = priority
+
+    # WHEN getting the trailblazer priority for the case
+    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(
+        case_id=case_id
+    )
+
+    # THEN the expected trailblazer priority should be returned
+    assert trailblazer_priority is expected_trailblazer_priority
 
 
 def test_gene_panels_not_part_of_master_list(customer_id: str):
@@ -226,13 +259,16 @@ def test_ensure_illumina_runs_on_disk_does_not_request_runs(
     # GIVEN a case
 
     # WHEN _is_illumina_run_check_available returns True and the attached flow cell is ON_DISK
-    with mock.patch.object(
-        AnalysisAPI,
-        "_is_illumina_run_check_applicable",
-        return_value=True,
-    ), mock.patch.object(
-        Store, "request_sequencing_runs_for_case", return_value=None
-    ) as request_checker:
+    with (
+        mock.patch.object(
+            AnalysisAPI,
+            "_is_illumina_run_check_applicable",
+            return_value=True,
+        ),
+        mock.patch.object(
+            Store, "request_sequencing_runs_for_case", return_value=None
+        ) as request_checker,
+    ):
         mip_analysis_api.ensure_illumina_run_on_disk(selected_novaseq_x_case_ids[0])
 
     # THEN runs should not be requested for the case
@@ -285,9 +321,10 @@ def test_is_case_ready_for_analysis_true(
     # GIVEN a case and a flow cell with status ON_DISK
 
     # GIVEN that no decompression is needed nor running
-    with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
-    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+    with (
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_needed", return_value=False),
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False),
+    ):
         # WHEN running is_case_ready_for_analysis
 
         # THEN the result should be true
@@ -305,9 +342,10 @@ def test_is_case_ready_for_analysis_decompression_needed(
     # GIVEN a case and an Illumina run
 
     # GIVEN that some files need to be decompressed
-    with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=True
-    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+    with (
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_needed", return_value=True),
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False),
+    ):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
         assert not mip_analysis_api.is_raw_data_ready_for_analysis(selected_novaseq_x_case_ids[0])
@@ -324,9 +362,10 @@ def test_is_case_ready_for_analysis_decompression_running(
     # GIVEN a case and a Illumina sequencing run
 
     # GIVEN that some files are being decompressed
-    with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
-    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
+    with (
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_needed", return_value=False),
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True),
+    ):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
         assert not mip_analysis_api.is_raw_data_ready_for_analysis(selected_novaseq_x_case_ids[0])
@@ -350,16 +389,21 @@ def test_prepare_fastq_files_success(
     # GIVEN a case with an Illumina run ON_DISK
 
     # GIVEN that no decompression is or running and adding the files to Housekeeper goes well
-    with mock.patch.object(
-        PrepareFastqAPI,
-        "is_spring_decompression_needed",
-        return_value=is_spring_decompression_needed,
-    ), mock.patch.object(MipAnalysisAPI, "decompress_case", return_value=None), mock.patch.object(
-        PrepareFastqAPI,
-        "is_spring_decompression_running",
-        return_value=is_spring_decompression_running,
-    ), mock.patch.object(
-        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    with (
+        mock.patch.object(
+            PrepareFastqAPI,
+            "is_spring_decompression_needed",
+            return_value=is_spring_decompression_needed,
+        ),
+        mock.patch.object(MipAnalysisAPI, "decompress_case", return_value=None),
+        mock.patch.object(
+            PrepareFastqAPI,
+            "is_spring_decompression_running",
+            return_value=is_spring_decompression_running,
+        ),
+        mock.patch.object(
+            PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+        ),
     ):
         # WHEN running prepare_fastq_files
         if is_spring_decompression_running or is_spring_decompression_needed:
@@ -384,17 +428,17 @@ def test_prepare_fastq_files_request_miria(
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
     # GIVEN that at least one file is archived and not retrieved
-    with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
-    ), mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
-    ), mock.patch.object(
-        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
-    ), mock.patch.object(
-        SpringArchiveAPI, "retrieve_spring_files_for_case"
-    ), mock.patch.object(
-        AnalysisAPI, "is_raw_data_ready_for_analysis", return_value=False
-    ) as request_submitter:
+    with (
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_needed", return_value=False),
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False),
+        mock.patch.object(
+            PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+        ),
+        mock.patch.object(SpringArchiveAPI, "retrieve_spring_files_for_case"),
+        mock.patch.object(
+            AnalysisAPI, "is_raw_data_ready_for_analysis", return_value=False
+        ) as request_submitter,
+    ):
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
 
@@ -422,12 +466,12 @@ def test_prepare_fastq_files_does_not_request_miria(
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
     # GIVEN that all Illumina runs have status on disk
-    with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
-    ), mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
-    ), mock.patch.object(
-        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    with (
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_needed", return_value=False),
+        mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False),
+        mock.patch.object(
+            PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+        ),
     ):
         # WHEN running prepare_fastq_files
 
@@ -483,10 +527,13 @@ def test_ensure_files_are_present(
 
     # WHEN ensuring that all files are present
 
-    with mock.patch.object(AnalysisAPI, "ensure_illumina_run_on_disk"), mock.patch.object(
-        SpringArchiveAPI,
-        "retrieve_spring_files_for_case",
-    ) as request_submitter:
+    with (
+        mock.patch.object(AnalysisAPI, "ensure_illumina_run_on_disk"),
+        mock.patch.object(
+            SpringArchiveAPI,
+            "retrieve_spring_files_for_case",
+        ) as request_submitter,
+    ):
         mip_analysis_api.ensure_files_are_present(case_id)
 
     # THEN the files should have been requested
@@ -624,3 +671,36 @@ def test_case_with_controls_get_correct_slurmqos(
 
     # THEN the result should match the expected QOS
     assert qos == expected_qos
+
+
+@pytest.mark.parametrize(
+    "priority, expected_trailblazer_priority",
+    [
+        (Priority.clinical_trials, TrailblazerPriority.NORMAL),
+        (Priority.research, TrailblazerPriority.LOW),
+        (Priority.standard, TrailblazerPriority.NORMAL),
+        (Priority.priority, TrailblazerPriority.HIGH),
+        (Priority.express, TrailblazerPriority.EXPRESS),
+    ],
+)
+def test_get_trailblazer_priority(
+    case_id: str,
+    priority: Priority,
+    expected_trailblazer_priority: TrailblazerPriority,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+):
+    """Test get Trailblazer priority from the case priority"""
+
+    # GIVEN a store with a case with a specific priority
+    mip_analysis_api.status_db = analysis_store
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    case.priority = priority
+
+    # WHEN getting the trailblazer priority for the priority
+    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(
+        case_id=case_id
+    )
+
+    # THEN the expected trailblazer priority should be returned
+    assert trailblazer_priority is expected_trailblazer_priority

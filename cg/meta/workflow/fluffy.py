@@ -227,7 +227,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
             fluffy_sample_sheet.write_sample_sheet(sample_sheet_out_path)
 
     def run_fluffy(
-        self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
+        self,
+        case_id: str,
+        dry_run: bool,
+        workflow_config: str,
+        external_ref: bool,
+        use_bwa_mem: bool,
     ) -> None:
         """
         Call fluffy with the configured command-line arguments
@@ -239,10 +244,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 shutil.rmtree(output_path, ignore_errors=True)
         if not workflow_config:
             workflow_config = self.fluffy_config.as_posix()
-        if not external_ref:
-            batch_ref_flag = "--batch-ref"
-        else:
-            batch_ref_flag = ""
+        batch_ref_flag = "" if external_ref else "--batch-ref"
+        use_bwa_mem_flag = "--bwa-mem" if use_bwa_mem else ""
         command_args = [
             "--config",
             workflow_config,
@@ -254,6 +257,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self.get_output_path(case_id=case_id).as_posix(),
             "--analyse",
             batch_ref_flag,
+            use_bwa_mem_flag,
             "--slurm_params",
             self.get_slurm_param_qos(case_id=case_id),
         ]
