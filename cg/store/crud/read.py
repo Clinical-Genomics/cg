@@ -233,7 +233,8 @@ class ReadHandler(BaseHandler):
             limit (int | None, default=30): The maximum number of cases to return.
             offset (int, default=0): The offset to start returning cases by.
         Returns:
-            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
+            tuple[list[Case], int]: A list of filtered cases sorted by creation time and truncated
+            by the limit parameter, and the total number of samples before truncation.
         """
         filter_functions: list[Callable] = [
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
@@ -621,7 +622,7 @@ class ReadHandler(BaseHandler):
         self,
         *,
         customers: list[Customer] | None = None,
-        pattern: str = None,
+        pattern: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Sample], int]:
@@ -629,6 +630,15 @@ class ReadHandler(BaseHandler):
         Return the samples by customer and internal id or name pattern, plus the total number of
         samples matching the filter criteria. A limit and offset can be applied to the query for
         pagination purposes.
+
+        Args:
+            customers (list[Customer] | None): A list of customer objects to filter cases by.
+            pattern (str | None): The sample internal id or name pattern to search for.
+            limit (int | None, default=30): The maximum number of cases to return.
+            offset (int, default=0): The offset to start returning cases by.
+        Returns:
+            tuple[list[Sample], int]: A list of filtered samples truncated by the limit parameter
+            and the total number of samples before truncation.
         """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
