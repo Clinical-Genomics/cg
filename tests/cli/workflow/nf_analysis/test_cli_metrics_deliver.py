@@ -18,7 +18,13 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.NALLO,
+    ],
 )
 def test_metrics_deliver_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -38,7 +44,13 @@ def test_metrics_deliver_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.NALLO,
+    ],
 )
 def test_metrics_deliver_with_missing_case(
     cli_runner: CliRunner,
@@ -69,7 +81,13 @@ def test_metrics_deliver_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.NALLO,
+    ],
 )
 def test_metrics_deliver_case(
     cli_runner: CliRunner,

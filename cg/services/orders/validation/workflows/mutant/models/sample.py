@@ -43,7 +43,7 @@ class MutantSample(Sample):
     def set_original_lab_address(cls, data: any) -> any:
         if isinstance(data, dict):
             is_set = bool(data.get("original_lab_address"))
-            if not is_set:
+            if not is_set and data.get("original_lab"):
                 data["original_lab_address"] = ORIGINAL_LAB_ADDRESSES[data["original_lab"]]
         return data
 
@@ -52,7 +52,7 @@ class MutantSample(Sample):
     def set_region_code(cls, data: any) -> any:
         if isinstance(data, dict):
             is_set = bool(data.get("region_code"))
-            if not is_set:
+            if not is_set and data.get("region"):
                 data["region_code"] = REGION_CODES[data["region"]]
         return data
 
