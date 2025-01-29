@@ -4,7 +4,7 @@ from flask import Blueprint, abort, g, jsonify, request
 
 from cg.server.dto.pools.requests import PoolsRequest
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import db
+from cg.server.ext import db, pools_service
 from cg.store.models import Customer, Pool
 
 POOLS_BLUEPRINT = Blueprint("pools", __name__, url_prefix="/api/v1")
@@ -18,14 +18,8 @@ def parse_pools():
     customers: list[Customer] | None = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools, total = db.get_pools_to_render(
-        customers=customers,
-        enquiry=pools_request.enquiry,
-        limit=pools_request.page_size,
-        offset=(pools_request.page - 1) * pools_request.page_size,
-    )
-    parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools]
-    return jsonify(pools=parsed_pools, total=total)
+    pools, total = pools_service.get_pools(request=pools_request, customers=customers)
+    return jsonify(pools=pools, total=total)
 
 
 @POOLS_BLUEPRINT.route("/pools/<pool_id>")

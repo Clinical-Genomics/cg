@@ -19,6 +19,7 @@ from cg.services.orders.storing.service_registry import (
 )
 from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.service import OrderValidationService
+from cg.services.pools.service import PoolsService
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
@@ -92,6 +93,7 @@ delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=anal
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
+pools_service = PoolsService(db)
 flow_cell_service = SampleRunMetricsService(db)
 storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,

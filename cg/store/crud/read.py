@@ -1718,7 +1718,6 @@ class ReadHandler(BaseHandler):
 
         related_dna_cases: list[Case] = []
         for rna_sample in rna_case.samples:
-
             collaborators: set[Customer] = rna_sample.customer.collaborators
 
             related_dna_samples_query: Query = self._get_related_samples_query(

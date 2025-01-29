@@ -1031,7 +1031,8 @@ def test_get_pools_to_render_with_customer(
 
     # WHEN getting pools by customer id truncating to only one pool
     pools, total = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers(), limit=1,
+        customers=store_with_multiple_pools_for_customer.get_customers(),
+        limit=1,
     )
 
     # THEN a list of pools must be returned

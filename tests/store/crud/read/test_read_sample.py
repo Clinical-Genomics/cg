@@ -590,11 +590,12 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     assert customer
 
     # WHEN getting the samples for a customer
-    samples, n_samples = (
-        store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
-            customers=customer,
-            pattern="sample",
-        )
+    (
+        samples,
+        n_samples,
+    ) = store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
+        customers=customer,
+        pattern="sample",
     )
 
     # THEN the samples should be returned
