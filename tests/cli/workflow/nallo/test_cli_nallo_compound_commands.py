@@ -45,7 +45,7 @@ def test_panel_file_is_written(
 
     cli_runner.invoke(panel, [nallo_case_id], obj=nallo_context)
 
-    panel_file = Path(analysis_api.root, nallo_case_id, ScoutExportFileName.PANELS)
+    panel_file = Path(analysis_api.root, nallo_case_id, ScoutExportFileName.PANELS_TSV)
 
     # THEN the file should exist
     assert panel_file.exists()
