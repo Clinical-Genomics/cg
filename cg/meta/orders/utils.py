@@ -31,10 +31,8 @@ def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
 
 def contains_only_existing_samples(order: OrderWithCases) -> bool:
     """Check if the order contains only existing samples"""
-    for enumerated_case in order.enumerated_cases:
-        case: Case = enumerated_case[1]
-        if case.enumerated_new_samples:
-            return False
+    if order.enumerated_new_samples:
+         return False
     return True
 
 
