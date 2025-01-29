@@ -292,48 +292,49 @@ def validate_sample_names_different_from_case_names(
     return errors
 
 
-def validate_fathers_are_male(order: OrderWithCases, **kwargs) -> list[InvalidFatherSexError]:
+def validate_fathers_are_male(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
-            case=case, case_index=index
+            case=case, case_index=index, store=store
         )
         errors.extend(case_errors)
     return errors
 
 
 def validate_fathers_in_same_case_as_children(
-    order: OrderWithCases, **kwargs
+    order: OrderWithCases, store: Store, **kwargs
 ) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
-            case=case,
-            case_index=index,
+            case=case, case_index=index, store=store
         )
         errors.extend(case_errors)
     return errors
 
 
-def validate_mothers_are_female(order: OrderWithCases, **kwargs) -> list[InvalidMotherSexError]:
+def validate_mothers_are_female(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
-            case=case,
-            case_index=index,
+            case=case, case_index=index, store=store
         )
         errors.extend(case_errors)
     return errors
 
 
 def validate_mothers_in_same_case_as_children(
-    order: OrderWithCases, **kwargs
+    order: OrderWithCases, store: Store, **kwargs
 ) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
     for index, case in order.enumerated_new_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
-            case=case,
-            case_index=index,
+            case=case, case_index=index, store=store
         )
         errors.extend(case_errors)
     return errors
