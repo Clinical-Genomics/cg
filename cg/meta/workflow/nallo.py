@@ -100,6 +100,16 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return True if a gene panel needs to be created using information in StatusDB and exporting it from Scout."""
         return True
 
+    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
+        """Create and write an aggregated gene panel file exported from Scout as tsv file."""
+        LOG.info("Creating gene panel file")
+        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            bed_lines: str = "\n".join(bed_lines)
+            LOG.debug(f"{bed_lines}")
+            return
+        self.write_panel_as_tsv(case_id=case_id, content=bed_lines)
+
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
         return GenomeVersion.HG38
