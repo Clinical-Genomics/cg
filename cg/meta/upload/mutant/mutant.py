@@ -24,4 +24,5 @@ class MutantUploadAPI(UploadAPI):
         self.gsaid_api.upload(case.internal_id)
         self.fohm_api.aggregate_delivery(case_ids=[case.internal_id])
         self.fohm_api.sync_files_sftp()
+        self.fohm_api.send_mail_reports()
         self.update_uploaded_at(latest_analysis)

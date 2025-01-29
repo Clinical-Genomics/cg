@@ -1,18 +1,10 @@
 from enum import StrEnum
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.models.orders.order import OrderType
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
-CONTAINER_TYPES = ["Tube", "96 well plate"]
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
-
-CASE_PROJECT_TYPES = [
-    OrderType.MIP_DNA,
-    OrderType.BALSAMIC,
-    OrderType.MIP_RNA,
-]
 
 
 class Orderform(StrEnum):
@@ -79,4 +71,5 @@ ORIGINAL_LAB_ADDRESSES: dict[str, str] = {
     "LaboratorieMedicinskt Centrum Gotland": "621 84 Visby",
     "Unilabs Eskilstuna Laboratorium": "631 88 Eskilstuna",
     "Norrland University Hospital": "901 85 Umeå",
+    "Länssjukhuset Sundsvall": "856 43 Sundsvall",
 }
