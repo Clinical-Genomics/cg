@@ -24,7 +24,7 @@ def parse_pools():
         limit=pools_request.page_size,
         offset=(pools_request.page - 1) * pools_request.page_size,
     )
-    parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
+    parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools]
     return jsonify(pools=parsed_pools, total=total)
 
 
