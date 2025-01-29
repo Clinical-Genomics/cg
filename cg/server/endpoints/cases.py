@@ -40,7 +40,7 @@ def _get_cases(request: CasesRequest, customers: list[Customer] | None) -> tuple
         action=request.action,
         case_search=request.enquiry,
         customers=customers,
-        offset=request.page * request.page_size,
+        offset=(request.page-1) * request.page_size,
         limit=request.page_size,
     )
 
