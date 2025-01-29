@@ -18,14 +18,14 @@ def parse_pools():
     customers: list[Customer] | None = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools: list[Pool] = db.get_pools_to_render(
+    pools, total = db.get_pools_to_render(
         customers=customers,
         enquiry=pools_request.enquiry,
         limit=pools_request.page_size,
         offset=(pools_request.page - 1) * pools_request.page_size,
     )
     parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
-    return jsonify(pools=parsed_pools, total=len(pools))
+    return jsonify(pools=parsed_pools, total=total)
 
 
 @POOLS_BLUEPRINT.route("/pools/<pool_id>")
