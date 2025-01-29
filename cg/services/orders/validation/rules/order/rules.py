@@ -4,6 +4,7 @@ from cg.services.orders.validation.errors.order_errors import (
     UserNotAssociatedWithCustomerError,
 )
 from cg.services.orders.validation.models.order import Order
+from cg.store.models import User
 from cg.store.store import Store
 
 
@@ -22,13 +23,13 @@ def validate_customer_exists(
 def validate_user_belongs_to_customer(
     order: Order, store: Store, **kwargs
 ) -> list[UserNotAssociatedWithCustomerError]:
+    user: User = store.get_user_by_entry_id(order._user_id)
     has_access: bool = store.is_user_associated_with_customer(
         user_id=order._user_id,
         customer_internal_id=order.customer,
     )
-
     errors: list[UserNotAssociatedWithCustomerError] = []
-    if not has_access:
+    if not (user.is_admin or has_access):
         error = UserNotAssociatedWithCustomerError()
         errors.append(error)
     return errors
