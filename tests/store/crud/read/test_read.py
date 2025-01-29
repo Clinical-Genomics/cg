@@ -1070,8 +1070,8 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
     )
 
-    # THEN the query must have 2 pools but only one was returned
-    assert total == 2
+    # THEN both teh query and the returned list should have one pool
+    assert total == 1
     assert len(pools) == 1
 
 
