@@ -1,85 +1,85 @@
 
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/aligned_reads/SAMPLENAME/SAMPLENAME_haplotagged.bam
+  path: PATHTOCASE/aligned_reads/SAMPLEID/SAMPLEID_haplotagged.bam
   path_index: ~
   step: alignment
   tag: alignment_haplotags
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/aligned_reads/SAMPLENAME/SAMPLENAME_haplotagged.bam.bai
+  path: PATHTOCASE/aligned_reads/SAMPLEID/SAMPLEID_haplotagged.bam.bai
   path_index: ~
   step: alignment
   tag: alignment_haplotags_index
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLENAME/SAMPLENAME.asm.bp.hap1.p_ctg.assembly_summary
+  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap1.p_ctg.assembly_summary
   path_index: ~
   step: assembly
   tag: summary_hap1
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLENAME/SAMPLENAME.asm.bp.hap2.p_ctg.assembly_summary
+  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap2.p_ctg.assembly_summary
   path_index: ~
   step: assembly
   tag: summary_hap2
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLENAME/SAMPLENAME.hap1.bam
+  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam
   path_index: ~
   step: assembly
   tag: assembly_hap1_mapped
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLENAME/SAMPLENAME.hap1.bam.bai
+  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam.bai
   path_index: ~
   step: assembly
   tag: assembly_hap1_mapped_index
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLENAME/SAMPLENAME.hap2.bam
+  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam
   path_index: ~
   step: assembly
   tag: assembly_hap2_mapped
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLENAME/SAMPLENAME.hap2.bam.bai
+  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam.bai
   path_index: ~
   step: assembly
   tag: assembly_hap2_mapped_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_1.bed.gz
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
   path_index: ~
   step: summary_counts
   tag: hap1
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_1.bed.gz/tbi
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz/tbi
   path_index: ~
   step: summary_counts
   tag: hap1_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_2.bed.gz
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
   path_index: ~
   step: summary_counts
   tag: hap2
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_2.bed.gz/tbi
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz/tbi
   path_index: ~
   step: summary_counts
   tag: hap2_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_2.bed.gz
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
   path_index: ~
   step: summary_counts
   tag: ungrouped
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLENAME/SAMPLENAME_modkit_pileup_ungrouped.bed.gz/tbi
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz/tbi
   path_index: ~
   step: summary_counts
   tag: ungrouped_index
@@ -115,61 +115,61 @@
   tag: relate_samples
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/qc/deepvariant_vcfstatsreport/SAMPLENAME/SAMPLENAME.visual_report.html
+  path: PATHTOCASE/qc/deepvariant_vcfstatsreport/SAMPLEID/SAMPLEID.visual_report.html
   path_index: ~
   step: deepvariant
   tag: report
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLENAME/SAMPLENAME.paraphase.bam
+  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam
   path_index: ~
   step: paraphase
   tag: paraphase
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLENAME/SAMPLENAME.paraphase.bam.bai
+  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam.bai
   path_index: ~
   step: paraphase
   tag: paraphase_index
 - format: json
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLENAME/SAMPLENAME.paraphase.json
+  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.json
   path_index: ~
   step: paraphase
   tag: json
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLENAME/SAMPLENAME_paraphase_vcfs/SAMPLENAME_*.vcf.gz
+  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz
   path_index: ~
   step: paraphase
   tag: vcf
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLENAME/SAMPLENAME_paraphase_vcfs/SAMPLENAME_*.vcf.gz.tbi
+  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz.tbi
   path_index: ~
   step: paraphase
   tag: vcf_index
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLENAME/SAMPLENAME_sorted.vcf.gz
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
   path_index: ~
   step: sorted_repeats
   tag: vcf_str
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLENAME/SAMPLENAME_sorted.vcf.gz.tbi
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz.tbi
   path_index: ~
   step: sorted_repeats
   tag: vcf_str_index
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLENAME/SAMPLENAME_spanning_sorted.bam
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam
   path_index: ~
   step: spanning_repeats
   tag: bam
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLENAME/SAMPLENAME_spanning_sorted.bam.bai
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam.bai
   path_index: ~
   step: spanning_repeats
   tag: bam_index
@@ -247,19 +247,19 @@
   tag: vcf_sv_clinical_index
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/visualization_tracks/SAMPLENAME/SAMPLENAME_hificnv.copynum.bedgraph
+  path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.copynum.bedgraph
   path_index: ~
   step: copy_number
   tag: bedgraph
 - format: bw
   id: SAMPLEID
-  path: PATHTOCASE/visualization_tracks/SAMPLENAME/SAMPLENAME_hificnv.depth.bw
+  path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.depth.bw
   path_index: ~
   step: depth_track
   tag: bigwig
 - format: bw
   id: SAMPLEID
-  path: PATHTOCASE/visualization_tracks/SAMPLENAME/SAMPLENAME_hificnv.maf.bw
+  path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.maf.bw
   path_index: ~
   step: maf_depth_track
   tag: bigwig
