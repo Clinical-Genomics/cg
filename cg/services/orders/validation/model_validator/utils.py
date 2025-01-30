@@ -122,19 +122,19 @@ def get_order_error_details(error_details: list[ErrorDetails]) -> list[ErrorDeta
 
 
 def is_sample_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 3 and error["loc"][0] == "samples"
+    return error["loc"][0] == "samples"
 
 
 def is_case_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 4 and error["loc"][0] == "cases"
+    return "cases" in error["loc"] and "samples" not in error["loc"]
 
 
 def is_case_sample_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 7
+    return "cases" in error["loc"] and "samples" in error["loc"]
 
 
 def is_order_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 1
+    return error["loc"][0] not in ["cases", "samples"]
 
 
 def get_error_message(error: ErrorDetails) -> str:
