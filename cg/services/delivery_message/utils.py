@@ -79,8 +79,7 @@ def get_rna_message_strategy_from_data_delivery(
     If a scout delivery is required it will use the RNADeliveryMessage class that links RNA to DNA cases.
     Otherwise it used the conventional delivery message strategy.
     """
-    message_strategy = RNA_STRATEGY_MAP[case.data_delivery]
-    if message_strategy:
+    if message_strategy := RNA_STRATEGY_MAP.get(case.data_delivery):
         return RNADeliveryMessage(store=store, strategy=message_strategy())
     return MESSAGE_MAP[case.data_delivery]()
 
