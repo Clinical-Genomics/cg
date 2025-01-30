@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
+from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -98,3 +99,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Raredisease bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
+
+    def get_workflow_metrics(self, metric_id: str) -> dict:
+        return NALLO_METRIC_CONDITIONS
