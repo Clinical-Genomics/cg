@@ -225,17 +225,20 @@ class ReadHandler(BaseHandler):
         offset: int = 0,
     ) -> tuple[list[Case], int]:
         """
-        Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
+        Return cases by customers, action, and matching names or internal ids, plus the total
+        number of cases matching the filter criteria. A limit and offset can be applied to the
+        query for pagination purposes.
 
         Args:
             customers (list[Customer] | None): A list of customer objects to filter cases by.
             action (str | None): The action string to filter cases by.
             case_search (str | None): The case search string to filter cases by.
-            limit (int | None, default=30): The maximum number of cases to return.
-            offset (int, default=0): The offset to start returning cases by.
+            limit (int | None, default=50): The maximum number of cases to return.
+            offset (int, default=0): The offset number of cases for the query.
         Returns:
-            tuple[list[Case], int]: A list of filtered cases sorted by creation time and truncated
-            by the limit parameter, and the total number of samples before truncation.
+            list[Case]: A list of filtered cases sorted by creation time and truncated
+                        by the limit parameter.
+            int: The total number of cases returned before truncation.
         """
         filter_functions: list[Callable] = [
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
@@ -635,11 +638,11 @@ class ReadHandler(BaseHandler):
         Args:
             customers (list[Customer] | None): A list of customer objects to filter cases by.
             pattern (str | None): The sample internal id or name pattern to search for.
-            limit (int | None, default=30): The maximum number of cases to return.
-            offset (int, default=0): The offset to start returning cases by.
+            limit (int | None, default=50): The maximum number of samples to return.
+            offset (int, default=0): The offset number of samples for the query.
         Returns:
-            tuple[list[Sample], int]: A list of filtered samples truncated by the limit parameter
-            and the total number of samples before truncation.
+            list[Sample]: A list of filtered samples truncated by the limit parameter.
+            int: The total number of samples returned before truncation.
         """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
