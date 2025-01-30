@@ -91,7 +91,7 @@
   tag: mosdepth_d4
 - format: meta
   id: CASEID
-  path: PATHTOCASE/pedigree/CASEID.ped
+  path: PATHTOCASE/pedigree/family/CASEID.ped
   path_index: ~
   step: pedigree
   tag: pedigree_fam
