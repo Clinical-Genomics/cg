@@ -301,13 +301,13 @@
   tag: manifest
 - format: yml
   id: CASE_ID
-  path: /CASE_ID/pipeline_info/nallo_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nallo_pipeline_software_mqc_versions.yml
   path_index: ~
   step: software-versions
   tag: software-versions
 - format: yaml
   id: CASE_ID
-  path: /CASE_ID/CASE_ID_metrics_deliverables.yaml
+  path: PATHTOCASE/CASE_ID_metrics_deliverables.yaml
   path_index: ~
   step: qc-metrics
   tag: qc-metrics
