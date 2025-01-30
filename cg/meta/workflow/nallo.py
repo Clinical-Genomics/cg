@@ -5,6 +5,7 @@ import logging
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -93,6 +94,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return NalloParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
+            filter_variants_hgnc_ids=f"{outdir}/{ScoutExportFileName.PANELS_TSV}",
         )
 
     @property
