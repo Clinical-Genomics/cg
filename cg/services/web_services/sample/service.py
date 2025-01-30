@@ -2,7 +2,7 @@ from cg.constants.constants import SampleStatus
 from cg.exc import AuthorisationError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
-from cg.services.sample_service.utils import (
+from cg.services.web_services.sample.utils import (
     create_samples_response,
     get_cancel_comment,
     get_confirmation_message,

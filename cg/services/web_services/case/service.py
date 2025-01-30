@@ -3,7 +3,7 @@ from cg.store.models import Case, Customer
 from cg.store.store import Store
 
 
-class CaseService:
+class CaseWebService:
 
     def __init__(self, store: Store):
         self.store = store

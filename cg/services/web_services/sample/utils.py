@@ -2,7 +2,7 @@ from datetime import datetime
 
 from cg.server.dto.samples.requests import SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
-from cg.services.sample_service.dto_mappers import create_sample_dto
+from cg.services.web_services.sample.dto_mappers import create_sample_dto
 from cg.store.models import Sample
 
 
