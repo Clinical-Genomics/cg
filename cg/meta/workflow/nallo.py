@@ -1,13 +1,15 @@
 """Module for Nallo Analysis API."""
 
 import logging
+from pathlib import Path
+
 from cg.constants import Workflow
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
+from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
+from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -91,3 +93,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
         )
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Raredisease bundle filenames path."""
+        return NALLO_BUNDLE_FILENAMES_PATH
