@@ -142,15 +142,18 @@ def get_error_message(error: ErrorDetails) -> str:
 
 
 def get_sample_field_name(error: ErrorDetails) -> str:
-    return error["loc"][2]
+    index_for_field_name: int = error["loc"].index("samples") + 2
+    return error["loc"][index_for_field_name]
 
 
 def get_case_field_name(error: ErrorDetails) -> str:
-    return error["loc"][3]
+    index_for_field_name: int = error["loc"].index("cases") + 3
+    return error["loc"][index_for_field_name]
 
 
 def get_case_sample_field_name(error: ErrorDetails) -> str:
-    return error["loc"][6]
+    index_for_field_name: int = error["loc"].index("samples") + 3
+    return error["loc"][index_for_field_name]
 
 
 def get_order_field_name(error: ErrorDetails) -> str:
@@ -158,12 +161,15 @@ def get_order_field_name(error: ErrorDetails) -> str:
 
 
 def get_sample_index(error: ErrorDetails) -> int:
-    return error["loc"][1]
+    index_for_index: int = error["loc"].index("samples") + 1
+    return error["loc"][index_for_index]
 
 
 def get_case_index(error: ErrorDetails) -> int:
-    return error["loc"][1]
+    index_for_index: int = error["loc"].index("cases") + 1
+    return error["loc"][index_for_index]
 
 
 def get_case_sample_index(error: ErrorDetails) -> int:
-    return error["loc"][4]
+    index_for_index: int = error["loc"].index("samples") + 1
+    return error["loc"][index_for_index]
