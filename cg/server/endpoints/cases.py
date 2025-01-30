@@ -3,13 +3,12 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.exc import CaseNotFoundError, OrderMismatchError
-from cg.server.dto.cases.requests import CasesRequest
 from cg.exc import CaseNotFoundError, CgDataError, OrderMismatchError
+from cg.server.dto.cases.requests import CasesRequest
 from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import db, delivery_message_service
+from cg.server.ext import case_service, db, delivery_message_service
 from cg.store.models import Case, Customer
 
 LOG = logging.getLogger(__name__)
@@ -23,26 +22,13 @@ def get_cases():
     cases_request = CasesRequest.model_validate(request.args.to_dict())
 
     customers: list[Customer] = _get_current_customers()
-    cases, total = _get_cases(request=cases_request, customers=customers)
-
-    cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(cases=cases_with_links, total=total)
+    cases, total = case_service.get_cases(request=cases_request, customers=customers)
+    return jsonify(cases=cases, total=total)
 
 
 def _get_current_customers() -> list[Customer] | None:
     """Return customers if the current user is not an admin."""
     return g.current_user.customers if not g.current_user.is_admin else None
-
-
-def _get_cases(request: CasesRequest, customers: list[Customer] | None) -> tuple[list[Case], int]:
-    """Get cases based on the provided filters."""
-    return db.get_cases_by_customers_action_and_case_search(
-        action=request.action,
-        case_search=request.enquiry,
-        customers=customers,
-        offset=(request.page - 1) * request.page_size,
-        limit=request.page_size,
-    )
 
 
 @CASES_BLUEPRINT.route("/cases/<case_id>")
