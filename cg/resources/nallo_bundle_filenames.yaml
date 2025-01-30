@@ -83,9 +83,9 @@
   path_index: ~
   step: summary_counts
   tag: ungrouped_index
-- format: d4
+- format: meta
   id: SAMPLEID
-  path: PATHTOCASE/qc_bam/SAMPLEID_mosdepth.per-base.d4
+  path: PATHTOCASE/qc/mosdepth/SAMPLEID/SAMPLEID.per-base.d4
   path_index: ~
   step: qc_bam
   tag: mosdepth_d4
