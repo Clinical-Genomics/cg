@@ -559,8 +559,8 @@ def test_create_rna_dna_collections(
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
-        rna_case
+    rna_dna_collections: list[RNADNACollection] = (
+        upload_scout_api.status_db.get_related_dna_cases_with_samples(rna_case)
     )
 
     # THEN the output should be a list of RNADNACollections
@@ -585,7 +585,7 @@ def test_add_rna_sample(
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
         rna_case
     )
 
@@ -593,7 +593,7 @@ def test_add_rna_sample(
     assert rna_sample_list
     for sample in rna_sample_list:
         assert sample.internal_id in [
-            rna_dna_collection.rna_sample_internal_id for rna_dna_collection in rna_dna_collections
+            rna_dna_collection.rna_sample_id for rna_dna_collection in rna_dna_collections
         ]
 
 
@@ -609,13 +609,15 @@ def test_link_rna_sample_to_dna_sample(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # WHEN creating an RNADNACollection for an RNA sample
-    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
+    rna_dna_collection: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
+        rna_sample.links[0].case
+    )
 
     # THEN the RNADNACollection should contain the RNA sample
-    assert rna_sample_son_id == rna_dna_collection.rna_sample_internal_id
+    assert rna_sample_son_id == rna_dna_collection[0].rna_sample_id
 
     # THEN the RNADNACollection should have its dna_sample_id set to the related dna_sample_id
-    assert dna_sample_son_id == rna_dna_collection.dna_sample_name
+    assert dna_sample_son_id == rna_dna_collection[0].dna_sample_name
 
 
 def test_add_dna_cases_to_dna_sample(
@@ -632,10 +634,12 @@ def test_add_dna_cases_to_dna_sample(
     dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding creating the RNADNACollection
-    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
+    rna_dna_collection: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
+        rna_sample.links[0].case
+    )
 
     # THEN the DNA cases should contain the DNA_case name associated with the DNA sample
-    assert dna_case.internal_id in rna_dna_collection.dna_case_ids
+    assert dna_case.internal_id in rna_dna_collection[0].dna_case_ids
 
 
 def test_map_dna_cases_to_dna_sample_incorrect_workflow(
@@ -776,8 +780,8 @@ def test_upload_rna_multiqc_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
 
     # THEN the api should know that it should find related DNA cases
@@ -802,7 +806,7 @@ def test_upload_tomte_rna_multiqc_report_to_successful_dna_case_in_scout(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN an RNA case, and an store with an rna connected to it
+    # GIVEN an RNA case, and a store with an rna connected to it
     upload_mip_analysis_scout_api.status_db: Store = rna_store
 
     # GIVEN an RNA case with a multiqc-htlml report
@@ -819,8 +823,8 @@ def test_upload_tomte_rna_multiqc_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
 
     # THEN the api should know that it should find related DNA cases
@@ -862,8 +866,8 @@ def test_upload_rna_delivery_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
 
     # THEN the api should know that it should find related DNA cases
@@ -905,16 +909,8 @@ def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = (
-        upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-            case_id=rna_case_id
-        )
-    )
-
-    dna_case_ids: Set[str] = (
-        upload_tomte_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-            case_id=rna_case_id
-        )
+    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
 
@@ -956,8 +952,8 @@ def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     )[0]
 
     # WHEN finding the related DNA case with no successful upload
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
     dna_case: Case = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
     dna_case.analyses[0].uploaded_at = None

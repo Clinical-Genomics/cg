@@ -148,25 +148,6 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
 
     helpers.add_sample(
         store=store,
-        internal_id="related_dna_sample_2",
-        application_tag=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
-        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
-        subject_id="subject_1",
-        is_tumour=True,
-        customer_id="cust000",
-    )
-    helpers.add_sample(
-        store=store,
-        internal_id="related_dna_sample_3",
-        application_tag=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
-        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
-        subject_id="subject_1",
-        is_tumour=True,
-        customer_id="cust000",
-    )
-
-    helpers.add_sample(
-        store=store,
         internal_id="not_related_dna_sample",
         application_tag=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
         application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
@@ -238,22 +219,7 @@ def related_dna_samples(store_with_rna_and_dna_samples_and_cases: Store) -> list
         )
     )
 
-    related_dna_sample_2: Sample = (
-        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
-            internal_id="related_dna_sample_2"
-        )
-    )
-    related_dna_sample_3: Sample = (
-        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
-            internal_id="related_dna_sample_3"
-        )
-    )
-
-    return [
-        related_dna_sample_1,
-        related_dna_sample_2,
-        related_dna_sample_3,
-    ]
+    return [related_dna_sample_1]
 
 
 @pytest.fixture
