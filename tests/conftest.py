@@ -2675,6 +2675,12 @@ def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) 
 
 
 @pytest.fixture(scope="function")
+def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
+    """Path to gene panel file."""
+    return Path(nallo_dir, nallo_case_id, "gene_panels").with_suffix(FileExtensions.TSV)
+
+
+@pytest.fixture(scope="function")
 def nallo_metrics_deliverables(nallo_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
