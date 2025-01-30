@@ -1,13 +1,19 @@
 """Module for Nallo Analysis API."""
 
 import logging
+from pathlib import Path
+
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion, FileFormat
+from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
+from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
+from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -90,4 +96,47 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return NalloParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
+            filter_variants_hgnc_ids=f"{outdir}/{ScoutExportFileName.PANELS_TSV}",
         )
+
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel needs to be created using information in StatusDB and exporting it from Scout."""
+        return True
+
+    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
+        """Create and write an aggregated gene panel file exported from Scout as tsv file."""
+        LOG.info("Creating gene panel file")
+        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            bed_lines: str = "\n".join(bed_lines)
+            LOG.debug(f"{bed_lines}")
+            return
+        self.write_panel_as_tsv(case_id=case_id, content=bed_lines)
+
+    def write_panel_as_tsv(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel_as_tsv(out_dir=Path(self.root, case_id), content=content)
+
+    @staticmethod
+    def _write_panel_as_tsv(out_dir: Path, content: list[str]) -> None:
+        """Write the gene panel to case dir while omitted the commented BED lines."""
+        filtered_content = [line for line in content if not line.startswith("##")]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(filtered_content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANELS_TSV),
+        )
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a Nallo case. Currently fixed for hg38."""
+        return GenomeVersion.HG38
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Nallo bundle filenames path."""
+        return NALLO_BUNDLE_FILENAMES_PATH
+
+    def get_workflow_metrics(self, metric_id: str) -> dict:
+        return NALLO_METRIC_CONDITIONS
