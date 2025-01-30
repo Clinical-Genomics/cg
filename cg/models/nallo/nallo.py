@@ -67,3 +67,5 @@ class NalloSampleSheetHeaders(StrEnum):
 
 class NalloParameters(WorkflowParameters):
     """Model for Nallo parameters."""
+
+    filter_variants_hgnc_ids: str
