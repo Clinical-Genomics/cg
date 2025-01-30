@@ -22,7 +22,7 @@
   path: PATHTOCASE/CASEID/assembly_haplotypes/gfastats/SAMPLENAME/SAMPLENAME.asm.bp.hap2.p_ctg.assembly_summary
   path_index: ~
   step: assembly
-  tag: summary_hap1
+  tag: summary_hap2
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/CASEID/assembly_variant_calling/dipcall/SAMPLENAME/SAMPLENAME.hap1.bam
