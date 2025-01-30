@@ -3,10 +3,11 @@
 import logging
 
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import GenomeVersion, FileFormat
 from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
@@ -111,6 +112,21 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             LOG.debug(f"{bed_lines}")
             return
         self.write_panel_as_tsv(case_id=case_id, content=bed_lines)
+
+    def write_panel_as_tsv(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel_as_tsv(out_dir=Path(self.root, case_id), content=content)
+
+    @staticmethod
+    def _write_panel_as_tsv(out_dir: Path, content: list[str]) -> None:
+        """Write the gene panel to case dir while omitted the commented BED lines."""
+        filtered_content = [line for line in content if not line.startswith("##")]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(filtered_content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANELS_TSV),
+        )
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""

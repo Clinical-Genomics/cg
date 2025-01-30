@@ -705,17 +705,6 @@ class AnalysisAPI(MetaAPI):
             file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )
 
-    @staticmethod
-    def _write_panel_as_tsv(out_dir: Path, content: list[str]) -> None:
-        """Write the gene panel to case dir while omitted the commented BED lines."""
-        filtered_content = [line for line in content if not line.startswith("##")]
-        out_dir.mkdir(parents=True, exist_ok=True)
-        WriteFile.write_file_from_content(
-            content="\n".join(filtered_content),
-            file_format=FileFormat.TXT,
-            file_path=Path(out_dir, ScoutExportFileName.PANELS_TSV),
-        )
-
     def _get_gene_panel(self, case_id: str, genome_build: str, dry_run: bool = False) -> list[str]:
         """Create and return the aggregated gene panel file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -735,10 +724,6 @@ class AnalysisAPI(MetaAPI):
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
         self._write_panel(out_dir=Path(self.root, case_id), content=content)
-
-    def write_panel_as_tsv(self, case_id: str, content: list[str]) -> None:
-        """Write the gene panel to case dir."""
-        self._write_panel_as_tsv(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
