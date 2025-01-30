@@ -2,9 +2,8 @@ from http import HTTPStatus
 
 from flask import Blueprint, abort, g, jsonify, request
 
-from cg.server.dto.pools.requests import PoolsRequest
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import db, pools_service
+from cg.server.ext import db
 from cg.store.models import Customer, Pool
 
 POOLS_BLUEPRINT = Blueprint("pools", __name__, url_prefix="/api/v1")
@@ -14,12 +13,14 @@ POOLS_BLUEPRINT.before_request(before_request)
 @POOLS_BLUEPRINT.route("/pools")
 def parse_pools():
     """Return pools."""
-    pools_request = PoolsRequest.model_validate(request.args.to_dict())
     customers: list[Customer] | None = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools, total = pools_service.get_pools(request=pools_request, customers=customers)
-    return jsonify(pools=pools, total=total)
+    pools: list[Pool] = db.get_pools_to_render(
+        customers=customers, enquiry=request.args.get("enquiry")
+    )
+    parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
+    return jsonify(pools=parsed_pools, total=len(pools))
 
 
 @POOLS_BLUEPRINT.route("/pools/<pool_id>")

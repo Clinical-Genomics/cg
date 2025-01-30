@@ -1006,21 +1006,16 @@ def test_get_pools_by_order_enquiry(
     assert len(pools) == 1
 
 
-def test_get_pools_to_render_with_offset(
+def test_get_pools_to_render_with(
     store_with_multiple_pools_for_customer: Store,
 ):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
 
     # WHEN fetching pools with no customer or enquiry
-    pools, total = store_with_multiple_pools_for_customer.get_pools_to_render(offset=1)
-
-    # THEN a list of pools must be returned
-    assert isinstance(pools[0], Pool)
-
-    # THEN the query must have 2 pools but only one was returned
-    assert total == 2
-    assert len(pools) == 1
+    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render()
+    # THEN two pools should be returned
+    assert len(pools) == 2
 
 
 def test_get_pools_to_render_with_customer(
@@ -1029,18 +1024,13 @@ def test_get_pools_to_render_with_customer(
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
 
-    # WHEN getting pools by customer id truncating to only one pool
-    pools, total = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers(),
-        limit=1,
+    # WHEN getting pools by customer id
+    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_pools_for_customer.get_customers()
     )
 
-    # THEN a list of pools must be returned
-    assert isinstance(pools[0], Pool)
-
-    # THEN the query must have 2 pools but only one was returned
-    assert total == 2
-    assert len(pools) == 1
+    # THEN two pools should be returned
+    assert len(pools) == 2
 
 
 def test_get_pools_to_render_with_customer_and_name_enquiry(
@@ -1051,7 +1041,7 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
     # GIVEN a database with two pools
 
     # WHEN fetching pools by customer id and name enquiry
-    pools, total = store_with_multiple_pools_for_customer.get_pools_to_render(
+    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_name_1
     )
 
@@ -1067,12 +1057,11 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
     # GIVEN a database with two pools
 
     # WHEN fetching pools by customer id and order enquiry
-    pools, total = store_with_multiple_pools_for_customer.get_pools_to_render(
+    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
     )
 
-    # THEN both teh query and the returned list should have one pool
-    assert total == 1
+    # THEN one pools should be returned
     assert len(pools) == 1
 
 

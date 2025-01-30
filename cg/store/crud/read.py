@@ -595,26 +595,8 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_pools_to_render(
-        self,
-        customers: list[Customer] | None = None,
-        enquiry: str = None,
-        limit: int = 50,
-        offset: int = 0,
-    ) -> tuple[list[Pool], int]:
-        """
-        Return pools by customers and internal id or name pattern, plus the total number of pools
-        matching the filter criteria. A limit and offset can be applied to the query for pagination
-        purposes.
-
-        Args:
-            customers (list[Customer] | None): A list of customer objects to filter cases by.
-            enquiry (str | None): The pool enquiry to filter on.
-            limit (int | None, default=50): The maximum number of pools to return.
-            offset (int, default=0): The offset number of pools for the query.
-        Returns:
-            list[Pool]: A list of filtered pools truncated by the limit parameter.
-            int: The total number of pools returned before truncation.
-        """
+        self, customers: list[Customer] | None = None, enquiry: str = None
+    ) -> list[Pool]:
         pools: list[Pool] = (
             self.get_pools_by_customers(customers=customers) if customers else self.get_pools()
         )
@@ -625,9 +607,7 @@ class ReadHandler(BaseHandler):
                     or set(self.get_pools_by_order_enquiry(order_enquiry=enquiry))
                 )
             )
-        total: int = len(pools)
-        start, finish = offset, offset + limit
-        return pools[start:finish], total
+        return pools
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
