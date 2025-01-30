@@ -912,10 +912,6 @@ def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
     dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_related_uploaded_dna_cases(
         rna_case_id
     )
-
-    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_related_uploaded_dna_cases(
-        rna_case_id
-    )
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
 
     # Assert that each string in 'expected_strings' is in 'caplog.text'
