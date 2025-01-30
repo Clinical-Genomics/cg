@@ -1,6 +1,7 @@
 """Module for Nallo Analysis API."""
 
 import logging
+from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, FileFormat
@@ -10,9 +11,9 @@ from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nallo.nallo import NalloSampleSheetHeaders, NalloSampleSheetEntry, NalloParameters
+from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
+from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -131,6 +132,11 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
         return GenomeVersion.HG38
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Nallo bundle filenames path."""
+        return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return NALLO_METRIC_CONDITIONS

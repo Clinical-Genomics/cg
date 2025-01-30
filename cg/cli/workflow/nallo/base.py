@@ -4,13 +4,11 @@ import logging
 
 import rich_click as click
 
+
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-
 from cg.constants.cli_options import DRY_RUN
-from cg.cli.workflow.nf_analysis import config_case, run, start, metrics_deliver
-
-
+from cg.cli.workflow.nf_analysis import config_case, metrics_deliver, report_deliver, run, start
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -28,6 +26,7 @@ def nallo(context: click.Context) -> None:
 
 
 nallo.add_command(config_case)
+nallo.add_command(report_deliver)
 nallo.add_command(run)
 nallo.add_command(start)
 nallo.add_command(metrics_deliver)
