@@ -100,8 +100,15 @@ def create_case_sample_error(error: ErrorDetails) -> CaseSampleError:
 What follows below are ways of extracting data from a Pydantic ErrorDetails object. The aim is to find out
 where the error occurred, for which the 'loc' value (which is a tuple) can be used. It is generally structured in 
 alternating strings and ints, specifying field names and list indices. An example:
-if loc = ('cases', 3, 'samples', 2, 'well_position'), that means that the error stems from the well_position of the
-third sample in the fourth case.
+if loc = ('samples', 2, 'well_position'), that means that the error stems from the well_position of the
+third sample in the order.
+
+As an additional point of complexity, the discriminator is also added to the loc, specifically in 
+OrdersWithCases which have a discriminator for both cases and samples specifying if it is a new 
+or existing case/sample. So
+    loc = ('cases', 0, 'new', 'priority')
+means that the error concerns the first case in the order, which is a new case, and it concerns the field
+'priority'.
 """
 
 
