@@ -1,6 +1,5 @@
 """Module for Rnafusion analysis API tests."""
 
-from cg.constants import Workflow
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig

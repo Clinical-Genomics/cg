@@ -943,7 +943,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
 
     def clean_past_run_dirs(self, before_date: str, skip_confirmation: bool = False) -> None:
