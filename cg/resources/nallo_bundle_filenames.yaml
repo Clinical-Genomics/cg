@@ -11,13 +11,13 @@
   path_index: ~
   step: alignment
   tag: alignment_haplotags_index
-- format: txt
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/CASEID/assembly_haplotypes/gfastats/SAMPLENAME/SAMPLENAME.asm.bp.hap1.p_ctg.assembly_summary
   path_index: ~
   step: assembly
   tag: summary_hap1
-- format: txt
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/CASEID/assembly_haplotypes/gfastats/SAMPLENAME/SAMPLENAME.asm.bp.hap2.p_ctg.assembly_summary
   path_index: ~
@@ -95,7 +95,7 @@
   path_index: ~
   step: pedigree
   tag: pedigree_fam
-- format: html
+- format: meta
   id: CASEID
   path: PATHTOCASE/CASEID/qc/somalier/relate/CASEID/CASEID.html
   path_index: ~
@@ -113,7 +113,7 @@
   path_index: ~
   step: somalier
   tag: relate_samples
-- format: html
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/CASEID/qc/deepvariant_vcfstatsreport/SAMPLENAME/SAMPLENAME.visual_report.html
   path_index: ~
@@ -299,3 +299,15 @@
   path_index: ~
   step: manifest
   tag: manifest
+- format: yml
+  id: CASE_ID
+  path: /CASE_ID/pipeline_info/nallo_pipeline_software_mqc_versions.yml
+  path_index: ~
+  step: software-versions
+  tag: software-versions
+- format: yaml
+  id: CASE_ID
+  path: /CASE_ID/CASE_ID_metrics_deliverables.yaml
+  path_index: ~
+  step: qc-metrics
+  tag: qc-metrics
