@@ -281,7 +281,6 @@ def rnafusion_metrics() -> dict[str, float]:
         "pct_duplication": 14.8643,
         "read_pairs_examined": 72391566.0,
         "uniquely_mapped_percent": 91.02,
-        "type": Workflow.RNAFUSION,
     }
 
 

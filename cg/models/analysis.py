@@ -22,4 +22,9 @@ class AnalysisModel(BaseModel):
 class NextflowAnalysis(AnalysisModel):
     """Nextflow's analysis results model."""
 
-    sample_metrics: dict[str, DiscriminatedMetric]
+    sample_metrics: (
+        dict[str, RarediseaseQCMetrics]
+        | dict[str, RnafusionQCMetrics]
+        | dict[str, TaxprofilerQCMetrics]
+        | dict[str, TomteQCMetrics]
+    ) = Field(union_mode="left_to_right")

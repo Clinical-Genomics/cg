@@ -1,9 +1,7 @@
 from pathlib import Path
-from typing import Literal
 
 from pydantic import Field
 
-from cg.constants import Workflow
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
@@ -20,7 +18,6 @@ class TaxprofilerQCMetrics(QCMetrics):
     pct_duplication: float
     raw_total_sequences: float
     reads_mapped: float
-    type: Literal[Workflow.TAXPROFILER]
 
 
 class TaxprofilerParameters(WorkflowParameters):

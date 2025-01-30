@@ -1,10 +1,9 @@
 from enum import StrEnum
 from pathlib import Path
-from typing import Literal
 
 from pydantic import field_validator
 
-from cg.constants.constants import GenomeVersion, Strandedness, Workflow
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.sample_sources import SourceType
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
@@ -88,4 +87,3 @@ class TomteQCMetrics(QCMetrics):
     pct_ribosomal_bases: float
     pct_surviving: float
     uniquely_mapped_percent: float
-    type: Literal[Workflow.TOMTE]

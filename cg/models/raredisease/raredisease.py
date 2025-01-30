@@ -1,9 +1,6 @@
 from enum import StrEnum
-from typing import Literal
 
-from pydantic import Field
-
-from cg.constants.constants import SexOptions, Workflow
+from cg.constants.constants import SexOptions
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
 
@@ -15,7 +12,6 @@ class RarediseaseQCMetrics(QCMetrics):
     percent_duplicates: float
     predicted_sex_sex_check: SexOptions
     total_reads: int
-    type: Literal[Workflow.RAREDISEASE]
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
