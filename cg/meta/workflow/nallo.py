@@ -97,7 +97,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def get_bundle_filenames_path() -> Path:
-        """Return Raredisease bundle filenames path."""
+        """Return Nallo bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
