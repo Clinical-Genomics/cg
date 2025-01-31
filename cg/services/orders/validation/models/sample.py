@@ -8,7 +8,7 @@ class Sample(BaseModel):
     _case_name: str = PrivateAttr(default="")
     comment: str | None = None
     container: ContainerEnum
-    container_name: str | None = None
+    container_name: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_]*$")
     _generated_lims_id: str | None = PrivateAttr(default=None)  # Will be populated by LIMS
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     volume: int | None = None
