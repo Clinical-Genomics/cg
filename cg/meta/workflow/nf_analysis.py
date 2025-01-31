@@ -629,6 +629,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
+            LOG.info(deliverables[deliverable_field])
             # If the formatted value contains a wildcard (*), expand it
             deliverables[deliverable_field] = glob.glob(deliverables[deliverable_field])
             LOG.info(deliverables[deliverable_field])
