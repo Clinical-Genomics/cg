@@ -73,7 +73,7 @@
   tag: hap2_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
+  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
   path_index: ~
   step: summary_counts
   tag: ungrouped
