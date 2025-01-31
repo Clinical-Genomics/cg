@@ -2,312 +2,260 @@
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/aligned_reads/SAMPLEID/SAMPLEID_haplotagged.bam
-  path_index: ~
   step: alignment
   tag: alignment_haplotags
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/aligned_reads/SAMPLEID/SAMPLEID_haplotagged.bam.bai
-  path_index: ~
   step: alignment
   tag: alignment_haplotags_index
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap1.p_ctg.assembly_summary
-  path_index: ~
   step: assembly
   tag: summary_hap1
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap2.p_ctg.assembly_summary
-  path_index: ~
   step: assembly
   tag: summary_hap2
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam
-  path_index: ~
   step: assembly
   tag: assembly_hap1_mapped
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam.bai
-  path_index: ~
   step: assembly
   tag: assembly_hap1_mapped_index
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam
-  path_index: ~
   step: assembly
   tag: assembly_hap2_mapped
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam.bai
-  path_index: ~
   step: assembly
   tag: assembly_hap2_mapped_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
-  path_index: ~
   step: summary_counts
   tag: hap1
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
-  path_index: ~
   step: summary_counts
   tag: hap1_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
-  path_index: ~
   step: summary_counts
   tag: hap2
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
-  path_index: ~
   step: summary_counts
   tag: hap2_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
-  path_index: ~
   step: summary_counts
   tag: ungrouped
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
-  path_index: ~
   step: summary_counts
   tag: ungrouped_index
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc/mosdepth/SAMPLEID/SAMPLEID.per-base.d4
-  path_index: ~
   step: qc_bam
   tag: mosdepth_d4
 - format: meta
   id: CASEID
   path: PATHTOCASE/pedigree/family/CASEID.ped
-  path_index: ~
   step: pedigree
   tag: pedigree_fam
 - format: meta
   id: CASEID
   path: PATHTOCASE/qc/somalier/relate/CASEID/CASEID.html
-  path_index: ~
   step: somalier
   tag: relate_html
 - format: tsv
   id: CASEID
   path: PATHTOCASE/qc/somalier/relate/CASEID/CASEID.pairs.tsv
-  path_index: ~
   step: somalier
   tag: relate_pairs
 - format: tsv
   id: CASEID
   path: PATHTOCASE/qc/somalier/relate/CASEID/CASEID.samples.tsv
-  path_index: ~
   step: somalier
   tag: relate_samples
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc/deepvariant_vcfstatsreport/SAMPLEID/SAMPLEID.visual_report.html
-  path_index: ~
   step: deepvariant
   tag: report
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam
-  path_index: ~
   step: paraphase
   tag: paraphase
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam.bai
-  path_index: ~
   step: paraphase
   tag: paraphase_index
 - format: json
   id: SAMPLEID
   path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.json
-  path_index: ~
   step: paraphase
   tag: json
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz
-  path_index: ~
   step: paraphase
   tag: vcf
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz.tbi
-  path_index: ~
   step: paraphase
   tag: vcf_index
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
-  path_index: ~
   step: sorted_repeats
   tag: vcf_str
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz.tbi
-  path_index: ~
   step: sorted_repeats
   tag: vcf_str_index
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam
-  path_index: ~
   step: spanning_repeats
   tag: bam
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam.bai
-  path_index: ~
   step: spanning_repeats
   tag: bam_index
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/family/CASEID/CASEID_repeats_annotated.vcf.gz
-  path_index: ~
   step: repeats_annotated
   tag: vcf_str
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/family/CASEID/CASEID_repeats_annotated.vcf.gz.tbi
-  path_index: ~
   step: repeats_annotated
   tag: vcf_str_index
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snv_annotated_ranked.vcf.gz
-  path_index: ~
   step: snv_annotated
   tag: vcf_snv_research
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snv_annotated_ranked.vcf.gz.tbi
-  path_index: ~
   step: snv_annotated
   tag: vcf_snv_research_index
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
-  path_index: ~
   step: snv_annotated_filtered
   tag: vcf_snv_clinical
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
-  path_index: ~
   step: snv_annotated_filtered
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
-  path_index: ~
   step: snv_annotated_filtered
   tag: vcf_snv_clinical
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
-  path_index: ~
   step: snv_annotated_filtered
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz
-  path_index: ~
   step: sv_annotated_ranked
   tag: vcf_sv_research
 - format: vcf
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz.tbi
-  path_index: ~
   step: sv_annotated_ranked
   tag: vcf_sv_research_index
 - format: vcf
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz
-  path_index: ~
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical
 - format: vcf
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz.tbi
-  path_index: ~
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical_index
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.copynum.bedgraph
-  path_index: ~
   step: copy_number
   tag: bedgraph
 - format: bw
   id: SAMPLEID
   path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.depth.bw
-  path_index: ~
   step: depth_track
   tag: bigwig
 - format: bw
   id: SAMPLEID
   path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.maf.bw
-  path_index: ~
   step: maf_depth_track
   tag: bigwig
 - format: meta
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
-  path_index: ~
   step: multiqc
   tag: multiqc-json
 - format: meta
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_report.html
-  path_index: ~
   step: multiqc
   tag: multiqc-html
 - format: csv
   id: CASEID
   path: PATHTOCASE/CASEID_samplesheet.csv
-  path_index: ~
   step: samplesheet
   tag: samplesheet
 - format: yaml
   id: CASEID
   path: PATHTOCASE/CASEID_params_file.yaml
-  path_index: ~
   step: nextflow-params
   tag: nextflow-params
 - format: json
   id: CASEID
   path: PATHTOCASE/CASEID_nextflow_config.json
-  path_index: ~
   step: nextflow-config
   tag: nextflow-config
 - format: json
   id: CASEID
   path: PATHTOCASE/manifest.json
-  path_index: ~
   step: manifest
   tag: manifest
 - format: yml
   id: CASEID
   path: PATHTOCASE/pipeline_info/nallo_pipeline_software_mqc_versions.yml
-  path_index: ~
   step: software-versions
   tag: software-versions
 - format: yaml
   id: CASEID
   path: PATHTOCASE/CASEID_metrics_deliverables.yaml
-  path_index: ~
   step: qc-metrics
   tag: qc-metrics
