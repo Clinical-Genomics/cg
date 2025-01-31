@@ -623,15 +623,15 @@ class NfAnalysisAPI(AnalysisAPI):
         for deliverable_field, deliverable_value in file_template.items():
             if deliverable_value is None:
                 continue
-            formatted_value = (
-                deliverable_value.replace("CASEID", case_id)
+            deliverables[deliverable_field] = (
+                deliverables[deliverable_field]
                 .replace("SAMPLEID", sample_id)
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
             # If the formatted value contains a wildcard (*), expand it
-            expanded_files = glob.glob(formatted_value)
-            deliverables[deliverable_field] = expanded_files if expanded_files else formatted_value
+            deliverables[deliverable_field] = glob.glob(deliverables[deliverable_field])
+            LOG.info(deliverables[deliverable_field])
 
         return FileDeliverable(**deliverables)
 
