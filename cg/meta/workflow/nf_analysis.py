@@ -1,5 +1,4 @@
 import copy
-import glob
 import logging
 import re
 from datetime import datetime
@@ -623,14 +622,14 @@ class NfAnalysisAPI(AnalysisAPI):
         for deliverable_field, deliverable_value in file_template.items():
             if deliverable_value is None:
                 continue
-            formatted_value = (
-                deliverable_value.replace("SAMPLEID", sample_id)
+            deliverables[deliverable_field] = (
+                deliverables[deliverable_field]
+                .replace("CASEID", case_id)
+                .replace("SAMPLEID", sample_id)
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
-            expanded_files = glob.glob(formatted_value)
-            deliverables[deliverable_field] = expanded_files if expanded_files else formatted_value
-
+            LOG.info(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
