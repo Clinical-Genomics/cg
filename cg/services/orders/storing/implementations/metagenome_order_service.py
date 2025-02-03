@@ -93,6 +93,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
             sex=Sex.UNKNOWN,
             comment=sample.comment,
             control=sample.control,
+            internal_id=sample._generated_lims_id,
             order=order.name,
             ordered=datetime.now(),
             original_ticket=order._generated_ticket_id,
