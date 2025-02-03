@@ -19,8 +19,9 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
-    RAREDISEASE_METRIC_CONDITIONS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_METRIC_CONDITIONS_WES,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -171,12 +172,22 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
-            metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
+            metric_conditions: dict[str, dict[str, Any]] = (
+                self.get_metric_conditions_by_analysis_type(sample_id=sample.internal_id)
+            )
             self.set_order_sex_for_sample(sample, metric_conditions)
-            self.set_dropout_cutoff_by_analysis_type(sample, metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
+
+    def get_metric_conditions_by_analysis_type(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if (
+            sample.application_version.application.analysis_type
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            return RAREDISEASE_METRIC_CONDITIONS_WGS.copy()
+        return RAREDISEASE_METRIC_CONDITIONS_WES.copy()
 
     def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
         """Return sample-pair patterns for searching in MultiQC."""
@@ -231,15 +242,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
-
-    @staticmethod
-    def set_dropout_cutoff_by_analysis_type(sample: Sample, metric_conditions: dict) -> None:
-        if (
-            sample.application_version.application.analysis_type
-            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-        ):
-            metric_conditions["AT_DROPOUT"]["threshold"] = 5
-            metric_conditions["GC_DROPOUT"]["threshold"] = 5
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
