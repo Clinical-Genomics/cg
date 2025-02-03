@@ -36,19 +36,6 @@ Explain the negative effects caused by this technical debt:
 - **Scalability:** Does it hinder growth or adding new features?  
 - **Other:** Any other impacts?
 
-
----
-
-### **Severity**
-<!--
-Provide a qualitative or quantitative assessment of the severity:
--->
-- **Critical:** Immediate action needed  
-- **High:** Prioritize within the next quarter  
-- **Medium:** Action required within a reasonable timeframe  
-- **Low:** Monitor for now
-
-
 ---
 
 ### **Proposed Resolution**
