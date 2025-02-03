@@ -479,14 +479,18 @@ metrics:
   name: PCT_TARGET_BASES_100000X
   step: multiqc
   value: 0.0
-- condition: null
+- condition:
+    norm: lt
+    threshold: 5.0
   header: null
   id: ADM1
   input: multiqc_data.json
   name: AT_DROPOUT
   step: multiqc
   value: 0.061814
-- condition: null
+- condition:
+    norm: lt
+    threshold: 5.0
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1599,14 +1603,18 @@ metrics:
   name: PCT_TARGET_BASES_100000X
   step: multiqc
   value: 0.0
-- condition: null
+- condition:
+    norm: lt
+    threshold: 5.0
   header: null
   id: ADM2
   input: multiqc_data.json
   name: AT_DROPOUT
   step: multiqc
   value: 0.061814
-- condition: null
+- condition:
+    norm: lt
+    threshold: 5.0
   header: null
   id: ADM2
   input: multiqc_data.json
