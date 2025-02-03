@@ -33,6 +33,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
         Workflow.BALSAMIC_UMI,
         Workflow.MIP_DNA,
         Workflow.MIP_RNA,
+        Workflow.NALLO,
         Workflow.RAREDISEASE,
         Workflow.RNAFUSION,
         Workflow.TOMTE,

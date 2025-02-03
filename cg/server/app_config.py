@@ -21,7 +21,6 @@ class AppConfig(BaseSettings):
     trailblazer_host: str = "trailblazer_host"
     trailblazer_service_account: str = "service_account"
     trailblazer_service_account_auth_file: str = "auth_file.json"
-    trailblazer_google_client_id: str = "google_client_id"
     freshdesk_url: str = "https://company.freshdesk.com"
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10

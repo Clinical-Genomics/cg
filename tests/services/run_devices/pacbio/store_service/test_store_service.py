@@ -97,10 +97,13 @@ def test_store_post_processing_data_error_database(
     # GIVEN a store that raises an error when creating a PacBio SMRT cell
 
     # WHEN trying to store data for a Pacbio instrument run
-    with mock.patch(
-        "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
-        return_value=pac_bio_dtos,
-    ), mock.patch.object(Store, "create_pac_bio_smrt_cell", side_effect=ValueError):
+    with (
+        mock.patch(
+            "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
+            return_value=pac_bio_dtos,
+        ),
+        mock.patch.object(Store, "create_pac_bio_smrt_cell", side_effect=ValueError),
+    ):
         # THEN a PostProcessingStoreDataError is raised
         with pytest.raises(PostProcessingStoreDataError):
             pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
@@ -116,13 +119,16 @@ def test_store_post_processing_data_error_parser(
     # GIVEN a data transfer service that raises an error when parsing data
 
     # WHEN trying to store data for a PacBio instrument ru
-    with mock.patch(
-        "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
-        return_value=pac_bio_dtos,
-    ), mock.patch.object(
-        PacBioDataTransferService,
-        "get_post_processing_dtos",
-        side_effect=PostProcessingDataTransferError,
+    with (
+        mock.patch(
+            "cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service.PacBioDataTransferService.get_post_processing_dtos",
+            return_value=pac_bio_dtos,
+        ),
+        mock.patch.object(
+            PacBioDataTransferService,
+            "get_post_processing_dtos",
+            side_effect=PostProcessingDataTransferError,
+        ),
     ):
         # THEN a PostProcessingStoreDataError is raised
         with pytest.raises(PostProcessingStoreDataError):

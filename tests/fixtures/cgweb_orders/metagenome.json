@@ -1,43 +1,43 @@
 {
-    "name": "Metagenome",
-    "customer": "cust000",
-    "comment": "",
-    "samples": [
-        {
-            "name": "Bristol",
-            "container": "96 well plate",
-            "application": "METLIFR020",
-            "data_analysis": "raw-data",
-            "data_delivery": "fastq",
-            "require_qc_ok": false,
-            "elution_buffer": "Tris-HCl",
-            "source": "faeces",
-            "priority": "standard",
-            "container_name": "Platen",
-            "well_position": "A:1",
-            "concentration_sample": "2",
-            "quantity": "10",
-            "extraction_method": "best",
-            "volume": "1",
-            "comment": "5 on the chart"
-        },
-        {
-            "name": "Trefyrasex",
-            "container": "Tube",
-            "application": "METNXTR020",
-            "data_analysis": "raw-data",
-            "data_delivery": "fastq",
-            "require_qc_ok": true,
-            "elution_buffer": "Nuclease-free water",
-            "source": "blood",
-            "priority": "priority",
-            "container_name": "Tuben",
-            "well_position": "",
-            "concentration_sample": "1",
-            "quantity": "2",
-            "extraction_method": "unknown",
-            "volume": "2",
-            "comment": "test"
-        }
-    ]
+	"comment": null,
+	"customer": "cust000",
+	"data_delivery": "fastq",
+	"dataAnalysis": "raw-data",
+	"delivery_type": "fastq",
+	"name": "Metagenome",
+	"project_type": "metagenome",
+	"samples": [
+		{
+			"application": "METPCFR030",
+			"comment": "5 on the chart",
+			"container": "96 well plate",
+			"container_name": "Platen",
+			"elution_buffer": "Tris-HCl",
+			"name": "Bristol",
+			"organism": null,
+			"priority": "standard",
+			"processedAt": "2025-01-03T09:00:27.876Z",
+			"quantity": "10",
+			"require_qc_ok": false,
+			"source": "blood",
+			"volume": 20,
+			"well_position": "A:1"
+		},
+		{
+			"application": "METWPFR030",
+			"comment": "test",
+			"container": "Tube",
+			"container_name": "Tuben",
+			"elution_buffer": "Nuclease-free water",
+			"name": "Trefyrasex",
+			"organism": null,
+			"priority": "priority",
+			"processedAt": "2025-01-03T09:00:27.876Z",
+			"quantity": "2",
+			"require_qc_ok": true,
+			"source": "buccal swab",
+			"volume": 21
+		}
+	],
+	"user_id": 1
 }

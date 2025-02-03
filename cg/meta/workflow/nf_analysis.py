@@ -18,6 +18,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelGenomeBuild
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
@@ -251,6 +252,15 @@ class NfAnalysisAPI(AnalysisAPI):
             metadata=sample_metadata, reverse_read=True
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
+
+    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
+        """Gather BAM file path for a sample based on the BAM tag."""
+        return [
+            Path(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={AlignmentFileTag.BAM}
+            )
+        ]
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""

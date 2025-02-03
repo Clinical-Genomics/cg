@@ -6,11 +6,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    AnalysisTag,
-    NFAnalysisTags,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
@@ -205,4 +201,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        )
+        config_sample.d4_file = self.get_sample_file(
+            hk_tags=self.sample_tags.d4_file, sample_id=sample_id
         )

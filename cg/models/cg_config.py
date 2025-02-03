@@ -27,9 +27,7 @@ from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.decompression_service.decompressor import Decompressor
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -129,7 +127,6 @@ class ClientConfig(BaseModel):
 class TrailblazerConfig(BaseModel):
     service_account: str
     service_account_auth_file: str
-    google_client_id: str
     host: str
 
 
@@ -146,6 +143,10 @@ class CommonAppConfig(BaseModel):
     binary_path: str | None = None
     config_path: str | None = None
     container_mount_volume: str | None = None
+
+
+class HermesConfig(CommonAppConfig):
+    container_path: str
 
 
 class FluffyUploadConfig(BaseModel):
@@ -210,6 +211,24 @@ class MipConfig(BaseModel):
     workflow: str
     root: str
     script: str
+
+
+class NalloConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    launch_directory: str
+    workflow_bin_path: str
+    profile: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
 
 
 class RarediseaseConfig(CommonAppConfig):
@@ -408,7 +427,7 @@ class CGConfig(BaseModel):
     genotype_api_: GenotypeAPI = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None
-    hermes: CommonAppConfig = None
+    hermes: HermesConfig = None
     hermes_api_: HermesApi = None
     janus: ClientConfig | None = None
     janus_api_: JanusAPIClient | None = None
@@ -443,6 +462,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
+    nallo: NalloConfig | None = None
     raredisease: RarediseaseConfig | None = None
     rnafusion: RnafusionConfig | None = None
     statina: StatinaConfig | None = None

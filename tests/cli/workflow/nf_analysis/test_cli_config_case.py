@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -44,7 +44,7 @@ def test_config_case_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
@@ -74,7 +74,7 @@ def test_config_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_without_samples(
     cli_runner: CliRunner,
@@ -185,7 +185,7 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,
