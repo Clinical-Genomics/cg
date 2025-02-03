@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest):
     """Test run command for workflow without options."""
@@ -35,7 +35,7 @@ def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request:
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_with_missing_case(
     cli_runner: CliRunner,
@@ -64,7 +64,7 @@ def test_run_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_case_without_samples(
     cli_runner: CliRunner,
@@ -94,7 +94,7 @@ def test_run_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_case_without_config_files(
     cli_runner: CliRunner,
@@ -121,7 +121,7 @@ def test_run_case_without_config_files(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_case_from_start_dry_run(
     cli_runner: CliRunner,
@@ -137,7 +137,7 @@ def test_run_case_from_start_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN mocked config files
-    request.getfixturevalue(f"{workflow}_mock_config")
+    request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(
@@ -155,7 +155,7 @@ def test_run_case_from_start_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
@@ -171,7 +171,7 @@ def test_run_case_with_revision_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
-    request.getfixturevalue(f"{workflow}_mock_config")
+    request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run and revision specified
     result = cli_runner.invoke(
@@ -189,7 +189,7 @@ def test_run_case_with_revision_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_resume_case_dry_run(
     cli_runner: CliRunner,
@@ -206,7 +206,7 @@ def test_resume_case_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
-    # request.getfixturevalue(f"{workflow}_mock_config")
+    # request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run and nf-tower-id specified
     result = cli_runner.invoke(
@@ -225,13 +225,13 @@ def test_resume_case_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    raredisease_mock_config,
+    raredisease_config,
     request: FixtureRequest,
 ):
     """Test resume command without providing NF-Tower ID and without existing Trailblazer config file."""
@@ -253,13 +253,13 @@ def test_resume_case_with_missing_tower_id(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    raredisease_mock_config,
+    raredisease_config,
     request: FixtureRequest,
 ):
     """Test command with case_id and config file using nextflow."""

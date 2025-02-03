@@ -15,10 +15,12 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
+from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
@@ -676,24 +678,6 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_customer_ids_and_subject_id_and_is_tumour(
-        self, customer_ids: list[int], subject_id: str, is_tumour: bool
-    ) -> list[Sample]:
-        """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
-        samples = self._get_query(table=Sample)
-        filter_functions = [
-            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
-            SampleFilter.BY_SUBJECT_ID,
-            SampleFilter.BY_TUMOUR,
-        ]
-        return apply_sample_filter(
-            samples=samples,
-            customer_entry_ids=customer_ids,
-            subject_id=subject_id,
-            is_tumour=is_tumour,
-            filter_functions=filter_functions,
-        ).all()
-
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
@@ -947,7 +931,7 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_organisms(self) -> list[Organism]:
+    def get_all_organisms(self) -> Query[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_query(table=Organism).order_by(Organism.internal_id)
 
@@ -967,13 +951,38 @@ class ReadHandler(BaseHandler):
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_user_by_email(self, email: str) -> User | None:
         """Return a user by email from the database."""
         return apply_user_filter(
             users=self._get_query(table=User),
             email=email,
             filter_functions=[UserFilter.BY_EMAIL],
         ).first()
+
+    def get_user_by_entry_id(self, id: int) -> User | None:
+        """Return a user by its entry id."""
+        return apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=id,
+            filter_functions=[UserFilter.BY_ID],
+        ).first()
+
+    def is_user_associated_with_customer(self, user_id: int, customer_internal_id: str) -> bool:
+        user: User | None = apply_user_filter(
+            users=self._get_query(table=User),
+            user_id=user_id,
+            customer_internal_id=customer_internal_id,
+            filter_functions=[UserFilter.BY_ID, UserFilter.BY_CUSTOMER_INTERNAL_ID],
+        ).first()
+        return bool(user)
+
+    def is_customer_trusted(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer and customer.is_trusted)
+
+    def customer_exists(self, customer_internal_id: str) -> bool:
+        customer: Customer | None = self.get_customer_by_internal_id(customer_internal_id)
+        return bool(customer)
 
     def get_samples_to_receive(self, external: bool = False) -> list[Sample]:
         """Return samples to receive."""
@@ -1569,6 +1578,13 @@ class ReadHandler(BaseHandler):
             ],
         ).all()
 
+    def is_application_archived(self, application_tag: str) -> bool:
+        application: Application | None = self.get_application_by_tag(application_tag)
+        return application and application.is_archived
+
+    def does_gene_panel_exist(self, abbreviation: str) -> bool:
+        return bool(self.get_panel_by_abbreviation(abbreviation))
+
     def get_pac_bio_smrt_cell_by_internal_id(self, internal_id: str) -> PacbioSMRTCell:
         return apply_pac_bio_smrt_cell_filters(
             filter_functions=[PacBioSMRTCellFilter.BY_INTERNAL_ID],
@@ -1587,14 +1603,35 @@ class ReadHandler(BaseHandler):
             case_ids.extend(self.get_case_ids_with_sample(sample_id))
         return list(set(case_ids))
 
+    def sample_exists_with_different_sex(
+        self,
+        customer_internal_id: str,
+        subject_id: str,
+        sex: SexEnum,
+    ) -> bool:
+        samples: list[Sample] = self.get_samples_by_customer_and_subject_id(
+            customer_internal_id=customer_internal_id,
+            subject_id=subject_id,
+        )
+        for sample in samples:
+            if sample.sex == SexEnum.unknown:
+                continue
+            if sample.sex != sex:
+                return True
+        return False
+
     def _get_related_samples_query(
         self,
         sample: Sample,
         prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> Query:
-        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
-        sample and within the given list of prep categories."""
+        """
+        Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories.
+        Raises:
+            CgDataError if the number of samples matching the criteria is not 1
+        """
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1615,48 +1652,115 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        if samples.count() != 1:
+            samples: list[Sample] = samples.all()
+            raise CgDataError(
+                f"No unique DNA sample could be found: found {len(samples)} samples: {[sample.internal_id for sample in samples]}"
+            )
         return samples
 
     def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
-        """Returns all uploaded DNA cases ids related to the given RNA case."""
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+
+        Raises:
+            CgDataError if no related DNA cases are found
+        """
 
         related_dna_cases: list[Case] = []
+        collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
-
-            collaborators: set[Customer] = rna_sample.customer.collaborators
-
-            related_dna_samples_query: Query = self._get_related_samples_query(
-                sample=rna_sample,
-                prep_categories=DNA_PREP_CATEGORIES,
-                collaborators=collaborators,
+            uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
+                rna_sample=rna_sample, collaborators=collaborators
             )
-
-            dna_samples_cases_analysis_query: Query = (
-                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
-            )
-
-            dna_samples_cases_analysis_query: Query = apply_case_filter(
-                cases=dna_samples_cases_analysis_query,
-                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-                customer_entry_ids=[customer.id for customer in collaborators],
-                filter_functions=[
-                    CaseFilter.BY_WORKFLOWS,
-                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-                ],
-            )
-
-            uploaded_dna_cases: list[Case] = (
-                apply_analysis_filter(
-                    analyses=dna_samples_cases_analysis_query,
-                    filter_functions=[AnalysisFilter.IS_UPLOADED],
-                )
-                .with_entities(Case)
-                .all()
-            )
-
-            related_dna_cases.extend([case for case in uploaded_dna_cases])
+            related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
-            raise CaseNotFoundError(
+            raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
             )
         return related_dna_cases
+
+    def _get_related_uploaded_cases_for_rna_sample(
+        self, rna_sample: Sample, collaborators: set[Customer]
+    ) -> list[Case]:
+        if not rna_sample.subject_id:
+            raise CgDataError(
+                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+            )
+
+        related_dna_samples_query: Query = self._get_related_samples_query(
+            sample=rna_sample,
+            prep_categories=DNA_PREP_CATEGORIES,
+            collaborators=collaborators,
+        )
+        customer_ids: list[int] = [customer.id for customer in collaborators]
+        return self._get_uploaded_dna_cases(
+            sample_query=related_dna_samples_query, customer_ids=customer_ids
+        )
+
+    def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+        """Filters the provided sample_query on the customer_ids, DNA workflows supporting
+        Scout uploads and on cases having an uploaded analysis. Returns the matching cases."""
+        dna_samples_cases_analysis_query: Query = (
+            sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+        )
+        dna_samples_cases_analysis_query: Query = apply_case_filter(
+            cases=dna_samples_cases_analysis_query,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+            customer_entry_ids=customer_ids,
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+        uploaded_dna_cases: list[Case] = (
+            apply_analysis_filter(
+                analyses=dna_samples_cases_analysis_query,
+                filter_functions=[AnalysisFilter.IS_UPLOADED],
+            )
+            .with_entities(Case)
+            .all()
+        )
+        return uploaded_dna_cases
+
+    def get_related_dna_cases_with_samples(self, rna_case: Case) -> list[RNADNACollection]:
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+
+        The cases are bundled by the DNA sample found in 3.
+        """
+        collaborators: set[Customer] = rna_case.customer.collaborators
+        collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
+        rna_dna_collections: list[RNADNACollection] = []
+        for sample in rna_case.samples:
+            related_dna_samples: Query = self._get_related_samples_query(
+                sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
+            )
+            dna_sample_name: str = related_dna_samples.first().name
+            dna_cases: list[Case] = self._get_uploaded_dna_cases(
+                sample_query=related_dna_samples, customer_ids=collaborator_ids
+            )
+            dna_case_ids: list[str] = [case.internal_id for case in dna_cases]
+            collection = RNADNACollection(
+                rna_sample_id=sample.internal_id,
+                dna_sample_name=dna_sample_name,
+                dna_case_ids=dna_case_ids,
+            )
+            rna_dna_collections.append(collection)
+        return rna_dna_collections

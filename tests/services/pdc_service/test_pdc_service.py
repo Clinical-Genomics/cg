@@ -1,12 +1,12 @@
 """Tests for the meta PdcAPI"""
 
 from unittest import mock
+
 import pytest
+
 from cg.constants import EXIT_FAIL
 from cg.constants.process import EXIT_WARNING
-from cg.exc import (
-    PdcError,
-)
+from cg.exc import PdcError
 from cg.models.cg_config import CGConfig
 from tests.conftest import create_process_response
 
@@ -80,9 +80,12 @@ def test_run_dsmc_command_fail(cg_context: CGConfig):
     pdc_service = cg_context.pdc_service
 
     # GIVEN an exit code signifying failure
-    with pytest.raises(PdcError), mock.patch(
-        "cg.utils.commands.subprocess.run",
-        return_value=create_process_response(return_code=EXIT_FAIL),
+    with (
+        pytest.raises(PdcError),
+        mock.patch(
+            "cg.utils.commands.subprocess.run",
+            return_value=create_process_response(return_code=EXIT_FAIL),
+        ),
     ):
         # WHEN running a dsmc command
         pdc_service.run_dsmc_command(["archive", "something"])

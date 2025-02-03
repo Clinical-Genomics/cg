@@ -15,6 +15,10 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
+NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "median_coverage": {"norm": "gt", "threshold": 25},
+}
+
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
