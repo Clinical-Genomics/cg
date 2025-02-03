@@ -40,7 +40,8 @@ Explain the negative effects caused by this technical debt:
 
 ### **Proposed Resolution**
 <!--
-Suggest how to resolve the technical debt:
+In broad terms and briefly, describe what is needed to address the technical debt 
+(fill one or more of the following sub-sections):
 -->
 - **Refactoring:** Rewrite the affected code  
 - **Tooling:** Add or update tools to mitigate the debt  
@@ -51,7 +52,7 @@ Suggest how to resolve the technical debt:
 
 ### **Estimated Effort**
 <!--
-Provide an estimate of the effort needed for resolution:
+Provide a rough estimate of the effort needed for resolution:
 -->
 - **Effort Level:** e.g., `Small`, `Medium`, `Large`, `Very Large`  
 - **Time Estimate:** e.g., `5 hours`, `2 days`, `2 weeks`
@@ -60,6 +61,7 @@ Provide an estimate of the effort needed for resolution:
 
 ### **Supporting Information**
 <!--
+Optional section
 Add any supporting details like screenshots, logs, or references:
 -->
 - **References:** Link to related issues, PRs, or documentation.
