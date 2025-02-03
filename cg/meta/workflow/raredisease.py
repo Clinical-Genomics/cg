@@ -173,14 +173,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
             metric_conditions: dict[str, dict[str, Any]] = (
-                self.get_metric_conditions_by_analysis_type(sample_id=sample.internal_id)
+                self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
             self.set_order_sex_for_sample(sample, metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
-    def get_metric_conditions_by_analysis_type(self, sample_id: str) -> dict:
+    def get_metric_conditions_by_prep_category(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if (
             sample.application_version.application.analysis_type
