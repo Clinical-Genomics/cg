@@ -14,15 +14,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
-from cg.store.models import (
-    Analysis,
-    Application,
-    Case,
-    CaseSample,
-    Customer,
-    IlluminaFlowCell,
-    Sample,
-)
+from cg.store.models import Analysis, Application, Case, CaseSample, IlluminaFlowCell, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
