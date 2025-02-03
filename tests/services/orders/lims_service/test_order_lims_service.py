@@ -36,7 +36,7 @@ def test_to_lims_mip(mip_dna_order: MipDnaOrder):
     # THEN it should pick out relevant UDFs
     first_sample: LimsSample = samples[0]
     assert first_sample.well_position == "A:1"
-    assert first_sample.udfs.priority == "standard"
+    assert first_sample.udfs.priority == "priority"
     assert first_sample.udfs.application == "WGSPCFC030"
     assert first_sample.udfs.source == "blood"
     assert first_sample.udfs.customer == "cust003"
