@@ -289,8 +289,10 @@ class TaxprofilerConfig(CommonAppConfig):
     conda_binary: str | None = None
     conda_env: str
     compute_env: str
-    databases: str
-    hostremoval_reference: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     workflow_bin_path: str
     profile: str
     revision: str
