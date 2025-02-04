@@ -9,7 +9,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
-from cg.services.application.service import ApplicationsWebService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
@@ -22,7 +21,9 @@ from cg.services.orders.validation.service import OrderValidationService
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
-from cg.services.sample_service.sample_service import SampleService
+from cg.services.web_services.application.service import ApplicationsWebService
+from cg.services.web_services.case.service import CaseWebService
+from cg.services.web_services.sample.service import SampleService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -90,6 +91,7 @@ applications_service = ApplicationsWebService(store=db)
 analysis_client = AnalysisClient()
 delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=analysis_client)
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
+case_service = CaseWebService(store=db)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
 flow_cell_service = SampleRunMetricsService(db)
