@@ -147,3 +147,13 @@ def mip_dna_order_with_existing_samples(mip_dna_order_to_submit: dict) -> MipDna
         ExistingSample(internal_id="ACC1234")
     )
     return mip_dna_order_with_existing_samples
+
+
+@pytest.fixture
+def mip_dna_order_with_only_existing_samples(mip_dna_order_to_submit: dict) -> MipDnaOrder:
+    """Returns a MIP DNA order containing only existing samples."""
+    mip_dna_order_to_submit["user_id"] = 1
+    mip_dna_order_with_only_existing_samples = MipDnaOrder.model_validate(mip_dna_order_to_submit)
+    for case in mip_dna_order_with_only_existing_samples.cases:
+        case.samples = [ExistingSample(internal_id="ACC1234")]
+    return mip_dna_order_with_only_existing_samples
