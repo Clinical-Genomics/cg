@@ -51,7 +51,7 @@ class SampleService:
             pattern=request.enquiry,
             customers=customers,
             limit=request.page_size,
-            offset=request.page,
+            offset=(request.page - 1) * request.page_size,
         )
         parsed_samples: list[dict] = [sample.to_dict() for sample in samples]
         return parsed_samples, total
