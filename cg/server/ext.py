@@ -92,7 +92,7 @@ delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=anal
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 order_service = OrderService(store=db, status_service=summary_service)
 sample_service = SampleService(db)
-flow_cell_service = SampleRunMetricsService(db)
+sample_run_metrics_service = SampleRunMetricsService(db)
 storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,
     status_db=db,

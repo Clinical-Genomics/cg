@@ -1,3 +1,4 @@
+from cg.server.endpoints.sequencing_metrics.dtos import PacbioSequencingMetricsRequest
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
@@ -10,7 +11,70 @@ def test_get_metrics_for_flow_cell(
     # GIVEN an existing flow cell with sequencing metrics
 
     # WHEN fetching the metrics for the flow cell
-    metrics = sample_run_metrics_service.get_metrics(novaseq_x_flow_cell_id)
+    metrics = sample_run_metrics_service.get_illumina_metrics(novaseq_x_flow_cell_id)
 
     # THEN the metrics should be returned
     assert metrics
+
+
+def test_get_pacbio_metrics(sample_run_metrics_service: SampleRunMetricsService):
+    # GIVEN a SampleRunMetricsService and a database containing Pacbio data
+
+    # WHEN fetching all PacbioSampleSequencingMetrics
+    metrics_request = PacbioSequencingMetricsRequest()
+    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+
+    # THEN metrics should be returned
+    assert metrics
+
+
+def test_get_pacbio_metrics_by_sample_internal_id(
+    sample_run_metrics_service: SampleRunMetricsService, pacbio_barcoded_sample_internal_id: str
+):
+    # GIVEN a SampleRunMetricsService and a database containing Pacbio data
+
+    # WHEN fetching a specific PacbioSampleSequencingMetrics
+    metrics_request = PacbioSequencingMetricsRequest(sample_id=pacbio_barcoded_sample_internal_id)
+    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+
+    # THEN metrics should be returned
+    assert metrics
+
+
+def test_get_pacbio_metrics_by_non_existent_sample_internal_id(
+    sample_run_metrics_service: SampleRunMetricsService,
+):
+    # GIVEN a SampleRunMetricsService and a database containing Pacbio data
+
+    # WHEN fetching a specific PacbioSampleSequencingMetrics
+    metrics_request = PacbioSequencingMetricsRequest(sample_id="I do not exist")
+    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+
+    # THEN metrics should be returned
+    assert not metrics
+
+
+def test_get_pacbio_metrics_by_smrt_cell_id(
+    sample_run_metrics_service: SampleRunMetricsService,
+):
+    # GIVEN a SampleRunMetricsService and a database containing Pacbio data
+
+    # WHEN fetching a specific PacbioSampleSequencingMetrics
+    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_id="internal_id")
+    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+
+    # THEN metrics should be returned
+    assert metrics
+
+
+def test_get_pacbio_metrics_by_non_existent_smrt_cell_id(
+    sample_run_metrics_service: SampleRunMetricsService,
+):
+    # GIVEN a SampleRunMetricsService and a database containing Pacbio data
+
+    # WHEN fetching a specific PacbioSampleSequencingMetrics
+    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_id="I do not exist")
+    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+
+    # THEN metrics should be returned
+    assert not metrics
