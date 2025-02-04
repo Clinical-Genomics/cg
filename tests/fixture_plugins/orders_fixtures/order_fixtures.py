@@ -157,4 +157,3 @@ def mip_dna_order_with_only_existing_samples(mip_dna_order_to_submit: dict) -> M
     for case in mip_dna_order_with_only_existing_samples.cases:
         case.samples = [ExistingSample(internal_id="ACC1234")]
     return mip_dna_order_with_only_existing_samples
-
