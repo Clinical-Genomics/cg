@@ -1,5 +1,5 @@
 from cg.models.orders.constants import OrderType
-from cg.services.application.models import ApplicationResponse
+from cg.services.web_services.application.models import ApplicationResponse
 from cg.store.models import Application
 from cg.store.store import Store
 

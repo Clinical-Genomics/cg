@@ -518,26 +518,62 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     """Test that samples can be returned for a customer."""
     # GIVEN a database with samples for a customer
 
-    # THEN the one customer can be retrieved
-    customer: set[Customer] = store_with_samples_for_multiple_customers.get_customer_by_internal_id(
-        customer_internal_id=three_customer_ids[1]
-    ).collaborators
-    assert customer
+    # GIVEN that the customer collaborators can be retrieved
+    customers: set[Customer] = (
+        store_with_samples_for_multiple_customers.get_customer_by_internal_id(
+            customer_internal_id=three_customer_ids[1]
+        ).collaborators
+    )
+    assert customers
 
-    # WHEN getting the samples for a customer
-    samples: list[Sample] = (
+    # WHEN getting the samples for a customer limiting the query to 2 samples
+    samples, n_samples = (
         store_with_samples_for_multiple_customers.get_samples_by_customers_and_pattern(
-            customers=customer,
+            customers=customers,
             pattern="sample",
+            limit=2,
         )
     )
 
-    # THEN the samples should be returned
-    assert samples
-    assert len(samples) == 3
+    # THEN two samples should be returned
+    assert len(samples) == 2
 
-    for sample in samples:
-        assert "sample" in sample.name
+    # THEN the total sampels in the query was 3
+    assert n_samples == 3
+
+    # THEN the returned samples have the expected sample name
+    assert all("sample" in sample.name for sample in samples)
+
+
+def test_get_cases_by_customers_action_and_case_search(
+    store_with_cases_with_customers_and_actions: Store,
+    customer_id: str,
+):
+    """Test that cases can be filtered properly by customer, action and case search."""
+    # GIVEN a store with cases for a customer
+    customer = store_with_cases_with_customers_and_actions.get_customer_by_internal_id(
+        customer_internal_id=customer_id
+    )
+    assert customer
+
+    # WHEN getting the cases for a customer
+    cases, n_cases = (
+        store_with_cases_with_customers_and_actions.get_cases_by_customers_action_and_case_search(
+            customers=[customer], action="analyze", case_search="case", limit=2
+        )
+    )
+
+    # THEN two cases should be returned
+    assert len(cases) == 2
+
+    # THEN the total cases in the query was 3
+    assert n_cases == 3
+
+    # THEN the returned cases have the expected case name
+    assert all("case" in case.name for case in cases)
+
+    # THEN the returned cases have the expected action
+    assert all(case.action == "analyze" for case in cases)
 
 
 def test_get_related_samples(
