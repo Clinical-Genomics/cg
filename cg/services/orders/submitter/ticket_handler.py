@@ -5,6 +5,7 @@ from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
+from cg.meta.orders.utils import get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.validation.models.order import Order
@@ -37,6 +38,8 @@ class TicketHandler:
             order_type=order_type,
         )
 
+        tags: list[str] = get_ticket_tags(order=order, order_type=order_type)
+
         with TemporaryDirectory() as temp_dir:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
@@ -47,7 +50,7 @@ class TicketHandler:
                 name=user_name,
                 subject=order.name,
                 type="Order",
-                tags=[ORDER_TYPE_WORKFLOW_MAP[order_type]],
+                tags=tags,
                 custom_fields={
                     "cf_environment": self.env,
                 },

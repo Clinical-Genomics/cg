@@ -2,6 +2,7 @@
 
 import pytest
 
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
@@ -135,3 +136,14 @@ def tomte_order(tomte_order_to_submit: dict, ticket_id_as_int: int) -> TomteOrde
     tomte_order = TomteOrder.model_validate(tomte_order_to_submit)
     tomte_order._generated_ticket_id = ticket_id_as_int
     return tomte_order
+
+
+@pytest.fixture
+def mip_dna_order_with_existing_samples(mip_dna_order_to_submit: dict) -> MipDnaOrder:
+    """Returns a MIP DNA order containing an existing sample."""
+    mip_dna_order_to_submit["user_id"] = 1
+    mip_dna_order_with_existing_samples = MipDnaOrder.model_validate(mip_dna_order_to_submit)
+    mip_dna_order_with_existing_samples.cases[0].samples.append(
+        ExistingSample(internal_id="ACC1234")
+    )
+    return mip_dna_order_with_existing_samples
