@@ -230,3 +230,4 @@ def test_get_ticket_status(
 
     # THEN the status should be correct
     assert status == expected_status
+

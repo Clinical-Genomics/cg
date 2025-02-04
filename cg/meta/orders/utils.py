@@ -19,11 +19,10 @@ def contains_existing_data(order: OrderWithCases) -> bool:
 def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
     """Generate ticket tags based on the order and order type"""
 
-    tags: list[str] = []
-    tags.append(ORDER_TYPE_WORKFLOW_MAP[order_type])
+    tags: list[str] = [ORDER_TYPE_WORKFLOW_MAP[order_type]]
 
     if isinstance(order, OrderWithCases):
-        if contains_existing_data(order=order):
+        if contains_existing_data(order):
             tags.append("existing-data")
 
     return tags
@@ -31,6 +30,7 @@ def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
 
 def contains_only_existing_samples(order: OrderWithCases) -> bool:
     """Check if the order contains only existing samples"""
+    
     if order.enumerated_new_samples:
         return False
     return True
@@ -38,6 +38,7 @@ def contains_only_existing_samples(order: OrderWithCases) -> bool:
 
 def get_ticket_status(order: Order) -> Status:
     """Get the ticket status based on the order"""
+    
     if isinstance(order, OrderWithCases):
         if contains_only_existing_samples(order=order):
             return Status.OPEN

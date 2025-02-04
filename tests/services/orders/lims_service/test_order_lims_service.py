@@ -1,5 +1,3 @@
-import pytest
-
 from cg.constants import Workflow
 from cg.models.lims.sample import LimsSample
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -12,17 +10,17 @@ from cg.services.orders.validation.workflows.mutant.models.order import MutantOr
 from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
 
 
-def test_to_lims_mip(mip_dna_order_to_submit):
+def test_to_lims_mip(mip_dna_order: MipDnaOrder):
     # GIVEN a scout order for a trio
-    order_data = MipDnaOrder.model_validate(mip_dna_order_to_submit)
+
     # WHEN parsing the order to format for LIMS import
-    new_samples = [sample for _, _, sample in order_data.enumerated_new_samples]
+    new_samples = [sample for _, _, sample in mip_dna_order.enumerated_new_samples]
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust003",
         samples=new_samples,
         workflow=Workflow.MIP_DNA,
-        delivery_type=order_data.delivery_type,
-        skip_reception_control=order_data.skip_reception_control,
+        delivery_type=mip_dna_order.delivery_type,
+        skip_reception_control=mip_dna_order.skip_reception_control,
     )
 
     # THEN it should list all samples
@@ -35,10 +33,10 @@ def test_to_lims_mip(mip_dna_order_to_submit):
     container_names = {sample.container_name for sample in samples if sample.container_name}
     assert container_names == {"MipPlate"}
 
-    # ... and pick out relevant UDFs
+    # THEN it should pick out relevant UDFs
     first_sample: LimsSample = samples[0]
     assert first_sample.well_position == "A:1"
-    assert first_sample.udfs.priority == "standard"
+    assert first_sample.udfs.priority == "priority"
     assert first_sample.udfs.application == "WGSPCFC030"
     assert first_sample.udfs.source == "blood"
     assert first_sample.udfs.customer == "cust003"
@@ -48,40 +46,39 @@ def test_to_lims_mip(mip_dna_order_to_submit):
     assert isinstance(samples[1].udfs.comment, str)
 
 
-def test_to_lims_fastq(fastq_order_to_submit):
+def test_to_lims_fastq(fastq_order: FastqOrder):
     # GIVEN a fastq order for two samples; normal vs. tumour
-    order_data = FastqOrder.model_validate(fastq_order_to_submit)
 
     # WHEN parsing the order to format for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="dummyCust",
-        samples=order_data.samples,
+        samples=fastq_order.samples,
         workflow=Workflow.RAW_DATA,
-        delivery_type=order_data.delivery_type,
-        skip_reception_control=order_data.skip_reception_control,
+        delivery_type=fastq_order.delivery_type,
+        skip_reception_control=fastq_order.skip_reception_control,
     )
 
-    # THEN should "work"
+    # THEN two samples should be parsed, one normal and one tumour
     assert len(samples) == 2
     normal_sample = samples[0]
     tumour_sample = samples[1]
-    # ... and pick out relevant UDF values
+
+    # THEN it should pick out relevant UDFs
     assert normal_sample.udfs.tumour is False
     assert tumour_sample.udfs.tumour is True
     assert normal_sample.udfs.volume == "54"
 
 
-@pytest.mark.xfail(reason="RML sample container validation not working")
-def test_to_lims_rml(rml_order_to_submit: dict):
+def test_to_lims_rml(rml_order: RmlOrder):
     # GIVEN a rml order for four samples
-    order_data = RmlOrder.model_validate(rml_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust000",
-        samples=order_data.samples,
+        samples=rml_order.samples,
         workflow=Workflow.RAW_DATA,
-        delivery_type=order_data.delivery_type,
+        delivery_type=rml_order.delivery_type,
+        skip_reception_control=rml_order.skip_reception_control,
     )
 
     # THEN it should have found the same number of samples
@@ -97,17 +94,16 @@ def test_to_lims_rml(rml_order_to_submit: dict):
     assert first_sample.udfs.well_position_rml == "A:1"
 
 
-@pytest.mark.xfail(reason="Fluffy sample container validation not working")
-def test_to_lims_fluffy(fluffy_order_to_submit: dict):
+def test_to_lims_fluffy(fluffy_order: FluffyOrder):
     # GIVEN a Fluffy order for four samples
-    order_data = FluffyOrder.model_validate(fluffy_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust000",
-        samples=order_data.samples,
+        samples=fluffy_order.samples,
         workflow=Workflow.FLUFFY,
-        delivery_type=order_data.delivery_type,
+        delivery_type=fluffy_order.delivery_type,
+        skip_reception_control=fluffy_order.skip_reception_control,
     )
 
     # THEN it should have found the same number of samples
@@ -123,22 +119,22 @@ def test_to_lims_fluffy(fluffy_order_to_submit: dict):
     assert first_sample.udfs.well_position_rml == "A:1"
 
 
-def test_to_lims_microbial(microbial_order_to_submit: dict):
+def test_to_lims_microbial(microsalt_order: MicrosaltOrder):
     # GIVEN a microbial order for three samples
-    order_data = MicrosaltOrder.model_validate(microbial_order_to_submit)
 
     # WHEN parsing for LIMS
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust000",
-        samples=order_data.samples,
+        samples=microsalt_order.samples,
         workflow=Workflow.MICROSALT,
-        delivery_type=order_data.delivery_type,
-        skip_reception_control=order_data.skip_reception_control,
+        delivery_type=microsalt_order.delivery_type,
+        skip_reception_control=microsalt_order.skip_reception_control,
     )
-    # THEN it should "work"
 
+    # THEN 5 samples should be parsed
     assert len(samples) == 5
-    # ... and pick out relevant UDFs
+
+    # THEN it should pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["organism"] == "C. jejuni"
@@ -161,7 +157,8 @@ def test_to_lims_sarscov2(mutant_order: MutantOrder):
 
     # THEN it should have found the same number of samples
     assert len(samples) == 6
-    # ... and pick out relevant UDFs
+
+    # THEN it should pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["udfs"]["collection_date"] == "2021-05-05"
     assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
@@ -178,27 +175,26 @@ def test_to_lims_sarscov2(mutant_order: MutantOrder):
     assert first_sample["udfs"]["volume"] == "20"
 
 
-def test_to_lims_balsamic(balsamic_order_to_submit: dict):
+def test_to_lims_balsamic(balsamic_order: BalsamicOrder):
     # GIVEN a cancer order for a sample
-    order_data = BalsamicOrder.model_validate(balsamic_order_to_submit)
 
-    new_samples = [sample for _, _, sample in order_data.enumerated_new_samples]
+    new_samples = [sample for _, _, sample in balsamic_order.enumerated_new_samples]
     # WHEN parsing the order to format for LIMS import
     samples: list[LimsSample] = OrderLimsService._build_lims_sample(
         customer="cust000",
         samples=new_samples,
         workflow=Workflow.BALSAMIC,
-        delivery_type=order_data.delivery_type,
-        skip_reception_control=order_data.skip_reception_control,
+        delivery_type=balsamic_order.delivery_type,
+        skip_reception_control=balsamic_order.skip_reception_control,
     )
+
     # THEN it should list all samples
-
     assert len(samples) == 1
-    # ... and determine the container, container name, and well position
 
+    # THEN it should determine the container, container name, and well position
     container_names = {sample.container_name for sample in samples if sample.container_name}
 
-    # ... and pick out relevant UDFs
+    # THEN it should pick out relevant UDFs
     first_sample = samples[0].dict()
     assert first_sample["name"] == "BalsamicSample"
     assert {sample.container for sample in samples} == set(["96 well plate"])
@@ -209,15 +205,32 @@ def test_to_lims_balsamic(balsamic_order_to_submit: dict):
     assert first_sample["udfs"]["source"] == "cytology (FFPE)"
     assert first_sample["udfs"]["volume"] == "42"
     assert first_sample["udfs"]["priority"] == "standard"
-
     assert container_names == set(["BalsamicPlate"])
     assert first_sample["well_position"] == "A:1"
     assert first_sample["udfs"]["tumour"] is True
     assert first_sample["udfs"]["capture_kit"] == "GMCKsolid"
     assert first_sample["udfs"]["tumour_purity"] == "13"
-
     assert first_sample["udfs"]["formalin_fixation_time"] == "15"
     assert first_sample["udfs"]["post_formalin_fixation_time"] == "3"
     assert first_sample["udfs"]["tissue_block_size"] == "large"
-
     assert first_sample["udfs"]["comment"] == "This is a sample comment"
+
+
+def test_order_with_skip_reception_control(balsamic_order: BalsamicOrder):
+    """Test that an order set to skip reception control can be parsed correctly by LIMS."""
+    # GIVEN a Balsamic order with one case and one sample set to skip reception control
+    balsamic_order.skip_reception_control = True
+
+    # WHEN parsing the order to format for LIMS import
+    new_samples = [sample for _, _, sample in balsamic_order.enumerated_new_samples]
+    samples: list[LimsSample] = OrderLimsService._build_lims_sample(
+        customer="cust000",
+        samples=new_samples,
+        workflow=Workflow.BALSAMIC,
+        delivery_type=balsamic_order.delivery_type,
+        skip_reception_control=balsamic_order.skip_reception_control,
+    )
+
+    # THEN the parsed samples should have the skip reception control flag set
+    first_sample = samples[0].dict()
+    assert first_sample["udfs"]["skip_reception_control"] is True

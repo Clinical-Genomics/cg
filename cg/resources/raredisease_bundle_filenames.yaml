@@ -28,7 +28,7 @@
   path_index: ~
   step: tiddit_coverage
   tag: tiddit_coverage
-- format: d4
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_mosdepth.per-base.d4
   path_index: ~
@@ -798,151 +798,151 @@
   tag: regions
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_1.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_1.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_2.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_2.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_3.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_3.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_4.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_4.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_5.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_5.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_6.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_6.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_7.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_7.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_8.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_8.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_9.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_9.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_10.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_10.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_11.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_11.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_12.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_12.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_13.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_13.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_14.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_14.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_15.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_15.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_16.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_16.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_17.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_17.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_18.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_18.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_19.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_19.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_20.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_20.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_21.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_21.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_22.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_22.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_X.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_X.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_Y.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_Y.png
   path_index: ~
   step: chromograph_upd
   tag: sites
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID__upd_sites_M.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_sites/SAMPLEID_upd_sites_M.png
   path_index: ~
   step: chromograph_upd
   tag: sites
