@@ -1807,7 +1807,7 @@ class ReadHandler(BaseHandler):
             .join(RunDevice)
         )
         if sample_id:
-            sequencing_metrics = sequencing_metrics.filter(Sample.internal_id.is_(sample_id))
+            sequencing_metrics = sequencing_metrics.filter(Sample.internal_id == sample_id)
         if smrt_cell_id:
-            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.is_(smrt_cell_id))
+            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
         return sequencing_metrics.all()
