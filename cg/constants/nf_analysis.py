@@ -19,7 +19,7 @@ NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 25},
 }
 
-RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.0005
+RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
 
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
