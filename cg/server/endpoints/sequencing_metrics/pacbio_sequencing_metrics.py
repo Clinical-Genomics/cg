@@ -5,7 +5,7 @@ from cg.server.endpoints.sequencing_metrics.dtos import (
     PacbioSequencingMetricsResponse,
 )
 from cg.server.endpoints.sequencing_metrics.error_handler import handle_endpoint_errors
-from cg.server.endpoints.utils import before_request, is_public
+from cg.server.endpoints.utils import before_request
 from cg.server.ext import sample_run_metrics_service
 from cg.services.sample_run_metrics_service.dtos import PacbioSequencingMetrics
 
@@ -16,7 +16,6 @@ PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT.before_request(before_request)
 
 
 @PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT.route("/pacbio_sample_sequencing_metrics")
-@is_public
 @handle_endpoint_errors
 def get_sequencing_metrics():
     sequencing_metrics_request = PacbioSequencingMetricsRequest.model_validate(
