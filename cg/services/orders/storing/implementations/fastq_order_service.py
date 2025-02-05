@@ -86,14 +86,15 @@ class StoreFastqOrderService(StoreOrderService):
         self, sample: FastqSample, order: FastqOrder, customer: Customer
     ) -> Case:
         """Return a Case database object."""
-        case_name: str = f"{sample.name}-case"
+        ticket_id: str = str(order._generated_ticket_id)
+        case_name: str = f"{sample.name}-{ticket_id}"
         priority: str = sample.priority
         case: Case = self.status_db.add_case(
             data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             data_delivery=DataDelivery(order.delivery_type),
             name=case_name,
             priority=priority,
-            ticket=str(order._generated_ticket_id),
+            ticket=ticket_id,
         )
         case.customer = customer
         return case
