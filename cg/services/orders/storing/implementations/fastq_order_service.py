@@ -55,7 +55,7 @@ class StoreFastqOrderService(StoreOrderService):
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
                 db_case: Case = self._create_db_case_for_sample(
-                    sample=sample, order=order, customer=db_order.customer
+                    sample=sample, customer=db_order.customer, order=order
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
@@ -83,10 +83,13 @@ class StoreFastqOrderService(StoreOrderService):
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
-        self, sample: FastqSample, order: FastqOrder, customer: Customer
+        self,
+        sample: FastqSample,
+        customer: Customer,
+        order: FastqOrder,
     ) -> Case:
         """Return a Case database object."""
-        ticket_id: str = str(order._generated_ticket_id)
+        ticket_id = str(order._generated_ticket_id)
         case_name: str = f"{sample.name}-{ticket_id}"
         priority: str = sample.priority
         case: Case = self.status_db.add_case(

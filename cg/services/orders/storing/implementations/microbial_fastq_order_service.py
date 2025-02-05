@@ -78,13 +78,14 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         self, sample: MicrobialFastqSample, customer: Customer, order: MicrobialFastqOrder
     ) -> Case:
         """Return a Case database object for a MicrobialFastqSample."""
-        case_name: str = f"{sample.name}-case"
+        ticket_id = str(order._generated_ticket_id)
+        case_name: str = f"{sample.name}-{ticket_id}"
         case: Case = self.status_db.add_case(
             data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             data_delivery=DataDelivery(order.delivery_type),
             name=case_name,
             priority=sample.priority,
-            ticket=str(order._generated_ticket_id),
+            ticket=ticket_id,
         )
         case.customer = customer
         return case
