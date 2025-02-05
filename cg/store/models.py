@@ -1218,7 +1218,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return to_dict(model_instance=PacbioSampleSequencingMetrics)
+        return to_dict(self)
 
 
 class OrderTypeApplication(Base):
