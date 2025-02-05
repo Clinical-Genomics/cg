@@ -16,7 +16,9 @@ PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT.before_request(before_request)
 @is_public
 @handle_endpoint_errors
 def get_sequencing_metrics():
-    sequencing_metrics_request = PacbioSequencingMetricsRequest.model_validate(request.args)
+    sequencing_metrics_request = PacbioSequencingMetricsRequest.model_validate(
+        request.args.to_dict()
+    )
     metrics: list[PacbioSampleSequencingMetrics] = sample_run_metrics_service.get_pacbio_metrics(
         sequencing_metrics_request
     )
