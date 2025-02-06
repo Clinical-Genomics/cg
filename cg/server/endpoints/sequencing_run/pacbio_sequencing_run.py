@@ -12,7 +12,6 @@ PACBIO_SEQUENCING_RUN_BLUEPRINT.before_request(before_request)
 @PACBIO_SEQUENCING_RUN_BLUEPRINT.route("/pacbio_sequencing_run/<run_name>", methods=["GET"])
 @handle_missing_entries
 def get_sequencing_metrics(run_name: str):
-    print(f"Here I am: {run_name}")
     response: PacbioSequencingRunsResponse = (
         pacbio_sequencing_runs_service.get_sequencing_runs_by_name(run_name)
     )
