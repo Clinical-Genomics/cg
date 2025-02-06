@@ -11,10 +11,13 @@ from cg.server.app_config import app_config
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
-from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.illumina_sequencing_metrics import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
+    PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT,
+)
 from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -101,6 +104,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(FLOW_CELLS_BLUEPRINT)
     app.register_blueprint(ANALYSES_BLUEPRINT)
     app.register_blueprint(USERS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(SAMPLES_BLUEPRINT)

@@ -1216,6 +1216,10 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
+    def to_dict(self) -> dict:
+        """Represent as dictionary"""
+        return to_dict(self)
+
 
 class OrderTypeApplication(Base):
     """Maps an order type to its allowed applications"""

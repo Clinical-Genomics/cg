@@ -83,12 +83,15 @@ from cg.store.models import (
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    InstrumentRun,
     Invoice,
     Order,
     Organism,
+    PacbioSampleSequencingMetrics,
     PacbioSMRTCell,
     Panel,
     Pool,
+    RunDevice,
     Sample,
     SampleRunMetrics,
     User,
@@ -1790,3 +1793,21 @@ class ReadHandler(BaseHandler):
             )
             rna_dna_collections.append(collection)
         return rna_dna_collections
+
+    def get_pacbio_sample_sequencing_metrics(
+        self, sample_id: str | None, smrt_cell_id: str | None
+    ) -> list[PacbioSampleSequencingMetrics]:
+        """
+        Fetches data from PacbioSampleSequencingMetrics filtered on sample_internal_id and/or smrt_cell_id.
+        """
+        sequencing_metrics: Query = (
+            self._get_query(table=PacbioSampleSequencingMetrics)
+            .join(Sample)
+            .join(InstrumentRun)
+            .join(RunDevice)
+        )
+        if sample_id:
+            sequencing_metrics = sequencing_metrics.filter(Sample.internal_id == sample_id)
+        if smrt_cell_id:
+            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
+        return sequencing_metrics.all()
