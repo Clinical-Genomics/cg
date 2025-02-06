@@ -3,6 +3,7 @@ from cg.services.sample_run_metrics_service.dtos import PacbioSequencingMetricsD
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
+from cg.store.models import PacbioSampleSequencingMetrics
 
 
 def test_get_metrics_for_flow_cell(
@@ -27,8 +28,11 @@ def test_get_pacbio_metrics(sample_run_metrics_service: SampleRunMetricsService)
         metrics_request
     )
 
-    # THEN metrics should be returned
-    assert metrics
+    # THEN all metrics should be returned
+    assert (
+        len(metrics)
+        == sample_run_metrics_service.store._get_query(table=PacbioSampleSequencingMetrics).count()
+    )
 
 
 def test_get_pacbio_metrics_by_sample_internal_id(
