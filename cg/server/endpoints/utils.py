@@ -3,12 +3,14 @@ from functools import wraps
 from http import HTTPStatus
 
 import cachecontrol
+from keycloak import KeycloakError
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
 
-from cg.server.ext import db
-from cg.store.models import User
-from cg.server.ext import keycloak_openid_client
+from cg.server.ext import auth_service
+from cg.services.authentication.models import AuthenticatedUser
+
+
 
 
 LOG = logging.getLogger(__name__)
@@ -47,11 +49,20 @@ def before_request():
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
-
-    user: User = db.get_user_by_email(user_data["email"])
-    if user is None or not user.order_portal_login:
-        message = f"{user_data['email']} doesn't have access"
-        LOG.error(message)
-        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
+    try:
+        user: AuthenticatedUser = auth_service.verify_token(jwt_token)
+    
+    except ValueError as error:
+        return abort(
+            make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN)
+        )
+    except KeycloakError as error:
+        return abort(
+            make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED)
+        )
+    except Exception as error:
+        return abort(
+            make_response(jsonify(message=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR)
+        )
 
     g.current_user = user
