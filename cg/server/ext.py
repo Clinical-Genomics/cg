@@ -25,6 +25,7 @@ from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
 from cg.services.sample_service.sample_service import SampleService
+from cg.services.user.service import UserService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -110,9 +111,9 @@ ticket_handler = TicketHandler(
     system_email_id=app_config.freshdesk_order_email_id,
     env=app_config.freshdesk_environment,
 )
-
+user_service = UserService(store=db)
 auth_service = AuthenticationService(
-    store=db,
+    user_service=user_service,
     server_url=app_config.keycloak_client_url,
     client_id=app_config.keycloak_client_id,
     client_secret=app_config.keycloak_client_secret_key,
