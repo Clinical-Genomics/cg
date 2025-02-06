@@ -118,4 +118,5 @@ auth_service = AuthenticationService(
     client_id=app_config.keycloak_client_id,
     client_secret=app_config.keycloak_client_secret_key,
     realm_name=app_config.keycloak_realm_name,
+    redirect_uri=app_config.keycloak_redirect_uri,
 )

@@ -1,3 +1,4 @@
+from cycler import K
 from pydantic_settings import BaseSettings
 
 
@@ -23,10 +24,10 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
-    keycloak_client_url: str = "http://localhost:8081"
-    keycloak_realm_name = "orderportal"
-    keycloak_client_id = "cg-backend-client"
-    keycloak_client_secret_key = "cg-very-secret-password"
-
+    keycloak_client_url: str = "server_url"
+    keycloak_realm_name = "realm"
+    keycloak_client_id = "client"
+    keycloak_client_secret_key = "client_secret"
+    keycloak_redirect_uri = "redirect_uri"
 
 app_config = AppConfig()

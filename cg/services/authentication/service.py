@@ -1,3 +1,4 @@
+from flask import redirect
 from cg.services.user.service import UserService
 from keycloak import KeycloakOpenID
 
@@ -8,7 +9,7 @@ class AuthenticationService:
     """Authentication service user to verify tokens against keycloak and return user information."""
 
     def __init__(
-        self, user_service: UserService, server_url: str, client_id: str, client_secret: str, realm_name: str
+        self, user_service: UserService, server_url: str, client_id: str, client_secret: str, realm_name: str, redirect_uri: str,
     ):
         """_summary_
 
@@ -17,13 +18,15 @@ class AuthenticationService:
             server_url (str): server url to the keycloak server or container
             realm_name (str): the keycloak realm to connect to (can be found in keycloak)
             client_id (str): the client id to use in keycloak realm (can be found in keycloak)
-            client_secret (str): the client secret to use in keycloak realm (can be found in keycloak)  
+            client_secret (str): the client secret to use in keycloak realm (can be found in keycloak)
+            redirect_uri (str): the redirect uri to use
         """
         self.user_service: UserService = user_service
         self.server_url: str = server_url
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.realm_name: str = realm_name
+        self.redirect_uri: str = redirect_uri
         self.client: KeycloakOpenID = self._get_client()
 
     def _get_client(self):
@@ -59,7 +62,7 @@ class AuthenticationService:
         """Get the authentication url.
         """
         return self.client.auth_url(
-        redirect_uri="http://localhost:3001/auth/callback",
+        redirect_uri=self.redirect_uri,
         scope="openid profile email"
     )
     
@@ -81,6 +84,6 @@ class AuthenticationService:
         return self.client.token(
         grant_type='authorization_code',
         code=code,
-        redirect_uri="http://localhost:3001/auth/callback"
+        redirect_uri=self.redirect_uri
     )
         
