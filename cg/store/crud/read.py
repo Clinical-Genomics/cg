@@ -88,6 +88,7 @@ from cg.store.models import (
     Order,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     Panel,
     Pool,
@@ -1811,3 +1812,11 @@ class ReadHandler(BaseHandler):
         if smrt_cell_id:
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
         return sequencing_metrics.all()
+
+    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
+        """
+        Fetches data from PacbioSequencingRun filtered on run name.
+        """
+        runs: Query = self._get_query(table=PacbioSequencingRun)
+        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
+        return runs.all()
