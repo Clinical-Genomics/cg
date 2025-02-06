@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from cg.services.sample_run_metrics_service.dtos import PacbioSequencingMetrics
+from cg.services.sample_run_metrics_service.dtos import PacbioSequencingMetricsDTO
 
 
 class PacbioSequencingMetricsRequest(BaseModel):
@@ -9,4 +9,4 @@ class PacbioSequencingMetricsRequest(BaseModel):
 
 
 class PacbioSequencingMetricsResponse(BaseModel):
-    metrics: list[PacbioSequencingMetrics] = []
+    metrics: list[PacbioSequencingMetricsDTO] = []
