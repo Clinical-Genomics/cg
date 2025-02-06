@@ -11,6 +11,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
 from cg.services.application.service import ApplicationsWebService
+from cg.services.authentication.service import AuthenticationService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
@@ -110,4 +111,10 @@ ticket_handler = TicketHandler(
     env=app_config.freshdesk_environment,
 )
 
-keycloak_client
+auth_service = AuthenticationService(
+    store=db,
+    server_url=app_config.keycloak_client_url,
+    client_id=app_config.keycloak_client_id,
+    client_secret=app_config.keycloak_client_secret_key,
+    realm_name=app_config.keycloak_realm_name,
+)
