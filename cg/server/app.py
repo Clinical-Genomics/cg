@@ -1,9 +1,6 @@
 import coloredlogs
-import requests
-from flask import Flask, redirect, session, url_for
+from flask import Flask
 from flask_admin.base import AdminIndexView
-from flask_dance.consumer import oauth_authorized
-from flask_dance.contrib.google import google, make_google_blueprint
 from sqlalchemy.orm import scoped_session
 
 from cg.server import admin, ext, invoices
@@ -16,6 +13,8 @@ from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
+from cg.server.endpoints.index import INDEX_BLUEPRINT
+from cg.server.endpoints.authentication import AUTH_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
@@ -60,9 +59,6 @@ def _load_config(app: Flask):
 
 def _configure_extensions(app: Flask):
     _initialize_logging(app)
-    certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
-    app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
-
     ext.cors.init_app(app)
     ext.csrf.init_app(app)
     ext.db.init_app(app)
@@ -77,22 +73,9 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-    oauth_bp = make_google_blueprint(
-        client_id=app.config["google_oauth_client_id"],
-        client_secret=app.config["google_oauth_client_secret"],
-        scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
-    )
-
-    @oauth_authorized.connect_via(oauth_bp)
-    def logged_in(blueprint, token):
-        """Called when the user logs in via Google OAuth."""
-        resp = google.get("/oauth2/v1/userinfo?alt=json")
-        assert resp.ok, resp.text
-        user_data = resp.json()
-        session["user_email"] = user_data["email"]
-
+    app.register_blueprint(INDEX_BLUEPRINT)
+    app.register_blueprint(AUTH_BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
-    app.register_blueprint(oauth_bp, url_prefix="/login")
     app.register_blueprint(APPLICATIONS_BLUEPRINT)
     app.register_blueprint(CASES_BLUEPRINT)
     app.register_blueprint(ORDERS_BLUEPRINT)
@@ -112,15 +95,7 @@ def _register_blueprints(app: Flask):
     ext.csrf.exempt(ANALYSES_BLUEPRINT)
     ext.csrf.exempt(USERS_BLUEPRINT)
 
-    @app.route("/")
-    def index():
-        return redirect(url_for("admin.index"))
-
-    @app.route("/logout")
-    def logout():
-        """Log out the user."""
-        session["user_email"] = None
-        return redirect(url_for("index"))
+    
 
 
 def _register_admin_views():

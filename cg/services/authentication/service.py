@@ -55,4 +55,32 @@ class AuthenticationService:
         
 
     
+    def get_auth_url(self):
+        """Get the authentication url.
+        """
+        return self.client.auth_url(
+        redirect_uri="http://localhost:3001/auth/callback",
+        scope="openid profile email"
+    )
     
+    def logout_user(self, token: str):
+        """Logout the user.
+        """
+        self.client.logout(token)
+        
+    def get_user_info(self, token):
+        """
+        Get the user information.
+        """
+        return self.client.userinfo(token["access_token"])
+    
+    def get_token(self, code: str):
+        """
+        Get the token the user token.
+        """
+        return self.client.token(
+        grant_type='authorization_code',
+        code=code,
+        redirect_uri="http://localhost:3001/auth/callback"
+    )
+        

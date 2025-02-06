@@ -16,8 +16,6 @@ class AppConfig(BaseSettings):
     lims_password: str = "password"
     support_system_email: str = "support@mail.com"
     email_uri: str = "smtp://localhost"
-    google_oauth_client_id: str = "client_id"
-    google_oauth_client_secret: str = "client_secret"
     trailblazer_host: str = "trailblazer_host"
     trailblazer_service_account: str = "service_account"
     trailblazer_service_account_auth_file: str = "auth_file.json"
