@@ -1815,8 +1815,12 @@ class ReadHandler(BaseHandler):
 
     def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
         """
-        Fetches data from PacbioSequencingRun filtered on run name.
+        Fetches data from PacbioSequencingRunDTO filtered on run name.
+        Raises:
+            EntryNotFoundError if no sequencing runs are found for the run name
         """
         runs: Query = self._get_query(table=PacbioSequencingRun)
         runs = runs.filter(PacbioSequencingRun.run_name == run_name)
+        if runs.count() == 0:
+            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
