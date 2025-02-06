@@ -146,7 +146,7 @@ def pacbio_sequencing_runs_store(
     base_store: Store,
     helpers: StoreHelpers,
     pacbio_run_name_to_fetch: str,
-    pacbio_run_name_to_not_fetch: str,
+    pacbio_run_name_not_to_fetch: str,
 ) -> Store:
     device = helpers.add_run_device(
         store=base_store, id=1, type=DeviceType.PACBIO, internal_id="device_internal_id"
@@ -158,6 +158,6 @@ def pacbio_sequencing_runs_store(
         store=base_store, id=2, run_name=pacbio_run_name_to_fetch, device_id=device.id
     )
     helpers.add_pacbio_sequencing_run(
-        store=base_store, id=3, run_name=pacbio_run_name_to_not_fetch, device_id=device.id
+        store=base_store, id=3, run_name=pacbio_run_name_not_to_fetch, device_id=device.id
     )
     return base_store

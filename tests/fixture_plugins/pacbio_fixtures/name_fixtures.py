@@ -86,5 +86,5 @@ def pacbio_run_name_to_fetch() -> str:
 
 
 @pytest.fixture
-def pacbio_run_name_to_not_fetch() -> str:
-    return "run_to_not_fetch"
+def pacbio_run_name_not_to_fetch() -> str:
+    return "run_not_to_fetch"
