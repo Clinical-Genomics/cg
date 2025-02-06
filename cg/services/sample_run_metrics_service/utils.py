@@ -1,10 +1,10 @@
-from cg.services.sample_run_metrics_service.dtos import IlluminaSequencingMetrics
+from cg.services.sample_run_metrics_service.dtos import IlluminaSequencingMetricsDTO
 from cg.store.models import IlluminaSampleSequencingMetrics
 
 
 def create_metrics_dto(
     metrics: list[IlluminaSampleSequencingMetrics] | None,
-) -> list[IlluminaSequencingMetrics]:
+) -> list[IlluminaSequencingMetricsDTO]:
 
     if not metrics:
         return []
@@ -12,7 +12,7 @@ def create_metrics_dto(
     parsed_metrics = []
 
     for metric in metrics:
-        parsed_metric = IlluminaSequencingMetrics(
+        parsed_metric = IlluminaSequencingMetricsDTO(
             flow_cell_name=metric.instrument_run.device.internal_id,
             flow_cell_lane_number=metric.flow_cell_lane,
             sample_internal_id=metric.sample.internal_id,

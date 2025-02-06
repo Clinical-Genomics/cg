@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class IlluminaSequencingMetrics(BaseModel):
+class IlluminaSequencingMetricsDTO(BaseModel):
     flow_cell_name: str
     flow_cell_lane_number: int
     sample_internal_id: str
@@ -9,7 +9,7 @@ class IlluminaSequencingMetrics(BaseModel):
     sample_base_percentage_passing_q30: float
 
 
-class PacbioSequencingMetrics(BaseModel):
+class PacbioSequencingMetricsDTO(BaseModel):
     hifi_mean_read_length: int
     hifi_median_read_quality: str
     hifi_reads: int
