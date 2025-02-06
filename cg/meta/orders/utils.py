@@ -7,9 +7,7 @@ from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 
 def contains_existing_data(order: OrderWithCases) -> bool:
     """Check if the order contains any existing data"""
-    return any(
-        not case.is_new or case.enumerated_existing_samples for _, case in order.enumerated_cases
-    )
+    return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
 
 
 def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
