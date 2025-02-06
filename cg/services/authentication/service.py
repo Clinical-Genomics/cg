@@ -1,6 +1,7 @@
-from cg.services.user.models import AuthenticatedUser
 from cg.services.user.service import UserService
 from keycloak import KeycloakOpenID
+
+from cg.store.models import User
 
 
 class AuthenticationService:
@@ -36,7 +37,7 @@ class AuthenticationService:
         )
         return keycloak_openid_client
 
-    def verify_token(self, token: str) -> AuthenticatedUser:
+    def verify_token(self, token: str) -> User:
         """Verify the token and return the user.
         args:
             token: str
@@ -46,13 +47,11 @@ class AuthenticationService:
             ValueError: if the token is not active
         """
         token_info = self.client.introspect(token)
-        
         if not token_info['active']:
             raise ValueError('Token is not active')
         verified_token = self.client.decode_token(token)
-            
         user_email = verified_token["email"]
-        return self.user_service.get_authenticated_user(user_email)
+        return self.user_service.get_user_by_email(user_email)
         
 
     
