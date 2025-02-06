@@ -176,8 +176,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             metric_conditions: dict[str, dict[str, Any]] = (
                 self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
-            self.set_order_sex_for_sample(sample, metric_conditions)
-            self.set_adapter_bases_for_sample(sample, metric_conditions)
+            self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            self.set_adapter_bases_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
@@ -248,7 +248,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def set_adapter_bases_for_sample(sample: Sample, metric_conditions: dict) -> None:
         """Calculate threshold for maximum number of adapter bases for a given sample"""
-        adapter_bases_threshold = (
+        adapter_bases_threshold: float = (
             sample.reads
             * NOVASEQ_SEQUENCING_READ_LENGTH
             * RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD
