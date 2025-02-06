@@ -110,9 +110,4 @@ ticket_handler = TicketHandler(
     env=app_config.freshdesk_environment,
 )
 
-keycloak_openid_client = KeycloakOpenID(
-    server_url=app_config.keycloak_client_url,
-    client_id=app_config.keycloak_client_id,
-    realm_name=app_config.keycloak_realm_name,
-    client_secret_key=app_config.keycloak_client_secret_key,
-)
+keycloak_client
