@@ -1,4 +1,3 @@
-from flask import redirect
 from cg.services.user.service import UserService
 from keycloak import KeycloakOpenID
 
