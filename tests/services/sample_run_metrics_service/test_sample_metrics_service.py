@@ -23,7 +23,9 @@ def test_get_pacbio_metrics(sample_run_metrics_service: SampleRunMetricsService)
 
     # WHEN fetching all PacbioSampleSequencingMetrics
     metrics_request = PacbioSequencingMetricsRequest()
-    metrics = sample_run_metrics_service.get_pacbio_metrics(metrics_request)
+    metrics: list[PacbioSequencingMetricsDTO] = sample_run_metrics_service.get_pacbio_metrics(
+        metrics_request
+    )
 
     # THEN metrics should be returned
     assert metrics
