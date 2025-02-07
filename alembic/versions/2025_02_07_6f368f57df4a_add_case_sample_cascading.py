@@ -20,7 +20,9 @@ case_constraint_name: str = "case_sample_ibfk_1"
 
 
 def upgrade():
-    op.drop_constraint(constraint_name=case_constraint_name, table_name="case_sample")
+    op.drop_constraint(
+        constraint_name=case_constraint_name, table_name="case_sample", type_="foreignkey"
+    )
     op.create_foreign_key(
         constraint_name=case_constraint_name,
         source_table="case_sample",
@@ -32,7 +34,9 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_constraint(constraint_name=case_constraint_name, table_name="case_sample")
+    op.drop_constraint(
+        constraint_name=case_constraint_name, table_name="case_sample", type_="foreignkey"
+    )
     op.create_foreign_key(
         constraint_name=case_constraint_name,
         source_table="case_sample",
