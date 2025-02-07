@@ -9,7 +9,6 @@ from cg.services.orders.storing.service_registry import StoringServiceRegistry
     "order_type, storing_service_fixture",
     [
         (OrderType.BALSAMIC, "store_generic_order_service"),
-        (OrderType.BALSAMIC_QC, "store_generic_order_service"),
         (OrderType.FASTQ, "store_fastq_order_service"),
         (OrderType.FLUFFY, "store_pool_order_service"),
         (OrderType.METAGENOME, "store_metagenome_order_service"),
@@ -26,7 +25,6 @@ from cg.services.orders.storing.service_registry import StoringServiceRegistry
     ],
     ids=[
         "balsamic",
-        "balsamic_qc",
         "fastq",
         "fluffy",
         "metagenome",
