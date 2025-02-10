@@ -11,7 +11,7 @@ from cg.services.orders.validation.errors.case_errors import (
     NewCaseWithoutAffectedSampleError,
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
-    RepeatedGenePanelsError,
+    RepeatedGenePanelsError, NormalOnlyWGS,
 )
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
@@ -19,7 +19,7 @@ from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     is_case_not_from_collaboration,
     is_double_normal,
-    is_double_tumour,
+    is_double_tumour, is_normal_only_wgs,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
@@ -126,6 +126,9 @@ def validate_number_of_normal_samples(
             errors.append(error)
         elif is_double_tumour(case=case, store=store):
             error = DoubleTumourError(case_index=case_index)
+            errors.append(error)
+        if is_normal_only_wgs(case=case, store=store):
+            error = NormalOnlyWGS(case_index=case_index)
             errors.append(error)
     return errors
 
