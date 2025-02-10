@@ -18,6 +18,7 @@ from cg.server.endpoints.sequencing_metrics.illumina_sequencing_metrics import F
 from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
     PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT,
 )
+from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import PACBIO_SEQUENCING_RUN_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -105,6 +106,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(ANALYSES_BLUEPRINT)
     app.register_blueprint(USERS_BLUEPRINT)
     app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SEQUENCING_RUN_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(SAMPLES_BLUEPRINT)

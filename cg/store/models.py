@@ -1162,6 +1162,9 @@ class PacbioSequencingRun(InstrumentRun):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
+    def to_dict(self):
+        return to_dict(self)
+
 
 class SampleRunMetrics(Base):
     """Parent model for the different types of sample run metrics."""
