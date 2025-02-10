@@ -16,9 +16,9 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_belong_to_collaboration,
     validate_one_sample_per_case,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.sample import RnaFusionSample
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.workflows.rna_fusion.models.sample import RNAFusionSample
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -82,9 +82,9 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWi
     assert isinstance(errors[0], RepeatedCaseNameError)
 
 
-def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
+def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
     # GIVEN an RNAFusion order with multiple samples in the same case
-    rnafusion_sample = RnaFusionSample(
+    rnafusion_sample = RNAFusionSample(
         container=ContainerEnum.tube,
         container_name="container_name",
         application="DummyAppTag",
@@ -108,7 +108,7 @@ def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
 
 
 def test_case_outside_of_collaboration(
-    mip_dna_order: MipDnaOrder, store_with_multiple_cases_and_samples: Store
+    mip_dna_order: MIPDNAOrder, store_with_multiple_cases_and_samples: Store
 ):
 
     # GIVEN a customer from outside the order's customer's collaboration

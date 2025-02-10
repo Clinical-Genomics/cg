@@ -3,7 +3,7 @@ from enum import StrEnum
 from cg.constants import DataDelivery
 
 
-class MipRnaDeliveryType(StrEnum):
+class MIPRNADeliveryType(StrEnum):
     ANALYSIS = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     SCOUT = DataDelivery.SCOUT

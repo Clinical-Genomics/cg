@@ -7,7 +7,7 @@ from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.utils import parse_buffer, parse_control
 
 
-class MipRnaSample(Sample):
+class MIPRNASample(Sample):
     age_at_sampling: float | None = None
     concentration_ng_ul: float | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control

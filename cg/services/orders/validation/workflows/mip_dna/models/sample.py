@@ -7,7 +7,7 @@ from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.utils import parse_buffer, parse_control
 
 
-class MipDnaSample(Sample):
+class MIPDNASample(Sample):
     age_at_sampling: float | None = None
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     elution_buffer: Annotated[ElutionBuffer | None, BeforeValidator(parse_buffer)] = None
