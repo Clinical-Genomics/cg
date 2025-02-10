@@ -22,6 +22,7 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 )
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
+from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
 from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.store.store import Store
 
@@ -102,3 +103,10 @@ def pac_bio_housekeeper_service(
         file_manager=pac_bio_run_file_manager,
         metrics_parser=pac_bio_metrics_parser,
     )
+
+
+@pytest.fixture
+def pacbio_sequencing_runs_service(
+    pacbio_sequencing_runs_store: Store,
+) -> PacbioSequencingRunsService:
+    return PacbioSequencingRunsService(pacbio_sequencing_runs_store)
