@@ -142,7 +142,6 @@ class BalsamicProtectedTags:
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
