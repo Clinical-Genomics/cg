@@ -18,6 +18,7 @@ from cg.services.orders.storing.service_registry import (
 )
 from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.service import OrderValidationService
+from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
@@ -93,6 +94,7 @@ delivery_message_service = DeliveryMessageService(store=db, trailblazer_api=anal
 summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
 case_service = CaseWebService(store=db)
 order_service = OrderService(store=db, status_service=summary_service)
+pacbio_sequencing_runs_service = PacbioSequencingRunsService(db)
 sample_service = SampleService(db)
 sample_run_metrics_service = SampleRunMetricsService(db)
 storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
