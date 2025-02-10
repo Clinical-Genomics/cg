@@ -51,23 +51,23 @@ new_analysis_enum = mysql.ENUM(*new_options)
 
 class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
+    RAREDISEASE: str = "raredisease"
     BALSAMIC_PON: str = "balsamic-pon"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
     FLUFFY: str = "fluffy"
     JASEN: str = "jasen"
-    MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
     NALLO: str = "nallo"
-    RAREDISEASE: str = "raredisease"
     RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
     TOMTE: str = "tomte"
+    MICROSALT: str = "microsalt"
 
 
 class Base(DeclarativeBase):
