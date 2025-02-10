@@ -1,11 +1,14 @@
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
+    ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
     MultipleSamplesInCaseError,
+    NewCaseWithoutAffectedSampleError,
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
@@ -21,6 +24,8 @@ from cg.services.orders.validation.rules.case.utils import (
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
 
@@ -121,5 +126,29 @@ def validate_number_of_normal_samples(
             errors.append(error)
         elif is_double_tumour(case=case, store=store):
             error = DoubleTumourError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_each_new_case_has_an_affected_sample(
+    order: MipDnaOrder, **kwargs
+) -> list[NewCaseWithoutAffectedSampleError]:
+    """Validates that each case in the order contains at least one sample with affected status."""
+    errors: list[NewCaseWithoutAffectedSampleError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if all(sample.status != StatusEnum.affected for sample in case.samples):
+            error = NewCaseWithoutAffectedSampleError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_existing_cases_have_an_affected_sample(
+    order: MipDnaOrder, store: Store, **kwargs
+) -> list[ExistingCaseWithoutAffectedSampleError]:
+    errors: list[ExistingCaseWithoutAffectedSampleError] = []
+    for case_index, case in order.enumerated_existing_cases:
+        db_case: DbCase = store.get_case_by_internal_id(case.internal_id)
+        if all(link.status != StatusEnum.affected for link in db_case.links):
+            error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
     return errors

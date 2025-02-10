@@ -9,7 +9,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.implementations.fastq_order_service import StoreFastqOrderService
 from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.store.models import Application, Case, Order, Sample
+from cg.store.models import Application, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -38,12 +38,14 @@ def test_store_order_data_in_status_db(
     db_samples: list[Sample] = store_to_submit_and_validate_orders._get_query(table=Sample).all()
     assert set(new_samples) == set(db_samples)
 
-    # THEN it should create one case for the analysis and one MAF case
+    # THEN it should create one case per sample and one MAF case
     cases: list[Case] = store_to_submit_and_validate_orders._get_query(table=Case).all()
-    assert len(cases) == 2
-    assert len(db_samples[0].links) == 2
+    assert len(cases) == 3
+    links: list[CaseSample] = store_to_submit_and_validate_orders._get_query(table=CaseSample).all()
+    assert len(links) == 3
     assert cases[0].data_analysis == Workflow.MIP_DNA
     assert cases[1].data_analysis == Workflow.RAW_DATA
+    assert cases[2].data_analysis == Workflow.RAW_DATA
 
     # THEN the analysis case has allowed data deliveries
     assert cases[1].data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
