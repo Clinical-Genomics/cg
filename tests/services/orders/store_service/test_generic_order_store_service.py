@@ -103,7 +103,6 @@ def test_store_balsamic_order(
     assert new_case.name == "BalsamicCase"
     assert new_case.data_analysis in [
         Workflow.BALSAMIC,
-        Workflow.BALSAMIC_QC,
         Workflow.BALSAMIC_UMI,
     ]
     assert new_case.data_delivery == str(DataDelivery.ANALYSIS_SCOUT)

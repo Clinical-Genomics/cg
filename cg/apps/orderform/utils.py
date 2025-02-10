@@ -3,7 +3,6 @@ from cg.models.orders.excel_sample import ExcelSample
 
 ORDER_TYPES_WITH_CASES = [
     OrderType.BALSAMIC,
-    OrderType.BALSAMIC_QC,
     OrderType.BALSAMIC_UMI,
     OrderType.MIP_DNA,
     OrderType.MIP_RNA,
