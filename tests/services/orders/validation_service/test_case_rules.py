@@ -144,7 +144,7 @@ def test_case_outside_of_collaboration(
     assert isinstance(errors[0], CaseOutsideOfCollaborationError)
 
 
-def test_new_case_without_affected_samples(mip_dna_order: MipDnaOrder):
+def test_new_case_without_affected_samples(mip_dna_order: MIPDNAOrder):
     """Tests that an error is returned if a new case does not contain any affected samples."""
 
     # GIVEN an order containing a case without any affected samples
@@ -164,7 +164,7 @@ def test_new_case_without_affected_samples(mip_dna_order: MipDnaOrder):
 
 
 def test_existing_case_without_affected_samples(
-    mip_dna_order: MipDnaOrder,
+    mip_dna_order: MIPDNAOrder,
     store_with_multiple_cases_and_samples: Store,
     case_id_with_single_sample: str,
 ):

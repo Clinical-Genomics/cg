@@ -24,7 +24,7 @@ from cg.services.orders.validation.rules.case.utils import (
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
 from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
@@ -131,7 +131,7 @@ def validate_number_of_normal_samples(
 
 
 def validate_each_new_case_has_an_affected_sample(
-    order: MipDnaOrder, **kwargs
+    order: MIPDNAOrder, **kwargs
 ) -> list[NewCaseWithoutAffectedSampleError]:
     """Validates that each case in the order contains at least one sample with affected status."""
     errors: list[NewCaseWithoutAffectedSampleError] = []
@@ -143,7 +143,7 @@ def validate_each_new_case_has_an_affected_sample(
 
 
 def validate_existing_cases_have_an_affected_sample(
-    order: MipDnaOrder, store: Store, **kwargs
+    order: MIPDNAOrder, store: Store, **kwargs
 ) -> list[ExistingCaseWithoutAffectedSampleError]:
     errors: list[ExistingCaseWithoutAffectedSampleError] = []
     for case_index, case in order.enumerated_existing_cases:
