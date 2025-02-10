@@ -4,6 +4,7 @@ from cg.constants import DataDelivery
 
 
 class MIPRNADeliveryType(StrEnum):
+    # test
     ANALYSIS = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     SCOUT = DataDelivery.SCOUT
