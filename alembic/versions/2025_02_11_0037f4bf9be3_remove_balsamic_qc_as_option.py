@@ -46,6 +46,7 @@ def upgrade():
         column_name="order_type",
         existing_type=sa.Enum(*old_order_types),
         type_=sa.Enum(*new_order_types),
+        nullable=False,
     )
 
 
@@ -55,4 +56,5 @@ def downgrade():
         column_name="order_type",
         existing_type=sa.Enum(*new_order_types),
         type_=sa.Enum(*old_order_types),
+        nullable=False,
     )
