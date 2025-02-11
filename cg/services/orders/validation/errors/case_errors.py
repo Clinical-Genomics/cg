@@ -59,7 +59,7 @@ class DoubleTumourError(NumberOfNormalSamplesError):
 
 
 class NormalOnlyWGSError(NumberOfNormalSamplesError):
-    message: str = "It is not possible to run the analysis only one normal WGS sample."
+    message: str = "It is not possible to run the analysis on only one normal WGS sample."
 
 
 class NewCaseWithoutAffectedSampleError(CaseError):
