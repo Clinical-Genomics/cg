@@ -1,4 +1,3 @@
-from cg.cli.set.base import sample
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
@@ -10,7 +9,6 @@ from cg.services.orders.validation.workflows.balsamic_umi.models.sample import B
 from cg.store.models import Case as DbCase, Application
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
-from tests.cli.conftest import application_tag
 
 
 def contains_duplicates(input_list: list) -> bool:
