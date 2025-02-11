@@ -7,7 +7,6 @@ from cg.constants import (
     REQUIRED_CASE_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
-    REQUIRED_DATA_ANALYSIS_FIELDS,
     REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_BALSAMIC_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS,
@@ -15,7 +14,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Workflow,
 )
 from cg.constants.scout import ScoutUploadKey
 from cg.constants.tb import AnalysisType
@@ -143,11 +141,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return a dictionary with the delivery report required fields for Balsamic."""
         analysis_type: str = case.data_analysis.type
-        required_data_analysis_fields: list[str] = (
-            REQUIRED_DATA_ANALYSIS_FIELDS
-            if self.analysis_api.workflow == Workflow.BALSAMIC_QC
-            else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
-        )
+        required_data_analysis_fields: list[str] = REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
             required_sample_metadata_fields: list[str] = (

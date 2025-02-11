@@ -32,7 +32,7 @@ def test_store_mip_order(
     new_case = new_cases[0]
     assert new_case.name == "MipCase1"
     assert set(new_case.panels) == {"AID"}
-    assert new_case.priority_human == Priority.standard.name
+    assert new_case.priority_human == Priority.priority.name
 
     assert len(new_case.links) == 3
     new_link = new_case.links[2]
@@ -103,7 +103,6 @@ def test_store_balsamic_order(
     assert new_case.name == "BalsamicCase"
     assert new_case.data_analysis in [
         Workflow.BALSAMIC,
-        Workflow.BALSAMIC_QC,
         Workflow.BALSAMIC_UMI,
     ]
     assert new_case.data_delivery == str(DataDelivery.ANALYSIS_SCOUT)

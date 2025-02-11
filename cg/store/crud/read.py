@@ -15,11 +15,12 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
-from cg.server.dto.samples.collaborator_samples_request import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.services.orders.order_service.models import OrderQueryParams
+from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
 from cg.store.exc import EntryNotFoundError
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
@@ -82,12 +83,16 @@ from cg.store.models import (
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    InstrumentRun,
     Invoice,
     Order,
     Organism,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     Panel,
     Pool,
+    RunDevice,
     Sample,
     SampleRunMetrics,
     User,
@@ -220,19 +225,24 @@ class ReadHandler(BaseHandler):
         customers: list[Customer] | None,
         action: str | None,
         case_search: str | None,
-        limit: int | None = 30,
-    ) -> list[Case]:
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Case], int]:
         """
-        Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
+        Return cases by customers, action, and matching names or internal ids, plus the total
+        number of cases matching the filter criteria. A limit and offset can be applied to the
+        query for pagination purposes.
 
         Args:
             customers (list[Customer] | None): A list of customer objects to filter cases by.
             action (str | None): The action string to filter cases by.
             case_search (str | None): The case search string to filter cases by.
-            limit (int | None, default=30): The maximum number of cases to return.
-
+            limit (int | None, default=50): The maximum number of cases to return.
+            offset (int, default=0): The offset number of cases for the query.
         Returns:
-            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
+            list[Case]: A list of filtered cases sorted by creation time and truncated
+                        by the limit parameter.
+            int: The total number of cases returned before truncation.
         """
         filter_functions: list[Callable] = [
             CaseFilter.BY_CUSTOMER_ENTRY_IDS,
@@ -252,7 +262,8 @@ class ReadHandler(BaseHandler):
             case_search=case_search,
             customer_entry_ids=customer_entry_ids,
         )
-        return filtered_cases.limit(limit=limit).all()
+        total: int = filtered_cases.count()
+        return filtered_cases.offset(offset).limit(limit=limit).all(), total
 
     def get_cases_by_customer_workflow_and_case_search(
         self,
@@ -616,9 +627,27 @@ class ReadHandler(BaseHandler):
         return application.expected_reads
 
     def get_samples_by_customers_and_pattern(
-        self, *, customers: list[Customer] | None = None, pattern: str = None
-    ) -> list[Sample]:
-        """Get samples by customer and sample internal id  or sample name pattern."""
+        self,
+        *,
+        customers: list[Customer] | None = None,
+        pattern: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Sample], int]:
+        """
+        Return the samples by customer and internal id or name pattern, plus the total number of
+        samples matching the filter criteria. A limit and offset can be applied to the query for
+        pagination purposes.
+
+        Args:
+            customers (list[Customer] | None): A list of customer objects to filter cases by.
+            pattern (str | None): The sample internal id or name pattern to search for.
+            limit (int | None, default=50): The maximum number of samples to return.
+            offset (int, default=0): The offset number of samples for the query.
+        Returns:
+            list[Sample]: A list of filtered samples truncated by the limit parameter.
+            int: The total number of samples returned before truncation.
+        """
         samples: Query = self._get_query(table=Sample)
         filter_functions: list[SampleFilter] = []
         if customers:
@@ -628,12 +657,14 @@ class ReadHandler(BaseHandler):
         if pattern:
             filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        return apply_sample_filter(
+        samples: Query = apply_sample_filter(
             samples=samples,
             customers=customers,
             search_pattern=pattern,
             filter_functions=filter_functions,
-        ).all()
+        )
+        total: int = samples.count()
+        return samples.offset(offset).limit(limit).all(), total
 
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
         customer: Customer | None = self.get_customer_by_internal_id(request.customer)
@@ -675,24 +706,6 @@ class ReadHandler(BaseHandler):
         """Get samples of customer with given subject id."""
         return self._get_samples_by_customer_and_subject_id_query(
             customer_internal_id=customer_internal_id, subject_id=subject_id
-        ).all()
-
-    def get_samples_by_customer_ids_and_subject_id_and_is_tumour(
-        self, customer_ids: list[int], subject_id: str, is_tumour: bool
-    ) -> list[Sample]:
-        """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
-        samples = self._get_query(table=Sample)
-        filter_functions = [
-            SampleFilter.BY_CUSTOMER_ENTRY_IDS,
-            SampleFilter.BY_SUBJECT_ID,
-            SampleFilter.BY_TUMOUR,
-        ]
-        return apply_sample_filter(
-            samples=samples,
-            customer_entry_ids=customer_ids,
-            subject_id=subject_id,
-            is_tumour=is_tumour,
-            filter_functions=filter_functions,
         ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
@@ -1643,8 +1656,12 @@ class ReadHandler(BaseHandler):
         prep_categories: list[SeqLibraryPrepCategory],
         collaborators: set[Customer],
     ) -> Query:
-        """Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
-        sample and within the given list of prep categories."""
+        """
+        Returns a sample query with the same subject_id, tumour status and within the collaborators of the given
+        sample and within the given list of prep categories.
+        Raises:
+            CgDataError if the number of samples matching the criteria is not 1
+        """
 
         sample_application_version_query: Query = self._get_join_sample_application_version_query()
 
@@ -1665,48 +1682,145 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             ],
         )
+        if samples.count() != 1:
+            samples: list[Sample] = samples.all()
+            raise CgDataError(
+                f"No unique DNA sample could be found: found {len(samples)} samples: {[sample.internal_id for sample in samples]}"
+            )
         return samples
 
     def get_uploaded_related_dna_cases(self, rna_case: Case) -> list[Case]:
-        """Returns all uploaded DNA cases ids related to the given RNA case."""
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+
+        Raises:
+            CgDataError if no related DNA cases are found
+        """
 
         related_dna_cases: list[Case] = []
+        collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
-
-            collaborators: set[Customer] = rna_sample.customer.collaborators
-
-            related_dna_samples_query: Query = self._get_related_samples_query(
-                sample=rna_sample,
-                prep_categories=DNA_PREP_CATEGORIES,
-                collaborators=collaborators,
+            uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
+                rna_sample=rna_sample, collaborators=collaborators
             )
-
-            dna_samples_cases_analysis_query: Query = (
-                related_dna_samples_query.join(Sample.links).join(CaseSample.case).join(Analysis)
-            )
-
-            dna_samples_cases_analysis_query: Query = apply_case_filter(
-                cases=dna_samples_cases_analysis_query,
-                workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-                customer_entry_ids=[customer.id for customer in collaborators],
-                filter_functions=[
-                    CaseFilter.BY_WORKFLOWS,
-                    CaseFilter.BY_CUSTOMER_ENTRY_IDS,
-                ],
-            )
-
-            uploaded_dna_cases: list[Case] = (
-                apply_analysis_filter(
-                    analyses=dna_samples_cases_analysis_query,
-                    filter_functions=[AnalysisFilter.IS_UPLOADED],
-                )
-                .with_entities(Case)
-                .all()
-            )
-
-            related_dna_cases.extend([case for case in uploaded_dna_cases])
+            related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
-            raise CaseNotFoundError(
+            raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
             )
         return related_dna_cases
+
+    def _get_related_uploaded_cases_for_rna_sample(
+        self, rna_sample: Sample, collaborators: set[Customer]
+    ) -> list[Case]:
+        if not rna_sample.subject_id:
+            raise CgDataError(
+                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
+            )
+
+        related_dna_samples_query: Query = self._get_related_samples_query(
+            sample=rna_sample,
+            prep_categories=DNA_PREP_CATEGORIES,
+            collaborators=collaborators,
+        )
+        customer_ids: list[int] = [customer.id for customer in collaborators]
+        return self._get_uploaded_dna_cases(
+            sample_query=related_dna_samples_query, customer_ids=customer_ids
+        )
+
+    def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+        """Filters the provided sample_query on the customer_ids, DNA workflows supporting
+        Scout uploads and on cases having an uploaded analysis. Returns the matching cases."""
+        dna_samples_cases_analysis_query: Query = (
+            sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
+        )
+        dna_samples_cases_analysis_query: Query = apply_case_filter(
+            cases=dna_samples_cases_analysis_query,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+            customer_entry_ids=customer_ids,
+            filter_functions=[
+                CaseFilter.BY_WORKFLOWS,
+                CaseFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+        uploaded_dna_cases: list[Case] = (
+            apply_analysis_filter(
+                analyses=dna_samples_cases_analysis_query,
+                filter_functions=[AnalysisFilter.IS_UPLOADED],
+            )
+            .with_entities(Case)
+            .all()
+        )
+        return uploaded_dna_cases
+
+    def get_related_dna_cases_with_samples(self, rna_case: Case) -> list[RNADNACollection]:
+        """
+        Finds all cases fulfilling the following criteria:
+        1. The case should be uploaded
+        2. The case should belong to a customer within the collaboration of the provided case's
+        3. It should contain exactly one DNA sample matching one of the provided case's RNA samples in the following way:
+            1. The DNA sample and the RNA sample should have matching subject_ids
+            2. The DNA sample and the RNA sample should have matching is_tumour
+        4. The DNA sample found in 3. should also:
+            1. Have an application within a DNA prep category
+            2. Belong to a customer within the provided collaboration
+
+        The cases are bundled by the DNA sample found in 3.
+        """
+        collaborators: set[Customer] = rna_case.customer.collaborators
+        collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
+        rna_dna_collections: list[RNADNACollection] = []
+        for sample in rna_case.samples:
+            related_dna_samples: Query = self._get_related_samples_query(
+                sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
+            )
+            dna_sample_name: str = related_dna_samples.first().name
+            dna_cases: list[Case] = self._get_uploaded_dna_cases(
+                sample_query=related_dna_samples, customer_ids=collaborator_ids
+            )
+            dna_case_ids: list[str] = [case.internal_id for case in dna_cases]
+            collection = RNADNACollection(
+                rna_sample_id=sample.internal_id,
+                dna_sample_name=dna_sample_name,
+                dna_case_ids=dna_case_ids,
+            )
+            rna_dna_collections.append(collection)
+        return rna_dna_collections
+
+    def get_pacbio_sample_sequencing_metrics(
+        self, sample_id: str | None, smrt_cell_id: str | None
+    ) -> list[PacbioSampleSequencingMetrics]:
+        """
+        Fetches data from PacbioSampleSequencingMetrics filtered on sample_internal_id and/or smrt_cell_id.
+        """
+        sequencing_metrics: Query = (
+            self._get_query(table=PacbioSampleSequencingMetrics)
+            .join(Sample)
+            .join(InstrumentRun)
+            .join(RunDevice)
+        )
+        if sample_id:
+            sequencing_metrics = sequencing_metrics.filter(Sample.internal_id == sample_id)
+        if smrt_cell_id:
+            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
+        return sequencing_metrics.all()
+
+    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
+        """
+        Fetches data from PacbioSequencingRunDTO filtered on run name.
+        Raises:
+            EntryNotFoundError if no sequencing runs are found for the run name
+        """
+        runs: Query = self._get_query(table=PacbioSequencingRun)
+        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
+        if runs.count() == 0:
+            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
+        return runs.all()

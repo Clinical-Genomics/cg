@@ -1,9 +1,10 @@
 from http import HTTPStatus
+
 from flask import Blueprint, abort, g, jsonify, request
 
 from cg.server.endpoints.utils import before_request
-from cg.store.models import Customer, Pool
 from cg.server.ext import db
+from cg.store.models import Customer, Pool
 
 POOLS_BLUEPRINT = Blueprint("pools", __name__, url_prefix="/api/v1")
 POOLS_BLUEPRINT.before_request(before_request)
