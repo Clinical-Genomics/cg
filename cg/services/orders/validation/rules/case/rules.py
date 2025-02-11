@@ -119,8 +119,7 @@ def validate_at_most_two_samples_per_case(
 def validate_number_of_normal_samples(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
 ) -> list[NumberOfNormalSamplesError]:
-    """Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample.
-    Validates that Balsamic cases with one WGS sample only contain a tumour sample.
+    """Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample, that cases with one WGS sample only contain a tumour sample.
     Only applicable to Balsamic and Balsamic-UMI."""
     errors: list[NumberOfNormalSamplesError] = []
     for case_index, case in order.enumerated_new_cases:

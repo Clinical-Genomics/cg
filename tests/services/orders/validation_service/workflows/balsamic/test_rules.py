@@ -3,7 +3,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleTumourError,
     MoreThanTwoSamplesInCaseError,
     NumberOfNormalSamplesError,
-    NormalOnlyWGS,
+    NormalOnlyWGSError,
 )
 from cg.services.orders.validation.errors.case_sample_errors import CaptureKitMissingError
 from cg.services.orders.validation.rules.case.rules import (
@@ -121,7 +121,7 @@ def test_normal_only_wgs_in_case_with_new_sample(valid_order: BalsamicOrder, bas
     assert errors
 
     # THEN the error should concern that case having only one sample that is normal and WGS
-    assert isinstance(errors[0], NormalOnlyWGS)
+    assert isinstance(errors[0], NormalOnlyWGSError)
     assert errors[0].case_index == 0
 
 
@@ -141,5 +141,5 @@ def test_normal_only_wgs_in_case_with_existing_sample(
     assert errors
 
     # THEN the error should concern that case having only one sample that is normal and WGS
-    assert isinstance(errors[0], NormalOnlyWGS)
+    assert isinstance(errors[0], NormalOnlyWGSError)
     assert errors[0].case_index == 0
