@@ -1,5 +1,4 @@
 import pytest
-from alembic.util import status
 
 from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
