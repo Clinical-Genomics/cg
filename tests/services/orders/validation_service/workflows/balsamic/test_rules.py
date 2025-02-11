@@ -2,7 +2,8 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleNormalError,
     DoubleTumourError,
     MoreThanTwoSamplesInCaseError,
-    NumberOfNormalSamplesError, NormalOnlyWGS,
+    NumberOfNormalSamplesError,
+    NormalOnlyWGS,
 )
 from cg.services.orders.validation.errors.case_sample_errors import CaptureKitMissingError
 from cg.services.orders.validation.rules.case.rules import (
@@ -113,7 +114,9 @@ def test_normal_only_wgs_in_case(valid_order: BalsamicOrder, base_store: Store):
     valid_order.cases[0].samples[0].tumour = True
 
     # WHEN validating that the order contains only one sample that is normal and WGS
-    errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(order=valid_order, store=base_store)
+    errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
+        order=valid_order, store=base_store
+    )
 
     # THEN an error should be returned
     assert errors
