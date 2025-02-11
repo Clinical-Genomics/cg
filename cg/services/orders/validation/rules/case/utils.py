@@ -36,7 +36,7 @@ def get_number_of_tumours(case: BalsamicCase | BalsamicUmiCase, store: Store) ->
 
 
 def is_normal_only_wgs(case: BalsamicCase | BalsamicUmiCase, store: Store) -> bool:
-     return len(case.samples) == 1 and _is_sample_wgs_normal(sample=case.samples[0], store=store)
+    return len(case.samples) == 1 and _is_sample_wgs_normal(sample=case.samples[0], store=store)
 
 
 def _is_sample_wgs_normal(

@@ -6,6 +6,7 @@ from cg.services.orders.validation.errors.case_errors import (
     NormalOnlyWGSError,
 )
 from cg.services.orders.validation.errors.case_sample_errors import CaptureKitMissingError
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_at_most_two_samples_per_case,
     validate_number_of_normal_samples,
@@ -17,6 +18,11 @@ from cg.services.orders.validation.workflows.balsamic.models.order import Balsam
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.store.models import Application
 from cg.store.store import Store
+from tests.services.orders.validation_service.workflows.balsamic.conftest import (
+    create_case,
+    create_order,
+)
+from tests.store_helpers import StoreHelpers
 
 
 def test_validate_capture_kit_required(
@@ -106,10 +112,12 @@ def test_double_normal_samples_in_case(
     assert errors[0].case_index == 0
 
 
-def test_normal_only_wgs_in_case_with_new_sample(valid_order: BalsamicOrder, base_store: Store):
+def test_normal_only_wgs_in_case_with_new_sample(
+    valid_order: BalsamicOrder, base_store: Store, wgs_application_tag: str
+):
 
     # GIVEN that the sample in the order is WGS and normal
-    valid_order.cases[0].samples[0].application = "WGSPCFC030"
+    valid_order.cases[0].samples[0].application = wgs_application_tag
     valid_order.cases[0].samples[0].tumour = False
 
     # WHEN validating that the order contains only one sample that is normal and WGS
@@ -123,18 +131,31 @@ def test_normal_only_wgs_in_case_with_new_sample(valid_order: BalsamicOrder, bas
     # THEN the error should concern that case having only one sample that is normal and WGS
     assert isinstance(errors[0], NormalOnlyWGSError)
     assert errors[0].case_index == 0
+    assert len(valid_order.cases[0].samples) == 1
 
 
 def test_normal_only_wgs_in_case_with_existing_sample(
-    valid_order_with_existing_sample: BalsamicOrder, store_with_existing_sample: Store
+    store_to_submit_and_validate_orders: Store, helpers: StoreHelpers, wgs_application_tag: str
 ):
 
-    # GIVEN an order with an existing sample and a store with the corresponding sample
-    # GIVEN that the sample is normal and WGS
+    # GIVEN a store with a wgs normal sample
+    helpers.add_sample(
+        store=store_to_submit_and_validate_orders,
+        application_tag=wgs_application_tag,
+        internal_id="wgs_normal_sample",
+        is_tumour=False,
+    )
+
+    # GIVEN an order with this existing sample
+    sample = ExistingSample(
+        internal_id="wgs_normal_sample",
+    )
+    case = create_case([sample])
+    order = create_order([case])
 
     # WHEN validating if the order contains only one sample that is normal and WGS
     errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
-        order=valid_order_with_existing_sample, store=store_with_existing_sample
+        order=order, store=store_to_submit_and_validate_orders
     )
 
     # THEN an error should be returned
@@ -143,3 +164,4 @@ def test_normal_only_wgs_in_case_with_existing_sample(
     # THEN the error should concern that case having only one sample that is normal and WGS
     assert isinstance(errors[0], NormalOnlyWGSError)
     assert errors[0].case_index == 0
+    assert len(order.cases[0].samples) == 1

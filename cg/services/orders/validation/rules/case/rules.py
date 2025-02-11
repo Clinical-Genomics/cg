@@ -12,7 +12,7 @@ from cg.services.orders.validation.errors.case_errors import (
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
-    NormalOnlyWGS,
+    NormalOnlyWGSError,
 )
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
@@ -130,7 +130,7 @@ def validate_number_of_normal_samples(
             error = DoubleTumourError(case_index=case_index)
             errors.append(error)
         if is_normal_only_wgs(case=case, store=store):
-            error = NormalOnlyWGS(case_index=case_index)
+            error = NormalOnlyWGSError(case_index=case_index)
             errors.append(error)
     return errors
 
