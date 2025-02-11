@@ -85,8 +85,8 @@ def store_with_existing_sample(base_store: Store) -> Store:
     wgs_normal_sample.customer = customer
     wgs_application: Application = base_store.get_application_by_tag("WGSPCFC030")
     wgs_normal_sample.application_version_id = wgs_application.versions[0].id
-    base_store.session.add(wgs_normal_sample)
-    base_store.session.commit()
+    base_store.add_item_to_store(wgs_normal_sample)
+    base_store.commit_to_store()
     return base_store
 
 

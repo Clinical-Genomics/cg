@@ -130,9 +130,9 @@ def test_normal_only_wgs_in_case_with_existing_sample(
 ):
 
     # GIVEN an order with an existing sample and a store with the corresponding sample
-    # GIVEN that the sample in normal and WGS
+    # GIVEN that the sample is normal and WGS
 
-    # WHEN validating that the order contains only one sample that is normal and WGS
+    # WHEN validating if the order contains only one sample that is normal and WGS
     errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
         order=valid_order_with_existing_sample, store=store_with_existing_sample
     )
