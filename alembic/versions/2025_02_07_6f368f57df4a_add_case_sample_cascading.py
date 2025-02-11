@@ -1,7 +1,7 @@
 """Add case sample cascading
 
 Revision ID: 6f368f57df4a
-Revises: 5552c02a4966
+Revises: 0037f4bf9be3
 Create Date: 2025-02-07 11:25:01.936922
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "6f368f57df4a"
-down_revision = "5552c02a4966"
+down_revision = "0037f4bf9be3"
 branch_labels = None
 depends_on = None
 
