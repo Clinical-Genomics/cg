@@ -42,10 +42,6 @@ order_service_mapping = {
         OrderLimsService,
         StoreCaseOrderService,
     ),
-    OrderType.BALSAMIC_QC: (
-        OrderLimsService,
-        StoreCaseOrderService,
-    ),
     OrderType.BALSAMIC_UMI: (
         OrderLimsService,
         StoreCaseOrderService,
