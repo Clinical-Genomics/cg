@@ -1,16 +1,18 @@
 import pytest
+from alembic.util import status
 
 from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.constants import MINIMUM_VOLUME, ElutionBuffer
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
 from cg.services.orders.validation.service import OrderValidationService
 from cg.services.orders.validation.workflows.balsamic.constants import BalsamicDeliveryType
 from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.store.models import Application, Customer, User
+from cg.store.models import Application, Customer, User, Sample
 from cg.store.store import Store
 
 
@@ -35,7 +37,13 @@ def create_sample(id: int) -> BalsamicSample:
     )
 
 
-def create_case(samples: list[BalsamicSample]) -> BalsamicCase:
+def create_existing_sample() -> ExistingSample:
+    return ExistingSample(
+        internal_id="internal_id",
+    )
+
+
+def create_case(samples: list[BalsamicSample | ExistingSample]) -> BalsamicCase:
     return BalsamicCase(
         name="name",
         samples=samples,
@@ -60,6 +68,27 @@ def valid_order() -> BalsamicOrder:
     sample = create_sample(1)
     case = create_case([sample])
     return create_order([case])
+
+
+@pytest.fixture
+def valid_order_with_existing_sample() -> BalsamicOrder:
+    sample = create_existing_sample()
+    case = create_case([sample])
+    return create_order([case])
+
+
+@pytest.fixture
+def store_with_existing_sample(base_store: Store) -> Store:
+    wgs_normal_sample: Sample = base_store.add_sample(
+        name="wgs_normal_sample", sex="female", internal_id="internal_id"
+    )
+    customer: Customer = (base_store.get_customers())[0]
+    wgs_normal_sample.customer = customer
+    wgs_application: Application = base_store.get_application_by_tag("WGSPCFC030")
+    wgs_normal_sample.application_version_id = wgs_application.versions[0].id
+    base_store.session.add(wgs_normal_sample)
+    base_store.session.commit()
+    return base_store
 
 
 @pytest.fixture

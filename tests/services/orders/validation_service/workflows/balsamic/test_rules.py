@@ -17,7 +17,6 @@ from cg.services.orders.validation.workflows.balsamic.models.order import Balsam
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.store.models import Application
 from cg.store.store import Store
-from tests.services.orders.summary_service.conftest import order
 
 
 def test_validate_capture_kit_required(
@@ -107,15 +106,35 @@ def test_double_normal_samples_in_case(
     assert errors[0].case_index == 0
 
 
-def test_normal_only_wgs_in_case(valid_order: BalsamicOrder, base_store: Store):
+def test_normal_only_wgs_in_case_with_new_sample(valid_order: BalsamicOrder, base_store: Store):
 
-    # GIVEN that the sample in the order is WGS and a tumour
-    valid_order.cases[0].samples[0].sample.application = "WGSPCFC030"
-    valid_order.cases[0].samples[0].tumour = True
+    # GIVEN that the sample in the order is WGS and normal
+    valid_order.cases[0].samples[0].application = "WGSPCFC030"
+    valid_order.cases[0].samples[0].tumour = False
 
     # WHEN validating that the order contains only one sample that is normal and WGS
     errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
         order=valid_order, store=base_store
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern that case having only one sample that is normal and WGS
+    assert isinstance(errors[0], NormalOnlyWGS)
+    assert errors[0].case_index == 0
+
+
+def test_normal_only_wgs_in_case_with_existing_sample(
+    valid_order_with_existing_sample: BalsamicOrder, store_with_existing_sample: Store
+):
+
+    # GIVEN an order with an existing sample and a store with the corresponding sample
+    # GIVEN that the sample in normal and WGS
+
+    # WHEN validating that the order contains only one sample that is normal and WGS
+    errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
+        order=valid_order_with_existing_sample, store=store_with_existing_sample
     )
 
     # THEN an error should be returned
