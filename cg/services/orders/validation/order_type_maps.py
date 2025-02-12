@@ -28,12 +28,12 @@ from cg.services.orders.validation.workflows.microsalt.models.order import Micro
 from cg.services.orders.validation.workflows.microsalt.validation_rules import (
     MICROSALT_SAMPLE_RULES,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.workflows.mip_dna.validation_rules import (
     MIP_DNA_CASE_RULES,
     MIP_DNA_CASE_SAMPLE_RULES,
 )
-from cg.services.orders.validation.workflows.mip_rna.models.order import MipRnaOrder
+from cg.services.orders.validation.workflows.mip_rna.models.order import MIPRNAOrder
 from cg.services.orders.validation.workflows.mip_rna.validation_rules import (
     MIP_RNA_CASE_RULES,
     MIP_RNA_CASE_SAMPLE_RULES,
@@ -45,9 +45,9 @@ from cg.services.orders.validation.workflows.pacbio_long_read.models.order impor
 from cg.services.orders.validation.workflows.pacbio_long_read.validation_rules import (
     PACBIO_LONG_READ_SAMPLE_RULES,
 )
-from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
+from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
 from cg.services.orders.validation.workflows.rml.validation_rules import RML_SAMPLE_RULES
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.workflows.rna_fusion.validation_rules import (
     RNAFUSION_CASE_RULES,
     RNAFUSION_CASE_SAMPLE_RULES,
@@ -132,11 +132,11 @@ ORDER_TYPE_MODEL_MAP: dict[OrderType, type[Order]] = {
     OrderType.METAGENOME: MetagenomeOrder,
     OrderType.MICROBIAL_FASTQ: MicrobialFastqOrder,
     OrderType.MICROSALT: MicrosaltOrder,
-    OrderType.MIP_DNA: MipDnaOrder,
-    OrderType.MIP_RNA: MipRnaOrder,
+    OrderType.MIP_DNA: MIPDNAOrder,
+    OrderType.MIP_RNA: MIPRNAOrder,
     OrderType.PACBIO_LONG_READ: PacbioOrder,
-    OrderType.RML: RmlOrder,
-    OrderType.RNAFUSION: RnaFusionOrder,
+    OrderType.RML: RMLOrder,
+    OrderType.RNAFUSION: RNAFusionOrder,
     OrderType.SARS_COV_2: MutantOrder,
     OrderType.TAXPROFILER: TaxprofilerOrder,
     OrderType.TOMTE: TomteOrder,

@@ -8,7 +8,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.rules.case_sample.pedigree.models import FamilyTree, Node
-from cg.services.orders.validation.workflows.mip_dna.models.sample import MipDnaSample
+from cg.services.orders.validation.workflows.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 
 
@@ -49,7 +49,7 @@ def get_error(node: Node, parent_type: str) -> PedigreeError:
 def get_mother_error(node: Node) -> PedigreeError:
     """Called when the node's 'mother' creates a cycle in the family tree. For clearer feedback
     we distinguish between the sample being its own mother, and other more complex situations."""
-    sample: TomteSample | MipDnaSample | ExistingSample = node.sample
+    sample: TomteSample | MIPDNASample | ExistingSample = node.sample
     if node.sample_name == sample.mother:
         return SampleIsOwnMotherError(sample_index=node.sample_index, case_index=node.case_index)
     return DescendantAsMotherError(sample_index=node.sample_index, case_index=node.case_index)

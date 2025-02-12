@@ -58,6 +58,10 @@ class DoubleTumourError(NumberOfNormalSamplesError):
     message: str = "Only one tumour sample is allowed per case"
 
 
+class NormalOnlyWGSError(NumberOfNormalSamplesError):
+    message: str = "It is not possible to run the analysis on only one normal WGS sample."
+
+
 class NewCaseWithoutAffectedSampleError(CaseError):
     field: str = "sample_errors"
     message: str = "Each case needs at least one affected sample"
