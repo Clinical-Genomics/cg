@@ -65,10 +65,10 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
             ),
             sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
             ),
             vcf_str=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
