@@ -7,9 +7,9 @@ have always been validated before calling the function.
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.services.orders.storing.implementations.case_order_service import StoreCaseOrderService
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.orders.validation.workflows.mip_rna.models.order import MipRnaOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.workflows.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -17,7 +17,7 @@ from cg.store.store import Store
 
 def test_store_mip_order(
     store_to_submit_and_validate_orders: Store,
-    mip_dna_order: MipDnaOrder,
+    mip_dna_order: MIPDNAOrder,
     store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a basic store with no samples nor cases
@@ -57,7 +57,7 @@ def test_store_mip_order(
 
 def test_store_mip_rna_order(
     store_to_submit_and_validate_orders: Store,
-    mip_rna_order: MipRnaOrder,
+    mip_rna_order: MIPRNAOrder,
     store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a basic store with no samples nor cases
@@ -120,7 +120,7 @@ def test_store_balsamic_order(
 
 def test_store_rna_fusion_order(
     store_to_submit_and_validate_orders: Store,
-    rnafusion_order: RnaFusionOrder,
+    rnafusion_order: RNAFusionOrder,
     store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a store with no samples nor cases

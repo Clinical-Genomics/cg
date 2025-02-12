@@ -3,7 +3,7 @@ from enum import StrEnum
 from cg.constants.constants import DataDelivery
 
 
-class RnaFusionDeliveryType(StrEnum):
+class RNAFusionDeliveryType(StrEnum):
     ANALYSIS_FILES = DataDelivery.ANALYSIS_FILES
     ANALYSIS_SCOUT = DataDelivery.ANALYSIS_SCOUT
     SCOUT = DataDelivery.SCOUT
