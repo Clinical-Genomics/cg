@@ -41,8 +41,8 @@ from cg.services.orders.validation.workflows.fastq.models.order import FastqOrde
 from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
 from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
 from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
-from cg.services.orders.validation.workflows.rml.models.sample import RmlSample
+from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
+from cg.services.orders.validation.workflows.rml.models.sample import RMLSample
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -180,7 +180,7 @@ def test_validate_well_position_format(valid_microsalt_order: MicrosaltOrder):
     assert errors[0].sample_index == 0
 
 
-def test_validate_well_position_rml_format(rml_order: RmlOrder):
+def test_validate_well_position_rml_format(rml_order: RMLOrder):
 
     # GIVEN a RML order with a sample with an invalid well position
     rml_order.samples[0].well_position_rml = "J:4"
@@ -341,7 +341,7 @@ def test_validate_buffer_skip_rc_condition(fastq_order: FastqOrder):
     assert isinstance(errors[0], BufferInvalidError)
 
 
-def test_validate_pools_contain_multiple_applications(rml_order: RmlOrder):
+def test_validate_pools_contain_multiple_applications(rml_order: RMLOrder):
 
     # GIVEN a pooled order with the same pool containing multiple applications
     rml_order.samples[0].pool = "pool"
@@ -360,7 +360,7 @@ def test_validate_pools_contain_multiple_applications(rml_order: RmlOrder):
     assert len(errors) == len(samples)
 
 
-def test_validate_pools_contain_multiple_priorities(rml_order: RmlOrder):
+def test_validate_pools_contain_multiple_priorities(rml_order: RMLOrder):
 
     # GIVEN a pooled order with the same pool containing multiple priorities
     rml_order.samples[0].pool = "pool"
@@ -380,10 +380,10 @@ def test_validate_pools_contain_multiple_priorities(rml_order: RmlOrder):
     assert len(errors) == len(samples)
 
 
-def test_validate_missing_index_number(rml_order: RmlOrder):
+def test_validate_missing_index_number(rml_order: RMLOrder):
 
     # GIVEN an indexed order with a missing index number
-    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample: RMLSample = rml_order.samples[0]
     erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
     erroneous_sample.index_number = None
 
@@ -398,10 +398,10 @@ def test_validate_missing_index_number(rml_order: RmlOrder):
     assert errors[0].sample_index == 0
 
 
-def test_validate_index_number_out_of_range(rml_order: RmlOrder):
+def test_validate_index_number_out_of_range(rml_order: RMLOrder):
 
     # GIVEN an indexed order with an index number out of range
-    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample: RMLSample = rml_order.samples[0]
     erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
     erroneous_sample.index_number = len(INDEX_SEQUENCES[erroneous_sample.index]) + 1
 
@@ -416,10 +416,10 @@ def test_validate_index_number_out_of_range(rml_order: RmlOrder):
     assert errors[0].sample_index == 0
 
 
-def test_validate_missing_index_sequence(rml_order: RmlOrder):
+def test_validate_missing_index_sequence(rml_order: RMLOrder):
 
     # GIVEN an indexed order with a missing index sequence
-    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample: RMLSample = rml_order.samples[0]
     erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
     erroneous_sample.index_sequence = None
 
@@ -434,10 +434,10 @@ def test_validate_missing_index_sequence(rml_order: RmlOrder):
     assert errors[0].sample_index == 0
 
 
-def test_validate_index_sequence_mismatch(rml_order: RmlOrder):
+def test_validate_index_sequence_mismatch(rml_order: RMLOrder):
 
     # GIVEN an indexed order with a mismatched index sequence
-    erroneous_sample: RmlSample = rml_order.samples[0]
+    erroneous_sample: RMLSample = rml_order.samples[0]
     erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
     erroneous_sample.index_number = 1
     erroneous_sample.index_sequence = INDEX_SEQUENCES[erroneous_sample.index][10]

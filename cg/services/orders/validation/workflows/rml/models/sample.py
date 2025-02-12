@@ -12,7 +12,7 @@ from cg.services.orders.validation.utils import parse_control
 LOG = logging.getLogger(__name__)
 
 
-class RmlSample(Sample):
+class RMLSample(Sample):
     concentration: float
     concentration_sample: float | None = None
     container: ContainerEnum | None = Field(default=None, exclude=True)
@@ -27,7 +27,7 @@ class RmlSample(Sample):
     well_position_rml: str | None = None
 
     @model_validator(mode="after")
-    def set_default_index_sequence(self) -> "RmlSample":
+    def set_default_index_sequence(self) -> "RMLSample":
         """Set a default index_sequence from the index and index_number."""
         if not self.index_sequence and (self.index and self.index_number):
             try:

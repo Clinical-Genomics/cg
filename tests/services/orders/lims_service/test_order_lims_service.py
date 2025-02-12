@@ -5,12 +5,12 @@ from cg.services.orders.validation.workflows.balsamic.models.order import Balsam
 from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
 from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
 from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
+from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
 
 
-def test_to_lims_mip(mip_dna_order: MipDnaOrder):
+def test_to_lims_mip(mip_dna_order: MIPDNAOrder):
     # GIVEN a scout order for a trio
 
     # WHEN parsing the order to format for LIMS import
@@ -69,7 +69,7 @@ def test_to_lims_fastq(fastq_order: FastqOrder):
     assert normal_sample.udfs.volume == "54"
 
 
-def test_to_lims_rml(rml_order: RmlOrder):
+def test_to_lims_rml(rml_order: RMLOrder):
     # GIVEN a rml order for four samples
 
     # WHEN parsing for LIMS
