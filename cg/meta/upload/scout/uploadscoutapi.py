@@ -19,6 +19,7 @@ from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -645,6 +646,13 @@ class UploadScoutAPI:
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
+            Workflow.NALLO: NalloConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                nallo_analysis_api=self.nallo_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
