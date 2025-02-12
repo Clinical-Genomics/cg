@@ -71,9 +71,6 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             vcf_str=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
             ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
-            ),
         )
 
     @staticmethod
