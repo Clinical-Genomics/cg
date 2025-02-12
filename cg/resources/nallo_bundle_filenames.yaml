@@ -115,16 +115,6 @@
   tag: json
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz
-  step: paraphase
-  tag: vcf
-- format: vcf
-  id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID_paraphase_vcfs/SAMPLEID_*.vcf.gz.tbi
-  step: paraphase
-  tag: vcf_index
-- format: vcf
-  id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
   step: sorted_repeats
   tag: vcf_str
