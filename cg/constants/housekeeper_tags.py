@@ -101,7 +101,7 @@ class BalsamicAnalysisTag:
 
 
 class NalloAnalysisTag:
-    HAPLOTAGS: list[str] = ["haplotags"]
+    HAPLOTAGS: str = "haplotags"
 
 
 class HkAnalysisMetricsTag:

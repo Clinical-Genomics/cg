@@ -20,6 +20,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
@@ -316,6 +317,7 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.NALLO: NalloAnalysisAPI,
         Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
         Workflow.TOMTE: TomteAnalysisAPI,
