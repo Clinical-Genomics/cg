@@ -223,23 +223,6 @@ def is_index_number_out_of_range(sample: IndexedSample) -> bool:
     )
 
 
-def is_index_sequence_missing(sample: IndexedSample) -> bool:
-    """Checks if a sample is missing its index number.
-    Note: Index sequence is an attribute on the sample, not its position in the list of samples."""
-    return sample.index != IndexEnum.NO_INDEX and not sample.index_sequence
-
-
-def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
-    """Validates if the sample's index sequence matches the given index and index number.
-    The index numbers start at 1, creating an offset."""
-    return (
-        sample.index_sequence
-        and sample.index != IndexEnum.NO_INDEX
-        and not is_index_number_out_of_range(sample)
-        and INDEX_SEQUENCES[sample.index][sample.index_number - 1] != sample.index_sequence
-    )
-
-
 def validate_buffers_are_allowed(order: FastqOrder) -> list[BufferInvalidError]:
     """
     Validate that the order has only samples with buffers that allow to skip reception control.

@@ -32,7 +32,7 @@ def test_validate_pool_sample_default_index(
     order, _ = model_validator.validate(order=raw_order, model=order_model)
 
     # THEN the index sequence should be set to the default index sequence
-    assert order.samples[0].index_sequence == expected_index_sequence
+    assert order.samples[0]._index_sequence == expected_index_sequence
 
 
 def test_validate_mutant_sample_gets_lab_and_region(
