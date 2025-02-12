@@ -2677,6 +2677,38 @@ def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) 
 
 
 @pytest.fixture(scope="function")
+def nallo_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    nallo_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", nallo_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", nallo_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": nallo_case_id,
+        }
+    )
+
+
+@pytest.fixture(scope="function")
+def nallo_malformed_hermes_deliverables(nallo_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = nallo_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
 def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
     """Path to gene panel file."""
     return Path(nallo_dir, nallo_case_id, "gene_panels").with_suffix(FileExtensions.TSV)
@@ -2757,6 +2789,17 @@ def nallo_mock_deliverable_dir(
         file_path=Path(nallo_dir, nallo_case_id, nallo_case_id + deliverables_yaml),
     )
     return nallo_dir
+
+
+@pytest.fixture(scope="function")
+def nallo_hermes_deliverables(nallo_deliverable_data: dict, nallo_case_id: str) -> dict:
+    hermes_output: dict = {"workflow": "nallo", "bundle_id": nallo_case_id, "files": []}
+    for file_info in nallo_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
 
 
 @pytest.fixture
