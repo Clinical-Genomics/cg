@@ -629,7 +629,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
-            LOG.info(deliverables[deliverable_field])
+            LOG.debug(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
