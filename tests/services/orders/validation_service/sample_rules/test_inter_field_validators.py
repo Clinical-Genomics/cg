@@ -2,11 +2,11 @@ from cg.services.orders.validation.errors.sample_errors import (
     OccupiedWellError,
     SampleNameRepeatedError,
 )
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
 from cg.services.orders.validation.rules.sample.rules import (
     validate_sample_names_unique,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
 
 
 def test_multiple_samples_in_well_not_allowed(order_with_samples_in_same_well: MicrosaltOrder):

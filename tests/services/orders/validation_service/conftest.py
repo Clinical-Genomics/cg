@@ -7,11 +7,11 @@ from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, St
 from cg.services.orders.validation.constants import MINIMUM_VOLUME
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
+from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.service import OrderValidationService
-from cg.services.orders.validation.workflows.tomte.constants import TomteDeliveryType
-from cg.services.orders.validation.workflows.tomte.models.case import TomteCase
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 

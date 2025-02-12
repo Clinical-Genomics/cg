@@ -35,6 +35,8 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 )
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
 from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
@@ -67,8 +69,6 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 

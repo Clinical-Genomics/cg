@@ -28,6 +28,8 @@ from cg.services.orders.validation.models.order_aliases import (
     OrderWithIndexedSamples,
 )
 from cg.services.orders.validation.models.sample_aliases import IndexedSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import OrderWithSamples
 from cg.services.orders.validation.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
@@ -49,8 +51,6 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.microsalt.models.order import OrderWithSamples
 from cg.store.store import Store
 
 

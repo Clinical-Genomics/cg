@@ -1,13 +1,13 @@
 from cg.constants import Workflow
 from cg.models.lims.sample import LimsSample
 from cg.services.orders.lims_service.service import OrderLimsService
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fluffy.models.order import FluffyOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 
 
 def test_to_lims_mip(mip_dna_order: MIPDNAOrder):
