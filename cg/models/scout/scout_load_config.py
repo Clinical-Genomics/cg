@@ -83,16 +83,6 @@ class ScoutMipIndividual(ScoutIndividual):
 
 
 class ScoutNalloIndividual(ScoutIndividual):
-    mt_bam: str | None = None
-    chromograph_images: ChromographImages = ChromographImages()
-    rhocall_bed: str | None = None
-    rhocall_wig: str | None = None
-    tiddit_coverage_wig: str | None = None
-    upd_regions_bed: str | None = None
-    upd_sites_bed: str | None = None
-    vcf2cytosure: str | None = None
-    mitodel_file: str | None = None
-    reviewer: Reviewer = Reviewer()
     d4_file: str | None = None
 
 

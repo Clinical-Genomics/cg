@@ -53,8 +53,6 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         )
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
-        self.include_pedigree_picture(load_config)
-        self.load_custom_image_sample(load_config)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_model_version = self.get_rank_model_version(variant_type=Variants.SNV)
         load_config.sv_rank_model_version = self.get_rank_model_version(variant_type=Variants.SV)

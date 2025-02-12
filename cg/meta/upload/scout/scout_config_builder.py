@@ -16,6 +16,7 @@ from cg.models.scout.scout_load_config import (
     ScoutIndividual,
     ScoutLoadConfig,
     ScoutMipIndividual,
+    ScoutNalloIndividual,
     ScoutRarediseaseIndividual,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -107,6 +108,8 @@ class ScoutConfigBuilder:
             config_sample = ScoutRarediseaseIndividual()
         elif self.analysis_obj.workflow == Workflow.MIP_DNA:
             config_sample = ScoutMipIndividual()
+        elif self.analysis_obj.workflow == Workflow.NALLO:
+            config_sample = ScoutNalloIndividual()
         elif self.analysis_obj.workflow == Workflow.RNAFUSION:
             config_sample = ScoutIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
