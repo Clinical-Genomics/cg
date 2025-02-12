@@ -5,7 +5,6 @@ from cg.constants.constants import Workflow
 
 class OrderType(StrEnum):
     BALSAMIC: str = Workflow.BALSAMIC
-    BALSAMIC_QC: str = Workflow.BALSAMIC_QC
     BALSAMIC_UMI: str = Workflow.BALSAMIC_UMI
     FASTQ: str = "fastq"
     FLUFFY: str = Workflow.FLUFFY

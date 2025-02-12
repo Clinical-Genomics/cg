@@ -8,6 +8,7 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.constants import CaseActions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
@@ -70,76 +71,10 @@ class StoreConstants(enum.Enum):
         return output
 
 
-@pytest.fixture(name="microbial_submitted_order")
-def microbial_submitted_order() -> dict:
-    """Build an example order as it looks after submission to."""
-
-    def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
-        """Return a item."""
-        ref_genomes = {
-            "C. Jejuni": "NC_111",
-            "M. upium": "NC_222",
-            "C. difficile": "NC_333",
-        }
-        return dict(
-            name=name,
-            internal_id=internal_id,
-            reads="1000",
-            container="96 well plate",
-            container_name="hej",
-            rml_plate_name=None,
-            well_position=well_position,
-            well_position_rml=None,
-            sex=None,
-            panels=None,
-            require_qc_ok=True,
-            application="MWRNXTR003",
-            source=None,
-            status=None,
-            customer="cust015",
-            family=None,
-            priority="standard",
-            capture_kit=None,
-            comment="comment",
-            index=None,
-            reagent_label=None,
-            tumour=False,
-            custom_index=None,
-            elution_buffer="Nuclease-free water",
-            organism=organism,
-            reference_genome=ref_genomes[organism],
-            extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=Workflow.RAW_DATA,
-            concentration_sample="1",
-            mother=None,
-            father=None,
-        )
-
-    return {
-        "customer": "cust000",
-        "name": "test order",
-        "internal_id": "lims_reference",
-        "comment": "test comment",
-        "ticket_number": "123456",
-        "items": [
-            _get_item("Jag", "ms1", "D:5", "C. Jejuni"),
-            _get_item("testar", "ms2", "H:5", "M. upium"),
-            _get_item("list", "ms3", "A:6", "C. difficile"),
-        ],
-        "project_type": "microbial",
-    }
-
-
 @pytest.fixture(name="sample")
 def sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
     return analysis_store._get_query(table=Sample).first()
-
-
-@pytest.fixture(name="sequencer_name")
-def sequencer_name() -> str:
-    """Return sequencer name."""
-    return "A00689"
 
 
 @pytest.fixture(name="invalid_application_id")
@@ -531,6 +466,19 @@ def store_with_samples_for_multiple_customers(
             delivered_at=timestamp_now,
         )
     yield store
+
+
+@pytest.fixture
+def store_with_cases_with_customers_and_actions(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with cases, customers and actions."""
+    for i in range(3):
+        helpers.add_case(
+            store=store,
+            internal_id=f"case_id_00{i}",
+            name=f"case_name_00{i}",
+            action=CaseActions.ANALYZE,
+        )
+    return store
 
 
 @pytest.fixture

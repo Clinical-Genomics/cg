@@ -1,6 +1,7 @@
-from http import HTTPStatus
 import logging
 from functools import wraps
+from http import HTTPStatus
+
 from flask import jsonify
 
 from cg.store.exc import EntryNotFoundError

@@ -28,7 +28,7 @@
   path_index: ~
   step: tiddit_coverage
   tag: tiddit_coverage
-- format: d4
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_mosdepth.per-base.d4
   path_index: ~

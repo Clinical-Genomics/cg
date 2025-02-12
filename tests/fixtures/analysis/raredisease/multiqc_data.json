@@ -210,8 +210,42 @@
                 "het_ratio_sex_check": 0.03753,
                 "predicted_sex_sex_check": "female",
                 "error_sex_check": "True"
-            },
-                        "ADM2_1": {
+            }
+        },
+        {
+            "ADM1": {
+                "filtering_result_passed_filter_reads": 104595780.0,
+                "filtering_result_corrected_reads": 1692428.0,
+                "filtering_result_corrected_bases": 3103038.0,
+                "filtering_result_low_quality_reads": 3135572.0,
+                "filtering_result_too_many_N_reads": 37730.0,
+                "filtering_result_too_short_reads": 153994.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 2.92768,
+                "after_filtering_total_reads": 104595780.0,
+                "after_filtering_total_bases": 15746394068.0,
+                "after_filtering_q20_bases": 15488662257.0,
+                "after_filtering_q30_bases": 14991083442.0,
+                "after_filtering_q20_rate": 0.983632,
+                "after_filtering_q30_rate": 0.952033,
+                "after_filtering_read1_mean_length": 150.0,
+                "after_filtering_read2_mean_length": 150.0,
+                "after_filtering_gc_content": 0.409313,
+                "before_filtering_total_reads": 107923076.0,
+                "pct_surviving": 96.91697445688075,
+                "adapter_cutting_adapter_trimmed_reads": 1365798.0,
+                "adapter_cutting_adapter_trimmed_bases": 65582892.0,
+                "pct_adapter": 1.265529162641732
+            }
+        },
+        {
+            "ADM1": {
+                "Contamination Status": "NO",
+                "Contamination Level": "ND"
+            }
+        },
+        {
+            "ADM2_1": {
                 "percent_gc": 40.0,
                 "avg_sequence_length": 151.0,
                 "median_sequence_length": 151,
@@ -419,6 +453,38 @@
                 "het_ratio_sex_check": 0.03753,
                 "predicted_sex_sex_check": "female",
                 "error_sex_check": "True"
+            }
+        },
+        {
+            "ADM2": {
+                "filtering_result_passed_filter_reads": 104595780.0,
+                "filtering_result_corrected_reads": 1692428.0,
+                "filtering_result_corrected_bases": 3103038.0,
+                "filtering_result_low_quality_reads": 3135572.0,
+                "filtering_result_too_many_N_reads": 37730.0,
+                "filtering_result_too_short_reads": 153994.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 2.92768,
+                "after_filtering_total_reads": 104595780.0,
+                "after_filtering_total_bases": 15746394068.0,
+                "after_filtering_q20_bases": 15488662257.0,
+                "after_filtering_q30_bases": 14991083442.0,
+                "after_filtering_q20_rate": 0.983632,
+                "after_filtering_q30_rate": 0.952033,
+                "after_filtering_read1_mean_length": 150.0,
+                "after_filtering_read2_mean_length": 150.0,
+                "after_filtering_gc_content": 0.409313,
+                "before_filtering_total_reads": 107923076.0,
+                "pct_surviving": 96.91697445688075,
+                "adapter_cutting_adapter_trimmed_reads": 1365798.0,
+                "adapter_cutting_adapter_trimmed_bases": 65582892.0,
+                "pct_adapter": 1.265529162641732
+            }
+        },
+        {
+            "ADM2": {
+                "Contamination Status": "NO",
+                "Contamination Level": "ND"
             }
         }
     ],

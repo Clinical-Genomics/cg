@@ -2199,11 +2199,13 @@ def context_config(
             "root": str(taxprofiler_dir),
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_taxprofiler",
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
-            "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
-            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
             "revision": "2.2.0",
             "slurm": {
                 "account": "development",
@@ -2672,6 +2674,12 @@ def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) 
             },
         ]
     }
+
+
+@pytest.fixture(scope="function")
+def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
+    """Path to gene panel file."""
+    return Path(nallo_dir, nallo_case_id, "gene_panels").with_suffix(FileExtensions.TSV)
 
 
 @pytest.fixture(scope="function")

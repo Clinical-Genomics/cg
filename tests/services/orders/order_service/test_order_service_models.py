@@ -7,7 +7,7 @@ from cg.services.orders.order_service.models import OrderQueryParams
 @pytest.mark.parametrize(
     "workflow, expected_workflows",
     [
-        ([Workflow.BALSAMIC], [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI, Workflow.BALSAMIC_QC]),
+        ([Workflow.BALSAMIC], [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]),
         ([Workflow.MIP_DNA], [Workflow.MIP_DNA]),
     ],
 )

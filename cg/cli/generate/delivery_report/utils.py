@@ -7,16 +7,14 @@ import rich_click as click
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, REPORT_SUPPORTED_WORKFLOW, Workflow
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
-from cg.meta.delivery_report.balsamic_qc import BalsamicQCDeliveryReportAPI
 from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
-from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.delivery_report.taxprofiler import TaxprofilerDeliveryReportAPI
 from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -82,13 +80,10 @@ def get_report_api(context: click.Context, case: Case) -> DeliveryReportAPI:
 def get_report_api_workflow(context: click.Context, workflow: Workflow) -> DeliveryReportAPI:
     """Return the report API given a specific workflow."""
     # Default report API workflow: MIP-DNA
-    workflow: Workflow = workflow if workflow else Workflow.MIP_DNA
+    workflow: Workflow = workflow or Workflow.MIP_DNA
     dispatch_report_api: dict[Workflow, DeliveryReportAPI] = {
         Workflow.BALSAMIC: BalsamicDeliveryReportAPI(
             analysis_api=BalsamicAnalysisAPI(config=context.obj)
-        ),
-        Workflow.BALSAMIC_QC: BalsamicQCDeliveryReportAPI(
-            analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
         ),
         Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
             analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)

@@ -1162,6 +1162,9 @@ class PacbioSequencingRun(InstrumentRun):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
+    def to_dict(self):
+        return to_dict(self)
+
 
 class SampleRunMetrics(Base):
     """Parent model for the different types of sample run metrics."""
@@ -1215,6 +1218,10 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+    def to_dict(self) -> dict:
+        """Represent as dictionary"""
+        return to_dict(self)
 
 
 class OrderTypeApplication(Base):

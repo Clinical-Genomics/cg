@@ -30,6 +30,8 @@ class OrderLimsService:
             dict_sample["data_analysis"] = workflow
             dict_sample["data_delivery"] = delivery_type
             dict_sample["family_name"] = sample._case_name
+            if not dict_sample.get("priority"):
+                dict_sample["priority"] = sample._case_priority
             if skip_reception_control:
                 dict_sample["skip_reception_control"] = True
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
