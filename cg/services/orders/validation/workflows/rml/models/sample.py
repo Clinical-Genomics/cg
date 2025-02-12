@@ -1,6 +1,6 @@
 import logging
 
-from pydantic import BeforeValidator, Field, model_validator
+from pydantic import BeforeValidator, Field, PrivateAttr, model_validator
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
@@ -19,7 +19,7 @@ class RMLSample(Sample):
     control: Annotated[ControlEnum, BeforeValidator(parse_control)] = ControlEnum.not_control
     index: IndexEnum
     index_number: int | None = None
-    index_sequence: str | None = None
+    _index_sequence: str | None = PrivateAttr(default=None)
     pool: str
     priority: PriorityEnum
     rml_plate_name: str | None = None
@@ -29,11 +29,16 @@ class RMLSample(Sample):
     @model_validator(mode="after")
     def set_default_index_sequence(self) -> "RMLSample":
         """Set a default index_sequence from the index and index_number."""
-        if not self.index_sequence and (self.index and self.index_number):
+        if self.index and self.index_number:
             try:
-                self.index_sequence = INDEX_SEQUENCES[self.index][self.index_number - 1]
+                self._index_sequence = INDEX_SEQUENCES[self.index][self.index_number - 1]
             except Exception:
                 LOG.warning(
                     f"No index sequence set and no suitable sequence found for index {self.index}, number {self.index_number}"
                 )
         return self
+
+    def model_dump(self, **kwargs) -> dict:
+        data = super().model_dump(**kwargs)
+        data["index_sequence"] = self._index_sequence
+        return data
