@@ -10,6 +10,7 @@ from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.balsamic_qc import BalsamicQCDeliveryReportAPI
 from cg.meta.delivery_report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.delivery_report.mip_dna import MipDNADeliveryReportAPI
+from cg.meta.delivery_report.nallo import NalloDeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
@@ -19,6 +20,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -95,6 +97,9 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
         ),
         Workflow.MIP_DNA: MipDNADeliveryReportAPI(
             analysis_api=MipDNAAnalysisAPI(config=context.obj)
+        ),
+        Workflow.NALLO: NalloDeliveryReportAPI(
+            analysis_api=NalloAnalysisAPI(config=context.obj)
         ),
         Workflow.RAREDISEASE: RarediseaseDeliveryReportAPI(
             analysis_api=RarediseaseAnalysisAPI(config=context.obj)
