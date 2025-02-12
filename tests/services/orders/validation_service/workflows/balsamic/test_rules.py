@@ -14,6 +14,7 @@ from cg.services.orders.validation.rules.case.rules import (
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_capture_kit_panel_requirement,
 )
+from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.store.models import Application
@@ -150,8 +151,8 @@ def test_normal_only_wgs_in_case_with_existing_sample(
     sample = ExistingSample(
         internal_id="wgs_normal_sample",
     )
-    case = create_case([sample])
-    order = create_order([case])
+    case: BalsamicCase = create_case([sample])
+    order: BalsamicOrder = create_order([case])
 
     # WHEN validating if the order contains only one sample that is normal and WGS
     errors: list[NumberOfNormalSamplesError] = validate_number_of_normal_samples(
