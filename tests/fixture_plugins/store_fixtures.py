@@ -3,6 +3,7 @@ from typing import Generator
 import pytest
 
 from cg.constants.constants import ControlOptions
+from cg.constants.devices import DeviceType
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -76,7 +77,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
         application_tag=application.tag,
     )
 
-    internal_negative_control_qc_pass = helpers.add_sample(
+    helpers.add_sample(
         store=store,
         internal_id="internal_negative_control_qc_pass",
         name="internal_negative_control_qc_pass",
@@ -94,7 +95,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
         application_tag=application.tag,
     )
 
-    internal_negative_control_qc_fail = helpers.add_sample(
+    helpers.add_sample(
         store=store,
         internal_id="internal_negative_control_qc_fail",
         name="internal_negative_control_qc_fail",
@@ -138,3 +139,25 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     )
 
     return store
+
+
+@pytest.fixture
+def pacbio_sequencing_runs_store(
+    base_store: Store,
+    helpers: StoreHelpers,
+    pacbio_run_name_to_fetch: str,
+    pacbio_run_name_not_to_fetch: str,
+) -> Store:
+    device = helpers.add_run_device(
+        store=base_store, id=1, type=DeviceType.PACBIO, internal_id="device_internal_id"
+    )
+    helpers.add_pacbio_sequencing_run(
+        store=base_store, id=1, run_name=pacbio_run_name_to_fetch, device_id=device.id
+    )
+    helpers.add_pacbio_sequencing_run(
+        store=base_store, id=2, run_name=pacbio_run_name_to_fetch, device_id=device.id
+    )
+    helpers.add_pacbio_sequencing_run(
+        store=base_store, id=3, run_name=pacbio_run_name_not_to_fetch, device_id=device.id
+    )
+    return base_store

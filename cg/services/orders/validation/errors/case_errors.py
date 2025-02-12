@@ -56,3 +56,15 @@ class DoubleNormalError(NumberOfNormalSamplesError):
 
 class DoubleTumourError(NumberOfNormalSamplesError):
     message: str = "Only one tumour sample is allowed per case"
+
+
+class NewCaseWithoutAffectedSampleError(CaseError):
+    field: str = "sample_errors"
+    message: str = "Each case needs at least one affected sample"
+
+
+class ExistingCaseWithoutAffectedSampleError(CaseError):
+    field: str = "sample_errors"
+    message: str = (
+        "This case contains no affected sample. Please create a new case with at least one affected sample."
+    )
