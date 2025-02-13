@@ -1,5 +1,10 @@
 """Raredisease Delivery Report API."""
 
+from pathlib import Path
+
+from housekeeper.store.models import File
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
@@ -64,18 +69,18 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
-            ),
+            snv_vcf=HousekeeperAPI.get_latest_file(
+                bundle=case_id, tags=ScoutUploadKey.VCF_SNV
+            ).full_path,
+            sv_vcf=HousekeeperAPI.get_latest_file(
+                bundle=case_id, tags=ScoutUploadKey.VCF_SV
+            ).full_path,
+            vcf_str=HousekeeperAPI.get_latest_file(
+                bundle=case_id, tags=ScoutUploadKey.VCF_STR
+            ).full_path,
+            smn_tsv=HousekeeperAPI.get_latest_file(
+                bundle=case_id, tags=ScoutUploadKey.SMN_TSV
+            ).full_path,
         )
 
     @staticmethod
