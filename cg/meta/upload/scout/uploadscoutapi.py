@@ -652,7 +652,7 @@ class UploadScoutAPI:
             Workflow.NALLO: NalloConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
-                nallo_analysis_api=self.nallo_analysis_api,
+                nallo_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
