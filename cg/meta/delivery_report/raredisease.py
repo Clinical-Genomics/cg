@@ -70,16 +70,16 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
             snv_vcf=HousekeeperAPI.get_latest_file(
-                bundle=case_id, tags=ScoutUploadKey.VCF_SNV
+                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_SNV]
             ).full_path,
             sv_vcf=HousekeeperAPI.get_latest_file(
-                bundle=case_id, tags=ScoutUploadKey.VCF_SV
+                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_SV]
             ).full_path,
             vcf_str=HousekeeperAPI.get_latest_file(
-                bundle=case_id, tags=ScoutUploadKey.VCF_STR
+                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_STR]
             ).full_path,
             smn_tsv=HousekeeperAPI.get_latest_file(
-                bundle=case_id, tags=ScoutUploadKey.SMN_TSV
+                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.SMN_TSV]
             ).full_path,
         )
 
