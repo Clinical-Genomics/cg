@@ -173,15 +173,8 @@ class NalloLoadConfig(ScoutLoadConfig):
     peddy_ped: str | None = None
     peddy_sex: str | None = None
     samples: list[ScoutNalloIndividual] = []
-    custom_images: CustomImages | None = None
-    smn_tsv: str | None = None
-    str_catalog: str | None = None
-    vcf_mei: str | None = None
-    vcf_mei_research: str | None = None
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
     vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    vcf_snv_mt: str | None = None
-    vcf_snv_research_mt: str | None = None
     vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_str: str | None = None
