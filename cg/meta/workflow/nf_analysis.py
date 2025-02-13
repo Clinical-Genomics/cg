@@ -629,6 +629,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
+            LOG.debug(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
@@ -833,7 +834,7 @@ class NfAnalysisAPI(AnalysisAPI):
             return
         workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
+            deliverables_content=workflow_content.model_dump(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
