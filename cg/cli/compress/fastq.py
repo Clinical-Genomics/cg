@@ -86,6 +86,7 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
 
     cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
+        LOG.info("Did not find any FASTQ files to clean. Closing")
         return
 
     cleaned_inds = 0
@@ -93,13 +94,16 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
         sample_ids: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
         for sample_id in sample_ids:
             archive_location: str = store.get_sample_by_internal_id(sample_id).archive_location
-            was_cleaned: bool = compress_api.clean_fastq(
-                sample_id=sample_id, archive_location=archive_location
-            )
-            if not was_cleaned:
-                LOG.debug(f"Skipping individual {sample_id}")
-                continue
-            cleaned_inds += 1
+            try:
+                was_cleaned: bool = compress_api.clean_fastq(
+                    sample_id=sample_id, archive_location=archive_location
+                )
+                if not was_cleaned:
+                    LOG.debug(f"Skipping individual {sample_id}")
+                    continue
+                cleaned_inds += 1
+            except Exception as error:
+                LOG.error(f"Could not clean individual {sample_id}: {error}")
 
     LOG.info(f"Cleaned fastqs in {cleaned_inds} individuals")
 
