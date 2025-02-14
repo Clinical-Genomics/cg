@@ -3,7 +3,7 @@
 import logging
 from typing import Iterable
 
-import click
+import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (

@@ -1,11 +1,5 @@
 FROM docker.io/library/python:3.11-slim-bullseye
 
-ENV GUNICORN_WORKERS=1
-ENV GUNICORN_THREADS=1
-ENV GUNICORN_BIND="0.0.0.0:8000"
-ENV GUNICORN_TIMEOUT=400
-
-
 ENV CG_SQL_DATABASE_URI="sqlite:///:memory:"
 ENV CG_SECRET_KEY="key"
 
@@ -29,23 +23,16 @@ ENV TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE="auth_file"
 
 
 WORKDIR /home/src/app
-COPY pyproject.toml poetry.lock ./ 
+COPY pyproject.toml poetry.lock gunicorn.conf.py README.md ./
 
 RUN pip install --no-cache-dir poetry \
     && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi --no-root
 
 COPY cg ./cg
 
+RUN poetry install --no-interaction --no-ansi
+
 CMD gunicorn \
-    --workers=$GUNICORN_WORKERS \
-    --bind=$GUNICORN_BIND  \
-    --threads=$GUNICORN_THREADS \
-    --timeout=$GUNICORN_TIMEOUT \
-    --proxy-protocol \
-    --forwarded-allow-ips="10.0.2.100,127.0.0.1" \
-    --log-syslog \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level="debug" \
+    --config gunicorn.conf.py \
     cg.server.auto:app

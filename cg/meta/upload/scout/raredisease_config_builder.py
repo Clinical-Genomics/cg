@@ -1,16 +1,21 @@
 import logging
+import re
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.scout import (
+    RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
     GenomeBuild,
     UploadTrack,
 )
+from cg.constants.sequencing import Variants
+from cg.io.controller import ReadFile
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -63,7 +68,60 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config)
         self.load_custom_image_sample(load_config)
         load_config.human_genome_build = GenomeBuild.hg19
+        load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
+        load_config.rank_model_version = self.get_rank_model_version(variant_type=Variants.SNV)
+        load_config.sv_rank_model_version = self.get_rank_model_version(variant_type=Variants.SV)
         return load_config
+
+    def get_rank_model_version(self, variant_type: Variants) -> str:
+        """
+        Returns the rank model version for a variant type from the manifest file.
+        Raises:
+            FileNotFoundError if no manifest file is found in housekeeper.
+        """
+        hk_manifest_file: File = self.get_file_from_hk({NFAnalysisTags.MANIFEST})
+        if not hk_manifest_file:
+            raise FileNotFoundError("No manifest file found in Housekeeper.")
+        return self.extract_rank_model_from_manifest(
+            hk_manifest_file=hk_manifest_file, variant_type=variant_type
+        )
+
+    def extract_rank_model_from_manifest(
+        self, hk_manifest_file: File, variant_type: Variants
+    ) -> str:
+        content: dict[str, dict[str, str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON, file_path=hk_manifest_file
+        )
+        return self.get_rank_model_version_from_manifest_content(
+            content=content, variant_type=variant_type
+        )
+
+    def get_rank_model_version_from_manifest_content(
+        self, content: dict[str, dict[str, str]], variant_type: Variants
+    ) -> str:
+        """
+        Return the rank model version from the manifest file content.
+        Raises:
+            ValueError if pattern not found ing process or clinical not found in script.
+        """
+        pattern: str = variant_type.upper() + ":GENMOD_SCORE"
+        for key, value in content["tasks"].items():
+            process: str = value.get("process")
+            script: str = value.get("script")
+            if pattern in process and AnalysisTag.CLINICAL in script:
+                return self._get_version_from_manifest_script(script)
+        raise ValueError(
+            f"Either {pattern} not found in any process or {AnalysisTag.CLINICAL} not found in any script of the manifest file"
+        )
+
+    def _get_version_from_manifest_script(self, script: str) -> str:
+        """
+        Returns the rank model version in the format 'vX.X from the given script string.
+        Raises a ValueError if no rank model version is found in the script string.
+        """
+        if match := re.search(r"v(\d+\.\d+)", script):
+            return match.group(1)
+        raise ValueError("No rank model version found")
 
     def load_custom_image_sample(self, load_config: RarediseaseLoadConfig) -> None:
         """Build custom images config."""
@@ -143,4 +201,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        )
+        config_sample.d4_file = self.get_sample_file(
+            hk_tags=self.sample_tags.d4_file, sample_id=sample_id
         )

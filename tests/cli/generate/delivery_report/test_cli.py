@@ -2,10 +2,10 @@
 
 import pytest
 from _pytest.fixtures import FixtureRequest
-from click.testing import Result, CliRunner
+from click.testing import CliRunner, Result
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-from cg.constants import Workflow, EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
@@ -33,7 +33,7 @@ def test_generate_delivery_report(
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
-def test_generate_delivery_report_dry_rum(
+def test_generate_delivery_report_dry_run(
     request: FixtureRequest, workflow: Workflow, cli_runner: CliRunner
 ) -> None:
     """Test dry run command to generate delivery report."""

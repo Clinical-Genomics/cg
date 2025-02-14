@@ -14,18 +14,21 @@ from cg.clients.chanjo2.models import (
     CoverageSample,
 )
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType, GenomeVersion
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
-    RAREDISEASE_METRIC_CONDITIONS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_METRIC_CONDITIONS_WES,
+    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
+from cg.constants.sequencing import SeqLibraryPrepCategory, NOVASEQ_SEQUENCING_READ_LENGTH
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
@@ -50,14 +53,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
-        self.nfcore_workflow_path: str = config.raredisease.workflow_path
-        self.references: str = config.raredisease.references
+        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
-        self.config_platform: str = config.raredisease.config_platform
-        self.config_params: str = config.raredisease.config_params
-        self.config_resources: str = config.raredisease.config_resources
+        self.platform: str = config.raredisease.platform
+        self.params: str = config.raredisease.params
+        self.workflow_config_path: str = config.raredisease.config
+        self.resources: str = config.raredisease.resources
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account
@@ -95,33 +98,32 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
-        Return the target bed file from LIMS and use default capture kit for WGS.
+        Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
-        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed:
-            if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed_file:
+            if analysis_type == AnalysisType.WGS:
                 return DEFAULT_CAPTURE_KIT
             raise ValueError("No capture kit was found in LIMS")
-        return target_bed
+        return target_bed_file
 
     def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
-        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+        if analysis_type == AnalysisType.WGS:
             return True
         return False
 
-    def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
         skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
-            local_genomes=str(self.references),
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=outdir,
             analysis_type=analysis_type,
-            target_bed=Path(self.references, target_bed).as_posix(),
+            target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
@@ -158,10 +160,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return True if a managed variants needs to be exported from Scout."""
         return True
 
-    @property
-    def root(self) -> str:
-        return self.config.raredisease.root
-
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
         self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
@@ -175,11 +173,23 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
-            metric_conditions: dict[str, dict[str, Any]] = RAREDISEASE_METRIC_CONDITIONS.copy()
-            self.set_order_sex_for_sample(sample, metric_conditions)
+            metric_conditions: dict[str, dict[str, Any]] = (
+                self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
+            )
+            self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            self.set_adapter_bases_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
+
+    def get_metric_conditions_by_prep_category(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if (
+            sample.application_version.application.analysis_type
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            return RAREDISEASE_METRIC_CONDITIONS_WGS.copy()
+        return RAREDISEASE_METRIC_CONDITIONS_WES.copy()
 
     def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
         """Return sample-pair patterns for searching in MultiQC."""
@@ -234,6 +244,18 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
+
+    @staticmethod
+    def set_adapter_bases_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        """Calculate threshold for maximum number of adapter bases for a given sample"""
+        adapter_bases_threshold: float = (
+            sample.reads
+            * NOVASEQ_SEQUENCING_READ_LENGTH
+            * RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD
+        )
+        metric_conditions["adapter_cutting_adapter_trimmed_reads"][
+            "threshold"
+        ] = adapter_bases_threshold
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""

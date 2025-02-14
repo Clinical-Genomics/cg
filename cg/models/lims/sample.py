@@ -64,6 +64,10 @@ class LimsSample(BaseModel):
     index_sequence: str | None
     udfs: Udf | None
 
+    @validator("well_position", pre=False)
+    def reset_well_positions_for_tubes(cls, value: str, values: dict[str, str]):
+        return None if values["container"] == "Tube" else value
+
     @classmethod
     def parse_obj(cls, obj: dict):
         parsed_obj: LimsSample = super().parse_obj(obj)

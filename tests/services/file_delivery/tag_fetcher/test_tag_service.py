@@ -4,12 +4,9 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.services.deliver_files.tag_fetcher.bam_service import (
-    BamDeliveryTagsFetcher,
-)
-from cg.services.deliver_files.tag_fetcher.exc import (
-    FetchDeliveryFileTagsError,
-)
+from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
+from cg.services.deliver_files.tag_fetcher.exc import FetchDeliveryFileTagsError
+from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -23,7 +20,6 @@ from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
         Workflow.RAW_DATA,
         Workflow.MIP_DNA,
         Workflow.MIP_RNA,
-        Workflow.BALSAMIC_QC,
         Workflow.MICROSALT,
         Workflow.TOMTE,
     ],
@@ -64,3 +60,15 @@ def test_bam_delivery_tags_fetcher():
     # THEN assert that the tags are fetched
     assert tags.case_tags is None
     assert tags.sample_tags == [{"bam"}]
+
+
+def test_fohm_upload_tags_fetcher():
+    # GIVEN a tag fetcher
+    test_fetcher = FOHMUploadTagsFetcher()
+
+    # WHEN fetching the tags for the files to deliver
+    tags: DeliveryFileTags = test_fetcher.fetch_tags(Workflow.MUTANT)
+
+    # THEN assert that the tags are fetched
+    assert tags.case_tags is None
+    assert tags.sample_tags == [{"consensus-sample"}, {"vcf-report"}]

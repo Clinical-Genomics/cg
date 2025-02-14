@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Iterable
 
-import click
+import rich_click as click
 from tabulate import tabulate
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS

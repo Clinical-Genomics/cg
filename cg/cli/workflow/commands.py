@@ -3,7 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 
-import click
+import rich_click as click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -16,7 +16,6 @@ from cg.exc import IlluminaRunsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
-from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -26,9 +25,7 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.deliver_files.rsync.service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.store import Store
 
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
@@ -239,22 +236,6 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
-    )
-
-
-@click.command("balsamic-qc-past-run-dirs")
-@SKIP_CONFIRMATION
-@DRY_RUN
-@ARGUMENT_BEFORE_STR
-@click.pass_context
-def balsamic_qc_past_run_dirs(
-    context: click.Context, before_str: str, skip_confirmation: bool = False, dry_run: bool = False
-):
-    """Clean up of "old" Balsamic qc case run dirs."""
-
-    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
     context.invoke(
         past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
     )

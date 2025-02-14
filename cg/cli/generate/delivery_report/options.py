@@ -1,6 +1,6 @@
 """Delivery report specific command options."""
 
-import click
+import rich_click as click
 
 from cg.constants import REPORT_SUPPORTED_WORKFLOW
 

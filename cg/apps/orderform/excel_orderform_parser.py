@@ -12,8 +12,8 @@ from cg.apps.orderform.utils import are_all_samples_metagenome
 from cg.constants import DataDelivery
 from cg.constants.orderforms import Orderform
 from cg.exc import OrderFormError
+from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.order import OrderType
 
 LOG = logging.getLogger(__name__)
 
@@ -22,10 +22,10 @@ class ExcelOrderformParser(OrderformParser):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
-    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
+    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form", "Order Form"]
     VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
-        f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WGS
+        f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WHOLE_GENOME_SEQUENCING
         f"{Orderform.RML}:{Orderform.get_current_orderform_version(Orderform.RML)}",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:{Orderform.get_current_orderform_version(Orderform.METAGENOME)}",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}",  # Orderform SARS-CoV-2

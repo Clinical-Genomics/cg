@@ -3,7 +3,7 @@
 import logging
 from typing import Callable
 
-import click
+import rich_click as click
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions

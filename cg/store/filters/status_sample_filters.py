@@ -13,6 +13,11 @@ def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) ->
     return samples.filter(Sample.internal_id == internal_id)
 
 
+def filter_samples_by_internal_ids(internal_ids: list[str], samples: Query, **kwargs) -> Query:
+    """Return sample by internal id."""
+    return samples.filter(Sample.internal_id.in_(internal_ids)) if internal_ids else samples
+
+
 def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample name."""
     return samples.filter(Sample.name == name)
@@ -224,6 +229,7 @@ class SampleFilter(Enum):
     BY_ENTRY_ID: Callable = filter_samples_by_entry_id
     BY_IDENTIFIER_NAME_AND_VALUE: Callable = filter_samples_by_identifier_name_and_value
     BY_INTERNAL_ID: Callable = filter_samples_by_internal_id
+    BY_INTERNAL_IDS: Callable = filter_samples_by_internal_ids
     BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
     BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     BY_INVOICE_ID: Callable = filter_samples_by_invoice_id

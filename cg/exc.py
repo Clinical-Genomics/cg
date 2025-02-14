@@ -104,6 +104,10 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
+class AuthorisationError(CgError):
+    """Raised when a forbidden transaction is attempted by an external user."""
+
+
 class IlluminaRunsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
@@ -171,6 +175,12 @@ class NfAnalysisError(CgError):
 class OrderError(CgError):
     """
     Exception related to orders.
+    """
+
+
+class OrderSubmissionError(CgError):
+    """
+    Exception related to order submission.
     """
 
 
@@ -296,10 +306,6 @@ class XMLError(CgError):
 
 class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
-
-
-class OrderExistsError(CgError):
-    """Exception raised when cases and samples are added to a pre-existing order."""
 
 
 class OrderMismatchError(CgError):

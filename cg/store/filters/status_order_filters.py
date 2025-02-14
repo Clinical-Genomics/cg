@@ -9,12 +9,6 @@ from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 from cg.store.models import Customer, Order
 
 
-def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
-    if workflow == Workflow.BALSAMIC:
-        return orders.filter(Order.workflow.startswith(workflow))
-    return orders.filter(Order.workflow == workflow) if workflow else orders
-
-
 def filter_orders_by_id(orders: Query, id: int | None, **kwargs) -> Query:
     return orders.filter(Order.id == id) if id else orders
 
@@ -65,7 +59,6 @@ class OrderFilter(Enum):
     BY_IDS: Callable = filter_orders_by_ids
     BY_SEARCH: Callable = filter_orders_by_search
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
-    BY_WORKFLOW: Callable = filter_orders_by_workflow
     BY_OPEN: Callable = filter_orders_by_is_open
     PAGINATE: Callable = apply_pagination
     SORT: Callable = apply_sorting
@@ -77,7 +70,6 @@ def apply_order_filters(
     id: int = None,
     ids: list[int] = None,
     ticket_id: int = None,
-    workflow: SortOrder = None,
     page: int = None,
     page_size: int = None,
     sort_field: OrderSortField = None,
@@ -90,7 +82,6 @@ def apply_order_filters(
             orders=orders,
             id=id,
             ids=ids,
-            workflow=workflow,
             page=page,
             page_size=page_size,
             ticket_id=ticket_id,

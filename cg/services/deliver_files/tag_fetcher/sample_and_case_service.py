@@ -13,7 +13,10 @@ class SampleAndCaseDeliveryTagsFetcher(FetchDeliveryFileTagsService):
 
     @handle_tag_errors
     def fetch_tags(self, workflow: Workflow) -> DeliveryFileTags:
-        """Get the case tags for the files that need to be delivered for a workflow."""
+        """Get the case tags for the files that need to be delivered for a workflow.
+        args:
+            workflow: The workflow to fetch tags for
+        """
         self._validate_workflow(workflow)
         return DeliveryFileTags(
             case_tags=PIPELINE_ANALYSIS_TAG_MAP[workflow]["case_tags"],

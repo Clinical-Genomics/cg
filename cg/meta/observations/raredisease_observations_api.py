@@ -13,11 +13,8 @@ from cg.constants.observations import (
     RarediseaseLoadParameters,
     RarediseaseObservationsAnalysisTag,
 )
-from cg.constants.sequencing import SequencingMethod
-from cg.exc import (
-    CaseNotFoundError,
-    LoqusdbDuplicateRecordError,
-)
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -67,10 +64,12 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def set_loqusdb_instance(self, case_id: str) -> None:
         """Set the Loqusdb instance associated to the sequencing method."""
-        sequencing_method: SequencingMethod = self.analysis_api.get_data_analysis_type(case_id)
-        loqusdb_instances: dict[SequencingMethod, LoqusdbInstance] = {
-            SequencingMethod.WGS: LoqusdbInstance.WGS,
-            SequencingMethod.WES: LoqusdbInstance.WES,
+        sequencing_method: SeqLibraryPrepCategory = self.analysis_api.get_data_analysis_type(
+            case_id
+        )
+        loqusdb_instances: dict[SeqLibraryPrepCategory, LoqusdbInstance] = {
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
         }
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
 
@@ -119,7 +118,8 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 self.housekeeper_api.files(
                     version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SV_VCF]
                 ).first()
-                if self.analysis_api.get_data_analysis_type(case_id) == SequencingMethod.WGS
+                if self.analysis_api.get_data_analysis_type(case_id)
+                == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
                 else None
             ),
             "profile_vcf_path": self.housekeeper_api.files(

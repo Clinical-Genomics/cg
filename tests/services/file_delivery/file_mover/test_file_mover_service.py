@@ -3,21 +3,37 @@
 import pytest
 
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.file_mover.service import (
-    DeliveryFilesMover,
+from cg.services.deliver_files.file_mover.customer_inbox_service import (
+    CustomerInboxDestinationFilesMover,
 )
+from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
+from cg.services.deliver_files.utils import FileMover, FileManager
 
 
 @pytest.mark.parametrize(
-    "expected_moved_delivery_files,delivery_files",
+    "expected_moved_delivery_files,delivery_files,move_files_service",
     [
-        ("expected_moved_fastq_delivery_files", "expected_fastq_delivery_files"),
-        ("expected_moved_analysis_delivery_files", "expected_analysis_delivery_files"),
+        (
+            "expected_moved_fastq_delivery_files",
+            "expected_fastq_delivery_files",
+            CustomerInboxDestinationFilesMover(FileMover(FileManager())),
+        ),
+        (
+            "expected_moved_analysis_delivery_files",
+            "expected_analysis_delivery_files",
+            CustomerInboxDestinationFilesMover(FileMover(FileManager())),
+        ),
+        (
+            "expected_moved_upload_files",
+            "expected_upload_files",
+            BaseDestinationFilesMover(FileMover(FileManager())),
+        ),
     ],
 )
 def test_move_files(
     expected_moved_delivery_files: DeliveryFiles,
     delivery_files: DeliveryFiles,
+    move_files_service: CustomerInboxDestinationFilesMover,
     tmp_path,
     request,
 ):
@@ -28,7 +44,6 @@ def test_move_files(
     delivery_files: DeliveryFiles = request.getfixturevalue(delivery_files)
 
     # WHEN moving the delivery files
-    move_files_service = DeliveryFilesMover()
     moved_delivery_files: DeliveryFiles = move_files_service.move_files(
         delivery_files=delivery_files, delivery_base_path=tmp_path
     )

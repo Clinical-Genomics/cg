@@ -1,7 +1,7 @@
 import logging
 from typing import Callable, Type
 
-import click
+import rich_click as click
 from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
 

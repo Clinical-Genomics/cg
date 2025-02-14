@@ -80,9 +80,12 @@ def test_run_dsmc_command_fail(cg_context: CGConfig):
     pdc_service = cg_context.pdc_service
 
     # GIVEN an exit code signifying failure
-    with pytest.raises(PdcError), mock.patch(
-        "cg.utils.commands.subprocess.run",
-        return_value=create_process_response(return_code=EXIT_FAIL),
+    with (
+        pytest.raises(PdcError),
+        mock.patch(
+            "cg.utils.commands.subprocess.run",
+            return_value=create_process_response(return_code=EXIT_FAIL),
+        ),
     ):
         # WHEN running a dsmc command
         pdc_service.run_dsmc_command(["archive", "something"])

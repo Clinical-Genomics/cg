@@ -2,18 +2,19 @@
 
 import logging
 
-import click
+import rich_click as click
 from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -186,7 +187,9 @@ def start(
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+        case: Case = analysis_api.status_db.get_case_by_internal_id(case_id)
+        if case.data_analysis != Workflow.NALLO:
+            analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
         analysis_api.run_nextflow_analysis(
             case_id=case_id,

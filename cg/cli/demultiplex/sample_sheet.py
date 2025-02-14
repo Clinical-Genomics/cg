@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService

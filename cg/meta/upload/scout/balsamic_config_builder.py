@@ -5,12 +5,7 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SampleType
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import (
-    BALSAMIC_CASE_TAGS,
-    BALSAMIC_SAMPLE_TAGS,
-    GenomeBuild,
-    UploadTrack,
-)
+from cg.constants.scout import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS, GenomeBuild, UploadTrack
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -71,7 +66,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type"""
 
-        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=sample)
+        analysis_type: str = BalsamicAnalysisAPI.get_analysis_type(sample=sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":

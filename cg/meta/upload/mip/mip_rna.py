@@ -3,7 +3,7 @@
 import logging
 from subprocess import CalledProcessError
 
-import click
+import rich_click as click
 
 
 from cg.cli.upload.scout import upload_rna_to_scout

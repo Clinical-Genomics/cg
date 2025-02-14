@@ -91,6 +91,10 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
+class NFAnalysisTags:
+    MANIFEST: str = "manifest"
+
+
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
@@ -138,7 +142,6 @@ class BalsamicProtectedTags:
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],

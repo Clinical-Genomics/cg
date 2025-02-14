@@ -13,7 +13,6 @@ def test_filter_orders_by_ticket_no_matching_ticket(base_store: Store, non_exist
         id=1,
         customer_id=1,
         ticket_id=1,
-        workflow=Workflow.MIP_DNA,
     )
     base_store.session.add(order)
     base_store.session.commit()
@@ -33,7 +32,6 @@ def test_filter_orders_by_ticket_id_matching_ticket(base_store: Store, ticket_id
         id=1,
         customer_id=1,
         ticket_id=int(ticket_id),
-        workflow=Workflow.MIP_DNA,
     )
     base_store.session.add(order)
     base_store.session.commit()

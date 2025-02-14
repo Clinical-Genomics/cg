@@ -36,8 +36,7 @@ MAX_CASES_TO_START_IN_50_MINUTES = 21
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
-    """Handles communication between BALSAMIC processes
-    and the rest of CG infrastructure"""
+    """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""
 
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
@@ -49,21 +48,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.account: str = config.balsamic.slurm.account
-        self.binary_path: str = config.balsamic.binary_path
         self.balsamic_cache: str = config.balsamic.balsamic_cache
+        self.bed_path: str = config.balsamic.bed_path
+        self.binary_path: str = config.balsamic.binary_path
+        self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.bed_path: str = config.balsamic.bed_path
-        self.cadd_path: str = config.balsamic.cadd_path
+        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
-        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
-        self.email: EmailStr = config.balsamic.slurm.mail_user
+        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
         self.loqusdb_path: str = config.balsamic.loqusdb_path
         self.pon_path: str = config.balsamic.pon_path
         self.qos: SlurmQos = config.balsamic.slurm.qos
         self.root_dir: str = config.balsamic.root
+        self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
+        self.sentieon_licence_server: str = config.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
 
     @property
@@ -94,7 +95,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Returns a list of cases that are ready for analysis."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
@@ -133,7 +134,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             self.status_db.get_case_by_internal_id(internal_id=case_id).links
         )
 
-        application_type: str = self.get_application_type(
+        application_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
         )
         sample_type = "tumor"
@@ -206,7 +207,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError("Multiple application types found in LIMS")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             if panel_bed:
-                raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
+                raise BalsamicStartError("Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample!")
             return None
         if panel_bed:
             return panel_bed.as_posix()
@@ -398,8 +399,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_verified_gens_file_paths(self, sex: Sex) -> dict[str, str] | None:
+    def get_verified_gens_file_paths(self, sex: Sex, panel_bed: str) -> dict[str, str]:
         """Return a list of file path arguments for Gens."""
+        if panel_bed:
+            return {
+                "gnomad_min_af5": self.gnomad_af5_path,
+            }
         return {
             "genome_interval": self.genome_interval_path,
             "gnomad_min_af5": self.gnomad_af5_path,
@@ -459,11 +464,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
-        (
-            config_case.update(self.get_verified_gens_file_paths(sex=verified_sex))
-            if not verified_panel_bed and genome_version == GenomeVersion.HG19
-            else None
-        )
+        if genome_version == GenomeVersion.HG19:
+            config_case.update(
+                self.get_verified_gens_file_paths(sex=verified_sex, panel_bed=verified_panel_bed)
+            )
 
         return config_case
 
@@ -496,7 +500,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             link_object.sample.internal_id: {
                 "sex": link_object.sample.sex,
                 "tissue_type": self.get_sample_type(link_object.sample).value,
-                "application_type": self.get_application_type(link_object.sample),
+                "application_type": self.get_analysis_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
             for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
@@ -508,7 +512,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
             return panel_bed
-        if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
+        if self.get_analysis_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
         return self.get_target_bed_from_lims(link_object.case.internal_id)
 
@@ -547,6 +551,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
+                "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
@@ -564,12 +569,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
-                "--exome": arguments.get("exome"),
                 "--pon-cnn": arguments.get("pon_cnn"),
+                "--exome": arguments.get("exome"),
+                "--sentieon-install-dir": self.sentieon_licence_path,
+                "--sentieon-license": self.sentieon_licence_server,
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
-                "--umi-trim-length": arguments.get("umi_trim_length"),
             },
             exclude_true=True,
         )

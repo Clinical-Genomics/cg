@@ -6,6 +6,12 @@ from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
 from tests.cli.workflow.conftest import tb_api
+from tests.cli.workflow.mip.conftest import (
+    mip_case_id,
+    mip_case_ids,
+    mip_dna_context,
+    mip_rna_context,
+)
 
 
 def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Case):

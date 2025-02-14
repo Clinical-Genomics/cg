@@ -1,8 +1,8 @@
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderFormError
+from cg.models.orders.constants import OrderType
 from cg.models.orders.json_sample import JsonSample
-from cg.models.orders.order import OrderType
 
 
 class JsonOrderformParser(OrderformParser):

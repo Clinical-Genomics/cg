@@ -4,20 +4,16 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
-from pydantic.dataclasses import dataclass
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, GenomeVersion, PrepCategory
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    AlignmentFileTag,
-    AnalysisTag,
-)
+from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
 from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -27,25 +23,13 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.genome_build_helpers import (
-    genome_to_scout_format,
-    get_genome_build,
-)
+from cg.meta.workflow.utils.genome_build_helpers import genome_to_scout_format, get_genome_build
 from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.store.api.data_classes import RNADNACollection
 from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
-
-
-@dataclass
-class RNADNACollection:
-    """Contains the id for an RNA sample, the name of its connected DNA sample,
-    and a list of connected, uploaded DNA cases."""
-
-    rna_sample_internal_id: str
-    dna_sample_name: str
-    dna_case_ids: list[str]
 
 
 class UploadScoutAPI:
@@ -188,15 +172,6 @@ class UploadScoutAPI:
         tags: set[str] = {AnalysisTag.OUTRIDER, case_id, AnalysisTag.CLINICAL}
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> set[str]:
-        """Return a set of unique DNA cases related to an RNA case."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(case)
-        unique_dna_cases_related_to_rna_case: set[str] = set()
-        for rna_dna_collection in rna_dna_collections:
-            unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
-        return unique_dna_cases_related_to_rna_case
-
     def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA alignment CRAM file for a case in Housekeeper."""
         tags: set[str] = {AlignmentFileTag.CRAM, sample_id}
@@ -212,9 +187,11 @@ class UploadScoutAPI:
     def upload_rna_alignment_file(self, case_id: str, dry_run: bool) -> None:
         """Upload RNA alignment file to Scout."""
         rna_case: Case = self.status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        rna_dna_collections: list[RNADNACollection] = (
+            self.status_db.get_related_dna_cases_with_samples(rna_case)
+        )
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_alignment_cram: File | None = self.get_rna_alignment_cram(
                 case_id=case_id, sample_id=rna_sample_internal_id
@@ -352,9 +329,11 @@ class UploadScoutAPI:
 
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        rna_dna_collections: list[RNADNACollection] = (
+            self.status_db.get_related_dna_cases_with_samples(rna_case)
+        )
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_coverage_bigwig: File | None = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_internal_id
@@ -388,7 +367,7 @@ class UploadScoutAPI:
         self, dry_run: bool, rna_dna_collections: list[RNADNACollection]
     ) -> None:
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
@@ -404,12 +383,15 @@ class UploadScoutAPI:
                 )
 
     def upload_rna_fraser_outrider_to_scout(
-        self, dry_run: bool, case_id: str, rna_dna_collections: list[RNADNACollection], cust_id: str
+        self,
+        dry_run: bool,
+        case_id: str,
+        rna_dna_collections: list[RNADNACollection],
     ) -> None:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_fraser: File | None = self.get_rna_omics_fraser(case_id=case_id)
             rna_outrider: File | None = self.get_rna_omics_outrider(case_id=case_id)
@@ -436,7 +418,7 @@ class UploadScoutAPI:
                     outrider_file_path=rna_outrider.full_path,
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
-                    cust_id=cust_id,
+                    cust_id=customer_case.customer.internal_id,
                 )
         for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
@@ -445,9 +427,8 @@ class UploadScoutAPI:
     def upload_rna_genome_build_to_scout(
         self,
         dry_run: bool,
-        rna_case: str,
+        rna_case: Case,
         rna_dna_collections: list[RNADNACollection],
-        cust_id: str,
     ) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         status_db: Store = self.status_db
@@ -469,7 +450,7 @@ class UploadScoutAPI:
                 self.scout_api.upload_rna_genome_build(
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
-                    cust_id=cust_id,
+                    cust_id=customer_case.customer.internal_id,
                     rna_genome_build=rna_genome_build,
                 )
 
@@ -506,9 +487,11 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case: Case = status_db.get_case_by_internal_id(case_id)
 
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        rna_dna_collections: list[RNADNACollection] = (
+            self.status_db.get_related_dna_cases_with_samples(rna_case)
+        )
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             splice_junctions_bed: File | None = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_internal_id
@@ -619,8 +602,9 @@ class UploadScoutAPI:
         """Upload RNA omics files to Scout."""
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
-        cust_id: str = rna_case.customer.internal_id
+        rna_dna_collections: list[RNADNACollection] = (
+            self.status_db.get_related_dna_cases_with_samples(rna_case)
+        )
         self.upload_omics_sample_id_to_scout(
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
@@ -628,13 +612,11 @@ class UploadScoutAPI:
             dry_run=dry_run,
             case_id=case_id,
             rna_dna_collections=rna_dna_collections,
-            cust_id=cust_id,
         )
         self.upload_rna_genome_build_to_scout(
             dry_run=dry_run,
             rna_case=rna_case,
             rna_dna_collections=rna_dna_collections,
-            cust_id=cust_id,
         )
         self.load_rna_variant_outlier_to_scout(
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
@@ -682,45 +664,6 @@ class UploadScoutAPI:
 
         return config_builders[analysis.workflow]
 
-    def create_rna_dna_collections(self, rna_case: Case) -> list[RNADNACollection]:
-        return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]
-
-    def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
-        """Creates a collection containing the given RNA sample id, its related DNA sample name, and
-        a list of ids for the DNA cases connected to the DNA sample."""
-        if not rna_sample.subject_id:
-            raise CgDataError(
-                f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
-            )
-
-        collaborators: set[Customer] = rna_sample.customer.collaborators
-        subject_id_samples: list[Sample] = (
-            self.status_db.get_samples_by_customer_ids_and_subject_id_and_is_tumour(
-                customer_ids=[customer.id for customer in collaborators],
-                subject_id=rna_sample.subject_id,
-                is_tumour=rna_sample.is_tumour,
-            )
-        )
-
-        subject_id_dna_samples: list[Sample] = self._get_application_prep_category(
-            subject_id_samples
-        )
-
-        if len(subject_id_dna_samples) != 1:
-            raise CgDataError(
-                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: "
-                f"{rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
-            )
-        dna_sample: Sample = subject_id_dna_samples[0]
-        dna_cases: list[str] = self._dna_cases_related_to_dna_sample(
-            dna_sample=dna_sample, collaborators=collaborators
-        )
-        return RNADNACollection(
-            rna_sample_internal_id=rna_sample.internal_id,
-            dna_sample_name=dna_sample.name,
-            dna_case_ids=dna_cases,
-        )
-
     def _dna_cases_related_to_dna_sample(
         self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
@@ -765,9 +708,9 @@ class UploadScoutAPI:
             for sample in subject_id_samples
             if sample.prep_category
             in [
-                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
-                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
-                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
+                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
             ]
         ]
 
@@ -775,11 +718,6 @@ class UploadScoutAPI:
 
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
-        unique_dna_case_ids: set[str] = self.get_unique_dna_cases_related_to_rna_case(rna_case_id)
-        uploaded_dna_cases: set[str] = set()
-        for dna_case_id in unique_dna_case_ids:
-            if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:
-                uploaded_dna_cases.add(dna_case_id)
-            else:
-                LOG.warning(f"Related DNA case {dna_case_id} has not been completed.")
-        return uploaded_dna_cases
+        rna_case: Case = self.status_db.get_case_by_internal_id(rna_case_id)
+        dna_cases: list[Case] = self.status_db.get_uploaded_related_dna_cases(rna_case)
+        return {dna_case.internal_id for dna_case in dna_cases}

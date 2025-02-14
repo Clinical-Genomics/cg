@@ -3,7 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 
-import click
+import rich_click as click
 import pytest
 from pytest_mock import MockFixture
 

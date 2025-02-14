@@ -4,9 +4,10 @@ from typing import Hashable, Iterable
 
 from pydantic import BaseModel, ConfigDict, constr
 
+from cg.apps.orderform.utils import ORDER_TYPES_WITH_CASES
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
-from cg.models.orders.order import OrderType
+from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
@@ -142,10 +143,11 @@ class OrderformParser(BaseModel):
 
     def generate_orderform(self) -> Orderform:
         """Generate an orderform"""
-        cases_map: dict[str, list[OrderSample]] = self.group_cases()
         case_objs: list[OrderCase] = []
-        for case_id in cases_map:
-            case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
+        if self.project_type in ORDER_TYPES_WITH_CASES:
+            cases_map: dict[str, list[OrderSample]] = self.group_cases()
+            for case_id in cases_map:
+                case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
         return Orderform(
             comment=self.order_comment,
             samples=self.samples,

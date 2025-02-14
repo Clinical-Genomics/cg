@@ -38,12 +38,23 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         self.hk_api = hk_api
         self.tags_fetcher = tags_fetcher
 
-    def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
-        """Return a list of analysis files to be delivered for a case."""
-        LOG.debug(f"[FETCH SERVICE] Fetching analysis files for case: {case_id}")
+    def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
+        """Return a list of analysis files to be delivered for a case.
+        args:
+            case_id: The case id to deliver files for
+            sample_id: The sample id to deliver files for
+        """
+        LOG.debug(
+            f"[FETCH SERVICE] Fetching analysis files for case: {case_id}, sample: {sample_id}"
+        )
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(case)
-        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(case)
+        analysis_case_files: list[CaseFile] = self._get_analysis_case_delivery_files(
+            case=case, sample_id=sample_id
+        )
+
+        analysis_sample_files: list[SampleFile] = self._get_analysis_sample_delivery_files(
+            case=case, sample_id=sample_id
+        )
         delivery_data = DeliveryMetaData(
             case_id=case.internal_id,
             customer_internal_id=case.customer.internal_id,
@@ -60,7 +71,13 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
 
     @staticmethod
     def _validate_delivery_has_content(delivery_files: DeliveryFiles) -> DeliveryFiles:
-        """Check if the delivery files has files to deliver."""
+        """
+        Check if the delivery files has files to deliver.
+        raises:
+            NoDeliveryFilesError if no files to deliver.
+        args:
+            delivery_files: The delivery files to check
+        """
         if delivery_files.case_files or delivery_files.sample_files:
             return delivery_files
         LOG.info(
@@ -71,9 +88,17 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
     @handle_missing_bundle_errors
     def _get_sample_files_from_case_bundle(
         self, workflow: Workflow, sample_id: str, case_id: str
-    ) -> list[SampleFile]:
-        """Return a list of files from a case bundle with a sample id as tag."""
+    ) -> list[SampleFile] | None:
+        """Return a list of files from a case bundle with a sample id as tag.
+        This is to fetch sample specific analysis files that are stored on the case level.
+        args:
+            workflow: The workflow to fetch files for
+            sample_id: The sample id to fetch files for
+            case_id: The case id to fetch files for
+        """
         sample_tags: list[set[str]] = self.tags_fetcher.fetch_tags(workflow).sample_tags
+        if not sample_tags:
+            return []
         sample_tags_with_sample_id: list[set[str]] = [tag | {sample_id} for tag in sample_tags]
         sample_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case_id, tags=sample_tags_with_sample_id
@@ -89,9 +114,16 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
             for sample_file in sample_files
         ]
 
-    def _get_analysis_sample_delivery_files(self, case: Case) -> list[SampleFile] | None:
-        """Return a all sample files to deliver for a case."""
-        sample_ids: list[str] = case.sample_ids
+    def _get_analysis_sample_delivery_files(
+        self, case: Case, sample_id: str | None
+    ) -> list[SampleFile]:
+        """Return all sample files to deliver for a case.
+        Write a list of sample files to deliver for a case.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample id to deliver files for
+        """
+        sample_ids: list[str] = [sample_id] if sample_id else case.sample_ids
         delivery_files: list[SampleFile] = []
         for sample_id in sample_ids:
             sample_files: list[SampleFile] = self._get_sample_files_from_case_bundle(
@@ -101,13 +133,20 @@ class AnalysisDeliveryFileFetcher(FetchDeliveryFilesService):
         return delivery_files
 
     @handle_missing_bundle_errors
-    def _get_analysis_case_delivery_files(self, case: Case) -> list[CaseFile]:
+    def _get_analysis_case_delivery_files(
+        self, case: Case, sample_id: str | None
+    ) -> list[CaseFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
-        files.
+        files. This is to ensure that only case level analysis files are delivered.
+        args:
+            case: The case to deliver files for
+            sample_id: The sample id to deliver files for
         """
         case_tags: list[set[str]] = self.tags_fetcher.fetch_tags(case.data_analysis).case_tags
-        sample_id_tags: list[str] = case.sample_ids
+        if not case_tags:
+            return []
+        sample_id_tags: list[str] = [sample_id] if sample_id else case.sample_ids
         case_files: list[File] = self.hk_api.get_files_from_latest_version_containing_tags(
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_id_tags
         )

@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from sqlalchemy.orm import Query
 
 from cg.cli.upload.observations.utils import get_observations_api

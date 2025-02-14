@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import click
+import rich_click as click
 from housekeeper.store.models import Version
 
 from cg.cli.generate.delivery_report.options import (

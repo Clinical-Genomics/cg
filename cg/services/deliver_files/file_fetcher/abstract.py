@@ -29,6 +29,6 @@ class FetchDeliveryFilesService(ABC):
         self.tags_fetcher = tags_fetcher
 
     @abstractmethod
-    def get_files_to_deliver(self, case_id: str) -> DeliveryFiles:
+    def get_files_to_deliver(self, case_id: str, sample_id: str | None) -> DeliveryFiles:
         """Get the files to deliver."""
         pass

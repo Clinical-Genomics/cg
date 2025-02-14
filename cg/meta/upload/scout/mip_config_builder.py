@@ -5,15 +5,18 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import GenomeBuild, MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
+from cg.constants.scout import (
+    MIP_CASE_TAGS,
+    MIP_SAMPLE_TAGS,
+    RANK_MODEL_THRESHOLD,
+    GenomeBuild,
+    UploadTrack,
+)
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.scout.scout_load_config import (
-    MipLoadConfig,
-    ScoutMipIndividual,
-)
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
 from cg.store.models import Analysis, CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -39,8 +42,8 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
-    def build_load_config(self, rank_score_threshold: int = 5) -> MipLoadConfig:
-        """Create a MIP specific load config for uploading analysis to Scout"""
+    def build_load_config(self, rank_score_threshold: int = RANK_MODEL_THRESHOLD) -> MipLoadConfig:
+        """Create a MIP specific load config for uploading analysis to Scout."""
         LOG.info("Generate load config for mip case")
         load_config: MipLoadConfig = MipLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,

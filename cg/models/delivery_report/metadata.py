@@ -122,7 +122,7 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
 
 
 class WTSSampleMetadataModel(SequencingSampleMetadataModel):
-    """Metrics and trending data model associated to a WTS sample.
+    """Metrics and trending data model associated to a WHOLE_TRANSCRIPTOME_SEQUENCING sample.
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow

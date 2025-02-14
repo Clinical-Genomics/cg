@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 
 
@@ -56,20 +56,6 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.BALSAMIC
-
-
-def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
-    """Test to parse a balsamic QC orderform in excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(balsamic_qc_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=balsamic_qc_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.BALSAMIC_QC
 
 
 def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
@@ -277,3 +263,19 @@ def test_parse_microbial_sequencing_orderform(microbial_sequencing_orderform: st
     assert order_form_parser.project_type == OrderType.MICROBIAL_FASTQ
     # THEN assert that samples are parsed
     assert order_form_parser.samples
+
+
+def test_parse_taxprofiler_orderform(taxprofiler_orderform: str):
+    """Test to parse a Taxprofiler orderform in excel format"""
+
+    # GIVEN an order form in Excel format
+    assert is_excel(Path(taxprofiler_orderform))
+
+    # GIVEN an ExcelOrderformParser
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=taxprofiler_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.TAXPROFILER

@@ -1,4 +1,6 @@
+import copy
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
@@ -16,15 +18,15 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelGenomeBuild
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
-from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
-from cg.io.yaml import write_yaml_nextflow_style
+from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
@@ -55,14 +57,15 @@ class NfAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.nfcore_workflow_path: str | None = None
+        self.workflow_bin_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
-        self.config_platform: str | None = None
-        self.config_params: str | None = None
-        self.config_resources: str | None = None
+        self.platform: str | None = None
+        self.params: str | None = None
+        self.workflow_config_path: str | None = None
+        self.resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
         self.account: str | None = None
@@ -99,11 +102,6 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
@@ -131,24 +129,20 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         config_files_list: list[str] = [
-            self.config_platform,
-            self.config_params,
-            self.config_resources,
+            self.platform,
+            self.workflow_config_path,
+            self.resources,
         ]
         extra_parameters_str: list[str] = [
             self.set_cluster_options(case_id=case_id),
         ]
-        if self.is_params_appended_to_nextflow_config:
-            extra_parameters_str.append(
-                write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict())
-            )
         return concat_txt(
             file_paths=config_files_list,
             str_content=extra_parameters_str,
@@ -259,6 +253,15 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
 
+    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
+        """Gather BAM file path for a sample based on the BAM tag."""
+        return [
+            Path(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={AlignmentFileTag.BAM}
+            )
+        ]
+
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         raise NotImplementedError
@@ -284,12 +287,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict = None) -> None:
+    def write_params_file(self, case_id: str, replaced_workflow_parameters: dict = None) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        if workflow_parameters:
+        if replaced_workflow_parameters:
             write_yaml_nextflow_style(
-                content=workflow_parameters,
+                content=replaced_workflow_parameters,
                 file_path=self.get_params_file_path(case_id=case_id),
             )
         else:
@@ -330,7 +333,7 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
-    def create_sample_sheet(self, case_id: str, dry_run: bool):
+    def create_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """Create sample sheet for a case."""
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         if not dry_run:
@@ -340,25 +343,59 @@ class NfAnalysisAPI(AnalysisAPI):
                 header=self.sample_sheet_headers,
             )
 
-    def create_params_file(self, case_id: str, dry_run: bool):
+    def create_params_file(self, case_id: str, dry_run: bool) -> None:
         """Create parameters file for a case."""
-        LOG.debug("Getting parameters information")
-        workflow_parameters = None
-        if not self.is_params_appended_to_nextflow_config:
-            workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
+        LOG.debug("Getting parameters information built on-the-fly")
+        built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
+            case_id=case_id
+        ).model_dump()
+        LOG.debug("Adding parameters from the pipeline config file if it exist")
+
+        workflow_parameters: dict = built_workflow_parameters | (
+            read_yaml(self.params) if hasattr(self, "params") and self.params else {}
+        )
+        replaced_workflow_parameters: dict = self.replace_values_in_params_file(
+            workflow_parameters=workflow_parameters
+        )
         if not dry_run:
-            self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
+            self.write_params_file(
+                case_id=case_id, replaced_workflow_parameters=replaced_workflow_parameters
+            )
+
+    def replace_values_in_params_file(self, workflow_parameters: dict) -> dict:
+        replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
+        """Iterate through the dictionary until all placeholders are replaced with the corresponding value from the dictionary"""
+        while True:
+            resolved: bool = True
+            for key, value in replaced_workflow_parameters.items():
+                new_value: str | int = self.replace_params_placeholders(value, workflow_parameters)
+                if new_value != value:
+                    resolved = False
+                    replaced_workflow_parameters[key] = new_value
+            if resolved:
+                break
+        return replaced_workflow_parameters
+
+    def replace_params_placeholders(self, value: str | int, workflow_parameters: dict) -> str:
+        """Replace values marked as placeholders with values from the given dictionary"""
+        if isinstance(value, str):
+            placeholders: list[str] = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
+            for placeholder in placeholders:
+                if placeholder in workflow_parameters:
+                    value = value.replace(
+                        f"{{{{{placeholder}}}}}", str(workflow_parameters[placeholder])
+                    )
+        return value
 
     def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
         """Create nextflow config file."""
         if content := self.get_nextflow_config_content(case_id=case_id):
             LOG.debug("Writing nextflow config file")
-            if dry_run:
-                return
-            write_txt(
-                content=content,
-                file_path=self.get_nextflow_config_path(case_id=case_id),
-            )
+            if not dry_run:
+                write_txt(
+                    content=content,
+                    file_path=self.get_nextflow_config_path(case_id=case_id),
+                )
 
     def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
@@ -402,7 +439,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            workflow_path=self.nfcore_workflow_path,
+            workflow_bin_path=self.workflow_bin_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
@@ -592,6 +629,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
+            LOG.debug(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
@@ -796,7 +834,7 @@ class NfAnalysisAPI(AnalysisAPI):
             return
         workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
+            deliverables_content=workflow_content.model_dump(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(

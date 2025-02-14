@@ -3,7 +3,7 @@
 import datetime
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.get import get_case as print_case
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION

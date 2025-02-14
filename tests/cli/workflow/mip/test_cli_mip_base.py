@@ -13,7 +13,6 @@ from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from tests.cli.workflow.mip.conftest import setup_mocks
-from tests.store.conftest import case_obj
 
 
 def test_spring_decompression_needed_and_started(
@@ -34,7 +33,7 @@ def test_spring_decompression_needed_and_started(
     # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
-        case_to_analyze=case,
+        get_case_to_analyze=case,
         decompress_spring=True,
         has_latest_analysis_started=False,
         is_spring_decompression_needed=True,
@@ -69,7 +68,7 @@ def test_spring_decompression_needed_and_start_failed(
     # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
-        case_to_analyze=case,
+        get_case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
         is_spring_decompression_needed=True,
@@ -105,7 +104,7 @@ def test_spring_decompression_needed_and_cant_start(
     # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case,
+        get_case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
         is_spring_decompression_needed=True,
@@ -142,7 +141,7 @@ def test_decompression_cant_start_and_is_running(
     # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case,
+        get_case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
         is_spring_decompression_needed=True,
@@ -180,7 +179,7 @@ def test_case_needs_to_be_stored(
     # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case,
+        get_case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
         is_spring_decompression_needed=False,

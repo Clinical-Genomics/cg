@@ -3,22 +3,22 @@ import getpass
 import logging
 import os
 import re
-import shutil
 from pathlib import Path
-
 import paramiko
-from housekeeper.store.models import Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
-from cg.constants.constants import SARS_COV_REGEX
+from cg.constants.constants import SARS_COV_REGEX, DataDelivery
 from cg.constants.housekeeper_tags import FohmTag
 from cg.exc import CgError
 from cg.io.csv import read_csv, write_csv_from_dict
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
+from cg.services.deliver_files.constants import DeliveryDestination, DeliveryStructure
+from cg.services.deliver_files.factory import (
+    DeliveryServiceFactory,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.dict import remove_duplicate_dicts
@@ -28,7 +28,12 @@ LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
-    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
+    def __init__(
+        self,
+        config: CGConfig,
+        dry_run: bool = False,
+        datestr: str | None = None,
+    ):
         self.config: CGConfig = config
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
@@ -44,6 +49,7 @@ class FOHMUploadAPI:
         self._reports_dataframe = None
         self._pangolin_dataframe = None
         self._aggregation_dataframe = None
+        self._delivery_factory: DeliveryServiceFactory = config.delivery_service_factory
 
     @property
     def current_datestr(self) -> str:
@@ -196,16 +202,16 @@ class FOHMUploadAPI:
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=report.internal_id
             )
-            bundle_name: str = sample.links[0].case.internal_id
-            version: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-            files = self.housekeeper_api.files(version=version.id, tags={report.internal_id}).all()
-            for file in files:
-                if self._dry_run:
-                    LOG.info(
-                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                    )
-                    continue
-                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
+            case: Case = sample.links[0].case
+            delivery_service = self._delivery_factory.build_delivery_service(
+                case=case,
+                delivery_type=DataDelivery.FASTQ_ANALYSIS,
+                delivery_destination=DeliveryDestination.FOHM,
+                delivery_structure=DeliveryStructure.FLAT,
+            )
+            delivery_service.deliver_files_for_sample_no_rsync(
+                case=case, sample_id=sample.internal_id, delivery_base_path=self.daily_rawdata_path
+            )
 
     def create_pangolin_report(self, reports: list[FohmPangolinReport]) -> None:
         LOG.info("Creating aggregate Pangolin report")
@@ -362,9 +368,13 @@ class FOHMUploadAPI:
         self.create_pangolin_report(sars_cov_pangolin_reports)
         return sars_cov_pangolin_reports
 
-    def aggregate_delivery(self, cases: list[str]) -> None:
-        """Aggregate and hardlink reports."""
-        self.set_cases_to_aggregate(cases)
+    def aggregate_delivery(self, case_ids: list[str]) -> None:
+        """
+        Aggregate and hardlink reports.
+        args:
+            case_ids: The internal ids for cases to aggregate.
+        """
+        self.set_cases_to_aggregate(case_ids)
         self.create_daily_delivery_folders()
         sars_cov_complementary_reports: list[FohmComplementaryReport] = (
             self.parse_and_write_complementary_report()

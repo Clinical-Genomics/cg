@@ -27,9 +27,7 @@ from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.decompression_service.decompressor import Decompressor
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -45,21 +43,13 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.housekeeper_service.pacbio_houskeeper_service import (
     PacBioHousekeeperService,
 )
-from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import (
-    PacBioMetricsParser,
-)
-from cg.services.run_devices.pacbio.post_processing_service import (
-    PacBioPostProcessingService,
-)
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
 from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator import (
     PacBioRunDataGenerator,
 )
-from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import (
-    PacBioRunFileManager,
-)
-from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import (
-    PacBioRunValidator,
-)
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
 from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
@@ -152,6 +142,11 @@ class StatinaConfig(BaseModel):
 class CommonAppConfig(BaseModel):
     binary_path: str | None = None
     config_path: str | None = None
+    container_mount_volume: str | None = None
+
+
+class HermesConfig(CommonAppConfig):
+    container_path: str
 
 
 class FluffyUploadConfig(BaseModel):
@@ -218,18 +213,36 @@ class MipConfig(BaseModel):
     script: str
 
 
+class NalloConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    launch_directory: str
+    workflow_bin_path: str
+    profile: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
-    workflow_path: str
+    workflow_bin_path: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -241,12 +254,12 @@ class TomteConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    config_platform: str
-    config_params: str
-    config_resources: str
-    workflow_path: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    workflow_bin_path: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -258,14 +271,17 @@ class RnafusionConfig(CommonAppConfig):
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
+    platform: str
+    params: str
+    config: str
+    resources: str
     launch_directory: str
     profile: str
-    references: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    workflow_path: str
+    workflow_bin_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
@@ -273,9 +289,11 @@ class TaxprofilerConfig(CommonAppConfig):
     conda_binary: str | None = None
     conda_env: str
     compute_env: str
-    databases: str
-    hostremoval_reference: str
-    workflow_path: str
+    platform: str
+    params: str
+    config: str
+    resources: str
+    workflow_bin_path: str
     profile: str
     revision: str
     root: str
@@ -411,7 +429,7 @@ class CGConfig(BaseModel):
     genotype_api_: GenotypeAPI = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None
-    hermes: CommonAppConfig = None
+    hermes: HermesConfig = None
     hermes_api_: HermesApi = None
     janus: ClientConfig | None = None
     janus_api_: JanusAPIClient | None = None
@@ -446,6 +464,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
+    nallo: NalloConfig | None = None
     raredisease: RarediseaseConfig | None = None
     rnafusion: RnafusionConfig | None = None
     statina: StatinaConfig | None = None
@@ -752,6 +771,7 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating delivery service factory")
             factory = DeliveryServiceFactory(
                 store=self.status_db,
+                lims_api=self.lims_api,
                 hk_api=self.housekeeper_api,
                 tb_service=self.trailblazer_api,
                 rsync_service=self.delivery_rsync_service,

@@ -1,4 +1,4 @@
-import click
+import rich_click as click
 
 from cg.constants.cli_options import DRY_RUN
 from cg.services.illumina.post_processing.housekeeper_storage import (

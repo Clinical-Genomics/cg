@@ -1,9 +1,10 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.constants.constants import AnalysisType, Workflow
-from cg.constants.tb import AnalysisStatus
+from cg.constants.constants import Workflow
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CaseNotFoundError
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
@@ -41,7 +42,7 @@ class RawDataAnalysisService:
             config_path="",
             order_id=case.latest_order.id,
             out_dir="",
-            slurm_quality_of_service=case.slurm_priority,
+            priority=MAP_TO_TRAILBLAZER_PRIORITY[case.priority],
             workflow=Workflow.RAW_DATA,
             ticket=case.latest_ticket,
         )

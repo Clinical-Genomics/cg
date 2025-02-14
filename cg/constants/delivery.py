@@ -44,16 +44,6 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {AlignmentFileTag.CRAM_INDEX},
 ]
 
-BALSAMIC_QC_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"delivery-report"},
-    {"multiqc-html"},
-]
-
-BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"qc-cram"},
-    {"qc-cram-index"},
-]
-
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"vcf-umi-snv"},
     {"vcf-umi-snv-index"},
@@ -144,7 +134,6 @@ MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
     {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
@@ -153,10 +142,6 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
-    },
-    Workflow.BALSAMIC_QC: {
-        "case_tags": BALSAMIC_QC_ANALYSIS_CASE_TAGS,
-        "sample_tags": BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.BALSAMIC_UMI: {
         "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,

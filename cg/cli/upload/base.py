@@ -4,7 +4,7 @@ import logging
 import sys
 import traceback
 
-import click
+import rich_click as click
 
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
@@ -39,6 +39,7 @@ from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.mutant.mutant import MutantUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
@@ -94,6 +95,8 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             Workflow.TAXPROFILER,
         }:
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
+        elif case.data_analysis == Workflow.MUTANT:
+            upload_api = MutantUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)

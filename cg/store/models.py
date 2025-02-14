@@ -25,13 +25,13 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
-    PrepCategory,
     SequencingQCStatus,
     SexOptions,
     StatusOptions,
 )
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -146,7 +146,7 @@ class Application(Base):
 
     tag: Mapped[UniqueStr]
     prep_category: Mapped[str] = mapped_column(
-        types.Enum(*(category.value for category in PrepCategory))
+        types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -211,13 +211,13 @@ class Application(Base):
 
     @property
     def analysis_type(self) -> str:
-        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
+            return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
-            PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
     def to_dict(self):
@@ -815,6 +815,11 @@ class Sample(Base, PriorityMixin):
         back_populates="sample", cascade="all, delete"
     )
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -991,8 +996,11 @@ class Order(Base):
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
-    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     is_open: Mapped[bool] = mapped_column(default=True)
+
+    @property
+    def workflow(self) -> Workflow:
+        return self.cases[0].data_analysis
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -1154,6 +1162,9 @@ class PacbioSequencingRun(InstrumentRun):
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
+    def to_dict(self):
+        return to_dict(self)
+
 
 class SampleRunMetrics(Base):
     """Parent model for the different types of sample run metrics."""
@@ -1207,6 +1218,10 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+    def to_dict(self) -> dict:
+        """Represent as dictionary"""
+        return to_dict(self)
 
 
 class OrderTypeApplication(Base):

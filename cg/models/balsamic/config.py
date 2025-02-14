@@ -12,7 +12,7 @@ class BalsamicConfigAnalysis(BaseModel):
     Attributes:
         case_id: case internal ID
         analysis_type: analysis type (single, paired or pon)
-        analysis_workflow: analysis carried out (balsamic, balsamic-qc or balsamic-umi)
+        analysis_workflow: analysis carried out (balsamic or balsamic-umi)
         sequencing_type: analysis sequencing type (wgs or targeted)
         BALSAMIC_version: BALSAMIC version used to produce the analysis
         config_creation_date: config creation timestamp
@@ -102,22 +102,12 @@ class BalsamicConfigQC(BaseModel):
     """Config QC attributes.
 
     Attributes:
-        picard_rmdup: if the duplicates has been removed or not
         adapter: adapter sequence that has been trimmed
-        quality_trim: whether quality trimming has been performed in the workflow
-        adapter_trim: whether adapter trimming has been performed in the workflow
-        umi_trim: whether UMI trimming has been performed in the workflow
         min_seq_length: minimum sequence length cutoff for reads
-        umi_trim_length: UMI trimming length
     """
 
-    picard_rmdup: bool
-    adapter: str | None = None
-    quality_trim: bool
-    adapter_trim: bool
-    umi_trim: bool
-    min_seq_length: str | None = None
-    umi_trim_length: str | None = None
+    adapter: str | None
+    min_seq_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):

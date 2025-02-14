@@ -21,7 +21,6 @@ RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
 
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
-    Workflow.BALSAMIC_QC,
     Workflow.BALSAMIC_UMI,
     Workflow.MIP_DNA,
     Workflow.RAREDISEASE,
@@ -227,7 +226,7 @@ _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADA
     "mean_length_r1",
 ]
 
-# WTS metadata required fields (OPTIONAL: "rin", "dv200")
+# WHOLE_TRANSCRIPTOME_SEQUENCING metadata required fields (OPTIONAL: "rin", "dv200")
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
     "input_amount",
