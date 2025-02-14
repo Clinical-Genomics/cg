@@ -54,7 +54,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         return load_config
 
     def include_case_files(self, load_config: NalloLoadConfig) -> None:
-        """Include case level files for mip case."""
+        """Include case level files for NALLO case."""
         LOG.info("Including NALLO specific case level files")
         for scout_key in NALLO_CASE_TAGS.keys():
             self._include_case_file(load_config, scout_key)
@@ -69,9 +69,6 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         """Include sample level files that are optional for mip samples."""
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = config_sample.sample_id
-        config_sample.mitodel_file = self.get_sample_file(
-            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
-        )
         config_sample.d4_file = self.get_sample_file(
             hk_tags=self.sample_tags.d4_file, sample_id=sample_id
         )

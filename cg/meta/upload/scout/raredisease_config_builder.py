@@ -148,7 +148,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             load_config.custom_images = config_custom_images
 
     def include_case_files(self, load_config: RarediseaseLoadConfig) -> None:
-        """Include case level files for mip case."""
+        """Include case level files for RAREDISEASE case."""
         LOG.info("Including RAREDISEASE specific case level files")
         for scout_key in RAREDISEASE_CASE_TAGS.keys():
             self._include_case_file(load_config, scout_key)
