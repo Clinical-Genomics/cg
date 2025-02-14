@@ -149,8 +149,6 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.BAM, NalloAnalysisTag.HAPLOTAGS},
     d4_file={"d4"},
-    vcf2cytosure={"vcf2cytosure"},
-    mitodel_file={"mitodel"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
