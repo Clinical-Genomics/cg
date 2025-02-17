@@ -10,11 +10,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
-<<<<<<< HEAD
-from cg.services.application.service import ApplicationsWebService
 from cg.services.authentication.service import AuthenticationService
-=======
->>>>>>> master
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
