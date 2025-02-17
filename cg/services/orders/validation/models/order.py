@@ -11,7 +11,7 @@ class Order(BaseModel):
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")
-    name: str = Field(min_length=1)
+    name: str = Field(min_length=1, max_length=64)
     skip_reception_control: Annotated[bool, BeforeValidator(set_null_to_false)] = False
     _generated_ticket_id: int | None = PrivateAttr(default=None)
     _user_id: int = PrivateAttr(default=None)

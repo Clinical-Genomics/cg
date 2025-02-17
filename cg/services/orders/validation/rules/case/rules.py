@@ -1,14 +1,18 @@
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
+    ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
     MultipleSamplesInCaseError,
+    NewCaseWithoutAffectedSampleError,
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
+    NormalOnlyWGSError,
 )
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
@@ -17,10 +21,13 @@ from cg.services.orders.validation.rules.case.utils import (
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
+    is_normal_only_wgs,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
+from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
 
@@ -112,7 +119,7 @@ def validate_at_most_two_samples_per_case(
 def validate_number_of_normal_samples(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
 ) -> list[NumberOfNormalSamplesError]:
-    """Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample.
+    """Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample, that cases with one WGS sample only contain a tumour sample.
     Only applicable to Balsamic and Balsamic-UMI."""
     errors: list[NumberOfNormalSamplesError] = []
     for case_index, case in order.enumerated_new_cases:
@@ -121,5 +128,32 @@ def validate_number_of_normal_samples(
             errors.append(error)
         elif is_double_tumour(case=case, store=store):
             error = DoubleTumourError(case_index=case_index)
+            errors.append(error)
+        if is_normal_only_wgs(case=case, store=store):
+            error = NormalOnlyWGSError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_each_new_case_has_an_affected_sample(
+    order: MIPDNAOrder, **kwargs
+) -> list[NewCaseWithoutAffectedSampleError]:
+    """Validates that each case in the order contains at least one sample with affected status."""
+    errors: list[NewCaseWithoutAffectedSampleError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if all(sample.status != StatusEnum.affected for sample in case.samples):
+            error = NewCaseWithoutAffectedSampleError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_existing_cases_have_an_affected_sample(
+    order: MIPDNAOrder, store: Store, **kwargs
+) -> list[ExistingCaseWithoutAffectedSampleError]:
+    errors: list[ExistingCaseWithoutAffectedSampleError] = []
+    for case_index, case in order.enumerated_existing_cases:
+        db_case: DbCase = store.get_case_by_internal_id(case.internal_id)
+        if all(link.status != StatusEnum.affected for link in db_case.links):
+            error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
     return errors

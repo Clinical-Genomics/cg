@@ -64,7 +64,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id)
     )
 
 
@@ -121,6 +121,20 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
         str(model.sample_concentration_maximum_cfdna) + NG_UL_SUFFIX
         if model.sample_concentration_maximum_cfdna
         else None
+    )
+
+
+def view_user_link(unused1, unused2, model, property_name):
+    """Column formatter used for linking to the User table."""
+    del unused1, unused2
+    contact_name: str = getattr(model, property_name)
+    return (
+        Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("user.index_view", search=f"{contact_name}"), contact_name)
+        )
+        if contact_name
+        else ""
     )
 
 
@@ -304,10 +318,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
-        "delivery_contact",
-        "lab_contact",
         "loqus_upload",
-        "primary_contact",
         "priority",
         "return_samples",
         "scout_access",
@@ -327,6 +338,11 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_formatters = {
+        "delivery_contact": view_user_link,
+        "lab_contact": view_user_link,
+        "primary_contact": view_user_link,
+    }
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
@@ -384,7 +400,7 @@ class CaseView(BaseView):
         if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.case.internal_id), model.case)
+                % (url_for("case.index_view", search=f"={model.case.internal_id}"), model.case)
             )
 
         return markup
@@ -640,7 +656,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
+                % (
+                    url_for("sample.index_view", search=f"={model.sample.internal_id}"),
+                    model.sample,
+                )
             )
             if model.sample
             else ""

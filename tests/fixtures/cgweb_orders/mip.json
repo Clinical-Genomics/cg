@@ -6,7 +6,7 @@
 			"panels": [
 				"AID"
 			],
-			"priority": "standard",
+			"priority": "priority",
 			"samples": [
 				{
 					"age_at_sampling": null,

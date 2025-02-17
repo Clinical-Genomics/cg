@@ -72,3 +72,10 @@ class Case(BaseModel):
         for _, sample in self.enumerated_new_samples:
             sample._case_name = self.name
         return self
+
+    @model_validator(mode="after")
+    def set_case_priority_on_new_samples(self):
+        """Sets the priority on new samples, so it can be easily fetched when stored in LIMS."""
+        for _, sample in self.enumerated_new_samples:
+            sample._case_priority = self.priority
+        return self

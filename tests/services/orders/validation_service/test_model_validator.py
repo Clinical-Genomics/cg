@@ -4,7 +4,7 @@ from cg.services.orders.validation.model_validator.model_validator import ModelV
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
 from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RmlOrder
+from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
 from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
 
 
@@ -12,7 +12,7 @@ from cg.services.orders.validation.workflows.tomte.models.order import TomteOrde
     "order_fixture, expected_index_sequence, order_model",
     [
         ("fluffy_order_to_submit", "C01 IDT_10nt_568 (TGTGAGCGAA-AACTCCGATC)", FluffyOrder),
-        ("rml_order_to_submit", "C01 IDT_10nt_568 (TGTGAGCGAA-AACTCCGATC)", RmlOrder),
+        ("rml_order_to_submit", "C01 IDT_10nt_568 (TGTGAGCGAA-AACTCCGATC)", RMLOrder),
     ],
     ids=["fluffy", "rml"],
 )
@@ -32,7 +32,7 @@ def test_validate_pool_sample_default_index(
     order, _ = model_validator.validate(order=raw_order, model=order_model)
 
     # THEN the index sequence should be set to the default index sequence
-    assert order.samples[0].index_sequence == expected_index_sequence
+    assert order.samples[0]._index_sequence == expected_index_sequence
 
 
 def test_validate_mutant_sample_gets_lab_and_region(
