@@ -27,9 +27,9 @@ def callback():
         session["userinfo"] = userinfo
         return redirect("/")
     return (
-            jsonify(error="You are not authorized to access this resource."),
-            HTTPStatus.UNAUTHORIZED,
-            )
+        jsonify(error="You are not authorized to access this resource."),
+        HTTPStatus.UNAUTHORIZED,
+    )
 
 
 @AUTH_BLUEPRINT.route("/logout")
