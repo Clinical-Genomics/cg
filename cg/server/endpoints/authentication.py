@@ -1,4 +1,5 @@
-from flask import request, redirect, session, Blueprint
+from http import HTTPStatus
+from flask import jsonify, request, redirect, session, Blueprint
 
 from cg.server.ext import auth_service
 import logging
@@ -25,7 +26,10 @@ def callback():
         userinfo = auth_service.get_user_info(token)
         session["userinfo"] = userinfo
         return redirect("/")
-    return "Authentication failed", 401
+    return (
+            jsonify(error="You are not authorized to access this resource."),
+            HTTPStatus.UNAUTHORIZED,
+            )
 
 
 @AUTH_BLUEPRINT.route("/logout")
