@@ -6,10 +6,10 @@ from cg.models.orders.sample_base import PriorityEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
-from cg.services.orders.validation.workflows.metagenome.models.order import MetagenomeOrder
-from cg.services.orders.validation.workflows.metagenome.models.sample import MetagenomeSample
-from cg.services.orders.validation.workflows.taxprofiler.models.order import TaxprofilerOrder
-from cg.services.orders.validation.workflows.taxprofiler.models.sample import TaxprofilerSample
+from cg.services.orders.validation.order_types.metagenome.models.order import MetagenomeOrder
+from cg.services.orders.validation.order_types.metagenome.models.sample import MetagenomeSample
+from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.orders.validation.order_types.taxprofiler.models.sample import TaxprofilerSample
 from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer

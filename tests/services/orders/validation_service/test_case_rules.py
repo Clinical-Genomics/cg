@@ -11,6 +11,9 @@ from cg.services.orders.validation.errors.case_errors import (
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
@@ -20,9 +23,6 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_have_an_affected_sample,
     validate_one_sample_per_case,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.sample import RNAFusionSample
 from cg.store.models import Case
 from cg.store.store import Store
 

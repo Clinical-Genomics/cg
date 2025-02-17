@@ -28,6 +28,8 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
+from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
@@ -36,8 +38,6 @@ from cg.services.orders.validation.rules.utils import (
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.store.models import Application, Customer
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store

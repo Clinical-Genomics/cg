@@ -8,7 +8,7 @@ from cg.constants import DataDelivery, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.implementations.fastq_order_service import StoreFastqOrderService
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
 from cg.store.models import Application, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

@@ -5,10 +5,10 @@ from cg.constants import DataDelivery, Sex
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.microsalt.models.sample import MicrosaltSample
-from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.mutant.models.sample import MutantSample
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.microsalt.models.sample import MicrosaltSample
+from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.mutant.models.sample import MutantSample
 from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer

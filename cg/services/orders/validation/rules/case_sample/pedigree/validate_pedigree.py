@@ -1,8 +1,8 @@
 from cg.services.orders.validation.errors.case_sample_errors import PedigreeError
+from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.services.orders.validation.rules.case_sample.pedigree.models import FamilyTree
 from cg.services.orders.validation.rules.case_sample.pedigree.utils import validate_tree
-from cg.services.orders.validation.workflows.mip_dna.models.case import MIPDNACase
-from cg.services.orders.validation.workflows.tomte.models.case import TomteCase
 from cg.store.store import Store
 
 
