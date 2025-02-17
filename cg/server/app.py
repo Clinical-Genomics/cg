@@ -95,8 +95,6 @@ def _register_blueprints(app: Flask):
     ext.csrf.exempt(ANALYSES_BLUEPRINT)
     ext.csrf.exempt(USERS_BLUEPRINT)
 
-    
-
 
 def _register_admin_views():
     # Base data views

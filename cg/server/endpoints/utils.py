@@ -8,9 +8,7 @@ import requests
 from flask import abort, current_app, g, jsonify, make_response, request
 
 from cg.server.ext import auth_service
-from cg.services.authentication.models import AuthenticatedUser
-
-
+from cg.store.models import User
 
 
 LOG = logging.getLogger(__name__)
@@ -51,18 +49,12 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user: User = auth_service.verify_token(jwt_token)
-    
+
     except ValueError as error:
-        return abort(
-            make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN)
-        )
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
     except KeycloakError as error:
-        return abort(
-            make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED)
-        )
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED))
     except Exception as error:
-        return abort(
-            make_response(jsonify(message=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR)
-        )
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR))
 
     g.current_user = user

@@ -3,11 +3,11 @@
 {% block body %}
   {% if session.userinfo %}
     <p>Welcome {{ session.userinfo.name }}!</p>
-    <a href="{{ url_for('auth/logout') }}">Logout</a>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
     <div>
       <a href="{{ url_for('invoices.index') }}">Invoices</a>
     </div>
   {% else %}
-    <a href="{{ url_for('auth/login') }}">Login</a>
+    <a href="{{ url_for('auth.login') }}">Login</a>
   {% endif %}
 {% endblock %}

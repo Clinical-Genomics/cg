@@ -4,11 +4,10 @@ from cg.store.store import Store
 
 class UserService:
     """Service to handle user related operations."""
-    
-    
-    def __init__(self, store:  Store):
+
+    def __init__(self, store: Store):
         self.store = store
-        
+
     def get_user_by_email(self, email: str):
         """
         Get user by email.
@@ -23,6 +22,3 @@ class UserService:
         if not user:
             raise ValueError(f"User with email {email} not found")
         return user
-    
-
-  
