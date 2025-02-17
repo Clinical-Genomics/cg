@@ -4,7 +4,6 @@ from json import JSONEncoder
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
-from keycloak import KeycloakOpenID
 
 from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI

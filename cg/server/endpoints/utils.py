@@ -49,7 +49,6 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user: User = auth_service.verify_token(jwt_token)
-
     except ValueError as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
     except KeycloakError as error:
