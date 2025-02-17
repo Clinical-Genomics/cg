@@ -65,7 +65,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id)
     )
 
 
@@ -401,7 +401,7 @@ class CaseView(BaseView):
         if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.case.internal_id), model.case)
+                % (url_for("case.index_view", search=f"={model.case.internal_id}"), model.case)
             )
 
         return markup
@@ -657,7 +657,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
+                % (
+                    url_for("sample.index_view", search=f"={model.sample.internal_id}"),
+                    model.sample,
+                )
             )
             if model.sample
             else ""
