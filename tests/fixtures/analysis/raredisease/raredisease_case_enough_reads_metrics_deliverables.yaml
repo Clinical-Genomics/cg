@@ -321,9 +321,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1617,9 +1615,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
