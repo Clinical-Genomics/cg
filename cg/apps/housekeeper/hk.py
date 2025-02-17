@@ -195,8 +195,11 @@ class HousekeeperAPI:
         files: Query = self._store.get_files(
             bundle_name=bundle, version_id=version, tag_names=list(tags)
         )
-        files = files.filter(File.tags == tags)
-        return files.order_by(File.id.desc()).first()
+        exact_match_files = [
+            file for file in files
+            if set(tag.name for tag in file.tags) == tags
+        ]
+        return exact_match_files[0]
 
     def check_bundle_files(
         self,
