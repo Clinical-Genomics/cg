@@ -126,7 +126,7 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
 
 
 def view_user_link(unused1, unused2, model, property_name):
-    """column formatter to open this view"""
+    """Column formatter used for linking to the User table."""
     del unused1, unused2
     contact_name: str = getattr(model, property_name)
     return (
