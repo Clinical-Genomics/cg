@@ -84,7 +84,9 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] | None = get_cases_to_process(
+        case_id=case_id, days_back=days_back, store=store
+    )
     if not cases:
         LOG.info("Did not find any FASTQ files to clean. Closing")
         return
