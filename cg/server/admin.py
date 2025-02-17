@@ -125,6 +125,20 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
     )
 
 
+def view_user_link(unused1, unused2, model, property_name):
+    """Column formatter used for linking to the User table."""
+    del unused1, unused2
+    contact_name: str = getattr(model, property_name)
+    return (
+        Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("user.index_view", search=f"{contact_name}"), contact_name)
+        )
+        if contact_name
+        else ""
+    )
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
@@ -305,10 +319,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
-        "delivery_contact",
-        "lab_contact",
         "loqus_upload",
-        "primary_contact",
         "priority",
         "return_samples",
         "scout_access",
@@ -328,6 +339,11 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_formatters = {
+        "delivery_contact": view_user_link,
+        "lab_contact": view_user_link,
+        "primary_contact": view_user_link,
+    }
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
