@@ -8,8 +8,6 @@ from cg.services.orders.validation.errors.sample_errors import (
     ContainerNameRepeatedError,
     IndexNumberMissingError,
     IndexNumberOutOfRangeError,
-    IndexSequenceMismatchError,
-    IndexSequenceMissingError,
     PoolApplicationError,
     PoolPriorityError,
     SampleNameNotAvailableControlError,
@@ -26,8 +24,6 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_container_name_required,
     validate_index_number_in_range,
     validate_index_number_required,
-    validate_index_sequence_mismatch,
-    validate_index_sequence_required,
     validate_non_control_sample_names_available,
     validate_pools_contain_one_application,
     validate_pools_contain_one_priority,
@@ -413,41 +409,4 @@ def test_validate_index_number_out_of_range(rml_order: RMLOrder):
 
     # THEN the error should concern the sample's index number being out of range
     assert isinstance(errors[0], IndexNumberOutOfRangeError)
-    assert errors[0].sample_index == 0
-
-
-def test_validate_missing_index_sequence(rml_order: RMLOrder):
-
-    # GIVEN an indexed order with a missing index sequence
-    erroneous_sample: RMLSample = rml_order.samples[0]
-    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
-    erroneous_sample.index_sequence = None
-
-    # WHEN validating that no index sequences are missing
-    errors: list[IndexSequenceMissingError] = validate_index_sequence_required(rml_order)
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the sample's missing index sequence
-    assert isinstance(errors[0], IndexSequenceMissingError)
-    assert errors[0].sample_index == 0
-
-
-def test_validate_index_sequence_mismatch(rml_order: RMLOrder):
-
-    # GIVEN an indexed order with a mismatched index sequence
-    erroneous_sample: RMLSample = rml_order.samples[0]
-    erroneous_sample.index = IndexEnum.AVIDA_INDEX_STRIP
-    erroneous_sample.index_number = 1
-    erroneous_sample.index_sequence = INDEX_SEQUENCES[erroneous_sample.index][10]
-
-    # WHEN validating that the index sequences match
-    errors: list[IndexSequenceMismatchError] = validate_index_sequence_mismatch(rml_order)
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the sample's mismatched index sequence
-    assert isinstance(errors[0], IndexSequenceMismatchError)
     assert errors[0].sample_index == 0

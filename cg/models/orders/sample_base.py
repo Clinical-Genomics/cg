@@ -78,7 +78,6 @@ class OrderSample(BaseModel):
     formalin_fixation_time: int | None = None
     index: str | None = None
     index_number: str | None = None
-    index_sequence: str | None = None
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None = None
     lab_code: str | None = None
     mother: (
