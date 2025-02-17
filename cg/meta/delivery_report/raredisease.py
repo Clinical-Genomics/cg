@@ -69,17 +69,17 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
-            snv_vcf=HousekeeperAPI.get_latest_file(
-                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_SNV]
+            snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id, tags=set(ScoutUploadKey.VCF_SNV)
             ).full_path,
-            sv_vcf=HousekeeperAPI.get_latest_file(
-                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_SV]
+            sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id, tags=set(ScoutUploadKey.VCF_SV)
             ).full_path,
-            vcf_str=HousekeeperAPI.get_latest_file(
-                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.VCF_STR]
+            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id, tags=set(ScoutUploadKey.VCF_STR)
             ).full_path,
-            smn_tsv=HousekeeperAPI.get_latest_file(
-                self=HousekeeperAPI, bundle=case_id, tags=set[ScoutUploadKey.SMN_TSV]
+            smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id, tags=set(ScoutUploadKey.SMN_TSV)
             ).full_path,
         )
 
