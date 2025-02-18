@@ -195,7 +195,9 @@ class HousekeeperAPI:
         files: Query = self._store.get_files(bundle_name=bundle, version_id=version, tag_names=tags)
         for file in files:
             file_tags = {tag.name for tag in file.tags}
+            LOG.debug(f"Using tags {file_tags}")
             if file_tags == set(tags):
+                LOG.debug(f"Found file {file}")
                 return file
 
     def check_bundle_files(
