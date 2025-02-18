@@ -10,7 +10,7 @@ class AppConfig(BaseSettings):
     gunicorn_bind: str = os.getenv("GUNICORN_BIND", "0.0.0.0:8000")
     gunicorn_timeout: int = int(os.getenv("GUNICORN_TIMEOUT", 400))
     cg_sql_database_uri: str = os.getenv("CG_SQL_DATABASE_URI", "sqlite:///")
-    cg_secret_key: str = os.getenv("CG_SECRET_KEY", "thisIsNotASafeKey")
+    secret_key: str = os.getenv("CG_SECRET_KEY", "thisIsNotASafeKey")
     invoice_max_price: int = int(os.getenv("INVOICE_MAX_PRICE", 750_000))
     lims_host: str = os.getenv("LIMS_HOST", "lims_host")
     lims_username: str = os.getenv("LIMS_USERNAME", "username")
