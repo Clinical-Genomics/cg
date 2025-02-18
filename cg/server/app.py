@@ -60,7 +60,7 @@ def create_app():
 
 def _load_config(app: Flask):
     app.config.update(app_config.model_dump())
-    
+
 
 def _configure_extensions(app: Flask):
     _initialize_logging(app)
