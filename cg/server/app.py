@@ -43,6 +43,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.server.app_config import app_config
 
 
 def create_app():
@@ -57,8 +58,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(app_config.dict())
-    app.secret_key = app.config["cg_secret_key"]
+    app.config.update(app_config.model_dump())
+    app.secret_key = app_config.cg_secret_key
 
 
 def _configure_extensions(app: Flask):
@@ -77,6 +78,7 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
+
     app.register_blueprint(INDEX_BLUEPRINT)
     app.register_blueprint(AUTH_BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")

@@ -31,6 +31,7 @@ from cg.services.web_services.sample.service import SampleService
 
 from cg.store.database import initialize_database
 from cg.store.store import Store
+from cg.server.app_config import app_config
 
 
 class FlaskLims(LimsAPI):
@@ -41,9 +42,9 @@ class FlaskLims(LimsAPI):
     def init_app(self, app):
         config = {
             "lims": {
-                "host": app.config["lims_host"],
-                "username": app.config["lims_username"],
-                "password": app.config["lims_password"],
+                "host": app_config.lims_host,
+                "username": app_config.lims_username,
+                "password": app_config.lims_password,
             }
         }
         super(FlaskLims, self).__init__(config)
@@ -55,7 +56,7 @@ class FlaskStore(Store):
             self.init_app(app)
 
     def init_app(self, app):
-        uri = app.config["cg_sql_database_uri"]
+        uri = app_config.cg_sql_database_uri
         initialize_database(uri)
         super(FlaskStore, self).__init__()
 
@@ -73,14 +74,11 @@ class AnalysisClient(TrailblazerAPI):
             self.init_app(app)
 
     def init_app(self, app):
-        service_account: str = app.config["trailblazer_service_account"]
-        service_account_auth_file: str = app.config["trailblazer_service_account_auth_file"]
-        host: str = app.config["trailblazer_host"]
         config = {
             "trailblazer": {
-                "service_account": service_account,
-                "service_account_auth_file": service_account_auth_file,
-                "host": host,
+                "service_account": app_config.trailblazer_service_account,
+                "service_account_auth_file": app_config.trailblazer_service_account_auth_file,
+                "host": app_config.trailblazer_host,
             }
         }
         super(AnalysisClient, self).__init__(config)

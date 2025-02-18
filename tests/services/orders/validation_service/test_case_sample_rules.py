@@ -28,6 +28,9 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -52,9 +55,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application, Sample
 from cg.store.store import Store
 

@@ -6,11 +6,11 @@ have always been validated before calling the function.
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.services.orders.storing.implementations.case_order_service import StoreCaseOrderService
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.workflows.mip_rna.models.order import MIPRNAOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 

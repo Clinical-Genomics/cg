@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 class StorePoolOrderService(StoreOrderService):
     """
     Service for storing generic orders in StatusDB and Lims.
-    This class is used to store orders for the following workflows:
+    This class is used to store orders for the following order types:
     - Fluffy / NIPT samples
     - RML samples
     """
