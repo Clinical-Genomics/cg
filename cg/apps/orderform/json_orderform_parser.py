@@ -6,12 +6,6 @@ from cg.models.orders.json_sample import JsonSample
 
 
 class JsonOrderformParser(OrderformParser):
-    ACCEPTED_DATA_ANALYSES: list[str] = [
-        Workflow.MIP_DNA,
-        Workflow.MIP_RNA,
-        Workflow.FLUFFY,
-        Workflow.BALSAMIC,
-    ]
     NO_VALUE: str = "no_value"
     samples: list[JsonSample] = []
 
@@ -24,7 +18,7 @@ class JsonOrderformParser(OrderformParser):
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
 
         data_analysis: str = data_analyses.pop()
-        if data_analysis in self.ACCEPTED_DATA_ANALYSES:
+        if data_analysis in Workflow.__members__.values():
             return data_analysis
 
         raise OrderFormError(f"Unsupported data_analysis: {data_analyses} for json data")
