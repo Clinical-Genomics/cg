@@ -1,8 +1,7 @@
 from pydantic import BeforeValidator, constr
 from typing_extensions import Annotated
 
-from cg.constants import DataDelivery
-from cg.models.orders.constants import OrderType
+from cg.constants import DataDelivery, Workflow
 from cg.models.orders.sample_base import OrderSample
 from cg.models.orders.validators.json_sample_validators import convert_well, join_list
 
@@ -13,7 +12,7 @@ class JsonSample(OrderSample):
     concentration_ng_ul: str | None = None
     concentration_sample: str | None = None
     control: str | None = None
-    data_analysis: OrderType = OrderType.MIP_DNA
+    data_analysis: Workflow = Workflow.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: str | None = None
     panels: list[str] | None = None
