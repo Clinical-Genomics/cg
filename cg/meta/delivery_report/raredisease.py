@@ -6,6 +6,7 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.chanjo2.models import CoverageMetrics
+from cg.constants.housekeeper_tags import HermesFileTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -70,16 +71,44 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
             snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id, tags=[ScoutUploadKey.VCF_SNV]
+                bundle=case_id,
+                tags=[
+                    ScoutUploadKey.VCF_SNV,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
             ).full_path,
             sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id, tags=[ScoutUploadKey.VCF_SV]
+                bundle=case_id,
+                tags=[
+                    ScoutUploadKey.VCF_SV,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
             ).full_path,
             vcf_str=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id, tags=[ScoutUploadKey.VCF_STR]
+                bundle=case_id,
+                tags=[
+                    ScoutUploadKey.VCF_STR,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
             ).full_path,
             smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id, tags=[ScoutUploadKey.SMN_TSV]
+                bundle=case_id,
+                tags=[
+                    ScoutUploadKey.SMN_TSV,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
             ).full_path,
         )
 

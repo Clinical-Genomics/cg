@@ -57,6 +57,7 @@ class HermesFileTag(StrEnum):
 
     CLINICAL_DELIVERY: str = "clinical-delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
+    SCOUT: str = "scout"
 
 
 class AnalysisTag(StrEnum):
