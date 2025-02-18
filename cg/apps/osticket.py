@@ -13,6 +13,7 @@ from cg.io.controller import WriteFile, WriteStream
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
+
 class OsTicket(object):
     """Interface to ticket system"""
 

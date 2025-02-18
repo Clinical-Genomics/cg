@@ -46,6 +46,7 @@ from cg.store.models import (
 )
 from app_config import app_config
 
+
 def create_app():
     """Generate a flask application."""
     app = Flask(__name__, template_folder="templates")

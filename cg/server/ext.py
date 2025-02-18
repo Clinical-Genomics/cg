@@ -29,6 +29,7 @@ from cg.store.database import initialize_database
 from cg.store.store import Store
 from app_config import app_config
 
+
 class FlaskLims(LimsAPI):
     def __init__(self, app=None):
         if app:
