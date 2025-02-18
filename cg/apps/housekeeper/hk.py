@@ -192,7 +192,7 @@ class HousekeeperAPI:
         if not tags:
             LOG.debug("No tags provided, skipping")
             return None
-        files: Query = self._store.get_files(bundle_name=bundle, version_id=version, tag_names=tags)
+        files: Query = self.files(bundle_name=bundle, version_id=version, tags=tags)
         for file in files:
             file_tags = {tag.name for tag in file.tags}
             if file_tags == set(tags):
