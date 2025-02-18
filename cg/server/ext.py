@@ -27,7 +27,7 @@ from cg.services.web_services.case.service import CaseWebService
 from cg.services.web_services.sample.service import SampleService
 from cg.store.database import initialize_database
 from cg.store.store import Store
-from app_config import app_config
+from cg.server.app_config import app_config
 
 
 class FlaskLims(LimsAPI):

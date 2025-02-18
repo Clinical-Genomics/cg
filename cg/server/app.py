@@ -44,7 +44,7 @@ from cg.store.models import (
     Sample,
     User,
 )
-from app_config import app_config
+from cg.server.app_config import app_config
 
 
 def create_app():
