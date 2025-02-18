@@ -6,11 +6,11 @@ from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, St
 from cg.services.orders.validation.constants import MINIMUM_VOLUME, ElutionBuffer
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
+from cg.services.orders.validation.order_types.balsamic.constants import BalsamicDeliveryType
+from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.service import OrderValidationService
-from cg.services.orders.validation.workflows.balsamic.constants import BalsamicDeliveryType
-from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
 from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 

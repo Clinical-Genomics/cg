@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 class StoreCaseOrderService(StoreOrderService):
     """
     Service for storing generic orders in StatusDB and Lims.
-    This class is used to store orders for the following workflows:
+    This class is used to store orders for the following order types:
     - Balsamic
     - Balsamic UMI
     - MIP DNA
