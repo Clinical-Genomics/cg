@@ -44,6 +44,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.server.app_config import app_config
 
 
 def create_app():
@@ -58,8 +59,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(app_config.dict())
-    app.secret_key = app.config["cg_secret_key"]
+    app.config.update(app_config.model_dump())
+    app.secret_key = app_config.cg_secret_key
 
 
 def _configure_extensions(app: Flask):
@@ -82,8 +83,8 @@ def _initialize_logging(app):
 
 def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
-        client_id=app.config["google_oauth_client_id"],
-        client_secret=app.config["google_oauth_client_secret"],
+        client_id=app_config.google_oauth_client_id,
+        client_secret=app_config.google_oauth_client_secret,
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
