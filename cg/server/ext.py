@@ -85,6 +85,26 @@ class AnalysisClient(TrailblazerAPI):
         }
         super(AnalysisClient, self).__init__(config)
 
+class AuthenticationService(AuthenticationService):
+    def __init__(self, app=None):
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        user_service = app.user_service
+        server_url = app.config["keycloak_client_url"]
+        client_id = app.config["keycloak_client_id"]
+        client_secret = app.config["keycloak_client_secret_key"]
+        realm_name = app.config["keycloak_realm_name"]
+        redirect_uri = app.config["keycloak_redirect_uri"]
+        super(AuthenticationService, self).__init__(
+            user_service=user_service,
+            server_url=server_url,
+            client_id=client_id,
+            client_secret=client_secret,
+            realm_name=realm_name,
+            redirect_uri=redirect_uri,
+        )
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 csrf = CSRFProtect()
@@ -119,7 +139,7 @@ ticket_handler = TicketHandler(
 user_service = UserService(store=db)
 auth_service = AuthenticationService(
     user_service=user_service,
-    server_url=app_config.keycloak_client_url,
+    server_url=app.config.keycloak_client_url,
     client_id=app_config.keycloak_client_id,
     client_secret=app_config.keycloak_client_secret_key,
     realm_name=app_config.keycloak_realm_name,

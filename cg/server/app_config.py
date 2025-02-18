@@ -1,11 +1,9 @@
 from pydantic_settings import BaseSettings
 
-
 class AppConfig(BaseSettings):
     """Default values are overridden by environment variable at run-time."""
 
     gunicorn_workers: int = 4
-    gunicorn_threads: int = 4
     gunicorn_bind: str = "0.0.0.0:8000"
     gunicorn_timeout: int = 400
     cg_sql_database_uri: str = "sqlite:///"
@@ -23,11 +21,11 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
-    keycloak_client_url: str = "http://keycloak:8080"
-    keycloak_realm_name: str = "orderportal"
-    keycloak_client_id: str = "cg-flask-client"
-    keycloak_client_secret_key: str = "cg-very-secret-password"
-    keycloak_redirect_uri: str = "https://localhost:8000/auth/callback"
+    keycloak_client_url: str = "keycloak_host"
+    keycloak_realm_name: str = "keycloak_realm"
+    keycloak_client_id: str = "keycloak_client_id"
+    keycloak_client_secret_key: str = "keycloak_client_secret"
+    keycloak_redirect_uri: str = "keycloak_redirect_uri"
 
 
 app_config = AppConfig()
