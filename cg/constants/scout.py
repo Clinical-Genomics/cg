@@ -39,6 +39,8 @@ class ScoutUploadKey(StrEnum):
     SV_VCF = auto()
     VCF_STR = auto()
     VCF_FUSION = auto()
+    VCF_SNV = auto()
+    VCF_SV = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(

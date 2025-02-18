@@ -40,14 +40,13 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
         )
         return NalloSampleMetadataModel(
-            bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=sample_metrics.percent_duplicates,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            sex=sample_metrics.predicted_sex_sex_check,
+            sex=sample_metrics.sex,
         )
 
     def is_report_accredited(
@@ -63,10 +62,10 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         """Return Nallo files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
             ),
             sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
+                case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
             ),
             vcf_str=self.get_scout_uploaded_file_from_hk(
                 case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
@@ -78,9 +77,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         """Return sample metadata required fields associated to a specific sample."""
         required_sample_metadata_fields = {}
         for sample in case.samples:
-            required_fields = (
-                REQUIRED_SAMPLE_METADATA_NALLO_FIELDS
-            )
+            required_fields = REQUIRED_SAMPLE_METADATA_NALLO_FIELDS
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
 
