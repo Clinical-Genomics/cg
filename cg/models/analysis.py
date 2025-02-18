@@ -17,9 +17,6 @@ class NextflowAnalysis(AnalysisModel):
     """Nextflow's analysis results model."""
 
     sample_metrics: (
-        dict[str, NalloQCMetrics]
-        | dict[str, RarediseaseQCMetrics]
-        | dict[str, RnafusionQCMetrics]
-        | dict[str, TaxprofilerQCMetrics]
-        | dict[str, TomteQCMetrics]
-    ) = Field(union_mode="left_to_right")
+        dict[
+            str, NalloQCMetrics | str, RarediseaseQCMetrics | str, RnafusionQCMetrics | str, TaxprofilerQCMetrics | str, TomteQCMetrics
+        ]) = Field(union_mode="left_to_right")
