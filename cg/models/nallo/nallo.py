@@ -12,6 +12,7 @@ class NalloQCMetrics(BaseModel):
     """Nallo QC metrics."""
 
     mapped_reads: int
+    mean_coverage: int
     percent_duplicates: float
     sex: SexOptions
     total_reads: int
