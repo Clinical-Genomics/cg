@@ -15,7 +15,7 @@ from cg.services.orders.validation.errors.validation_errors import ValidationErr
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.store.models import Case
 from cg.store.models import Order as DbOrder
 from cg.store.models import Pool, Sample, User
@@ -154,7 +154,7 @@ def test_submit_order(
 
 def test_submit_ticketexception(
     order_submitter: OrderSubmitter,
-    mip_dna_order: MipDnaOrder,
+    mip_dna_order: MIPDNAOrder,
 ):
 
     # GIVEN an order
