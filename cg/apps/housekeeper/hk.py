@@ -192,7 +192,7 @@ class HousekeeperAPI:
         if not tags:
             LOG.debug("No tags provided, skipping")
             return None
-        files: Query = self._store.get_files(bundle_name=bundle, version_id=version, tag_names=tags)
+        files: list[File] = self.files(bundle=bundle, version=version, tags=tags).all()
         for file in files:
             file_tags = {tag.name for tag in file.tags}
             LOG.debug(f"Using tags {file_tags}")
