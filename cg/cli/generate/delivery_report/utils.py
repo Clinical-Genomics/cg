@@ -93,9 +93,7 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
         Workflow.MIP_DNA: MipDNADeliveryReportAPI(
             analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
-        Workflow.NALLO: NalloDeliveryReportAPI(
-            analysis_api=NalloAnalysisAPI(config=context.obj)
-        ),
+        Workflow.NALLO: NalloDeliveryReportAPI(analysis_api=NalloAnalysisAPI(config=context.obj)),
         Workflow.RAREDISEASE: RarediseaseDeliveryReportAPI(
             analysis_api=RarediseaseAnalysisAPI(config=context.obj)
         ),

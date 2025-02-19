@@ -9,7 +9,8 @@ from cg.models.delivery_report.metadata import (
     RarediseaseSampleMetadataModel,
     RnafusionSampleMetadataModel,
     TaxprofilerSampleMetadataModel,
-    TomteSampleMetadataModel, NalloSampleMetadataModel,
+    TomteSampleMetadataModel,
+    NalloSampleMetadataModel,
 )
 from cg.models.delivery_report.validators import (
     get_boolean_as_string,

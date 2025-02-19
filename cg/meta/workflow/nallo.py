@@ -3,11 +3,20 @@
 import logging
 from pathlib import Path
 
-from cg.clients.chanjo2.models import CoverageMetrics, CoveragePostRequest, CoverageSample, CoveragePostResponse
+from cg.clients.chanjo2.models import (
+    CoverageMetrics,
+    CoveragePostRequest,
+    CoverageSample,
+    CoveragePostResponse,
+)
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, FileFormat
-from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS, NALLO_COVERAGE_THRESHOLD, NALLO_COVERAGE_INTERVAL_TYPE, \
-    NALLO_COVERAGE_FILE_TAGS
+from cg.constants.nf_analysis import (
+    NALLO_METRIC_CONDITIONS,
+    NALLO_COVERAGE_THRESHOLD,
+    NALLO_COVERAGE_INTERVAL_TYPE,
+    NALLO_COVERAGE_FILE_TAGS,
+)
 from cg.constants.scout import ScoutExportFileName, NALLO_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile

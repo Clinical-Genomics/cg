@@ -34,19 +34,15 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
     ) -> NalloSampleMetadataModel:
         """Return Nallo sample metadata to include in the report."""
-        sample_metrics: NalloQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
         gene_ids: list[int] = self.analysis_api.get_gene_ids_from_scout(case.panels)
         coverage_metrics: CoverageMetrics | None = self.analysis_api.get_sample_coverage(
             case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
         )
         return NalloSampleMetadataModel(
-            duplicates=sample_metrics.percent_duplicates,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
-            mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            sex=sample_metrics.sex,
         )
 
     def is_report_accredited(

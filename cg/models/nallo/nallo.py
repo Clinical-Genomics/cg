@@ -3,7 +3,6 @@ from pathlib import Path
 
 from pydantic import BaseModel, field_validator
 
-from cg.constants import SexOptions
 from cg.exc import NfSampleSheetError
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
@@ -12,11 +11,7 @@ from cg.models.qc_metrics import QCMetrics
 class NalloQCMetrics(QCMetrics):
     """Nallo QC metrics."""
 
-    mapped_reads: int
-    mean_coverage: int
     percent_duplicates: float
-    sex: SexOptions
-    total_reads: int
 
 
 class NalloSampleSheetEntry(BaseModel):
