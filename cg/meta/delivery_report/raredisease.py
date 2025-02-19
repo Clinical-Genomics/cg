@@ -68,7 +68,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    ScoutUploadKey.VCF_SNV,
+                    "vcf-snv-clinical",
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -78,7 +78,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    ScoutUploadKey.VCF_SV,
+                    "vcf-sv-clinical",
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -88,7 +88,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             vcf_str=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    ScoutUploadKey.VCF_STR,
+                    "vcf-str",
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -98,7 +98,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    ScoutUploadKey.SMN_TSV,
+                    "smn-calling",
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
