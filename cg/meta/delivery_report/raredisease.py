@@ -1,10 +1,5 @@
 """Raredisease Delivery Report API."""
 
-from pathlib import Path
-
-from housekeeper.store.models import File
-
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants.housekeeper_tags import HermesFileTag
 from cg.constants.report import (
