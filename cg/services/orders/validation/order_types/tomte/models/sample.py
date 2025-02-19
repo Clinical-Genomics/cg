@@ -1,5 +1,5 @@
 from pydantic import BeforeValidator, Field
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Literal
 
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
@@ -18,7 +18,7 @@ class TomteSample(Sample):
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     post_formalin_fixation_time: int | None = None
-    reference_genome: GenomeVersion
+    reference_genome: Literal[GenomeVersion.HG38] = GenomeVersion.HG38
     require_qc_ok: bool = False
     sex: SexEnum
     source: str

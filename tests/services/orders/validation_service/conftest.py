@@ -24,7 +24,6 @@ def create_tomte_sample(id: int) -> TomteSample:
         container_name="ContainerName",
         control=ControlEnum.not_control,
         require_qc_ok=True,
-        reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
         source="source",
         status=StatusEnum.affected,
