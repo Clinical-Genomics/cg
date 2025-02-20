@@ -5,7 +5,6 @@ from gettext import gettext
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
@@ -23,11 +22,11 @@ class BaseView(ModelView):
 
     def is_accessible(self):
         user = db.get_user_by_email(email=session.get("user_email"))
-        return bool(google.authorized and user and user.is_admin)
+        return bool(user and user.is_admin)
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
-        return redirect(url_for("google.login", next=request.url))
+        return redirect(url_for("/"))
 
 
 def view_priority(unused1, unused2, model, unused3):

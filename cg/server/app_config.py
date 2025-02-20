@@ -29,11 +29,8 @@ class AppConfig(BaseSettings):
     support_system_email: str = "support@mail.com"
     email_uri: str = "smtp://localhost"
 
-    # Google OAuth settings
-    google_oauth_client_id: str = "client_id"
-    google_oauth_client_secret: str = "client_secret"
-
     # Trailblazer settings
+
     trailblazer_host: str = "trailblazer_host"
     trailblazer_service_account: str = "service_account"
     trailblazer_service_account_auth_file: str = "auth_file.json"
@@ -43,6 +40,11 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
+    keycloak_client_url: str = "http://keycloak:8080"
+    keycloak_realm_name: str = "orderportal"
+    keycloak_client_id: str = "cg-flask-client"
+    keycloak_client_secret_key: str = "cg-very-secret-password"
+    keycloak_redirect_uri: str = "https://localhost:8000/auth/callback"
 
 
 app_config = AppConfig()
