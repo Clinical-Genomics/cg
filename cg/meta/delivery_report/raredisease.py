@@ -1,7 +1,7 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants.housekeeper_tags import HermesFileTag
+from cg.constants.housekeeper_tags import HermesFileTag, AnalysisTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -68,7 +68,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    "vcf-snv-clinical",
+                    AnalysisTag.VCF_SNV_CLINICAL,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -78,7 +78,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    "vcf-sv-clinical",
+                    AnalysisTag.VCF_SV_CLINICAL,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -88,7 +88,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             vcf_str=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    "vcf-str",
+                    AnalysisTag.VCF_STR,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
@@ -98,7 +98,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    "smn-calling",
+                    AnalysisTag.SMN_CALLING,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,

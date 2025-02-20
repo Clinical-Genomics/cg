@@ -82,8 +82,12 @@ class AnalysisTag(StrEnum):
     OUTRIDER: str = "outrider"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
+    VCF_STR: str = "vcf-str"
+    VCF_SV_CLINICAL: str = "vcf-sv-clinical"
 
 
 class HkMipAnalysisTag:
