@@ -1,8 +1,9 @@
 from cg.constants import Workflow
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
+from cg.services.analysis_starter.submitters.submitter import Submitter
 
 
-class SeqeraPlatformSubmitter:
+class SeqeraPlatformSubmitter(Submitter):
 
     def __init__(self, client: SeqeraPlatformClient):
         self.client = client
