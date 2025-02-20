@@ -67,7 +67,9 @@ class AuthenticationService:
             raise ValueError("Token is not active")
         verified_token = self.client.decode_token(token)
         user_email = verified_token["email"]
-        test_user: User =  User(email=user_email,id=1, name="testUser",is_admin=True, order_portal_login=True)
+        test_user: User = User(
+            email=user_email, id=1, name="testUser", is_admin=True, order_portal_login=True
+        )
         return test_user
 
     def get_auth_url(self):
