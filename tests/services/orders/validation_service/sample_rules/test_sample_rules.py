@@ -17,6 +17,12 @@ from cg.services.orders.validation.errors.sample_errors import (
     WellFormatRmlError,
 )
 from cg.services.orders.validation.index_sequences import INDEX_SEQUENCES
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fluffy.models.order import FluffyOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
+from cg.services.orders.validation.order_types.rml.models.sample import RMLSample
 from cg.services.orders.validation.rules.sample.rules import (
     validate_buffer_skip_rc_condition,
     validate_concentration_interval_if_skip_rc,
@@ -33,12 +39,6 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_well_position_format,
     validate_well_position_rml_format,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
-from cg.services.orders.validation.workflows.rml.models.sample import RMLSample
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

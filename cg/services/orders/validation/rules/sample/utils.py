@@ -17,14 +17,14 @@ from cg.services.orders.validation.index_sequences import INDEX_SEQUENCES
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
 from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.models.sample_aliases import IndexedSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
 from cg.services.orders.validation.rules.utils import (
     get_application_concentration_interval,
     get_concentration_interval,
     has_sample_invalid_concentration,
     is_sample_cfdna,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.fastq.models.sample import FastqSample
 from cg.store.models import Application
 from cg.store.store import Store
 

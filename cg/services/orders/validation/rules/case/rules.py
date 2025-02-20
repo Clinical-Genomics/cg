@@ -9,13 +9,16 @@ from cg.services.orders.validation.errors.case_errors import (
     MoreThanTwoSamplesInCaseError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
+    NormalOnlyWGSError,
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
-    NormalOnlyWGSError,
 )
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     is_case_not_from_collaboration,
@@ -24,9 +27,6 @@ from cg.services.orders.validation.rules.case.utils import (
     is_normal_only_wgs,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.workflows.balsamic_umi.models.order import BalsamicUmiOrder
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
 from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
