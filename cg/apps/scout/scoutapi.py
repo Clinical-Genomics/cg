@@ -317,10 +317,10 @@ class ScoutAPI:
             cust_id,
         ]
         if fraser_file_path:
-            upload_command.extend(["--rna-fraser", fraser_file_path])
+            upload_command.extend(["--fraser", fraser_file_path])
 
         if outrider_file_path:
-            upload_command.extend(["--rna-outrider", outrider_file_path])
+            upload_command.extend(["--outrider", outrider_file_path])
         try:
             LOG.info(
                 f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id} with command {upload_command}"
