@@ -1,11 +1,5 @@
-import email
-
-import test
-from cg.io.xml import LOG
-from cg.server.invoices.views import is_admin
 from cg.services.user.service import UserService
 from keycloak import KeycloakOpenID
-
 from cg.store.models import User
 import logging
 
