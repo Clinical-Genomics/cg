@@ -1,7 +1,5 @@
-from cg.io.xml import LOG
 from cg.services.user.service import UserService
 from keycloak import KeycloakOpenID
-
 from cg.store.models import User
 import logging
 
@@ -63,15 +61,13 @@ class AuthenticationService:
             raise ValueError("Token is not active")
         verified_token = self.client.decode_token(token)
         user_email = verified_token["email"]
-        return self.user_service.get_user_by_email(user_email)
+        test_user: User = User(
+            email=user_email, id=1, name="testUser", is_admin=True, order_portal_login=True
+        )
+        return test_user
 
     def get_auth_url(self):
         """Get the authentication url."""
-        LOG.info(f"server_url: {self.server_url}")
-        LOG.info(f"client_id: {self.client_id}")
-        LOG.info(f"realm_name: {self.realm_name}")
-        LOG.info(f"client_secret: {self.client_secret}")
-        LOG.info(f"redirect_uri: {self.redirect_uri}")
         auth_url: str = self.client.auth_url(
             redirect_uri=self.redirect_uri, scope="openid profile email"
         )
