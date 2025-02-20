@@ -302,13 +302,12 @@ class ScoutAPI:
     def upload_rna_fraser_outrider(
         self,
         case_id: str,
-        fraser_file_path: str,
-        outrider_file_path: str,
+        fraser_file_path: str | None,
+        outrider_file_path: str | None,
         customer_case_name: str,
         cust_id: str,
     ) -> None:
         """Load a rna fraser file into a case in the database."""
-
         upload_command: list[str] = [
             "update",
             "case",
@@ -316,11 +315,12 @@ class ScoutAPI:
             customer_case_name,
             "-i",
             cust_id,
-            "--fraser",
-            fraser_file_path,
-            "--outrider",
-            outrider_file_path,
         ]
+        if fraser_file_path:
+            upload_command.extend(["--rna-fraser", fraser_file_path])
+
+        if outrider_file_path:
+            upload_command.extend(["--rna-outrider", outrider_file_path])
         try:
             LOG.info(
                 f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id} with command {upload_command}"

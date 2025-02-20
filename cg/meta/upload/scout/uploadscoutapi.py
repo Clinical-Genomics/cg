@@ -391,18 +391,9 @@ class UploadScoutAPI:
         """Upload omics fraser and outrider file for a case to Scout."""
         status_db: Store = self.status_db
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_internal_id: str = rna_dna_collection.rna_sample_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_fraser: File | None = self.get_rna_omics_fraser(case_id=case_id)
             rna_outrider: File | None = self.get_rna_omics_outrider(case_id=case_id)
-            if not rna_fraser:
-                raise FileNotFoundError(
-                    f"No RNA fraser file was found in housekeeper for {rna_sample_internal_id}."
-                )
-            if not rna_outrider:
-                raise FileNotFoundError(
-                    f"No RNA outrider file was found in housekeeper for {rna_sample_internal_id}."
-                )
             LOG.debug(f"RNA fraser file {rna_fraser.path} found.")
             LOG.debug(f"RNA outrider file {rna_outrider.path} found.")
             for dna_case_id in rna_dna_collection.dna_case_ids:
@@ -413,13 +404,14 @@ class UploadScoutAPI:
                 customer_case = status_db.get_case_by_internal_id(dna_case_id)
                 if dry_run:
                     continue
-                self.scout_api.upload_rna_fraser_outrider(
-                    fraser_file_path=rna_fraser.full_path,
-                    outrider_file_path=rna_outrider.full_path,
-                    case_id=dna_case_id,
-                    customer_case_name=customer_case.name,
-                    cust_id=customer_case.customer.internal_id,
-                )
+                if rna_fraser or rna_outrider:
+                    self.scout_api.upload_rna_fraser_outrider(
+                        fraser_file_path=rna_fraser.full_path,
+                        outrider_file_path=rna_outrider.full_path,
+                        case_id=dna_case_id,
+                        customer_case_name=customer_case.name,
+                        cust_id=customer_case.customer.internal_id,
+                    )
         for upload_statement in self.get_rna_fraser_outrider_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload RNA fraser and outrider file finished!")
