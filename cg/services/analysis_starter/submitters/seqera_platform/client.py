@@ -10,6 +10,7 @@ class SeqeraPlatformClient:
     def __init__(self, config: SeqeraPlatformConfig):
         self.base_url: str = config.base_url
         self.bearer_token: str = config.bearer_token
+        self.auth_headers: dict = {"Authorization": f"Bearer {self.bearer_token}"}
         self.compute_environment_ids: dict[SlurmQos, str] = config.compute_environments
         self.workflow_ids: dict[Workflow, int] = config.workflow_ids
         self.workspace_id: int = config.workspace_id
@@ -19,7 +20,7 @@ class SeqeraPlatformClient:
         url = f"{self.base_url}/pipelines/{workflow_id}/launch"
         params: dict = {"workspaceId": self.workspace_id}
         response: requests.Response = requests.get(
-            url=url, headers={"Authorization": f"Bearer {self.bearer_token}"}, params=params
+            url=url, headers=self.auth_headers, params=params
         )
         response.raise_for_status()
         response_dict: dict = response.json()
@@ -33,7 +34,7 @@ class SeqeraPlatformClient:
         params: dict = {"workspaceId": self.workspace_id}
         response: requests.Response = requests.post(
             url=url,
-            headers={"Authorization": f"Bearer {self.bearer_token}"},
+            headers=self.auth_headers,
             params=params,
             json=request.model_dump(),
         )
