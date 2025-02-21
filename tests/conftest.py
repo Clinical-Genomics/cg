@@ -2982,7 +2982,6 @@ def raredisease_parameters_default(
     )
 
 
-## Anchor
 @pytest.fixture(scope="function")
 def raredisease_context(
     cg_context: CGConfig,
