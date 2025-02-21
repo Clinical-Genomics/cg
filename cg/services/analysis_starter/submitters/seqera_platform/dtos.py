@@ -1,6 +1,20 @@
 from pydantic import BaseModel
 
 
+class LaunchResponse:
+    configProfiles: list[str]
+    pipeline: str
+    preRunScript: str
+    pullLatest: str
+    revision: str
+
+
+class PipelineResponse(BaseModel):
+    """Structured as the response of the /pipelines/:pipelineId endpoint."""
+
+    launch: LaunchResponse
+
+
 class LaunchRequest(BaseModel):
     computeEnvId: str
     configProfiles: list[str]
@@ -18,4 +32,6 @@ class LaunchRequest(BaseModel):
 
 
 class WorkflowLaunchRequest(BaseModel):
+    """Structured as the request for the /workflow/launch endpoint."""
+
     launch: LaunchRequest
