@@ -3903,7 +3903,7 @@ def tomte_parameters_default(
         outdir=Path(tomte_dir, tomte_case_id),
         gene_panel_clinical_filter=tomte_gene_panel_path,
         tissue="unkown",
-        genome="hg38",
+        genome=GenomeVersion.HG38,
     )
 
 
@@ -3950,7 +3950,6 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
-        reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(

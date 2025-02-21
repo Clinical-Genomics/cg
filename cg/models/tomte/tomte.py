@@ -1,5 +1,6 @@
 from enum import StrEnum
 from pathlib import Path
+from typing import Literal
 
 from pydantic import field_validator
 
@@ -51,7 +52,7 @@ class TomteParameters(WorkflowParameters):
 
     gene_panel_clinical_filter: Path
     tissue: str
-    genome: str = GenomeVersion.HG38
+    genome: Literal[GenomeVersion.HG38] = GenomeVersion.HG38
 
     @field_validator("tissue", mode="before")
     @classmethod
@@ -60,14 +61,6 @@ class TomteParameters(WorkflowParameters):
             return replace_non_alphanumeric(string=tissue)
         else:
             return SourceType.UNKNOWN
-
-    @field_validator("genome", mode="before")
-    @classmethod
-    def restrict_genome_values(cls, genome: str) -> str:
-        if genome == GenomeVersion.HG38:
-            return GenomeVersion.GRCh38.value
-        elif genome == GenomeVersion.HG19:
-            return GenomeVersion.GRCh37.value
 
 
 class TomteQCMetrics(QCMetrics):
