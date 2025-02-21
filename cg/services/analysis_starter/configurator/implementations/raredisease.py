@@ -43,12 +43,7 @@ class RarediseaseConfigurator(Configurator):
         )
 
     def _create_nextflow_config(self, case_id: str) -> None:
-        if content := self._get_nextflow_config_content(case_id=case_id):
-            LOG.debug("Writing nextflow config file")
-            write_txt(
-                content=content,
-                file_path=self._get_nextflow_config_path(case_id=case_id),
-            )
+        pass
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
