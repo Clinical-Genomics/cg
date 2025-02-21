@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 
-class LaunchResponse:
+class LaunchResponse(BaseModel):
     configProfiles: list[str]
     pipeline: str
     preRunScript: str
-    pullLatest: str
+    pullLatest: bool
     revision: str
 
 
