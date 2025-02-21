@@ -23,11 +23,7 @@ class SeqeraPlatformClient:
             url=url, headers=self.auth_headers, params=params
         )
         response.raise_for_status()
-        response_dict: dict = response.json()
-        response_dict["computeEnvId"] = response_dict["computeEnv"][
-            "id"
-        ]  # This is to make it parseable
-        return WorkflowLaunchRequest.model_construct(**response_dict)
+        return WorkflowLaunchRequest.model_construct(**response.json())
 
     def run_case(self, request: WorkflowLaunchRequest) -> str:
         url = f"{self.base_url}/workflow/launch"
