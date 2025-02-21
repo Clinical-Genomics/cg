@@ -1,6 +1,5 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
