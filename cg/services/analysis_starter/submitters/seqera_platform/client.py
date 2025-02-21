@@ -27,7 +27,7 @@ class SeqeraPlatformClient:
         response_dict["computeEnvId"] = response_dict["computeEnv"][
             "id"
         ]  # This is to make it parseable
-        return LaunchRequest.model_validate(**response_dict)
+        return LaunchRequest.model_construct(**response_dict)
 
     def run_case(self, request: LaunchRequest) -> str:
         url = f"{self.base_url}/workflow/launch"
