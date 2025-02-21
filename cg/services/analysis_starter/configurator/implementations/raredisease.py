@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from cg.io.txt import write_txt
 from cg.models.cg_config import CGConfig
@@ -33,12 +34,11 @@ class RarediseaseConfigurator(Configurator):
     def create_config(self, case_id: str) -> RarediseaseCaseConfig:
         return RarediseaseCaseConfig(
             case_id=case_id,
+            case_priority="some_priority",
             workflow="raredisease",
-            compute_env="raredisease",
-            netxflow_config_file="raredisease",
-            params_file="raredisease",
-            revision="raredisease",
-            work_dir="raredisease",
+            netxflow_config_file="/path/to/file",
+            params_file="/path/to/file",
+            work_dir=self._get_working_dir(case_id=case_id).as_posix(),
         )
 
     def _create_params_file(self, case_id: str) -> None:
@@ -52,8 +52,15 @@ class RarediseaseConfigurator(Configurator):
                 file_path=self._get_nextflow_config_path(case_id=case_id),
             )
 
+    def _get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory."""
+        return Path(self.root_dir, case_id)
+
     def _get_nextflow_config_content(self, case_id: str) -> None:
         pass
 
-    def _get_nextflow_config_path(self, case_id: str) -> str:
-        return f"{self.root_dir}/{case_id}/nextflow.config"
+    def _get_nextflow_config_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, "nextflow.config")
+
+    def _get_working_dir(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, "work")
