@@ -82,7 +82,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg38."""
-        return GenomeVersion.HG38
+        return GenomeVersion.GRCh38
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS

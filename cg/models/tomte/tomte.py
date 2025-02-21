@@ -52,7 +52,7 @@ class TomteParameters(WorkflowParameters):
 
     gene_panel_clinical_filter: Path
     tissue: str
-    genome: Literal[GenomeVersion.HG38] = GenomeVersion.HG38
+    genome: Literal[GenomeVersion.HG38] = GenomeVersion.GRCh38
 
     @field_validator("tissue", mode="before")
     @classmethod
