@@ -39,7 +39,7 @@ class RarediseaseConfigurator(Configurator):
             workflow="raredisease",
             netxflow_config_file=self._get_nextflow_config_path(case_id=case_id).as_posix(),
             params_file=self._get_params_file_path(case_id=case_id).as_posix(),
-            work_dir=Path(self.root_dir, case_id, "work").as_posix(),
+            work_dir=self._get_work_dir(case_id=case_id).as_posix(),
         )
 
     def _create_nextflow_config(self, case_id: str) -> None:
@@ -63,3 +63,6 @@ class RarediseaseConfigurator(Configurator):
         return Path((self._get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
             FileExtensions.JSON
         )
+
+    def _get_work_dir(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, "work")
