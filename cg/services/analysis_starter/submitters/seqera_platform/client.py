@@ -35,7 +35,7 @@ class SeqeraPlatformClient:
             url=url,
             headers={"Authorization": f"Bearer {self.bearer_token}"},
             params=params,
-            json=request,
+            json=request.model_dump(),
         )
         response.raise_for_status()
         return response.json()["workflowId"]
