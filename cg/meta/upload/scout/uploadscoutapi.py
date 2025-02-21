@@ -10,9 +10,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
-from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
-from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.constants.scout import GenomeBuild, ScoutCustomCaseReportTags
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
@@ -23,7 +23,6 @@ from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBui
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.utils.genome_build_helpers import genome_to_scout_format, get_genome_build
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.api.data_classes import RNADNACollection
 from cg.store.models import Analysis, Case, Customer, Sample
@@ -427,16 +426,12 @@ class UploadScoutAPI:
     def upload_rna_genome_build_to_scout(
         self,
         dry_run: bool,
-        rna_case: Case,
         rna_dna_collections: list[RNADNACollection],
     ) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         status_db: Store = self.status_db
         for rna_dna_collection in rna_dna_collections:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_genome_build = genome_to_scout_format(
-                GenomeVersion(get_genome_build(case=rna_case))
-            )
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA genome built for sample {dna_sample_name} "
@@ -451,7 +446,7 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
                     cust_id=customer_case.customer.internal_id,
-                    rna_genome_build=rna_genome_build,
+                    rna_genome_build=GenomeBuild.hg38,
                 )
 
         for upload_statement in self.get_rna_genome_build_upload_summary(rna_dna_collections):
@@ -615,7 +610,6 @@ class UploadScoutAPI:
         )
         self.upload_rna_genome_build_to_scout(
             dry_run=dry_run,
-            rna_case=rna_case,
             rna_dna_collections=rna_dna_collections,
         )
         self.load_rna_variant_outlier_to_scout(
