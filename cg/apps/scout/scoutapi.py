@@ -318,13 +318,12 @@ class ScoutAPI:
         ]
         if fraser_file_path:
             upload_command.extend(["--fraser", fraser_file_path])
+            LOG.info(f"Uploading rna fraser file {fraser_file_path} to case {case_id}")
 
         if outrider_file_path:
             upload_command.extend(["--outrider", outrider_file_path])
+            LOG.info(f"Uploading outrider file {outrider_file_path} to case {case_id}")
         try:
-            LOG.info(
-                f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id} with command {upload_command}"
-            )
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error
