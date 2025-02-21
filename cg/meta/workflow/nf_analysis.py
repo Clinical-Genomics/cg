@@ -407,7 +407,6 @@ class NfAnalysisAPI(AnalysisAPI):
             return
         self.write_panel(case_id=case_id, content=bed_lines)
 
-    ## ANCHOR
     def config_case(self, case_id: str, dry_run: bool):
         """Create directory and config files required by a workflow for a case."""
         if dry_run:
