@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 from cg.constants import FileExtensions
-from cg.io.txt import write_txt
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
