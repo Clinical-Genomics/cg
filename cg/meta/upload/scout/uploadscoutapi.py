@@ -394,8 +394,6 @@ class UploadScoutAPI:
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_fraser: File | None = self.get_rna_omics_fraser(case_id=case_id)
             rna_outrider: File | None = self.get_rna_omics_outrider(case_id=case_id)
-            LOG.debug(f"RNA fraser file {rna_fraser.path} found.")
-            LOG.debug(f"RNA outrider file {rna_outrider.path} found.")
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA fraser and outrider files for sample {dna_sample_name} "
