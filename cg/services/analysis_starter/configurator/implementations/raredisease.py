@@ -48,14 +48,14 @@ class RarediseaseConfigurator(Configurator):
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
 
-    def _get_params_file_path(self, case_id: str) -> Path:
-        return Path((self._get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
-            FileExtensions.YAML
-        )
-
     def _get_nextflow_config_path(self, case_id: str) -> Path:
         return Path((self._get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
             FileExtensions.JSON
+        )
+
+    def _get_params_file_path(self, case_id: str) -> Path:
+        return Path((self._get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
+            FileExtensions.YAML
         )
 
     def _get_work_dir(self, case_id: str) -> Path:
