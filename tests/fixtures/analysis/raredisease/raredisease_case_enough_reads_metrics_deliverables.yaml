@@ -28,9 +28,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1278,6 +1276,15 @@ metrics:
   name: pct_adapter
   step: multiqc
   value: 1.265529162641732
+- condition:
+    norm: lt
+    threshold: 20.0
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: picard_mark_duplicates-PERCENT_DUPLICATION
+  step: multiqc
+  value: 4.38
 - condition:
     norm: eq
     threshold: 'NO'
@@ -1322,9 +1329,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -2572,6 +2577,15 @@ metrics:
   name: pct_adapter
   step: multiqc
   value: 1.265529162641732
+- condition:
+    norm: lt
+    threshold: 20.0
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: picard_mark_duplicates-PERCENT_DUPLICATION
+  step: multiqc
+  value: 4.38
 - condition:
     norm: eq
     threshold: 'NO'
