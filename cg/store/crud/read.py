@@ -1779,6 +1779,10 @@ class ReadHandler(BaseHandler):
         collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
         rna_dna_collections: list[RNADNACollection] = []
         for sample in rna_case.samples:
+            if not sample.subject_id:
+                raise CgDataError(
+                    f"Failed to link RNA sample {sample.internal_id} to DNA samples - subject_id field is empty."
+                )
             related_dna_samples: Query = self._get_related_samples_query(
                 sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
             )
