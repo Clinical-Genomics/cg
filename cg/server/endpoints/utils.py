@@ -3,7 +3,7 @@ from functools import wraps
 from http import HTTPStatus
 
 import cachecontrol
-from keycloak import KeycloakError
+from keycloak import KeycloakAuthenticationError, KeycloakError, KeycloakInvalidTokenError
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
 
@@ -45,15 +45,14 @@ def before_request():
         return abort(
             make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
         )
-
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user: User = auth_service.verify_token(jwt_token)
+        auth_service.check_user_role(token=jwt_token, required_role="cg-employee")
     except ValueError as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
-    except KeycloakError as error:
+    except (KeycloakError, KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED))
     except Exception as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR))
-
     g.current_user = user

@@ -15,13 +15,14 @@ from flask import (
     session,
     url_for,
 )
+from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
 from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
 import logging
-
+from cg.server.ext import auth_service
 LOG = logging.getLogger(__name__)
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
@@ -29,16 +30,15 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
 @BLUEPRINT.before_request
 def before_request():
-    if not is_admin():
-        return redirect(url_for("admin.index"))
-
-
-def is_admin() -> bool:
-    user_info: dict = session.get("userinfo")
-    user: User = db.get_user_by_email(email=user_info.get("email"))
-    if user.is_admin:
-        return True
-    raise abort(http.HTTPStatus.FORBIDDEN)
+    try:
+        user_info: dict = session.get("token")
+        auth_service.check_user_role(token=user_info.get("access_token"), required_role="cg-employee")
+    except KeycloakAuthenticationError as error:
+        return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
+    except KeycloakInvalidTokenError as error:
+        return abort(http.HTTPStatus.FORBIDDEN, str(error))
+    except Exception as error:
+        return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR, str(error))
 
 
 def undo_invoice(invoice_id):
