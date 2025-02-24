@@ -23,6 +23,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class BaseView(ModelView):
     """Base for the specific views."""
 
@@ -30,8 +31,10 @@ class BaseView(ModelView):
         token: dict = session.get("token")
         if not token:
             return False
-        try: 
-            auth_service.check_user_role(token=token.get("access_token"), required_role="cg-employee")
+        try:
+            auth_service.check_user_role(
+                token=token.get("access_token"), required_role="cg-employee"
+            )
             return True
         except KeycloakAuthenticationError as error:
             return abort(http.HTTPStatus.UNAUTHORIZED, str(error))

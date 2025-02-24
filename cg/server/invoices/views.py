@@ -23,6 +23,7 @@ from cg.server.ext import db, lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
 import logging
 from cg.server.ext import auth_service
+
 LOG = logging.getLogger(__name__)
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")

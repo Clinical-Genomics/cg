@@ -7,6 +7,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class AuthenticationService:
     """Authentication service to verify tokens against Keycloak and return user information."""
 
@@ -148,4 +149,3 @@ class AuthenticationService:
         if not required_role in roles:
             raise KeycloakAuthenticationError("User does not have the required role.")
         LOG.debug(f"User has the required role: {required_role}")
-        

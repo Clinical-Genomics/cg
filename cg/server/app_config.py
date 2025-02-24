@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 
+
 class AppConfig(BaseSettings):
     """
     Default values are overridden by environment variable at run-time.
@@ -38,7 +39,7 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
-    
+
     # Keycloak settings
     keycloak_client_url: str = "keycloak_host"
     keycloak_realm_name: str = "keycloak_realm"
