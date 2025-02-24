@@ -8,4 +8,8 @@ from cg.services.analysis_starter.configurator.implementations.raredisease impor
 
 @pytest.fixture
 def raredisease_configurator(raredisease_context: CGConfig) -> RarediseaseConfigurator:
-    return RarediseaseConfigurator(cg_config=raredisease_context)
+    return RarediseaseConfigurator(
+        store=raredisease_context.status_db,
+        config=raredisease_context.raredisease,
+        tower_binary_path=raredisease_context.tower_binary_path,
+    )

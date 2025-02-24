@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants import Workflow
+from cg.constants import Priority, Workflow
 from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
 
 
@@ -14,7 +14,7 @@ def raredisease_case_config(
     return RarediseaseCaseConfig(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
-        case_priority="some_priority",
+        case_priority=Priority.standard,
         netxflow_config_file=dummy_nextflow_config_path,
         params_file=dummy_params_file_path,
         work_dir=dummy_work_dir_path,
