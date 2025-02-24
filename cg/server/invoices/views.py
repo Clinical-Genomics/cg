@@ -31,8 +31,8 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 @BLUEPRINT.before_request
 def before_request():
     try:
-        user_info: dict = session.get("token")
-        auth_service.check_user_role(token=user_info.get("access_token"), required_role="cg-employee")
+        token: dict = session.get("token")
+        auth_service.check_user_role(token=token.get("access_token"), required_role="cg-employee")
     except KeycloakAuthenticationError as error:
         return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
     except KeycloakInvalidTokenError as error:

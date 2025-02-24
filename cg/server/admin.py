@@ -1,10 +1,13 @@
 """Module for Flask-Admin views"""
 
 from gettext import gettext
+import http
+import token
 
-from flask import flash, redirect, request, session, url_for
+from flask import abort, flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
+from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
 from markupsafe import Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
@@ -15,14 +18,25 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.ext import auth_service
+import logging
 
+LOG = logging.getLogger(__name__)
 
 class BaseView(ModelView):
     """Base for the specific views."""
 
     def is_accessible(self):
-        user = db.get_user_by_email(email=session.get("user_email"))
-        return bool(user and user.is_admin)
+        token: dict = session.get("token")
+        if not token:
+            return False
+        try: 
+            auth_service.check_user_role(token=token.get("access_token"), required_role="cg-employee")
+            return True
+        except KeycloakAuthenticationError as error:
+            return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
+        except KeycloakInvalidTokenError as error:
+            return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
