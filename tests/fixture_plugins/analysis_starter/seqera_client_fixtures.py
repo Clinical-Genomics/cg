@@ -10,8 +10,10 @@ from cg.io.controller import WriteStream
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
+    LaunchRequest,
     LaunchResponse,
     PipelineResponse,
+    WorkflowLaunchRequest,
 )
 
 
@@ -59,5 +61,37 @@ def http_pipeline_response(pipeline_response: PipelineResponse) -> Response:
     response._content = WriteStream.write_stream_from_content(
         file_format=FileFormat.JSON,
         content=pipeline_response.model_dump(),
+    ).encode()
+    return response
+
+
+@pytest.fixture
+def launch_request(launch_response: LaunchResponse) -> LaunchRequest:
+    return LaunchRequest(
+        computeEnvId="id",
+        configProfiles=launch_response.configProfiles,
+        configText="DummyTextForDummyCase",
+        paramsText="DummyTextForDummyCase",
+        pipeline=launch_response.pipeline,
+        preRunScript=launch_response.preRunScript,
+        pullLatest=launch_response.pullLatest,
+        revision=launch_response.revision,
+        runName="DummyCase",
+        workDir="WorkDirForDummyCase",
+    )
+
+
+@pytest.fixture
+def workflow_launch_request(launch_request: LaunchRequest) -> WorkflowLaunchRequest:
+    return WorkflowLaunchRequest(launch=launch_request)
+
+
+@pytest.fixture
+def http_workflow_launch_response() -> Response:
+    response = Response()
+    response.status_code = HTTPStatus.OK.value
+    response._content = WriteStream.write_stream_from_content(
+        file_format=FileFormat.JSON,
+        content={"workflowId": "DummyId"},
     ).encode()
     return response
