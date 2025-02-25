@@ -1,6 +1,6 @@
 input: "/path/to/samplesheet/case_samplesheet.csv"
 outdir: "/path/to/case"
-genomes_base: "/path/to/to/pipeline/version"
+genomes_base: "/path/to/pipeline/version"
 all: False
 arriba: True
 cram: "arriba,starfusion"
