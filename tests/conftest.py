@@ -3955,7 +3955,6 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
-        reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(
