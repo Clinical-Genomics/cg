@@ -1,3 +1,4 @@
+from cg.clients.authentication.keycloak_client import KeycloakClient
 from cg.io.xml import LOG
 from cg.services.user.service import UserService
 from keycloak import KeycloakAuthenticationError, KeycloakOpenID
@@ -14,10 +15,7 @@ class AuthenticationService:
     def __init__(
         self,
         user_service: UserService,
-        server_url: str,
-        client_id: str,
-        client_secret: str,
-        realm_name: str,
+        keycloak_client: KeycloakClient,
         redirect_uri: str,
     ):
         """Initialize the AuthenticationService.
@@ -31,26 +29,8 @@ class AuthenticationService:
             redirect_uri (str): Redirect URI to use.
         """
         self.user_service = user_service
-        self.server_url = server_url
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.realm_name = realm_name
         self.redirect_uri = redirect_uri
-        self.client = self._get_client()
-
-    def _get_client(self) -> KeycloakOpenID:
-        """Set the KeycloakOpenID client."""
-        try:
-            keycloak_openid_client = KeycloakOpenID(
-                server_url=self.server_url,
-                client_id=self.client_id,
-                realm_name=self.realm_name,
-                client_secret_key=self.client_secret,
-            )
-            return keycloak_openid_client
-        except KeycloakGetError as e:
-            LOG.error(f"Failed to initialize Keycloak client: {e}")
-            raise
+        self.client = keycloak_client.get_client()
 
     def verify_token(self, token: str) -> User:
         """Verify the token and return the user.

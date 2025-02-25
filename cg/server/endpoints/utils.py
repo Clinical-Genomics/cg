@@ -47,11 +47,8 @@ def before_request():
         )
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        LOG.info("############## Verifying token")
         user: User = auth_service.verify_token(jwt_token)
-        LOG.info("############### Verifying User role")
         auth_service.check_user_role(token=jwt_token, required_role="cg-employee")
-        LOG.info("############### Verifying User DONE")
     except ValueError as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
     except (KeycloakError, KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:

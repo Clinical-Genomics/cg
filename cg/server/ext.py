@@ -7,6 +7,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
+from cg.clients.authentication.keycloak_client import KeycloakClient
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
 from cg.services.authentication.service import AuthenticationService
@@ -116,11 +117,14 @@ ticket_handler = TicketHandler(
     env=app_config.freshdesk_environment,
 )
 user_service = UserService(store=db)
-auth_service = AuthenticationService(
-    user_service=user_service,
+keycloak_client = KeycloakClient(
     server_url=app_config.keycloak_client_url,
     client_id=app_config.keycloak_client_id,
-    client_secret=app_config.keycloak_client_secret_key,
+    client_secret_key=app_config.keycloak_client_secret_key,
     realm_name=app_config.keycloak_realm_name,
+)
+auth_service = AuthenticationService(
+    user_service=user_service,
+    keycloak_client=keycloak_client,
     redirect_uri=app_config.keycloak_redirect_uri,
 )
