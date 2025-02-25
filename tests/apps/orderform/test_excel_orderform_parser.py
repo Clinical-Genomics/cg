@@ -279,3 +279,19 @@ def test_parse_taxprofiler_orderform(taxprofiler_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.TAXPROFILER
+
+
+def test_parse_tomte_orderform(tomte_orderform: str):
+    """Test to parse a Tomte orderform in excel format"""
+
+    # GIVEN an order form in Excel format
+    assert is_excel(Path(tomte_orderform))
+
+    # GIVEN an ExcelOrderformParser
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=tomte_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.TOMTE
