@@ -13,6 +13,7 @@ from cg.constants.report import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
 from cg.constants.scout import ScoutUploadKey
+from cg.constants.subject import PlinkSex
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -45,7 +46,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            sex=sample_metrics.sex,
+            sex=PlinkSex(str(sample_metrics.sex)).value,
         )
 
     def is_report_accredited(
