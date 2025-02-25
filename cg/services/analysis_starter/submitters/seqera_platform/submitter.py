@@ -30,16 +30,17 @@ class SeqeraPlatformSubmitter(Submitter):
     def _create_launch_request(
         self, case_config: RarediseaseCaseConfig, pipeline_config: PipelineResponse
     ) -> WorkflowLaunchRequest:
-        parameters: str = ReadFile.get_content_from_file(
+        parameters: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=case_config.params_file
+        )
+        parameters_as_string = WriteStream.write_stream_from_content(
+            content=parameters, file_format=FileFormat.YAML
         )
         slurm_qos: str = Priority.priority_to_slurm_qos()[case_config.case_priority]
         launch_request = LaunchRequest(
             computeEnvId=self.compute_environment_ids[slurm_qos],
             configText=f"includeConfig {case_config.nextflow_config_file.as_posix()}",
-            paramsText=WriteStream.write_stream_from_content(
-                content=parameters, file_format=FileFormat.YAML
-            ),
+            paramsText=parameters_as_string,
             runName=case_config.case_id,
             workDir=case_config.work_dir.as_posix(),
             **pipeline_config.launch.model_dump(),
