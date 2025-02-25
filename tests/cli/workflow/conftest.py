@@ -53,7 +53,7 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
 
 
 @pytest.fixture
-def fastq_context(
+def raw_data_fastq_context(
     base_context,
     cg_context: CGConfig,
     fastq_case,

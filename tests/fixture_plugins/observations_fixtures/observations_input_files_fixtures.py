@@ -26,7 +26,7 @@ def balsamic_observations_input_files_raw(case_id: str, filled_file: Path) -> di
 def balsamic_observations_input_files(
     balsamic_observations_input_files_raw: dict[str, Path],
 ) -> BalsamicObservationsInputFiles:
-    """Return raw observations input files for cancer WGS analysis."""
+    """Return raw observations input files for cancer WHOLE_GENOME_SEQUENCING analysis."""
     return BalsamicObservationsInputFiles(**balsamic_observations_input_files_raw)
 
 
@@ -45,7 +45,7 @@ def mip_dna_observations_input_files_raw(case_id: str, filled_file: Path) -> dic
 def mip_dna_observations_input_files(
     mip_dna_observations_input_files_raw: dict[str, Path],
 ) -> MipDNAObservationsInputFiles:
-    """Return raw observations input files for rare diseases WES analysis."""
+    """Return raw observations input files for rare diseases WHOLE_EXOME_SEQUENCING analysis."""
     return MipDNAObservationsInputFiles(**mip_dna_observations_input_files_raw)
 
 
@@ -66,5 +66,5 @@ def raredisease_observations_input_files_raw(
 def raredisease_observations_input_files(
     raredisease_observations_input_files_raw: dict[str, Path],
 ) -> RarediseaseObservationsInputFiles:
-    """Return raw observations input files for RAREDISEASE WES analysis."""
+    """Return raw observations input files for RAREDISEASE WHOLE_EXOME_SEQUENCING analysis."""
     return RarediseaseObservationsInputFiles(**raredisease_observations_input_files_raw)

@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.deliver_files_service.deliver_files_service_factory import (
+from cg.services.deliver_files.factory import (
     DeliveryServiceFactory,
 )
 from cg.store.models import Analysis, Case
@@ -97,8 +97,7 @@ class UploadAPI(MetaAPI):
         """Uploads the analysis files to the customer inbox."""
         factory_service: DeliveryServiceFactory = self.config.delivery_service_factory
         delivery_service: DeliverFilesService = factory_service.build_delivery_service(
-            delivery_type=case.data_delivery,
-            workflow=case.data_analysis,
+            case=case, delivery_type=case.data_delivery
         )
         delivery_service.deliver_files_for_case(
             case=case, delivery_base_path=Path(self.config.delivery_path)

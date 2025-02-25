@@ -2,18 +2,19 @@
 
 import logging
 
-import click
+import rich_click as click
 from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -35,12 +36,6 @@ OPTION_PROFILE = click.option(
     type=str,
     show_default=True,
     help="Choose a configuration profile",
-)
-
-OPTION_LOG = click.option(
-    "--log",
-    type=click.Path(),
-    help="Set nextflow log file path",
 )
 
 OPTION_CONFIG = click.option(
@@ -88,6 +83,13 @@ OPTION_FROM_START = click.option(
     show_default=True,
     help="Start workflow from start without resuming execution",
 )
+OPTION_STUB = click.option(
+    "--stub-run",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Start a stub workflow",
+)
 
 
 @click.command("config-case")
@@ -106,7 +108,6 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @click.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_FROM_START
 @OPTION_PROFILE
@@ -116,12 +117,12 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @OPTION_TOWER_RUN_ID
+@OPTION_STUB
 @DRY_RUN
 @click.pass_obj
 def run(
     context: CGConfig,
     case_id: str,
-    log: str,
     work_dir: str,
     from_start: bool,
     profile: str,
@@ -131,6 +132,7 @@ def run(
     compute_env: str,
     use_nextflow: bool,
     nf_tower_id: str | None,
+    stub_run: bool,
     dry_run: bool,
 ) -> None:
     """Run analysis for a case."""
@@ -139,7 +141,6 @@ def run(
         analysis_api.run_nextflow_analysis(
             case_id=case_id,
             dry_run=dry_run,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
@@ -149,6 +150,7 @@ def run(
             compute_env=compute_env,
             use_nextflow=use_nextflow,
             nf_tower_id=nf_tower_id,
+            stub_run=stub_run,
         )
     except Exception as error:
         LOG.error(f"Unspecified error occurred: {error}")
@@ -157,7 +159,6 @@ def run(
 
 @click.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_PROFILE
 @OPTION_CONFIG
@@ -165,12 +166,12 @@ def run(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_STUB
 @DRY_RUN
 @click.pass_obj
 def start(
     context: CGConfig,
     case_id: str,
-    log: str,
     work_dir: str,
     profile: str,
     config: str,
@@ -178,6 +179,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    stub_run: bool,
     dry_run: bool,
 ) -> None:
     """Start workflow for a case."""
@@ -185,12 +187,13 @@ def start(
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+        case: Case = analysis_api.status_db.get_case_by_internal_id(case_id)
+        if case.data_analysis != Workflow.NALLO:
+            analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
         analysis_api.run_nextflow_analysis(
             case_id=case_id,
             dry_run=dry_run,
-            log=log,
             work_dir=work_dir,
             from_start=True,
             profile=profile,
@@ -199,6 +202,7 @@ def start(
             revision=revision,
             compute_env=compute_env,
             use_nextflow=use_nextflow,
+            stub_run=stub_run,
         )
     except Exception as error:
         LOG.error(f"Unexpected error occurred: {error}")

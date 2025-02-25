@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -20,7 +20,9 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Case
@@ -50,7 +52,10 @@ def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str)
         return
 
     context.invoke(
-        create_scout_load_config, case_id=case_id, print_console=print_console, re_upload=re_upload
+        create_scout_load_config,
+        case_id=case_id,
+        print_console=print_console,
+        re_upload=re_upload,
     )
     if not print_console:
         context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
@@ -84,11 +89,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     except SyntaxError as error:
         LOG.warning(repr(error))
         raise click.Abort from error
-    LOG.info(f"Found load config {scout_load_config}")
+    LOG.info(f"Found load config: {scout_load_config}")
+
     root_dir: str = context.meta_apis["upload_api"].analysis_api.root
     LOG.info(f"Set root dir to {root_dir}")
     file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
-
     if print_console:
         click.echo(
             WriteStream.write_stream_from_content(
@@ -162,7 +167,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.pass_obj
 def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    are_all_samples_rna: bool = scout_upload_api.mip_analysis_api.are_case_samples_rna(case_id)
+    are_all_samples_rna: bool = scout_upload_api.analysis_api.are_case_samples_rna(case_id)
     if not are_all_samples_rna:
         LOG.error(f"{case_id} has non-RNA samples - aborting.")
         raise click.Abort
@@ -174,7 +179,7 @@ def validate_case_samples_are_rna(context: CGConfig, case_id: str) -> None:
 @click.argument("case_id")
 @click.pass_context
 def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
-    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject ID."""
+    """Upload an RNA case's gene fusion report and junction splice files for all samples connected via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
@@ -183,6 +188,26 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
     context.invoke(
         upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
+
+
+@click.command(name="tomte-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_context
+def upload_tomte_to_scout(
+    context,
+    case_id: str,
+    dry_run: bool,
+) -> None:
+    """Upload an Tomte RNA case's junction splice files and omics files for all samples connected via subject ID."""
+    LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
+
+    context.invoke(validate_case_samples_are_rna, case_id=case_id)
+    context.invoke(upload_rna_delivery_report_to_scout, case_id=case_id)
+    context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_rna_omics_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
@@ -215,6 +240,19 @@ def upload_rna_fusion_report_to_scout(
     )
 
 
+@click.command(name="rna-delivery-report-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_delivery_report_to_scout(context: CGConfig, dry_run: bool, case_id: str) -> None:
+    """Upload rna delivery report file for a case to Scout."""
+
+    LOG.info("----------------- UPLOAD RNA DELIVERY REPORT TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_delivery_report_to_scout(dry_run=dry_run, case_id=case_id)
+
+
 @click.command(name="rna-junctions-to-scout")
 @DRY_RUN
 @click.argument("case_id")
@@ -226,6 +264,18 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
 
     scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+
+
+@click.command(name="rna-omics-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_omics_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA omics files to Scout."""
+    LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
 @click.command(name="multiqc-to-scout")
@@ -266,7 +316,9 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
+        Workflow.TOMTE: TomteAnalysisAPI,
     }
 
     return UploadAPI(

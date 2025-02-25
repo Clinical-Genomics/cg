@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.lims import LimsAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS

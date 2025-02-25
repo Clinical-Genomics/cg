@@ -1,11 +1,14 @@
 import logging
 from http import HTTPStatus
+
 from flask import Blueprint, abort, g, jsonify, request
-from cg.exc import CaseNotFoundError, OrderMismatchError
+
+from cg.exc import CaseNotFoundError, CgDataError, OrderMismatchError
+from cg.server.dto.cases.requests import CasesRequest
 from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import DeliveryMessageResponse
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import db, delivery_message_service
+from cg.server.ext import case_service, db, delivery_message_service
 from cg.store.models import Case, Customer
 
 LOG = logging.getLogger(__name__)
@@ -16,31 +19,16 @@ CASES_BLUEPRINT.before_request(before_request)
 @CASES_BLUEPRINT.route("/cases")
 def get_cases():
     """Return cases with links for a customer from the database."""
-    enquiry: str = request.args.get("enquiry")
-    action: str = request.args.get("action")
+    cases_request = CasesRequest.model_validate(request.args.to_dict())
 
     customers: list[Customer] = _get_current_customers()
-    cases: list[Case] = _get_cases(enquiry=enquiry, action=action, customers=customers)
-
-    nr_cases: int = len(cases)
-    cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=cases_with_links, total=nr_cases)
+    cases, total = case_service.get_cases(request=cases_request, customers=customers)
+    return jsonify(cases=cases, total=total)
 
 
 def _get_current_customers() -> list[Customer] | None:
     """Return customers if the current user is not an admin."""
     return g.current_user.customers if not g.current_user.is_admin else None
-
-
-def _get_cases(
-    enquiry: str | None, action: str | None, customers: list[Customer] | None
-) -> list[Case]:
-    """Get cases based on the provided filters."""
-    return db.get_cases_by_customers_action_and_case_search(
-        case_search=enquiry,
-        customers=customers,
-        action=action,
-    )
 
 
 @CASES_BLUEPRINT.route("/cases/<case_id>")
@@ -62,7 +50,7 @@ def get_cases_delivery_message():
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except (CaseNotFoundError, OrderMismatchError) as error:
+    except (CaseNotFoundError, OrderMismatchError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
@@ -74,7 +62,7 @@ def get_case_delivery_message(case_id: str):
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except CaseNotFoundError as error:
+    except (CaseNotFoundError, CgDataError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 

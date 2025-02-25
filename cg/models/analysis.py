@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
@@ -9,10 +9,15 @@ from cg.models.tomte.tomte import TomteQCMetrics
 class AnalysisModel(BaseModel):
     """Metadata analysis model"""
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 
 class NextflowAnalysis(AnalysisModel):
     """Nextflow's analysis results model."""
 
-    sample_metrics: dict[
-        str, RarediseaseQCMetrics | RnafusionQCMetrics | TaxprofilerQCMetrics | TomteQCMetrics
-    ]
+    sample_metrics: (
+        dict[str, RarediseaseQCMetrics]
+        | dict[str, RnafusionQCMetrics]
+        | dict[str, TaxprofilerQCMetrics]
+        | dict[str, TomteQCMetrics]
+    ) = Field(union_mode="left_to_right")

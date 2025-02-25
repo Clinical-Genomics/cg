@@ -6,14 +6,13 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Iterator
 
-import click
+import rich_click as click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
-    AnalysisType,
     CaseActions,
     CustomerId,
     FileFormat,
@@ -21,13 +20,16 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
-from cg.constants.tb import AnalysisStatus
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.meta.workflow.utils.utils import are_all_samples_control, MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -119,23 +121,27 @@ class AnalysisAPI(MetaAPI):
     def get_cases_ready_for_analysis(self):
         """
         Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
+        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
         """
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_passing_quality_check: list[Case] = [
             case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 
-    def get_priority_for_case(self, case_id: str) -> int:
-        """Get priority from the status db case priority"""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case.priority or Priority.research
-
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
-        priority: int = self.get_priority_for_case(case_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if are_all_samples_control(case=case):
+            return SlurmQos.EXPRESS
+        priority: int = case.priority or Priority.research
         return Priority.priority_to_slurm_qos().get(priority)
+
+    def get_trailblazer_priority(self, case_id: str) -> int:
+        """Get the priority for the case in Trailblazer."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        priority: int = case.priority
+        return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given workflow."""
@@ -168,17 +174,18 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(sample_obj: Sample) -> str:
+    def get_analysis_type(sample: Sample) -> str:
         """
-        Gets application type for sample. Only application types supported by trailblazer (or other)
+        Return the analysis type for sample.
+        Only analysis types supported by Trailblazer
         are valid outputs.
         """
-        prep_category: str = sample_obj.prep_category
+        prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
-            AnalysisType.TARGETED_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_EXOME_SEQUENCING,
-            AnalysisType.WHOLE_GENOME_SEQUENCING,
-            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
@@ -186,7 +193,7 @@ class AnalysisAPI(MetaAPI):
     def get_case_application_type(self, case_id: str) -> str:
         """Returns the application type for samples in a case."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
-        application_types: set[str] = {self.get_application_type(sample) for sample in samples}
+        application_types: set[str] = {self.get_analysis_type(sample) for sample in samples}
 
         if len(application_types) > 1:
             raise CgError(
@@ -197,7 +204,7 @@ class AnalysisAPI(MetaAPI):
 
     def are_case_samples_rna(self, case_id: str) -> bool:
         analysis_type: str = self.get_case_application_type(case_id)
-        return analysis_type == AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING
+        return analysis_type == AnalysisType.WTS
 
     def get_case_source_type(self, case_id: str) -> str | None:
         """
@@ -215,9 +222,9 @@ class AnalysisAPI(MetaAPI):
         return source_types.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
-        """Returns True if the application type for all samples in a case is WES."""
+        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
         application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
+        return application_type == AnalysisType.WES
 
     def upload_bundle_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False
@@ -282,26 +289,26 @@ class AnalysisAPI(MetaAPI):
         tower_workflow_id: str | None = None,
     ) -> None:
         self.check_analysis_ongoing(case_id)
-        application_type: str = self.get_application_type(
+        analysis_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
         )
         config_path: str = self.get_job_ids_path(case_id).as_posix()
         email: str = environ_email()
         order_id: int = self._get_order_id_from_case_id(case_id)
         out_dir: str = self.get_job_ids_path(case_id).parent.as_posix()
-        slurm_quality_of_service: str = self.get_slurm_qos_for_case(case_id)
+        priority: TrailblazerPriority = self.get_trailblazer_priority(case_id)
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
         self.trailblazer_api.add_pending_analysis(
-            analysis_type=application_type,
+            analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
             email=email,
             order_id=order_id,
             out_dir=out_dir,
-            slurm_quality_of_service=slurm_quality_of_service,
+            priority=priority,
             ticket=ticket,
             workflow=workflow,
             workflow_manager=workflow_manager,
@@ -366,8 +373,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyse(self) -> list[Case]:
-        return self.status_db.cases_to_analyse(workflow=self.workflow)
+    def get_cases_to_analyze(self) -> list[Case]:
+        return self.status_db.get_cases_to_analyze(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

@@ -2,17 +2,22 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy import and_, exists, not_, or_
+from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
+from cg.constants.constants import (
+    CaseActions,
+    DataDelivery,
+    SequencingQCStatus,
+    Workflow,
+)
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Sample
+from cg.store.models import Analysis, Application, Case, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -76,6 +81,11 @@ def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Que
     return cases.filter(Case.name.contains(name_search))
 
 
+def filter_cases_by_workflows(cases: Query, workflows: list[Workflow], **kwargs) -> Query:
+    """Filter cases by data analysis types."""
+    return cases.filter(Case.data_analysis.in_(workflows))
+
+
 def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs) -> Query:
     """Filter cases with a workflow search pattern."""
     return cases.filter(Case.data_analysis.contains(workflow_search))
@@ -84,11 +94,6 @@ def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs
 def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
     """Filter cases with matching priority."""
     return cases.filter(Case.priority == priority)
-
-
-def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
-    """Filter cases with matching ticket id."""
-    return cases.filter(Case.tickets.contains(ticket_id))
 
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
@@ -232,6 +237,7 @@ def apply_case_filter(
     order_date: datetime | None = None,
     workflow: Workflow | None = None,
     workflow_search: str | None = None,
+    workflows: list[Workflow] | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,
     order_id: int | None = None,
@@ -254,6 +260,7 @@ def apply_case_filter(
             order_date=order_date,
             workflow=workflow,
             workflow_search=workflow_search,
+            workflows=workflows,
             priority=priority,
             ticket_id=ticket_id,
             order_id=order_id,
@@ -274,9 +281,9 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    BY_WORKFLOWS: Callable = filter_cases_by_workflows
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
-    BY_TICKET: Callable = filter_cases_by_ticket_id
     FOR_ANALYSIS: Callable = filter_cases_for_analysis
     HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     HAS_SEQUENCE: Callable = filter_cases_has_sequence

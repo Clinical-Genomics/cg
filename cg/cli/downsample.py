@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Tuple
 
-import click
+import rich_click as click
 
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle

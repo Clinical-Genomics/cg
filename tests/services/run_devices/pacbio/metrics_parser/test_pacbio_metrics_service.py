@@ -6,9 +6,7 @@ from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.run_devices.pacbio.metrics_parser.models import BaseMetrics
-from cg.services.run_devices.pacbio.metrics_parser.utils import (
-    get_parsed_metrics_from_file_name,
-)
+from cg.services.run_devices.pacbio.metrics_parser.utils import get_parsed_metrics_from_file_name
 
 
 @pytest.mark.parametrize(
@@ -25,7 +23,7 @@ from cg.services.run_devices.pacbio.metrics_parser.utils import (
 def test_get_parsed_metrics_from_file_name(
     file_name: str,
     expected_metrics_fixture: str,
-    pac_bio_report_files_to_parse: list[Path],
+    pacbio_barcoded_report_files_to_parse: list[Path],
     request: FixtureRequest,
 ):
     """Test the parsing of all PacBio metric files."""
@@ -33,7 +31,7 @@ def test_get_parsed_metrics_from_file_name(
 
     # WHEN parsing the SMRTlink datasets metrics
     parsed_metrics: BaseMetrics = get_parsed_metrics_from_file_name(
-        metrics_files=pac_bio_report_files_to_parse, file_name=file_name
+        metrics_files=pacbio_barcoded_report_files_to_parse, file_name=file_name
     )
 
     # THEN the parsed metrics are the expected ones

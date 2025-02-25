@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI

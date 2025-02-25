@@ -11,7 +11,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.deliver_files.delivery_rsync_service.sbatch import (
+from cg.services.deliver_files.rsync.sbatch import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
 )

@@ -86,30 +86,12 @@ class SequencingRunDataAvailability(StrEnum):
         return list(map(lambda status: status.value, cls))
 
 
-class AnalysisType(StrEnum):
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-    OTHER: str = "other"
-
-
 class CancerAnalysisType(StrEnum):
     TUMOR_NORMAL = auto()
     TUMOR_NORMAL_PANEL = auto()
     TUMOR_NORMAL_WGS = auto()
     TUMOR_PANEL = auto()
     TUMOR_WGS = auto()
-
-
-class PrepCategory(StrEnum):
-    COVID: str = "cov"
-    MICROBIAL: str = "mic"
-    READY_MADE_LIBRARY: str = "rml"
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
 class SexOptions(StrEnum):
@@ -132,7 +114,6 @@ class StatusOptions(StrEnum):
 class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
     BALSAMIC_PON: str = "balsamic-pon"
-    BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
     FLUFFY: str = "fluffy"
@@ -141,6 +122,7 @@ class Workflow(StrEnum):
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
     MUTANT: str = "mutant"
+    NALLO: str = "nallo"
     RAREDISEASE: str = "raredisease"
     RAW_DATA: str = "raw-data"
     RNAFUSION: str = "rnafusion"
@@ -148,6 +130,13 @@ class Workflow(StrEnum):
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
     TOMTE: str = "tomte"
+
+
+DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
+    Workflow.MIP_DNA,
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+]
 
 
 class FileFormat(StrEnum):
@@ -166,8 +155,8 @@ class GenomeVersion(StrEnum):
     GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19 = auto()
-    HG38 = auto()
+    HG19: str = "hg19"
+    HG38: str = "hg38"
 
 
 class SampleType(StrEnum):
@@ -197,6 +186,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BAM: str = ".bam"
+    BCF: str = ".bcf"
     BED: str = ".bed"
     COMPLETE: str = ".complete"
     CONFIG: str = ".config"
@@ -224,6 +214,7 @@ class FileExtensions(StrEnum):
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"
+    VCF_GZ: str = ".vcf.gz"
     XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
@@ -259,7 +250,7 @@ class MicrosaltAppTags(StrEnum):
 class MutantQC:
     EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
     INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
-    FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_THRESHOLD: float = 0.2
     QUALITY_REPORT_FILE_NAME: str = f"QC_report{FileExtensions.JSON}"
 
 
@@ -307,3 +298,13 @@ class SequencingQCStatus(Enum):
     FAILED = auto()
     PASSED = auto()
     PENDING = auto()
+
+
+class SampleStatus(StrEnum):
+    INCOMING = "incoming"
+    LABPREP = "labprep"
+    SEQUENCING = "sequencing"
+
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return [cls.INCOMING, cls.LABPREP, cls.SEQUENCING]

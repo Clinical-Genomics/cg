@@ -15,13 +15,37 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
-RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "median_coverage": {"norm": "gt", "threshold": 25},
+}
+
+RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
+
+RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
+
+RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "percent_duplicates": {"norm": "lt", "threshold": 20},
+    "Contamination Status": {"norm": "eq", "threshold": "NO"},
+    "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
+    "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
+    "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
+    "AT_DROPOUT": {"norm": "lt", "threshold": 10},
+    "GC_DROPOUT": {"norm": "lt", "threshold": 10},
+    RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
+    "gender": {"norm": "eq", "threshold": None},
+}
+
+RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
+    "percent_duplicates": {"norm": "lt", "threshold": 20},
+    "Contamination Status": {"norm": "eq", "threshold": "NO"},
+    "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
     "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
-    "PCT_EXC_ADAPTER": {"norm": "lt", "threshold": 0.0005},
-    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+    "AT_DROPOUT": {"norm": "lt", "threshold": 5},
+    "GC_DROPOUT": {"norm": "lt", "threshold": 5},
+    RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
+    "gender": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
@@ -45,10 +69,10 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
 
 MULTIQC_NEXFLOW_CONFIG = """process {
     withName:'MULTIQC' {
-        memory = { 1.GB * task.attempt }
+        memory = { 4.GB * task.attempt }
         time   = { 4.h  * task.attempt }
         cpus = 2
-        ext.args = ' --data-format json '
+        ext.args = ' --data-format json --cl-config "max_table_rows: 10000" '
     }
 }
 """

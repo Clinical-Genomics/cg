@@ -36,9 +36,12 @@ from cg.store.models import (
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
+    PacbioSequencingRun,
     Panel,
     Pool,
+    RunDevice,
     Sample,
     User,
 )
@@ -251,6 +254,18 @@ class StoreHelpers:
         store.session.commit()
         return application
 
+    def add_application_order_type(
+        self, store: Store, application: Application, order_types: list[str]
+    ):
+        """Add an order type to an application."""
+        order_app_links: list[OrderTypeApplication] = store.link_order_types_to_application(
+            application=application, order_types=order_types
+        )
+        for link in order_app_links:
+            store.session.add(link)
+        store.session.commit()
+        return order_app_links
+
     @staticmethod
     def ensure_application_limitation(
         store: Store,
@@ -340,7 +355,9 @@ class StoreHelpers:
         """Utility function to add an analysis for tests."""
 
         if not case:
-            case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
+            case = StoreHelpers.add_case(
+                store=store, data_analysis=workflow, data_delivery=data_delivery
+            )
 
         analysis = store.add_analysis(workflow=workflow, version=workflow_version, case_id=case.id)
 
@@ -381,6 +398,7 @@ class StoreHelpers:
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Utility function to add a sample to use in tests."""
@@ -407,6 +425,7 @@ class StoreHelpers:
             tumour=is_tumour,
             reads=reads,
             internal_id=internal_id,
+            subject_id=subject_id,
         )
 
         sample.application_version_id = application_version_id
@@ -498,10 +517,11 @@ class StoreHelpers:
         customer_id: int,
         ticket_id: int,
         order_date: datetime = datetime(year=2023, month=12, day=24),
-        workflow: Workflow = Workflow.MIP_DNA,
     ) -> Order:
         order = Order(
-            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+            customer_id=customer_id,
+            ticket_id=ticket_id,
+            order_date=order_date,
         )
         store.session.add(order)
         store.session.commit()
@@ -550,6 +570,10 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
+        order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
+            ticket_id=int(case_info["tickets"]),
+            customer_id=customer_obj.id,
+        )
         case = Case(
             name=case_info["name"],
             panels=case_info["panels"],
@@ -561,7 +585,7 @@ class StoreHelpers:
             action=case_info.get("action"),
             tickets=case_info["tickets"],
         )
-
+        case.orders.append(order)
         case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"
@@ -943,9 +967,9 @@ class StoreHelpers:
         """Utility function to add many cases with two samples to use in tests."""
 
         cases: list[Case] = []
-        for i in range(nr_cases):
-            case: list[Case] = cls.add_case_with_samples(
-                base_store, f"f{i}", 2, sequenced_at=sequenced_at
+        for index in range(nr_cases):
+            case: Case = cls.add_case_with_samples(
+                base_store=base_store, case_id=f"f{index}", nr_samples=2, sequenced_at=sequenced_at
             )
             cases.append(case)
         return cases
@@ -1087,3 +1111,59 @@ class StoreHelpers:
                 sequencing_run=sequencing_run,
                 lane=i + 1,
             )
+
+    @staticmethod
+    def add_run_device(store: Store, id: int, type: DeviceType, internal_id: str) -> RunDevice:
+        device = RunDevice(id=id, type=type, internal_id=internal_id)
+        store.add_item_to_store(device)
+        store.commit_to_store()
+        return device
+
+    @staticmethod
+    def add_pacbio_sequencing_run(
+        store: Store,
+        id: int,
+        device_id: int,
+        run_name: str = "run_name",
+    ) -> PacbioSequencingRun:
+        run = PacbioSequencingRun(
+            barcoded_hifi_reads=123456700,
+            barcoded_hifi_yield=12345600,
+            barcoded_hifi_reads_percentage=99.9,
+            barcoded_hifi_mean_read_length=14789,
+            id=id,
+            well="A01",
+            plate=1,
+            run_name=run_name,
+            movie_name="movie_name",
+            started_at=datetime.now(),
+            hifi_reads=123456789,
+            hifi_yield=12345678,
+            hifi_mean_read_length=15000,
+            hifi_median_read_quality="Q32",
+            percent_reads_passing_q30=92.3,
+            p0_percent=79.1,
+            p1_percent=13.1,
+            p2_percent=0.1,
+            device_id=device_id,
+            completed_at=datetime.now(),
+            productive_zmws=123,
+            polymerase_mean_read_length=123,
+            polymerase_mean_longest_subread=123,
+            polymerase_read_length_n50=123,
+            polymerase_longest_subread_n50=123,
+            control_reads=0,
+            control_mean_read_length=0,
+            control_mean_read_concordance=0,
+            control_mode_read_concordance=0,
+            barcoded_hifi_yield_percentage=12.65,
+            failed_reads=0,
+            failed_mean_read_length=0,
+            failed_yield=0,
+            unbarcoded_hifi_mean_read_length=0,
+            unbarcoded_hifi_yield=0,
+            unbarcoded_hifi_reads=0,
+        )
+        store.add_item_to_store(run)
+        store.commit_to_store()
+        return run

@@ -3,34 +3,34 @@ import logging
 import shutil
 from pathlib import Path
 
-import click
+import rich_click as click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.utils import TOWER_WORKFLOW_TO_ANALYSIS_API_MAP
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION, FORCE, COMMENT
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, SKIP_CONFIRMATION
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import IlluminaRunsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
-from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.deliver_files.delivery_rsync_service.delivery_rsync_service import (
-    DeliveryRsyncService,
-)
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.store import Store
 
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+ARGUMENT_WORKFLOW = click.argument("workflow", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
@@ -241,22 +241,6 @@ def balsamic_past_run_dirs(
     )
 
 
-@click.command("balsamic-qc-past-run-dirs")
-@SKIP_CONFIRMATION
-@DRY_RUN
-@ARGUMENT_BEFORE_STR
-@click.pass_context
-def balsamic_qc_past_run_dirs(
-    context: click.Context, before_str: str, skip_confirmation: bool = False, dry_run: bool = False
-):
-    """Clean up of "old" Balsamic qc case run dirs."""
-
-    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
-    )
-
-
 @click.command("balsamic-umi-past-run-dirs")
 @SKIP_CONFIRMATION
 @DRY_RUN
@@ -383,3 +367,19 @@ def microsalt_past_run_dirs(
     context.invoke(
         past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
     )
+
+
+@click.command("tower-past-run-dirs")
+@SKIP_CONFIRMATION
+@ARGUMENT_WORKFLOW
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def tower_past_run_dirs(
+    context: click.Context, before_str: str, workflow: Workflow, skip_confirmation: bool = False
+):
+    """Clean up of "old" tower case run dirs."""
+    if workflow not in TOWER_WORKFLOW_TO_ANALYSIS_API_MAP:
+        LOG.error(f"Please ensure that the provided workflow {workflow} is using Tower")
+        raise click.Abort()
+    analysis_api: NfAnalysisAPI = TOWER_WORKFLOW_TO_ANALYSIS_API_MAP.get(workflow)(context.obj)
+    analysis_api.clean_past_run_dirs(before_date=before_str, skip_confirmation=skip_confirmation)

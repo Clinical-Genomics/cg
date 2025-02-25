@@ -1,8 +1,8 @@
 """Common CLI file generation functions"""
 
-import click
+import rich_click as click
 
-from cg.cli.generate.report.base import (
+from cg.cli.generate.delivery_report.base import (
     generate_available_delivery_reports,
     generate_delivery_report,
 )

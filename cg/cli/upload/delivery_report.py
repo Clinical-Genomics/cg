@@ -2,13 +2,13 @@
 
 import logging
 
-import click
+import rich_click as click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.report.options import ARGUMENT_CASE_ID
-from cg.cli.generate.report.utils import get_report_api, get_report_case
+from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID
+from cg.cli.generate.delivery_report.utils import get_report_api, get_report_case
 from cg.constants.cli_options import DRY_RUN
-from cg.meta.report.report_api import ReportAPI
+from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def upload_delivery_report_to_scout(
     """Fetches a delivery report from Housekeeper and uploads it to Scout."""
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
     case: Case = get_report_case(context, case_id)
-    report_api: ReportAPI = get_report_api(context, case)
+    report_api: DeliveryReportAPI = get_report_api(context, case)
     version: Version = report_api.housekeeper_api.last_version(case_id)
     delivery_report: str | None = report_api.get_delivery_report_from_hk(
         case_id=case_id, version=version

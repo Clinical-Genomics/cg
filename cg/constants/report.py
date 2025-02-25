@@ -11,7 +11,7 @@ project_root_dir: Path = get_project_root_dir()
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
-    project_root_dir, "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
+    project_root_dir, "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
@@ -21,7 +21,6 @@ RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
 
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
-    Workflow.BALSAMIC_QC,
     Workflow.BALSAMIC_UMI,
     Workflow.MIP_DNA,
     Workflow.RAREDISEASE,
@@ -227,7 +226,7 @@ _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADA
     "mean_length_r1",
 ]
 
-# WTS metadata required fields (OPTIONAL: "rin", "dv200")
+# WHOLE_TRANSCRIPTOME_SEQUENCING metadata required fields (OPTIONAL: "rin", "dv200")
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
     "input_amount",

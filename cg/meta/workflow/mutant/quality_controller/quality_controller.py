@@ -206,7 +206,7 @@ class MutantQualityController:
             samples_quality_results.failed_samples_count
             / samples_quality_results.total_samples_count
         )
-        return fraction_failed_samples < MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD
+        return fraction_failed_samples < MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_THRESHOLD
 
     def _get_internal_negative_control_id_for_case(self, case: Case) -> str:
         """Query lims to retrive internal_negative_control_id for a mutant case sequenced in one pool."""

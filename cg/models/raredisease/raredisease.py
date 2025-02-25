@@ -64,9 +64,9 @@ class RarediseaseSampleSheetHeaders(StrEnum):
 class RarediseaseParameters(WorkflowParameters):
     """Model for Raredisease parameters."""
 
-    target_bed: str
+    target_bed_file: str
     analysis_type: str
     save_mapped_as_cram: bool
     skip_germlinecnvcaller: bool
     vcfanno_extra_resources: str
-    local_genomes: str
+    vep_filters_scout_fmt: str

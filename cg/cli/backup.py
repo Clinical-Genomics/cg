@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-import click
+import rich_click as click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI

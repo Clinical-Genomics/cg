@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression, store, store_available

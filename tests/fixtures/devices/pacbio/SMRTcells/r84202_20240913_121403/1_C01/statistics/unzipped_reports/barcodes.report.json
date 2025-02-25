@@ -1,0 +1,220 @@
+{
+    "_comment": "Generated with pbcommand version  at 2024-09-15T14:19:11.537226",
+    "attributes": [
+        {
+            "id": "barcode.n_barcodes",
+            "name": "Unique Barcodes",
+            "value": 1
+        },
+        {
+            "id": "barcode.n_barcoded_reads",
+            "name": "Barcoded HiFi Reads",
+            "value": 7785983
+        },
+        {
+            "id": "barcode.n_unbarcoded_reads",
+            "name": "Unbarcoded HiFi Reads",
+            "value": 29318
+        },
+        {
+            "id": "barcode.percent_barcoded_reads",
+            "name": "Barcoded HiFi Reads (%)",
+            "value": 0.9962486409672513
+        },
+        {
+            "id": "barcode.barcoded_bases",
+            "name": "Barcoded HiFi yield (Gb)",
+            "value": 114676808325
+        },
+        {
+            "id": "barcode.unbarcoded_bases",
+            "name": "Unbarcoded HiFi yield (Gb)",
+            "value": 424465869
+        },
+        {
+            "id": "barcode.percent_barcoded_bases",
+            "name": "Barcoded HiFi Yield (%)",
+            "value": 0.9963122400514475
+        },
+        {
+            "id": "barcode.mean_reads",
+            "name": "Mean HiFi Reads per Barcode",
+            "value": 7785983
+        },
+        {
+            "id": "barcode.max_reads",
+            "name": "Max. HiFi Reads per Barcode",
+            "value": 7785983
+        },
+        {
+            "id": "barcode.min_reads",
+            "name": "Min. HiFi Reads per Barcode",
+            "value": 7785983
+        },
+        {
+            "id": "barcode.mean_read_length",
+            "name": "Barcoded HiFi read length (mean, kb)",
+            "value": 14728
+        },
+        {
+            "id": "barcode.mean_unbarcoded_read_length",
+            "name": "Unbarcoded HiFi read length (mean, kb)",
+            "value": 14477
+        }
+    ],
+    "dataset_uuids": [
+        "43f950a9-8bde-3855-6b25-c13368069745",
+        "ef1e02ce-7264-476d-8cf9-b9fd01e18f4c"
+    ],
+    "id": "barcode",
+    "plotGroups": [
+        {
+            "id": "barcode.read_stats",
+            "legend": null,
+            "plots": [
+                {
+                    "caption": "Number Of Reads Per Barcode",
+                    "id": "barcode.read_stats.nreads",
+                    "image": "nreads.png",
+                    "plotType": "image",
+                    "thumbnail": "nreads_thumb.png",
+                    "title": "Number Of Reads Per Barcode"
+                },
+                {
+                    "caption": "Barcode Frequency Distribution",
+                    "id": "barcode.read_stats.nreads_histogram",
+                    "image": "nreads_histogram.png",
+                    "plotType": "image",
+                    "thumbnail": "nreads_histogram_thumb.png",
+                    "title": "Barcode Frequency Distribution"
+                },
+                {
+                    "caption": "Mean Read Length Distribution",
+                    "id": "barcode.read_stats.readlength_histogram",
+                    "image": "readlength_histogram.png",
+                    "plotType": "image",
+                    "thumbnail": "readlength_histogram_thumb.png",
+                    "title": "Mean Read Length Distribution"
+                }
+            ],
+            "thumbnail": null,
+            "title": "Barcoded Read Statistics"
+        },
+        {
+            "id": "barcode.bq_plots",
+            "legend": null,
+            "plots": [
+                {
+                    "caption": "Barcode Quality Score Distribution",
+                    "id": "barcode.bq_plots.bq_histogram",
+                    "image": "bq_histogram.png",
+                    "plotType": "image",
+                    "thumbnail": "bq_histogram_thumb.png",
+                    "title": "Barcode Quality Score Distribution"
+                }
+            ],
+            "thumbnail": null,
+            "title": "Barcode Quality Scores"
+        },
+        {
+            "id": "barcode.hist2d",
+            "legend": null,
+            "plots": [
+                {
+                    "caption": "Read Length Distribution By Barcode",
+                    "id": "barcode.hist2d.binned_readlength",
+                    "image": "binned_readlength.json.gz",
+                    "plotType": "plotly",
+                    "plotlyVersion": "1.37.1",
+                    "title": "Read Length Distribution By Barcode"
+                },
+                {
+                    "caption": "Barcode Quality Distribution By Barcode",
+                    "id": "barcode.hist2d.binned_bcqual",
+                    "image": "binned_bcqual.json.gz",
+                    "plotType": "plotly",
+                    "plotlyVersion": "1.37.1",
+                    "title": "Barcode Quality Distribution By Barcode"
+                }
+            ],
+            "thumbnail": null,
+            "title": "Barcoded Read Binned Histograms"
+        }
+    ],
+    "tables": [
+        {
+            "columns": [
+                {
+                    "header": "Sample Name",
+                    "id": "barcode.barcode_table.biosample",
+                    "values": [
+                        "Bio Sample 4",
+                        "No Name"
+                    ]
+                },
+                {
+                    "header": "Barcode",
+                    "id": "barcode.barcode_table.barcode",
+                    "values": [
+                        "bc2004--bc2004",
+                        "Not Barcoded"
+                    ]
+                },
+                {
+                    "header": "Barcode Quality",
+                    "id": "barcode.barcode_table.mean_bcqual",
+                    "values": [
+                        96.11025955232628,
+                        0.0
+                    ]
+                },
+                {
+                    "header": "HiFi Reads",
+                    "id": "barcode.barcode_table.number_of_reads",
+                    "values": [
+                        7785983,
+                        29318
+                    ]
+                },
+                {
+                    "header": "HiFi Read Length (mean, bp)",
+                    "id": "barcode.barcode_table.mean_read_length",
+                    "values": [
+                        14728,
+                        14477
+                    ]
+                },
+                {
+                    "header": "HiFi Read Quality (median, QV)",
+                    "id": "barcode.barcode_table.median_read_quality",
+                    "values": [
+                        "Q35",
+                        "Q28"
+                    ]
+                },
+                {
+                    "header": "HiFi Yield (bp)",
+                    "id": "barcode.barcode_table.number_of_bases",
+                    "values": [
+                        114676808325,
+                        424465869
+                    ]
+                },
+                {
+                    "header": "Polymerase Read Length (mean, bp)",
+                    "id": "barcode.barcode_table.mean_polymerase_read_length",
+                    "values": [
+                        163451,
+                        142228
+                    ]
+                }
+            ],
+            "id": "barcode.barcode_table",
+            "title": "Barcode Data"
+        }
+    ],
+    "tags": [],
+    "title": "Report barcode",
+    "uuid": "ad7a29dd-2621-4b52-8726-f66510093a0c",
+    "version": "1.0.1"
+}

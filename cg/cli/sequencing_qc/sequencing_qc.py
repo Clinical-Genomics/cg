@@ -1,5 +1,5 @@
 import logging
-import click
+import rich_click as click
 
 from cg.models.cg_config import CGConfig
 from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService

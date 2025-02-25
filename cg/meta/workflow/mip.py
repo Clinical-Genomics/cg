@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import FileExtensions, Workflow
@@ -251,7 +251,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Return cases to analyze."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]

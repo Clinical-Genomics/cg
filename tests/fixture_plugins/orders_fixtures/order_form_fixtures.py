@@ -81,10 +81,10 @@ def fastq_order_parser(fastq_orderform: str) -> ExcelOrderformParser:
 
 
 @pytest.fixture(scope="session")
-def microbial_order_parser(microbial_orderform: str) -> ExcelOrderformParser:
+def microsalt_order_parser(microsalt_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed an orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
-    order_form_parser.parse_orderform(excel_path=microbial_orderform)
+    order_form_parser.parse_orderform(excel_path=microsalt_orderform)
     return order_form_parser
 
 
@@ -145,11 +145,29 @@ def mip_rna_orderform_sample() -> dict:
 
 
 @pytest.fixture(scope="session")
-def microbial_orderform(orderforms: Path) -> str:
+def microsalt_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples."""
     return Path(
         orderforms,
         f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.microbial.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def microbial_sequencing_orderform(orderforms: Path) -> str:
+    """Orderform fixture for microbial samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.MICROBIAL_FASTQ}.{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def pacbio_revio_sequencing_orderform(orderforms: Path) -> str:
+    """Orderform fixture for pacbio samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.PACBIO_LONG_READ}_{Orderform.get_current_orderform_version(Orderform.PACBIO_LONG_READ)}.xlsx",
     ).as_posix()
 
 
@@ -177,15 +195,6 @@ def balsamic_orderform(orderforms: Path) -> str:
     return Path(
         orderforms,
         f"{Orderform.BALSAMIC}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC)}.balsamic.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def balsamic_qc_orderform(orderforms: Path) -> str:
-    """Orderform fixture for Balsamic QC samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.BALSAMIC_QC}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC_QC)}.balsamic_qc.xlsx",
     ).as_posix()
 
 
@@ -240,6 +249,15 @@ def rnafusion_orderform(orderforms: Path) -> str:
     return Path(
         orderforms,
         f"{Orderform.RNAFUSION}.{Orderform.get_current_orderform_version(Orderform.RNAFUSION)}.rnafusion.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture
+def taxprofiler_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.TAXPROFILER}.{Orderform.get_current_orderform_version(Orderform.TAXPROFILER)}.taxprofiler.xlsx",
     ).as_posix()
 
 

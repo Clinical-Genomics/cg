@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
@@ -13,6 +13,7 @@ from cg.models.cg_config import CGConfig
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
+OPTION_USE_BWA_MEM = click.option("-b", "--use-bwa-mem", is_flag=True)
 
 LOG = logging.getLogger(__name__)
 
@@ -51,15 +52,27 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
+@OPTION_USE_BWA_MEM
 @click.pass_obj
-def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_ref: bool = False):
+def run(
+    context: CGConfig,
+    case_id: str,
+    dry_run: bool,
+    config: str,
+    external_ref: bool,
+    use_bwa_mem: bool,
+):
     """
     Run Fluffy analysis
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     analysis_api.run_fluffy(
-        case_id=case_id, workflow_config=config, dry_run=dry_run, external_ref=external_ref
+        case_id=case_id,
+        workflow_config=config,
+        dry_run=dry_run,
+        external_ref=external_ref,
+        use_bwa_mem=use_bwa_mem,
     )
     if dry_run:
         return
@@ -78,12 +91,14 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
+@OPTION_USE_BWA_MEM
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
     dry_run: bool,
-    external_ref: bool = False,
+    external_ref: bool,
+    use_bwa_mem: bool,
     config: str = None,
 ):
     """
@@ -96,7 +111,14 @@ def start(
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
-    context.invoke(run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref)
+    context.invoke(
+        run,
+        case_id=case_id,
+        config=config,
+        dry_run=dry_run,
+        external_ref=external_ref,
+        use_bwa_mem=use_bwa_mem,
+    )
 
 
 @fluffy.command("start-available")

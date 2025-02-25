@@ -1,15 +1,15 @@
 import logging
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.demultiplex.sample_sheet.utils import (
-    delete_sample_sheet_from_housekeeper,
     add_and_include_sample_sheet_path_to_housekeeper,
+    delete_sample_sheet_from_housekeeper,
 )
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -160,6 +160,20 @@ class IlluminaSampleSheetService:
                 "would have copied it to sequencing run directory"
             )
             return
+
+        try:
+            if sample_sheet_path.samefile(run_directory_data.sample_sheet_path):
+                LOG.info(
+                    "Sample sheet from Housekeeper is the same as the sequencing directory sample sheet"
+                )
+                return
+        except FileNotFoundError:
+            LOG.info(
+                f"Sample sheet or target path does not exist. "
+                f"Housekeeper sample sheet path: {sample_sheet_path}, "
+                f"Target sample sheet path: {run_directory_data.sample_sheet_path}"
+            )
+
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
         link_or_overwrite_file(src=sample_sheet_path, dst=run_directory_data.sample_sheet_path)
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants import FileExtensions
-from cg.constants.pacbio import PacBioDirsAndFiles, MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN
+from cg.constants.pacbio import MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN, PacBioDirsAndFiles
 from cg.services.run_devices.abstract_classes import RunFileManager
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
@@ -54,9 +54,10 @@ class PacBioRunFileManager(RunFileManager):
         return files[0]
 
     def _get_report_files(self, run_path: Path) -> list[Path]:
-        """Return the paths to the unzipped report files."""
+        """Return the paths to the report files."""
         unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
         report_files: list[Path] = [
+            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
@@ -67,14 +68,19 @@ class PacBioRunFileManager(RunFileManager):
         return report_files
 
     @staticmethod
-    def _get_hifi_read_files(run_path: Path) -> list[Path]:
+    def _remove_unassigned_bam_file(bam_files: list[Path]) -> list[Path]:
+        """Remove the unassigned bam file from the file list."""
+        return [file for file in bam_files if "unassigned" not in file.name]
+
+    def _get_hifi_read_files(self, run_path: Path) -> list[Path]:
         """Return the path to the HiFi read file."""
         hifi_dir = Path(run_path, PacBioDirsAndFiles.HIFI_READS)
         bam_files: list[Path] = get_files_matching_pattern(
             directory=hifi_dir, pattern=f"*{FileExtensions.BAM}"
         )
-        validate_files_or_directories_exist(bam_files)
-        return bam_files
+        barcoded_files: list[Path] = self._remove_unassigned_bam_file(bam_files)
+        validate_files_or_directories_exist(barcoded_files)
+        return barcoded_files
 
     @staticmethod
     def _get_unzipped_reports_dir(run_path) -> Path:

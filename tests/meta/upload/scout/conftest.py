@@ -9,20 +9,24 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -132,25 +136,25 @@ def rna_store(
 
     rna_sample_son = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_son_id,
         subject_id="son",
     )
     rna_sample_daughter = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_daughter_id,
         subject_id="daughter",
     )
     rna_sample_mother = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_mother_id,
         subject_id=Pedigree.MOTHER,
     )
     rna_sample_father = helpers.add_sample(
         store=store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         name=rna_sample_father_id,
         subject_id=Pedigree.FATHER,
     )
@@ -192,29 +196,29 @@ def rna_store(
 
     dna_sample_son = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_son_id,
         subject_id="son",
     )
     dna_sample_daughter = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_daughter_id,
         subject_id="daughter",
     )
     dna_sample_mother = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_mother_id,
         subject_id=Pedigree.MOTHER,
     )
     dna_sample_father = helpers.add_sample(
         store=store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         name=dna_sample_father_id,
         subject_id=Pedigree.FATHER,
     )
@@ -254,7 +258,8 @@ def rna_store(
 def lims_family(fixtures_dir) -> dict:
     """Returns a LIMS-like case of samples."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+        file_format=FileFormat.JSON,
+        file_path=Path(fixtures_dir, "report", "lims_family." + FileFormat.JSON),
     )
 
 
@@ -404,6 +409,73 @@ def mip_rna_analysis_hk_bundle_data(
 
 
 @pytest.fixture(scope="function")
+def tomte_analysis_hk_bundle_data(
+    rna_case_id: str,
+    timestamp: datetime,
+    tomte_analysis_dir: Path,
+    rna_sample_son_id: str,
+    rna_sample_daughter_id: str,
+    rna_sample_mother_id: str,
+    rna_sample_father_id: str,
+) -> dict:
+    """Return MIP RNA bundle data for Housekeeper."""
+
+    files: list[dict] = [
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}.cram").as_posix(),
+            "archive": False,
+            "tags": ["cram", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
+            "archive": False,
+            "tags": ["fusion", "pdf", "clinical", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.pdf").as_posix(),
+            "archive": False,
+            "tags": ["fusion", "pdf", "research", rna_case_id],
+        },
+        {
+            "path": Path(tomte_analysis_dir, f"{rna_case_id}_report.pdf").as_posix(),
+            "archive": False,
+            "tags": ["delivery-report", "rna", rna_case_id],
+        },
+    ]
+    for sample_id in [
+        rna_sample_son_id,
+        rna_sample_daughter_id,
+        rna_sample_mother_id,
+        rna_sample_father_id,
+    ]:
+        files.extend(
+            [
+                {
+                    "path": Path(
+                        tomte_analysis_dir, f"{sample_id}_lanes_1_star_sorted_sj.bigWig"
+                    ).as_posix(),
+                    "archive": False,
+                    "tags": ["coverage", "bigwig", "scout", sample_id],
+                },
+                {
+                    "path": Path(
+                        tomte_analysis_dir, f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
+                    ).as_posix(),
+                    "archive": False,
+                    "tags": ["bed", "scout", "junction", sample_id],
+                },
+            ]
+        )
+
+    return {
+        "name": rna_case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": files,
+    }
+
+
+@pytest.fixture(scope="function")
 def balsamic_analysis_hk_bundle_data(
     case_id: str,
     timestamp: datetime,
@@ -447,6 +519,94 @@ def balsamic_analysis_hk_bundle_data(
                 "path": Path(balsamic_wgs_analysis_dir, "coverage_qc_report.pdf").as_posix(),
                 "archive": False,
                 "tags": ["delivery-report"],
+            },
+        ],
+    }
+
+
+@pytest.fixture(scope="function")
+def raredisease_analysis_hk_bundle_data(
+    case_id: str,
+    sample_id: str,
+    timestamp: datetime,
+    raredisease_analysis_dir: Path,
+    delivery_report_html: Path,
+) -> dict:
+    """Return RAREDISEASE Housekeeper bundle data."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(raredisease_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": [AnalysisTag.MULTIQC_HTML],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+            {
+                "path": str(raredisease_analysis_dir / "snv_vcf_file.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-clinical"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "snv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-snv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "sv_research_vcf_file.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-sv-research"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "str.vcf").as_posix(),
+                "archive": False,
+                "tags": ["vcf-str"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "smn.vcf").as_posix(),
+                "archive": False,
+                "tags": ["smn-calling"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.cram").as_posix(),
+                "archive": False,
+                "tags": ["cram", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "report.pdf").as_posix(),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "adm1.mt.bam").as_posix(),
+                "archive": False,
+                "tags": ["bam-mt", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "vcf2cytosure.txt").as_posix(),
+                "archive": False,
+                "tags": ["vcf2cytosure", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "multiqc.html").as_posix(),
+                "archive": False,
+                "tags": ["multiqc-html", sample_id],
+            },
+            {
+                "path": Path(raredisease_analysis_dir, "manifest." + FileFormat.JSON).as_posix(),
+                "archive": False,
+                "tags": [NFAnalysisTags.MANIFEST],
             },
         ],
     }
@@ -498,6 +658,14 @@ def mip_dna_analysis_hk_version(
 
 
 @pytest.fixture
+def raredisease_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return Housekeeper version for a MIP DNA bundle."""
+    return helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
+
+
+@pytest.fixture
 def mip_dna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -516,11 +684,29 @@ def mip_rna_analysis_hk_api(
 
 
 @pytest.fixture
+def tomte_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, tomte_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with MIP RNA analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, tomte_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
 def balsamic_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with Balsamic analysis files."""
     helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
+def raredisease_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, raredisease_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a Housekeeper API populated with some RAREDISEASE analysis files."""
+    helpers.ensure_hk_version(housekeeper_api, raredisease_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -566,7 +752,7 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.BALSAMIC
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_EXOME_SEQUENCING
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC
     return analysis_obj
@@ -578,10 +764,23 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.BALSAMIC_UMI
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_EXOME_SEQUENCING
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC_UMI
 
+    return analysis_obj
+
+
+@pytest.fixture
+def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
+    """Return a Balsamic analysis object."""
+    analysis_obj.workflow = Workflow.RAREDISEASE
+    for link_object in analysis_obj.case.links:
+        link_object.sample.application_version.application.prep_category = (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        )
+        link_object.sample.reference_genome = GenomeVersion.GRCh37
+        link_object.case.data_analysis = Workflow.RAREDISEASE
     return analysis_obj
 
 
@@ -591,7 +790,7 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     analysis_obj.workflow = Workflow.RNAFUSION
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
-            PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.RNAFUSION
         link_object.case.panels = None
@@ -613,6 +812,24 @@ def mip_config_builder(
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
+    )
+
+
+@pytest.fixture
+def raredisease_config_builder(
+    raredisease_analysis_hk_version: Version,
+    raredisease_analysis_obj: Analysis,
+    lims_api: MockLimsAPI,
+    raredisease_analysis_api: RarediseaseAnalysisAPI,
+    madeline_api: MockMadelineAPI,
+) -> MipConfigBuilder:
+    """Return a MIP config builder."""
+    return RarediseaseConfigBuilder(
+        hk_version_obj=raredisease_analysis_hk_version,
+        analysis_obj=raredisease_analysis_obj,
+        lims_api=lims_api,
+        madeline_api=madeline_api,
+        raredisease_analysis_api=raredisease_analysis_api,
     )
 
 
@@ -707,16 +924,39 @@ def upload_mip_analysis_scout_api(
 
 
 @pytest.fixture
+def upload_tomte_analysis_scout_api(
+    cg_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> Generator[UploadScoutAPI, None, None]:
+    """Return MIP upload Scout API."""
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.TOMTE)
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    yield UploadScoutAPI(
+        hk_api=tomte_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+        status_db=store,
+    )
+
+
+@pytest.fixture
 def upload_balsamic_analysis_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockBalsamicAnalysis(config=cg_context, workflow=Workflow.BALSAMIC)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -725,8 +965,36 @@ def upload_balsamic_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
+
+
+@pytest.fixture
+def upload_raredisease_analysis_scout_api(
+    raredisease_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    raredisease_analysis_hk_api: MockHousekeeperAPI,
+    analysis_store: Store,
+) -> Generator[UploadScoutAPI, None, None]:
+    """Return RAREDISEASE upload Scout API."""
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    yield UploadScoutAPI(
+        hk_api=raredisease_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=raredisease_context.meta_apis["analysis_api"],
+        lims_api=lims_api,
+        status_db=analysis_store,
+    )
+
+
+@pytest.fixture
+def raredisease_analysis_api(cg_context: CGConfig) -> NextflowAnalysis:
+    """Return a RAREDISEASE analysis API."""
+    return NextflowAnalysis(config=cg_context, workflow=Workflow.RAREDISEASE, sample_metrics=dict())
 
 
 @pytest.fixture
@@ -754,7 +1022,7 @@ def upload_rnafusion_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
-    store: Store,
+    analysis_store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
     analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
@@ -766,7 +1034,7 @@ def upload_rnafusion_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
-        status_db=store,
+        status_db=analysis_store,
     )
 
     return _api

@@ -29,10 +29,10 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
     case_passes_workflows = [
         Workflow.BALSAMIC,
         Workflow.BALSAMIC_PON,
-        Workflow.BALSAMIC_QC,
         Workflow.BALSAMIC_UMI,
         Workflow.MIP_DNA,
         Workflow.MIP_RNA,
+        Workflow.NALLO,
         Workflow.RAREDISEASE,
         Workflow.RNAFUSION,
         Workflow.TOMTE,

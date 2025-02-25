@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
@@ -292,7 +292,6 @@ def add_case(
         order = Order(
             customer_id=customer.id,
             ticket_id=int(ticket),
-            workflow=data_analysis,
         )
     new_case.orders.append(order)
 
@@ -337,10 +336,18 @@ def link_sample_to_case(
             LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
+        if mother.sex != Sex.FEMALE:
+            LOG.error(f"{mother_id}: mother is not {Sex.FEMALE}")
+            raise click.Abort
+
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
             LOG.error(f"{father_id}: father not found")
+            raise click.Abort
+
+        if father.sex != Sex.MALE:
+            LOG.error(f"{father_id}: father is not {Sex.MALE}")
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(

@@ -231,6 +231,7 @@ class IlluminaPostProcessingService:
             )
         except Exception as e:
             LOG.error(f"Failed to store Illumina run: {str(e)}")
+            self.status_db.rollback()
             raise
         if sequencing_run:
             self.status_db.update_illumina_sequencing_run_has_backup(

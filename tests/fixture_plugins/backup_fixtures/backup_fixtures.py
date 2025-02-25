@@ -5,12 +5,11 @@ from typing import Callable
 import pytest
 
 from cg.constants import FileExtensions
-from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import PDCArchivingDirectory
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 
@@ -27,22 +26,24 @@ def mock_pdc_query_method(archived_illumina_runs: list[str]) -> Callable:
 
 @pytest.fixture
 def dsmc_q_archive_output() -> list[str]:
-    output: str = """IBM Tivoli Storage Manager
+    output: str = """IBM Spectrum Protect
 Command Line Backup-Archive Client Interface
-  Client Version 7, Release 1, Level 4.0
-  Client date/time: 09/22/2023 10:42:42
-(c) Copyright by IBM Corporation and other(s) 1990, 2015. All Rights Reserved.
+  Client Version 8, Release 1, Level 11.0
+  Client date/time: 09/16/2024 09:11:47
+(c) Copyright by IBM Corporation and other(s) 1990, 2020. All Rights Reserved.
 
-Node Name: HASTA.SCILIFELAB.SE_CLINICAL
+Node Name: INFINITE.IMPROBABILITY.DRIVE
 Session established with server BLACKHOLE: Linux/x86_64
   Server Version 8, Release 1, Level 9.300
-  Server date/time: 09/22/2023 10:42:42  Last access: 09/22/2023 10:42:26
+  Server date/time: 09/16/2024 09:11:48  Last access: 09/16/2024 09:11:19
 
-Accessing as node: SLLCLINICAL
+Accessing as node: ArthurDent
              Size  Archive Date - Time    File - Expires on - Description
              ----  -------------------    -------------------------------
-           607  B  04/07/2019 07:30:15    /home/hiseq.clinical/ENCRYPT/190329_A00689_0018_AHVKJCDRXX.key.gpg Never Archive Date: 04/07/2019
- 1,244,997,334 KB  04/07/2019 04:00:05    /home/hiseq.clinical/ENCRYPT/190329_A00689_0018_AHVKJCDRXX.tar.gz.gpg Never Archive Date: 04/07/2019"""
+           607  B  12/03/2016 11:51:24    /home/hiseq.clinical/ENCRYPT/161115_ST-E00214_0117_BHVKJCDRXX.key.gpg Never Archive Date: 12/03/2016
+   323,235,178  B  12/03/2016 11:51:18    /home/hiseq.clinical/ENCRYPT/161115_ST-E00214_0117_BHVKJCDRXX.tar.gz.gpg Never Archive Date: 12/03/2016
+           607  B  12/03/2016 20:18:46    /home/hiseq.clinical/ENCRYPT/161115_ST-E00214_0118_BHVKJCDRXX.key.gpg Never Archive Date: 12/03/2016
+   647,336,368 KB  12/03/2016 18:30:04    /home/hiseq.clinical/ENCRYPT/161115_ST-E00214_0118_BHVKJCDRXX.tar.gz.gpg Never Archive Date: 12/03/2016"""
     return output.splitlines()
 
 

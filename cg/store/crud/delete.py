@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.base import BaseHandler
-from cg.store.models import Case, Sample
+from cg.store.models import Case, OrderTypeApplication, Sample
 
 
 class DeleteDataHandler(BaseHandler):
@@ -33,3 +33,6 @@ class DeleteDataHandler(BaseHandler):
         for case_sample in sample.links:
             self.session.delete(case_sample)
         self.session.commit()
+
+    def delete_order_type_applications_by_application_id(self, application_id: int) -> None:
+        self._get_query(OrderTypeApplication).filter_by(application_id=application_id).delete()

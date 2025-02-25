@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from housekeeper.store.models import File
 
 from cg.apps.gens import GensAPI

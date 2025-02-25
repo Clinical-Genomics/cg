@@ -24,7 +24,41 @@ from cg.services.illumina.post_processing.utils import (
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
     get_undetermined_fastqs,
+    is_sample_negative_control_with_reads_in_lane,
 )
+
+
+@pytest.mark.parametrize(
+    "reads, is_negative_control, expected_negative_control_with_reads",
+    [
+        (0, False, False),
+        (0, True, False),
+        (1, True, True),
+        (1, False, False),
+    ],
+    ids=[
+        "no_reads_no_negative_control",
+        "no_reads_negative_control",
+        "reads_negative_control",
+        "reads_no_negative_control",
+    ],
+)
+def test_is_sample_negative_control_with_reads_in_lane(
+    mapped_metric: IlluminaSampleSequencingMetricsDTO,
+    reads: int,
+    is_negative_control: bool,
+    expected_negative_control_with_reads: bool,
+):
+    # GIVEN a metric with a specific amount of reads for a sample
+    mapped_metric.total_reads_in_lane = reads
+
+    # WHEN checking if the sample is a negative control with reads in the lane
+    result: bool = is_sample_negative_control_with_reads_in_lane(
+        is_negative_control=is_negative_control, metric=mapped_metric
+    )
+
+    # THEN the result should be return according to the expected outcome
+    assert result == expected_negative_control_with_reads
 
 
 @pytest.mark.parametrize(

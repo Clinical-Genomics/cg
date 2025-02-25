@@ -7,9 +7,9 @@ class BalsamicAnalysis(AnalysisModel):
     """BALSAMIC analysis model
 
     Attributes:
-        config: balsamic config file attributes model
+        balsamic_config: balsamic config file attributes model
         sample_metrics: retrieved QC metrics associated to a sample
     """
 
-    config: BalsamicConfigJSON
+    balsamic_config: BalsamicConfigJSON
     sample_metrics: dict[str, BalsamicQCMetrics]

@@ -47,15 +47,6 @@ FLOWCELL_Q30_THRESHOLD = {
 }
 
 
-class SequencingMethod(StrEnum):
-    """Sequencing method types."""
-
-    TGS: str = "tgs"
-    WES: str = "wes"
-    WGS: str = "wgs"
-    WTS: str = "wts"
-
-
 class Variants(StrEnum):
     """Type of variants."""
 
@@ -71,3 +62,22 @@ class RecordType(StrEnum):
 class SequencingPlatform(StrEnum):
     ILLUMINA: str = "ILLUMINA"
     OXFORD_NANOPORE: str = "OXFORD_NANOPORE"
+
+
+class SeqLibraryPrepCategory(StrEnum):
+    COVID: str = "cov"
+    MICROBIAL: str = "mic"
+    READY_MADE_LIBRARY: str = "rml"
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+
+
+DNA_PREP_CATEGORIES: list[SeqLibraryPrepCategory] = [
+    SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+]
+
+NOVASEQ_SEQUENCING_READ_LENGTH = 151

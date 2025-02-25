@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from cg.constants.constants import SampleType
 
@@ -12,7 +12,7 @@ class BalsamicConfigAnalysis(BaseModel):
     Attributes:
         case_id: case internal ID
         analysis_type: analysis type (single, paired or pon)
-        analysis_workflow: analysis carried out (balsamic, balsamic-qc or balsamic-umi)
+        analysis_workflow: analysis carried out (balsamic or balsamic-umi)
         sequencing_type: analysis sequencing type (wgs or targeted)
         BALSAMIC_version: BALSAMIC version used to produce the analysis
         config_creation_date: config creation timestamp
@@ -47,16 +47,17 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: str | None
+    reference_genome_version: str | None = Field(default=None, validate_default=True)
 
-    @validator("reference_genome_version", always=True)
-    def extract_genome_version_from_path(cls, value: str | None, values: dict) -> str:
+    @field_validator("reference_genome_version")
+    @classmethod
+    def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
         """
         Return the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
-        return str(values["reference_genome"]).split("/")[-3]
+        return str(info.data.get("reference_genome")).split("/")[-3]
 
 
 class BalsamicConfigPanel(BaseModel):
@@ -70,23 +71,24 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: str | None
+    capture_kit_version: str | None = Field(default=None, validate_default=True)
     chrom: list[str]
     pon_cnn: str | None = None
 
-    @validator("capture_kit", pre=True)
+    @field_validator("capture_kit", mode="before")
+    @classmethod
     def get_filename_from_path(cls, path: str) -> str:
         """Return the base name of the provided file path."""
         return Path(path).name
 
-    @validator("capture_kit_version", always=True)
-    def get_panel_version_from_filename(
-        cls, capture_kit_version: str | None, values: dict[str, str | None]
-    ) -> str:
+    @field_validator("capture_kit_version")
+    @classmethod
+    def get_panel_version_from_filename(cls, _, info: ValidationInfo) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
-        return values["capture_kit"].split("_")[-3]
+        return info.data.get("capture_kit").split("_")[-3]
 
-    @validator("pon_cnn", pre=True)
+    @field_validator("pon_cnn", mode="before")
+    @classmethod
     def get_pon_cnn_name_version_from_filename(cls, pon_cnn: str | None) -> str:
         """Return the CNVkit PON name and version from its filename (gmsmyeloid_5.3_hg19_design_CNVkit_PON_reference_v1.cnn)."""
         pon_cnn_filename_split: list[str] = Path(pon_cnn).stem.split("_")
@@ -100,22 +102,12 @@ class BalsamicConfigQC(BaseModel):
     """Config QC attributes.
 
     Attributes:
-        picard_rmdup: if the duplicates has been removed or not
         adapter: adapter sequence that has been trimmed
-        quality_trim: whether quality trimming has been performed in the workflow
-        adapter_trim: whether adapter trimming has been performed in the workflow
-        umi_trim: whether UMI trimming has been performed in the workflow
         min_seq_length: minimum sequence length cutoff for reads
-        umi_trim_length: UMI trimming length
     """
 
-    picard_rmdup: bool
     adapter: str | None
-    quality_trim: bool
-    adapter_trim: bool
-    umi_trim: bool
     min_seq_length: str | None
-    umi_trim_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):
@@ -149,7 +141,7 @@ class BalsamicConfigJSON(BaseModel):
     analysis: BalsamicConfigAnalysis
     samples: list[BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: BalsamicConfigPanel | None
+    panel: BalsamicConfigPanel | None = None
     QC: BalsamicConfigQC
     vcf: dict[str, BalsamicVarCaller]
     bioinfo_tools_version: dict[str, list[str]]

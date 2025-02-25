@@ -7,9 +7,14 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from sqlalchemy import inspect
+from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
-from cg.server.ext import db, sample_service
+from cg.models.orders.constants import OrderType
+from cg.server.ext import applications_service, db, sample_service
+from cg.server.utils import MultiCheckboxField
+from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -43,6 +48,16 @@ def view_flow_cell_model(unused1, unused2, model, unused3):
     return Markup("%s" % model.device.model)
 
 
+def view_smrt_cell_model(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.model)
+
+
+def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.internal_id)
+
+
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -50,7 +65,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id)
     )
 
 
@@ -58,6 +73,16 @@ def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
     return model.application_version.application.is_external if model.application_version else ""
+
+
+def view_order_types(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    order_type_list = "<br>".join(model.order_types)
+    return (
+        Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
+        if model.order_type_applications
+        else ""
+    )
 
 
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
@@ -100,8 +125,24 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
     )
 
 
+def view_user_link(unused1, unused2, model, property_name):
+    """Column formatter used for linking to the User table."""
+    del unused1, unused2
+    contact_name: str = getattr(model, property_name)
+    return (
+        Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("user.index_view", search=f"{contact_name}"), contact_name)
+        )
+        if contact_name
+        else ""
+    )
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
+
+    column_list = list(inspect(Application).columns) + ["order_types"]
 
     column_editable_list = [
         "description",
@@ -133,6 +174,7 @@ class ApplicationView(BaseView):
         "category",
     ]
     column_formatters = {
+        "order_types": view_order_types,
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
@@ -140,7 +182,12 @@ class ApplicationView(BaseView):
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category", "versions"]
+    form_excluded_columns = ["category", "versions", "order_type_applications"]
+    form_extra_fields = {
+        "suitable_order_types": MultiCheckboxField(
+            "Order Types", choices=[(choice, choice.name) for choice in OrderType]
+        )
+    }
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
@@ -157,6 +204,23 @@ class ApplicationView(BaseView):
             if model.application
             else ""
         )
+
+    def on_model_change(self, form: Form, model: Application, is_created: bool):
+        """Override to persist entries to the OrderTypeApplication table."""
+        super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
+        order_types: list[OrderType] = form["suitable_order_types"].data
+        applications_service.update_application_order_types(
+            application=model, order_types=order_types
+        )
+
+    def edit_form(self, obj=None):
+        """Override to prefill the order types according to the current Application entry."""
+        form = super(ApplicationView, self).edit_form(obj)
+
+        # Pre-select the existing order types for the application
+        if obj and request.method != "POST":
+            form.suitable_order_types.data = obj.order_types
+        return form
 
 
 class ApplicationVersionView(BaseView):
@@ -255,10 +319,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
-        "delivery_contact",
-        "lab_contact",
         "loqus_upload",
-        "primary_contact",
         "priority",
         "return_samples",
         "scout_access",
@@ -278,6 +339,11 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_formatters = {
+        "delivery_contact": view_user_link,
+        "lab_contact": view_user_link,
+        "primary_contact": view_user_link,
+    }
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
@@ -335,7 +401,7 @@ class CaseView(BaseView):
         if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.case.internal_id), model.case)
+                % (url_for("case.index_view", search=f"={model.case.internal_id}"), model.case)
             )
 
         return markup
@@ -581,6 +647,7 @@ class SampleView(BaseView):
         "_phenotype_terms",
         "links",
         "mother_links",
+        "sequencing_metrics",
     ]
 
     @staticmethod
@@ -590,7 +657,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
+                % (
+                    url_for("sample.index_view", search=f"={model.sample.internal_id}"),
+                    model.sample,
+                )
             )
             if model.sample
             else ""
@@ -663,6 +733,76 @@ class IlluminaSampleSequencingMetricsView(BaseView):
     ]
     column_formatters = {
         "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
+
+
+class PacbioSmrtCellView(BaseView):
+    """Admin view for Model.PacbioSMRTCell"""
+
+    column_list = (
+        "internal_id",
+        "run_name",
+        "movie_name",
+        "well",
+        "plate",
+        "hifi_reads",
+        "hifi_yield",
+        "hifi_mean_read_length",
+        "hifi_median_read_quality",
+        "percent_reads_passing_q30",
+        "p0_percent",
+        "p1_percent",
+        "p2_percent",
+        "started_at",
+        "completed_at",
+        "barcoded_hifi_reads",
+        "barcoded_hifi_reads_percentage",
+        "barcoded_hifi_yield",
+        "barcoded_hifi_yield_percentage",
+        "barcoded_hifi_mean_read_length",
+    )
+    column_formatters = {"internal_id": view_smrt_cell_internal_id, "model": view_smrt_cell_model}
+    column_default_sort = ("completed_at", True)
+    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_sortable_list = [
+        ("internal_id", "device.internal_id"),
+        "started_at",
+        "completed_at",
+    ]
+
+    @staticmethod
+    def view_smrt_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                "<a href='%s'>%s</a>"
+                % (
+                    url_for(
+                        "pacbiosequencingrun.index_view",
+                        search=model.instrument_run.device.internal_id,
+                    ),
+                    model.instrument_run.device.internal_id,
+                )
+            )
+            if model.instrument_run.device
+            else ""
+        )
+
+
+class PacbioSampleRunMetricsView(BaseView):
+    column_list = [
+        "smrt_cell",
+        "sample",
+        "hifi_reads",
+        "hifi_yield",
+        "hifi_mean_read_length",
+        "hifi_median_read_quality",
+    ]
+    column_formatters = {
+        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]

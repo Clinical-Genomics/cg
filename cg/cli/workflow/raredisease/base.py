@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression

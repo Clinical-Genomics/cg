@@ -1,11 +1,13 @@
+import copy
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
 
+from dateutil.parser import parse
 from pydantic.v1 import ValidationError
 
-from cg.cli.utils import echo_lines
 from cg.constants import Workflow
 from cg.constants.constants import (
     CaseActions,
@@ -16,17 +18,18 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelGenomeBuild
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
-from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
-from cg.io.yaml import write_yaml_nextflow_style
+from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -41,7 +44,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -54,14 +57,15 @@ class NfAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.nfcore_workflow_path: str | None = None
+        self.workflow_bin_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
-        self.config_platform: str | None = None
-        self.config_params: str | None = None
-        self.config_resources: str | None = None
+        self.platform: str | None = None
+        self.params: str | None = None
+        self.workflow_config_path: str | None = None
+        self.resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
         self.account: str | None = None
@@ -98,11 +102,6 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def is_params_appended_to_nextflow_config(self) -> bool:
-        """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return False
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
@@ -130,24 +129,20 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         config_files_list: list[str] = [
-            self.config_platform,
-            self.config_params,
-            self.config_resources,
+            self.platform,
+            self.workflow_config_path,
+            self.resources,
         ]
         extra_parameters_str: list[str] = [
             self.set_cluster_options(case_id=case_id),
         ]
-        if self.is_params_appended_to_nextflow_config:
-            extra_parameters_str.append(
-                write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict())
-            )
         return concat_txt(
             file_paths=config_files_list,
             str_content=extra_parameters_str,
@@ -206,10 +201,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str) -> Path:
         """Path to NF log."""
-        if log:
-            return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
@@ -260,6 +253,15 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
 
+    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
+        """Gather BAM file path for a sample based on the BAM tag."""
+        return [
+            Path(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={AlignmentFileTag.BAM}
+            )
+        ]
+
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         raise NotImplementedError
@@ -285,12 +287,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict = None) -> None:
+    def write_params_file(self, case_id: str, replaced_workflow_parameters: dict = None) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        if workflow_parameters:
+        if replaced_workflow_parameters:
             write_yaml_nextflow_style(
-                content=workflow_parameters,
+                content=replaced_workflow_parameters,
                 file_path=self.get_params_file_path(case_id=case_id),
             )
         else:
@@ -331,7 +333,7 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
-    def create_sample_sheet(self, case_id: str, dry_run: bool):
+    def create_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """Create sample sheet for a case."""
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         if not dry_run:
@@ -341,25 +343,59 @@ class NfAnalysisAPI(AnalysisAPI):
                 header=self.sample_sheet_headers,
             )
 
-    def create_params_file(self, case_id: str, dry_run: bool):
+    def create_params_file(self, case_id: str, dry_run: bool) -> None:
         """Create parameters file for a case."""
-        LOG.debug("Getting parameters information")
-        workflow_parameters = None
-        if not self.is_params_appended_to_nextflow_config:
-            workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
+        LOG.debug("Getting parameters information built on-the-fly")
+        built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
+            case_id=case_id
+        ).model_dump()
+        LOG.debug("Adding parameters from the pipeline config file if it exist")
+
+        workflow_parameters: dict = built_workflow_parameters | (
+            read_yaml(self.params) if hasattr(self, "params") and self.params else {}
+        )
+        replaced_workflow_parameters: dict = self.replace_values_in_params_file(
+            workflow_parameters=workflow_parameters
+        )
         if not dry_run:
-            self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
+            self.write_params_file(
+                case_id=case_id, replaced_workflow_parameters=replaced_workflow_parameters
+            )
+
+    def replace_values_in_params_file(self, workflow_parameters: dict) -> dict:
+        replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
+        """Iterate through the dictionary until all placeholders are replaced with the corresponding value from the dictionary"""
+        while True:
+            resolved: bool = True
+            for key, value in replaced_workflow_parameters.items():
+                new_value: str | int = self.replace_params_placeholders(value, workflow_parameters)
+                if new_value != value:
+                    resolved = False
+                    replaced_workflow_parameters[key] = new_value
+            if resolved:
+                break
+        return replaced_workflow_parameters
+
+    def replace_params_placeholders(self, value: str | int, workflow_parameters: dict) -> str:
+        """Replace values marked as placeholders with values from the given dictionary"""
+        if isinstance(value, str):
+            placeholders: list[str] = re.findall(r"{{\s*([^{}\s]+)\s*}}", value)
+            for placeholder in placeholders:
+                if placeholder in workflow_parameters:
+                    value = value.replace(
+                        f"{{{{{placeholder}}}}}", str(workflow_parameters[placeholder])
+                    )
+        return value
 
     def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
         """Create nextflow config file."""
         if content := self.get_nextflow_config_content(case_id=case_id):
             LOG.debug("Writing nextflow config file")
-            if dry_run:
-                return
-            write_txt(
-                content=content,
-                file_path=self.get_nextflow_config_path(case_id=case_id),
-            )
+            if not dry_run:
+                write_txt(
+                    content=content,
+                    file_path=self.get_nextflow_config_path(case_id=case_id),
+                )
 
     def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
@@ -385,7 +421,8 @@ class NfAnalysisAPI(AnalysisAPI):
         if self.is_managed_variants_required:
             vcf_lines: list[str] = self.get_managed_variants(case_id=case_id)
             if dry_run:
-                echo_lines(lines=vcf_lines)
+                for line in vcf_lines:
+                    LOG.debug(line)
             else:
                 self.write_managed_variants(case_id=case_id, content=vcf_lines)
 
@@ -402,7 +439,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            workflow_path=self.nfcore_workflow_path,
+            workflow_bin_path=self.workflow_bin_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
@@ -452,7 +489,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_command_args(
         self,
         case_id: str,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -461,10 +497,11 @@ class NfAnalysisAPI(AnalysisAPI):
         revision: str,
         compute_env: str,
         nf_tower_id: str | None,
+        stub_run: bool,
     ) -> NfCommandArgs:
         command_args: NfCommandArgs = NfCommandArgs(
             **{
-                "log": self.get_log_path(case_id=case_id, workflow=self.workflow, log=log),
+                "log": self.get_log_path(case_id=case_id, workflow=self.workflow),
                 "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
                 "resume": not from_start,
                 "profile": self.get_profile(profile=profile),
@@ -475,6 +512,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 "revision": revision or self.revision,
                 "wait": NfTowerStatus.SUBMITTED,
                 "id": nf_tower_id,
+                "stub_run": stub_run,
             }
         )
         return command_args
@@ -483,7 +521,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         use_nextflow: bool,
-        log: str,
         work_dir: str,
         from_start: bool,
         profile: str,
@@ -491,6 +528,7 @@ class NfAnalysisAPI(AnalysisAPI):
         params_file: str | None,
         revision: str,
         compute_env: str,
+        stub_run: bool,
         nf_tower_id: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -499,7 +537,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
         command_args = self.get_command_args(
             case_id=case_id,
-            log=log,
             work_dir=work_dir,
             from_start=from_start,
             profile=profile,
@@ -508,6 +545,7 @@ class NfAnalysisAPI(AnalysisAPI):
             revision=revision,
             compute_env=compute_env,
             nf_tower_id=nf_tower_id,
+            stub_run=stub_run,
         )
 
         try:
@@ -591,6 +629,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
+            LOG.debug(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
@@ -795,7 +834,7 @@ class NfAnalysisAPI(AnalysisAPI):
             return
         workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
+            deliverables_content=workflow_content.model_dump(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
@@ -871,17 +910,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
-        reference_genome: set[str] = {
-            sample.reference_genome
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
-        if len(reference_genome) == 1:
-            return reference_genome.pop()
-        if len(reference_genome) > 1:
-            raise CgError(
-                f"Samples linked to case {case_id} have different reference genome versions set"
-            )
-        raise CgError(f"No reference genome specified for case {case_id}")
+        case = self.status_db.get_case_by_internal_id(case_id)
+        return get_genome_build(case)
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
@@ -915,3 +945,23 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def clean_past_run_dirs(self, before_date: str, skip_confirmation: bool = False) -> None:
+        """Clean past run directories"""
+        before_date: datetime = parse(before_date)
+        analyses_to_clean: list[Analysis] = self.get_analyses_to_clean(before_date)
+        LOG.info(f"Cleaning {len(analyses_to_clean)} analyses created before {before_date}")
+
+        for analysis in analyses_to_clean:
+            case_id = analysis.case.internal_id
+            case_path = self.get_case_path(case_id)
+            try:
+                LOG.info(f"Cleaning output for {case_id}")
+                self.clean_run_dir(
+                    case_id=case_id, skip_confirmation=skip_confirmation, case_path=case_path
+                )
+            except FileNotFoundError:
+                continue
+            except Exception as error:
+                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
+        LOG.info(f"Done cleaning {self.workflow} output")

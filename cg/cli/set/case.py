@@ -1,8 +1,9 @@
 """Set case attributes in the status database."""
 
 import logging
+from typing import Callable
 
-import click
+import rich_click as click
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions
@@ -57,7 +58,7 @@ def set_case(
         data_analysis,
         data_delivery,
     ]
-    abort_on_empty_options(options=options)
+    abort_on_empty_options(options=options, priority=priority)
 
     status_db: Store = context.status_db
     case: Case = get_case(case_id=case_id, status_db=status_db)
@@ -77,14 +78,15 @@ def set_case(
     if panel_abbreviations:
         update_panels(case=case, panel_abbreviations=panel_abbreviations, status_db=status_db)
 
-    if priority:
+    if isinstance(priority, Priority):
         update_priority(case=case, priority=priority)
 
     status_db.session.commit()
 
 
-def abort_on_empty_options(options: list[str]) -> None:
-    if not any(options):
+def abort_on_empty_options(options: list[str], priority: Priority | None) -> None:
+    """Abort if options are empty and bypass_check for priority returns False"""
+    if not any(options) and not priority == Priority.research:
         LOG.error("Nothing to change")
         raise click.Abort
 

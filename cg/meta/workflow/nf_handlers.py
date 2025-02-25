@@ -6,11 +6,7 @@ from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileExtensions, FileFormat
-from cg.constants.nextflow import (
-    JAVA_MEMORY_HEADJOB,
-    NXF_JVM_ARGS_ENV,
-    SlurmHeadJobDefaults,
-)
+from cg.constants.nextflow import JAVA_MEMORY_HEADJOB, NXF_JVM_ARGS_ENV, SlurmHeadJobDefaults
 from cg.io.controller import ReadFile
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils.utils import build_command_from_dict
@@ -44,6 +40,7 @@ class NfTowerHandler(NfBaseHandler):
                     "name",
                     "revision",
                     "compute_env",
+                    "stub_run",
                 )
             },
             exclude_true=True,
@@ -62,6 +59,7 @@ class NfTowerHandler(NfBaseHandler):
                     "params_file",
                     "config",
                     "compute_env",
+                    "stub_run",
                 )
             },
             exclude_true=True,
@@ -114,7 +112,7 @@ class NextflowHandler(NfBaseHandler):
 
     @classmethod
     def get_nextflow_run_parameters(
-        cls, case_id: str, workflow_path: str, root_dir: str, command_args: dict
+        cls, case_id: str, workflow_bin_path: str, root_dir: str, command_args: dict
     ) -> list[str]:
         """Returns a Nextflow run command given a dictionary with arguments."""
 
@@ -135,7 +133,7 @@ class NextflowHandler(NfBaseHandler):
             ),
             exclude_true=True,
         )
-        return nextflow_options + ["run", workflow_path] + run_options
+        return nextflow_options + ["run", workflow_bin_path] + run_options
 
     @staticmethod
     def get_head_job_sbatch_path(case_directory: Path) -> Path:

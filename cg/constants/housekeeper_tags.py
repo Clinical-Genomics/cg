@@ -45,7 +45,7 @@ class SequencingFileTag(StrEnum):
     SPRING_METADATA: str = "spring-metadata"
 
 
-HK_MULTIQC_HTML_TAG = ["multiqc-html"]
+HK_MULTIQC_HTML_TAG = "multiqc-html"
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
@@ -57,6 +57,7 @@ class HermesFileTag(StrEnum):
 
     CLINICAL_DELIVERY: str = "clinical-delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
+    SCOUT: str = "scout"
 
 
 class AnalysisTag(StrEnum):
@@ -64,6 +65,11 @@ class AnalysisTag(StrEnum):
 
     ARRIBA: str = "arriba"
     ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    BED: str = "bed"
+    BIGWIG: str = "bigwig"
+    CLINICAL: str = "clinical"
+    COVERAGE: str = "coverage"
+    FRASER: str = "fraser"
     FUSION: str = "fusion"
     FUSIONCATCHER: str = "fusioncatcher"
     FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
@@ -71,11 +77,17 @@ class AnalysisTag(StrEnum):
     FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
     FUSIONREPORT: str = "fusionreport"
     GENE_COUNTS: str = "gene-counts"
+    JUNCTION: str = "junction"
     MULTIQC_HTML: str = "multiqc-html"
+    OUTRIDER: str = "outrider"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
+    VCF_STR: str = "vcf-str"
+    VCF_SV_CLINICAL: str = "vcf-sv-clinical"
 
 
 class HkMipAnalysisTag:
@@ -84,14 +96,26 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
+class NFAnalysisTags:
+    MANIFEST: str = "manifest"
+
+
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
+class HkAnalysisMetricsTag:
+    QC_METRICS: set[str] = {"qc-metrics", "deliverable"}
+
+
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
+
+
+class GenotypeAnalysisTag:
+    GENOTYPE: str = "genotype"
 
 
 class BalsamicProtectedTags:
@@ -123,7 +147,6 @@ class BalsamicProtectedTags:
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],

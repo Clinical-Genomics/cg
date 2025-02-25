@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.constants import Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE

@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import click
+import rich_click as click
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -14,7 +14,6 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
-    balsamic_qc_past_run_dirs,
     balsamic_umi_past_run_dirs,
     fluffy_past_run_dirs,
     microsalt_past_run_dirs,
@@ -23,17 +22,16 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
+    tower_past_run_dirs,
 )
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import IlluminaCleanRunError, FlowCellError
+from cg.exc import FlowCellError, IlluminaCleanRunError
 from cg.meta.clean.api import CleanAPI
-from cg.services.illumina.cleaning.clean_runs_service import (
-    IlluminaCleanRunsService,
-)
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
+from cg.services.illumina.cleaning.clean_runs_service import IlluminaCleanRunsService
 from cg.store.models import Analysis
 from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
@@ -62,7 +60,6 @@ def clean():
 
 for sub_cmd in [
     balsamic_past_run_dirs,
-    balsamic_qc_past_run_dirs,
     balsamic_umi_past_run_dirs,
     balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
@@ -72,6 +69,7 @@ for sub_cmd in [
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
     microsalt_past_run_dirs,
+    tower_past_run_dirs,
 ]:
     clean.add_command(sub_cmd)
 

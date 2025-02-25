@@ -1,7 +1,7 @@
 import operator
-from typing import Any, Callable
+from typing import Annotated, Any, Callable
 
-from pydantic.v1 import BaseModel, Field, validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
@@ -15,28 +15,26 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
             return metric
 
 
-def add_metric(name: str, values: dict) -> list[Any]:
-    """Add metric to list of objects"""
-    found_metrics: list = []
-    raw_metrics: list = values.get("metrics_")
-    metrics_validator: dict[str, Any] = values.get("metric_to_get_")
-    for metric in raw_metrics:
-        if name == metric.name and metric.name in metrics_validator:
-            found_metrics.append(
-                metrics_validator[metric.name](
-                    sample_id=metric.id, step=metric.step, value=metric.value
-                )
-            )
+def add_metric(name: str, info: ValidationInfo) -> list[Any]:
+    """Add metric to a list of objects."""
+    raw_metrics: list = info.data.get("metrics_")
+    metrics_validator: dict[str, Any] = info.data.get("metric_to_get_")
+    found_metrics: list = [
+        metrics_validator[metric.name](sample_id=metric.id, step=metric.step, value=metric.value)
+        for metric in raw_metrics
+        if name == metric.name and metric.name in metrics_validator
+    ]
     return found_metrics
 
 
-def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
+def add_sample_id_metrics(parsed_metric: Any, info: ValidationInfo) -> list[Any]:
     """Add parsed sample_id metrics gathered from all metrics to list"""
-    sample_ids: set = values.get("sample_ids")
+    sample_ids: set = info.data.get("sample_ids")
     sample_id_metrics: list = []
-    metric_per_sample_id_map: dict = {}
-    for metric_name in values.get("sample_metric_to_parse"):
-        metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
+    metric_per_sample_id_map: dict = {
+        metric_name: info.data.get(metric_name)
+        for metric_name in info.data.get("sample_metric_to_parse")
+    }
     for sample_id in sample_ids:
         metric_per_sample_id: dict = {"sample_id": sample_id}
         for metric_name, metric_objs in metric_per_sample_id_map.items():
@@ -45,7 +43,7 @@ def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
             )
             if sample_metric.value:
                 metric_per_sample_id[metric_name]: Any = sample_metric.value
-                metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
+                metric_per_sample_id[f"{metric_name}_step"]: str = sample_metric.step
         sample_id_metrics.append(parsed_metric(**metric_per_sample_id))
     return sample_id_metrics
 
@@ -61,7 +59,8 @@ class MetricCondition(BaseModel):
     norm: str
     threshold: float | str
 
-    @validator("norm")
+    @field_validator("norm")
+    @classmethod
     def validate_operator(cls, norm: str) -> str:
         """Validate that an operator is accepted."""
         try:
@@ -76,13 +75,13 @@ class MetricCondition(BaseModel):
 class MetricsBase(BaseModel):
     """Definition for elements in deliverables metrics file."""
 
-    header: str | None
+    header: str | None = None
     id: str
     input: str
     name: str
     step: str
     value: Any
-    condition: MetricCondition | None
+    condition: MetricCondition | None = None
 
 
 class SampleMetric(BaseModel):
@@ -97,7 +96,8 @@ class MeanInsertSize(SampleMetric):
 
     value: float
 
-    @validator("value", always=True)
+    @field_validator("value")
+    @classmethod
     def convert_mean_insert_size(cls, value) -> int:
         """Convert raw value from float to int"""
         return int(value)
@@ -122,16 +122,15 @@ class ParsedMetrics(QCMetrics):
 class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
-    metrics_: list[MetricsBase] = Field(..., alias="metrics")
-    sample_ids: set | None
+    metrics_: list[MetricsBase] = Field(list[MetricsBase], alias="metrics")
+    sample_ids: Annotated[set | None, Field(validate_default=True)] = None
 
-    @validator("sample_ids", always=True)
-    def set_sample_ids(cls, _, values: dict) -> set:
+    @field_validator("sample_ids")
+    @classmethod
+    def set_sample_ids(cls, _, info: ValidationInfo) -> set:
         """Set sample_ids gathered from all metrics"""
-        sample_ids: list = []
-        raw_metrics: list = values.get("metrics_")
-        for metric in raw_metrics:
-            sample_ids.append(metric.id)
+        raw_metrics: list = info.data.get("metrics_")
+        sample_ids: list = [metric.id for metric in raw_metrics]
         return set(sample_ids)
 
 
@@ -140,7 +139,8 @@ class MetricsDeliverablesCondition(BaseModel):
 
     metrics: list[MetricsBase]
 
-    @validator("metrics")
+    @field_validator("metrics")
+    @classmethod
     def validate_metrics(cls, metrics: list[MetricsBase]) -> list[MetricsBase]:
         """Verify that metrics met QC conditions."""
         failed_metrics = []
@@ -164,6 +164,6 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: list[dict] | None
-    report_data_sources: dict | None
-    report_saved_raw_data: dict[str, dict] | None
+    report_general_stats_data: list[dict] | None = None
+    report_data_sources: dict | None = None
+    report_saved_raw_data: dict[str, dict] | None = None
