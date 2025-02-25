@@ -125,6 +125,6 @@ keycloak_client = KeycloakClient(
 )
 auth_service = AuthenticationService(
     user_service=user_service,
-    keycloak_client=keycloak_client,
+    keycloak_client=keycloak_client.get_client(),
     redirect_uri=app_config.keycloak_redirect_uri,
 )

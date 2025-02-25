@@ -15,7 +15,7 @@ class AuthenticationService:
     def __init__(
         self,
         user_service: UserService,
-        keycloak_client: KeycloakClient,
+        keycloak_client: KeycloakOpenID,
         redirect_uri: str,
     ):
         """Initialize the AuthenticationService.
@@ -30,7 +30,7 @@ class AuthenticationService:
         """
         self.user_service = user_service
         self.redirect_uri = redirect_uri
-        self.client = keycloak_client.get_client()
+        self.client = keycloak_client
 
     def verify_token(self, token: str) -> User:
         """Verify the token and return the user.
