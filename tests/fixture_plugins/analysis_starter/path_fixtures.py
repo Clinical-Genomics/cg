@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 
@@ -7,10 +9,12 @@ def dummy_work_dir_path() -> str:
 
 
 @pytest.fixture
-def dummy_params_file_path() -> str:
-    return "path/to/params/file"
+def dummy_params_file_path(fixtures_dir) -> str:
+    return Path(fixtures_dir, "services", "analysis_starter", "case_params_file.yaml").as_posix()
 
 
 @pytest.fixture
-def dummy_nextflow_config_path() -> str:
-    return "path/to/nextflow/config"
+def dummy_nextflow_config_path(fixtures_dir) -> str:
+    return Path(
+        fixtures_dir, "services", "analysis_starter", "case_nextflow_config.json"
+    ).as_posix()

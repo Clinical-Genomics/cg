@@ -96,6 +96,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
+    "tests.fixture_plugins.analysis_starter.seqera_submitter_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",

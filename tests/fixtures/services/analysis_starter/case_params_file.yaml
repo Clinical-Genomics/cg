@@ -1,0 +1,10 @@
+input: "/path/to/samplesheet/case_samplesheet.csv"
+outdir: "/path/to/case"
+genomes_base: "/path/to/to/pipeline/version"
+all: False
+arriba: True
+cram: "arriba,starfusion"
+fastp_trim: True
+fusioncatcher: True
+starfusion: True
+trim_tail: 50
