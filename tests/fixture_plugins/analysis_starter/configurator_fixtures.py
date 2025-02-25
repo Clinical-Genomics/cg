@@ -1,15 +1,12 @@
 import pytest
 
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.implementations.raredisease import (
-    RarediseaseConfigurator,
-)
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 
 
 @pytest.fixture
-def raredisease_configurator(raredisease_context: CGConfig) -> RarediseaseConfigurator:
-    return RarediseaseConfigurator(
+def nextflow_configurator(raredisease_context: CGConfig) -> NextflowConfigurator:
+    return NextflowConfigurator(
         store=raredisease_context.status_db,
         config=raredisease_context.raredisease,
-        tower_binary_path=raredisease_context.tower_binary_path,
     )
