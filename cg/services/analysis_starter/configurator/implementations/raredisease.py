@@ -8,7 +8,7 @@ from cg.services.analysis_starter.configurator.abstract_service import Configura
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.configurator.utils import (
     get_slurm_qos_for_case,
-    write_content_to_json_or_stdout,
+    write_content_to_file_or_stdout,
 )
 from cg.store.models import Case
 from cg.store.store import Store
@@ -52,7 +52,7 @@ class RarediseaseConfigurator(Configurator):
         """Create nextflow config file."""
         content: str = self._get_nextflow_config_content(case_id=case_id)
         file_path: Path = self._get_nextflow_config_path(case_id=case_id)
-        write_content_to_json_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
+        write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
         LOG.debug(f"Created nextflow config file {file_path.as_posix()} successfully")
 
     def _get_case_path(self, case_id: str) -> Path:
