@@ -64,9 +64,10 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    AnalysisTag.VCF_SNV_CLINICAL,
+                    AnalysisTag.VCF_SNV,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
+                    AnalysisTag.CLINICAL,
                     HermesFileTag.LONG_TERM_STORAGE,
                     HermesFileTag.SCOUT,
                 ],
@@ -74,9 +75,10 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
-                    AnalysisTag.VCF_SV_CLINICAL,
+                    AnalysisTag.VCF_SV,
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
+                    AnalysisTag.CLINICAL,
                     HermesFileTag.LONG_TERM_STORAGE,
                     HermesFileTag.SCOUT,
                 ],
@@ -88,6 +90,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
                     case_id,
                     HermesFileTag.CLINICAL_DELIVERY,
                     HermesFileTag.LONG_TERM_STORAGE,
+                    AnalysisTag.REPEATS,
                     HermesFileTag.SCOUT,
                 ],
             ).full_path,
