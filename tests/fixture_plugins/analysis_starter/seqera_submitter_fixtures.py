@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cg.constants.constants import FileFormat
@@ -30,7 +32,7 @@ def expected_workflow_launch_request(
     pipeline_response: PipelineResponse, raredisease_case_config: NextflowCaseConfig
 ) -> WorkflowLaunchRequest:
     parameters: dict = ReadFile.get_content_from_file(
-        file_format=FileFormat.YAML, file_path=raredisease_case_config.params_file
+        file_format=FileFormat.YAML, file_path=Path(raredisease_case_config.params_file)
     )
     parameters_as_string = WriteStream.write_stream_from_content(
         content=parameters, file_format=FileFormat.YAML
