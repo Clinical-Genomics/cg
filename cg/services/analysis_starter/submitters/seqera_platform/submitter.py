@@ -1,8 +1,10 @@
+from pathlib import Path
+
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.priority import Priority, SlurmQos
 from cg.io.controller import ReadFile, WriteStream
-from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
@@ -28,10 +30,10 @@ class SeqeraPlatformSubmitter(Submitter):
         return self.client.run_case(run_request)
 
     def _create_launch_request(
-        self, case_config: RarediseaseCaseConfig, pipeline_config: PipelineResponse
+        self, case_config: NextflowCaseConfig, pipeline_config: PipelineResponse
     ) -> WorkflowLaunchRequest:
         parameters: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=case_config.params_file
+            file_format=FileFormat.YAML, file_path=Path(case_config.params_file)
         )
         parameters_as_string = WriteStream.write_stream_from_content(
             content=parameters, file_format=FileFormat.YAML
@@ -39,10 +41,10 @@ class SeqeraPlatformSubmitter(Submitter):
         slurm_qos: str = Priority.priority_to_slurm_qos()[case_config.case_priority]
         launch_request = LaunchRequest(
             computeEnvId=self.compute_environment_ids[slurm_qos],
-            configText=f"includeConfig {case_config.nextflow_config_file.as_posix()}",
+            configText=f"includeConfig {case_config.nextflow_config_file}",
             paramsText=parameters_as_string,
             runName=case_config.case_id,
-            workDir=case_config.work_dir.as_posix(),
+            workDir=case_config.work_dir,
             **pipeline_config.launch.model_dump(),
         )
         return WorkflowLaunchRequest(launch=launch_request)

@@ -23,7 +23,7 @@ class RarediseaseConfigurator(Configurator):
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),
             workflow=self._get_case_workflow(case_id),
-            netxflow_config_file=self._get_nextflow_config_path(case_id=case_id).as_posix(),
+            nextflow_config_file=self._get_nextflow_config_path(case_id=case_id).as_posix(),
             params_file=self._get_params_file_path(case_id=case_id).as_posix(),
             work_dir=self._get_work_dir(case_id=case_id).as_posix(),
         )

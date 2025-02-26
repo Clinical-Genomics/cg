@@ -3,7 +3,7 @@ import pytest
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteStream
 from cg.models.cg_config import SeqeraPlatformConfig
-from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
@@ -27,7 +27,7 @@ def seqera_platform_submitter(
 
 @pytest.fixture
 def expected_workflow_launch_request(
-    pipeline_response: PipelineResponse, raredisease_case_config: RarediseaseCaseConfig
+    pipeline_response: PipelineResponse, raredisease_case_config: NextflowCaseConfig
 ) -> WorkflowLaunchRequest:
     parameters: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML, file_path=raredisease_case_config.params_file
@@ -48,6 +48,6 @@ def expected_workflow_launch_request(
         runName=raredisease_case_config.case_id,
         sessionId=None,
         stubRun=False,
-        workDir=raredisease_case_config.work_dir.as_posix(),
+        workDir=raredisease_case_config.work_dir,
     )
     return WorkflowLaunchRequest(launch=launch)

@@ -1,4 +1,4 @@
-from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     PipelineResponse,
     WorkflowLaunchRequest,
@@ -10,7 +10,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 
 def test_create_launch_request(
     seqera_platform_submitter: SeqeraPlatformSubmitter,
-    raredisease_case_config: RarediseaseCaseConfig,
+    raredisease_case_config: NextflowCaseConfig,
     pipeline_response: PipelineResponse,
     expected_workflow_launch_request: WorkflowLaunchRequest,
 ):
