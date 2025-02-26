@@ -44,7 +44,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         )
         return RarediseaseSampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
-            duplicates=sample_metrics.percent_duplicates,
+            duplicates=sample_metrics.PERCENT_DUPLICATION * 100,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
