@@ -24,7 +24,7 @@ RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
-    "picard_mark_duplicates-PERCENT_DUPLICATION": {"norm": "lt", "threshold": 20},
+    "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
     "Contamination Status": {"norm": "eq", "threshold": "NO"},
     "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
@@ -36,7 +36,7 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
 }
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
-    "picard_mark_duplicates-PERCENT_DUPLICATION": {"norm": "lt", "threshold": 20},
+    "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
     "Contamination Status": {"norm": "eq", "threshold": "NO"},
     "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},

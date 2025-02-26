@@ -1278,13 +1278,13 @@ metrics:
   value: 1.265529162641732
 - condition:
     norm: lt
-    threshold: 20.0
+    threshold: 0.20
   header: null
   id: ADM1
   input: multiqc_data.json
-  name: picard_mark_duplicates-PERCENT_DUPLICATION
+  name: PERCENT_DUPLICATION
   step: multiqc
-  value: 4.38
+  value: 0.0438
 - condition:
     norm: eq
     threshold: 'NO'
@@ -2579,13 +2579,13 @@ metrics:
   value: 1.265529162641732
 - condition:
     norm: lt
-    threshold: 20.0
+    threshold: 0.20
   header: null
   id: ADM2
   input: multiqc_data.json
-  name: picard_mark_duplicates-PERCENT_DUPLICATION
+  name: PERCENT_DUPLICATION
   step: multiqc
-  value: 4.38
+  value: 0.0438
 - condition:
     norm: eq
     threshold: 'NO'
