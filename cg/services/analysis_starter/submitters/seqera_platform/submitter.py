@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.priority import Priority, SlurmQos
 from cg.io.controller import ReadFile, WriteStream
@@ -8,7 +7,6 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
-    PipelineResponse,
     WorkflowLaunchRequest,
 )
 from cg.services.analysis_starter.submitters.submitter import Submitter
@@ -22,16 +20,10 @@ class SeqeraPlatformSubmitter(Submitter):
 
     def submit(self, case_config) -> str:
         """Starts a case and returns the workflow id for the job."""
-        workflow: Workflow = case_config.workflow
-        pipeline_config: PipelineResponse = self.client.get_pipeline_config(workflow)
-        run_request: WorkflowLaunchRequest = self._create_launch_request(
-            case_config=case_config, pipeline_config=pipeline_config
-        )
+        run_request: WorkflowLaunchRequest = self._create_launch_request(case_config)
         return self.client.run_case(run_request)
 
-    def _create_launch_request(
-        self, case_config: NextflowCaseConfig, pipeline_config: PipelineResponse
-    ) -> WorkflowLaunchRequest:
+    def _create_launch_request(self, case_config: NextflowCaseConfig) -> WorkflowLaunchRequest:
         parameters: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=Path(case_config.params_file)
         )
@@ -45,6 +37,5 @@ class SeqeraPlatformSubmitter(Submitter):
             paramsText=parameters_as_string,
             runName=case_config.case_id,
             workDir=case_config.work_dir,
-            **pipeline_config.launch.model_dump(),
         )
         return WorkflowLaunchRequest(launch=launch_request)
