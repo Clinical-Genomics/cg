@@ -20,5 +20,4 @@ def get_slurm_qos_for_case(case: Case) -> str:
     """Get Quality of service (SLURM QOS) for the case."""
     if are_all_samples_control(case=case):
         return SlurmQos.EXPRESS
-    priority: int = case.priority or Priority.research
-    return Priority.priority_to_slurm_qos().get(priority)
+    return Priority.priority_to_slurm_qos().get(case.priority)

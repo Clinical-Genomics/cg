@@ -73,7 +73,7 @@ class RarediseaseConfigurator(Configurator):
             self.resources,
         ]
         case_specific_params: list[str] = [
-            self._set_cluster_options(case_id=case_id),
+            self._get_cluster_options(case_id=case_id),
         ]
         return concat_txt(
             file_paths=config_files_list,
@@ -93,7 +93,7 @@ class RarediseaseConfigurator(Configurator):
     def _get_work_dir(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "work")
 
-    def _set_cluster_options(self, case_id: str) -> str:
+    def _get_cluster_options(self, case_id: str) -> str:
         case: Case = self.store.get_case_by_internal_id(case_id)
         qos: str = get_slurm_qos_for_case(case)
         return f'process.clusterOptions = "-A {self.account} --qos={qos}"\n'
