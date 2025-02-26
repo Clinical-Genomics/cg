@@ -235,7 +235,8 @@
                 "pct_surviving": 96.91697445688075,
                 "adapter_cutting_adapter_trimmed_reads": 1365798.0,
                 "adapter_cutting_adapter_trimmed_bases": 65582892.0,
-                "pct_adapter": 1.265529162641732
+                "pct_adapter": 1.265529162641732,
+                "PERCENT_DUPLICATION": 0.0438
             }
         },
         {
@@ -478,7 +479,8 @@
                 "pct_surviving": 96.91697445688075,
                 "adapter_cutting_adapter_trimmed_reads": 1365798.0,
                 "adapter_cutting_adapter_trimmed_bases": 65582892.0,
-                "pct_adapter": 1.265529162641732
+                "pct_adapter": 1.265529162641732,
+                "PERCENT_DUPLICATION": 0.0438
             }
         },
         {
