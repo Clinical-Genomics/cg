@@ -7,8 +7,10 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
+from cg.clients.authentication.keycloak_client import KeycloakClient
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
+from cg.services.authentication.service import AuthenticationService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
@@ -22,10 +24,14 @@ from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequenc
 from cg.services.sample_run_metrics_service.sample_run_metrics_service import (
     SampleRunMetricsService,
 )
+
+from cg.services.user.service import UserService
 from cg.services.web_services.application.service import ApplicationsWebService
 from cg.services.web_services.case.service import CaseWebService
 from cg.services.web_services.sample.service import SampleService
+
 from cg.store.database import initialize_database
+from cg.store.models import User
 from cg.store.store import Store
 from cg.server.app_config import app_config
 
@@ -109,4 +115,16 @@ ticket_handler = TicketHandler(
     client=freshdesk_client,
     system_email_id=app_config.freshdesk_order_email_id,
     env=app_config.freshdesk_environment,
+)
+user_service = UserService(store=db)
+keycloak_client = KeycloakClient(
+    server_url=app_config.keycloak_client_url,
+    client_id=app_config.keycloak_client_id,
+    client_secret_key=app_config.keycloak_client_secret_key,
+    realm_name=app_config.keycloak_realm_name,
+)
+auth_service = AuthenticationService(
+    user_service=user_service,
+    keycloak_client=keycloak_client.get_client(),
+    redirect_uri=app_config.keycloak_redirect_uri,
 )
