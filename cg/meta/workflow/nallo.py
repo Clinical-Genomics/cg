@@ -3,6 +3,8 @@
 import logging
 from pathlib import Path
 
+from click import File
+
 from cg.clients.chanjo2.models import (
     CoverageMetrics,
     CoveragePostRequest,

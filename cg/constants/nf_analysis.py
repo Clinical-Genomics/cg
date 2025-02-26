@@ -77,7 +77,7 @@ MULTIQC_NEXFLOW_CONFIG = """process {
 }
 """
 
-NALLO_COVERAGE_FILE_TAGS: list[str] = ["mosdepth_d4"]
+NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
 NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
 NALLO_COVERAGE_THRESHOLD: int = 10
 
