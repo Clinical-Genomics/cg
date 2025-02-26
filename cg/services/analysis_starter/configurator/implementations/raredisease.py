@@ -28,6 +28,7 @@ class RarediseaseConfigurator(Configurator):
         self.workflow_config_path: str = config.config
 
     def create_config(self, case_id: str) -> NextflowCaseConfig:
+        self._create_case_directory(case_id=case_id, dry_run=False)
         self._create_nextflow_config(case_id=case_id, dry_run=False)
         return NextflowCaseConfig(
             case_id=case_id,
@@ -37,6 +38,15 @@ class RarediseaseConfigurator(Configurator):
             params_file=self._get_params_file_path(case_id=case_id).as_posix(),
             work_dir=self._get_work_dir(case_id=case_id).as_posix(),
         )
+
+    def _create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
+        """Create case working directory."""
+        case_path: Path = self._get_case_path(case_id=case_id)
+        if dry_run:
+            LOG.info(f"Would have created case directory {case_path.as_posix()}")
+            return
+        case_path.mkdir(parents=True, exist_ok=True)
+        LOG.debug(f"Created case directory {case_path.as_posix()} successfully")
 
     def _create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
         """Create nextflow config file."""

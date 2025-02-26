@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 
@@ -14,3 +16,9 @@ def dummy_params_file_path() -> str:
 @pytest.fixture
 def dummy_nextflow_config_path() -> str:
     return "path/to/nextflow/config"
+
+
+@pytest.fixture
+def raredisease_nextflow_config_path(raredisease_dir: Path, raredisease_case_id: str) -> str:
+    path = Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config.json")
+    return path.as_posix()
