@@ -9,7 +9,7 @@ from cg.services.analysis_starter.configurator.abstract_service import Configura
 
 @pytest.mark.parametrize(
     "configurator_fixture, case_config_fixture, case_id_fixture",
-    [("nextflow_configurator", "raredisease_case_config", "raredisease_case_id")],
+    [("raredisease_configurator", "raredisease_case_config", "raredisease_case_id")],
     ids=["nextflow"],
 )
 def test_create_config(

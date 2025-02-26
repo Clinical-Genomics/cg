@@ -11,7 +11,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class NextflowConfigurator(Configurator):
+class RarediseaseConfigurator(Configurator):
     """Configurator for Raredisease analysis."""
 
     def __init__(self, store: Store, config: RarediseaseConfig):
