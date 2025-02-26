@@ -22,12 +22,13 @@ class Orderform(StrEnum):
     MICROBIAL_FASTQ: str = "microbial_sequencing"
     PACBIO_LONG_READ: str = "pacbio_revio_sequencing"
     TAXPROFILER: str = "1508"
+    TOMTE: str = "1508"
 
     @staticmethod
     def get_current_orderform_version(order_form: str) -> str:
         """Returns the current version of the given order form."""
         current_order_form_versions = {
-            Orderform.MIP_DNA: "33",
+            Orderform.MIP_DNA: "34",
             Orderform.RML: "19",
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "10",
