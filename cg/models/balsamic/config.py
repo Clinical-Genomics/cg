@@ -12,7 +12,7 @@ class BalsamicConfigAnalysis(BaseModel):
     Attributes:
         case_id: case internal ID
         analysis_type: analysis type (single, paired or pon)
-        analysis_workflow: analysis carried out (balsamic, balsamic-qc or balsamic-umi)
+        analysis_workflow: analysis carried out (balsamic or balsamic-umi)
         sequencing_type: analysis sequencing type (wgs or targeted)
         BALSAMIC_version: BALSAMIC version used to produce the analysis
         config_creation_date: config creation timestamp

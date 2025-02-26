@@ -1,7 +1,7 @@
 from cg.constants import DataDelivery, Workflow
 from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.storing.implementations.pacbio_order_service import StorePacBioOrderService
-from cg.services.orders.validation.workflows.pacbio_long_read.models.order import PacbioOrder
+from cg.services.orders.validation.order_types.pacbio_long_read.models.order import PacbioOrder
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 

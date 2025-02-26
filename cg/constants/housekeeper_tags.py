@@ -57,6 +57,7 @@ class HermesFileTag(StrEnum):
 
     CLINICAL_DELIVERY: str = "clinical-delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
+    SCOUT: str = "scout"
 
 
 class AnalysisTag(StrEnum):
@@ -81,8 +82,12 @@ class AnalysisTag(StrEnum):
     OUTRIDER: str = "outrider"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
+    VCF_STR: str = "vcf-str"
+    VCF_SV_CLINICAL: str = "vcf-sv-clinical"
 
 
 class HkMipAnalysisTag:
@@ -142,7 +147,6 @@ class BalsamicProtectedTags:
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],

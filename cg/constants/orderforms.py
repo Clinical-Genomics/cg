@@ -9,7 +9,6 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 
 class Orderform(StrEnum):
     BALSAMIC: str = "1508"
-    BALSAMIC_QC: str = "1508"
     BALSAMIC_UMI: str = "1508"
     FASTQ: str = "1508"
     METAGENOME: str = "1508"
@@ -23,12 +22,13 @@ class Orderform(StrEnum):
     MICROBIAL_FASTQ: str = "microbial_sequencing"
     PACBIO_LONG_READ: str = "pacbio_revio_sequencing"
     TAXPROFILER: str = "1508"
+    TOMTE: str = "1508"
 
     @staticmethod
     def get_current_orderform_version(order_form: str) -> str:
         """Returns the current version of the given order form."""
         current_order_form_versions = {
-            Orderform.MIP_DNA: "33",
+            Orderform.MIP_DNA: "34",
             Orderform.RML: "19",
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "10",

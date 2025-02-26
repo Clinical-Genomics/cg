@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
-from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum
+from cg.models.orders.sample_base import NAME_PATTERN, ContainerEnum, PriorityEnum
 
 
 class Sample(BaseModel):
     application: str = Field(min_length=1)
     _case_name: str = PrivateAttr(default="")
+    _case_priority: PriorityEnum | None = PrivateAttr(default=None)
     comment: str | None = None
     container: ContainerEnum
     container_name: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_]*$")

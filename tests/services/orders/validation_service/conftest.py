@@ -1,17 +1,16 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.constants import MINIMUM_VOLUME
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_type_maps import ORDER_TYPE_RULE_SET_MAP, RuleSet
+from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.service import OrderValidationService
-from cg.services.orders.validation.workflows.tomte.constants import TomteDeliveryType
-from cg.services.orders.validation.workflows.tomte.models.case import TomteCase
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application, Customer, User
 from cg.store.store import Store
 
@@ -24,7 +23,6 @@ def create_tomte_sample(id: int) -> TomteSample:
         container_name="ContainerName",
         control=ControlEnum.not_control,
         require_qc_ok=True,
-        reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
         source="source",
         status=StatusEnum.affected,
