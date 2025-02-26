@@ -50,7 +50,6 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     Attributes:
         mean_target_coverage: mean coverage of a target region; source: Chanjo2
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
-        sex: sex predicted by the workflow; source: workflow
     """
 
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

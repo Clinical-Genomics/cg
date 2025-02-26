@@ -12,7 +12,6 @@ class NalloQCMetrics(QCMetrics):
     """Nallo QC metrics."""
 
     percent_duplicates: float
-    sex: str
 
 
 class NalloSampleSheetEntry(BaseModel):
