@@ -72,12 +72,12 @@ class RarediseaseConfigurator(Configurator):
             self.workflow_config_path,
             self.resources,
         ]
-        extra_parameters_str: list[str] = [
+        case_specific_params: list[str] = [
             self._set_cluster_options(case_id=case_id),
         ]
         return concat_txt(
             file_paths=config_files_list,
-            str_content=extra_parameters_str,
+            str_content=case_specific_params,
         )
 
     def _get_nextflow_config_path(self, case_id: str) -> Path:
