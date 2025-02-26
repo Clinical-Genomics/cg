@@ -50,10 +50,10 @@ class RarediseaseConfigurator(Configurator):
 
     def _create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
         """Create nextflow config file."""
-        if content := self._get_nextflow_config_content(case_id=case_id):
-            file_path: Path = self._get_nextflow_config_path(case_id=case_id)
-            write_content_to_json_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
-            LOG.debug(f"Created nextflow config file {file_path.as_posix()} successfully")
+        content: str = self._get_nextflow_config_content(case_id=case_id)
+        file_path: Path = self._get_nextflow_config_path(case_id=case_id)
+        write_content_to_json_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
+        LOG.debug(f"Created nextflow config file {file_path.as_posix()} successfully")
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
