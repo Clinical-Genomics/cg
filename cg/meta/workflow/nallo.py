@@ -21,8 +21,15 @@ from cg.constants.scout import ScoutExportFileName, NALLO_CASE_TAGS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
+from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.nallo.nallo import (
+    NalloParameters,
+    NalloSampleSheetEntry,
+    NalloSampleSheetHeaders,
+    NalloQCMetrics,
+)
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -188,3 +195,10 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Nallo Scout upload case tags."""
         return NALLO_CASE_TAGS
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        qc_metrics_model = NalloQCMetrics
+        return super().parse_analysis(
+            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
+        )
