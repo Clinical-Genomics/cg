@@ -3,9 +3,10 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Type
 
 from dateutil.parser import parse
+from pydantic import TypeAdapter
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
@@ -43,6 +44,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
+from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
@@ -926,7 +928,9 @@ class NfAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+    def parse_analysis(
+        self, qc_metrics_raw: list[MetricsBase], qc_metrics_model: Type[QCMetrics], **kwargs
+    ) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
@@ -934,7 +938,8 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:
                 sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return NextflowAnalysis(sample_metrics=sample_metrics)
+        pydantic_parser = TypeAdapter(dict[str, qc_metrics_model])
+        return NextflowAnalysis(sample_metrics=pydantic_parser.validate_python(sample_metrics))
 
     def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return analysis output of a Nextflow case."""
