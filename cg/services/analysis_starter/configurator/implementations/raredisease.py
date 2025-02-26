@@ -27,7 +27,7 @@ class RarediseaseConfigurator(Configurator):
         self.store: Store = store
         self.workflow_config_path: str = config.config
 
-    def create_config(self, case_id: str) -> NextflowCaseConfig:
+    def create_config(self, case_id: str, dry_run: bool = False) -> NextflowCaseConfig:
         self._create_case_directory(case_id=case_id, dry_run=False)
         self._create_nextflow_config(case_id=case_id, dry_run=False)
         return NextflowCaseConfig(
