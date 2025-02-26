@@ -261,6 +261,15 @@ def taxprofiler_orderform(orderforms: Path) -> str:
     ).as_posix()
 
 
+@pytest.fixture
+def tomte_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.TOMTE}.{Orderform.get_current_orderform_version(Orderform.TOMTE)}.tomte.xlsx",
+    ).as_posix()
+
+
 @pytest.fixture(scope="session")
 def mip_uploaded_json_order(orderforms: Path) -> str:
     """JSON orderform fixture for MIP DNA samples."""

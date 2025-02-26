@@ -1,7 +1,7 @@
 import pytest
 
 from cg.constants import Priority, Workflow
-from cg.services.analysis_starter.configurator.models.raredisease import RarediseaseCaseConfig
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
 
 @pytest.fixture
@@ -10,8 +10,8 @@ def raredisease_case_config(
     dummy_work_dir_path: str,
     dummy_nextflow_config_path: str,
     dummy_params_file_path: str,
-) -> RarediseaseCaseConfig:
-    return RarediseaseCaseConfig(
+) -> NextflowCaseConfig:
+    return NextflowCaseConfig(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
         case_priority=Priority.standard,
