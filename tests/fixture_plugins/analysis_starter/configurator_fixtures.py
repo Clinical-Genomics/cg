@@ -11,5 +11,4 @@ def raredisease_configurator(raredisease_context: CGConfig) -> RarediseaseConfig
     return RarediseaseConfigurator(
         store=raredisease_context.status_db,
         config=raredisease_context.raredisease,
-        tower_binary_path=raredisease_context.tower_binary_path,
     )
