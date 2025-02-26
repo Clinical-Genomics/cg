@@ -1,6 +1,5 @@
 import pytest
 
-from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
@@ -24,7 +23,6 @@ def create_tomte_sample(id: int) -> TomteSample:
         container_name="ContainerName",
         control=ControlEnum.not_control,
         require_qc_ok=True,
-        reference_genome=GenomeVersion.HG19,
         sex=SexEnum.female,
         source="source",
         status=StatusEnum.affected,
