@@ -573,10 +573,11 @@ class Case(Base, PriorityMixin):
         return self.analyses and self.analyses[0].uploaded_at
 
     @property
-    def slurm_priority(self) -> SlurmQos:
-        case_priority: str = self.priority
-        slurm_priority: str = Priority.priority_to_slurm_qos().get(case_priority)
-        return SlurmQos(slurm_priority)
+    def slurm_priority(self) -> str:
+        """Get Quality of service (SLURM QOS) for the case."""
+        if self.are_all_samples_control():
+            return SlurmQos.EXPRESS
+        return Priority.priority_to_slurm_qos().get(self.priority)
 
     def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to workflow specific arguments."""
