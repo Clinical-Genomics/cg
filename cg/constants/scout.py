@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 
 HGNC_ID = "hgnc_id"
 
@@ -79,6 +79,16 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_str={"vcf-str"},
 )
 
+NALLO_CASE_TAGS = dict(
+    delivery_report={"delivery-report"},
+    multiqc={"multiqc-html"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_str={"vcf-str"},
+)
+
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
     snv_vcf={"vcf-snv-clinical"},
@@ -136,6 +146,11 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
     mitodel_file={"mitodel"},
+)
+
+NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    alignment_file={AlignmentFileTag.BAM, NalloAnalysisTag.HAPLOTAGS},
+    d4_file={"d4"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
