@@ -33,14 +33,14 @@ class FastqFetcher(InputFetcher):
         is raised."""
         self._ensure_files_are_present(case_id)
         self._resolve_decompression(case_id=case_id, dry_run=False)
-        if not self.is_raw_data_ready_for_analysis(case_id):
+        if not self._is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def _ensure_files_are_present(self, case_id: str):
         """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
-        self.ensure_illumina_run_on_disk(case_id)
-        if not self.are_all_spring_files_present(case_id):
+        self._ensure_illumina_run_on_disk(case_id)
+        if not self._are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.status_db,
@@ -49,7 +49,7 @@ class FastqFetcher(InputFetcher):
             )
             spring_archive_api.retrieve_spring_files_for_case(case_id)
 
-    def ensure_illumina_run_on_disk(self, case_id: str) -> None:
+    def _ensure_illumina_run_on_disk(self, case_id: str) -> None:
         """Check if Illumina sequencing runs are on disk for given case."""
         if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
@@ -60,7 +60,7 @@ class FastqFetcher(InputFetcher):
         if not self.status_db.are_all_illumina_runs_on_disk(case_id):
             self.status_db.request_sequencing_runs_for_case(case_id)
 
-    def are_all_spring_files_present(self, case_id: str) -> bool:
+    def _are_all_spring_files_present(self, case_id: str) -> bool:
         """Return True if no Spring files for the case are archived in the data location used by the customer."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in case.samples:
@@ -77,7 +77,7 @@ class FastqFetcher(InputFetcher):
         Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            self.decompress_case(case_id=case_id, dry_run=dry_run)
+            self._decompress_case(case_id=case_id, dry_run=dry_run)
             return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
@@ -86,7 +86,7 @@ class FastqFetcher(InputFetcher):
 
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
-    def decompress_case(self, case_id: str, dry_run: bool) -> None:
+    def _decompress_case(self, case_id: str, dry_run: bool) -> None:
         """Decompress all possible fastq files for all samples in a case"""
 
         # Very messy due to dry run
@@ -96,7 +96,7 @@ class FastqFetcher(InputFetcher):
         )
         if not is_decompression_possible:
             # Raise error? This is messy
-            self.set_to_analyze_if_decompressing(case_id)
+            self._set_to_analyze_if_decompressing(case_id)
             return
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         any_decompression_started = False
@@ -121,12 +121,12 @@ class FastqFetcher(InputFetcher):
             self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
         LOG.info(f"Decompression started for {case_id}")
 
-    def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
+    def _is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
         decompressed."""
 
         # Should this reference spring files? No need to be vague in the fastq fetcher
-        if self.does_any_file_need_to_be_retrieved(case_id):
+        if self._does_any_file_need_to_be_retrieved(case_id):
             return False
         if self.prepare_fastq_api.is_spring_decompression_needed(
             case_id
@@ -135,7 +135,7 @@ class FastqFetcher(InputFetcher):
             return False
         return True
 
-    def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
+    def _does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
         if self._is_illumina_run_check_applicable(
             case_id
@@ -143,7 +143,7 @@ class FastqFetcher(InputFetcher):
             LOG.warning(f"Case {case_id} is not ready - not all Illumina runs present on disk.")
             return True
         else:
-            if not self.are_all_spring_files_present(case_id):
+            if not self._are_all_spring_files_present(case_id):
                 LOG.warning(f"Case {case_id} is not ready - some files are archived.")
                 return True
         return False
@@ -154,7 +154,7 @@ class FastqFetcher(InputFetcher):
             self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
-    def set_to_analyze_if_decompressing(self, case_id: str) -> None:
+    def _set_to_analyze_if_decompressing(self, case_id: str) -> None:
         """Sets a case's action to 'analyze' if it is currently being decompressed."""
         is_decompression_running: bool = self.prepare_fastq_api.is_spring_decompression_running(
             case_id
