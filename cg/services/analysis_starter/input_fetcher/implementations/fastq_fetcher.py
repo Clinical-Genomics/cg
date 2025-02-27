@@ -96,7 +96,7 @@ class FastqFetcher(InputFetcher):
         )
         if not is_decompression_possible:
             # Raise error? This is messy
-            self.is_decompression_running(case_id)
+            self.set_to_analyze_if_decompressing(case_id)
             return
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         any_decompression_started = False
@@ -154,9 +154,8 @@ class FastqFetcher(InputFetcher):
             self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
-    def is_decompression_running(self, case_id: str) -> None:
-        """Check if decompression is running for a case"""
-        # Misleading name - should be set_to_analyze_if_decompressing
+    def set_to_analyze_if_decompressing(self, case_id: str) -> None:
+        """Sets a case's action to 'analyze' if it is currently being decompressed."""
         is_decompression_running: bool = self.prepare_fastq_api.is_spring_decompression_running(
             case_id
         )
