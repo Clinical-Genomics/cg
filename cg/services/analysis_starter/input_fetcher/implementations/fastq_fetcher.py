@@ -6,7 +6,6 @@ from cg.constants.constants import CaseActions
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.models.cg_config import DataFlowConfig
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
 from cg.store.models import Case
 from cg.store.store import Store
@@ -21,12 +20,12 @@ class FastqFetcher(InputFetcher):
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
         prepare_fastq_api: PrepareFastqAPI,
-        data_flow_config: DataFlowConfig,
+        spring_archive_api: SpringArchiveAPI,
     ):
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
         self.prepare_fastq_api = prepare_fastq_api
-        self.data_flow_config = data_flow_config
+        self.spring_archive_api = spring_archive_api
 
     def ensure_files_are_ready(self, case_id: str):
         """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
@@ -42,12 +41,7 @@ class FastqFetcher(InputFetcher):
         self._ensure_illumina_run_on_disk(case_id)
         if not self._are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
-            spring_archive_api = SpringArchiveAPI(
-                status_db=self.status_db,
-                housekeeper_api=self.housekeeper_api,
-                data_flow_config=self.data_flow_config,
-            )
-            spring_archive_api.retrieve_spring_files_for_case(case_id)
+            self.spring_archive_api.retrieve_spring_files_for_case(case_id)
 
     def _ensure_illumina_run_on_disk(self, case_id: str) -> None:
         """Check if Illumina sequencing runs are on disk for given case."""
