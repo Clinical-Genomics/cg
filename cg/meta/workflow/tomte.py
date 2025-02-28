@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -79,6 +79,9 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             tissue=self.get_case_source_type(case_id=case_id),
             genome=self.get_genome_build(case_id=case_id),  # set the HG38 genome build
         )
+
+    def get_genome_build(self, case_id: str) -> str:
+        return GenomeVersion.HG38
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS
