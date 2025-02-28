@@ -38,6 +38,7 @@ class RarediseaseConfigurator(Configurator):
     def create_config(self, case_id: str, dry_run: bool = False) -> NextflowCaseConfig:
         self._create_case_directory(case_id=case_id, dry_run=False)
         self._create_nextflow_config(case_id=case_id, dry_run=False)
+        self._create_params_file(case_id=case_id, dry_run=False)
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),
