@@ -11,4 +11,5 @@ def raredisease_configurator(raredisease_context: CGConfig) -> RarediseaseConfig
     return RarediseaseConfigurator(
         store=raredisease_context.status_db,
         config=raredisease_context.raredisease,
+        lims=raredisease_context.lims_api,
     )
