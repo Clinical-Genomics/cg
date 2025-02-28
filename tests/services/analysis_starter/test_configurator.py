@@ -29,10 +29,7 @@ def test_create_config(
     case_id: str = request.getfixturevalue(case_id_fixture)
 
     # WHEN creating a case config
-    with mock.patch.object(
-        configurator, "_get_work_dir", return_value=Path(raredisease_work_dir_path)
-    ):
-        case_config: CaseConfig = configurator.create_config(case_id=case_id)
+    case_config: CaseConfig = configurator.create_config(case_id=case_id)
 
     # THEN the expected case config is returned
     expected_case_config: CaseConfig = request.getfixturevalue(case_config_fixture)

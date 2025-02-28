@@ -6,8 +6,8 @@ from cg.constants import FileExtensions
 
 
 @pytest.fixture
-def raredisease_work_dir_path(raredisease_dir: Path) -> Path:
-    return Path(raredisease_dir, "work")
+def raredisease_work_dir_path(raredisease_dir: Path, raredisease_case_id: Path) -> Path:
+    return Path(raredisease_dir, raredisease_case_id, "work")
 
 
 @pytest.fixture(scope="function")
