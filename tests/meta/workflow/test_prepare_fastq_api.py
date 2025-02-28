@@ -1,6 +1,7 @@
 """Tests for the prepare_fastq_api"""
 
 from unittest import mock
+from unittest.mock import PropertyMock
 
 import pytest
 
@@ -99,8 +100,12 @@ def test_no_samples_can_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is not possible
-    mocker.patch.object(CompressionData, "is_spring_decompression_possible")
-    CompressionData.is_spring_decompression_possible.return_value = False
+    mocker.patch.object(
+        CompressionData,
+        "is_spring_decompression_possible",
+        new_callable=PropertyMock,
+        return_value=False,
+    )
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
@@ -136,16 +141,16 @@ def test_fastq_should_be_added_to_housekeeper(
     nr_of_files_before: int = len(list(version_object.files))
 
     # GIVEN that the decompressed files exist
-    with (
-        mock.patch.object(
-            CompressionData,
-            "file_exists_and_is_accessible",
-            return_value=file_exists_and_is_accessible,
-        ),
-        mock.patch.object(crunchy.files, "get_crunchy_metadata", returnvalue=[]),
-    ):
-        # WHEN adding decompressed fastq files
-        prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
+    mock.patch.object(
+        CompressionData,
+        "file_exists_and_is_accessible",
+        return_value=file_exists_and_is_accessible,
+        new_callable=PropertyMock,
+    ),
+    mock.patch.object(crunchy.files, "get_crunchy_metadata", returnvalue=[]),
+
+    # WHEN adding decompressed fastq files
+    prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     # THEN assert that fastq files were added
     version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(

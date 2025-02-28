@@ -114,7 +114,7 @@ class PrepareFastqAPI:
             )
 
     def add_decompressed_spring_object(
-        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Case
+        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Sample
     ) -> None:
         """Adds decompressed FASTQ files to Housekeeper related to a single spring file."""
         result = True
