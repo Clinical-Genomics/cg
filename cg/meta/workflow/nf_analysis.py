@@ -241,7 +241,7 @@ class NfAnalysisAPI(AnalysisAPI):
             if fastq_file.read_direction == read_direction
         ]
 
-    def get_paired_read_paths(self, sample=Sample) -> tuple[list[str], list[str]]:
+    def get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
         """Returns a tuple of paired fastq file paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
@@ -252,7 +252,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
 
-    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
+    def get_bam_read_file_paths(self, sample: Sample) -> list[Path]:
         """Gather BAM file path for a sample based on the BAM tag."""
         return [
             Path(hk_file.full_path)
