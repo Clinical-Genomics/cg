@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from cg.apps.crunchy import CrunchyAPI, crunchy
+from cg.apps.crunchy import crunchy
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
@@ -77,8 +77,8 @@ def test_at_least_one_sample_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is possible
-    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
-    CrunchyAPI.is_spring_decompression_possible.return_value = True
+    mocker.patch.object(CompressionData, "is_spring_decompression_possible")
+    CompressionData.is_spring_decompression_possible.return_value = True
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
@@ -99,8 +99,8 @@ def test_no_samples_can_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is not possible
-    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
-    CrunchyAPI.is_spring_decompression_possible.return_value = False
+    mocker.patch.object(CompressionData, "is_spring_decompression_possible")
+    CompressionData.is_spring_decompression_possible.return_value = False
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
