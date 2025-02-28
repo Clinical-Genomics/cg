@@ -5,11 +5,10 @@ from unittest.mock import PropertyMock
 
 import pytest
 
-from cg.apps.crunchy import crunchy
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.models import CompressionData
+from cg.models import CompressionData, compression_data
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -141,16 +140,17 @@ def test_fastq_should_be_added_to_housekeeper(
     nr_of_files_before: int = len(list(version_object.files))
 
     # GIVEN that the decompressed files exist
-    mock.patch.object(
-        CompressionData,
-        "file_exists_and_is_accessible",
-        return_value=file_exists_and_is_accessible,
-        new_callable=PropertyMock,
-    ),
-    mock.patch.object(crunchy.files, "get_crunchy_metadata", returnvalue=[]),
+    with (
+        mock.patch.object(
+            CompressionData,
+            "file_exists_and_is_accessible",
+            return_value=file_exists_and_is_accessible,
+        ),
+        mock.patch.object(compression_data, "get_crunchy_metadata"),
+    ):
 
-    # WHEN adding decompressed fastq files
-    prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
+        # WHEN adding decompressed fastq files
+        prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     # THEN assert that fastq files were added
     version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(
