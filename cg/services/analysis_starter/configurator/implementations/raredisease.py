@@ -1,23 +1,35 @@
 import logging
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions, Priority, Workflow
+from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions, Priority, SequencingFileTag, Workflow
+from cg.constants.constants import FileFormat
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisType
 from cg.exc import CgDataError
+from cg.io.controller import WriteFile
 from cg.io.txt import concat_txt
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.models.cg_config import RarediseaseConfig
-from cg.models.raredisease.raredisease import RarediseaseParameters
+from cg.models.fastq import FastqFileMeta
+from cg.models.raredisease.raredisease import (
+    RarediseaseParameters,
+    RarediseaseSampleSheetEntry,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.configurator.utils import (
+    extract_read_files,
+    get_phenotype_code,
+    get_sex_code,
     get_slurm_qos_for_case,
+    parse_fastq_data,
     replace_values_in_params_file,
     write_content_to_file_or_stdout,
 )
-from cg.store.models import BedVersion, Case, Sample
+from cg.store.models import BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -26,19 +38,32 @@ LOG = logging.getLogger(__name__)
 class RarediseaseConfigurator(Configurator):
     """Configurator for Raredisease analysis."""
 
-    def __init__(self, store: Store, config: RarediseaseConfig, lims: LimsAPI):
+    def __init__(
+        self,
+        store: Store,
+        config: RarediseaseConfig,
+        housekeeper_api: HousekeeperAPI,
+        lims: LimsAPI,
+    ):
         self.account: str = config.slurm.account
         self.lims: LimsAPI = lims
+        self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.platform: str = config.platform
         self.resources: str = config.resources
         self.root_dir: str = config.root
         self.store: Store = store
         self.workflow_config_path: str = config.config
 
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return RarediseaseSampleSheetHeaders.list()
+
     def create_config(self, case_id: str, dry_run: bool = False) -> NextflowCaseConfig:
         self._create_case_directory(case_id=case_id, dry_run=False)
-        self._create_nextflow_config(case_id=case_id, dry_run=False)
+        self._create_sample_sheet(case_id=case_id, dry_run=False)
         self._create_params_file(case_id=case_id, dry_run=False)
+        self._create_nextflow_config(case_id=case_id, dry_run=False)
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),
@@ -83,10 +108,15 @@ class RarediseaseConfigurator(Configurator):
                 case_id=case_id, replaced_workflow_parameters=replaced_workflow_parameters
             )
 
-    def _get_data_analysis_type(self, case_id: str) -> str:
-        """Return data analysis type carried out."""
-        sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
-        return sample.application_version.application.analysis_type
+    def _create_sample_sheet(self, case_id: str, dry_run: bool) -> None:
+        """Create sample sheet for a case."""
+        sample_sheet_content: list[list[any]] = self._get_sample_sheet_content(case_id=case_id)
+        if not dry_run:
+            self._write_sample_sheet(
+                content=sample_sheet_content,
+                file_path=self._get_sample_sheet_path(case_id=case_id),
+                header=self.sample_sheet_headers,
+            )
 
     def _get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
@@ -122,6 +152,19 @@ class RarediseaseConfigurator(Configurator):
         qos: str = get_slurm_qos_for_case(case)
         return f'process.clusterOptions = "-A {self.account} --qos={qos}"\n'
 
+    def _get_data_analysis_type(self, case_id: str) -> str:
+        """Return data analysis type carried out."""
+        sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
+        return sample.application_version.application.analysis_type
+
+    def _get_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
+        return [
+            parse_fastq_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+            )
+        ]
+
     @staticmethod
     def _get_germlinecnvcaller_flag(analysis_type: str) -> bool:
         if analysis_type == AnalysisType.WGS:
@@ -151,6 +194,45 @@ class RarediseaseConfigurator(Configurator):
         return Path((self._get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
             FileExtensions.YAML
         )
+
+    def _get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
+        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
+        sample_metadata: list[FastqFileMeta] = self._get_file_metadata_for_sample(sample=sample)
+        fastq_forward_read_paths: list[str] = extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        fastq_reverse_read_paths: list[str] = extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+        return fastq_forward_read_paths, fastq_reverse_read_paths
+
+    def _get_sample_sheet_content(self, case_id: str) -> list[list[any]]:
+        """Return formatted information required to build a sample sheet for a case.
+        This contains information for all samples linked to the case."""
+        sample_sheet_content: list = []
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.debug("Getting sample sheet information")
+        for link in case.links:
+            sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(case_sample=link))
+        return sample_sheet_content
+
+    def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+        """Collect and format information required to build a sample sheet for a single sample."""
+        fastq_forward_read_paths, fastq_reverse_read_paths = self._get_paired_read_paths(
+            sample=case_sample.sample
+        )
+        sample_sheet_entry = RarediseaseSampleSheetEntry(
+            name=case_sample.sample.internal_id,
+            fastq_forward_read_paths=fastq_forward_read_paths,
+            fastq_reverse_read_paths=fastq_reverse_read_paths,
+            sex=get_sex_code(case_sample.sample.sex),
+            phenotype=get_phenotype_code(case_sample.status),
+            paternal_id=case_sample.get_paternal_sample_id,
+            maternal_id=case_sample.get_maternal_sample_id,
+            case_id=case_sample.case.internal_id,
+        )
+        return sample_sheet_entry.reformat_sample_content
 
     def _get_sample_sheet_path(self, case_id: str) -> Path:
         """Path to sample sheet."""
@@ -198,3 +280,19 @@ class RarediseaseConfigurator(Configurator):
             )
         else:
             self._get_params_file_path(case_id=case_id).touch()
+
+    @staticmethod
+    def _write_sample_sheet(
+        content: list[list[any]],
+        file_path: Path,
+        header: list[str],
+    ) -> None:
+        """Write sample sheet CSV file."""
+        LOG.debug("Writing sample sheet")
+        if header:
+            content.insert(0, header)
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.CSV,
+            file_path=file_path,
+        )

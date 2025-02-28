@@ -2820,7 +2820,7 @@ def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
 
 
 @pytest.fixture(scope="function")
-def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
+def nallo_nextflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
     """Path to config file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -2903,36 +2903,6 @@ def raredisease_sample_sheet_content(
         ]
     )
     return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="function")
-def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet"
-    ).with_suffix(FileExtensions.CSV)
-
-
-@pytest.fixture(scope="function")
-def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="function")
-def raredisease_gene_panel_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_dir, raredisease_case_id, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
 
 
 @pytest.fixture(scope="function")
@@ -3378,7 +3348,7 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+def rnafusion_nextflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to config file."""
     return Path(
         rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
@@ -3690,7 +3660,7 @@ def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
+def tomte_nextflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
     """Path to config file."""
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -4025,7 +3995,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_nextflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to config file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"

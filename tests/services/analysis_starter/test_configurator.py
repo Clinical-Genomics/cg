@@ -19,8 +19,8 @@ def test_create_config(
     configurator_fixture: str,
     case_config_fixture: str,
     case_id_fixture: str,
-    dummy_params_file_path: str,
-    dummy_work_dir_path: str,
+    raredisease_params_file_path: str,
+    raredisease_work_dir_path: str,
     request: pytest.FixtureRequest,
 ):
     """Test creating the case config for all pipelines."""
@@ -29,11 +29,8 @@ def test_create_config(
     case_id: str = request.getfixturevalue(case_id_fixture)
 
     # WHEN creating a case config
-    with (
-        mock.patch.object(
-            configurator, "_get_params_file_path", return_value=Path(dummy_params_file_path)
-        ),
-        mock.patch.object(configurator, "_get_work_dir", return_value=Path(dummy_work_dir_path)),
+    with mock.patch.object(
+        configurator, "_get_work_dir", return_value=Path(raredisease_work_dir_path)
     ):
         case_config: CaseConfig = configurator.create_config(case_id=case_id)
 
