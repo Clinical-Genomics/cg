@@ -91,6 +91,7 @@
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/paraphase/sample/SAMPLEID/SAMPLEID.paraphase.bam
+  step: paraphase
   tag: paraphase
 - format: bam
   id: SAMPLEID
