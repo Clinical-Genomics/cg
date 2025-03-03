@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
 
+import rich_click as click
+
 from cg.constants import FileExtensions
-from cg.io.txt import concat_txt
-from cg.services.analysis_starter.configurator.utils import write_content_to_file_or_stdout
+from cg.io.txt import concat_txt, write_txt
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -30,12 +31,8 @@ class RarediseaseNextflowConfigCreator:
         """Create a config file for the raredisease pipeline."""
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: str = self._get_file_content(case_id=case_id)
-        write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
+        self._write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
         LOG.debug(f"Created nextflow config file {file_path.as_posix()} successfully")
-
-    def _get_cluster_options(self, case_id: str) -> str:
-        case: Case = self.store.get_case_by_internal_id(case_id)
-        return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
 
     def _get_file_content(self, case_id: str) -> str:
         """Get the content of the nextflow config file."""
@@ -51,3 +48,17 @@ class RarediseaseNextflowConfigCreator:
             file_paths=config_files_list,
             str_content=case_specific_params,
         )
+
+    def _get_cluster_options(self, case_id: str) -> str:
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
+
+    @staticmethod
+    def _write_content_to_file_or_stdout(content: any, file_path: Path, dry_run: bool) -> None:
+        """Write content to file or stdout."""
+        if dry_run:
+            LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")
+            click.echo(content)
+            return
+        LOG.debug(f"Writing config file to {file_path}")
+        write_txt(content=content, file_path=file_path)

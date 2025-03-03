@@ -6,9 +6,8 @@ import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
-from cg.constants.constants import FileFormat
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.controller import WriteFile
+from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import _is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
@@ -156,11 +155,8 @@ class RarediseaseSampleSheetCreator:
         """Write sample sheet to file."""
         content.insert(0, HEADER)
         if dry_run:
+            LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")
             click.echo(content)
             return
         LOG.debug(f"Writing sample sheet to {file_path}")
-        WriteFile.write_file_from_content(
-            content=content,
-            file_format=FileFormat.CSV,
-            file_path=file_path,
-        )
+        write_csv(content=content, file_path=file_path)
