@@ -33,7 +33,6 @@ from cg.services.analysis_starter.configurator.utils import (
     extract_read_files,
     get_phenotype_code,
     get_sex_code,
-    get_slurm_qos_for_case,
     parse_fastq_data,
     replace_values_in_params_file,
     write_content_to_file_or_stdout,
@@ -307,6 +306,7 @@ class RarediseaseConfigurator(Configurator):
             file_format=FileFormat.CSV,
             file_path=file_path,
         )
+
     def _get_cluster_options(self, case_id: str) -> str:
         case: Case = self.store.get_case_by_internal_id(case_id)
         return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
