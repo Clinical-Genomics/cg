@@ -11,7 +11,6 @@
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/assembly/stats/SAMPLEID/SAMPLEID_haplotype_1.assembly_summary
-
   step: assembly
   tag: summary_hap1
 - format: meta
