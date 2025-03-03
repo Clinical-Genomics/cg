@@ -9,8 +9,8 @@ import pytest
 from cg.services.orders.storing.implementations.metagenome_order_service import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.validation.workflows.metagenome.models.order import MetagenomeOrder
-from cg.services.orders.validation.workflows.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.orders.validation.order_types.metagenome.models.order import MetagenomeOrder
+from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
 from cg.store.models import Sample
 from cg.store.store import Store
 

@@ -2,11 +2,12 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
-from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.workflows.balsamic_umi.models.case import BalsamicUmiCase
-from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
-from cg.store.models import Case as DbCase, Application
+from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
+from cg.services.orders.validation.order_types.balsamic_umi.models.case import BalsamicUmiCase
+from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
+from cg.store.models import Application
+from cg.store.models import Case as DbCase
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 

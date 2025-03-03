@@ -28,9 +28,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -321,9 +319,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1280,6 +1276,15 @@ metrics:
   name: pct_adapter
   step: multiqc
   value: 1.265529162641732
+- condition:
+    norm: lt
+    threshold: 0.20
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: PERCENT_DUPLICATION
+  step: multiqc
+  value: 0.0438
 - condition:
     norm: eq
     threshold: 'NO'
@@ -1324,9 +1329,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -1617,9 +1620,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -2576,6 +2577,15 @@ metrics:
   name: pct_adapter
   step: multiqc
   value: 1.265529162641732
+- condition:
+    norm: lt
+    threshold: 0.20
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: PERCENT_DUPLICATION
+  step: multiqc
+  value: 0.0438
 - condition:
     norm: eq
     threshold: 'NO'
