@@ -30,7 +30,6 @@ class AuthenticationService:
 
     def verify_token(self, jwt_token: str) -> User:
         """Verify the token and return the user.
-
         Args:
             token (str): The token to verify.
 
@@ -95,37 +94,3 @@ class AuthenticationService:
         if not "cg-employee" in roles:
             return False
         return True
-
-
-    def refresh_access_token(self, refresh_token: str) -> dict:
-        """
-        Refresh the user tokens.
-        Args:
-            refresh_token: the refresh token of the user
-        Raises:
-            KeycloakAuthenticationError: if the token refresh failed.
-        """
-        try:
-            return self.client.refresh_token(refresh_token)
-        except KeycloakAuthenticationError as error:
-            LOG.error(f"Token refresh failed {error}")
-            raise
-        
-    def refresh_token(self, token: str) -> dict:
-        """
-        Refresh the token when it is about to expire.
-        
-        Args: 
-            token_info: dict, the token information retrieved from the token introspection.
-        """
-        decoded_token: dict = self.decode_access_token
-        expiration_time: int = token_info.get("exp")
-        LOG.debug(f"#############Token expires at {expiration_time}###########")
-        expires_in_less_than_a_minute: bool = expiration_time < time.time() +60      
-        if expiration_time and expires_in_less_than_a_minute:
-            LOG.debug("###########User token expired, getting a new token.#############")
-            refresh_token = token_info.get("refresh_token")
-            if not refresh_token:
-                raise KeycloakAuthenticationError(error_message="Could not find refresh token")
-            new_tokens: dict = self.refresh_access_token(refresh_token)
-            return new_tokens
