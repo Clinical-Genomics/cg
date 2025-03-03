@@ -532,6 +532,13 @@ class Case(Base, PriorityMixin):
     def are_all_samples_sequenced(self) -> bool:
         return all([link.sample.last_sequenced_at for link in self.links])
 
+    def are_all_samples_control(self) -> bool:
+        """Return True if all case samples are controls."""
+        return all(
+            sample.control in [ControlOptions.NEGATIVE, ControlOptions.POSITIVE]
+            for sample in self.samples
+        )
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -566,10 +573,11 @@ class Case(Base, PriorityMixin):
         return self.analyses and self.analyses[0].uploaded_at
 
     @property
-    def slurm_priority(self) -> SlurmQos:
-        case_priority: str = self.priority
-        slurm_priority: str = Priority.priority_to_slurm_qos().get(case_priority)
-        return SlurmQos(slurm_priority)
+    def slurm_priority(self) -> str:
+        """Get Quality of service (SLURM QOS) for the case."""
+        if self.are_all_samples_control():
+            return SlurmQos.EXPRESS
+        return Priority.priority_to_slurm_qos().get(self.priority)
 
     def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to workflow specific arguments."""
