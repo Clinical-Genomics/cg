@@ -80,6 +80,7 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    sex_check={"sex-check"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
@@ -168,3 +169,7 @@ RNAFUSION_SAMPLE_TAGS = dict(
 )
 
 RANK_MODEL_THRESHOLD = 5
+
+NALLO_RANK_MODEL_THRESHOLD = 8
+NALLO_RANK_MODEL_VERSION_SNV = 1
+NALLO_RANK_MODEL_VERSION_SV = 1

@@ -169,9 +169,6 @@ class MipLoadConfig(ScoutLoadConfig):
 
 class NalloLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
-    peddy_check: str | None = None
-    peddy_ped: str | None = None
-    peddy_sex: str | None = None
     samples: list[ScoutNalloIndividual] = []
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
     vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None

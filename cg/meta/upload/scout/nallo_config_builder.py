@@ -5,7 +5,15 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import NALLO_CASE_TAGS, NALLO_SAMPLE_TAGS, GenomeBuild, UploadTrack
+from cg.constants.scout import (
+    NALLO_CASE_TAGS,
+    NALLO_RANK_MODEL_THRESHOLD,
+    NALLO_RANK_MODEL_VERSION_SNV,
+    NALLO_RANK_MODEL_VERSION_SV,
+    NALLO_SAMPLE_TAGS,
+    GenomeBuild,
+    UploadTrack,
+)
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -50,7 +58,9 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
         load_config.human_genome_build = GenomeBuild.hg38
-
+        load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
+        load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
+        load_config.sv_rank_model_version = NALLO_RANK_MODEL_VERSION_SV
         return load_config
 
     def include_case_files(self, load_config: NalloLoadConfig) -> None:
