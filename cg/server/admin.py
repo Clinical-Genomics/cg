@@ -2,7 +2,6 @@
 
 from gettext import gettext
 import http
-import token
 
 from flask import abort, flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -27,18 +26,20 @@ LOG = logging.getLogger(__name__)
 class BaseView(ModelView):
     """Base for the specific views."""
 
-    def is_accessible(self):
-        token: dict = session.get("token")
+    def is_accessible(self) -> bool:
+        """
+        Get the token from the current session and check if the user has access to view the database tables.
+        Aborts if the user does not have the required permissions or the token is invalid.
+        """
+        # This is run before the user is actually logged in due to the current setup.
+        # Set the token to None and return False before a token is available to the session. 
+    
+        token: dict| None = session.get("token", None)
         if not token:
             return False
         try:
-            auth_service.check_user_role(
-                token=token.get("access_token"), required_role="cg-employee"
-            )
-            return True
-        except KeycloakAuthenticationError as error:
-            return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
-        except KeycloakInvalidTokenError as error:
+            return auth_service.check_user_role(token["access_token"])
+        except (KeycloakAuthenticationError,KeycloakInvalidTokenError) as error:
             return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
 
     def inaccessible_callback(self, name, **kwargs):

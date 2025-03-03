@@ -77,7 +77,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
             gene_panel_clinical_filter=self.get_gene_panels_path(case_id=case_id),
             tissue=self.get_case_source_type(case_id=case_id),
-            genome=self.get_genome_build(case_id=case_id),  # set the HG38 genome build
+            genome=self.get_genome_build(case_id=case_id),
         )
 
     def get_genome_build(self, case_id: str) -> str:

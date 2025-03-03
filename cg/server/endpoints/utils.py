@@ -39,7 +39,7 @@ def before_request():
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
         return
-
+    
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return abort(
@@ -48,9 +48,6 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user: User = auth_service.verify_token(jwt_token)
-        auth_service.check_user_role(token=jwt_token, required_role="cg-employee")
-    except ValueError as error:
-        return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
     except (KeycloakError, KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED))
     except Exception as error:

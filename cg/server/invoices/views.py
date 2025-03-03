@@ -14,13 +14,14 @@ from flask import (
     send_from_directory,
     session,
     url_for,
+    g,
 )
 from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
 from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
-from cg.store.models import Customer, Invoice, Pool, Sample, User
+from cg.store.models import Customer, Invoice, Pool, Sample
 import logging
 from cg.server.ext import auth_service
 
@@ -31,15 +32,11 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
 @BLUEPRINT.before_request
 def before_request():
-    try:
-        token: dict = session.get("token")
-        auth_service.check_user_role(token=token.get("access_token"), required_role="cg-employee")
-    except KeycloakAuthenticationError as error:
-        return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
-    except KeycloakInvalidTokenError as error:
-        return abort(http.HTTPStatus.FORBIDDEN, str(error))
-    except Exception as error:
-        return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR, str(error))
+    token: str = session.get("token")
+    if not token:
+        return redirect("/")
+    if not auth_service.check_user_role(token["access_token"]):
+        return abort(http.HTTPStatus.UNAUTHORIZED, "You are not authorised to access this resource.")
 
 
 def undo_invoice(invoice_id):

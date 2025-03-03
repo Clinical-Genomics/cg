@@ -1,7 +1,10 @@
 from http import HTTPStatus
 from flask import jsonify, request, redirect, session, Blueprint
+from keycloak import KeycloakOpenID
 
+from cg.server.ext import keycloak_client
 from cg.server.ext import auth_service
+
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -12,8 +15,7 @@ AUTH_BLUEPRINT = Blueprint("auth", __name__, url_prefix="/auth")
 @AUTH_BLUEPRINT.route("/login")
 def login():
     """Redirect the user to the auth service login page."""
-    auth_url = auth_service.get_auth_url()
-    return redirect(auth_url)
+    return redirect(keycloak_client.get_auth_url())
 
 
 @AUTH_BLUEPRINT.route("/callback")
@@ -36,8 +38,8 @@ def callback():
 def logout():
     """Logout the user from the auth service."""
     refresh_token = session.get("refresh_token")
-    LOG.debug(f"refresh_token: {refresh_token}")
+    client: KeycloakOpenID = keycloak_client.get_client()
     if refresh_token:
-        auth_service.logout_user(refresh_token)
+       client.logout(refresh_token)
     session.clear()
     return redirect("/")
