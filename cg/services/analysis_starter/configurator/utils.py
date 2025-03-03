@@ -5,13 +5,11 @@ from pathlib import Path
 
 import rich_click as click
 
-from cg.constants.priority import Priority, SlurmQos
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.gzip import read_gzip_first_line
 from cg.io.txt import write_txt
 from cg.meta.workflow.fastq import _is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
-from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
