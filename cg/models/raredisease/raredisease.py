@@ -14,6 +14,7 @@ class RarediseaseQCMetrics(QCMetrics):
     total_reads: int
 
 
+# TODO: MOve this to models folder in appropriate service
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 
@@ -31,15 +32,15 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
             [
                 self.name,
                 lane + 1,
-                self.fastq_forward_read_paths,
-                self.fastq_reverse_read_paths,
+                forward_path,
+                reverse_path,
                 self.sex,
                 self.phenotype,
                 self.paternal_id,
                 self.maternal_id,
                 self.case_id,
             ]
-            for lane, (self.fastq_forward_read_paths, self.fastq_reverse_read_paths) in enumerate(
+            for lane, (forward_path, reverse_path) in enumerate(
                 zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
             )
         ]

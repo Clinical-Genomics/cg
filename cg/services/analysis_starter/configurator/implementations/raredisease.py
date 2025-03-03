@@ -26,6 +26,9 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 from cg.services.analysis_starter.configurator.params_file_creator.raredisease import (
     RarediseaseParamsCreator,
 )
+from cg.services.analysis_starter.configurator.params_file_creator.utils import (
+    replace_values_in_params_file,
+)
 from cg.services.analysis_starter.configurator.sample_sheet_creator.raredisease import (
     RarediseaseSampleSheetCreator,
 )
@@ -34,7 +37,6 @@ from cg.services.analysis_starter.configurator.utils import (
     get_phenotype_code,
     get_sex_code,
     parse_fastq_data,
-    replace_values_in_params_file,
     write_content_to_file_or_stdout,
 )
 from cg.store.models import BedVersion, Case, CaseSample, Sample

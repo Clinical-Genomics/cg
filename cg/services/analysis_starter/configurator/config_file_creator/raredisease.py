@@ -28,8 +28,8 @@ class RarediseaseNextflowConfigCreator:
 
     def create(self, case_id: str, case_path: Path, dry_run: bool = False) -> None:
         """Create a config file for the raredisease pipeline."""
-        content: str = self._get_file_content(case_id=case_id)
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: str = self._get_file_content(case_id=case_id)
         write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
         LOG.debug(f"Created nextflow config file {file_path.as_posix()} successfully")
 
