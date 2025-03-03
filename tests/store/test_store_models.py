@@ -1,4 +1,5 @@
-from cg.store.models import Application, ApplicationVersion, Customer
+from cg.constants.constants import ControlOptions
+from cg.store.models import Application, ApplicationVersion, Case, Customer
 from cg.store.store import Store
 from tests.cli.conftest import application_tag
 from tests.store_helpers import StoreHelpers
@@ -114,3 +115,17 @@ def test_multiple_collaborations(base_store, customer_id):
         collaborator.internal_id in ["cust001", new_customer_id, "cust002", "cust003", customer_id]
         for collaborator in collaborators
     )
+
+
+def test_case_samples_all_control(analysis_store: Store, case_id: str) -> None:
+    """Tests that are_all_samples_control returns True if all samples in a case are controls."""
+
+    # GIVEN a case with all samples being positive controls
+    case: Case = analysis_store.get_case_by_internal_id(case_id)
+    for sample in case.samples:
+        sample.control = ControlOptions.POSITIVE
+
+    # WHEN checking if all samples are controls
+
+    # THEN the result should be True
+    assert case.are_all_samples_control()
