@@ -14,9 +14,8 @@ from flask import (
     send_from_directory,
     session,
     url_for,
-    g,
 )
-from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
+from flask.config import T
 from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
@@ -32,11 +31,14 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
 @BLUEPRINT.before_request
 def before_request():
-    token: str = session.get("token")
+    token: dict = session.get("token")
     if not token:
-        return redirect("/")
+        ### If there is no token in the session anymore, logout the user
+        return redirect(url_for("auth.logout"))
+    token: dict = auth_service.refresh_token(token)
+    # If the user is not authorised to view the invoices, logout the user
     if not auth_service.check_user_role(token["access_token"]):
-        return abort(http.HTTPStatus.UNAUTHORIZED, "You are not authorised to access this resource.")
+        return redirect(url_for("auth.logout"))
 
 
 def undo_invoice(invoice_id):

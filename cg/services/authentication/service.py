@@ -47,35 +47,6 @@ class AuthenticationService:
             LOG.error(f"Token verification failed: {e}")
             raise
 
-    def get_user_info(self, token: dict) -> dict:
-        """Get the user information.
-        Args:
-            token (dict): The token dictionary containing the access token.
-
-        Returns:
-            dict: The user information.
-        """
-        try:
-            return self.client.userinfo(token["access_token"])
-        except KeycloakGetError as e:
-            LOG.error(f"Failed to get user info: {e}")
-            raise
-
-    def get_token(self, code: str) -> dict:
-        """Get the user token.
-        Args:
-            code (str): The authorization code.
-        Returns:
-            dict: The token dictionary.
-        """
-        try:
-            return self.client.token(
-                grant_type="authorization_code", code=code, redirect_uri=self.redirect_uri
-            )
-        except KeycloakAuthenticationError as e:
-            LOG.error(f"Failed to get token: {e}")
-            raise
-
     def check_user_role(self, access_token: str) -> bool:
         """Check if the user has the required role.
 
@@ -94,3 +65,14 @@ class AuthenticationService:
         if not "cg-employee" in roles:
             return False
         return True
+
+    def refresh_token(self, token: dict) -> dict:
+        """
+        Refresh a token if it expires in less than 10 minutes.
+        Args:
+            token: the token dictionary from keycloak
+        """
+        expires_in: int = int(token.get("expires_in"))
+        if expires_in < 600:  # Expires in ten minutes
+            return self.client.refresh_token(token.get("refresh_token"))
+        return token

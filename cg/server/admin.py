@@ -32,19 +32,23 @@ class BaseView(ModelView):
         Aborts if the user does not have the required permissions or the token is invalid.
         """
         # This is run before the user is actually logged in due to the current setup.
-        # Set the token to None and return False before a token is available to the session. 
-    
-        token: dict| None = session.get("token", None)
+        # Set the token to None and return False before a token is available to the session.
+        token: dict | None = session.get("token", None)
         if not token:
             return False
         try:
+            token: dict = auth_service.refresh_token(token)
+            session["token"] = token
             return auth_service.check_user_role(token["access_token"])
-        except (KeycloakAuthenticationError,KeycloakInvalidTokenError) as error:
+        except (KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
             return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
 
+        except Exception as error:
+            return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR), str(error)
+
     def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        return redirect(url_for("/"))
+        # redirect to logout endpoint if user doesn't have access
+        return redirect(url_for("auth.logout"))
 
 
 def view_priority(unused1, unused2, model, unused3):

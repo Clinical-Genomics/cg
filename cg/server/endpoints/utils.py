@@ -39,7 +39,7 @@ def before_request():
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
         return
-    
+
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return abort(

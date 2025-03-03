@@ -23,9 +23,9 @@ def callback():
     """Callback route for the auth service."""
     code = request.args.get("code")
     if code:
-        token = auth_service.get_token(code)
+        token: dict = keycloak_client.get_token(code)
         session["token"] = token
-        userinfo = auth_service.get_user_info(token)
+        userinfo = keycloak_client.get_user_info(token["access_token"])
         session["userinfo"] = userinfo
         return redirect("/")
     return (
@@ -38,8 +38,7 @@ def callback():
 def logout():
     """Logout the user from the auth service."""
     refresh_token = session.get("refresh_token")
-    client: KeycloakOpenID = keycloak_client.get_client()
     if refresh_token:
-       client.logout(refresh_token)
+        keycloak_client.logout_user(refresh_token)
     session.clear()
     return redirect("/")
