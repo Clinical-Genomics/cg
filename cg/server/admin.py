@@ -42,7 +42,6 @@ class BaseView(ModelView):
             return auth_service.check_user_role(token["access_token"])
         except (KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
             return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
-
         except Exception as error:
             return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR), str(error)
 

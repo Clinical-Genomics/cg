@@ -1,7 +1,6 @@
-import time
 from cg.services.user.service import UserService
 from keycloak import KeycloakAuthenticationError, KeycloakOpenID
-from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
+from keycloak.exceptions import KeycloakAuthenticationError
 from cg.store.models import User
 import logging
 
@@ -29,7 +28,7 @@ class AuthenticationService:
         self.client = keycloak_client
 
     def verify_token(self, jwt_token: str) -> User:
-        """Verify the token and return the user.
+        """Verify the token and return the user if required roles are present.
         Args:
             token (str): The token to verify.
 
@@ -41,30 +40,38 @@ class AuthenticationService:
         """
         try:
             decoded_token: dict = self.client.decode_token(jwt_token)
+            LOG.info(f"Decoded token: {decoded_token}")
+            if not self.has_required_role(decoded_token.get("realm_access", {})):
+                raise ValueError("User not permitted, role requirement not met.")
             user_email = decoded_token["email"]
             return self.user_service.get_user_by_email(user_email)
         except KeycloakAuthenticationError as e:
             LOG.error(f"Token verification failed: {e}")
             raise
 
-    def check_user_role(self, access_token: str) -> bool:
-        """Check if the user has the required role.
+    @staticmethod
+    def has_required_role(realm_access: dict) -> bool:
+        roles = realm_access.get("roles", [])
+        if not "cg-employee" in roles:
+            return False
+        return True
 
+    def check_user_role(self, access_token: str) -> bool:
+        """Check if the user has the required role using the access token.
         Args:
             token (str): The access token for a user token.
             required_role (str): The role to check.
-
         Returns:
-            None
-
+            bool
         Raises:
             KeycloakAuthenticationError: If the user does not have the required role.
         """
         token_introspect: dict = self.client.introspect(access_token)
-        roles = token_introspect.get("realm_access", {}).get("roles", [])
-        if not "cg-employee" in roles:
+        LOG.info(f"{token_introspect}")
+        access = token_introspect.get("realm_access", {})
+        if not access:
             return False
-        return True
+        return self.has_required_role(access)
 
     def refresh_token(self, token: dict) -> dict:
         """

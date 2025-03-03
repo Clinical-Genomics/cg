@@ -1,3 +1,4 @@
+from email import message
 import logging
 from functools import wraps
 from http import HTTPStatus
@@ -7,6 +8,7 @@ from keycloak import KeycloakAuthenticationError, KeycloakError, KeycloakInvalid
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
 
+from cg import exc
 from cg.server.ext import auth_service
 from cg.store.models import User
 
@@ -48,6 +50,8 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user: User = auth_service.verify_token(jwt_token)
+    except ValueError as error:
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
     except (KeycloakError, KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
         return abort(make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED))
     except Exception as error:
