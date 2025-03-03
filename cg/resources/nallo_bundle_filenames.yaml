@@ -99,10 +99,20 @@
   step: paraphase
   tag: paraphase_index
 - format: json
-  id: SAMPLEID
-  path: PATHTOCASE/paraphase/sample/SAMPLEID/SAMPLEID.paraphase.json
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_merged.json
   step: paraphase
   tag: json
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_paraphase_merged.vcf.gz
+  step: paraphase
+  tag: vcf
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_paraphase_merged.vcf.gz.tbi
+  step: paraphase
+  tag: vcf_index
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
