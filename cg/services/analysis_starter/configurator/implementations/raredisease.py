@@ -147,11 +147,6 @@ class RarediseaseConfigurator(Configurator):
         case: Case = self.store.get_case_by_internal_id(case_id)
         return Workflow(case.data_analysis)
 
-    def _get_cluster_options(self, case_id: str) -> str:
-        case: Case = self.store.get_case_by_internal_id(case_id)
-        qos: str = get_slurm_qos_for_case(case)
-        return f'process.clusterOptions = "-A {self.account} --qos={qos}"\n'
-
     def _get_data_analysis_type(self, case_id: str) -> str:
         """Return data analysis type carried out."""
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
@@ -296,3 +291,6 @@ class RarediseaseConfigurator(Configurator):
             file_format=FileFormat.CSV,
             file_path=file_path,
         )
+    def _get_cluster_options(self, case_id: str) -> str:
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
