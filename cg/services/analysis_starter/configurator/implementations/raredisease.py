@@ -6,10 +6,7 @@ from cg.io.txt import concat_txt
 from cg.models.cg_config import RarediseaseConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.configurator.utils import (
-    get_slurm_qos_for_case,
-    write_content_to_file_or_stdout,
-)
+from cg.services.analysis_starter.configurator.utils import write_content_to_file_or_stdout
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -95,5 +92,4 @@ class RarediseaseConfigurator(Configurator):
 
     def _get_cluster_options(self, case_id: str) -> str:
         case: Case = self.store.get_case_by_internal_id(case_id)
-        qos: str = get_slurm_qos_for_case(case)
-        return f'process.clusterOptions = "-A {self.account} --qos={qos}"\n'
+        return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
