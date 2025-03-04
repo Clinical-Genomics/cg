@@ -61,7 +61,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Nallo files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
-            snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+            snv_vcf=self.housekeeper_api.get_latest_file(
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_SNV_CLINICAL,
@@ -71,7 +71,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
                     HermesFileTag.SCOUT,
                 ],
             ).full_path,
-            sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+            sv_vcf=self.housekeeper_api.get_latest_file(
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_SV_CLINICAL,
@@ -81,7 +81,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
                     HermesFileTag.SCOUT,
                 ],
             ).full_path,
-            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
+            vcf_str=self.housekeeper_api.get_latest_file(
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_STR,
