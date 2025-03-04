@@ -15,6 +15,12 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
+class NextflowFileType(StrEnum):
+    PARAMS = "params_file"
+    SAMPLE_SHEET = "sample_sheet"
+    CONFIG = "nextflow_config"
+
+
 NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 25},
 }
