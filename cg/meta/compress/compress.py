@@ -14,7 +14,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)

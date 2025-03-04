@@ -3,7 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 
 def test_get_run_name():

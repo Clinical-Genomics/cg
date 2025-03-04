@@ -18,7 +18,7 @@ from cg.apps.crunchy.sbatch import (
 )
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.priority import SlurmQos
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 from cg.models.slurm.sbatch import Sbatch
 
 LOG = logging.getLogger(__name__)

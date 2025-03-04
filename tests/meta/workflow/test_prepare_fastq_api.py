@@ -8,7 +8,8 @@ import pytest
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.models import CompressionData, compression_data
+from cg.models import compression_data
+from cg.models.compression_data import CompressionData
 from cg.store.models import Case
 from cg.store.store import Store
 

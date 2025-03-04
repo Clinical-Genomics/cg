@@ -8,7 +8,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 
 def test_get_tmp_path_correct_place(project_dir: Path):
