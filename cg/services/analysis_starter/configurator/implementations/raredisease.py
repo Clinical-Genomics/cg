@@ -19,19 +19,16 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
-from cg.services.analysis_starter.configurator.config_file_creator.raredisease import (
-    RarediseaseNextflowConfigCreator,
+from cg.services.analysis_starter.configurator.file_creators.config_creator import (
+    ConfigFileContentCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.params.raredisease import (
+    RarediseaseParamsFileContentCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
+    RarediseaseSampleSheetContentCreator,
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.configurator.params_file_creator.raredisease import (
-    RarediseaseParamsCreator,
-)
-from cg.services.analysis_starter.configurator.params_file_creator.utils import (
-    replace_values_in_params_file,
-)
-from cg.services.analysis_starter.configurator.sample_sheet_creator.raredisease import (
-    RarediseaseSampleSheetCreator,
-)
 from cg.services.analysis_starter.configurator.utils import (
     extract_read_files,
     get_phenotype_code,
@@ -54,13 +51,13 @@ class RarediseaseConfigurator(Configurator):
         config: RarediseaseConfig,
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
-        sample_sheet_creator: RarediseaseSampleSheetCreator,
-        config_file_creator: RarediseaseNextflowConfigCreator,
-        parameters_file_creator: RarediseaseParamsCreator,
+        sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
+        config_file_content_creator: ConfigFileContentCreator,
+        parameters_content_file_creator: RarediseaseParamsFileContentCreator,
     ):
-        self.sample_sheet_creator = sample_sheet_creator
-        self.config_file_creator = config_file_creator
-        self.parameters_file_creator = parameters_file_creator
+        self.sample_sheet_content_creator = sample_sheet_content_creator
+        self.config_file_content_creator = config_file_content_creator
+        self.parameters_content_file_creator = parameters_content_file_creator
         self.account: str = config.slurm.account
         self.lims: LimsAPI = lims
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
@@ -76,11 +73,12 @@ class RarediseaseConfigurator(Configurator):
         return RarediseaseSampleSheetHeaders.list()
 
     def create_config(self, case_id: str, dry_run: bool = False) -> NextflowCaseConfig:
-        case_path: Path = self._get_case_path(case_id=case_id)
         self._create_case_directory(case_id=case_id, dry_run=False)
         self._create_sample_sheet(case_id=case_id, dry_run=False)
         self._create_params_file(case_id=case_id, dry_run=False)
-        self.config_file_creator.create(case_id=case_id, case_path=case_path, dry_run=dry_run)
+        self._create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        self._create_gene_panel(case_id=case_id, dry_run=dry_run)
+        self._write_managed_variants(case_id=case_id, dry_run=dry_run)
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),

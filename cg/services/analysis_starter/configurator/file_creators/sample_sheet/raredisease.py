@@ -2,12 +2,10 @@ import logging
 import re
 from pathlib import Path
 
-import rich_click as click
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FileExtensions, SequencingFileTag
+from cg.apps.lims import LimsAPI
+from cg.constants import SequencingFileTag
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import _is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
@@ -15,36 +13,27 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.services.analysis_starter.configurator.file_creators.abstract import NextflowFileCreator
+from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
+from cg.services.analysis_starter.configurator.file_creators.utils import get_case_id_from_path
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
-HEADER: list[str] = RarediseaseSampleSheetHeaders.list()
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseSampleSheetCreator(NextflowFileCreator):
+class RarediseaseSampleSheetContentCreator(FileContentCreator):
 
-    def __init__(self, store: Store, housekeeper_api: HousekeeperAPI):
-        self.housekeeper_api = housekeeper_api
+    def __init__(self, store: Store, housekeeper_api: HousekeeperAPI, lims: LimsAPI):
         self.store = store
+        self.housekeeper_api = housekeeper_api
+        self.lims = lims
 
-    @staticmethod
-    def get_file_path(case_id: str, case_path: Path) -> Path:
-        """Path to sample sheet."""
-        return NextflowFileCreator._get_sample_sheet_path(case_id=case_id, case_path=case_path)
-
-    def create(self, case_id: str, case_path: Path, dry_run: bool = False) -> None:
-        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
-        content: list[list[any]] = self._get_file_content(case_id=case_id)
-        self._write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
-
-    def _get_file_content(self, case_id: str) -> list[list[str]]:
+    def create(self, case_path: Path) -> any:
         """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
-        sample_sheet_content: list = []
+        case_id: str = get_case_id_from_path(case_path=case_path)
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        sample_sheet_content: list[list[str]] = [RarediseaseSampleSheetHeaders.list()]
         for link in case.links:
             sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(case_sample=link))
         return sample_sheet_content
@@ -132,7 +121,6 @@ class RarediseaseSampleSheetCreator(NextflowFileCreator):
     @staticmethod
     def _get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to integer code")
         try:
             code = PlinkPhenotypeStatus[phenotype.upper()]
         except KeyError:
@@ -140,24 +128,10 @@ class RarediseaseSampleSheetCreator(NextflowFileCreator):
         return code
 
     @staticmethod
-    def _get_sex_code(sex: str) -> int:
+    def _get_sex_code(sex: str) -> PlinkSex:
         """Return Raredisease sex code."""
-        LOG.debug("Translate sex to integer code")
         try:
             code = PlinkSex[sex.upper()]
         except KeyError:
             raise ValueError(f"{sex} is not a valid sex")
         return code
-
-    @staticmethod
-    def _write_content_to_file_or_stdout(
-        content: list[list[any]], file_path: Path, dry_run: bool = False
-    ) -> None:
-        """Write sample sheet to file."""
-        content.insert(0, HEADER)
-        if dry_run:
-            LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")
-            click.echo(content)
-            return
-        LOG.debug(f"Writing sample sheet to {file_path}")
-        write_csv(content=content, file_path=file_path)
