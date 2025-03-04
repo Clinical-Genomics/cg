@@ -15,26 +15,30 @@ from flask import (
     session,
     url_for,
 )
-from flask_dance.contrib.google import google
-
+from flask.config import T
 from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
 from cg.store.models import Customer, Invoice, Pool, Sample
+import logging
+from cg.server.ext import auth_service
+
+LOG = logging.getLogger(__name__)
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
 
 @BLUEPRINT.before_request
 def before_request():
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
-
-def logged_in():
-    user = db.get_user_by_email(email=session.get("user_email"))
-    return google.authorized and user and user.is_admin
+    token: dict = session.get("token")
+    if not token:
+        ### If there is no token in the session anymore, logout the user
+        return redirect(url_for("auth.logout"))
+    token: dict = auth_service.refresh_token(token)
+    # If the user is not authorised to view the invoices, logout the user
+    if not auth_service.check_user_role(token["access_token"]):
+        return redirect(url_for("auth.logout"))
 
 
 def undo_invoice(invoice_id):

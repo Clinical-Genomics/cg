@@ -1,11 +1,12 @@
 """Module for Flask-Admin views"""
 
 from gettext import gettext
+import http
 
-from flask import flash, redirect, request, session, url_for
+from flask import abort, flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from flask_dance.contrib.google import google
+from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
 from markupsafe import Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
@@ -16,18 +17,37 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.ext import auth_service
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class BaseView(ModelView):
     """Base for the specific views."""
 
-    def is_accessible(self):
-        user = db.get_user_by_email(email=session.get("user_email"))
-        return bool(google.authorized and user and user.is_admin)
+    def is_accessible(self) -> bool:
+        """
+        Get the token from the current session and check if the user has access to view the database tables.
+        Aborts if the user does not have the required permissions or the token is invalid.
+        """
+        # This is run before the user is actually logged in due to the current setup.
+        # Set the token to None and return False before a token is available to the session.
+        token: dict | None = session.get("token", None)
+        if not token:
+            return False
+        try:
+            token: dict = auth_service.refresh_token(token)
+            session["token"] = token
+            return auth_service.check_user_role(token["access_token"])
+        except (KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
+            return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
+        except Exception as error:
+            return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR), str(error)
 
     def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        return redirect(url_for("google.login", next=request.url))
+        # redirect to logout endpoint if user doesn't have access
+        return redirect(url_for("auth.logout"))
 
 
 def view_priority(unused1, unused2, model, unused3):
