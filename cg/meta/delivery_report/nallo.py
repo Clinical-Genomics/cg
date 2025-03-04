@@ -61,15 +61,36 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Nallo files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
-            ),
+            snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_SNV_CLINICAL,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
+            sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_SV_CLINICAL,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
+            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_STR,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
         )
 
     @staticmethod
