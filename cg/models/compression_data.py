@@ -135,8 +135,7 @@ class CompressionData:
         - Compression is running          -> Compression NOT possible
         - SPRING file exists on Hasta     -> Compression NOT possible
         - Data is external                -> Compression NOT possible
-        - Not compressed and
-           not running  -> Compression IS possible
+        - Not compressed and not running  -> Compression IS possible
         """
         if self.is_compression_pending:
             return False

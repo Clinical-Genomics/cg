@@ -5,7 +5,6 @@
     along with the helper methods.
 """
 
-import datetime
 import logging
 from pathlib import Path
 
@@ -18,7 +17,6 @@ from cg.apps.crunchy.sbatch import (
     SPRING_TO_FASTQ_ERROR,
 )
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import FASTQ_DELTA
 from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
@@ -157,13 +155,3 @@ class CrunchyAPI:
         )
         LOG.info(f"Spring decompression running as job {sbatch_number}")
         return sbatch_number
-
-    @staticmethod
-    def check_if_update_spring(file_date: datetime.date) -> bool:
-        """Check if date is older than FASTQ_DELTA."""
-        delta = file_date + datetime.timedelta(days=FASTQ_DELTA)
-        now = datetime.datetime.now()
-        if delta > now.date():
-            LOG.info("FASTQ files are not old enough")
-            return False
-        return True
