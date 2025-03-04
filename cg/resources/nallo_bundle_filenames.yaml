@@ -10,63 +10,53 @@
   tag: alignment_haplotags_index
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap1.p_ctg.assembly_summary
+  path: PATHTOCASE/assembly/stats/SAMPLEID/SAMPLEID_haplotype_1.assembly_summary
   step: assembly
   tag: summary_hap1
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/assembly_haplotypes/gfastats/SAMPLEID/SAMPLEID.asm.bp.hap2.p_ctg.assembly_summary
+  path: PATHTOCASE/assembly/stats/SAMPLEID/SAMPLEID_haplotype_2.assembly_summary
   step: assembly
   tag: summary_hap2
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam
+  path: PATHTOCASE/assembly/sample/SAMPLEID/SAMPLEID_aligned_assembly.bam
   step: assembly
-  tag: assembly_hap1_mapped
+  tag: assembly_aligned
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap1.bam.bai
+  path: PATHTOCASE/assembly/sample/SAMPLEID/SAMPLEID_aligned_assembly.bam.bai
   step: assembly
-  tag: assembly_hap1_mapped_index
-- format: bam
-  id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam
-  step: assembly
-  tag: assembly_hap2_mapped
-- format: bam
-  id: SAMPLEID
-  path: PATHTOCASE/assembly_variant_calling/dipcall/SAMPLEID/SAMPLEID.hap2.bam.bai
-  step: assembly
-  tag: assembly_hap2_mapped_index
+  tag: assembly_aligned_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
-  step: summary_counts
+  step: methylation_pileup
   tag: hap1
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
-  step: summary_counts
+  step: methylation_pileup
   tag: hap1_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
-  step: summary_counts
+  step: methylation_pileup
   tag: hap2
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
-  step: summary_counts
+  step: methylation_pileup
   tag: hap2_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
-  step: summary_counts
+  step: methylation_pileup
   tag: ungrouped
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
-  step: summary_counts
+  step: methylation_pileup
   tag: ungrouped_index
 - format: meta
   id: SAMPLEID
@@ -100,19 +90,29 @@
   tag: report
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam
+  path: PATHTOCASE/paraphase/sample/SAMPLEID/SAMPLEID.paraphase.bam
   step: paraphase
   tag: paraphase
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.bam.bai
+  path: PATHTOCASE/paraphase/sample/SAMPLEID/SAMPLEID.paraphase.bam.bai
   step: paraphase
   tag: paraphase_index
 - format: json
-  id: SAMPLEID
-  path: PATHTOCASE/paraphase/SAMPLEID/SAMPLEID.paraphase.json
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_merged.json
   step: paraphase
   tag: json
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_paraphase_merged.vcf.gz
+  step: paraphase
+  tag: vcf
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_paraphase_merged.vcf.gz.tbi
+  step: paraphase
+  tag: vcf_index
 - format: vcf
   id: SAMPLEID
   path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
@@ -145,12 +145,12 @@
   tag: vcf_str_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snv_annotated_ranked.vcf.gz
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz
   step: snv_annotated
   tag: vcf_snv_research
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snv_annotated_ranked.vcf.gz.tbi
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz.tbi
   step: snv_annotated
   tag: vcf_snv_research_index
 - format: vcf

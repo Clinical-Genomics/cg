@@ -29,7 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.utils.utils import are_all_samples_control, MAP_TO_TRAILBLAZER_PRIORITY
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
@@ -132,10 +132,7 @@ class AnalysisAPI(MetaAPI):
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if are_all_samples_control(case=case):
-            return SlurmQos.EXPRESS
-        priority: int = case.priority or Priority.research
-        return Priority.priority_to_slurm_qos().get(priority)
+        return case.slurm_priority
 
     def get_trailblazer_priority(self, case_id: str) -> int:
         """Get the priority for the case in Trailblazer."""
