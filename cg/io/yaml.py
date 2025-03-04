@@ -28,7 +28,6 @@ def write_yaml_stream(content: Any) -> str:
     return yaml.dump(content)
 
 
-# TODO: Refactor this into a content convertor (without writting)
 def write_yaml_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
     """Write content to yaml file accepted by Nextflow with non-quoted booleans and quoted strings."""
     with open(file_path, "w") as outfile:
