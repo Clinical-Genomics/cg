@@ -8,9 +8,9 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import ChecksumFailedError
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
+from cg.services.pdc_service.pdc_service import PdcService
 
 LOG = logging.getLogger(__name__)
 

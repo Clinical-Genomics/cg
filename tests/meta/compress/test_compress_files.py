@@ -3,7 +3,7 @@
 import logging
 
 from cg.meta.compress import files
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 
 def test_get_fastq_files(populated_compress_fastq_api, sample):

@@ -1,14 +1,15 @@
 """Tests for the prepare_fastq_api"""
 
 from unittest import mock
+from unittest.mock import PropertyMock
 
 import pytest
 
-from cg.apps.crunchy import CrunchyAPI, crunchy
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.models import CompressionData
+from cg.models import compression_data
+from cg.models.compression_data import CompressionData
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -77,8 +78,8 @@ def test_at_least_one_sample_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is possible
-    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
-    CrunchyAPI.is_spring_decompression_possible.return_value = True
+    mocker.patch.object(CompressionData, "is_spring_decompression_possible")
+    CompressionData.is_spring_decompression_possible.return_value = True
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
@@ -99,8 +100,12 @@ def test_no_samples_can_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is not possible
-    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
-    CrunchyAPI.is_spring_decompression_possible.return_value = False
+    mocker.patch.object(
+        CompressionData,
+        "is_spring_decompression_possible",
+        new_callable=PropertyMock,
+        return_value=False,
+    )
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
@@ -142,8 +147,9 @@ def test_fastq_should_be_added_to_housekeeper(
             "file_exists_and_is_accessible",
             return_value=file_exists_and_is_accessible,
         ),
-        mock.patch.object(crunchy.files, "get_crunchy_metadata", returnvalue=[]),
+        mock.patch.object(compression_data, "get_crunchy_metadata"),
     ):
+
         # WHEN adding decompressed fastq files
         prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 

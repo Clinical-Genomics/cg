@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class MockCrunchyAPI(CrunchyAPI):
             return False
 
         if self._compression_done_all:
-            print(f"Compression done")
+            print("Compression done")
             return False
 
         compression_possible = self._compression_possible_files.get(
