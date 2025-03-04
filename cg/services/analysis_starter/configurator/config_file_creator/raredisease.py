@@ -5,12 +5,13 @@ import rich_click as click
 
 from cg.constants import FileExtensions
 from cg.io.txt import concat_txt, write_txt
+from cg.services.analysis_starter.configurator.file_creators.abstract import NextflowFileCreator
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseNextflowConfigCreator:
+class RarediseaseNextflowConfigCreator(NextflowFileCreator):
     """Create a config file for the raredisease pipeline."""
 
     def __init__(
@@ -54,7 +55,7 @@ class RarediseaseNextflowConfigCreator:
         return f'process.clusterOptions = "-A {self.account} --qos={case.slurm_priority}"\n'
 
     @staticmethod
-    def _write_content_to_file_or_stdout(content: any, file_path: Path, dry_run: bool) -> None:
+    def _write_content_to_file_or_stdout(content: str, file_path: Path, dry_run: bool) -> None:
         """Write content to file or stdout."""
         if dry_run:
             LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")

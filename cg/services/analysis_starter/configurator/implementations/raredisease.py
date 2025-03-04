@@ -113,7 +113,6 @@ class RarediseaseConfigurator(Configurator):
             case_id=case_id
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
-
         workflow_parameters: dict = built_workflow_parameters | (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )

@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+import rich_click as click
+
 from cg.apps.lims import LimsAPI
 from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions
 from cg.constants.scout import ScoutExportFileName
@@ -8,6 +10,7 @@ from cg.constants.tb import AnalysisType
 from cg.exc import CgDataError
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.models.raredisease.raredisease import RarediseaseParameters
+from cg.services.analysis_starter.configurator.file_creators.abstract import NextflowFileCreator
 from cg.services.analysis_starter.configurator.params_file_creator.utils import (
     replace_values_in_params_file,
 )
@@ -16,7 +19,7 @@ from cg.store.models import BedVersion, Case, Sample
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseParamsCreator:
+class RarediseaseParamsCreator(NextflowFileCreator):
 
     def __init__(self, store, lims: LimsAPI, params: str):
         self.store = store
@@ -27,26 +30,28 @@ class RarediseaseParamsCreator:
     def get_file_path(case_id: str, case_path: Path) -> Path:
         return Path(case_path, f"{case_id}_params_file").with_suffix(FileExtensions.YAML)
 
-    def create(
-        self, case_id: str, case_path: Path, sample_sheet_path: Path, dry_run: bool = False
-    ) -> None:
+    def create(self, case_id: str, case_path: Path, dry_run: bool = False) -> None:
         """Create parameters file for a case."""
+        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: any = self._get_file_content(
+            case_id=case_id,
+            case_path=case_path,
+        )
+        self._write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
+
+    def _get_file_content(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> dict:
+        """Return parameters."""
         LOG.debug("Getting parameters information built on-the-fly")
         built_workflow_parameters: dict | None = self._get_built_workflow_parameters(
-            case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
+            case_id=case_id,
+            case_path=case_path,
+            sample_sheet_path=sample_sheet_path,
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
-
         workflow_parameters: dict = built_workflow_parameters | (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
-        replaced_workflow_parameters: dict = replace_values_in_params_file(
-            workflow_parameters=workflow_parameters
-        )
-        if not dry_run:
-            self._write_file(
-                case_id=case_id, content=replaced_workflow_parameters, case_path=case_path
-            )
+        return replace_values_in_params_file(workflow_parameters)
 
     def _get_built_workflow_parameters(
         self, case_id: str, case_path: Path, sample_sheet_path: Path
@@ -54,8 +59,8 @@ class RarediseaseParamsCreator:
         """Return parameters."""
         analysis_type: str = self._get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self._get_target_bed(case_id=case_id, analysis_type=analysis_type)
-        skip_germlinecnvcaller = self._get_germlinecnvcaller_flag(analysis_type=analysis_type)
-        outdir = case_path
+        skip_germlinecnvcaller: bool = self._get_germlinecnvcaller_flag(analysis_type=analysis_type)
+        outdir: Path = case_path
 
         return RarediseaseParameters(
             input=sample_sheet_path,
@@ -107,6 +112,11 @@ class RarediseaseParamsCreator:
             raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
         return bed_version.filename
 
+    @staticmethod
+    def _get_germlinecnvcaller_flag(analysis_type: str) -> bool:
+        """Return True if the germlinecnvcaller should be skipped."""
+        return True if analysis_type == AnalysisType.WGS else False
+
     def _write_file(self, case_id: str, case_path: Path, content: dict = None) -> None:
         """Write params-file for analysis."""
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
@@ -118,3 +128,12 @@ class RarediseaseParamsCreator:
             )
         else:
             file_path.touch()
+
+    @staticmethod
+    def _write_content_to_file_or_stdout(content: any, file_path: Path, dry_run: bool) -> None:
+        if dry_run:
+            LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")
+            click.echo(content)
+            return
+        LOG.debug(f"Writing params file to {file_path}")
+        write_yaml_nextflow_style(content=content, file_path=file_path)

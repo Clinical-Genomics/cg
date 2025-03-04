@@ -15,6 +15,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
+from cg.services.analysis_starter.configurator.file_creators.abstract import NextflowFileCreator
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -22,23 +23,23 @@ HEADER: list[str] = RarediseaseSampleSheetHeaders.list()
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseSampleSheetCreator:
+class RarediseaseSampleSheetCreator(NextflowFileCreator):
 
     def __init__(self, store: Store, housekeeper_api: HousekeeperAPI):
         self.housekeeper_api = housekeeper_api
         self.store = store
 
     @staticmethod
-    def get_sample_sheet_path(case_id: str, case_path: Path) -> Path:
+    def get_file_path(case_id: str, case_path: Path) -> Path:
         """Path to sample sheet."""
-        return Path(case_path, f"{case_id}_samplesheet").with_suffix(FileExtensions.CSV)
+        return NextflowFileCreator._get_sample_sheet_path(case_id=case_id, case_path=case_path)
 
     def create(self, case_id: str, case_path: Path, dry_run: bool = False) -> None:
-        file_path: Path = self.get_sample_sheet_path(case_id=case_id, case_path=case_path)
-        content: list[list[any]] = self._get_content(case_id=case_id)
+        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: list[list[any]] = self._get_file_content(case_id=case_id)
         self._write_content_to_file_or_stdout(content=content, file_path=file_path, dry_run=dry_run)
 
-    def _get_content(self, case_id: str) -> list[list[str]]:
+    def _get_file_content(self, case_id: str) -> list[list[str]]:
         """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
         sample_sheet_content: list = []
