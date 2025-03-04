@@ -17,14 +17,14 @@ from cg.services.orders.validation.index_sequences import INDEX_SEQUENCES
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
 from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.models.sample_aliases import IndexedSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
 from cg.services.orders.validation.rules.utils import (
     get_application_concentration_interval,
     get_concentration_interval,
     has_sample_invalid_concentration,
     is_sample_cfdna,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.fastq.models.sample import FastqSample
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -220,23 +220,6 @@ def is_index_number_out_of_range(sample: IndexedSample) -> bool:
     Note: Index number is an attribute on the sample, not its position in the list of samples."""
     return sample.index_number and not (
         1 <= sample.index_number <= len(INDEX_SEQUENCES[sample.index])
-    )
-
-
-def is_index_sequence_missing(sample: IndexedSample) -> bool:
-    """Checks if a sample is missing its index number.
-    Note: Index sequence is an attribute on the sample, not its position in the list of samples."""
-    return sample.index != IndexEnum.NO_INDEX and not sample.index_sequence
-
-
-def is_index_sequence_mismatched(sample: IndexedSample) -> bool:
-    """Validates if the sample's index sequence matches the given index and index number.
-    The index numbers start at 1, creating an offset."""
-    return (
-        sample.index_sequence
-        and sample.index != IndexEnum.NO_INDEX
-        and not is_index_number_out_of_range(sample)
-        and INDEX_SEQUENCES[sample.index][sample.index_number - 1] != sample.index_sequence
     )
 
 

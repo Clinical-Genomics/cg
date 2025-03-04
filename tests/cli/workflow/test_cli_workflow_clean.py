@@ -3,7 +3,6 @@ from click.testing import CliRunner
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
-    balsamic_qc_past_run_dirs,
     balsamic_umi_past_run_dirs,
     fluffy_past_run_dirs,
     microsalt_past_run_dirs,
@@ -28,20 +27,6 @@ def test_cli_workflow_clean_balsamic(
     result = cli_runner.invoke(balsamic_past_run_dirs, [before_date], obj=base_context)
 
     # THEN command should exit successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-
-def test_cli_workflow_clean_balsamic_qc(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    before_date: str,
-):
-    # GIVEN a before string
-
-    # WHEN running command in dry-run
-    result = cli_runner.invoke(balsamic_qc_past_run_dirs, [before_date], obj=base_context)
-
-    # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
 
 

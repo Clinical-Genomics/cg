@@ -28,6 +28,9 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
+from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
+from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
     has_sample_invalid_concentration,
@@ -35,8 +38,6 @@ from cg.services.orders.validation.rules.utils import (
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.store.models import Application, Customer
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
@@ -112,12 +113,12 @@ def get_repeated_case_name_errors(order: OrderWithCases) -> list[RepeatedCaseNam
 
 
 def get_father_sex_errors(
-    case: CaseContainingRelatives, case_index: int
+    case: CaseContainingRelatives, case_index: int, store: Store
 ) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
     for child, child_index in children:
-        if is_father_sex_invalid(child=child, case=case):
+        if is_father_sex_invalid(child=child, case=case, store=store):
             error: InvalidFatherSexError = create_father_sex_error(
                 case_index=case_index, sample_index=child_index
             )
@@ -125,8 +126,14 @@ def get_father_sex_errors(
     return errors
 
 
-def is_father_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
-    father: SampleWithRelatives | None = case.get_sample(child.father)
+def is_father_sex_invalid(
+    child: SampleWithRelatives, case: CaseContainingRelatives, store: Store
+) -> bool:
+    father: SampleWithRelatives | None = case.get_new_sample(child.father)
+    if not father:
+        father: DbSample | None = case.get_existing_sample_from_db(
+            sample_name=child.father, store=store
+        )
     return father and father.sex != Sex.MALE
 
 
@@ -135,14 +142,14 @@ def create_father_sex_error(case_index: int, sample_index: int) -> InvalidFather
 
 
 def get_father_case_errors(
-    case: CaseContainingRelatives,
-    case_index: int,
+    case: CaseContainingRelatives, case_index: int, store: Store
 ) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_father()
+    children: list[tuple[SampleWithRelatives | ExistingSample, int]] = (
+        case.get_samples_with_father()
+    )
     for child, child_index in children:
-        father: SampleWithRelatives | None = case.get_sample(child.father)
-        if not father:
+        if not is_sample_in_case(case=case, sample_name=child.father, store=store):
             error: FatherNotInCaseError = create_father_case_error(
                 case_index=case_index,
                 sample_index=child_index,
@@ -152,13 +159,12 @@ def get_father_case_errors(
 
 
 def get_mother_sex_errors(
-    case: CaseContainingRelatives,
-    case_index: int,
+    case: CaseContainingRelatives, case_index: int, store: Store
 ) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
-        if is_mother_sex_invalid(child=child, case=case):
+        if is_mother_sex_invalid(child=child, case=case, store=store):
             error: InvalidMotherSexError = create_mother_sex_error(
                 case_index=case_index,
                 sample_index=child_index,
@@ -168,14 +174,12 @@ def get_mother_sex_errors(
 
 
 def get_mother_case_errors(
-    case: CaseContainingRelatives,
-    case_index: int,
+    case: CaseContainingRelatives, case_index: int, store: Store
 ) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
     children: list[tuple[SampleWithRelatives, int]] = case.get_samples_with_mother()
     for child, child_index in children:
-        mother: SampleWithRelatives | None = case.get_sample(child.mother)
-        if not mother:
+        if not is_sample_in_case(case=case, sample_name=child.mother, store=store):
             error: MotherNotInCaseError = create_mother_case_error(
                 case_index=case_index, sample_index=child_index
             )
@@ -191,8 +195,14 @@ def create_mother_case_error(case_index: int, sample_index: int) -> MotherNotInC
     return MotherNotInCaseError(case_index=case_index, sample_index=sample_index)
 
 
-def is_mother_sex_invalid(child: SampleWithRelatives, case: CaseContainingRelatives) -> bool:
-    mother: SampleWithRelatives | None = case.get_sample(child.mother)
+def is_mother_sex_invalid(
+    child: SampleWithRelatives, case: CaseContainingRelatives, store: Store
+) -> bool:
+    mother: SampleWithRelatives | None = case.get_new_sample(child.mother)
+    if not mother:
+        mother: DbSample | None = case.get_existing_sample_from_db(
+            sample_name=child.mother, store=store
+        )
     return mother and mother.sex != Sex.FEMALE
 
 

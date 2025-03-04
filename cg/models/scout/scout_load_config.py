@@ -93,6 +93,7 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     vcf2cytosure: str | None = None
     mitodel_file: str | None = None
     reviewer: Reviewer = Reviewer()
+    d4_file: str | None = None
 
 
 class ScoutCancerIndividual(ScoutIndividual):
