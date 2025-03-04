@@ -65,30 +65,18 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_SNV_CLINICAL,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
                 ],
             ).full_path,
             sv_vcf=self.housekeeper_api.get_latest_file(
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_SV_CLINICAL,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
                 ],
             ).full_path,
             vcf_str=self.housekeeper_api.get_latest_file(
                 bundle=case_id,
                 tags=[
                     AnalysisTag.VCF_STR,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
                 ],
             ).full_path,
         )
