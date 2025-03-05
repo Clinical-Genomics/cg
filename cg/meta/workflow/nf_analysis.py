@@ -362,8 +362,8 @@ class NfAnalysisAPI(AnalysisAPI):
             )
 
     def replace_values_in_params_file(self, workflow_parameters: dict) -> dict:
-        """Iterate through the dictionary until all placeholders are replaced with the corresponding value from the dictionary"""
         replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
+        """Iterate through the dictionary until all placeholders are replaced with the corresponding value from the dictionary"""
         while True:
             resolved: bool = True
             for key, value in replaced_workflow_parameters.items():
