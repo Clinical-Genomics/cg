@@ -10,6 +10,7 @@ from cg.services.analysis_starter.configurator.file_creators.abstract import Fil
 
 LOG = logging.getLogger(__name__)
 
+# TODO: Adapt to gene panel and variant files
 FILE_TYPE_TO_EXTENSION: dict[NextflowFileType, FileExtensions] = {
     NextflowFileType.PARAMS: FileExtensions.YAML,
     NextflowFileType.SAMPLE_SHEET: FileExtensions.CSV,
