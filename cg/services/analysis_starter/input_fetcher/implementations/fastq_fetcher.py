@@ -32,7 +32,7 @@ class FastqFetcher(InputFetcher):
         Raises:
             AnalysisNotReadyError if the FASTQ files are not ready to be analysed."""
         self._ensure_files_are_present(case_id)
-        self._resolve_decompression(case_id=case_id)
+        self._resolve_decompression(case_id)
         if not self._is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
