@@ -27,15 +27,16 @@ class FastqFetcher(InputFetcher):
         self.prepare_fastq_api = prepare_fastq_api
         self.spring_archive_api = spring_archive_api
 
-    def ensure_files_are_ready(self, case_id: str):
-        """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
-        is raised."""
+    def ensure_files_are_ready(self, case_id: str) -> None:
+        """Retrieves or decompresses Spring files if needed.
+        Raises:
+            AnalysisNotReadyError if the FASTQ files are not ready to be analysed."""
         self._ensure_files_are_present(case_id)
-        self._resolve_decompression(case_id=case_id, dry_run=False)
+        self._resolve_decompression(case_id=case_id)
         if not self._is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
-    def _ensure_files_are_present(self, case_id: str):
+    def _ensure_files_are_present(self, case_id: str) -> None:
         """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self._ensure_illumina_run_on_disk(case_id)
@@ -55,7 +56,7 @@ class FastqFetcher(InputFetcher):
             self.status_db.request_sequencing_runs_for_case(case_id)
 
     def _are_all_spring_files_present(self, case_id: str) -> bool:
-        """Return True if no Spring files for the case are archived in the data location used by the customer."""
+        """Return True if no Spring files for the case are archived."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in case.samples:
             if (
@@ -66,12 +67,12 @@ class FastqFetcher(InputFetcher):
                 return False
         return True
 
-    def _resolve_decompression(self, case_id: str, dry_run: bool) -> None:
+    def _resolve_decompression(self, case_id: str) -> None:
         """
         Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            self._decompress_case(case_id=case_id, dry_run=dry_run)
+            self._decompress_case(case_id)
             return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
@@ -80,10 +81,9 @@ class FastqFetcher(InputFetcher):
 
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
-    def _decompress_case(self, case_id: str, dry_run: bool) -> None:
+    def _decompress_case(self, case_id: str) -> None:
         """Decompress all possible fastq files for all samples in a case"""
 
-        # Very messy due to dry run
         LOG.info(f"The analysis for {case_id} could not start, decompression is needed")
         is_decompression_possible: bool = (
             self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
@@ -96,23 +96,17 @@ class FastqFetcher(InputFetcher):
         any_decompression_started = False
         for sample in case.samples:
             sample_id: str = sample.internal_id
-            if dry_run:
-                LOG.info(
-                    f"This is a dry run, therefore decompression for {sample_id} won't be started"
-                )
-                continue
-            decompression_started: bool = self.prepare_fastq_api.compress_api.decompress_spring(
+            is_decompression_started: bool = self.prepare_fastq_api.compress_api.decompress_spring(
                 sample_id
             )
-            if decompression_started:
+            if is_decompression_started:
                 any_decompression_started = True
 
         if not any_decompression_started:
             # Raise error?
             LOG.warning(f"Decompression failed to start for {case_id}")
             return
-        if not dry_run:
-            self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+        self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
         LOG.info(f"Decompression started for {case_id}")
 
     def _is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
