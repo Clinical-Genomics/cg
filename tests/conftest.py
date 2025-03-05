@@ -49,8 +49,8 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
@@ -94,6 +94,7 @@ deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.case_config_fixtures",
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
+    "tests.fixture_plugins.analysis_starter.file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",

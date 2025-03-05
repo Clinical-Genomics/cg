@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -70,31 +70,3 @@ class MockCrunchyAPI(CrunchyAPI):
 
     def update_metadata_date(self, spring_metadata_path):
         print(f"Updates {spring_metadata_path}")
-
-    def is_fastq_compression_possible(self, compression_obj: CompressionData) -> bool:
-        """Check if it compression/decompression is possible"""
-        if self._compression_pending:
-            print("Compression pending")
-            return False
-
-        if self._compression_pending_files.get(compression_obj.fastq_first):
-            print(f"Compression pending for file {compression_obj.fastq_first}")
-            return False
-
-        if self._compression_done_all:
-            print(f"Compression done")
-            return False
-
-        compression_possible = self._compression_possible_files.get(
-            compression_obj.fastq_first, self._compression_possible
-        )
-        print(f"Compression possible {compression_possible}")
-        return compression_possible
-
-    def is_fastq_compression_done(self, compression: CompressionData) -> bool:
-        """Check if spring compression if finished"""
-        return self._compression_done_all
-
-    def is_compression_pending(self, compression_obj: CompressionData) -> bool:
-        """Check if compression has started, but not yet finished"""
-        return self._compression_pending
