@@ -30,9 +30,7 @@ def get_file_path(case_path: Path, file_type: NextflowFileType) -> Path:
     return Path(case_path, f"{case_id}_{file_type}").with_suffix(extension)
 
 
-def write_content_to_file_or_stdout(
-    content: any, file_path: Path, file_type: NextflowFileType
-) -> None:
+def write_content_to_file(content: any, file_path: Path, file_type: NextflowFileType) -> None:
     LOG.debug(f"Writing sample sheet to {file_path}")
     FILE_TYPE_TO_WRITER[file_type](content=content, file_path=file_path)
 
@@ -44,7 +42,7 @@ def create_file(
 ) -> None:
     file_path: Path = get_file_path(case_path=case_path, file_type=file_type)
     content: any = content_creator.create(case_path)
-    write_content_to_file_or_stdout(content=content, file_path=file_path, file_type=file_type)
+    write_content_to_file(content=content, file_path=file_path, file_type=file_type)
 
 
 def get_case_id_from_path(case_path: Path) -> str:
