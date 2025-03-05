@@ -18,8 +18,8 @@ PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT.before_request(before_request)
 @PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT.route("/pacbio_sample_sequencing_metrics")
 @handle_endpoint_errors
 def get_sequencing_metrics():
-    sequencing_metrics_request = PacbioSequencingMetricsRequest.model_validate(
-        request.args.to_dict()
+    sequencing_metrics_request = PacbioSequencingMetricsRequest(
+        sample_id=request.args.get("sample_id"), smrt_cell_ids=request.args.getlist("smrt_cell_ids")
     )
     metrics: list[PacbioSequencingMetricsDTO] = sample_run_metrics_service.get_pacbio_metrics(
         sequencing_metrics_request

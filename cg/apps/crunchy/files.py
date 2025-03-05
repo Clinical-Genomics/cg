@@ -1,10 +1,11 @@
 import logging
 import tempfile
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from json.decoder import JSONDecodeError
 from pathlib import Path
 
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
+from cg.constants import FASTQ_DELTA
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, ReadStream, WriteFile
 from cg.utils.date import get_date
@@ -116,3 +117,13 @@ def update_metadata_paths(spring_metadata_path: Path, new_parent_path: Path) -> 
     write_metadata_content(
         spring_metadata=spring_metadata, spring_metadata_path=spring_metadata_path
     )
+
+
+def check_if_update_spring(file_date: date) -> bool:
+    """Check if date is older than FASTQ_DELTA."""
+    delta = file_date + timedelta(days=FASTQ_DELTA)
+    now = datetime.now()
+    if delta > now.date():
+        LOG.info("FASTQ files are not old enough")
+        return False
+    return True
