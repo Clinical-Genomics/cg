@@ -41,7 +41,7 @@ class BaseView(ModelView):
         parsed_token = TokenResponseModel(**token)
         new_token: TokenResponseModel = auth_service.refresh_token(parsed_token)
         session["token"] = new_token.model_dump()
-        auth_service.check_user_role(token["access_token"])
+        auth_service.check_user_role(new_token.access_token)
         return True
 
     def inaccessible_callback(self, name, **kwargs):
