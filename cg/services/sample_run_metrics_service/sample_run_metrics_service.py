@@ -24,7 +24,7 @@ class SampleRunMetricsService:
         response: list[PacbioSequencingMetricsDTO] = []
         sequencing_metrics: list[PacbioSampleSequencingMetrics] = (
             self.store.get_pacbio_sample_sequencing_metrics(
-                sample_id=metrics_request.sample_id, smrt_cell_id=metrics_request.smrt_cell_id
+                sample_id=metrics_request.sample_id, smrt_cell_ids=metrics_request.smrt_cell_ids
             )
         )
         for db_metrics in sequencing_metrics:
