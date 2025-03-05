@@ -18,7 +18,7 @@ from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
 from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import PACBIO_SEQUENCING_RUN_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.server.endpoints.index import INDEX_BLUEPRINT
-from cg.server.endpoints.authentication import AUTH_BLUEPRINT
+from cg.server.endpoints.authentication.authentication import AUTH_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,

@@ -1,3 +1,6 @@
+from pydantic import ValidationError
+from cg.services.authentication.exc import TokenIntrospectionError
+from cg.services.authentication.models import DecodingResponse, IntrospectionResponse, RealmAccess
 from cg.services.user.service import UserService
 from keycloak import KeycloakAuthenticationError, KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError
@@ -39,19 +42,20 @@ class AuthenticationService:
             ValueError: If the token is not active.
         """
         try:
-            decoded_token: dict = self.client.decode_token(jwt_token)
-            LOG.info(f"Decoded token: {decoded_token}")
-            if not self.has_required_role(decoded_token.get("realm_access", {})):
+            decoded_token = DecodingResponse(**self.client.decode_token(jwt_token))
+            if not self.has_required_role(decoded_token.realm_access):
                 raise ValueError("User not permitted, role requirement not met.")
-            user_email = decoded_token["email"]
+            user_email = decoded_token.email
             return self.user_service.get_user_by_email(user_email)
         except KeycloakAuthenticationError as e:
             LOG.error(f"Token verification failed: {e}")
             raise
+        except Exception as error:
+            LOG.info(f"error: {error}")
 
     @staticmethod
-    def has_required_role(realm_access: dict) -> bool:
-        roles = realm_access.get("roles", [])
+    def has_required_role(realm_access: RealmAccess) -> bool:
+        roles = realm_access.roles
         if not "cg-employee" in roles:
             return False
         return True
@@ -66,12 +70,12 @@ class AuthenticationService:
         Raises:
             KeycloakAuthenticationError: If the user does not have the required role.
         """
-        token_introspect: dict = self.client.introspect(access_token)
-        LOG.info(f"{token_introspect}")
-        access = token_introspect.get("realm_access", {})
-        if not access:
-            return False
-        return self.has_required_role(access)
+        try:
+            token_introspect = IntrospectionResponse(**self.client.introspect(access_token))
+            return self.has_required_role(token_introspect.realm_access)
+        except ValidationError as error:
+            raise TokenIntrospectionError(f"{error}")
+        
 
     def refresh_token(self, token: dict) -> dict:
         """

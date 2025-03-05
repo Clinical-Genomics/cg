@@ -43,6 +43,7 @@ class BaseView(ModelView):
         except (KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
             return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
         except Exception as error:
+            session.clear()
             return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR), str(error)
 
     def inaccessible_callback(self, name, **kwargs):

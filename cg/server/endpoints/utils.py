@@ -1,14 +1,10 @@
-from email import message
 import logging
 from functools import wraps
 from http import HTTPStatus
-
 import cachecontrol
 from keycloak import KeycloakAuthenticationError, KeycloakError, KeycloakInvalidTokenError
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
-
-from cg import exc
 from cg.server.ext import auth_service
 from cg.store.models import User
 
