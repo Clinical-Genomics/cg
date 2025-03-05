@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 
-import rich_click as click
-
 from cg.constants import FileExtensions
 from cg.constants.nf_analysis import NextflowFileType
 from cg.io.csv import write_csv
@@ -32,12 +30,8 @@ def get_file_path(case_path: Path, file_type: NextflowFileType) -> Path:
 
 
 def write_content_to_file_or_stdout(
-    content: any, file_path: Path, file_type: NextflowFileType, dry_run: bool
+    content: any, file_path: Path, file_type: NextflowFileType
 ) -> None:
-    if dry_run:
-        LOG.info(f"Dry-run: printing content to stdout. Would have written to {file_path}")
-        click.echo(content)
-        return
     LOG.debug(f"Writing sample sheet to {file_path}")
     FILE_TYPE_TO_WRITER[file_type](content=content, file_path=file_path)
 
@@ -46,13 +40,10 @@ def create_file(
     content_creator: FileContentCreator,
     case_path: Path,
     file_type: NextflowFileType,
-    dry_run: bool = False,
 ) -> None:
     file_path: Path = get_file_path(case_path=case_path, file_type=file_type)
     content: any = content_creator.create(case_path)
-    write_content_to_file_or_stdout(
-        content=content, file_path=file_path, file_type=file_type, dry_run=dry_run
-    )
+    write_content_to_file_or_stdout(content=content, file_path=file_path, file_type=file_type)
 
 
 def get_case_id_from_path(case_path: Path) -> str:

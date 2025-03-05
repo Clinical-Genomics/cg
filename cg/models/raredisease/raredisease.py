@@ -14,7 +14,7 @@ class RarediseaseQCMetrics(QCMetrics):
     total_reads: int
 
 
-# TODO: MOve this to models folder in appropriate service
+# TODO: Move these to models folder in appropriate service
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 

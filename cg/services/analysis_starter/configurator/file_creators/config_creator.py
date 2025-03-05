@@ -4,7 +4,7 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-class ConfigFileContentCreator(FileContentCreator):
+class NextflowConfigFileContentCreator(FileContentCreator):
 
     def __init__(
         self, store: Store, platform: str, workflow_config_path: str, resources: str, account: str
