@@ -6,3 +6,6 @@ class TokenIntrospectionError(CgError):
 
 class UserRoleError(CgError):
     pass
+
+class UserNotFoundError(CgError):
+    pass

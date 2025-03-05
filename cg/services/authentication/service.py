@@ -1,6 +1,6 @@
 from pydantic import ValidationError
-from cg.services.authentication.exc import TokenIntrospectionError
-from cg.services.authentication.models import DecodingResponse, IntrospectionResponse, RealmAccess
+from cg.services.authentication.exc import TokenIntrospectionError, UserNotFoundError, UserRoleError
+from cg.services.authentication.models import DecodingResponse, IntrospectionResponse, RealmAccess, TokenResponseModel
 from cg.services.user.service import UserService
 from keycloak import KeycloakAuthenticationError, KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError
@@ -37,30 +37,22 @@ class AuthenticationService:
 
         Returns:
             User: The user object from the statusDB database.
-
-        Raises:
-            ValueError: If the token is not active.
         """
         try:
             decoded_token = DecodingResponse(**self.client.decode_token(jwt_token))
-            if not self.has_required_role(decoded_token.realm_access):
-                raise ValueError("User not permitted, role requirement not met.")
+            self._check_role(decoded_token.realm_access)
             user_email = decoded_token.email
-            return self.user_service.get_user_by_email(user_email)
-        except KeycloakAuthenticationError as e:
-            LOG.error(f"Token verification failed: {e}")
-            raise
-        except Exception as error:
-            LOG.info(f"error: {error}")
-
+            return self.user_service.get_user_by_email(user_email)  
+        except ValueError as error:
+            raise UserNotFoundError(f"{error}")
+            
+            
     @staticmethod
-    def has_required_role(realm_access: RealmAccess) -> bool:
-        roles = realm_access.roles
-        if not "cg-employee" in roles:
-            return False
-        return True
+    def _check_role(realm_acces: RealmAccess) -> None:
+        if not "cg-employee" in realm_acces.roles:
+                raise UserRoleError("Unauthorised, the user does not have the required role to access this service.")
 
-    def check_user_role(self, access_token: str) -> bool:
+    def check_user_role(self, access_token: str) -> None:
         """Check if the user has the required role using the access token.
         Args:
             token (str): The access token for a user token.
@@ -72,18 +64,17 @@ class AuthenticationService:
         """
         try:
             token_introspect = IntrospectionResponse(**self.client.introspect(access_token))
-            return self.has_required_role(token_introspect.realm_access)
+            self._check_role(token_introspect.realm_access)
         except ValidationError as error:
             raise TokenIntrospectionError(f"{error}")
         
 
-    def refresh_token(self, token: dict) -> dict:
+    def refresh_token(self, token: TokenResponseModel) -> TokenResponseModel:
         """
-        Refresh a token if it expires in less than 10 minutes.
+        Refresh a token if it expires in less than 10 minutes. Otherwise return the current tokens.
         Args:
-            token: the token dictionary from keycloak
-        """
-        expires_in: int = int(token.get("expires_in"))
-        if expires_in < 600:  # Expires in ten minutes
-            return self.client.refresh_token(token.get("refresh_token"))
+            token: TokenResponseModel
+        """        
+        if token.expires_in < 600:  # Expires in ten minutes
+            return TokenResponseModel(**self.client.refresh_token(token.refresh_token))
         return token

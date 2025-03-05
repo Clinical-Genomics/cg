@@ -1,20 +1,19 @@
 """Module for Flask-Admin views"""
 
 from gettext import gettext
-import http
-
-from flask import abort, flash, redirect, request, session, url_for
+from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from keycloak import KeycloakAuthenticationError, KeycloakInvalidTokenError
 from markupsafe import Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
+from cg.server.endpoints.authentication.auth_error_handler import handle_auth_errors
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
+from cg.services.authentication.models import TokenResponseModel
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 from cg.server.ext import auth_service
@@ -25,26 +24,26 @@ LOG = logging.getLogger(__name__)
 
 class BaseView(ModelView):
     """Base for the specific views."""
-
+    
+    @handle_auth_errors
     def is_accessible(self) -> bool:
         """
         Get the token from the current session and check if the user has access to view the database tables.
-        Aborts if the user does not have the required permissions or the token is invalid.
+        
+        Returns:
+            bool: depending on wheter the user has access or not.
         """
         # This is run before the user is actually logged in due to the current setup.
         # Set the token to None and return False before a token is available to the session.
         token: dict | None = session.get("token", None)
         if not token:
             return False
-        try:
-            token: dict = auth_service.refresh_token(token)
-            session["token"] = token
-            return auth_service.check_user_role(token["access_token"])
-        except (KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
-            return abort(http.HTTPStatus.UNAUTHORIZED, str(error))
-        except Exception as error:
-            session.clear()
-            return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR), str(error)
+        parsed_token = TokenResponseModel(**token)
+        new_token: TokenResponseModel = auth_service.refresh_token(parsed_token)
+        session["token"] = new_token.model_dump()
+        auth_service.check_user_role(token["access_token"])
+        return True
+
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to logout endpoint if user doesn't have access
