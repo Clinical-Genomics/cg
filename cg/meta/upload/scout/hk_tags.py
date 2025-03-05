@@ -32,6 +32,8 @@ class CaseTags(BaseModel):
     peddy_ped: set[str] = Field(None, description="Ped info from peddy, only for rare disease")
     peddy_sex: set[str] | None = Field(None, description="Peddy sex check, only for rare disease")
     peddy_check: set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
+    somalier_samples: set[str] = Field(None, description="Somalier samples info")
+    somalier_pairs: set[str] = Field(None, description="Somalier pairs info")
     sex_check: set[str] = Field(None, description="Somalier sex check info, only for rare disease")
     multiqc_report: set[str] | None = Field(None, description="MultiQC report")
     multiqc: set[str] | None = Field(None, description="MultiQC report")
@@ -85,3 +87,4 @@ class SampleTags(BaseModel):
     reviewer_catalog: set[str] | None = None
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
+    paraphase_alignment_path: set[str] | None = None

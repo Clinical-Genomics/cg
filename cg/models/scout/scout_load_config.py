@@ -84,6 +84,7 @@ class ScoutMipIndividual(ScoutIndividual):
 
 class ScoutNalloIndividual(ScoutIndividual):
     d4_file: str | None = None
+    paraphase_alignment_path: str | None = None
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
@@ -170,6 +171,8 @@ class MipLoadConfig(ScoutLoadConfig):
 class NalloLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
     samples: list[ScoutNalloIndividual] = []
+    somalier_samples: str | None = None
+    somalier_pairs: str | None = None
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
     vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None

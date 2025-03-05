@@ -82,7 +82,8 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
-    sex_check={"sex-check"},
+    somalier_pairs={"relate-pairs", "somalier"},
+    somalier_samples={"relate-samples", "somalier"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
@@ -152,6 +153,7 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.BAM, NalloAnalysisTag.HAPLOTAGS},
     d4_file={"d4"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(

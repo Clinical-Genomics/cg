@@ -107,6 +107,7 @@ class BalsamicAnalysisTag:
 
 class NalloAnalysisTag:
     HAPLOTAGS: str = "haplotags"
+    PARAPHASE: str = "paraphase"
 
 
 class HkAnalysisMetricsTag:

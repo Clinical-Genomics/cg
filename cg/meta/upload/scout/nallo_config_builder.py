@@ -57,6 +57,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         )
         self.include_case_files(load_config)
         self.get_sample_information(load_config)
+        self.include_pedigree_picture(load_config)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
         load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
@@ -76,9 +77,12 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         setattr(load_config, scout_key, file_path)
 
     def include_sample_files(self, config_sample: ScoutNalloIndividual) -> None:
-        """Include sample level files that are optional for mip samples."""
+        """Include sample level files that are optional."""
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.d4_file = self.get_sample_file(
             hk_tags=self.sample_tags.d4_file, sample_id=sample_id
+        )
+        config_sample.paraphase_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.paraphase_alignment_path, sample_id=sample_id
         )
