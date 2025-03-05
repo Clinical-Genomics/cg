@@ -73,7 +73,7 @@ def test_get_pacbio_metrics_by_smrt_cell_id(
     # GIVEN a SampleRunMetricsService and a database containing Pacbio data
 
     # WHEN fetching a specific PacbioSampleSequencingMetrics
-    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_id="internal_id")
+    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_ids=["internal_id"])
     sequencing_metrics: list[PacbioSequencingMetricsDTO] = (
         sample_run_metrics_service.get_pacbio_metrics(metrics_request)
     )
@@ -88,7 +88,7 @@ def test_get_pacbio_metrics_by_non_existent_smrt_cell_id(
     # GIVEN a SampleRunMetricsService and a database containing Pacbio data
 
     # WHEN fetching a specific PacbioSampleSequencingMetrics
-    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_id="I do not exist")
+    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_ids=["I do not exist"])
     metrics: list[PacbioSequencingMetricsDTO] = sample_run_metrics_service.get_pacbio_metrics(
         metrics_request
     )
