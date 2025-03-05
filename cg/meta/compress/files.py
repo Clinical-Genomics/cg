@@ -12,7 +12,7 @@ from cg.constants.compression import (
     FASTQ_FIRST_READ_SUFFIX,
     FASTQ_SECOND_READ_SUFFIX,
 )
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 LOG = logging.getLogger(__name__)
 
