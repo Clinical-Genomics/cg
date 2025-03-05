@@ -5,6 +5,7 @@ from typing import List
 class RealmAccess(BaseModel):
     roles: List[str]
 
+
 class IntrospectionResponse(BaseModel):
     exp: int
     iat: int
@@ -29,7 +30,7 @@ class IntrospectionResponse(BaseModel):
     username: str
     token_type: str
     active: bool
-    
+
 
 class TokenResponseModel(BaseModel):
     access_token: str
@@ -41,7 +42,8 @@ class TokenResponseModel(BaseModel):
     scope: str
     session_state: str
     token_type: str
-    
+
+
 class DecodingResponse(BaseModel):
     exp: int
     iat: int
@@ -62,7 +64,8 @@ class DecodingResponse(BaseModel):
     given_name: str
     family_name: str
     email: str
-    
+
+
 class UserInfo(BaseModel):
     sub: str
     email_verified: bool

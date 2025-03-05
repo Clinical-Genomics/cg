@@ -39,7 +39,7 @@ def before_request():
     new_token: TokenResponseModel = auth_service.refresh_token(parsed_token)
     session["token"] = new_token.model_dump()
     auth_service.check_user_role(token["access_token"])
-    
+
 
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)

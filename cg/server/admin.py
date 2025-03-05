@@ -24,12 +24,12 @@ LOG = logging.getLogger(__name__)
 
 class BaseView(ModelView):
     """Base for the specific views."""
-    
+
     @handle_auth_errors
     def is_accessible(self) -> bool:
         """
         Get the token from the current session and check if the user has access to view the database tables.
-        
+
         Returns:
             bool: depending on wheter the user has access or not.
         """
@@ -43,7 +43,6 @@ class BaseView(ModelView):
         session["token"] = new_token.model_dump()
         auth_service.check_user_role(token["access_token"])
         return True
-
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to logout endpoint if user doesn't have access

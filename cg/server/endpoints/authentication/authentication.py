@@ -21,7 +21,7 @@ AUTH_BLUEPRINT = Blueprint("auth", __name__, url_prefix="/auth")
 def login():
     """Redirect the user to the auth service login page."""
     return redirect(keycloak_client.get_auth_url())
-    
+
 
 @AUTH_BLUEPRINT.route("/callback")
 @handle_auth_errors
@@ -31,16 +31,14 @@ def callback():
     if code:
         token = keycloak_client.get_token(code)
         parsed_token = TokenResponseModel(**token)
-        session["token"] = token       
+        session["token"] = token
         userinfo = keycloak_client.get_user_info(parsed_token.access_token)
         session["userinfo"] = userinfo
         return redirect("/")
     return (
-            jsonify(error="You are not authorized to access this resource."),
-            HTTPStatus.UNAUTHORIZED,
-         ) 
-    
-        
+        jsonify(error="You are not authorized to access this resource."),
+        HTTPStatus.UNAUTHORIZED,
+    )
 
 
 @AUTH_BLUEPRINT.route("/logout")
@@ -52,4 +50,3 @@ def logout():
     keycloak_client.logout_user(token.refresh_token)
     session.clear()
     return redirect(url_for("admin.index"))
-        
