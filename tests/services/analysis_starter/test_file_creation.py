@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
+from cg.services.analysis_starter.configurator.file_creators.abstract import FileCreator
 
 
 @pytest.mark.parametrize(
@@ -24,7 +24,7 @@ def test_create_nextflow_config_file_content(
 ):
     """Test that a Nextflow config file content is created correctly for all pipelines."""
     # GIVEN a Nextflow config content creator and a case id
-    content_creator: FileContentCreator = request.getfixturevalue(content_creator_fixture)
+    content_creator: FileCreator = request.getfixturevalue(content_creator_fixture)
     case_path: Path = request.getfixturevalue(case_path_fixture)
 
     # WHEN creating a Nextflow config file
@@ -54,7 +54,7 @@ def test_create_params_file_content(
 ):
     """Test that the params file content is created correctly for all pipelines."""
     # GIVEN a params file content creator and a case id
-    content_creator: FileContentCreator = request.getfixturevalue(content_creator_fixture)
+    content_creator: FileCreator = request.getfixturevalue(content_creator_fixture)
     case_path: Path = request.getfixturevalue(case_path_fixture)
 
     # WHEN creating a params file

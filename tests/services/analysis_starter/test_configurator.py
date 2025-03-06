@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
@@ -50,7 +52,10 @@ def test_create_nextflow_config_file_exists(
     configurator._create_case_directory(case_id=case_id)
 
     # WHEN creating nextflow config
-    configurator._create_nextflow_config(case_id=case_id)
+    configurator.config_file_creator.create(case_id=case_id)
 
     # THEN the nextflow config is created
-    assert configurator._get_nextflow_config_path(case_id).exists()
+    case_path: Path = configurator._get_case_path(case_id=case_id)
+    assert configurator.config_file_creator.get_file_path(
+        case_id=case_id, case_path=case_path
+    ).exists()

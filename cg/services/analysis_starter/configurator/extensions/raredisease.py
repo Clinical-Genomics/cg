@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from cg.constants.nf_analysis import NextflowFileType
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import (
     GenePanelFileContentCreator,
@@ -8,7 +7,6 @@ from cg.services.analysis_starter.configurator.file_creators.gene_panel import (
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileContentCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.utils import create_file
 
 
 class RarediseaseExtension(PipelineExtension):
@@ -28,15 +26,7 @@ class RarediseaseExtension(PipelineExtension):
         self._create_managed_variants(case_path)
 
     def _create_gene_panel(self, case_path: Path) -> None:
-        create_file(
-            content_creator=self.gene_panel_content_creator,
-            case_path=case_path,
-            file_type=NextflowFileType.GENE_PANEL,
-        )
+        raise NotImplementedError
 
     def _create_managed_variants(self, case_path: Path) -> None:
-        create_file(
-            content_creator=self.managed_variants_content_creator,
-            case_path=case_path,
-            file_type=NextflowFileType.MANAGED_VARIANTS,
-        )
+        raise NotImplementedError
