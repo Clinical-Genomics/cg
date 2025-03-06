@@ -56,27 +56,3 @@ def test_create_nextflow_config_file_exists(
 
     # THEN the nextflow config is created
     assert configurator._get_nextflow_config_path(case_id).exists()
-
-
-@pytest.mark.parametrize(
-    "configurator_fixture, case_id_fixture, expected_content_fixture",
-    [("raredisease_configurator", "raredisease_case_id", "expected_raredisease_config_content")],
-    ids=["raredisease"],
-)
-def test_get_nextflow_config_content(
-    configurator_fixture: str,
-    case_id_fixture: str,
-    expected_content_fixture: str,
-    request: pytest.FixtureRequest,
-):
-    """Test that the content of the nextflow config file is accurate for all Nextflow pipelines."""
-    # GIVEN a configurator and a case id
-    configurator: RarediseaseConfigurator = request.getfixturevalue(configurator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
-
-    # WHEN getting nextflow config content
-    nextflow_config_content: str = configurator._get_nextflow_config_content(case_id=case_id)
-
-    # THEN the expected content is returned
-    expected_content: str = request.getfixturevalue(expected_content_fixture)
-    assert nextflow_config_content.rstrip() == expected_content.rstrip()

@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from cg.io.txt import concat_txt
 from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
+from cg.services.analysis_starter.configurator.file_creators.utils import get_case_id_from_path
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -15,8 +18,9 @@ class NextflowConfigFileContentCreator(FileContentCreator):
         self.resources = resources
         self.account = account
 
-    def create(self, case_id: str) -> str:
+    def create(self, case_path: Path) -> str:
         """Get the content of the nextflow config file."""
+        case_id: str = get_case_id_from_path(case_path)
         config_files_list: list[str] = [
             self.platform,
             self.workflow_config_path,
