@@ -2,7 +2,7 @@ import pytest
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 
 
 @pytest.mark.parametrize(
@@ -43,7 +43,7 @@ def test_create_nextflow_config_file_exists(
 ):
     """Test that a nextflow config file is created fro all Nextflow pipelines."""
     # GIVEN a configurator and a case id
-    configurator: RarediseaseExtension = request.getfixturevalue(configurator_fixture)
+    configurator: NextflowConfigurator = request.getfixturevalue(configurator_fixture)
     case_id: str = request.getfixturevalue(case_id_fixture)
 
     # GIVEN that a case directory exists
