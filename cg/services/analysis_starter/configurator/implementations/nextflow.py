@@ -5,7 +5,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.nf_analysis import NextflowFileType
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
@@ -24,7 +24,7 @@ class NextflowConfigurator(Configurator):
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
         config_content_creator: NextflowConfigFileContentCreator,
-        pipeline_extension: RarediseaseExtension,
+        pipeline_extension: PipelineExtension,
     ):
         self.root_dir: str = config.root
         self.store: Store = store
