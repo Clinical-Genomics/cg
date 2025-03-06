@@ -28,6 +28,7 @@ old_options = (
     "demultiplex",
     "fastq",
     "fluffy",
+    "jasen",
     "microsalt",
     "mip-dna",
     "mip-rna",
