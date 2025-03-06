@@ -11,7 +11,7 @@ from cg.services.analysis_starter.configurator.file_creators.utils import (
 from cg.store.store import Store
 
 
-class ManagedVariantsContentCreator(FileContentCreator):
+class ManagedVariantsFileContentCreator(FileContentCreator):
 
     def __init__(self, scout_api: ScoutAPI, store: Store):
         self.scout_api = scout_api
