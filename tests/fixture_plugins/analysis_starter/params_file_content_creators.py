@@ -1,0 +1,17 @@
+import pytest
+
+from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
+    RarediseaseParamsFileContentCreator,
+)
+
+
+@pytest.fixture
+def raredisease_params_content_creator(
+    raredisease_context: CGConfig,
+) -> RarediseaseParamsFileContentCreator:
+    return RarediseaseParamsFileContentCreator(
+        store=raredisease_context.status_db,
+        lims=raredisease_context.lims_api,
+        params=raredisease_context.raredisease.params,
+    )
