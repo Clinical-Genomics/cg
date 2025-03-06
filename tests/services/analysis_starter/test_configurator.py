@@ -1,6 +1,3 @@
-from pathlib import Path
-from unittest import mock
-
 import pytest
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
@@ -52,10 +49,10 @@ def test_create_nextflow_config_file_exists(
     case_id: str = request.getfixturevalue(case_id_fixture)
 
     # GIVEN that a case directory exists
-    configurator._create_case_directory(case_id=case_id, dry_run=False)
+    configurator._create_case_directory(case_id=case_id)
 
     # WHEN creating nextflow config
-    configurator._create_nextflow_config(case_id=case_id, dry_run=False)
+    configurator._create_nextflow_config(case_id=case_id)
 
     # THEN the nextflow config is created
     assert configurator._get_nextflow_config_path(case_id).exists()
