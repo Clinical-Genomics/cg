@@ -6,7 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.nf_analysis import NextflowFileType
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
-from cg.services.analysis_starter.configurator.file_creators.config_creator import (
+from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.utils import create_file, get_file_path

@@ -9,7 +9,7 @@ from cg.exc import CgDataError
 from cg.io.yaml import read_yaml
 from cg.models.raredisease.raredisease import RarediseaseParameters
 from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
-from cg.services.analysis_starter.configurator.file_creators.params.utils import (
+from cg.services.analysis_starter.configurator.file_creators.params_file.utils import (
     replace_values_in_params_file,
 )
 from cg.services.analysis_starter.configurator.file_creators.utils import (

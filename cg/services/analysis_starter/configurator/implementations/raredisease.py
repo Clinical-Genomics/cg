@@ -4,7 +4,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.nf_analysis import NextflowFileType
 from cg.models.cg_config import RarediseaseConfig
-from cg.services.analysis_starter.configurator.file_creators.params.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
     RarediseaseParamsFileContentCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
