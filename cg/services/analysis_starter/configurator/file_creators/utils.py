@@ -6,6 +6,7 @@ from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import NextflowFileType
 from cg.io.csv import write_csv
 from cg.io.json import write_json
+from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
 
@@ -24,13 +25,26 @@ FILE_TYPE_TO_WRITER: dict[NextflowFileType, callable] = {
     NextflowFileType.PARAMS: write_yaml_nextflow_style,
     NextflowFileType.SAMPLE_SHEET: write_csv,
     NextflowFileType.CONFIG: write_json,
+    NextflowFileType.MANAGED_VARIANTS: write_txt,
 }
+
+
+def get_file_name(file_type: NextflowFileType) -> str:
+    if file_type in [
+        NextflowFileType.CONFIG,
+        NextflowFileType.PARAMS,
+        NextflowFileType.SAMPLE_SHEET,
+    ]:
+        return "{case_id}_" + file_type
+    else:
+        return file_type
 
 
 def get_file_path(case_path: Path, file_type: NextflowFileType) -> Path:
     case_id: str = case_path.name
     extension: str = FILE_TYPE_TO_EXTENSION[file_type]
-    return Path(case_path, f"{case_id}_{file_type}").with_suffix(extension)
+    file_name: str = get_file_name(file_type).format(case_id=case_id)
+    return Path(case_path, file_name).with_suffix(extension)
 
 
 def write_content_to_file(content: any, file_path: Path, file_type: NextflowFileType) -> None:

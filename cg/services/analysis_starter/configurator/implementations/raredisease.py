@@ -7,6 +7,12 @@ from cg.models.cg_config import RarediseaseConfig
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import (
+    GenePanelFileContentCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileContentCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
     RarediseaseParamsFileContentCreator,
 )
@@ -32,6 +38,8 @@ class RarediseaseConfigurator(NextflowConfigurator):
         config_content_creator: NextflowConfigFileContentCreator,
         sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
         params_content_creator: RarediseaseParamsFileContentCreator,
+        gene_panel_content_creator: GenePanelFileContentCreator,
+        managed_variants_content_creator: ManagedVariantsFileContentCreator,
     ):
         super().__init__(
             config=config,
@@ -40,8 +48,10 @@ class RarediseaseConfigurator(NextflowConfigurator):
             lims=lims,
             config_content_creator=config_content_creator,
         )
+        self.gene_panel_content_creator = gene_panel_content_creator
         self.sample_sheet_content_creator = sample_sheet_content_creator
         self.params_content_creator = params_content_creator
+        self.managed_variants_content_creator = managed_variants_content_creator
 
     def _do_pipeline_specific_actions(self, case_id: str) -> None:
         """Perform pipeline specific actions."""
