@@ -31,7 +31,7 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 @BLUEPRINT.before_request
 @handle_auth_errors
 def before_request():
-    user_roles = session["user_roles"]
+    user_roles = session.get("user_roles")
     auth_service.check_role(user_roles)
 
 

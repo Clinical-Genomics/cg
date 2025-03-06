@@ -28,6 +28,7 @@ def callback():
     if code:
         token = keycloak_client.get_token(code)
         parsed_token = TokenResponseModel(**token)
+        LOG.info(f"access_token: {parsed_token.access_token}")
         session["token"] = token
         user_info = UserInfo(**keycloak_client.get_user_info(parsed_token.access_token))
         session["user_info"] = user_info.model_dump()
