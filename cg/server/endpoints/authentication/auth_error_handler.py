@@ -24,9 +24,11 @@ def handle_auth_errors(func):
             flash(f"Wrong information send to Keycloak. Contact sys-dev: {error}")
             # If no connection to keycloak can be established return to admin view
             return redirect(url_for("admin.index"))
-        
+
         except TokenIntrospectionError as error:
-            flash(f"Cannot parse token introspection. Contact sys-dev. If realm_access is missing the user has no assigned roles! Reason: {error}")
+            flash(
+                f"Cannot parse token introspection. Contact sys-dev. If realm_access is missing the user has no assigned roles! Reason: {error}"
+            )
             return redirect(url_for("admin.index"))
 
         except (KeycloakAuthenticationError, UserRoleError) as error:
@@ -44,4 +46,5 @@ def handle_auth_errors(func):
         except Exception as error:
             flash(f"An unexpected error occured. Contact sys-dev: {error}")
             return redirect(url_for("admin.index"))
+
     return wrapper

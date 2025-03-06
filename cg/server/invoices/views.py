@@ -34,6 +34,7 @@ def before_request():
     user_roles = session["user_roles"]
     auth_service.check_role(user_roles)
 
+
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     record_type: str = invoice_obj.record_type

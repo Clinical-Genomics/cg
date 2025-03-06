@@ -42,7 +42,7 @@ class AuthenticationService:
 
         Returns:
             User: The user object from the statusDB database.
-        
+
         Raises:
             UserNotFoundError: If the user is not present in the statusDB user table
         """
@@ -64,11 +64,8 @@ class AuthenticationService:
             UserRoleError: if required role not present
         """
         if not "cg-employee" in roles:
-            raise UserRoleError(
-                "The user does not have the required role to access this service."
-            )
-    
-    
+            raise UserRoleError("The user does not have the required role to access this service.")
+
     def get_user_roles(self, access_token: str) -> list[str]:
         """Check if the user has the required role using the access token.
         Args:

@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 class BaseView(ModelView):
     """Base for the specific views."""
-    
+
     def is_accessible(self) -> bool:
         """
         Get the cached user roles from the session and check if the user has the required roles.
@@ -34,7 +34,6 @@ class BaseView(ModelView):
             return False
         auth_service.check_role(user_roles)
         return True
-        
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("admin.index"))
@@ -599,6 +598,7 @@ class PanelView(BaseView):
     column_searchable_list = ["customer.internal_id", "name", "abbrev"]
     create_modal = True
     edit_modal = True
+
 
 class PoolView(BaseView):
     """Admin view for Model.Pool"""
