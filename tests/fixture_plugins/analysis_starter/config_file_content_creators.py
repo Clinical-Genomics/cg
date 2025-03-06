@@ -13,7 +13,7 @@ def raredisease_config_file_content_creator(
     return NextflowConfigFileContentCreator(
         store=raredisease_context.status_db,
         platform=raredisease_context.raredisease.platform,
-        workflow_config_path=raredisease_context.raredisease.workflow_config_path,
+        workflow_config_path=raredisease_context.raredisease.config,
         resources=raredisease_context.raredisease.resources,
         account=raredisease_context.raredisease.slurm.account,
     )

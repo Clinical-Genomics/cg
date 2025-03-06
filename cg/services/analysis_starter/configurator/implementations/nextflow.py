@@ -25,7 +25,7 @@ class NextflowConfigurator(Configurator):
         lims: LimsAPI,
         config_content_creator: NextflowConfigFileContentCreator,
     ):
-        self.root_dir: str = config.root_dir
+        self.root_dir: str = config.root
         self.store: Store = store
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.lims: LimsAPI = lims

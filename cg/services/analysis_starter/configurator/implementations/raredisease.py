@@ -4,6 +4,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.nf_analysis import NextflowFileType
 from cg.models.cg_config import RarediseaseConfig
+from cg.services.analysis_starter.configurator.file_creators.config_file import (
+    NextflowConfigFileContentCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
     RarediseaseParamsFileContentCreator,
 )
@@ -26,10 +29,17 @@ class RarediseaseConfigurator(NextflowConfigurator):
         store: Store,
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
+        config_content_creator: NextflowConfigFileContentCreator,
         sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
         params_content_creator: RarediseaseParamsFileContentCreator,
     ):
-        super().__init__(config=config, store=store, housekeeper_api=housekeeper_api, lims=lims)
+        super().__init__(
+            config=config,
+            store=store,
+            housekeeper_api=housekeeper_api,
+            lims=lims,
+            config_content_creator=config_content_creator,
+        )
         self.sample_sheet_content_creator = sample_sheet_content_creator
         self.params_content_creator = params_content_creator
 
