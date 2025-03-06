@@ -26,14 +26,12 @@ class RarediseaseConfigurator(NextflowConfigurator):
         store: Store,
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
+        sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
+        params_content_creator: RarediseaseParamsFileContentCreator,
     ):
         super().__init__(config=config, store=store, housekeeper_api=housekeeper_api, lims=lims)
-        self.sample_sheet_content_creator = RarediseaseSampleSheetContentCreator(
-            store=self.store, housekeeper_api=self.housekeeper_api, lims=self.lims
-        )
-        self.params_content_creator = RarediseaseParamsFileContentCreator(
-            store=self.store, lims=self.lims, params=config.params
-        )
+        self.sample_sheet_content_creator = sample_sheet_content_creator
+        self.params_content_creator = params_content_creator
 
     def _do_pipeline_specific_actions(self, case_id: str) -> None:
         """Perform pipeline specific actions."""
@@ -47,7 +45,7 @@ class RarediseaseConfigurator(NextflowConfigurator):
             file_type=NextflowFileType.GENE_PANEL,
         )
 
-    def _create_managed_variants(self, case_id: str, dry_run: bool = False) -> None:
+    def _create_managed_variants(self, case_id: str) -> None:
         create_file(
             content_creator=self.managed_variants_content_creator,
             case_path=self._get_case_path(case_id=case_id),

@@ -17,18 +17,19 @@ from cg.store.store import Store
 
 class NextflowConfigurator(Configurator):
 
-    def __init__(self, config: any, store: Store, housekeeper_api: HousekeeperAPI, lims: LimsAPI):
+    def __init__(
+        self,
+        config: any,
+        store: Store,
+        housekeeper_api: HousekeeperAPI,
+        lims: LimsAPI,
+        config_content_creator: NextflowConfigFileContentCreator,
+    ):
         self.root_dir: str = config.root_dir
         self.store: Store = store
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.lims: LimsAPI = lims
-        self.config_content_creator = NextflowConfigFileContentCreator(
-            store=self.store,
-            platform=config.platform,
-            workflow_config_path=config.workflow_config_path,
-            resources=config.resources,
-            account=config.slurm.account,
-        )
+        self.config_content_creator = config_content_creator
 
     def create_config(self, case_id: str) -> NextflowCaseConfig:
         """Create a Nextflow case config."""

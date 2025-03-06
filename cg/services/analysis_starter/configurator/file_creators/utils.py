@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from cg.constants import FileExtensions
+from cg.constants import FileExtensions, Workflow
+from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import NextflowFileType
 from cg.io.csv import write_csv
 from cg.io.json import write_json
@@ -10,13 +11,15 @@ from cg.services.analysis_starter.configurator.file_creators.abstract import Fil
 
 LOG = logging.getLogger(__name__)
 
-# TODO: Adapt to gene panel and variant files
-FILE_TYPE_TO_EXTENSION: dict[NextflowFileType, FileExtensions] = {
+FILE_TYPE_TO_EXTENSION: dict[NextflowFileType, str] = {
     NextflowFileType.PARAMS: FileExtensions.YAML,
     NextflowFileType.SAMPLE_SHEET: FileExtensions.CSV,
     NextflowFileType.CONFIG: FileExtensions.JSON,
+    NextflowFileType.GENE_PANEL: FileExtensions.BED,
+    NextflowFileType.MANAGED_VARIANTS: FileExtensions.VCF,
 }
 
+# TODO: Adapt to gene panel and variant files
 FILE_TYPE_TO_WRITER: dict[NextflowFileType, callable] = {
     NextflowFileType.PARAMS: write_yaml_nextflow_style,
     NextflowFileType.SAMPLE_SHEET: write_csv,
@@ -26,7 +29,7 @@ FILE_TYPE_TO_WRITER: dict[NextflowFileType, callable] = {
 
 def get_file_path(case_path: Path, file_type: NextflowFileType) -> Path:
     case_id: str = case_path.name
-    extension: FileExtensions = FILE_TYPE_TO_EXTENSION[file_type]
+    extension: str = FILE_TYPE_TO_EXTENSION[file_type]
     return Path(case_path, f"{case_id}_{file_type}").with_suffix(extension)
 
 
@@ -47,3 +50,13 @@ def create_file(
 
 def get_case_id_from_path(case_path: Path) -> str:
     return case_path.name
+
+
+def get_genome_build(workflow: Workflow) -> GenePanelGenomeBuild:
+    """Return genome build for the given Workflow."""
+    workflow_to_genome_build: dict[Workflow, GenePanelGenomeBuild] = {
+        Workflow.NALLO: GenePanelGenomeBuild.hg38,
+        Workflow.RAREDISEASE: GenePanelGenomeBuild.hg19,
+        Workflow.TOMTE: GenePanelGenomeBuild.hg38,
+    }
+    return workflow_to_genome_build.get(workflow)
