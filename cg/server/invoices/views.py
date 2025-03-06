@@ -19,7 +19,6 @@ from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.endpoints.authentication.auth_error_handler import handle_auth_errors
 from cg.server.ext import db, lims
-from cg.services.authentication.models import TokenResponseModel
 from cg.store.models import Customer, Invoice, Pool, Sample
 import logging
 from cg.server.ext import auth_service
@@ -32,14 +31,8 @@ BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 @BLUEPRINT.before_request
 @handle_auth_errors
 def before_request():
-    token: dict | None = session.get("token", None)
-    if not token:
-        return redirect(url_for("auth.logout)"))
-    parsed_token = TokenResponseModel(**token)
-    new_token: TokenResponseModel = auth_service.refresh_token(parsed_token)
-    session["token"] = new_token.model_dump()
-    auth_service.check_user_role(token["access_token"])
-
+    user_roles = session["user_roles"]
+    auth_service.check_role(user_roles)
 
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)

@@ -15,32 +15,33 @@ def handle_auth_errors(func):
         try:
             return func(*args, **kwargs)
 
-        except KeycloakGetError as error:
-            flash(f"Wrong information send to Keycloak: {error}")
-            return redirect(url_for("auth.logout"))
-
         except KeycloakConnectionError as error:
-            flash(f"Cannot establish connection with Keycloak contact Sysdev: {error}")
-            return redirect(url_for("auth.logout"))
+            flash(f"Cannot establish connection with Keycloak. Contact sys-dev: {error}")
+            # If no connection to keycloak can be established return to admin view
+            return redirect(url_for("admin.index"))
 
+        except KeycloakGetError as error:
+            flash(f"Wrong information send to Keycloak. Contact sys-dev: {error}")
+            # If no connection to keycloak can be established return to admin view
+            return redirect(url_for("admin.index"))
+        
         except TokenIntrospectionError as error:
-            flash(f"Cannot parse token introspection. Does the user have roles?")
-            redirect(url_for("auth.logout"))
+            flash(f"Cannot parse token introspection. Contact sys-dev. If realm_access is missing the user has no assigned roles! Reason: {error}")
+            return redirect(url_for("admin.index"))
 
         except (KeycloakAuthenticationError, UserRoleError) as error:
-            flash(f"Unauthorized: {error}")
-            return redirect(url_for("auth.logout"))
+            flash(f"Unauthorised: {error}")
+            return redirect(url_for("admin.index"))
 
         except UserNotFoundError as error:
             flash(f"Forbidden access: {error}")
-            return
+            return redirect(url_for("admin.index"))
 
         except ValidationError as error:
-            flash(f"Parsing of authentication models failed: {error}")
-            return redirect(url_for("auth.logout"))
+            flash(f"Parsing of authentication models failed. Contact sys-dev: {error}")
+            return redirect(url_for("admin.index"))
 
         except Exception as error:
-            flash(f"An unexpected error occured: {error}")
-            return redirect(url_for("auth.logout"))
-
+            flash(f"An unexpected error occured. Contact sys-dev: {error}")
+            return redirect(url_for("admin.index"))
     return wrapper

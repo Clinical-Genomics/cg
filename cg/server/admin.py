@@ -10,10 +10,8 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
-from cg.server.endpoints.authentication.auth_error_handler import handle_auth_errors
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
-from cg.services.authentication.models import TokenResponseModel
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 from cg.server.ext import auth_service
@@ -24,29 +22,22 @@ LOG = logging.getLogger(__name__)
 
 class BaseView(ModelView):
     """Base for the specific views."""
-
-    @handle_auth_errors
+    
     def is_accessible(self) -> bool:
         """
-        Get the token from the current session and check if the user has access to view the database tables.
-
+        Get the cached user roles from the session and check if the user has the required roles.
         Returns:
             bool: depending on wheter the user has access or not.
         """
-        # This is run before the user is actually logged in due to the current setup.
-        # Set the token to None and return False before a token is available to the session.
-        token: dict | None = session.get("token", None)
-        if not token:
+        user_roles: list[str] = session.get("user_roles")
+        if not user_roles:
             return False
-        parsed_token = TokenResponseModel(**token)
-        new_token: TokenResponseModel = auth_service.refresh_token(parsed_token)
-        session["token"] = new_token.model_dump()
-        auth_service.check_user_role(new_token.access_token)
+        auth_service.check_role(user_roles)
         return True
+        
 
     def inaccessible_callback(self, name, **kwargs):
-        # redirect to logout endpoint if user doesn't have access
-        return redirect(url_for("auth.logout"))
+        return redirect(url_for("admin.index"))
 
 
 def view_priority(unused1, unused2, model, unused3):
@@ -608,7 +599,6 @@ class PanelView(BaseView):
     column_searchable_list = ["customer.internal_id", "name", "abbrev"]
     create_modal = True
     edit_modal = True
-
 
 class PoolView(BaseView):
     """Admin view for Model.Pool"""

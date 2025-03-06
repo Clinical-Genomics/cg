@@ -1,7 +1,7 @@
 from cg.exc import CgError
 
 
-class TokenIntrospectionError(CgError):
+class TokenIntrospectionError(ValueError):
     pass
 
 

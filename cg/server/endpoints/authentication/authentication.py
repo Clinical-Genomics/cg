@@ -1,10 +1,7 @@
 from http import HTTPStatus
-from flask import jsonify, request, redirect, session, Blueprint, flash, url_for
-from keycloak import KeycloakConnectionError, KeycloakGetError
-from pydantic import ValidationError
-from cg import exc
+from flask import jsonify, request, redirect, session, Blueprint, url_for
 from cg.server.endpoints.authentication.auth_error_handler import handle_auth_errors
-from cg.server.ext import keycloak_client
+from cg.server.ext import keycloak_client, auth_service
 
 
 import logging
@@ -32,8 +29,10 @@ def callback():
         token = keycloak_client.get_token(code)
         parsed_token = TokenResponseModel(**token)
         session["token"] = token
-        userinfo = keycloak_client.get_user_info(parsed_token.access_token)
-        session["userinfo"] = userinfo
+        user_info = UserInfo(**keycloak_client.get_user_info(parsed_token.access_token))
+        session["user_info"] = user_info.model_dump()
+        user_roles: list[str] = auth_service.get_user_roles(parsed_token.access_token)
+        session["user_roles"] = user_roles
         return redirect("/")
     return (
         jsonify(error="You are not authorized to access this resource."),
@@ -46,7 +45,6 @@ def callback():
 def logout():
     """Logout the user from the auth service."""
     token = TokenResponseModel(**session.get("token"))
-    LOG.info(f"refresh token: {token.refresh_token}")
     keycloak_client.logout_user(token.refresh_token)
     session.clear()
     return redirect(url_for("admin.index"))
