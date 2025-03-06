@@ -9,6 +9,12 @@ from cg.services.analysis_starter.configurator.extensions.abstract import Pipeli
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
+    RarediseaseParamsFileContentCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
+    RarediseaseSampleSheetContentCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.utils import create_file, get_file_path
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.models import Case
@@ -24,7 +30,9 @@ class NextflowConfigurator(Configurator):
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
         config_content_creator: NextflowConfigFileContentCreator,
-        pipeline_extension: PipelineExtension,
+        sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
+        params_content_creator: RarediseaseParamsFileContentCreator,
+        pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
         self.root_dir: str = config.root
         self.store: Store = store
@@ -32,6 +40,8 @@ class NextflowConfigurator(Configurator):
         self.lims: LimsAPI = lims
         self.config_content_creator = config_content_creator
         self.pipeline_extension = pipeline_extension
+        self.sample_sheet_content_creator = sample_sheet_content_creator
+        self.params_content_creator = params_content_creator
 
     def create_config(self, case_id: str) -> NextflowCaseConfig:
         """Create a Nextflow case config."""
@@ -69,7 +79,7 @@ class NextflowConfigurator(Configurator):
     def _create_params_file(self, case_id: str) -> None:
         """Create parameters file for case."""
         create_file(
-            content_creator=self.params_file_content_creator,
+            content_creator=self.params_content_creator,
             case_path=self._get_case_path(case_id=case_id),
             file_type=NextflowFileType.PARAMS,
         )

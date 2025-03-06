@@ -1,7 +1,7 @@
 import pytest
 
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
@@ -11,6 +11,7 @@ from cg.services.analysis_starter.configurator.file_creators.params_file.raredis
 from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
     RarediseaseSampleSheetContentCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 
 
 @pytest.fixture
@@ -19,8 +20,9 @@ def raredisease_configurator(
     raredisease_config_file_content_creator: NextflowConfigFileContentCreator,
     raredisease_sample_sheet_content_creator: RarediseaseSampleSheetContentCreator,
     raredisease_params_content_creator: RarediseaseParamsFileContentCreator,
-) -> RarediseaseExtension:
-    return RarediseaseExtension(
+    raredisease_extension: PipelineExtension,
+) -> NextflowConfigurator:
+    return NextflowConfigurator(
         store=raredisease_context.status_db,
         config=raredisease_context.raredisease,
         housekeeper_api=raredisease_context.housekeeper_api,
@@ -28,4 +30,5 @@ def raredisease_configurator(
         config_content_creator=raredisease_config_file_content_creator,
         sample_sheet_content_creator=raredisease_sample_sheet_content_creator,
         params_content_creator=raredisease_params_content_creator,
+        pipeline_extension=raredisease_extension,
     )
