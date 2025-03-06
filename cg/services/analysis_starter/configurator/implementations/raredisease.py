@@ -51,7 +51,6 @@ class RarediseaseConfigurator(NextflowConfigurator):
         self.gene_panel_content_creator = gene_panel_content_creator
         self.sample_sheet_content_creator = sample_sheet_content_creator
         self.params_content_creator = params_content_creator
-        self.sample_sheet_content_creator = (sample_sheet_content_creator,)
         self.managed_variants_content_creator = managed_variants_content_creator
 
     def _do_pipeline_specific_actions(self, case_id: str) -> None:
