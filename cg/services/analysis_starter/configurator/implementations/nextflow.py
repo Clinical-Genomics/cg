@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -6,6 +5,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.nf_analysis import NextflowFileType
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
     NextflowConfigFileContentCreator,
 )
@@ -24,12 +24,14 @@ class NextflowConfigurator(Configurator):
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
         config_content_creator: NextflowConfigFileContentCreator,
+        pipeline_extension: RarediseaseExtension,
     ):
         self.root_dir: str = config.root
         self.store: Store = store
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.lims: LimsAPI = lims
         self.config_content_creator = config_content_creator
+        self.pipeline_extension = pipeline_extension
 
     def create_config(self, case_id: str) -> NextflowCaseConfig:
         """Create a Nextflow case config."""
@@ -37,7 +39,7 @@ class NextflowConfigurator(Configurator):
         self._create_sample_sheet(case_id=case_id)
         self._create_params_file(case_id=case_id)
         self._create_nextflow_config(case_id=case_id)
-        self._do_pipeline_specific_actions(case_id=case_id)
+        self.pipeline_extension.configure(self._get_case_path(case_id))
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),
@@ -79,11 +81,6 @@ class NextflowConfigurator(Configurator):
             case_path=self._get_case_path(case_id=case_id),
             file_type=NextflowFileType.CONFIG,
         )
-
-    @abstractmethod
-    def _do_pipeline_specific_actions(self, case_id: str) -> None:
-        """Perform pipeline specific actions."""
-        pass
 
     def _get_case_priority(self, case_id: str) -> str:
         """Get case priority."""
