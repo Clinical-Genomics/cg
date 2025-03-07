@@ -25,7 +25,8 @@ DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --partition=dragen
 #SBATCH --account={account}
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=48
+#SBATCH --exclusive
 #SBATCH --nodes=1
 #SBATCH --error={log_dir}/{job_name}.stderr
 #SBATCH --output={log_dir}/{job_name}.stdout
