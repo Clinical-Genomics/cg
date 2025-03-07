@@ -2885,6 +2885,7 @@ def raredisease_case_id() -> str:
     return "raredisease_case_enough_reads"
 
 
+# TODO: Move this to pluggins
 @pytest.fixture(scope="function")
 def raredisease_sample_sheet_content(
     sample_id: str,
