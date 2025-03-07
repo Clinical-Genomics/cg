@@ -7,7 +7,7 @@ from cg.services.analysis_starter.configurator.file_creators.params_file.raredis
 
 
 @pytest.fixture
-def raredisease_params_content_creator(
+def raredisease_params_file_creator(
     raredisease_context: CGConfig,
 ) -> RarediseaseParamsFileCreator:
     return RarediseaseParamsFileCreator(

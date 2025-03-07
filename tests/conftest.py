@@ -95,7 +95,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.case_config_fixtures",
     "tests.fixture_plugins.analysis_starter.config_file_content_creators",
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
-    "tests.fixture_plugins.analysis_starter.extension_fixtures"
+    "tests.fixture_plugins.analysis_starter.extension_fixtures",
     "tests.fixture_plugins.analysis_starter.file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.sample_sheet_content_creators",

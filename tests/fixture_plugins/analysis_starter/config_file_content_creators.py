@@ -7,7 +7,7 @@ from cg.services.analysis_starter.configurator.file_creators.config_file import 
 
 
 @pytest.fixture
-def raredisease_config_file_content_creator(
+def raredisease_config_file_creator(
     raredisease_context: CGConfig,
 ) -> NextflowConfigFileCreator:
     return NextflowConfigFileCreator(
