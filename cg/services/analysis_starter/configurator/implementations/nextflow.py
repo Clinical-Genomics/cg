@@ -3,6 +3,8 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
+from cg.constants.priority import SlurmQos
+from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.config_file import (
@@ -23,7 +25,7 @@ class NextflowConfigurator(Configurator):
 
     def __init__(
         self,
-        config: any,
+        config: CommonAppConfig,
         store: Store,
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
@@ -78,10 +80,10 @@ class NextflowConfigurator(Configurator):
         case_path: Path = self._get_case_path(case_id=case_id)
         case_path.mkdir(parents=True, exist_ok=True)
 
-    def _get_case_priority(self, case_id: str) -> str:
+    def _get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
         case: Case = self.store.get_case_by_internal_id(case_id)
-        return case.slurm_priority
+        return SlurmQos(case.slurm_priority)
 
     def _get_case_workflow(self, case_id: str) -> Workflow:
         """Get case workflow."""
