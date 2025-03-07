@@ -3,12 +3,10 @@ from cg.services.authentication.exc import TokenIntrospectionError, UserNotFound
 from cg.services.authentication.models import (
     DecodingResponse,
     IntrospectionResponse,
-    RealmAccess,
-    TokenResponseModel,
 )
 from cg.services.user.service import UserService
-from keycloak import KeycloakAuthenticationError, KeycloakOpenID
-from keycloak.exceptions import KeycloakAuthenticationError
+from keycloak import  KeycloakOpenID
+
 from cg.store.models import User
 import logging
 

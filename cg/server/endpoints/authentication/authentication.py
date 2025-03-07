@@ -26,7 +26,7 @@ def callback():
     """Callback route for the auth service."""
     code = request.args.get("code")
     if code:
-        token = keycloak_client.get_token(code)
+        token = keycloak_client.get_token_by_authorisation_code(code)
         parsed_token = TokenResponseModel(**token)
         LOG.info(f"access_token: {parsed_token.access_token}")
         session["token"] = token

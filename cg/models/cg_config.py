@@ -20,6 +20,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.authentication.keycloak_client import KeycloakClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
@@ -125,7 +126,8 @@ class ClientConfig(BaseModel):
 
 
 class TrailblazerConfig(BaseModel):
-    service_account: str
+    keycloak_backend_user: str
+    keycloak_backend_user_password: str
     service_account_auth_file: str
     host: str
 
@@ -387,6 +389,14 @@ class PostProcessingServices(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class KeyCloakConfig(BaseModel):
+    server_url: str
+    client_id: str
+    realm_name:str
+    client_secret_key: str
+    redirect_uri: str
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -454,7 +464,11 @@ class CGConfig(BaseModel):
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
+    keycloak: KeyCloakConfig = None
+    keycloak_client_: KeycloakClient | None = None
 
+    
+    
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig | None = None
     fluffy: FluffyConfig | None = None
@@ -779,3 +793,16 @@ class CGConfig(BaseModel):
             )
             self.delivery_service_factory_ = factory
         return factory
+
+    @property
+    def keycloant_client(self) -> KeycloakClient:
+        client = self.keycloak_client_
+        if client is None:
+            LOG.debug("Instantiating keycloak client")
+            client = KeycloakClient(server_url=self.keycloak.server_url,
+                                    client_id=self.keycloak.client_id,
+                                    client_secret_key=self.keycloak.client_secret_key,
+                                    realm_name=self.keycloak.realm_name,
+                                    redirect_uri=self.keycloak.redirect_uri)
+            self.keycloak_client_ = client
+        return client
