@@ -92,7 +92,7 @@ def test_params_file_content(
             "raredisease_sample_sheet_creator",
             "raredisease_case_id",
             "raredisease_case_path",
-            "raredisease_sample_sheet_content",
+            "raredisease_sample_sheet_expected_content",
         )
     ],
     ids=["raredisease"],

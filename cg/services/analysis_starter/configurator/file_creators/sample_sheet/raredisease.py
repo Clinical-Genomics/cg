@@ -17,7 +17,6 @@ from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.services.analysis_starter.configurator.file_creators.utils import get_case_id_from_path
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
