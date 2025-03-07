@@ -34,25 +34,27 @@ def test_create_config(
 
 
 @pytest.mark.parametrize(
-    "configurator_fixture, case_id_fixture",
-    [("raredisease_configurator", "raredisease_case_id")],
+    "configurator_fixture, case_id_fixture, case_path_fixture",
+    [("raredisease_configurator", "raredisease_case_id", "raredisease_case_path")],
     ids=["raredisease"],
 )
 def test_create_nextflow_config_file_exists(
     configurator_fixture: str,
     case_id_fixture: str,
+    case_path_fixture: str,
     request: pytest.FixtureRequest,
 ):
     """Test that a nextflow config file is created fro all Nextflow pipelines."""
-    # GIVEN a configurator and a case id
+    # GIVEN a configurator, a case id and a case path
     configurator: NextflowConfigurator = request.getfixturevalue(configurator_fixture)
     case_id: str = request.getfixturevalue(case_id_fixture)
+    case_path: Path = request.getfixturevalue(case_path_fixture)
 
     # GIVEN that a case directory exists
     configurator._create_case_directory(case_id=case_id)
 
     # WHEN creating nextflow config
-    configurator.config_file_creator.create(case_id=case_id)
+    configurator.config_file_creator.create(case_id=case_id, case_path=case_path)
 
     # THEN the nextflow config is created
     case_path: Path = configurator._get_case_path(case_id=case_id)

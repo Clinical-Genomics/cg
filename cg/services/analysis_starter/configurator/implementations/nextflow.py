@@ -45,8 +45,13 @@ class NextflowConfigurator(Configurator):
         """Create a Nextflow case config."""
         case_path: Path = self._get_case_path(case_id=case_id)
         self._create_case_directory(case_id=case_id)
+        sample_sheet_path: Path = self.sample_sheet_creator.get_file_path(
+            case_id=case_id, case_path=case_path
+        )
         self.sample_sheet_creator.create(case_id=case_id, case_path=case_path)
-        self.params_file_creator.create(case_id=case_id, case_path=case_path)
+        self.params_file_creator.create(
+            case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
+        )
         self.config_file_creator.create(case_id=case_id, case_path=case_path)
         config_file_path: Path = self.config_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
