@@ -61,7 +61,7 @@ class NextflowConfigurator(Configurator):
         params_file_path: Path = self.params_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
         )
-        self.pipeline_extension.configure(case_path)
+        self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self._get_case_priority(case_id),
