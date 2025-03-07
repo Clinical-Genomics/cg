@@ -12,19 +12,13 @@ class RarediseaseExtension(PipelineExtension):
 
     def __init__(
         self,
-        gene_panel_content_creator: GenePanelFileCreator,
-        managed_variants_content_creator: ManagedVariantsFileCreator,
+        gene_panel_file_creator: GenePanelFileCreator,
+        managed_variants_file_creator: ManagedVariantsFileCreator,
     ):
-        self.gene_panel_content_creator = gene_panel_content_creator
-        self.managed_variants_content_creator = managed_variants_content_creator
+        self.gene_panel_file_creator = gene_panel_file_creator
+        self.managed_variants_file_creator = managed_variants_file_creator
 
     def configure(self, case_path: Path) -> None:
         """Perform pipeline specific actions."""
-        self._create_gene_panel(case_path)
-        self._create_managed_variants(case_path)
-
-    def _create_gene_panel(self, case_path: Path) -> None:
-        raise NotImplementedError
-
-    def _create_managed_variants(self, case_path: Path) -> None:
-        raise NotImplementedError
+        self.gene_panel_file_creator.create(case_path)
+        self.managed_variants_file_creator.create(case_path)
