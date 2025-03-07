@@ -11,7 +11,7 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-class GenePanelFileContentCreator:
+class GenePanelFileCreator:
     def __init__(self, store: Store, scout_api: ScoutAPI):
         self.store = store
         self.scout_api = scout_api

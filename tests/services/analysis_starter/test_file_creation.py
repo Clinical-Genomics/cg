@@ -41,7 +41,7 @@ def test_create_nextflow_config_file_content(
 
 
 @pytest.mark.parametrize(
-    "content_creator_fixture, case_id_fixture, case_path_fixture, expected_content_fixture",
+    "file_creator_fixture, case_id_fixture, case_path_fixture, expected_content_fixture",
     [
         (
             "raredisease_params_file_creator",
@@ -53,7 +53,7 @@ def test_create_nextflow_config_file_content(
     ids=["raredisease"],
 )
 def test_create_params_file_content(
-    content_creator_fixture: str,
+    file_creator_fixture: str,
     case_id_fixture: str,
     case_path_fixture: str,
     expected_content_fixture: str,
@@ -62,7 +62,7 @@ def test_create_params_file_content(
 ):
     """Test that the params file content is created correctly for all pipelines."""
     # GIVEN a params file content creator and a case id
-    content_creator: RarediseaseParamsFileCreator = request.getfixturevalue(content_creator_fixture)
+    content_creator: RarediseaseParamsFileCreator = request.getfixturevalue(file_creator_fixture)
     case_id: str = request.getfixturevalue(case_id_fixture)
     case_path: Path = request.getfixturevalue(case_path_fixture)
 

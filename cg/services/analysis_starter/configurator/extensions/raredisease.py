@@ -1,11 +1,9 @@
 from pathlib import Path
 
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
-from cg.services.analysis_starter.configurator.file_creators.gene_panel import (
-    GenePanelFileContentCreator,
-)
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
-    ManagedVariantsFileContentCreator,
+    ManagedVariantsFileCreator,
 )
 
 
@@ -14,8 +12,8 @@ class RarediseaseExtension(PipelineExtension):
 
     def __init__(
         self,
-        gene_panel_content_creator: GenePanelFileContentCreator,
-        managed_variants_content_creator: ManagedVariantsFileContentCreator,
+        gene_panel_content_creator: GenePanelFileCreator,
+        managed_variants_content_creator: ManagedVariantsFileCreator,
     ):
         self.gene_panel_content_creator = gene_panel_content_creator
         self.managed_variants_content_creator = managed_variants_content_creator

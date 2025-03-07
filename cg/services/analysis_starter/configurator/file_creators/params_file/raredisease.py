@@ -27,7 +27,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
         """Return the path to the params file."""
-        return Path(case_path, f"{case_id}_params").with_suffix(FileExtensions.YAML)
+        return Path(case_path, f"{case_id}_params_file").with_suffix(FileExtensions.YAML)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
         """Create the params file for a case."""
