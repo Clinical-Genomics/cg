@@ -13,9 +13,10 @@ from cg.cli.workflow.nf_analysis import (
     report_deliver,
     run,
     start,
-    start-available,
+    start_available,
     store,
     store_housekeeper,
+)
 
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
