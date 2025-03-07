@@ -42,10 +42,9 @@ class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
         content: any = self._get_content(case_path=case_path)
         write_csv(file_path=file_path, content=content)
 
-    def _get_content(self, case_path: Path) -> any:
+    def _get_content(self, case_id: str, case_path: Path) -> list[list[str]]:
         """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
-        case_id: str = get_case_id_from_path(case_path=case_path)
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content: list[list[str]] = [RarediseaseSampleSheetHeaders.list()]
         for link in case.links:

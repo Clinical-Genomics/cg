@@ -13,20 +13,29 @@ def raredisease_sample_sheet_content(
     raredisease_case_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
-) -> str:
+) -> list[list[str]]:
     """Return the expected sample sheet content  for raredisease."""
-    headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
-    row: str = ",".join(
-        [
-            sample_id,
-            "1",
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            "2",
-            "0",
-            "",
-            "",
-            raredisease_case_id,
-        ]
-    )
-    return "\n".join([headers, row])
+    headers: list[str] = RarediseaseSampleSheetHeaders.list()
+    row_link_1: list[str] = [
+        sample_id,
+        "1",
+        fastq_forward_read_path.as_posix(),
+        fastq_reverse_read_path.as_posix(),
+        "2",
+        "0",
+        "",
+        "",
+        raredisease_case_id,
+    ]
+    row_link_2: list[str] = [
+        sample_id,
+        "1",
+        fastq_forward_read_path.as_posix(),
+        fastq_reverse_read_path.as_posix(),
+        "2",
+        "0",
+        "",
+        "",
+        raredisease_case_id,
+    ]
+    return [headers, row_link_1, row_link_2]

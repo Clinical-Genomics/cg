@@ -14,6 +14,9 @@ from cg.services.analysis_starter.configurator.file_creators.managed_variants im
 from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstract import (
+    NextflowSampleSheetCreator,
+)
 
 
 @pytest.mark.parametrize(
@@ -27,7 +30,7 @@ from cg.services.analysis_starter.configurator.file_creators.params_file.raredis
     ],
     ids=["raredisease"],
 )
-def test_create_nextflow_config_file_content(
+def test_nextflow_config_file_content(
     file_creator_fixture: str,
     case_path_fixture: str,
     expected_content_fixture: str,
@@ -58,7 +61,7 @@ def test_create_nextflow_config_file_content(
     ],
     ids=["raredisease"],
 )
-def test_create_params_file_content(
+def test_params_file_content(
     file_creator_fixture: str,
     case_id_fixture: str,
     case_path_fixture: str,
@@ -82,7 +85,37 @@ def test_create_params_file_content(
     assert content == expected_content
 
 
-# TODO: test creation of sample sheet content
+@pytest.mark.parametrize(
+    "file_creator_fixture, case_id_fixture, case_path_fixture, expected_content_fixture",
+    [
+        (
+            "raredisease_sample_sheet_creator",
+            "raredisease_case_id",
+            "raredisease_case_path",
+            "raredisease_sample_sheet_content",
+        )
+    ],
+    ids=["raredisease"],
+)
+def test_nextflow_sample_sheet_content(
+    file_creator_fixture: str,
+    case_id_fixture: str,
+    case_path_fixture: str,
+    expected_content_fixture: str,
+    request: pytest.FixtureRequest,
+):
+    """Test that the sample sheet content is created correctly."""
+    # GIVEN a sample sheet content creator, a case id and a case path
+    file_creator: NextflowSampleSheetCreator = request.getfixturevalue(file_creator_fixture)
+    case_id: str = request.getfixturevalue(case_id_fixture)
+    case_path: Path = request.getfixturevalue(case_path_fixture)
+
+    # WHEN creating a sample sheet
+    content: list[list[str]] = file_creator._get_content(case_id=case_id, case_path=case_path)
+
+    # THEN the content of the file is the expected
+    expected_content: str = request.getfixturevalue(expected_content_fixture)
+    assert content == expected_content
 
 
 @pytest.mark.parametrize(
@@ -96,7 +129,7 @@ def test_create_params_file_content(
     ],
     ids=["raredisease"],
 )
-def test_create_gene_panel_file_content(
+def test_gene_panel_file_content(
     file_creator_fixture: str,
     case_path_fixture: str,
     expected_content_fixture: str,
@@ -119,7 +152,7 @@ def test_create_gene_panel_file_content(
     assert content == expected_content
 
 
-def test_create_managed_variants_content(
+def test_managed_variants_content(
     raredisease_managed_variants_creator: ManagedVariantsFileCreator,
     raredisease_case_id: str,
     raredisease_managed_variants_file_content: list[str],

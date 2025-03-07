@@ -6,7 +6,6 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 
-    sex: str
     phenotype: int
     sex: int
     paternal_id: str
