@@ -16,27 +16,27 @@ from cg.clients.chanjo2.models import (
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
+    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
-    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
-    RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
-    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
-from cg.constants.sequencing import SeqLibraryPrepCategory, NOVASEQ_SEQUENCING_READ_LENGTH
+from cg.constants.sequencing import NOVASEQ_SEQUENCING_READ_LENGTH, SeqLibraryPrepCategory
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.raredisease.raredisease import (
+from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
