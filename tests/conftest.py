@@ -53,14 +53,13 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
-    RarediseaseSampleSheetHeaders,
-    RarediseaseParameters,
-)
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+    RarediseaseParameters,
+)
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
@@ -96,15 +95,16 @@ software_version_file = "software_versions.yml"
 deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.case_config_fixtures",
-    "tests.fixture_plugins.analysis_starter.config_file_content_creators",
+    "tests.fixture_plugins.analysis_starter.config_file_creators",
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
     "tests.fixture_plugins.analysis_starter.extension_fixtures",
-    "tests.fixture_plugins.analysis_starter.file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.config_file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
-    "tests.fixture_plugins.analysis_starter.sample_sheet_content_creators",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
     "tests.fixture_plugins.analysis_starter.specific_file_creators",
-    "tests.fixture_plugins.analysis_starter.params_file_content_creators",
+    "tests.fixture_plugins.analysis_starter.params_file_creators",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
@@ -2886,32 +2886,6 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
 def raredisease_case_id() -> str:
     """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
-
-
-# TODO: Move this to pluggins
-@pytest.fixture(scope="function")
-def raredisease_sample_sheet_content(
-    sample_id: str,
-    raredisease_case_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-) -> str:
-    """Return the expected sample sheet content  for raredisease."""
-    headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
-    row: str = ",".join(
-        [
-            sample_id,
-            "1",
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            "2",
-            "0",
-            "",
-            "",
-            raredisease_case_id,
-        ]
-    )
-    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
