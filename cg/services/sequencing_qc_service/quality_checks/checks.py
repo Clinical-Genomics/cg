@@ -6,6 +6,7 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
     sample_pass_sequencing_qc,
+    all_samples_in_case_have_reads,
 )
 from cg.store.models import Case
 
@@ -19,6 +20,7 @@ class QualityCheck(Enum):
 class SequencingQCCheck(QualityCheck):
     CASE_PASSES: Callable = case_pass_sequencing_qc
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc
+    ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = all_samples_in_case_have_reads
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
 
 
@@ -42,14 +44,19 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
         Workflow.RAW_DATA,
         Workflow.MICROSALT,
         Workflow.MUTANT,
-        Workflow.NALLO,
         Workflow.TAXPROFILER,
+    ]
+
+    all_samples_in_case_have_reads_workflows = [
+        Workflow.NALLO,
     ]
 
     if workflow in case_passes_workflows:
         return SequencingQCCheck.CASE_PASSES
     elif workflow in any_sample_in_case_has_reads_workflows:
         return SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS
+    elif workflow in all_samples_in_case_have_reads_workflows:
+        return SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS
     raise ValueError(f"Workflow {workflow} does not have a sequencing quality check.")
 
 
