@@ -15,7 +15,7 @@ class ManagedVariantsFileCreator:
         self.store = store
 
     def create(self, case_id: str, case_path: Path) -> None:
-        file_path = Path(case_path, f"managed_variants").with_suffix(FileExtensions.VCF)
+        file_path = Path(case_path, "managed_variants").with_suffix(FileExtensions.VCF)
         content: list[str] = self._get_content(case_id=case_id)
         write_txt(file_path=file_path, content=content)
 
