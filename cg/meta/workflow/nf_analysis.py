@@ -29,7 +29,6 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
-from cg.meta.workflow.utils.genome_build_helpers import get_genome_build
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -242,7 +241,7 @@ class NfAnalysisAPI(AnalysisAPI):
             if fastq_file.read_direction == read_direction
         ]
 
-    def get_paired_read_paths(self, sample=Sample) -> tuple[list[str], list[str]]:
+    def get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
         """Returns a tuple of paired fastq file paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
@@ -253,7 +252,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         return fastq_forward_read_paths, fastq_reverse_read_paths
 
-    def get_bam_read_file_paths(self, sample=Sample) -> list[Path]:
+    def get_bam_read_file_paths(self, sample: Sample) -> list[Path]:
         """Gather BAM file path for a sample based on the BAM tag."""
         return [
             Path(hk_file.full_path)
@@ -629,6 +628,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 .replace("SAMPLENAME", sample_name)
                 .replace("PATHTOCASE", case_path)
             )
+            LOG.debug(deliverables[deliverable_field])
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
@@ -833,7 +833,7 @@ class NfAnalysisAPI(AnalysisAPI):
             return
         workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
+            deliverables_content=workflow_content.model_dump(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
@@ -906,11 +906,7 @@ class NfAnalysisAPI(AnalysisAPI):
         ]
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
-        """Return reference genome version for a case.
-        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
-        """
-        case = self.status_db.get_case_by_internal_id(case_id)
-        return get_genome_build(case)
+        raise NotImplementedError
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""

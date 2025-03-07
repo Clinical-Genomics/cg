@@ -9,8 +9,8 @@ from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.service import StoreOrderService
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.fastq.models.sample import FastqSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
@@ -45,16 +45,18 @@ class StoreFastqOrderService(StoreOrderService):
         The stored data objects are:
         - Order
         - Samples
-        - One Case containing all samples
-        - For each Sample, a relationship between the sample and the Case
+        - One Case per sample
+        - For each Sample, a relationship between the sample and its Case
         - For each non-tumour WGS Sample, a MAF Case and a relationship between the Sample and the
         MAF Case
         """
         db_order: Order = self._create_db_order(order=order)
-        db_case: Case = self._create_db_case(order=order, db_order=db_order)
         new_samples = []
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
+                db_case: Case = self._create_db_case_for_sample(
+                    sample=sample, customer=db_order.customer, order=order
+                )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
                     order_name=order.name,
@@ -65,10 +67,10 @@ class StoreFastqOrderService(StoreOrderService):
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
-                self.status_db.add_multiple_items_to_store([db_sample, case_sample])
+                self.status_db.add_multiple_items_to_store([db_sample, case_sample, db_case])
                 new_samples.append(db_sample)
-        db_order.cases.append(db_case)
-        self.status_db.add_multiple_items_to_store([db_order, db_case])
+                db_order.cases.append(db_case)
+        self.status_db.add_item_to_store(db_order)
         self.status_db.commit_to_store()
         return new_samples
 
@@ -80,17 +82,24 @@ class StoreFastqOrderService(StoreOrderService):
         )
         return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
 
-    def _create_db_case(self, order: FastqOrder, db_order: Order) -> Case:
+    def _create_db_case_for_sample(
+        self,
+        sample: FastqSample,
+        customer: Customer,
+        order: FastqOrder,
+    ) -> Case:
         """Return a Case database object."""
-        priority: str = order.samples[0].priority
+        ticket_id = str(order._generated_ticket_id)
+        case_name: str = f"{sample.name}-{ticket_id}"
+        priority: str = sample.priority
         case: Case = self.status_db.add_case(
             data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             data_delivery=DataDelivery(order.delivery_type),
-            name=str(db_order.ticket_id),
+            name=case_name,
             priority=priority,
-            ticket=str(db_order.ticket_id),
+            ticket=ticket_id,
         )
-        case.customer = db_order.customer
+        case.customer = customer
         return case
 
     def _create_db_sample(

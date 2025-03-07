@@ -3,8 +3,10 @@ from unittest.mock import patch
 
 import pytest
 
+from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import TicketCreationError
+from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.constants import MAF_ORDER_ID
@@ -13,7 +15,7 @@ from cg.services.orders.validation.errors.validation_errors import ValidationErr
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.store.models import Case
 from cg.store.models import Order as DbOrder
 from cg.store.models import Pool, Sample, User
@@ -152,7 +154,7 @@ def test_submit_order(
 
 def test_submit_ticketexception(
     order_submitter: OrderSubmitter,
-    mip_dna_order: MipDnaOrder,
+    mip_dna_order: MIPDNAOrder,
 ):
 
     # GIVEN an order
@@ -180,3 +182,51 @@ def test_submit_ticketexception(
             order_submitter.submit(
                 raw_order=raw_order, user=user, order_type=mip_dna_order.order_type
             )
+
+
+@pytest.mark.parametrize(
+    "order_fixture, order_type, expected_tags",
+    [
+        ("mip_dna_order_with_existing_samples", OrderType.MIP_DNA, ["mip-dna", "existing-data"]),
+        ("mip_dna_order", OrderType.MIP_DNA, ["mip-dna"]),
+    ],
+)
+def test_get_ticket_tags(
+    request: pytest.FixtureRequest,
+    order_fixture: str,
+    order_type: OrderType,
+    expected_tags: list[str],
+):
+    """Test that the correct tags are generated based on the order and order type."""
+
+    # GIVEN an order with existing data
+    order: OrderWithCases = request.getfixturevalue(order_fixture)
+
+    # WHEN getting the ticket tags
+    tags = get_ticket_tags(order=order, order_type=order_type)
+
+    # THEN the tags should be correct
+    assert tags == expected_tags
+
+
+@pytest.mark.parametrize(
+    "order_fixture, expected_status",
+    [
+        ("mip_dna_order", Status.PENDING),
+        ("mip_dna_order_with_existing_samples", Status.PENDING),
+        ("mip_dna_order_with_only_existing_samples", Status.OPEN),
+    ],
+)
+def test_get_ticket_status(
+    request: pytest.FixtureRequest, order_fixture: str, expected_status: int
+):
+    """Test that the correct ticket status is returned based on the order samples."""
+
+    # GIVEN an order
+    order: Order = request.getfixturevalue(order_fixture)
+
+    # WHEN getting the ticket status
+    status = get_ticket_status(order=order)
+
+    # THEN the status should be correct
+    assert status == expected_status

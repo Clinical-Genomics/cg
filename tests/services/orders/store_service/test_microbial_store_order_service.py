@@ -10,8 +10,8 @@ from cg.models.orders.sample_base import ControlEnum
 from cg.services.orders.storing.implementations.microbial_order_service import (
     StoreMicrobialOrderService,
 )
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.store.models import Case, Organism, Sample
 from cg.store.store import Store
 

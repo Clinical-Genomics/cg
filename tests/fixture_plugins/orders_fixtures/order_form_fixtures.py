@@ -199,15 +199,6 @@ def balsamic_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def balsamic_qc_orderform(orderforms: Path) -> str:
-    """Orderform fixture for Balsamic QC samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.BALSAMIC_QC}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC_QC)}.balsamic_qc.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
 def balsamic_umi_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic UMI samples."""
     return Path(
@@ -267,6 +258,15 @@ def taxprofiler_orderform(orderforms: Path) -> str:
     return Path(
         orderforms,
         f"{Orderform.TAXPROFILER}.{Orderform.get_current_orderform_version(Orderform.TAXPROFILER)}.taxprofiler.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture
+def tomte_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.TOMTE}.{Orderform.get_current_orderform_version(Orderform.TOMTE)}.tomte.xlsx",
     ).as_posix()
 
 

@@ -100,8 +100,15 @@ def create_case_sample_error(error: ErrorDetails) -> CaseSampleError:
 What follows below are ways of extracting data from a Pydantic ErrorDetails object. The aim is to find out
 where the error occurred, for which the 'loc' value (which is a tuple) can be used. It is generally structured in 
 alternating strings and ints, specifying field names and list indices. An example:
-if loc = ('cases', 3, 'samples', 2, 'well_position'), that means that the error stems from the well_position of the
-third sample in the fourth case.
+if loc = ('samples', 2, 'well_position'), that means that the error stems from the well_position of the
+third sample in the order.
+
+As an additional point of complexity, the discriminator is also added to the loc, specifically in 
+OrdersWithCases which have a discriminator for both cases and samples specifying if it is a new 
+or existing case/sample. So
+    loc = ('cases', 0, 'new', 'priority')
+means that the error concerns the first case in the order, which is a new case, and it concerns the field
+'priority'.
 """
 
 
@@ -122,19 +129,19 @@ def get_order_error_details(error_details: list[ErrorDetails]) -> list[ErrorDeta
 
 
 def is_sample_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 3 and error["loc"][0] == "samples"
+    return error["loc"][0] == "samples"
 
 
 def is_case_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 4 and error["loc"][0] == "cases"
+    return "cases" in error["loc"] and "samples" not in error["loc"]
 
 
 def is_case_sample_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 7
+    return "cases" in error["loc"] and "samples" in error["loc"]
 
 
 def is_order_error(error: ErrorDetails) -> bool:
-    return len(error["loc"]) == 1
+    return error["loc"][0] not in ["cases", "samples"]
 
 
 def get_error_message(error: ErrorDetails) -> str:
@@ -142,15 +149,18 @@ def get_error_message(error: ErrorDetails) -> str:
 
 
 def get_sample_field_name(error: ErrorDetails) -> str:
-    return error["loc"][2]
+    index_for_field_name: int = error["loc"].index("samples") + 2
+    return error["loc"][index_for_field_name]
 
 
 def get_case_field_name(error: ErrorDetails) -> str:
-    return error["loc"][3]
+    index_for_field_name: int = error["loc"].index("cases") + 3
+    return error["loc"][index_for_field_name]
 
 
 def get_case_sample_field_name(error: ErrorDetails) -> str:
-    return error["loc"][6]
+    index_for_field_name: int = error["loc"].index("samples") + 3
+    return error["loc"][index_for_field_name]
 
 
 def get_order_field_name(error: ErrorDetails) -> str:
@@ -158,12 +168,15 @@ def get_order_field_name(error: ErrorDetails) -> str:
 
 
 def get_sample_index(error: ErrorDetails) -> int:
-    return error["loc"][1]
+    index_for_index: int = error["loc"].index("samples") + 1
+    return error["loc"][index_for_index]
 
 
 def get_case_index(error: ErrorDetails) -> int:
-    return error["loc"][1]
+    index_for_index: int = error["loc"].index("cases") + 1
+    return error["loc"][index_for_index]
 
 
 def get_case_sample_index(error: ErrorDetails) -> int:
-    return error["loc"][4]
+    index_for_index: int = error["loc"].index("samples") + 1
+    return error["loc"][index_for_index]

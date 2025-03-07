@@ -18,7 +18,7 @@ from cg.models.cg_config import CGConfig
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_store_success(
     cli_runner: CliRunner,
@@ -78,7 +78,7 @@ def test_store_success(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_store_fail(
     cli_runner: CliRunner,

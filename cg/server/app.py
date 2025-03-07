@@ -11,10 +11,14 @@ from cg.server.app_config import app_config
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
-from cg.server.endpoints.flow_cells.flow_cells import FLOW_CELLS_BLUEPRINT
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.illumina_sequencing_metrics import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
+    PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT,
+)
+from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import PACBIO_SEQUENCING_RUN_BLUEPRINT
 from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -40,6 +44,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.server.app_config import app_config
 
 
 def create_app():
@@ -54,8 +59,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(app_config.dict())
-    app.secret_key = app.config["cg_secret_key"]
+    app.config.update(app_config.model_dump())
+    app.secret_key = app_config.cg_secret_key
 
 
 def _configure_extensions(app: Flask):
@@ -78,8 +83,8 @@ def _initialize_logging(app):
 
 def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
-        client_id=app.config["google_oauth_client_id"],
-        client_secret=app.config["google_oauth_client_secret"],
+        client_id=app_config.google_oauth_client_id,
+        client_secret=app_config.google_oauth_client_secret,
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
@@ -101,6 +106,8 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(FLOW_CELLS_BLUEPRINT)
     app.register_blueprint(ANALYSES_BLUEPRINT)
     app.register_blueprint(USERS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SEQUENCING_RUN_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(SAMPLES_BLUEPRINT)

@@ -3,12 +3,12 @@ from cg.services.orders.validation.errors.order_errors import (
     CustomerDoesNotExistError,
     UserNotAssociatedWithCustomerError,
 )
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.order.rules import (
     validate_customer_can_skip_reception_control,
     validate_customer_exists,
     validate_user_belongs_to_customer,
 )
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
 from cg.store.models import Customer
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

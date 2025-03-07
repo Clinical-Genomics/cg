@@ -28,6 +28,9 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -52,9 +55,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 from cg.store.models import Application, Sample
 from cg.store.store import Store
 
@@ -541,7 +541,7 @@ def test_validate_not_all_samples_unknown_in_case(valid_order: OrderWithCases):
     assert isinstance(errors[0], StatusUnknownError)
 
 
-def test_validate_buffer_required(mip_dna_order: MipDnaOrder, application_tag_required_buffer: str):
+def test_validate_buffer_required(mip_dna_order: MIPDNAOrder, application_tag_required_buffer: str):
 
     # GIVEN an order for which the buffer is only required for samples running certain applications
 
@@ -565,7 +565,7 @@ def test_validate_buffer_required(mip_dna_order: MipDnaOrder, application_tag_re
 
 
 def test_existing_sample_from_outside_of_collaboration(
-    mip_dna_order: MipDnaOrder,
+    mip_dna_order: MIPDNAOrder,
     store_with_multiple_cases_and_samples: Store,
     sample_id_in_single_case: str,
 ):

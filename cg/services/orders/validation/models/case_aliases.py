@@ -1,6 +1,6 @@
-from cg.services.orders.validation.workflows.mip_dna.models.case import MipDnaCase
-from cg.services.orders.validation.workflows.tomte.models.case import TomteCase
+from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 
-CaseContainingRelatives = TomteCase | MipDnaCase
+CaseContainingRelatives = TomteCase | MIPDNACase
 
-CaseWithSkipRC = TomteCase | MipDnaCase
+CaseWithSkipRC = TomteCase | MIPDNACase
