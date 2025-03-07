@@ -23,11 +23,10 @@ log "Running on: $(hostname)"
 
 DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
-#SBATCH --partition=dragen
+#SBATCH --partition={partition}
 #SBATCH --account={account}
-#SBATCH --cpus-per-task=48
 #SBATCH --exclusive
-#SBATCH --nodes=1
+#SBATCH --mem=0 # Allocates all memory on the node
 #SBATCH --error={log_dir}/{job_name}.stderr
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
