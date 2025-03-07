@@ -28,35 +28,26 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
     """Return the appropriate sequencing quality checks for the workflow for a case."""
     workflow: Workflow = case.data_analysis
 
-    case_passes_workflows = [
-        Workflow.BALSAMIC,
-        Workflow.BALSAMIC_PON,
-        Workflow.BALSAMIC_UMI,
-        Workflow.MIP_DNA,
-        Workflow.MIP_RNA,
-        Workflow.RAREDISEASE,
-        Workflow.RNAFUSION,
-        Workflow.TOMTE,
-    ]
+    workflow_qc_mapping = {
+        Workflow.BALSAMIC: SequencingQCCheck.CASE_PASSES,
+        Workflow.BALSAMIC_PON: SequencingQCCheck.CASE_PASSES,
+        Workflow.BALSAMIC_UMI: SequencingQCCheck.CASE_PASSES,
+        Workflow.MIP_DNA: SequencingQCCheck.CASE_PASSES,
+        Workflow.MIP_RNA: SequencingQCCheck.CASE_PASSES,
+        Workflow.RAREDISEASE: SequencingQCCheck.CASE_PASSES,
+        Workflow.RNAFUSION: SequencingQCCheck.CASE_PASSES,
+        Workflow.TOMTE: SequencingQCCheck.CASE_PASSES,
+        Workflow.FLUFFY: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.RAW_DATA: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.MICROSALT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.MUTANT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.TAXPROFILER: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.NALLO: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
+    }
 
-    any_sample_in_case_has_reads_workflows = [
-        Workflow.FLUFFY,
-        Workflow.RAW_DATA,
-        Workflow.MICROSALT,
-        Workflow.MUTANT,
-        Workflow.TAXPROFILER,
-    ]
+    if workflow in workflow_qc_mapping:
+        return workflow_qc_mapping[workflow]
 
-    all_samples_in_case_have_reads_workflows = [
-        Workflow.NALLO,
-    ]
-
-    if workflow in case_passes_workflows:
-        return SequencingQCCheck.CASE_PASSES
-    elif workflow in any_sample_in_case_has_reads_workflows:
-        return SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS
-    elif workflow in all_samples_in_case_have_reads_workflows:
-        return SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS
     raise ValueError(f"Workflow {workflow} does not have a sequencing quality check.")
 
 
