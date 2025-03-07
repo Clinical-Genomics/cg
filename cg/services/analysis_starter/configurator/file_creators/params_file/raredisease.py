@@ -1,46 +1,56 @@
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import DEFAULT_CAPTURE_KIT
-from cg.constants.nf_analysis import NextflowFileType
+from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisType
 from cg.exc import CgDataError
-from cg.io.yaml import read_yaml
+from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.models.raredisease.raredisease import RarediseaseParameters
-from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
+from cg.services.analysis_starter.configurator.file_creators.params_file.abstract import (
+    ParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.params_file.utils import (
     replace_values_in_params_file,
-)
-from cg.services.analysis_starter.configurator.file_creators.utils import (
-    get_case_id_from_path,
-    get_file_path,
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 
-class RarediseaseParamsFileContentCreator(FileContentCreator):
+class RarediseaseParamsFileCreator(ParamsFileCreator):
 
     def __init__(self, store: Store, lims: LimsAPI, params: str):
         self.store = store
         self.lims = lims
         self.params = params
 
-    def create(self, case_path: Path) -> dict:
+    @staticmethod
+    def get_file_path(case_id: str, case_path: Path) -> Path:
+        """Return the path to the params file."""
+        return Path(case_path, f"{case_id}_params_file").with_suffix(FileExtensions.YAML)
+
+    def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
+        """Create the params file for a case."""
+        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: dict = self._get_content(
+            case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
+        )
+        write_yaml_nextflow_style(file_path=file_path, content=content)
+
+    def _get_content(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> dict:
         """Create parameters file for a case."""
-        case_workflow_parameters: dict = self._get_case_parameters(case_path).model_dump()
+        case_workflow_parameters: dict = self._get_case_parameters(
+            case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
+        ).model_dump()
         workflow_parameters: any = read_yaml(self.params)
         parameters: dict = case_workflow_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
         return curated_parameters
 
-    def _get_case_parameters(self, case_path: Path) -> RarediseaseParameters:
+    def _get_case_parameters(
+        self, case_id: str, case_path: Path, sample_sheet_path: Path
+    ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        case_id: str = get_case_id_from_path(case_path=case_path)
-        sample_sheet_path: Path = get_file_path(
-            case_path=case_path, file_type=NextflowFileType.SAMPLE_SHEET
-        )
         analysis_type: str = self._get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self._get_target_bed(case_id=case_id, analysis_type=analysis_type)
         skip_germlinecnvcaller: bool = self._get_germlinecnvcaller_flag(analysis_type=analysis_type)

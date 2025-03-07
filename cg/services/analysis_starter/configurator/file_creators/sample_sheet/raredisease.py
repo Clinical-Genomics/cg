@@ -4,8 +4,9 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants import SequencingFileTag
+from cg.constants import FileExtensions, SequencingFileTag
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import _is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
@@ -13,7 +14,9 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstract import (
+    NextflowSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.utils import get_case_id_from_path
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
@@ -21,14 +24,25 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseSampleSheetContentCreator(FileContentCreator):
+class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
 
     def __init__(self, store: Store, housekeeper_api: HousekeeperAPI, lims: LimsAPI):
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.lims = lims
 
-    def create(self, case_path: Path) -> any:
+    @staticmethod
+    def get_file_path(case_id: str, case_path: Path) -> Path:
+        """Return the path to the params file."""
+        return Path(case_path, f"{case_id}_sample_sheet").with_suffix(FileExtensions.CSV)
+
+    def create(self, case_id: str, case_path: Path) -> None:
+        """Create the sample sheet for a case."""
+        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: any = self._get_content(case_path=case_path)
+        write_csv(file_path=file_path, content=content)
+
+    def _get_content(self, case_path: Path) -> any:
         """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
         case_id: str = get_case_id_from_path(case_path=case_path)

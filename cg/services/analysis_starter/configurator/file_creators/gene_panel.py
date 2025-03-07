@@ -3,7 +3,6 @@ from pathlib import Path
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import GenePanelMasterList
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
-from cg.services.analysis_starter.configurator.file_creators.abstract import FileContentCreator
 from cg.services.analysis_starter.configurator.file_creators.utils import (
     get_case_id_from_path,
     get_genome_build,
@@ -12,7 +11,7 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-class GenePanelFileContentCreator(FileContentCreator):
+class GenePanelFileCreator:
     def __init__(self, store: Store, scout_api: ScoutAPI):
         self.store = store
         self.scout_api = scout_api
