@@ -47,6 +47,6 @@ def raredisease_nextflow_config_file_path(
 @pytest.fixture(scope="function")
 def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) -> Path:
     """Path to sample sheet."""
-    return Path(raredisease_case_path, f"{raredisease_case_id}_sample_sheet").with_suffix(
+    return Path(raredisease_case_path, f"{raredisease_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     )
