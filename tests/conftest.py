@@ -2943,7 +2943,6 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     ).with_suffix(FileExtensions.YAML)
 
 
-# TODO: Take a look at this for the tests
 @pytest.fixture(scope="function")
 def raredisease_parameters_default(
     raredisease_dir: Path,
