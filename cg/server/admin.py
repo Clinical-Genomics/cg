@@ -1,11 +1,9 @@
 """Module for Flask-Admin views"""
 
 from gettext import gettext
-
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
@@ -16,18 +14,29 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.ext import auth_service
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class BaseView(ModelView):
     """Base for the specific views."""
 
-    def is_accessible(self):
-        user = db.get_user_by_email(email=session.get("user_email"))
-        return bool(google.authorized and user and user.is_admin)
+    def is_accessible(self) -> bool:
+        """
+        Get the cached user roles from the session and check if the user has the required roles.
+        Returns:
+            bool: depending on wheter the user has access or not.
+        """
+        user_roles: list[str] = session.get("user_roles")
+        if not user_roles:
+            return False
+        auth_service.check_role(user_roles)
+        return True
 
     def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        return redirect(url_for("google.login", next=request.url))
+        return redirect(url_for("admin.index"))
 
 
 def view_priority(unused1, unused2, model, unused3):
