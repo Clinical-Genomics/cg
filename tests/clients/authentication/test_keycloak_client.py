@@ -6,7 +6,7 @@ from cg.clients.authentication.keycloak_client import KeycloakClient
 
 
 def test_get_client_success(mocker):
-    
+
     # Mock the KeycloakOpenID class
     mock_keycloak_openid = mocker.patch("cg.clients.authentication.keycloak_client.KeycloakOpenID")
     mock_instance = MagicMock()
@@ -39,7 +39,7 @@ def test_get_client_success(mocker):
 
 
 def test_get_client_connection_error(mocker):
-    
+
     # GIVEN a KeycloakOpenID class that raises KeycloakConnectionError
     mocker.patch(
         "cg.clients.authentication.keycloak_client.KeycloakOpenID",

@@ -8,7 +8,7 @@ from cg.store.models import User
 
 
 def test_verify_token_success(decode_token_response):
-    
+
     # GIVEN a mock user service and a keycloak client
     mock_user_service = MagicMock(spec=UserService)
     mock_keycloak_client = MagicMock(spec=KeycloakOpenID)
@@ -21,7 +21,7 @@ def test_verify_token_success(decode_token_response):
     auth_service = AuthenticationService(
         user_service=mock_user_service,
         redirect_uri="redirect_uri",
-        keycloak_client=mock_keycloak_client
+        keycloak_client=mock_keycloak_client,
     )
 
     # WHEN verifying a jwt token
@@ -32,8 +32,9 @@ def test_verify_token_success(decode_token_response):
     mock_keycloak_client.decode_token.assert_called_once_with("jwt_token")
     mock_user_service.get_user_by_email.assert_called_once_with(decode_token_response.email)
 
+
 def test_verify_token_user_not_found(decode_token_response):
-     # GIVEN a mock user service and a keycloak client
+    # GIVEN a mock user service and a keycloak client
     mock_user_service = MagicMock(spec=UserService)
     mock_keycloak_client = MagicMock(spec=KeycloakOpenID)
 
@@ -45,21 +46,22 @@ def test_verify_token_user_not_found(decode_token_response):
     auth_service = AuthenticationService(
         user_service=mock_user_service,
         redirect_uri="redirect_uri",
-        keycloak_client=mock_keycloak_client
+        keycloak_client=mock_keycloak_client,
     )
 
     # WHEN verifying the jwt token
-    
+
     # THEN an UserNotFoundError is raised
     with pytest.raises(UserNotFoundError):
         auth_service.verify_token("jwt_token")
+
 
 def test_verify_token_invalid_role(decode_token_response):
     # GIVEN a mock user service and a keycloak client
     mock_user_service = MagicMock(spec=UserService)
     mock_keycloak_client = MagicMock(spec=KeycloakOpenID)
-    
-     # GIVEN a decoded token response with an invalid user role
+
+    # GIVEN a decoded token response with an invalid user role
     decode_token_response.realm_access.roles = ["invalid-role"]
     mock_keycloak_client.decode_token.return_value = decode_token_response.dict()
 
@@ -67,14 +69,17 @@ def test_verify_token_invalid_role(decode_token_response):
     auth_service = AuthenticationService(
         user_service=mock_user_service,
         redirect_uri="redirect_uri",
-        keycloak_client=mock_keycloak_client
+        keycloak_client=mock_keycloak_client,
     )
 
     # WHEN verifying the jwt token
-    
+
     # THEN an UserRoleError is raised
-    with pytest.raises(UserRoleError, match="The user does not have the required role to access this service."):
+    with pytest.raises(
+        UserRoleError, match="The user does not have the required role to access this service."
+    ):
         auth_service.verify_token("jwt_token")
+
 
 def test_get_user_roles_success(introspection_response):
     # GIVEN a mock user service and a keycloak client
@@ -88,7 +93,7 @@ def test_get_user_roles_success(introspection_response):
     auth_service = AuthenticationService(
         user_service=mock_user_service,
         redirect_uri="redirect_uri",
-        keycloak_client=mock_keycloak_client
+        keycloak_client=mock_keycloak_client,
     )
 
     # WHEN retrieving the user roles
@@ -96,6 +101,6 @@ def test_get_user_roles_success(introspection_response):
 
     # THEN the right roles are returned
     assert roles == introspection_response.realm_access.roles
-    
+
     # THEN the introspection endpoint is called
     mock_keycloak_client.introspect.assert_called_once_with("access_token")

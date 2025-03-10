@@ -1,10 +1,17 @@
-
 import pytest
-from cg.services.authentication.models import DecodingResponse, IntrospectionResponse, RealmAccess, TokenResponseModel, UserInfo
+from cg.services.authentication.models import (
+    DecodingResponse,
+    IntrospectionResponse,
+    RealmAccess,
+    TokenResponseModel,
+    UserInfo,
+)
+
 
 @pytest.fixture
 def realm_access() -> RealmAccess:
     return RealmAccess(roles=["cg-employee"])
+
 
 @pytest.fixture
 def introspection_response(realm_access) -> IntrospectionResponse:
@@ -31,8 +38,9 @@ def introspection_response(realm_access) -> IntrospectionResponse:
         client_id="client-id",
         username="johndoe",
         token_type="Bearer",
-        active=True
+        active=True,
     )
+
 
 @pytest.fixture
 def token_response() -> TokenResponseModel:
@@ -45,8 +53,9 @@ def token_response() -> TokenResponseModel:
         refresh_token="refresh_token",
         scope="email profile",
         session_state="session-state",
-        token_type="Bearer"
+        token_type="Bearer",
     )
+
 
 @pytest.fixture
 def decode_token_response(realm_access) -> DecodingResponse:
@@ -69,8 +78,9 @@ def decode_token_response(realm_access) -> DecodingResponse:
         preferred_username="johndoe",
         given_name="John",
         family_name="Doe",
-        email="johndoe@example.com"
+        email="johndoe@example.com",
     )
+
 
 @pytest.fixture
 def user_info() -> UserInfo:
@@ -81,5 +91,5 @@ def user_info() -> UserInfo:
         preferred_username="johndoe",
         given_name="John",
         family_name="Doe",
-        email="johndoe@example.com"
+        email="johndoe@example.com",
     )
