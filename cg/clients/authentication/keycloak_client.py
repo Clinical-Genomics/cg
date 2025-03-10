@@ -50,7 +50,7 @@ class KeycloakClient:
         return client.token(
             grant_type="authorization_code", code=code, redirect_uri=self.redirect_uri
         )
-        
+
     def get_token_by_user_password(self, user_name: str, password: str) -> dict:
         """
         Get a token using a username and password.
@@ -58,11 +58,7 @@ class KeycloakClient:
             code: code retrieved request
         """
         client: KeycloakOpenID = self.get_client()
-        return client.token(
-            grant_type="password", username=user_name, password=pa
-        )
-        
-        
+        return client.token(grant_type="password", username=user_name, password=pa)
 
     def get_user_info(self, access_token: str) -> dict:
         """Get the user info for a provided access token.

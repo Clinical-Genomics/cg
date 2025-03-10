@@ -128,7 +128,6 @@ class ClientConfig(BaseModel):
 class TrailblazerConfig(BaseModel):
     keycloak_backend_user: str
     keycloak_backend_user_password: str
-    service_account_auth_file: str
     host: str
 
 
@@ -392,7 +391,7 @@ class PostProcessingServices(BaseModel):
 class KeyCloakConfig(BaseModel):
     server_url: str
     client_id: str
-    realm_name:str
+    realm_name: str
     client_secret_key: str
     redirect_uri: str
 
@@ -467,8 +466,6 @@ class CGConfig(BaseModel):
     keycloak: KeyCloakConfig = None
     keycloak_client_: KeycloakClient | None = None
 
-    
-    
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig | None = None
     fluffy: FluffyConfig | None = None
@@ -799,10 +796,12 @@ class CGConfig(BaseModel):
         client = self.keycloak_client_
         if client is None:
             LOG.debug("Instantiating keycloak client")
-            client = KeycloakClient(server_url=self.keycloak.server_url,
-                                    client_id=self.keycloak.client_id,
-                                    client_secret_key=self.keycloak.client_secret_key,
-                                    realm_name=self.keycloak.realm_name,
-                                    redirect_uri=self.keycloak.redirect_uri)
+            client = KeycloakClient(
+                server_url=self.keycloak.server_url,
+                client_id=self.keycloak.client_id,
+                client_secret_key=self.keycloak.client_secret_key,
+                realm_name=self.keycloak.realm_name,
+                redirect_uri=self.keycloak.redirect_uri,
+            )
             self.keycloak_client_ = client
         return client

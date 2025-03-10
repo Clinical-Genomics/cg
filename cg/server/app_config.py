@@ -49,4 +49,5 @@ class AppConfig(BaseSettings):
     keycloak_backend_user: str = "user"
     keycloak_backend_user_password: str = "password"
 
+
 app_config = AppConfig()

@@ -5,7 +5,7 @@ from cg.services.authentication.models import (
     IntrospectionResponse,
 )
 from cg.services.user.service import UserService
-from keycloak import  KeycloakOpenID
+from keycloak import KeycloakOpenID
 
 from cg.store.models import User
 import logging

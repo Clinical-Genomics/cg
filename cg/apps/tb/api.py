@@ -44,12 +44,18 @@ class TrailblazerAPI:
     def __init__(self, config: dict, keycloak_client: KeycloakClient):
         self.keycloak_client: KeycloakClient = keycloak_client
         self.keycloak_backend_user = config["trailblazer"]["keycloak_backend_user"]
-        self.keycloak_backend_user_password = config["trailblazer"]["keycloak_backend_user_password"]
+        self.keycloak_backend_user_password = config["trailblazer"][
+            "keycloak_backend_user_password"
+        ]
         self.host = config["trailblazer"]["host"]
 
     @property
     def auth_header(self) -> dict:
-        token = TokenResponseModel(**self.keycloak_client.get_token_by_user_password(user_name=self.keycloak_backend_user,password=self.keycloak_backend_user_password))
+        token = TokenResponseModel(
+            **self.keycloak_client.get_token_by_user_password(
+                user_name=self.keycloak_backend_user, password=self.keycloak_backend_user_password
+            )
+        )
         return {"Authorization": f"Bearer {token.access_token}"}
 
     def query_trailblazer(
