@@ -44,7 +44,7 @@ def test_create_nextflow_config_file_exists(
     case_path_fixture: str,
     request: pytest.FixtureRequest,
 ):
-    """Test that a nextflow config file is created fro all Nextflow pipelines."""
+    """Test that a Nextflow config file is created for all Nextflow pipelines."""
     # GIVEN a configurator, a case id and a case path
     configurator: NextflowConfigurator = request.getfixturevalue(configurator_fixture)
     case_id: str = request.getfixturevalue(case_id_fixture)
