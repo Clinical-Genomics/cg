@@ -43,6 +43,10 @@ class Priority(IntEnum):
             Priority.clinical_trials: SlurmQos.NORMAL,
         }
 
+    # def int_to_priority(self, value: int) -> Priority:
+    #     priority_mapping: dict[int, str] = {value: key for key, value in Priority.__dict__.items() if not key.startswith("__")}
+    #     return priority_mapping[value]
+
 
 class SlurmAccount(StrEnum):
     PRODUCTION: str = "production"
