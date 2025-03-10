@@ -30,7 +30,7 @@ def nextflow_cluster_options() -> str:
 
 @pytest.fixture
 def expected_raredisease_config_content(
-    nextflow_config_base_content: str,
     nextflow_cluster_options: str,
+    nextflow_config_base_content: str,
 ) -> str:
     return nextflow_cluster_options + nextflow_config_base_content

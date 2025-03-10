@@ -14,6 +14,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
@@ -1828,3 +1829,13 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_case_priority(self, case_id: str) -> SlurmQos:
+        """Get case priority."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return SlurmQos(case.slurm_priority)
+
+    def get_case_workflow(self, case_id: str) -> Workflow:
+        """Get case workflow."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return Workflow(case.data_analysis)

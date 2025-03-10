@@ -53,11 +53,14 @@ from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
-from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+    RarediseaseParameters,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
@@ -93,10 +96,18 @@ software_version_file = "software_versions.yml"
 deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.case_config_fixtures",
+    "tests.fixture_plugins.analysis_starter.config_file_creators",
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
-    "tests.fixture_plugins.analysis_starter.file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.extension_fixtures",
+    "tests.fixture_plugins.analysis_starter.config_file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
+    "tests.fixture_plugins.analysis_starter.specific_file_creators",
+    "tests.fixture_plugins.analysis_starter.specific_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.params_file_creators",
+    "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
@@ -2820,7 +2831,7 @@ def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
 
 
 @pytest.fixture(scope="function")
-def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
+def nallo_nextflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
     """Path to config file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -2906,36 +2917,6 @@ def raredisease_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
-def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet"
-    ).with_suffix(FileExtensions.CSV)
-
-
-@pytest.fixture(scope="function")
-def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="function")
-def raredisease_gene_panel_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_dir, raredisease_case_id, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
-
-
-@pytest.fixture(scope="function")
 def raredisease_deliverable_data(
     raredisease_dir: Path, raredisease_case_id: str, sample_id: str
 ) -> dict:
@@ -3008,6 +2989,7 @@ def raredisease_context(
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.lims_api_ = MockLimsAPI()
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
@@ -3377,7 +3359,7 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+def rnafusion_nextflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to config file."""
     return Path(
         rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
@@ -3689,7 +3671,7 @@ def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
+def tomte_nextflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
     """Path to config file."""
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -4024,7 +4006,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_nextflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to config file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
