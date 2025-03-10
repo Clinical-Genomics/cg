@@ -107,6 +107,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.specific_file_creators",
     "tests.fixture_plugins.analysis_starter.specific_file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.params_file_creators",
+    "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",

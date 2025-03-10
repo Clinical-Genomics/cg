@@ -38,10 +38,10 @@ class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
     def create(self, case_id: str, case_path: Path) -> None:
         """Create the sample sheet for a case."""
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
-        content: any = self._get_content(case_id=case_id, case_path=case_path)
+        content: list[list[str]] = self._get_content(case_id)
         write_csv(file_path=file_path, content=content)
 
-    def _get_content(self, case_id: str, case_path: Path) -> list[list[str]]:
+    def _get_content(self, case_id: str) -> list[list[str]]:
         """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)

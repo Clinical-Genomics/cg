@@ -24,7 +24,7 @@ def raredisease_configurator(
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=raredisease_context.status_db,
-        config=raredisease_context.raredisease,
+        pipeline_config=raredisease_context.raredisease,
         housekeeper_api=raredisease_context.housekeeper_api,
         lims=raredisease_context.lims_api,
         config_file_creator=raredisease_config_file_creator,

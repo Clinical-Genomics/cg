@@ -40,11 +40,11 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
     def _get_content(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> dict:
-        """Create parameters file for a case."""
+        """Return the content of a params file for a case."""
         case_workflow_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
-        workflow_parameters: any = read_yaml(self.params)
+        workflow_parameters: any = read_yaml(Path(self.params))
         parameters: dict = case_workflow_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
         return curated_parameters
@@ -53,7 +53,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, case_id: str, case_path: Path, sample_sheet_path: Path
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        analysis_type: str = self._get_data_analysis_type(case_id=case_id)
+        analysis_type: str = self._get_data_analysis_type(case_id)
         target_bed_file: str = self._get_target_bed(case_id=case_id, analysis_type=analysis_type)
         skip_germlinecnvcaller: bool = self._get_germlinecnvcaller_flag(analysis_type=analysis_type)
         return RarediseaseParameters(
@@ -78,6 +78,8 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def _get_target_bed(self, case_id: str, analysis_type: str) -> str:
         """
         Return the target bed file from LIMS or use default capture kit for WHOLE_GENOME_SEQUENCING.
+        Raises:
+            ValueError if not capture kit can be assigned to the case.
         """
         target_bed_file: str = self._get_target_bed_from_lims(case_id=case_id)
         if not target_bed_file:
@@ -109,4 +111,4 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     @staticmethod
     def _get_germlinecnvcaller_flag(analysis_type: str) -> bool:
         """Return True if the germlinecnvcaller should be skipped."""
-        return True if analysis_type == AnalysisType.WGS else False
+        return analysis_type == AnalysisType.WGS

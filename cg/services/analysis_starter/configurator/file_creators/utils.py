@@ -1,11 +1,5 @@
-from pathlib import Path
-
 from cg.constants import Workflow
 from cg.constants.gene_panel import GenePanelGenomeBuild
-
-
-def get_case_id_from_path(case_path: Path) -> str:
-    return case_path.name
 
 
 def get_genome_build(workflow: Workflow) -> GenePanelGenomeBuild:

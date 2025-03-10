@@ -12,7 +12,3 @@ class NextflowSampleSheetCreator(ABC):
     @abstractmethod
     def create(self, case_id: str, case_path: Path) -> None:
         pass
-
-    @abstractmethod
-    def _get_content(self, case_id: str, case_path: Path) -> list[list[str]]:
-        pass

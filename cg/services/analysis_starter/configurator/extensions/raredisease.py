@@ -8,7 +8,7 @@ from cg.services.analysis_starter.configurator.file_creators.managed_variants im
 
 
 class RarediseaseExtension(PipelineExtension):
-    """Configurator for Raredisease analysis."""
+    """Contains Raredisease specific file creations which differ from the default Nextflow flow."""
 
     def __init__(
         self,
@@ -20,5 +20,5 @@ class RarediseaseExtension(PipelineExtension):
 
     def configure(self, case_id: str, case_path: Path) -> None:
         """Perform pipeline specific actions."""
-        self.gene_panel_file_creator.create(case_path)
-        self.managed_variants_file_creator.create(case_path)
+        self.gene_panel_file_creator.create(case_id=case_id, case_path=case_path)
+        self.managed_variants_file_creator.create(case_id=case_id, case_path=case_path)

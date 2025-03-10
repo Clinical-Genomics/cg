@@ -20,11 +20,11 @@ from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstra
 
 
 @pytest.mark.parametrize(
-    "file_creator_fixture, case_path_fixture, expected_content_fixture",
+    "file_creator_fixture, case_id_fixture, expected_content_fixture",
     [
         (
             "raredisease_config_file_creator",
-            "raredisease_case_path",
+            "raredisease_case_id",
             "expected_raredisease_config_content",
         )
     ],
@@ -32,17 +32,17 @@ from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstra
 )
 def test_nextflow_config_file_content(
     file_creator_fixture: str,
-    case_path_fixture: str,
+    case_id_fixture: str,
     expected_content_fixture: str,
     request: pytest.FixtureRequest,
 ):
     """Test that a Nextflow config file content is created correctly for all pipelines."""
     # GIVEN a Nextflow config content creator and a case id
     file_creator: NextflowConfigFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_path: Path = request.getfixturevalue(case_path_fixture)
+    case_id: str = request.getfixturevalue(case_id_fixture)
 
     # WHEN creating a Nextflow config file
-    content: str = file_creator._get_content(case_path)
+    content: str = file_creator._get_content(case_id)
 
     # THEN the content of the file is the expected
     expected_content: str = request.getfixturevalue(expected_content_fixture)
@@ -86,12 +86,11 @@ def test_params_file_content(
 
 
 @pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, case_path_fixture, expected_content_fixture",
+    "file_creator_fixture, case_id_fixture, expected_content_fixture",
     [
         (
             "raredisease_sample_sheet_creator",
             "raredisease_case_id",
-            "raredisease_case_path",
             "raredisease_sample_sheet_expected_content",
         )
     ],
@@ -100,7 +99,6 @@ def test_params_file_content(
 def test_nextflow_sample_sheet_content(
     file_creator_fixture: str,
     case_id_fixture: str,
-    case_path_fixture: str,
     expected_content_fixture: str,
     request: pytest.FixtureRequest,
 ):
@@ -108,10 +106,9 @@ def test_nextflow_sample_sheet_content(
     # GIVEN a sample sheet content creator, a case id and a case path
     file_creator: NextflowSampleSheetCreator = request.getfixturevalue(file_creator_fixture)
     case_id: str = request.getfixturevalue(case_id_fixture)
-    case_path: Path = request.getfixturevalue(case_path_fixture)
 
     # WHEN creating a sample sheet
-    content: list[list[str]] = file_creator._get_content(case_id=case_id, case_path=case_path)
+    content: list[list[str]] = file_creator._get_content(case_id=case_id)
 
     # THEN the content of the file is the expected
     expected_content: str = request.getfixturevalue(expected_content_fixture)
@@ -119,11 +116,11 @@ def test_nextflow_sample_sheet_content(
 
 
 @pytest.mark.parametrize(
-    "file_creator_fixture, case_path_fixture, expected_content_fixture",
+    "file_creator_fixture, case_id_fixture, expected_content_fixture",
     [
         (
             "raredisease_gene_panel_creator",
-            "raredisease_case_path",
+            "raredisease_case_id",
             "raredisease_gene_panel_file_content",
         )
     ],
@@ -131,21 +128,21 @@ def test_nextflow_sample_sheet_content(
 )
 def test_gene_panel_file_content(
     file_creator_fixture: str,
-    case_path_fixture: str,
+    case_id_fixture: str,
     expected_content_fixture: str,
     request: pytest.FixtureRequest,
 ):
     """Test that the gene panel file content is created correctly."""
     # GIVEN a gene panel file content creator and a case path
     file_creator: GenePanelFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_path: Path = request.getfixturevalue(case_path_fixture)
+    case_id: str = request.getfixturevalue(case_id_fixture)
 
     # GIVEN a mock of Scout gene panels
     expected_content: list[str] = request.getfixturevalue(expected_content_fixture)
 
     # WHEN creating a gene panel file
     with mock.patch.object(ScoutAPI, "export_panels", return_value=expected_content):
-        content: list[str] = file_creator._get_content(case_path)
+        content: list[str] = file_creator._get_content(case_id)
 
     # THEN the content of the file is the expected
 
