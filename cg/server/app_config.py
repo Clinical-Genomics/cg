@@ -46,6 +46,7 @@ class AppConfig(BaseSettings):
     keycloak_client_id: str = "keycloak_client_id"
     keycloak_client_secret_key: str = "keycloak_client_secret"
     keycloak_redirect_uri: str = "keycloak_redirect_uri"
-
+    keycloak_backend_user: str = "user"
+    keycloak_backend_user_password: str = "password"
 
 app_config = AppConfig()

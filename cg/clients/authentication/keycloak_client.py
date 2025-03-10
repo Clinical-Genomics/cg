@@ -1,4 +1,3 @@
-from calendar import c
 from keycloak import KeycloakOpenID
 from keycloak import KeycloakConnectionError
 

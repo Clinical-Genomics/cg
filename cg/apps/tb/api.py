@@ -41,8 +41,8 @@ class TrailblazerAPI:
         AnalysisStatus.QC,
     ]
 
-    def __init__(self, config: dict):
-        self.keycloak_client: KeycloakClient = config["keycloak_client"]
+    def __init__(self, config: dict, keycloak_client: KeycloakClient):
+        self.keycloak_client: KeycloakClient = keycloak_client
         self.keycloak_backend_user = config["trailblazer"]["keycloak_backend_user"]
         self.keycloak_backend_user_password = config["trailblazer"]["keycloak_backend_user_password"]
         self.host = config["trailblazer"]["host"]

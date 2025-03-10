@@ -738,7 +738,7 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("trailblazer_api_")
         if api is None:
             LOG.debug("Instantiating trailblazer api")
-            api = TrailblazerAPI(config=self.dict())
+            api = TrailblazerAPI(config=self.dict(), keycloak_client=self.keycloak_client)
             self.trailblazer_api_ = api
         return api
 
@@ -795,7 +795,7 @@ class CGConfig(BaseModel):
         return factory
 
     @property
-    def keycloant_client(self) -> KeycloakClient:
+    def keycloak_client(self) -> KeycloakClient:
         client = self.keycloak_client_
         if client is None:
             LOG.debug("Instantiating keycloak client")

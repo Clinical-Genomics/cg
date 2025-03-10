@@ -32,7 +32,6 @@ from cg.services.web_services.case.service import CaseWebService
 from cg.services.web_services.sample.service import SampleService
 
 from cg.store.database import initialize_database
-from cg.store.models import User
 from cg.store.store import Store
 from cg.server.app_config import app_config
 
@@ -79,12 +78,12 @@ class AnalysisClient(TrailblazerAPI):
     def init_app(self, app):
         config = {
             "trailblazer": {
-                "service_account": app_config.trailblazer_service_account,
-                "service_account_auth_file": app_config.trailblazer_service_account_auth_file,
+                "keycloak_backend_user": app_config.keycloak_backend_user,
+                "keycloak_backend_user_password": app_config.keycloak_backend_user_password,
                 "host": app_config.trailblazer_host,
             }
         }
-        super(AnalysisClient, self).__init__(config)
+        super(AnalysisClient, self).__init__(config=config, keycloak_client=keycloak_client)
 
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
