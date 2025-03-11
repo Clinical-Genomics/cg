@@ -225,7 +225,7 @@ class TicketHandler:
         return message
 
     def __get_max_case_priority(self, order: Order) -> Priority:
-
+        """Get max case priority for a given order."""
         priority_list: list[Priority] = []
 
         if isinstance(order, OrderWithCases):

@@ -51,6 +51,6 @@ def get_ticket_status(order: Order) -> Status:
 
 
 def get_due_by_date(priority: Priority) -> datetime:
-    """Get the ticket due by date based on the order priority"""
+    """Get the ticket due by date based on the order priority."""
 
     return datetime.now() + TIMEDELTA_BY_PRIORITY[priority]
