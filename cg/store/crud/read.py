@@ -14,6 +14,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
@@ -1800,7 +1801,7 @@ class ReadHandler(BaseHandler):
         return rna_dna_collections
 
     def get_pacbio_sample_sequencing_metrics(
-        self, sample_id: str | None, smrt_cell_id: str | None
+        self, sample_id: str | None, smrt_cell_ids: list[str] | None
     ) -> list[PacbioSampleSequencingMetrics]:
         """
         Fetches data from PacbioSampleSequencingMetrics filtered on sample_internal_id and/or smrt_cell_id.
@@ -1813,8 +1814,8 @@ class ReadHandler(BaseHandler):
         )
         if sample_id:
             sequencing_metrics = sequencing_metrics.filter(Sample.internal_id == sample_id)
-        if smrt_cell_id:
-            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
+        if smrt_cell_ids:
+            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
     def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
@@ -1828,3 +1829,13 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_case_priority(self, case_id: str) -> SlurmQos:
+        """Get case priority."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return SlurmQos(case.slurm_priority)
+
+    def get_case_workflow(self, case_id: str) -> Workflow:
+        """Get case workflow."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return Workflow(case.data_analysis)

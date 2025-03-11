@@ -90,7 +90,7 @@ def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
     # GIVEN an RNAFusion order with multiple samples in the same case
     rnafusion_sample = RNAFusionSample(
         container=ContainerEnum.tube,
-        container_name="container_name",
+        container_name="container-name",
         application="DummyAppTag",
         name="ExtraSample",
         require_qc_ok=False,
