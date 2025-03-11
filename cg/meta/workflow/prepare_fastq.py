@@ -5,7 +5,6 @@ from pathlib import Path
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
@@ -23,7 +22,6 @@ class PrepareFastqAPI:
         self.store: Store = store
         self.hk_api: HousekeeperAPI = compress_api.hk_api
         self.compress_api: CompressAPI = compress_api
-        self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
     def get_compression_objects(self, case_id: str) -> list[CompressionData]:
         """Return a list of compression objects"""
@@ -35,9 +33,7 @@ class PrepareFastqAPI:
             if self._should_skip_sample(case=case, sample=sample):
                 LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
                 continue
-            version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
-                bundle_name=sample_id
-            )
+            version_obj: Version = self.hk_api.get_latest_bundle_version(sample_id)
             compression_objects.extend(files.get_spring_paths(version_obj))
         return compression_objects
 
@@ -64,9 +60,7 @@ class PrepareFastqAPI:
         For some workflows, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
         """
-        if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:
-            return True
-        return False
+        return case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads
 
     def is_spring_decompression_needed(self, case_id: str) -> bool:
         """Check if spring decompression needs to be started"""

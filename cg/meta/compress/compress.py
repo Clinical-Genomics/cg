@@ -12,10 +12,11 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.exc import DecompressionCouldNotStartError
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models.compression_data import CompressionData
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -101,6 +102,15 @@ class CompressAPI:
         if (not spring_file) or (not spring_file.archive):
             return False
         return bool(spring_file.archive.archived_at)
+
+    def decompress_case(self, case: Case) -> None:
+        """Decompresses all Spring files tied to the case.
+        Raises:
+            DecompressionFailedToStartError if no sample could start decompressing."""
+        if not any(self.decompress_spring(sample.internal_id) for sample in case.samples):
+            raise DecompressionCouldNotStartError(
+                f"No sample could be decompressed for {case.internal_id}"
+            )
 
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample.
