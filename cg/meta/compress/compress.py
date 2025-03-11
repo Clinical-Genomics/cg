@@ -15,7 +15,7 @@ from cg.constants import SequencingFileTag
 from cg.exc import DecompressionCouldNotStartError
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models.compression_data import CompressionData
+from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -359,3 +359,22 @@ class CompressAPI:
             if fastq_file.exists():
                 fastq_file.unlink()
                 LOG.debug(f"FASTQ file {fastq_file} removed")
+
+    def get_case_compression_data(self, case: Case) -> CaseCompressionData:
+        """Return an object containing compression data for a case."""
+        sample_compressions: list[SampleCompressionData] = []
+        for sample in case.samples:
+            sample_id: str = sample.internal_id
+            sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
+                sample_id
+            )
+            sample_compressions.append(sample_compression_data)
+        return CaseCompressionData(
+            case_id=case.internal_id, sample_compression_data=sample_compressions
+        )
+
+    def get_sample_compression_data(self, sample_id: str) -> SampleCompressionData:
+        compression_objects: list[CompressionData] = []
+        version: Version = self.hk_api.get_latest_bundle_version(sample_id)
+        compression_objects.extend(files.get_spring_paths(version))
+        return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)

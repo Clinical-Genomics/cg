@@ -75,7 +75,10 @@ class FastqFetcher(InputFetcher):
         """
         Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
-        case_compression_data: CaseCompressionData = self._get_case_compression_data(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        case_compression_data: CaseCompressionData = self.compress_api.get_case_compression_data(
+            case
+        )
         if case_compression_data.is_spring_decompression_needed():
             LOG.info(f"The analysis for {case_id} could not start, decompression is needed")
             if not case_compression_data.can_at_least_one_sample_be_decompressed():
@@ -102,8 +105,10 @@ class FastqFetcher(InputFetcher):
     def _are_fastq_files_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
         decompressed."""
-
-        case_compression_data: CaseCompressionData = self._get_case_compression_data(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        case_compression_data: CaseCompressionData = self.compress_api.get_case_compression_data(
+            case
+        )
         if self._does_any_file_need_to_be_retrieved(case_id):
             return False
         if (
@@ -142,24 +147,6 @@ class FastqFetcher(InputFetcher):
             )
             self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
 
-    def _get_case_compression_data(self, case_id: str) -> CaseCompressionData:
-        """Return an object containing compression data for a case."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        sample_compressions: list[SampleCompressionData] = []
-        for sample in case.samples:
-            sample_id: str = sample.internal_id
-            sample_compression_data: SampleCompressionData = self._get_sample_compression_data(
-                sample_id
-            )
-            sample_compressions.append(sample_compression_data)
-        return CaseCompressionData(case_id=case_id, sample_compression_data=sample_compressions)
-
-    def _get_sample_compression_data(self, sample_id: str) -> SampleCompressionData:
-        compression_objects: list[CompressionData] = []
-        version: Version = self.housekeeper_api.get_latest_bundle_version(sample_id)
-        compression_objects.extend(files.get_spring_paths(version))
-        return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)
-
     @staticmethod
     def _should_skip_sample(case: Case, sample: Sample):
         """
@@ -180,7 +167,9 @@ class FastqFetcher(InputFetcher):
     def _add_decompressed_sample(self, sample: Sample) -> None:
         """Adds decompressed FASTQ files to Housekeeper for a sample, if there are any."""
         sample_id = sample.internal_id
-        compression_data: SampleCompressionData = self._get_sample_compression_data(sample_id)
+        compression_data: SampleCompressionData = self.compress_api.get_sample_compression_data(
+            sample_id
+        )
         if not self._are_all_fastqs_in_housekeeper(compression_data):
             self.compress_api.add_decompressed_fastq(sample)
 
