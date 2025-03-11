@@ -271,6 +271,8 @@ class CompressionData:
 
 
 class SampleCompressionData:
+    """Object encapsulating a sample's compression status."""
+
     def __init__(self, sample_id: str, compression_objects: list[CompressionData]):
         self.sample_id = sample_id
         self.compression_objects = compression_objects
@@ -299,6 +301,8 @@ class SampleCompressionData:
 
 
 class CaseCompressionData:
+    """Object encapsulating a case's compression status."""
+
     def __init__(self, case_id: str, sample_compression_data: list[SampleCompressionData]):
         self.case_id = case_id
         self.sample_compression_data = sample_compression_data
