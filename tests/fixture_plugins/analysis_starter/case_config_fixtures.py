@@ -18,7 +18,7 @@ def raredisease_case_config(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
         case_priority=SlurmQos.NORMAL,
-        netxflow_config_file=raredisease_nextflow_config_file_path.as_posix(),
+        nextflow_config_file=raredisease_nextflow_config_file_path.as_posix(),
         params_file=raredisease_params_file_path.as_posix(),
         work_dir=raredisease_work_dir_path.as_posix(),
     )
