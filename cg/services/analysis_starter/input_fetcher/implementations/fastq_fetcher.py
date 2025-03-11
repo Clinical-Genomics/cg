@@ -147,7 +147,7 @@ class FastqFetcher(InputFetcher):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         sample_compressions: list[SampleCompressionData] = []
         for sample in case.samples:
-            sample_id = sample.internal_id
+            sample_id: str = sample.internal_id
             sample_compression_data: SampleCompressionData = self._get_sample_compression_data(
                 sample_id
             )
@@ -156,8 +156,8 @@ class FastqFetcher(InputFetcher):
 
     def _get_sample_compression_data(self, sample_id: str) -> SampleCompressionData:
         compression_objects: list[CompressionData] = []
-        version_obj: Version = self.housekeeper_api.get_latest_bundle_version(sample_id)
-        compression_objects.extend(files.get_spring_paths(version_obj))
+        version: Version = self.housekeeper_api.get_latest_bundle_version(sample_id)
+        compression_objects.extend(files.get_spring_paths(version))
         return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)
 
     @staticmethod
@@ -172,14 +172,14 @@ class FastqFetcher(InputFetcher):
         """Adds decompressed FASTQ files to Housekeeper for a case, if there are any."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for sample in case.samples:
-            self._add_decompressed_sample(sample=sample, case=case)
+            if self._should_skip_sample(case=case, sample=sample):
+                LOG.warning(f"Skipping sample {sample.internal_id} - it has no reads.")
+                return
+            self._add_decompressed_sample(sample=sample)
 
-    def _add_decompressed_sample(self, sample: Sample, case: Case) -> None:
+    def _add_decompressed_sample(self, sample: Sample) -> None:
         """Adds decompressed FASTQ files to Housekeeper for a sample, if there are any."""
         sample_id = sample.internal_id
-        if self._should_skip_sample(case=case, sample=sample):
-            LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
-            return
         compression_data: SampleCompressionData = self._get_sample_compression_data(sample_id)
         if not self._are_all_fastqs_in_housekeeper(compression_data):
             self.compress_api.add_decompressed_fastq(sample)
