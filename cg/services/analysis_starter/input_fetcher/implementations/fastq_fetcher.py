@@ -161,7 +161,7 @@ class FastqFetcher(InputFetcher):
         for sample in case.samples:
             if self._should_skip_sample(case=case, sample=sample):
                 LOG.warning(f"Skipping sample {sample.internal_id} - it has no reads.")
-                return
+                continue
             self._add_decompressed_sample(sample=sample)
 
     def _add_decompressed_sample(self, sample: Sample) -> None:
