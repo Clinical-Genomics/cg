@@ -29,8 +29,8 @@ def raredisease_managed_variants_path(
 
 
 @pytest.fixture
-def raredisease_params_file_path(raredisease_case_path: Path, raredisease_case_id: str) -> Path:
-    return Path(raredisease_case_path, f"{raredisease_case_id}_params_file").with_suffix(
+def raredisease_params_file_path(x: Path, raredisease_case_id: str) -> Path:
+    return Path(raredisease_case_path, "case_params_file").with_suffix(
         FileExtensions.YAML
     )
 
