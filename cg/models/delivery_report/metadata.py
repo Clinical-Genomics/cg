@@ -50,11 +50,12 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     Attributes:
         mean_target_coverage: mean coverage of a target region; source: Chanjo2
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        avg_sequence_length: Average length of the sequenced reads; source: workflow
     """
 
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
+    avg_sequence_length: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class RarediseaseSampleMetadataModel(SampleMetadataModel):

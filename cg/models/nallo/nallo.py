@@ -11,7 +11,7 @@ from cg.models.qc_metrics import QCMetrics
 class NalloQCMetrics(QCMetrics):
     """Nallo QC metrics."""
 
-    percent_duplicates: float
+    avg_sequence_length: float | None
 
 
 class NalloSampleSheetEntry(BaseModel):
