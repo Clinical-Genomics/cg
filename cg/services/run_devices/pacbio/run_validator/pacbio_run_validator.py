@@ -60,7 +60,7 @@ class PacBioRunValidator(RunValidator):
     def validate_run_files(self, run_data: PacBioRunData):
         """
         Validate presence manifest and report file for the Pacbio run
-        
+
         Args:
             run_data: A Pacbio run data object
 
