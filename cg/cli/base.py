@@ -122,7 +122,6 @@ def find_commands(group, query: str) -> list[str]:
     "query",
     required=False,
     default="",
-    help="Search the CLI for commands matching your search. Input can be for example 'case'",
 )
 def search(query):
     """Search for available commands."""
