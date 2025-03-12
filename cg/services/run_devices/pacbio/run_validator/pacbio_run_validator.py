@@ -63,7 +63,7 @@ class PacBioRunValidator(RunValidator):
         Validate presence of all required run files
         Args:
             run_data: A Pacbio run data object
-        
+
         Raises:
             PostProcessingRunFileManagerError in case not all files are present in the directory
 
