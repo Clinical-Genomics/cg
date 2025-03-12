@@ -5,7 +5,6 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.run_devices.abstract_classes import RunValidator
-from cg.services.run_devices.abstract_models import RunData
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
@@ -60,7 +59,8 @@ class PacBioRunValidator(RunValidator):
 
     def validate_run_files(self, run_data: PacBioRunData):
         """
-        Validate presence of all required run files
+        Validate presence manifest and report file for the Pacbio run
+        
         Args:
             run_data: A Pacbio run data object
 

@@ -29,7 +29,7 @@ class RunValidator(ABC):
 
     @abstractmethod
     def validate_run_files(self, run_data: RunData):
-        """Validate presense of all required run files."""
+        """Validate presence run files."""
         pass
 
 
