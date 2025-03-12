@@ -32,16 +32,22 @@ class FastqFetcher(InputFetcher):
         self.spring_archive_api = spring_archive_api
 
     def ensure_files_are_ready(self, case_id: str) -> None:
-        """Retrieves or decompresses Spring files if needed.
+        """
+        Ensures Fastq files are ready to be analysed. Executes the following processes if needed:
+        1. Retrieval of flow cells via PDC.
+        2. Retrieval of Spring files via DDN.
+        3. Decompression of Spring files.
+        4. Adds decompressed Fastq files to Housekeeper.
         Raises:
-            AnalysisNotReadyError if the FASTQ files are not ready to be analysed."""
+            AnalysisNotReadyError if the FASTQ files are not ready to be analysed.
+        """
         self._ensure_files_are_present(case_id)
         self._resolve_decompression(case_id)
         if not self._are_fastq_files_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def _ensure_files_are_present(self, case_id: str) -> None:
-        """Checks if any Illumina runs need to be retrieved and submits a job if that is the case.
+        """Checks if any Illumina runs need to be retrieved and queries PDC if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self._ensure_illumina_run_on_disk(case_id)
         if not self._are_all_spring_files_present(case_id):
@@ -49,7 +55,8 @@ class FastqFetcher(InputFetcher):
             self.spring_archive_api.retrieve_spring_files_for_case(case_id)
 
     def _ensure_illumina_run_on_disk(self, case_id: str) -> None:
-        """Check if Illumina sequencing runs are on disk for given case."""
+        """Check if Illumina sequencing runs are on disk for given case. Downsampled and external
+        cases are disregarded."""
         if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
                 "Illumina run check is not applicable - "
@@ -148,7 +155,7 @@ class FastqFetcher(InputFetcher):
             self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
 
     @staticmethod
-    def _should_skip_sample(case: Case, sample: Sample):
+    def _should_skip_sample(case: Case, sample: Sample) -> bool:
         """
         For some workflows, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
@@ -186,5 +193,7 @@ class FastqFetcher(InputFetcher):
         )
 
     @staticmethod
-    def _is_fastq_pair_in_housekeeper(compression: CompressionData, fastq_files: dict[Path, File]):
+    def _is_fastq_pair_in_housekeeper(
+        compression: CompressionData, fastq_files: dict[Path, File]
+    ) -> bool:
         return compression.fastq_first in fastq_files and compression.fastq_second in fastq_files
