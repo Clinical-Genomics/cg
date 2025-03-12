@@ -364,9 +364,8 @@ class CompressAPI:
         """Return an object containing compression data for a case."""
         sample_compressions: list[SampleCompressionData] = []
         for sample in case.samples:
-            sample_id: str = sample.internal_id
             sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
-                sample_id
+                sample.internal_id
             )
             sample_compressions.append(sample_compression_data)
         return CaseCompressionData(
