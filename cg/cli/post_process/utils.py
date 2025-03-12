@@ -71,11 +71,12 @@ def _get_unprocessed_runs_from_run_names(
         if post_processing_service.is_run_processed(name):
             LOG.debug(f"Run {name} has already been post-processed. Skipping")
             continue
-        runs.append(
-            UnprocessedRunInfo(
-                name=name,
-                post_processing_service=post_processing_service,
-                instrument=instrument_name,
+        if post_processing_service.can_post_processing_start(name):
+            runs.append(
+                UnprocessedRunInfo(
+                    name=name,
+                    post_processing_service=post_processing_service,
+                    instrument=instrument_name,
+                )
             )
-        )
     return runs
