@@ -62,10 +62,7 @@ class PacBioRunValidator(RunValidator):
         """
         Validate presence of all required run files
         """
-        self.file_manager.get_run_validation_files(
-            run_data
-        )
-
+        self.file_manager.get_run_validation_files(run_data)
 
     @staticmethod
     def _is_validated(run_path: Path) -> bool:
