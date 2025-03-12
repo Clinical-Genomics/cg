@@ -101,6 +101,7 @@ def init(context: CGConfig, reset: bool, force: bool):
     create_all_tables()
     LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
+
 def find_commands(group, query):
     """Recursively find commands in a group that match the query."""
     commands = []
@@ -112,8 +113,9 @@ def find_commands(group, query):
             commands.extend(f"{cmd_name} {sub_cmd}" for sub_cmd in sub_commands)
     return commands
 
+
 @base.command()
-@click.argument('query', required=False, default="")
+@click.argument("query", required=False, default="")
 def search(query):
     """Search for available commands."""
     commands = find_commands(base, query)
@@ -124,7 +126,8 @@ def search(query):
             click.echo(f"  {cmd}")
     else:
         click.echo("No matching commands found.")
-        
+
+
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)
