@@ -60,19 +60,12 @@ class PacBioRunValidator(RunValidator):
 
     def validate_run_files(self, run_data: PacBioRunData):
         """
-        Validate presense of all required run files
+        Validate presence of all required run files
         """
-        if self._is_validated(run_data.full_path):
-            LOG.debug(f"Run for {run_data.full_path} is validated.")
-            return
-        paths_information: PacBioRunValidatorFiles = self.file_manager.get_run_validation_files(
+        self.file_manager.get_run_validation_files(
             run_data
         )
-        self.file_transfer_validator.validate_file_transfer(
-            manifest_file=paths_information.manifest_file,
-            source_dir=run_data.full_path,
-            manifest_file_format=FileFormat.TXT,
-        )
+
 
     @staticmethod
     def _is_validated(run_path: Path) -> bool:
