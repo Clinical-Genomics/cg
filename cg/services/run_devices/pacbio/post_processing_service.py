@@ -7,6 +7,7 @@ from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingError,
     PostProcessingRunDataGeneratorError,
+    PostProcessingRunFileManagerError,
     PostProcessingStoreDataError,
     PostProcessingStoreFileError,
 )
@@ -72,6 +73,6 @@ class PacBioPostProcessingService(PostProcessingService):
                 run_name=run_name, sequencing_dir=self.sequencing_dir
             )
             self.run_validator.validate_run_files(run_data)
-        except Exception:
+        except PostProcessingRunFileManagerError:
             return False
         return True
