@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants.constants import FileFormat
-from cg.constants.priority import Priority, SlurmQos
+from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile, WriteStream
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
@@ -30,7 +30,7 @@ class SeqeraPlatformSubmitter(Submitter):
         parameters_as_string = WriteStream.write_stream_from_content(
             content=parameters, file_format=FileFormat.YAML
         )
-        slurm_qos: str = Priority.priority_to_slurm_qos()[case_config.case_priority]
+        slurm_qos: str = case_config.case_priority
         launch_request = LaunchRequest(
             computeEnvId=self.compute_environment_ids[slurm_qos],
             configText=f"includeConfig {case_config.nextflow_config_file}",

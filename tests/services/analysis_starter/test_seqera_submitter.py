@@ -18,9 +18,7 @@ def test_create_launch_request(
 
     # WHEN creating a workflow launch request
     workflow_launch_request: WorkflowLaunchRequest = (
-        seqera_platform_submitter._create_launch_request(
-            case_config=raredisease_case_config, pipeline_config=pipeline_response
-        )
+        seqera_platform_submitter._create_launch_request(case_config=raredisease_case_config)
     )
 
     # THEN the workflow launch request should be populated
