@@ -32,6 +32,7 @@ class RunValidator(ABC):
         """Validate presense of all required run files."""
         pass
 
+
 class RunFileManager(ABC):
     """Abstract class that manages files related to an instrument run."""
 
@@ -94,7 +95,7 @@ class PostProcessingService(ABC):
     def is_run_processed(self, run_name: str) -> bool:
         """Check if a run has been post-processed."""
         pass
-    
+
     @abstractmethod
     def can_post_processing_start(self, run_name: str) -> bool:
         """Check if a run can be post processed."""

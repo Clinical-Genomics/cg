@@ -42,7 +42,6 @@ class PacBioRunFileManager(RunFileManager):
             decompression_target=decompression_target,
             decompression_destination=decompression_destination,
         )
-        
 
     def _get_ccs_report_file(self, run_path: Path) -> Path:
         """Return the path to the CCS report file."""
