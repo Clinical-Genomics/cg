@@ -134,12 +134,12 @@
   step: spanning_repeats
   tag: bam_index
 - format: vcf
-  id: SAMPLEID
+  id: CASEID
   path: PATHTOCASE/repeats/family/CASEID/CASEID_repeats_annotated.vcf.gz
   step: repeats_annotated
   tag: vcf_str
 - format: vcf
-  id: SAMPLEID
+  id: CASEID
   path: PATHTOCASE/repeats/family/CASEID/CASEID_repeats_annotated.vcf.gz.tbi
   step: repeats_annotated
   tag: vcf_str_index
