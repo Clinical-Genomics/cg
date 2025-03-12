@@ -5,6 +5,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
 from cg.services.run_devices.abstract_classes import RunValidator
+from cg.services.run_devices.abstract_models import RunData
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
@@ -56,6 +57,22 @@ class PacBioRunValidator(RunValidator):
         )
         self._touch_is_validated(run_data.full_path)
         LOG.debug(f"Run for {run_data.full_path} is validated.")
+
+    def validate_run_files(self, run_data: PacBioRunData):
+        """
+        Validate presense of all required run files
+        """
+        if self._is_validated(run_data.full_path):
+            LOG.debug(f"Run for {run_data.full_path} is validated.")
+            return
+        paths_information: PacBioRunValidatorFiles = self.file_manager.get_run_validation_files(
+            run_data
+        )
+        self.file_transfer_validator.validate_file_transfer(
+            manifest_file=paths_information.manifest_file,
+            source_dir=run_data.full_path,
+            manifest_file_format=FileFormat.TXT,
+        )
 
     @staticmethod
     def _is_validated(run_path: Path) -> bool:
