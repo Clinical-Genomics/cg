@@ -47,6 +47,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
+            duplicates=sample_metrics.percent_duplicates,
         )
 
     def is_report_accredited(
