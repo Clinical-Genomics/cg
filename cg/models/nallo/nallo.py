@@ -12,6 +12,7 @@ class NalloQCMetrics(QCMetrics):
     """Nallo QC metrics."""
 
     avg_sequence_length: float | None
+    percent_duplicates: float | None
 
 
 class NalloSampleSheetEntry(BaseModel):
