@@ -10,7 +10,7 @@ from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 TIMEDELTA_BY_PRIORITY: dict[Priority, timedelta.days] = {
     Priority.express: timedelta(days=7),
     Priority.priority: timedelta(days=14),
-    Priority.standard: timedelta(days=14),
+    Priority.standard: timedelta(days=21),
     Priority.clinical_trials: timedelta(days=21),
     Priority.research: timedelta(days=60),
 }
