@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Tuple, Union
 
-from pydantic import BaseModel, EmailStr, Field  # , field_serializer
+from pydantic import BaseModel, EmailStr, Field, field_serializer
 
 from cg.clients.freshdesk.constants import Priority, Source, Status
 
@@ -24,9 +24,9 @@ class TicketCreate(BaseModel):
     type: str | None = None
     custom_fields: dict[str, str | int | float | None] = Field(default_factory=dict)
 
-    # @field_serializer("due_by", "fr_due_by")
-    # def serialize_due_by_dates(self, value: datetime) -> str:
-    #     return value.isoformat()
+    @field_serializer("due_by", "fr_due_by")
+    def serialize_due_by_dates(self, value: date) -> str:
+        return value.isoformat()
 
     def to_multipart_data(self) -> list[Tuple[str, str | int | bytes]]:
         """Custom converter to multipart form data."""
