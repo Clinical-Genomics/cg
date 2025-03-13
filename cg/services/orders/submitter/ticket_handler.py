@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import date
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -43,7 +43,7 @@ class TicketHandler:
         status: int = get_ticket_status(order=order)
 
         order_priority: Priority = self.__get_max_case_priority(order=order)
-        deadline_date: datetime = get_due_by_date(priority=order_priority)
+        deadline_date: date = get_due_by_date(priority=order_priority)
 
         with TemporaryDirectory() as temp_dir:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
