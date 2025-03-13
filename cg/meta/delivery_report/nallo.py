@@ -43,10 +43,10 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         )
         return NalloSampleMetadataModel(
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            avg_sequence_length=sample_metrics.avg_sequence_length,
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            avg_sequence_length=sample_metrics.avg_sequence_length,
         )
 
     def is_report_accredited(

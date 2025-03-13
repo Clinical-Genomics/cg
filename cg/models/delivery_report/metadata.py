@@ -53,9 +53,9 @@ class NalloSampleMetadataModel(SampleMetadataModel):
         avg_sequence_length: Average length of the sequenced reads; source: workflow
     """
 
+    avg_sequence_length: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    avg_sequence_length: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class RarediseaseSampleMetadataModel(SampleMetadataModel):
