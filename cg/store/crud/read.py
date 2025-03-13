@@ -1711,7 +1711,8 @@ class ReadHandler(BaseHandler):
             uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
                 rna_sample=rna_sample, collaborators=collaborators
             )
-            related_dna_cases.extend(uploaded_dna_cases)
+            if not uploaded_dna_cases in related_dna_cases:
+                related_dna_cases.extend(uploaded_dna_cases)
         if not related_dna_cases:
             raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
