@@ -60,7 +60,9 @@ class RNADeliveryMessage:
         return message + file_upload_message
 
     def _get_scout_message_for_case(self, case: Case) -> str:
-        related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(rna_case=case)
+        related_uploaded_dna_cases: list[Case] = self.store.get_uploaded_related_dna_cases(
+            rna_case=case
+        )
         scout_links: str = get_scout_links_row_separated(cases=related_uploaded_dna_cases)
         return (
             f"The analysis for case {case.name} has been uploaded to the corresponding DNA case(s) on Scout at:\n\n"
