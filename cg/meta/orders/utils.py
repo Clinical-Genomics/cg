@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from cg.clients.freshdesk.constants import Status
 from cg.constants.priority import Priority
@@ -50,7 +50,7 @@ def get_ticket_status(order: Order) -> Status:
     return Status.PENDING
 
 
-def get_due_by_date(priority: Priority) -> datetime:
+def get_due_by_date(priority: Priority) -> date:
     """Get the ticket due by date based on the order priority."""
-
-    return datetime.now() + TIMEDELTA_BY_PRIORITY[priority]
+    due_by: datetime = datetime.now() + TIMEDELTA_BY_PRIORITY[priority]
+    return due_by.date()
