@@ -16,7 +16,8 @@ class NfTowerStatus(StrEnum):
 
 
 NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
-    "median_coverage": {"norm": "gt", "threshold": 25},
+    "median_coverage": {"norm": "gt", "threshold": 20},
+    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
