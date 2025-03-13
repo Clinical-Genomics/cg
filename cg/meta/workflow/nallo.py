@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, FileFormat
@@ -13,7 +14,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -138,5 +139,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, metric_id: str) -> dict:
-        return NALLO_METRIC_CONDITIONS
+    def get_workflow_metrics(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        metric_conditions: dict[str, dict[str, Any]] = dict(NALLO_METRIC_CONDITIONS)
+        self.set_order_sex_for_sample(sample, metric_conditions)
+        return metric_conditions
+
+    @staticmethod
+    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
