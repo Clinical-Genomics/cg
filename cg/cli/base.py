@@ -4,8 +4,8 @@ import logging
 import sys
 from pathlib import Path
 
-import rich_click as click
 import coloredlogs
+import rich_click as click
 from sqlalchemy.orm import scoped_session
 
 import cg
@@ -18,6 +18,7 @@ from cg.cli.delete.base import delete
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.downsample import downsample
+from cg.cli.freshdesk.base import freshdesk_cli as freshdesk_cmd
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.post_process.post_process import post_process_group as post_processing
@@ -141,6 +142,7 @@ base.add_command(clean)
 base.add_command(compress)
 base.add_command(decompress)
 base.add_command(delete)
+base.add_command(freshdesk_cmd)
 base.add_command(get)
 base.add_command(set_cmd)
 base.add_command(transfer_group)
