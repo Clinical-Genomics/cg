@@ -1,3 +1,4 @@
+from cg.constants import Sex
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     InvalidGenePanelsError,
@@ -7,18 +8,21 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     DescendantAsFatherError,
     FatherNotInCaseError,
     InvalidFatherSexError,
+    InvalidMotherSexError,
     PedigreeError,
     SampleIsOwnFatherError,
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case.rules import validate_gene_panels_unique
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_gene_panels_exist,
+    validate_mothers_are_female,
     validate_pedigree,
 )
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
+from cg.store.models import Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -55,11 +59,13 @@ def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store)
     assert isinstance(errors[0], RepeatedGenePanelsError)
 
 
-def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
+def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder, base_store: Store):
     # GIVEN an order with an incorrectly specified father
 
     # WHEN validating the order
-    errors: list[InvalidFatherSexError] = validate_fathers_are_male(order_with_invalid_father_sex)
+    errors: list[InvalidFatherSexError] = validate_fathers_are_male(
+        order=order_with_invalid_father_sex, store=base_store
+    )
 
     # THEN errors are returned
     assert errors
@@ -68,13 +74,73 @@ def test_father_must_be_male(order_with_invalid_father_sex: TomteOrder):
     assert isinstance(errors[0], InvalidFatherSexError)
 
 
-def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder):
+def test_existing_father_must_be_male(
+    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+):
+    """Tests that an order with a father which is a female sample in StatusDB gives an error."""
+
+    # GIVEN a sample in StatusDB with female sex
+    father_db_sample: Sample = store_with_multiple_cases_and_samples.session.query(Sample).first()
+    father_db_sample.sex = Sex.FEMALE
+    store_with_multiple_cases_and_samples.commit_to_store()
+
+    # GIVEN that an order has a corresponding existing sample in one of its cases
+    father_sample = ExistingSample(internal_id=father_db_sample.internal_id)
+    valid_order.cases[0].samples.append(father_sample)
+
+    # GIVEN that another sample in the order specifies the sample as its father
+    father_name = father_db_sample.name
+    valid_order.cases[0].samples[0].father = father_name
+
+    # WHEN validating the order
+    errors: list[InvalidFatherSexError] = validate_fathers_are_male(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN errors are returned
+    assert errors
+
+    # THEN the errors are about the father's sex
+    assert isinstance(errors[0], InvalidFatherSexError)
+
+
+def test_existing_mother_must_be_female(
+    valid_order: TomteOrder, store_with_multiple_cases_and_samples: Store
+):
+    """Tests that an order with a mother which is a male sample in StatusDB gives an error."""
+
+    # GIVEN a sample in StatusDB with male sex
+    mother_db_sample: Sample = store_with_multiple_cases_and_samples.session.query(Sample).first()
+    mother_db_sample.sex = Sex.MALE
+    store_with_multiple_cases_and_samples.commit_to_store()
+
+    # GIVEN that an order has a corresponding existing sample in one of its cases
+    mother_sample = ExistingSample(internal_id=mother_db_sample.internal_id)
+    valid_order.cases[0].samples.append(mother_sample)
+
+    # GIVEN that another sample in the order specifies the sample as its mother
+    mother_name = mother_db_sample.name
+    valid_order.cases[0].samples[0].mother = mother_name
+
+    # WHEN validating the order
+    errors: list[InvalidMotherSexError] = validate_mothers_are_female(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN errors are returned
+    assert errors
+
+    # THEN the errors are about the mother's sex
+    assert isinstance(errors[0], InvalidMotherSexError)
+
+
+def test_father_in_wrong_case(order_with_father_in_wrong_case: TomteOrder, base_store: Store):
 
     # GIVEN an order with the father sample in the wrong case
 
     # WHEN validating the order
     errors: list[FatherNotInCaseError] = validate_fathers_in_same_case_as_children(
-        order_with_father_in_wrong_case
+        order=order_with_father_in_wrong_case, store=base_store
     )
 
     # THEN an error is returned

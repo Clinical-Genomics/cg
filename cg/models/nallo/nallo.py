@@ -7,6 +7,12 @@ from cg.exc import NfSampleSheetError
 from cg.models.nf_analysis import WorkflowParameters
 
 
+class NalloQCMetrics(BaseModel):
+    """Nallo QC metrics"""
+
+    median_coverage: float | None
+
+
 class NalloSampleSheetEntry(BaseModel):
     """Nallo sample model is used when building the sample sheet."""
 
@@ -61,3 +67,5 @@ class NalloSampleSheetHeaders(StrEnum):
 
 class NalloParameters(WorkflowParameters):
     """Model for Nallo parameters."""
+
+    filter_variants_hgnc_ids: str

@@ -35,6 +35,8 @@ cd cg
 poetry install
 ```
 
+For development, use `poetry install --all-extras` to install development dependencies.
+
 
 [portal]: https://clinical.scilifelab.se/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer

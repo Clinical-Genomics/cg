@@ -10,8 +10,6 @@ from cg.services.orders.validation.errors.sample_errors import (
     ContainerNameRepeatedError,
     IndexNumberMissingError,
     IndexNumberOutOfRangeError,
-    IndexSequenceMismatchError,
-    IndexSequenceMissingError,
     InvalidVolumeError,
     OccupiedWellError,
     PoolApplicationError,
@@ -30,6 +28,8 @@ from cg.services.orders.validation.models.order_aliases import (
     OrderWithIndexedSamples,
 )
 from cg.services.orders.validation.models.sample_aliases import IndexedSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import OrderWithSamples
 from cg.services.orders.validation.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
@@ -40,8 +40,6 @@ from cg.services.orders.validation.rules.sample.utils import (
     is_container_name_missing,
     is_index_number_missing,
     is_index_number_out_of_range,
-    is_index_sequence_mismatched,
-    is_index_sequence_missing,
     is_invalid_well_format,
     is_invalid_well_format_rml,
     validate_buffers_are_allowed,
@@ -53,8 +51,6 @@ from cg.services.orders.validation.rules.utils import (
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.microsalt.models.order import OrderWithSamples
 from cg.store.store import Store
 
 
@@ -181,30 +177,6 @@ def validate_index_number_required(
     for sample_index, sample in order.enumerated_samples:
         if is_index_number_missing(sample):
             error = IndexNumberMissingError(sample_index=sample_index)
-            errors.append(error)
-    return errors
-
-
-def validate_index_sequence_mismatch(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexSequenceMismatchError]:
-    errors: list[IndexSequenceMismatchError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_sequence_mismatched(sample):
-            error = IndexSequenceMismatchError(
-                sample_index=sample_index, index=sample.index, index_number=sample.index_number
-            )
-            errors.append(error)
-    return errors
-
-
-def validate_index_sequence_required(
-    order: OrderWithIndexedSamples, **kwargs
-) -> list[IndexSequenceMissingError]:
-    errors: list[IndexSequenceMissingError] = []
-    for sample_index, sample in order.enumerated_samples:
-        if is_index_sequence_missing(sample):
-            error = IndexSequenceMissingError(sample_index=sample_index)
             errors.append(error)
     return errors
 

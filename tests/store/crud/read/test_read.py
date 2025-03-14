@@ -1014,7 +1014,6 @@ def test_get_pools_to_render_with(
 
     # WHEN fetching pools with no customer or enquiry
     pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render()
-
     # THEN two pools should be returned
     assert len(pools) == 2
 
@@ -1040,6 +1039,7 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
 ):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
+
     # WHEN fetching pools by customer id and name enquiry
     pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_name_1
@@ -1057,7 +1057,6 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
     # GIVEN a database with two pools
 
     # WHEN fetching pools by customer id and order enquiry
-
     pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
     )

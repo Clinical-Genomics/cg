@@ -14,6 +14,7 @@ class GenomeBuild(StrEnum):
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
     PANELS: str = f"gene_panels{FileExtensions.BED}"
+    PANELS_TSV: str = f"gene_panels{FileExtensions.TSV}"
 
 
 class UploadTrack(StrEnum):
@@ -38,6 +39,8 @@ class ScoutUploadKey(StrEnum):
     SV_VCF = auto()
     VCF_STR = auto()
     VCF_FUSION = auto()
+    VCF_SNV = auto()
+    VCF_SV = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(
@@ -106,6 +109,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
 
 RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.CRAM},
+    d4_file={"d4"},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
     eklipse_path={"eklipse-png"},

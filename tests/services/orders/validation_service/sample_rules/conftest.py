@@ -3,9 +3,9 @@ import pytest
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
 from cg.services.orders.validation.constants import MINIMUM_VOLUME, ElutionBuffer, ExtractionMethod
-from cg.services.orders.validation.workflows.microsalt.constants import MicrosaltDeliveryType
-from cg.services.orders.validation.workflows.microsalt.models.order import MicrosaltOrder
-from cg.services.orders.validation.workflows.microsalt.models.sample import MicrosaltSample
+from cg.services.orders.validation.order_types.microsalt.constants import MicrosaltDeliveryType
+from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.microsalt.models.sample import MicrosaltSample
 from cg.store.models import Application
 from cg.store.store import Store
 

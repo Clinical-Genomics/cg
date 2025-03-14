@@ -1,24 +1,28 @@
 from cg.constants import GenePanelMasterList
-from cg.models.orders.sample_base import ContainerEnum, SexEnum
+from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
+    ExistingCaseWithoutAffectedSampleError,
     MultipleSamplesInCaseError,
+    NewCaseWithoutAffectedSampleError,
     RepeatedCaseNameError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
+    validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
+    validate_existing_cases_have_an_affected_sample,
     validate_one_sample_per_case,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MipDnaOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RnaFusionOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.sample import RnaFusionSample
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -82,11 +86,11 @@ def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWi
     assert isinstance(errors[0], RepeatedCaseNameError)
 
 
-def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
+def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
     # GIVEN an RNAFusion order with multiple samples in the same case
-    rnafusion_sample = RnaFusionSample(
+    rnafusion_sample = RNAFusionSample(
         container=ContainerEnum.tube,
-        container_name="container_name",
+        container_name="container-name",
         application="DummyAppTag",
         name="ExtraSample",
         require_qc_ok=False,
@@ -108,7 +112,7 @@ def test_multiple_samples_in_case(rnafusion_order: RnaFusionOrder):
 
 
 def test_case_outside_of_collaboration(
-    mip_dna_order: MipDnaOrder, store_with_multiple_cases_and_samples: Store
+    mip_dna_order: MIPDNAOrder, store_with_multiple_cases_and_samples: Store
 ):
 
     # GIVEN a customer from outside the order's customer's collaboration
@@ -138,3 +142,51 @@ def test_case_outside_of_collaboration(
 
     # THEN the error should concern the added existing case
     assert isinstance(errors[0], CaseOutsideOfCollaborationError)
+
+
+def test_new_case_without_affected_samples(mip_dna_order: MIPDNAOrder):
+    """Tests that an error is returned if a new case does not contain any affected samples."""
+
+    # GIVEN an order containing a case without any affected samples
+    for sample in mip_dna_order.cases[0].samples:
+        sample.status = StatusEnum.unaffected
+
+    # WHEN validating that each case contains at least one affected sample
+    errors: list[NewCaseWithoutAffectedSampleError] = validate_each_new_case_has_an_affected_sample(
+        mip_dna_order
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the first case
+    assert errors[0].case_index == 0
+
+
+def test_existing_case_without_affected_samples(
+    mip_dna_order: MIPDNAOrder,
+    store_with_multiple_cases_and_samples: Store,
+    case_id_with_single_sample: str,
+):
+    """Tests that an error is returned if an existing case does not contain any affected samples."""
+
+    # GIVEN an order containing an existing case without any affected samples
+    db_case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        case_id_with_single_sample
+    )
+    assert all(link.status != StatusEnum.affected for link in db_case.links)
+    existing_case = ExistingCase(internal_id=db_case.internal_id, panels=db_case.panels)
+    mip_dna_order.cases.append(existing_case)
+
+    # WHEN validating that each case contains at least one affected sample
+    errors: list[ExistingCaseWithoutAffectedSampleError] = (
+        validate_existing_cases_have_an_affected_sample(
+            order=mip_dna_order, store=store_with_multiple_cases_and_samples
+        )
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the first case
+    assert errors[0].case_index == mip_dna_order.cases.index(existing_case)

@@ -102,6 +102,38 @@ def init(context: CGConfig, reset: bool, force: bool):
     LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
+def find_commands(group, query: str) -> list[str]:
+    """Recursively find commands in a group that match the query.
+    Args:
+        query the command or pattern you want to look for. Does not support fuzzy searches.
+    """
+    commands: list[str] = []
+    for cmd_name, cmd in group.commands.items():
+        if query.lower() in cmd_name.lower():
+            commands.append(cmd_name)
+        if isinstance(cmd, click.Group):
+            sub_commands = find_commands(cmd, query)
+            commands.extend(f"{cmd_name} {sub_cmd}" for sub_cmd in sub_commands)
+    return commands
+
+
+@base.command()
+@click.argument(
+    "query",
+    required=False,
+    default="",
+)
+def search(query):
+    """Search for available commands."""
+    commands: list[str] = find_commands(base, query)
+    if commands:
+        click.echo("Matching commands:")
+        for cmd in commands:
+            click.echo(f"  {cmd}")
+    else:
+        click.echo("No matching commands found.")
+
+
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)

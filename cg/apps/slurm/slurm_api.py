@@ -9,7 +9,7 @@ from cg.apps.slurm.sbatch import (
     SBATCH_HEADER_TEMPLATE,
 )
 from cg.constants.slurm import Slurm
-from cg.models.slurm.sbatch import Sbatch
+from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class SlurmAPI:
     @staticmethod
     def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information."""
-        if hasattr(sbatch_parameters, Slurm.PARTITION):
+        if isinstance(sbatch_parameters, SbatchDragen):
             sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
                 sbatch_parameters=sbatch_parameters
             )

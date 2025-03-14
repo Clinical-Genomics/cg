@@ -114,7 +114,6 @@ class StatusOptions(StrEnum):
 class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
     BALSAMIC_PON: str = "balsamic-pon"
-    BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
     DEMULTIPLEX: str = "demultiplex"
     FLUFFY: str = "fluffy"
@@ -299,3 +298,13 @@ class SequencingQCStatus(Enum):
     FAILED = auto()
     PASSED = auto()
     PENDING = auto()
+
+
+class SampleStatus(StrEnum):
+    INCOMING = "incoming"
+    LABPREP = "labprep"
+    SEQUENCING = "sequencing"
+
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return [cls.INCOMING, cls.LABPREP, cls.SEQUENCING]

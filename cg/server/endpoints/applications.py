@@ -7,7 +7,7 @@ from cg.models.orders.constants import OrderType
 from cg.server.endpoints.error_handler import handle_missing_entries
 from cg.server.endpoints.utils import before_request, is_public
 from cg.server.ext import applications_service, db
-from cg.services.application.models import ApplicationResponse
+from cg.services.web_services.application.service import ApplicationResponse
 from cg.store.models import Application, ApplicationLimitations
 
 APPLICATIONS_BLUEPRINT = Blueprint("applications", __name__, url_prefix="/api/v1")
