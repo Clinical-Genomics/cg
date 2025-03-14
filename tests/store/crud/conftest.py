@@ -118,8 +118,11 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
     )
     return store
 
+
 @pytest.fixture
-def store_with_multiple_rna_and_dna_samples_and_cases(store_with_rna_and_dna_samples_and_cases: Store, helpers: StoreHelpers) -> Store:
+def store_with_multiple_rna_and_dna_samples_and_cases(
+    store_with_rna_and_dna_samples_and_cases: Store, helpers: StoreHelpers
+) -> Store:
     """Return a store with:
     - 2 rna samples
     - 3 dna samples related to the rna sample (with different prep categories)
@@ -144,18 +147,44 @@ def store_with_multiple_rna_and_dna_samples_and_cases(store_with_rna_and_dna_sam
         is_tumour=True,
         customer_id="cust001",
     )
-    rna_case: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(internal_id="rna_case")
-    helpers.add_relationship(store=store_with_rna_and_dna_samples_and_cases, sample=rna_sample_2, case=rna_case)
+    rna_case: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        internal_id="rna_case"
+    )
+    helpers.add_relationship(
+        store=store_with_rna_and_dna_samples_and_cases, sample=rna_sample_2, case=rna_case
+    )
 
-    related_dna_case_1: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id("related_dna_case_1")
-    helpers.add_relationship(store=store_with_rna_and_dna_samples_and_cases, sample=related_dna_sample_2, case=related_dna_case_1)
-    helpers.add_analysis(store=store_with_rna_and_dna_samples_and_cases, case=related_dna_case_1, uploaded_at=datetime.now())
+    related_dna_case_1: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        "related_dna_case_1"
+    )
+    helpers.add_relationship(
+        store=store_with_rna_and_dna_samples_and_cases,
+        sample=related_dna_sample_2,
+        case=related_dna_case_1,
+    )
+    helpers.add_analysis(
+        store=store_with_rna_and_dna_samples_and_cases,
+        case=related_dna_case_1,
+        uploaded_at=datetime.now(),
+    )
 
-    related_dna_case_2: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id("related_dna_case_2")
-    helpers.add_relationship(store=store_with_rna_and_dna_samples_and_cases, sample=related_dna_sample_2, case=related_dna_case_2)
+    related_dna_case_2: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        "related_dna_case_2"
+    )
+    helpers.add_relationship(
+        store=store_with_rna_and_dna_samples_and_cases,
+        sample=related_dna_sample_2,
+        case=related_dna_case_2,
+    )
 
-    not_related_dna_case: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id("not_related_dna_case")
-    helpers.add_relationship(store=store_with_rna_and_dna_samples_and_cases, sample=related_dna_sample_2, case=not_related_dna_case)
+    not_related_dna_case: Case = store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id(
+        "not_related_dna_case"
+    )
+    helpers.add_relationship(
+        store=store_with_rna_and_dna_samples_and_cases,
+        sample=related_dna_sample_2,
+        case=not_related_dna_case,
+    )
 
     return store_with_rna_and_dna_samples_and_cases
 
