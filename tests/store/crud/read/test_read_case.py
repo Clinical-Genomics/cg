@@ -2,6 +2,7 @@ import pytest
 from cg.store.models import Case
 from cg.store.store import Store
 
+
 @pytest.mark.parametrize(
     "store_with_cases",
     [
