@@ -15,6 +15,7 @@ from cg.cli.workflow.nf_analysis import (
     start,
     start_available,
     store,
+    store_available,
     store_housekeeper,
 )
 
@@ -40,6 +41,7 @@ nallo.add_command(run)
 nallo.add_command(start)
 nallo.add_command(start_available)
 nallo.add_command(store)
+nallo.add_command(store_available)
 nallo.add_command(store_housekeeper)
 nallo.add_command(metrics_deliver)
 
