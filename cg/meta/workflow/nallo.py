@@ -163,30 +163,32 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Nallo d4 coverage file path."""
-        coverage_file_tags: list[str] = NALLO_COVERAGE_FILE_TAGS + [sample_id]
-        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=coverage_file_tags
+        nallo_coverage_file_tags: list[str] = NALLO_COVERAGE_FILE_TAGS + [sample_id]
+        nallo_coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=bundle_name, tags=nallo_coverage_file_tags
         )
-        if coverage_file:
-            return coverage_file.full_path
-        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
+        if nallo_coverage_file:
+            return nallo_coverage_file.full_path
+        LOG.warning(f"No Nallo coverage file found with the tags: {nallo_coverage_file_tags}")
         return None
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
         """Return sample coverage metrics from Chanjo2."""
-        genome_version: GenomeVersion = self.get_genome_build(case_id)
-        coverage_file_path: str | None = self.get_sample_coverage_file_path(
+        nallo_genome_version: GenomeVersion = self.get_genome_build(case_id)
+        nallo_coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
         )
         try:
             post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(genome_version),
+                build=self.translate_genome_reference(nallo_genome_version),
                 coverage_threshold=NALLO_COVERAGE_THRESHOLD,
                 hgnc_gene_ids=gene_ids,
                 interval_type=NALLO_COVERAGE_INTERVAL_TYPE,
-                samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
+                samples=[
+                    CoverageSample(coverage_file_path=nallo_coverage_file_path, name=sample_id)
+                ],
             )
             post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
             return post_response.get_sample_coverage_metrics(sample_id)
