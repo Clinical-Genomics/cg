@@ -5,6 +5,7 @@ from cg.services.delivery_message.messages.utils import (
     get_scout_links_row_separated,
 )
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 class RNAUploadMessageStrategy(ABC):
@@ -46,7 +47,7 @@ class RNAScoutStrategy(RNAUploadMessageStrategy):
 
 
 class RNADeliveryMessage:
-    def __init__(self, store, strategy: RNAUploadMessageStrategy):
+    def __init__(self, store: Store, strategy: RNAUploadMessageStrategy):
         self.store = store
         self.strategy = strategy
 
