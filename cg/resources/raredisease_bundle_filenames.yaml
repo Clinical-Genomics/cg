@@ -545,7 +545,7 @@
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_regions/SAMPLEID_rhocall_filter_cadd_vep_upd_regions_1.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_regions/SAMPLEID_upd_regions_1.png
   step: chromograph_upd
   tag: regions
 - format: png
