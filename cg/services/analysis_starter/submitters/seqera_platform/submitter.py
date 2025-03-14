@@ -30,9 +30,8 @@ class SeqeraPlatformSubmitter(Submitter):
         parameters_as_string = WriteStream.write_stream_from_content(
             content=parameters, file_format=FileFormat.YAML
         )
-        slurm_qos: str = case_config.case_priority
         launch_request = LaunchRequest(
-            computeEnvId=self.compute_environment_ids[slurm_qos],
+            computeEnvId=self.compute_environment_ids[case_config.case_priority],
             configProfiles=case_config.config_profiles,
             configText=f"includeConfig {case_config.nextflow_config_file}",
             paramsText=parameters_as_string,
