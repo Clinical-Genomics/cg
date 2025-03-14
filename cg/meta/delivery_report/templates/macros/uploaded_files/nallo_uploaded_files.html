@@ -1,0 +1,32 @@
+{% macro nallo_scout_files(scout_files, case_id, case_name) %}
+<table class="table w-auto align-middle" aria-describedby="nallo-scout-table">
+  <tbody>
+    {% if scout_files.snv_vcf != "N/A" %}
+    <tr>
+      <th scope="row">Kliniskt relevanta SNVs och INDELs</th>
+      <td>{{ scout_files.snv_vcf.replace(case_id, case_name) }}</td>
+    </tr>
+    {% endif %} {% if scout_files.snv_research_vcf != "N/A" %}
+    <tr>
+      <th scope="row">SNVs och INDELs för forskning</th>
+      <td>{{ scout_files.snv_research_vcf.replace(case_id, case_name) }}</td>
+    </tr>
+    {% endif %} {% if scout_files.sv_vcf != "N/A" %}
+    <tr>
+      <th scope="row">Kliniskt relevanta SVs</th>
+      <td>{{ scout_files.sv_vcf.replace(case_id, case_name) }}</td>
+    </tr>
+    {% endif %} {% if scout_files.sv_research_vcf != "N/A" %}
+    <tr>
+      <th scope="row">SVs för forskning</th>
+      <td>{{ scout_files.sv_research_vcf.replace(case_id, case_name) }}</td>
+    </tr>
+    {% endif %} {% if scout_files.vcf_str != "N/A" %}
+    <tr>
+      <th scope="row">Kliniskt relevanta STRs</th>
+      <td>{{ scout_files.vcf_str.replace(case_id, case_name) }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endmacro %}
