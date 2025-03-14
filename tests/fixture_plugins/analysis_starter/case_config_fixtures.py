@@ -9,7 +9,7 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 
 @pytest.fixture
 def raredisease_repository() -> str:
-    return "http://some_url"
+    return "https://some_url"
 
 
 @pytest.fixture
