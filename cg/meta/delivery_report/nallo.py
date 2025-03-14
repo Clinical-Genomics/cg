@@ -87,7 +87,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         """Return sample metadata required fields associated to a specific sample."""
         required_sample_metadata_fields = {}
         for sample in case.samples:
-            required_fields = REQUIRED_SAMPLE_METADATA_NALLO_FIELDS
+            required_fields: list[str] = REQUIRED_SAMPLE_METADATA_NALLO_FIELDS
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
 
