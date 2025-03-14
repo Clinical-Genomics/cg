@@ -67,6 +67,16 @@ def ready_made_library_case_pass_sequencing_qc(case: Case) -> bool:
     return enough_reads
 
 
+def all_samples_in_case_have_reads(case: Case) -> bool:
+    """
+    Check if all samples have reads.
+    """
+    passed_quality_check: bool = all(sample.has_reads for sample in case.samples)
+    if not passed_quality_check:
+        LOG.warning("Not all samples in case have reads.")
+    return passed_quality_check
+
+
 def any_sample_in_case_has_reads(case: Case) -> bool:
     """
     Check if any sample has reads.

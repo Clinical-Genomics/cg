@@ -46,7 +46,7 @@
 {% macro sample_status(workflow) %}
   {% if "balsamic" in workflow or workflow == "rnafusion" %}
     <th scope="col">Tumör</th>
-  {% elif workflow in ("mip-dna", "raredisease", "tomte") %}
+  {% elif workflow in ("mip-dna", "nallo", "raredisease", "tomte") %}
     <th scope="col">Status</th>
   {% endif %}
 {% endmacro %}
@@ -54,7 +54,7 @@
 {% macro sample_status_value(workflow, sample) %}
   {% if "balsamic" in workflow or workflow == "rnafusion" %}
     <td>{{ sample.tumour }}</td>
-  {% elif workflow in ("mip-dna", "raredisease", "tomte") %}
+  {% elif workflow in ("mip-dna", "nallo", "raredisease", "tomte") %}
     <td>{{ sample.status }}</td>
   {% endif %}
 {% endmacro %}
