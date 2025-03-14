@@ -243,7 +243,9 @@ class RarediseaseConfig(CommonAppConfig):
     resources: str
     launch_directory: str
     workflow_bin_path: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig

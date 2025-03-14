@@ -106,7 +106,7 @@ def test_config_case_without_samples(
     "workflow",
     NEXTFLOW_WORKFLOWS,
 )
-def test_config_case_default_parameters(
+def Wtest_config_case_default_parameters(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,

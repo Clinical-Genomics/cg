@@ -33,8 +33,12 @@ class SeqeraPlatformSubmitter(Submitter):
         slurm_qos: str = case_config.case_priority
         launch_request = LaunchRequest(
             computeEnvId=self.compute_environment_ids[slurm_qos],
+            configProfiles=case_config.config_profiles,
             configText=f"includeConfig {case_config.nextflow_config_file}",
             paramsText=parameters_as_string,
+            pipeline=case_config.pipeline_repository,
+            preRunScript=case_config.pre_run_script,
+            revision=case_config.revision,
             runName=case_config.case_id,
             workDir=case_config.work_dir,
         )
