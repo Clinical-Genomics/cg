@@ -28,7 +28,7 @@ def test_create_raredisease_config(
         raredisease_configurator.pipeline_extension.managed_variants_file_creator
     )
 
-    # GIVEN that we mock the Scout calls
+    # GIVEN that scout returns panels and variants
     with (
         mock.patch.object(gene_panel_creator, "scout_api") as mock_gene_panel_scout_api,
         mock.patch.object(managed_variants_creator, "scout_api") as mock_managed_variants_scout_api,
