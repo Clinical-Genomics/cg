@@ -86,6 +86,10 @@ class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
 
 
+class DecompressionCouldNotStartError(CgError):
+    """Raised when decompression could not be started."""
+
+
 class DeliveryReportError(CgError):
     """
     Exception related to delivery report creation.
