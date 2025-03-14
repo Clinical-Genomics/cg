@@ -1,20 +1,6 @@
 from pydantic import BaseModel
 
 
-class LaunchResponse(BaseModel):
-    configProfiles: list[str]
-    pipeline: str
-    preRunScript: str
-    pullLatest: bool
-    revision: str
-
-
-class PipelineResponse(BaseModel):
-    """Structured as the response of the /pipelines/:pipelineId endpoint."""
-
-    launch: LaunchResponse
-
-
 class LaunchRequest(BaseModel):
     computeEnvId: str
     configProfiles: list[str]
