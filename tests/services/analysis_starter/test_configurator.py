@@ -1,36 +1,46 @@
 from pathlib import Path
 
+import mock
 import pytest
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
-from cg.services.analysis_starter.configurator.abstract_service import Configurator
-from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
-
-
-@pytest.mark.parametrize(
-    "configurator_fixture, case_config_fixture, case_id_fixture",
-    [("raredisease_configurator", "raredisease_case_config", "raredisease_case_id")],
-    ids=["raredisease"],
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
 )
-def test_create_config(
-    configurator_fixture: str,
-    case_config_fixture: str,
-    case_id_fixture: str,
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+
+
+def test_create_raredisease_config(
+    raredisease_configurator: NextflowConfigurator,
+    raredisease_case_config: NextflowCaseConfig,
+    raredisease_case_id: str,
     raredisease_params_file_path: str,
     raredisease_work_dir_path: str,
-    request: pytest.FixtureRequest,
 ):
     """Test creating the case config for all pipelines."""
     # GIVEN a configurator and a case id
-    configurator: Configurator = request.getfixturevalue(configurator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
+    gene_panel_creator: GenePanelFileCreator = (
+        raredisease_configurator.pipeline_extension.gene_panel_file_creator
+    )
+    managed_variants_creator: ManagedVariantsFileCreator = (
+        raredisease_configurator.pipeline_extension.managed_variants_file_creator
+    )
 
-    # WHEN creating a case config
-    case_config: CaseConfig = configurator.create_config(case_id=case_id)
+    # GIVEN that scout returns panels and variants
+    with (
+        mock.patch.object(gene_panel_creator, "scout_api") as mock_gene_panel_scout_api,
+        mock.patch.object(managed_variants_creator, "scout_api") as mock_managed_variants_scout_api,
+    ):
+        mock_gene_panel_scout_api.export_panels.return_value = []
+        mock_managed_variants_scout_api.export_managed_variants.return_value = []
+
+        # WHEN creating a case config
+        case_config: CaseConfig = raredisease_configurator.create_config(raredisease_case_id)
 
     # THEN the expected case config is returned
-    expected_case_config: CaseConfig = request.getfixturevalue(case_config_fixture)
-    assert case_config == expected_case_config
+    assert case_config == raredisease_case_config
 
 
 @pytest.mark.parametrize(
