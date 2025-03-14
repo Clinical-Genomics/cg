@@ -104,6 +104,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
     "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
+    "tests.fixture_plugins.analysis_starter.seqera_submitter_fixtures",
     "tests.fixture_plugins.analysis_starter.specific_file_creators",
     "tests.fixture_plugins.analysis_starter.specific_file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.params_file_creators",
@@ -2158,6 +2159,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(raredisease_dir),
             "slurm": {
