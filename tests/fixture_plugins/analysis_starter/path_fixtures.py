@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 
 import pytest
@@ -46,12 +45,9 @@ def raredisease_params_file_path(raredisease_case_path: Path, raredisease_case_i
 def raredisease_params_file_path_readable(
     analysis_starter_fixtures: Path, raredisease_case_path: Path, raredisease_case_id: str
 ) -> Path:
-    real_file = Path(analysis_starter_fixtures, f"{raredisease_case_id}_params_file").with_suffix(
+    return Path(analysis_starter_fixtures, f"{raredisease_case_id}_params_file").with_suffix(
         FileExtensions.YAML
     )
-    raredisease_case_path.mkdir(parents=True, exist_ok=True)
-    shutil.copy(real_file, Path(raredisease_case_path, f"{raredisease_case_id}_params_file.yaml"))
-    return real_file
 
 
 @pytest.fixture
