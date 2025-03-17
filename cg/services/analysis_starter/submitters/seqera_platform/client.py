@@ -3,10 +3,7 @@ import requests
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import SeqeraPlatformConfig
-from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
-    PipelineResponse,
-    WorkflowLaunchRequest,
-)
+from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
 
 
 class SeqeraPlatformClient:
@@ -17,17 +14,6 @@ class SeqeraPlatformClient:
         self.compute_environment_ids: dict[SlurmQos, str] = config.compute_environments
         self.workflow_ids: dict[Workflow, int] = config.workflow_ids
         self.workspace_id: int = config.workspace_id
-
-    def get_pipeline_config(self, workflow: Workflow) -> PipelineResponse:
-        """Fetches data from a pipeline configured in the Seqera platform."""
-        workflow_id: int = self.workflow_ids.get(workflow)
-        url = f"{self.base_url}/pipelines/{workflow_id}/launch"
-        params: dict = {"workspaceId": self.workspace_id}
-        response: requests.Response = requests.get(
-            url=url, headers=self.auth_headers, params=params
-        )
-        response.raise_for_status()
-        return PipelineResponse.model_validate(response.json())
 
     def run_case(self, request: WorkflowLaunchRequest) -> str:
         """Launches a case from the request and returns the workflow ID."""

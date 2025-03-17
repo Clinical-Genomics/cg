@@ -3,7 +3,6 @@ from pathlib import Path
 import mock
 import pytest
 
-from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -37,7 +36,9 @@ def test_create_raredisease_config(
         mock_managed_variants_scout_api.export_managed_variants.return_value = []
 
         # WHEN creating a case config
-        case_config: CaseConfig = raredisease_configurator.create_config(raredisease_case_id)
+        case_config: NextflowCaseConfig = raredisease_configurator.create_config(
+            raredisease_case_id
+        )
 
     # THEN the expected case config is returned
     assert case_config == raredisease_case_config
