@@ -178,7 +178,10 @@ class ExcelOrderformParser(OrderformParser):
         """Determine the order_data delivery type"""
 
         data_delivery: str = self.parse_data_delivery()
-
+        # Orderforms allow for No delivery option, not adjusting it here causes an error when parsing excel order forms.
+        # The .replace() below would otherwise an incompatible DataDelivery option.
+        if data_delivery == "no_delivery":
+            return DataDelivery.NO_DELIVERY
         try:
             return DataDelivery(data_delivery)
         except ValueError as error:
@@ -233,8 +236,5 @@ class ExcelOrderformParser(OrderformParser):
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
         """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
-        # Orderforms allow for No delivery option, not adjusting it here causes an error when parsing excel order forms.
-        # The .replace() below would otherwise an incompatible DataDelivery option.
-        if "No delivery" in data_delivery:
-            return DataDelivery.NO_DELIVERY
+        
         return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
