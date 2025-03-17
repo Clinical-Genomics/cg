@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -44,7 +45,7 @@ class NextflowConfigurator(Configurator):
         self.sample_sheet_creator = sample_sheet_creator
         self.params_file_creator = params_file_creator
 
-    def create_config(self, case_id: str) -> NextflowCaseConfig:
+    def configure(self, case_id: str) -> NextflowCaseConfig:
         """Configure a Nextflow case so that it is ready for analysis. This entails
         1. Creating a case directory.
         2. Creating a sample sheet.
@@ -62,12 +63,25 @@ class NextflowConfigurator(Configurator):
         )
         self.config_file_creator.create(case_id=case_id, case_path=case_path)
         self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
+        return self.get_config(case_id)
+
+    def get_config(self, case_id: str) -> NextflowCaseConfig:
+        """
+        Gets the configuration properties for the provided case.
+        Raises:
+            CaseNotConfiguredError if the params file or config file does not exist.
+        """
+        case_path: Path = self._get_case_path(case_id=case_id)
         params_file_path: Path = self.params_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
         )
         config_file_path: Path = self.config_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
         )
+        if not params_file_path.exists() or not config_file_path.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that both the parameters file {params_file_path.as_posix()} and the configuration file {config_file_path.as_posix()} exists."
+            )
         return NextflowCaseConfig(
             case_id=case_id,
             case_priority=self.store.get_case_priority(case_id),
@@ -77,7 +91,7 @@ class NextflowConfigurator(Configurator):
             pipeline_repository=self.pipeline_repository,
             pre_run_script=self.pre_run_script,
             revision=self.pipeline_revision,
-            work_dir=self._get_work_dir(case_id=case_id).as_posix(),
+            work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
 

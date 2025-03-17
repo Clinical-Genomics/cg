@@ -36,9 +36,7 @@ def test_create_raredisease_config(
         mock_managed_variants_scout_api.export_managed_variants.return_value = []
 
         # WHEN creating a case config
-        case_config: NextflowCaseConfig = raredisease_configurator.create_config(
-            raredisease_case_id
-        )
+        case_config: NextflowCaseConfig = raredisease_configurator.configure(raredisease_case_id)
 
     # THEN the expected case config is returned
     assert case_config == raredisease_case_config
