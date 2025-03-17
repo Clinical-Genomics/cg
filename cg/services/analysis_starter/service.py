@@ -13,7 +13,7 @@ class AnalysisStarter:
         self.submitter = submitter
 
     def start(self, case_id: str):
-        """Fetches raw data, generates additional files and runs the specified case."""
+        """Fetches raw data, generates configuration files and runs the specified case."""
         self.input_fetcher.ensure_files_are_ready(case_id)
         case_config: CaseConfig = self.configurator.configure(case_id)
         self.submitter.submit(case_config)
