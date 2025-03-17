@@ -163,10 +163,6 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
-    Workflow.NALLO: {
-        "case_tags": CLINICAL_DELIVERY_TAGS,
-        "sample_tags": CLINICAL_DELIVERY_TAGS,
-    },
     Workflow.RAREDISEASE: {
         "case_tags": CLINICAL_DELIVERY_TAGS,
         "sample_tags": CLINICAL_DELIVERY_TAGS,

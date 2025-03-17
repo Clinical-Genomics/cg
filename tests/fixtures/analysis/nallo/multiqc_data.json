@@ -15,16 +15,6 @@
                 "50_x_pc": 2.0,
                 "median_coverage": 33
             }
-        },
-        {
-            "ADM1": {
-                "total_sequences": 2944513.0,
-                "percent_gc": 39.0,
-                "avg_sequence_length": 12792.931765117017,
-                "median_sequence_length": 12999,
-                "percent_duplicates": 1.7232745723252236,
-                "percent_fails": 30.0
-            }
         }
     ]
 }
