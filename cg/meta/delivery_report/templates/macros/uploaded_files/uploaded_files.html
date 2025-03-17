@@ -1,6 +1,5 @@
 {% from "/macros/uploaded_files/balsamic_uploaded_files.html" import balsamic_scout_files %}
 {% from "/macros/uploaded_files/mip_dna_uploaded_files.html" import mip_dna_scout_files %}
-{% from "/macros/uploaded_files/nallo_uploaded_files.html" import nallo_scout_files %}
 {% from "/macros/uploaded_files/raredisease_uploaded_files.html" import raredisease_scout_files %}
 {% from "/macros/uploaded_files/rnafusion_uploaded_files.html" import rnafusion_scout_files %}
 
@@ -37,9 +36,6 @@
     {% elif workflow == "mip-dna" %}
       <!-- MIP-DNA Scout files -->
       {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-    {% elif workflow == "nallo" %}
-      <!-- Nallo Scout files -->
-      {{ nallo_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
     {% elif workflow == "raredisease" %}
       <!-- Raredisease Scout files -->
       {{ raredisease_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
