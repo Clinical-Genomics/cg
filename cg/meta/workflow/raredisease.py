@@ -29,14 +29,12 @@ from cg.constants.sequencing import SeqLibraryPrepCategory, NOVASEQ_SEQUENCING_R
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
-    RarediseaseQCMetrics,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
@@ -299,10 +297,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a raredisease case. Currently fixed for hg19."""
         return GenomeVersion.HG19
-
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
-        """Parse Nextflow output analysis files and return an analysis model."""
-        qc_metrics_model = RarediseaseQCMetrics
-        return super().parse_analysis(
-            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
-        )

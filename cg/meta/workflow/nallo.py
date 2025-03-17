@@ -3,35 +3,15 @@
 import logging
 from pathlib import Path
 
-from click import File
-
-from cg.clients.chanjo2.models import (
-    CoverageMetrics,
-    CoveragePostRequest,
-    CoverageSample,
-    CoveragePostResponse,
-)
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, FileFormat
-from cg.constants.nf_analysis import (
-    NALLO_METRIC_CONDITIONS,
-    NALLO_COVERAGE_THRESHOLD,
-    NALLO_COVERAGE_INTERVAL_TYPE,
-    NALLO_COVERAGE_FILE_TAGS,
-)
-from cg.constants.scout import ScoutExportFileName, NALLO_CASE_TAGS
+from cg.constants.nf_analysis import NALLO_METRIC_CONDITIONS
+from cg.constants.scout import ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.nallo.nallo import (
-    NalloParameters,
-    NalloSampleSheetEntry,
-    NalloSampleSheetHeaders,
-    NalloQCMetrics,
-)
+from cg.models.nallo.nallo import NalloParameters, NalloSampleSheetEntry, NalloSampleSheetHeaders
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -160,49 +140,3 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return NALLO_METRIC_CONDITIONS
-
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Nallo d4 coverage file path."""
-        nallo_coverage_file_tags: list[str] = NALLO_COVERAGE_FILE_TAGS + [sample_id]
-        nallo_coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=nallo_coverage_file_tags
-        )
-        if nallo_coverage_file:
-            return nallo_coverage_file.full_path
-        LOG.warning(f"No Nallo coverage file found with the tags: {nallo_coverage_file_tags}")
-        return None
-
-    def get_sample_coverage(
-        self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""
-        nallo_genome_version: GenomeVersion = self.get_genome_build(case_id)
-        nallo_coverage_file_path: str | None = self.get_sample_coverage_file_path(
-            bundle_name=case_id, sample_id=sample_id
-        )
-        try:
-            post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(nallo_genome_version),
-                coverage_threshold=NALLO_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=gene_ids,
-                interval_type=NALLO_COVERAGE_INTERVAL_TYPE,
-                samples=[
-                    CoverageSample(coverage_file_path=nallo_coverage_file_path, name=sample_id)
-                ],
-            )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
-            return post_response.get_sample_coverage_metrics(sample_id)
-        except Exception as error:
-            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
-            return None
-
-    def get_scout_upload_case_tags(self) -> dict:
-        """Return Nallo Scout upload case tags."""
-        return NALLO_CASE_TAGS
-
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
-        """Parse Nextflow output analysis files and return an analysis model."""
-        qc_metrics_model = NalloQCMetrics
-        return super().parse_analysis(
-            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
-        )

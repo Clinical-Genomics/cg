@@ -62,16 +62,6 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_str={"vcf-str"},
 )
 
-NALLO_CASE_TAGS = dict(
-    delivery_report={"delivery-report"},
-    multiqc={"multiqc-html"},
-    vcf_snv_research={"vcf-snv-research"},
-    vcf_snv={"vcf-snv-clinical"},
-    vcf_sv_research={"vcf-sv-research"},
-    vcf_sv={"vcf-sv-clinical"},
-    vcf_str={"vcf-str"},
-)
-
 MIP_CASE_TAGS: dict[str, set[str]] = dict(
     delivery_report={"delivery-report"},
     multiqc_report={"multiqc-html"},
@@ -132,12 +122,6 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     mitodel_file={"mitodel"},
 )
-
-NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_file={"alignment_haplotags"},
-    d4_file={"mosdepth_d4"},
-)
-
 
 MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     bam_file={"bam"},
