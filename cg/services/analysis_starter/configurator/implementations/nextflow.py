@@ -23,13 +23,13 @@ class NextflowConfigurator(Configurator):
 
     def __init__(
         self,
-        pipeline_config: CommonAppConfig,
-        store: Store,
+        config_file_creator: NextflowConfigFileCreator,
         housekeeper_api: HousekeeperAPI,
         lims: LimsAPI,
-        config_file_creator: NextflowConfigFileCreator,
-        sample_sheet_creator: NextflowSampleSheetCreator,
         params_file_creator: ParamsFileCreator,
+        pipeline_config: CommonAppConfig,
+        sample_sheet_creator: NextflowSampleSheetCreator,
+        store: Store,
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
         self.root_dir: str = pipeline_config.root
