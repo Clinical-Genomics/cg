@@ -118,7 +118,7 @@ class AnalysisStarterFactory:
             seqera_platform_client: SeqeraPlatformClient = self._get_seqera_platform_client()
             return SeqeraPlatformSubmitter(
                 client=seqera_platform_client,
-                compute_environment_ids=self.cg_config.seqera_platform.compute_environmentsCan,
+                compute_environment_ids=self.cg_config.seqera_platform.compute_environments,
             )
 
     def _get_seqera_platform_client(self) -> SeqeraPlatformClient:
