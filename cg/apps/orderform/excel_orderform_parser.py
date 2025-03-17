@@ -178,8 +178,6 @@ class ExcelOrderformParser(OrderformParser):
         """Determine the order_data delivery type"""
 
         data_delivery: str = self.parse_data_delivery()
-        # Orderforms allow for No delivery option, not adjusting it here causes an error when parsing excel order forms.
-        # The .replace() below would otherwise an incompatible DataDelivery option.
         if data_delivery == "no_delivery":
             return DataDelivery.NO_DELIVERY
         try:
