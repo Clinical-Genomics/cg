@@ -44,7 +44,7 @@ class NextflowConfigurator(Configurator):
         self.sample_sheet_creator = sample_sheet_creator
         self.params_file_creator = params_file_creator
 
-    def create_config(self, case_id: str) -> NextflowCaseConfig:
+    def configure(self, case_id: str) -> NextflowCaseConfig:
         """Configure a Nextflow case so that it is ready for analysis. This entails
         1. Creating a case directory.
         2. Creating a sample sheet.
@@ -62,6 +62,10 @@ class NextflowConfigurator(Configurator):
         )
         self.config_file_creator.create(case_id=case_id, case_path=case_path)
         self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
+        return self.get_config(case_id)
+
+    def get_config(self, case_id: str) -> NextflowCaseConfig:
+        case_path: Path = self._get_case_path(case_id=case_id)
         params_file_path: Path = self.params_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
         )
