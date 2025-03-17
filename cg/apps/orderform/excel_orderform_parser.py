@@ -188,7 +188,6 @@ class ExcelOrderformParser(OrderformParser):
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
-
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
@@ -234,4 +233,8 @@ class ExcelOrderformParser(OrderformParser):
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
         """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
+        # Orderforms allow for No delivery option, not adjusting it here causes an error when parsing excel order forms.
+        # The .replace() below would otherwise an incompatible DataDelivery option.
+        if data_delivery == "No delivery":
+            data_delivery: str = DataDelivery.NO_DELIVERY
         return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
