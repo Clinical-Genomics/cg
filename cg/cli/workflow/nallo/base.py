@@ -13,9 +13,11 @@ from cg.cli.workflow.nf_analysis import (
     report_deliver,
     run,
     start,
+    start_available,
     store,
     store_housekeeper,
 )
+
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -36,6 +38,7 @@ nallo.add_command(config_case)
 nallo.add_command(report_deliver)
 nallo.add_command(run)
 nallo.add_command(start)
+nallo.add_command(start_available)
 nallo.add_command(store)
 nallo.add_command(store_housekeeper)
 nallo.add_command(metrics_deliver)
