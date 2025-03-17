@@ -236,5 +236,5 @@ class ExcelOrderformParser(OrderformParser):
         # Orderforms allow for No delivery option, not adjusting it here causes an error when parsing excel order forms.
         # The .replace() below would otherwise an incompatible DataDelivery option.
         if data_delivery == "No delivery":
-            data_delivery: str = DataDelivery.NO_DELIVERY
+            return DataDelivery.NO_DELIVERY
         return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
