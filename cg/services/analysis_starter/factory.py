@@ -137,11 +137,11 @@ class AnalysisStarterFactory:
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
         if workflow in NEXTFLOW_WORKFLOWS:
-            seqera_platform_client: SeqeraPlatformClient = self._get_seqera_platform_client()
-            return SeqeraPlatformSubmitter(
-                client=seqera_platform_client,
-                compute_environment_ids=self.cg_config.seqera_platform.compute_environments,
-            )
+            return self._get_seqera_platform_submitter()
 
-    def _get_seqera_platform_client(self) -> SeqeraPlatformClient:
-        return SeqeraPlatformClient(self.cg_config.seqera_platform)
+    def _get_seqera_platform_submitter(self) -> SeqeraPlatformSubmitter:
+        client = SeqeraPlatformClient(config=self.cg_config.seqera_platform)
+        return SeqeraPlatformSubmitter(
+            client=client,
+            compute_environment_ids=self.cg_config.seqera_platform.compute_environments,
+        )
