@@ -27,11 +27,6 @@ class FreshdeskClient:
         response = self.session.post(
             url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
         )
-
-        # response = self.session.post(
-        #     url=f"{self.base_url}{EndPoints.TICKETS}", json=ticket.model_dump(), files=files
-        # )
-
         response.raise_for_status()
         return TicketResponse.model_validate(response.json())
 
