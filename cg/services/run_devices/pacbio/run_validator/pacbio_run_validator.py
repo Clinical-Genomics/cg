@@ -57,6 +57,19 @@ class PacBioRunValidator(RunValidator):
         self._touch_is_validated(run_data.full_path)
         LOG.debug(f"Run for {run_data.full_path} is validated.")
 
+    def validate_run_files(self, run_data: PacBioRunData):
+        """
+        Validate presence manifest and report file for the Pacbio run
+
+        Args:
+            run_data: A Pacbio run data object
+
+        Raises:
+            PostProcessingRunFileManagerError in case not all files are present in the directory
+
+        """
+        self.file_manager.get_run_validation_files(run_data)
+
     @staticmethod
     def _is_validated(run_path: Path) -> bool:
         return Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()

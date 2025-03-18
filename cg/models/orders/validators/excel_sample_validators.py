@@ -8,6 +8,8 @@ def parse_panels(panels: str) -> list[str] | None:
     separator = ";" if ";" in panels else None
     if ":" in panels:
         separator = ":"
+    if not separator:
+        return [panels]
     return panels.split(separator)
 
 
