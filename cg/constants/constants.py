@@ -180,6 +180,8 @@ class DataDelivery(StrEnum):
     STATINA: str = "statina"
 
 
+    
+
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"
 

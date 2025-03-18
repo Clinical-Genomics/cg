@@ -167,6 +167,27 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
     # THEN assert that the project type is correct
     assert order_form_parser.project_type == OrderType.MIP_DNA
 
+def test_parse_mip_orderform_no_delivery(mip_orderform_no_delivery: str, nr_samples_mip_orderform: int):
+    """Test to parse a mip orderform in xlsx format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(mip_orderform_no_delivery))
+    # GIVEN a orderform API
+    order_form_parser = ExcelOrderformParser()
+    # GIVEN the correct orderform name
+    order_name: str = Path(mip_orderform_no_delivery).stem
+
+    # WHEN parsing the mip orderform
+    order_form_parser.parse_orderform(excel_path=mip_orderform_no_delivery)
+
+    # THEN assert that the correct name was set
+    assert order_form_parser.order_name == order_name
+
+    # THEN assert the number of samples parsed are correct
+    assert len(order_form_parser.samples) == nr_samples_mip_orderform
+
+    # THEN assert that the project type is correct
+    assert order_form_parser.project_type == OrderType.MIP_DNA
+
 
 def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
     """Test to parse an excel orderform in xlsx format"""
@@ -228,7 +249,7 @@ def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
     assert tumour_sample and normal_sample
 
 
-def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, caplog):
+def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser):
     """Test to generate a order from a parsed rml excel file"""
     # GIVEN a order form parser that have parsed an excel file
 
