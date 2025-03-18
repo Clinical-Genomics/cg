@@ -92,3 +92,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> str:
         """Return the reference genome build version of a Taxprofiler analysis."""
         return GenomeVersion.T2T_CHM13.value
+
+    @property
+    def use_read_count_threshold(self) -> bool:
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started."""
+        return False
