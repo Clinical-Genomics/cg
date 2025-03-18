@@ -242,6 +242,7 @@ def mip_orderform_no_delivery(orderforms: Path) -> str:
         f"{Orderform.MIP_DNA}.{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}.mip_no_delivery.xlsx",
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""

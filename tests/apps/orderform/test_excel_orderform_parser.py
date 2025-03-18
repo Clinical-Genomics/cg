@@ -167,7 +167,10 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
     # THEN assert that the project type is correct
     assert order_form_parser.project_type == OrderType.MIP_DNA
 
-def test_parse_mip_orderform_no_delivery(mip_orderform_no_delivery: str, nr_samples_mip_orderform: int):
+
+def test_parse_mip_orderform_no_delivery(
+    mip_orderform_no_delivery: str, nr_samples_mip_orderform: int
+):
     """Test to parse a mip orderform in xlsx format"""
     # GIVEN a orderform in excel format
     assert is_excel(Path(mip_orderform_no_delivery))

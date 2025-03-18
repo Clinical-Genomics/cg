@@ -55,7 +55,7 @@ class ExcelOrderformParser(OrderformParser):
     @staticmethod
     def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
         """Get the document title for the order form.
-        
+
         Openpyxl use 1 based counting
         """
         for sheet_number, sheet_name in enumerate(workbook.sheetnames):
@@ -178,7 +178,7 @@ class ExcelOrderformParser(OrderformParser):
     def get_data_delivery(self) -> str:
         """Determine the order_data delivery type."""
         return self.parse_data_delivery()
-            
+
     def parse_data_delivery(self) -> str:
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
@@ -229,21 +229,21 @@ class ExcelOrderformParser(OrderformParser):
     def _transform_data_delivery(data_delivery: str) -> str:
         """Transforms the data-delivery parsed in the excel file, to the ones used in cg."""
         try:
-            orderform_to_internal: dict = {  
-            "analysis": DataDelivery.ANALYSIS_FILES,
-            "analysis + scout": DataDelivery.ANALYSIS_SCOUT,
-            "bam": DataDelivery.BAM,
-            "fastq": DataDelivery.FASTQ,
-            "fastq + analysis": DataDelivery.FASTQ_ANALYSIS,
-            "fastq + analysis + scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
-            "fastq + Scout": DataDelivery.FASTQ_SCOUT,
-            "fastq qc": DataDelivery.FASTQ_QC,
-            "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
-            "no delivery": DataDelivery.NO_DELIVERY,
-            "scout": DataDelivery.SCOUT,
-            "nipt viewer": DataDelivery.NIPT_VIEWER, # legacy option; keeping it for backward compatibility
-            "statina": DataDelivery.STATINA,
-            "fastq-analysis": DataDelivery.FASTQ_ANALYSIS   # Sars Cov10 orderform does not have the same options as others
+            orderform_to_internal: dict = {
+                "analysis": DataDelivery.ANALYSIS_FILES,
+                "analysis + scout": DataDelivery.ANALYSIS_SCOUT,
+                "bam": DataDelivery.BAM,
+                "fastq": DataDelivery.FASTQ,
+                "fastq + analysis": DataDelivery.FASTQ_ANALYSIS,
+                "fastq + analysis + scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
+                "fastq + Scout": DataDelivery.FASTQ_SCOUT,
+                "fastq qc": DataDelivery.FASTQ_QC,
+                "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
+                "no delivery": DataDelivery.NO_DELIVERY,
+                "scout": DataDelivery.SCOUT,
+                "nipt viewer": DataDelivery.NIPT_VIEWER,  # legacy option; keeping it for backward compatibility
+                "statina": DataDelivery.STATINA,
+                "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
             }
             return orderform_to_internal[data_delivery]
         except KeyError as error:
