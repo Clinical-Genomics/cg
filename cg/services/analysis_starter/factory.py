@@ -82,7 +82,7 @@ class AnalysisStarterFactory:
             platform=pipeline_config.platform,
             resources=pipeline_config.resources,
             store=self.store,
-            workflow_config_path=pipeline_config.workflow_config_path,
+            workflow_config_path=pipeline_config.config,
         )
 
     def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
