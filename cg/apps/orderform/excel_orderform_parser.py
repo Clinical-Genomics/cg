@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 
-from h11 import Data
 import openpyxl
 from openpyxl.cell.cell import Cell
 from openpyxl.workbook import Workbook
