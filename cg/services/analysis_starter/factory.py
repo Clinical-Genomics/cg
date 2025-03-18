@@ -4,6 +4,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.archive.archive import SpringArchiveAPI
+from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.abstract_service import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -127,8 +128,13 @@ class AnalysisStarterFactory:
                 housekeeper_api=self.housekeeper_api,
                 data_flow_config=self.cg_config.data_flow,
             )
+            compress_api = CompressAPI(
+                hk_api=self.housekeeper_api,
+                crunchy_api=self.cg_config.crunchy_api,
+                demux_root=self.cg_config.run_instruments.illumina.demultiplexed_runs_dir,
+            )
             return FastqFetcher(
-                compress_api=self.cg_config.meta_apis["compress_api"],
+                compress_api=compress_api,
                 housekeeper_api=self.housekeeper_api,
                 spring_archive_api=spring_archive_api,
                 status_db=self.store,
