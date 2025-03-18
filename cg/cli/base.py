@@ -4,8 +4,8 @@ import logging
 import sys
 from pathlib import Path
 
-import rich_click as click
 import coloredlogs
+import rich_click as click
 from sqlalchemy.orm import scoped_session
 
 import cg
@@ -32,6 +32,8 @@ from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 from cg.store.database import (
     create_all_tables,
     drop_all_tables,
@@ -132,6 +134,16 @@ def search(query):
             click.echo(f"  {cmd}")
     else:
         click.echo("No matching commands found.")
+
+
+@base.command("start")
+@click.pass_obj
+@click.argument("case_id")
+def start(context: CGConfig, case_id: str):
+    """Start the analysis for the given case."""
+    starter_factory = AnalysisStarterFactory(context)
+    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter(case_id)
+    analysis_starter.start(case_id)
 
 
 base.add_command(add_cmd)
