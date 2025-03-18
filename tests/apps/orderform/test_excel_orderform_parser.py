@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.constants.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.orderform_schema import Orderform
@@ -188,6 +189,9 @@ def test_parse_mip_orderform_no_delivery(
     # THEN assert the number of samples parsed are correct
     assert len(order_form_parser.samples) == nr_samples_mip_orderform
     assert order_form_parser.samples[0].panels == ["Inherited cancer"]
+    assert order_form_parser.samples[1].panels == ["AID", "Inherited cancer"]
+    assert order_form_parser.delivery_type == DataDelivery.NO_DELIVERY
+
     # THEN assert that the project type is correct
     assert order_form_parser.project_type == OrderType.MIP_DNA
 

@@ -175,10 +175,7 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data delivery type."""
-        return self.parse_data_delivery()
-
-    def parse_data_delivery(self) -> str:
+        "Get the data delivery type."
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
@@ -240,7 +237,6 @@ class ExcelOrderformParser(OrderformParser):
                 "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
                 "no delivery": DataDelivery.NO_DELIVERY,
                 "scout": DataDelivery.SCOUT,
-                "nipt viewer": DataDelivery.NIPT_VIEWER,  # legacy option; keeping it for backward compatibility
                 "statina": DataDelivery.STATINA,
                 "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
             }
