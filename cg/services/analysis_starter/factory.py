@@ -78,7 +78,7 @@ class AnalysisStarterFactory:
     def _get_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
         pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
         return NextflowConfigFileCreator(
-            account=pipeline_config.account,
+            account=pipeline_config.slurm.account,
             platform=pipeline_config.platform,
             resources=pipeline_config.resources,
             store=self.store,
