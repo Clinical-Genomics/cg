@@ -175,20 +175,10 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data delivery type"""
-
-        data_delivery: str = self.parse_data_delivery()
-
-        try:
-            return DataDelivery(data_delivery)
-        except ValueError as error:
-            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
-
-    def parse_data_delivery(self) -> str:
+        "Get the data delivery type."
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
-
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
@@ -203,7 +193,7 @@ class ExcelOrderformParser(OrderformParser):
         return customers.pop()
 
     def parse_orderform(self, excel_path: str) -> None:
-        """Parse out information from an order form"""
+        """Parse out information from an order form."""
 
         LOG.info(f"Open excel workbook from file {excel_path}")
         workbook: Workbook = openpyxl.load_workbook(
@@ -233,5 +223,23 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
-        """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
-        return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg."""
+        try:
+            orderform_to_internal: dict = {
+                "analysis": DataDelivery.ANALYSIS_FILES,
+                "analysis + scout": DataDelivery.ANALYSIS_SCOUT,
+                "bam": DataDelivery.BAM,
+                "fastq": DataDelivery.FASTQ,
+                "fastq + analysis": DataDelivery.FASTQ_ANALYSIS,
+                "fastq + analysis + scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
+                "fastq + Scout": DataDelivery.FASTQ_SCOUT,
+                "fastq qc": DataDelivery.FASTQ_QC,
+                "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
+                "no delivery": DataDelivery.NO_DELIVERY,
+                "scout": DataDelivery.SCOUT,
+                "statina": DataDelivery.STATINA,
+                "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
+            }
+            return orderform_to_internal[data_delivery]
+        except KeyError as error:
+            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
