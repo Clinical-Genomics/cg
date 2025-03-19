@@ -545,7 +545,7 @@
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_regions/SAMPLEID_rhocall_filter_cadd_vep_upd_regions_1.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_chromograph_regions/SAMPLEID_upd_regions_1.png
   step: chromograph_upd
   tag: regions
 - format: png
@@ -800,7 +800,7 @@
   tag: qc-metrics
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/nf_core_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nf_core_raredisease_software_mqc_versions.yml
   step: software-versions
   tag: software-versions
 - format: meta
@@ -813,81 +813,6 @@
   path: PATHTOCASE/multiqc/multiqc_report.html
   step: multiqc
   tag: multiqc-html
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_cov_dist.json
-  step: multiqc
-  tag: multiqc-mosdepth-covdist
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_cumcov_dist.json
-  step: multiqc
-  tag: multiqc-mosdepth-cumcov
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_perchrom.json
-  step: multiqc
-  tag: multiqc-mosdepth-perchrom
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
-  step: multiqc
-  tag: multiqc-general-stats
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_peddy.json
-  step: multiqc
-  tag: multiqc-peddy
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_AlignmentSummaryMetrics.json
-  step: multiqc
-  tag: multiqc-picard-alignment
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_HsMetrics.json
-  step: multiqc
-  tag: multiqc-picard-hs
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_insertSize.json
-  step: multiqc
-  tag: multiqc-picard-insertsize
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_quality_by_cycle.json
-  step: multiqc
-  tag: multiqc-picard-qualitycycle
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_quality_score_distribution.json
-  step: multiqc
-  tag: multiqc-picard-qualitydistr
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_wgsmetrics.json
-  step: multiqc
-  tag: multiqc-picard-wgs
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_qualimap_bamqc_genome_results.json
-  step: multiqc
-  tag: multiqc-picard-bamqc
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_1.json
-  step: multiqc
-  tag: multiqc-picard-histogram1
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_2.json
-  step: multiqc
-  tag: multiqc-picard-histogram2
-- format: meta
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_3.json
-  step: multiqc
-  tag: multiqc-picard-histogram3
 - format: csv
   id: CASEID
   path: PATHTOCASE/CASEID_samplesheet.csv
