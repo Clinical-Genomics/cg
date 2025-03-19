@@ -146,6 +146,16 @@ def start(context: CGConfig, case_id: str):
     analysis_starter.start(case_id)
 
 
+@base.command("run")
+@click.pass_obj
+@click.argument("case_id")
+def run(context: CGConfig, case_id: str):
+    """Start the analysis for the given case."""
+    starter_factory = AnalysisStarterFactory(context)
+    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter(case_id)
+    analysis_starter.run(case_id)
+
+
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)
