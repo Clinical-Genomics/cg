@@ -42,7 +42,7 @@ class TicketHandler:
         tags: list[str] = get_ticket_tags(order=order, order_type=order_type)
         status: int = get_ticket_status(order=order)
 
-        order_priority: Priority = self.__get_max_case_priority(order=order)
+        order_priority: Priority = self._get_max_case_priority(order=order)
         deadline_date: date = get_due_by_date(priority=order_priority)
 
         with TemporaryDirectory() as temp_dir:
@@ -224,7 +224,7 @@ class TicketHandler:
                         )
         return message
 
-    def __get_max_case_priority(self, order: Order) -> Priority:
+    def _get_max_case_priority(self, order: Order) -> Priority:
         """Get max case priority for a given order."""
         priority_list: list[Priority] = []
 
