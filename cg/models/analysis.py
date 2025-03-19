@@ -17,9 +17,9 @@ class NextflowAnalysis(AnalysisModel):
     """Nextflow's analysis results model."""
 
     sample_metrics: (
-        dict[str, NalloQCMetrics]
-        | dict[str, RarediseaseQCMetrics]
+        dict[str, RarediseaseQCMetrics]
         | dict[str, RnafusionQCMetrics]
         | dict[str, TaxprofilerQCMetrics]
         | dict[str, TomteQCMetrics]
+        | dict[str, NalloQCMetrics]
     )
