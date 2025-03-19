@@ -39,7 +39,7 @@ def expected_workflow_launch_request(
     launch = LaunchRequest(
         computeEnvId="normal-id",
         configProfiles=raredisease_case_config.config_profiles,
-        configText=f"includeConfig {raredisease_case_config.nextflow_config_file}",
+        configText=f"includeConfig '{raredisease_case_config.nextflow_config_file}'",
         paramsText=parameters_as_string,
         pipeline=raredisease_case_config.pipeline_repository,
         preRunScript=raredisease_case_config.pre_run_script,
