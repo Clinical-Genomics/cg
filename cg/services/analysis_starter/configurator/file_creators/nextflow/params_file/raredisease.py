@@ -6,13 +6,13 @@ from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisType
 from cg.exc import CgDataError
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.services.analysis_starter.configurator.file_creators.params_file.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.params_file.utils import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseParameters,
 )
 from cg.store.models import BedVersion, Case, Sample

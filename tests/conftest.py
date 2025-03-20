@@ -57,7 +57,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseParameters,
     RarediseaseSampleSheetHeaders,
 )

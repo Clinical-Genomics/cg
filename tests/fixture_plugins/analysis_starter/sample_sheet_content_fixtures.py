@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseSampleSheetHeaders,
 )
 
