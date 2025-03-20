@@ -8,8 +8,14 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+    TaxprofilerQCMetrics,
+)
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
 
@@ -92,3 +98,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> str:
         """Return the reference genome build version of a Taxprofiler analysis."""
         return GenomeVersion.T2T_CHM13.value
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        qc_metrics_model = TaxprofilerQCMetrics
+        return super().parse_analysis(
+            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
+        )
