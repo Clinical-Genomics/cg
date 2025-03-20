@@ -20,7 +20,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.priority import SlurmQos, TrailblazerPriority
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisStatus, AnalysisType
@@ -137,7 +137,7 @@ class AnalysisAPI(MetaAPI):
     def get_trailblazer_priority(self, case_id: str) -> int:
         """Get the priority for the case in Trailblazer."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        priority: int = case.priority
+        priority: Priority = case.priority
         return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
