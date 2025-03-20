@@ -38,7 +38,6 @@ from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
-    RarediseaseQCMetrics,
 )
 from cg.store.models import CaseSample, Sample
 
