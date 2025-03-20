@@ -5,12 +5,14 @@ from pydantic import BaseModel, field_validator
 
 from cg.exc import NfSampleSheetError
 from cg.models.nf_analysis import WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
 
-class NalloQCMetrics(BaseModel):
-    """Nallo QC metrics"""
+class NalloQCMetrics(QCMetrics):
+    """Nallo QC metrics."""
 
-    median_coverage: float | None
+    avg_sequence_length: float | None
+    percent_duplicates: float | None
 
 
 class NalloSampleSheetEntry(BaseModel):

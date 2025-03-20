@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
+from cg.models.nallo.nallo import NalloQCMetrics
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.models.taxprofiler.taxprofiler import TaxprofilerQCMetrics
@@ -20,4 +21,5 @@ class NextflowAnalysis(AnalysisModel):
         | dict[str, RnafusionQCMetrics]
         | dict[str, TaxprofilerQCMetrics]
         | dict[str, TomteQCMetrics]
-    ) = Field(union_mode="left_to_right")
+        | dict[str, NalloQCMetrics]
+    )
