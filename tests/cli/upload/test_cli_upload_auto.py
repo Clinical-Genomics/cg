@@ -2,8 +2,8 @@
 
 import datetime
 import logging
-import pytest
 
+import pytest
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload_all_completed_analyses
@@ -16,6 +16,7 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.MICROSALT,
     Workflow.MIP_DNA,
     Workflow.MIP_RNA,
+    Workflow.NALLO,
     Workflow.RAREDISEASE,
     Workflow.RNAFUSION,
     Workflow.TAXPROFILER,

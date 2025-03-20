@@ -82,6 +82,11 @@ class ScoutMipIndividual(ScoutIndividual):
     mitodel_file: str | None = None
 
 
+class ScoutNalloIndividual(ScoutIndividual):
+    d4_file: str | None = None
+    paraphase_alignment_path: str | None = None
+
+
 class ScoutRarediseaseIndividual(ScoutIndividual):
     mt_bam: str | None = None
     chromograph_images: ChromographImages = ChromographImages()
@@ -161,6 +166,18 @@ class MipLoadConfig(ScoutLoadConfig):
     vcf_str: str | None = None
     vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
     vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+
+
+class NalloLoadConfig(ScoutLoadConfig):
+    madeline: str | None = None
+    samples: list[ScoutNalloIndividual] = []
+    somalier_samples: str | None = None
+    somalier_pairs: str | None = None
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_str: str | None = None
 
 
 class RarediseaseLoadConfig(ScoutLoadConfig):
