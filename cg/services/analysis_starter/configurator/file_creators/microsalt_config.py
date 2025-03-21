@@ -20,13 +20,13 @@ class MicrosaltConfigFileCreator:
         self.store = store
 
     def create(self, case_id: str):
-        content: list[dict[str, str]] = self._get_content(case_id)
-        config_case_path: Path = self.get_config_path(case_id)
+        content: list[dict] = self._get_content(case_id)
+        config_case_path: Path = self._get_config_path(case_id)
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.JSON, file_path=config_case_path
         )
 
-    def _get_content(self, case_id: str) -> list[dict[str, str]]:
+    def _get_content(self, case_id: str) -> list[dict]:
         case: Case = self.store.get_case_by_internal_id(case_id)
 
         return [self._get_content_for_sample(sample) for sample in case.samples]
@@ -45,7 +45,7 @@ class MicrosaltConfigFileCreator:
             "Customer_ID_project": sample.original_ticket,
             "CG_ID_sample": sample.internal_id,
             "Customer_ID_sample": sample.name,
-            "organism": self.get_organism(sample),
+            "organism": self._get_organism(sample),
             "priority": priority,
             "reference": sample.reference_genome,
             "Customer_ID": sample.customer.internal_id,
@@ -58,7 +58,7 @@ class MicrosaltConfigFileCreator:
             "sequencing_qc_passed": passes_sequencing_qc,
         }
 
-    def get_organism(self, sample: Sample) -> str:
+    def _get_organism(self, sample: Sample) -> str:
         """Organism
         - Fallback based on reference, ‘Other species’ and ‘Comment’.
         Default to "Unset"."""
@@ -67,7 +67,7 @@ class MicrosaltConfigFileCreator:
             raise CgDataError("Organism missing on Sample")
 
         organism: str = sample.organism.internal_id.strip()
-        comment: str = self.get_lims_comment(sample_id=sample.internal_id)
+        comment: str = self._get_lims_comment(sample.internal_id)
 
         if "gonorrhoeae" in organism:
             organism = "Neisseria spp."
@@ -86,10 +86,10 @@ class MicrosaltConfigFileCreator:
 
         return organism
 
-    def get_lims_comment(self, sample_id: str) -> str:
+    def _get_lims_comment(self, sample_id: str) -> str:
         """Returns the comment associated with a sample stored in lims"""
         comment: str = self.lims_api.get_sample_comment(sample_id) or ""
         return comment if re.match(r"\w{4}\d{2,3}", comment) else ""
 
-    def get_config_path(self, case_id: str) -> Path:
+    def _get_config_path(self, case_id: str) -> Path:
         return Path(self.queries_path, case_id).with_suffix(".json")

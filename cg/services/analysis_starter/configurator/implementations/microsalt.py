@@ -26,7 +26,7 @@ class MicrosaltConfigurator(Configurator):
         return self.get_config(case_id)
 
     def get_config(self, case_id: str) -> MicrosaltCaseConfig:
-        config_file_path: Path = self.config_file_creator.get_config_path(case_id)
+        config_file_path: Path = self.config_file_creator._get_config_path(case_id)
         return MicrosaltCaseConfig(
             case_id=case_id, config_file_path=config_file_path, workflow=Workflow.MICROSALT
         )
