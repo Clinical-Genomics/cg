@@ -33,7 +33,7 @@ class SeqeraPlatformSubmitter(Submitter):
         launch_request = LaunchRequest(
             computeEnvId=self.compute_environment_ids[case_config.case_priority],
             configProfiles=case_config.config_profiles,
-            configText=f"includeConfig {case_config.nextflow_config_file}",
+            configText=f"includeConfig '{case_config.nextflow_config_file}'",
             paramsText=parameters_as_string,
             pipeline=case_config.pipeline_repository,
             preRunScript=case_config.pre_run_script,

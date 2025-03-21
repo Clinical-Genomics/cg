@@ -25,10 +25,10 @@ LOG = logging.getLogger(__name__)
 
 class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
 
-    def __init__(self, store: Store, housekeeper_api: HousekeeperAPI, lims: LimsAPI):
-        self.store = store
+    def __init__(self, housekeeper_api: HousekeeperAPI, lims: LimsAPI, store: Store):
         self.housekeeper_api = housekeeper_api
         self.lims = lims
+        self.store = store
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
