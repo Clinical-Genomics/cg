@@ -1,8 +1,7 @@
 from pathlib import Path
 
 from cg.constants import FileExtensions
-from cg.io.json import write_json
-from cg.io.txt import concat_txt
+from cg.io.txt import concat_txt, write_txt
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -10,13 +9,13 @@ from cg.store.store import Store
 class NextflowConfigFileCreator:
 
     def __init__(
-        self, store: Store, platform: str, workflow_config_path: str, resources: str, account: str
+        self, account: str, platform: str, resources: str, store: Store, workflow_config_path: str
     ):
-        self.store = store
-        self.platform = platform
-        self.workflow_config_path = workflow_config_path
-        self.resources = resources
         self.account = account
+        self.platform = platform
+        self.resources = resources
+        self.store = store
+        self.workflow_config_path = workflow_config_path
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
@@ -27,7 +26,7 @@ class NextflowConfigFileCreator:
         """Create the Nextflow config file for a case."""
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: str = self._get_content(case_id)
-        write_json(file_path=file_path, content=content)
+        write_txt(file_path=file_path, content=content)
 
     def _get_content(self, case_id: str) -> str:
         """Get the content of the Nextflow config file."""

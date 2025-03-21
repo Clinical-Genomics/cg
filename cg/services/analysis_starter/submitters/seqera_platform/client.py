@@ -1,9 +1,13 @@
+import logging
+
 import requests
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
+
+LOG = logging.getLogger(__name__)
 
 
 class SeqeraPlatformClient:
@@ -19,6 +23,9 @@ class SeqeraPlatformClient:
         """Launches a case from the request and returns the workflow ID."""
         url = f"{self.base_url}/workflow/launch"
         params: dict = {"workspaceId": self.workspace_id}
+        LOG.debug(
+            f"Sending request body {request.model_dump()} \n Headers: {self.auth_headers} \n Params: {params}"
+        )
         response: requests.Response = requests.post(
             url=url,
             headers=self.auth_headers,

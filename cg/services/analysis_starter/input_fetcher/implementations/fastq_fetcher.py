@@ -21,10 +21,10 @@ class FastqFetcher(InputFetcher):
 
     def __init__(
         self,
-        status_db: Store,
-        housekeeper_api: HousekeeperAPI,
         compress_api: CompressAPI,
+        housekeeper_api: HousekeeperAPI,
         spring_archive_api: SpringArchiveAPI,
+        status_db: Store,
     ):
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
