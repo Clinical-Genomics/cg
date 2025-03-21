@@ -21,7 +21,7 @@ class MicrosaltConfigFileCreator:
 
     def create(self, case_id: str):
         content: list[dict] = self._get_content(case_id)
-        config_case_path: Path = self._get_config_path(case_id)
+        config_case_path: Path = self.get_config_path(case_id)
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.JSON, file_path=config_case_path
         )
@@ -91,5 +91,5 @@ class MicrosaltConfigFileCreator:
         comment: str = self.lims_api.get_sample_comment(sample_id) or ""
         return comment if re.match(r"\w{4}\d{2,3}", comment) else ""
 
-    def _get_config_path(self, case_id: str) -> Path:
+    def get_config_path(self, case_id: str) -> Path:
         return Path(self.queries_path, case_id).with_suffix(".json")
