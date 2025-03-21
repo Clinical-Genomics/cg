@@ -76,12 +76,11 @@ class MicrosaltConfigFileCreator:
 
         if organism == "VRE":
             reference = sample.organism.reference_genome
-            has_comment = bool(comment)
             if reference == "NC_017960.1":
                 organism = "Enterococcus faecium"
             elif reference == "NC_004668.1":
                 organism = "Enterococcus faecalis"
-            elif has_comment:
+            elif comment:
                 organism = comment
 
         return organism
