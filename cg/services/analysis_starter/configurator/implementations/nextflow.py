@@ -4,7 +4,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CommonAppConfig
-from cg.services.analysis_starter.configurator.abstract_service import Configurator
+from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,

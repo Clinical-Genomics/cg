@@ -6,7 +6,7 @@ from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
-from cg.services.analysis_starter.configurator.abstract_service import Configurator
+from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (

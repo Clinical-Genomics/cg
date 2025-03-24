@@ -75,10 +75,10 @@ class MicrosaltConfigFileCreator:
             organism = "Propionibacterium acnes"
 
         if organism == "VRE":
-            reference = sample.organism.reference_genome
-            if reference == "NC_017960.1":
+            reference_genome = sample.organism.reference_genome
+            if reference_genome == "NC_017960.1":
                 organism = "Enterococcus faecium"
-            elif reference == "NC_004668.1":
+            elif reference_genome == "NC_004668.1":
                 organism = "Enterococcus faecalis"
             elif comment:
                 organism = comment

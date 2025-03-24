@@ -14,9 +14,12 @@ import re
 import shutil
 from pathlib import Path
 
-from cg.constants import FileExtensions
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import FileExtensions, SequencingFileTag
 from cg.io.gzip import read_gzip_first_line
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
+from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -34,6 +37,72 @@ def _is_undetermined_in_path(file_path: Path) -> bool:
 
 class FastqHandler:
     """Handles fastq file linking"""
+
+    def __init__(self, housekeeper_api: HousekeeperAPI, root_dir: Path, status_db: Store):
+        self.housekeeper_api = housekeeper_api
+        self.root_dir = root_dir
+        self.status_db = status_db
+
+    def link_fastq_files(self, case_id: str) -> None:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for sample in case.samples:
+            fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
+            self.link_fastq_files_for_sample(sample=sample, fastq_dir=fastq_dir)
+
+    def link_fastq_files_for_sample(
+        self, sample: Sample, fastq_dir: Path, concatenate: bool = False, meta: str | None = None
+    ) -> None:
+        """
+        Link FASTQ files for a sample to the work directory.
+        If workflow input requires concatenated fastq, files can also be concatenated
+        """
+        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
+        fastq_files_meta: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
+            fastq_files_meta, key=lambda k: k.path
+        )
+        fastq_dir.mkdir(parents=True, exist_ok=True)
+
+        for fastq_file in sorted_fastq_files_meta:
+            fastq_file_name: str = self.create_fastq_name(
+                lane=fastq_file.lane,
+                flow_cell=fastq_file.flow_cell_id,
+                sample=sample.internal_id,
+                read_direction=fastq_file.read_direction,
+                undetermined=fastq_file.undetermined,
+                meta=meta,
+            )
+            destination_path = Path(fastq_dir, fastq_file_name)
+            linked_reads_paths[fastq_file.read_direction].append(destination_path)
+            concatenated_paths[fastq_file.read_direction] = (
+                f"{fastq_dir}/{self.get_concatenated_name(fastq_file_name)}"
+            )
+
+            if not destination_path.exists():
+                LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_file.path)
+            else:
+                LOG.warning(f"Destination path already exists: {destination_path}")
+
+        if not concatenate:
+            return
+
+        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
+        for read, value in linked_reads_paths.items():
+            self.concatenate(linked_reads_paths[read], concatenated_paths[read])
+            self.remove_files(value)
+
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
+        return [
+            self.parse_file_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+            )
+        ]
+
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
+        raise NotImplementedError("Not implemented on parent class")
 
     @staticmethod
     def concatenate(files: list, concat_file: str):
@@ -195,6 +264,13 @@ class MicrosaltFastqHandler(FastqHandler):
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         return f"{sample}_{flow_cell}_L{lane}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    def get_case_fastq_path(self, case_id: str) -> Path:
+        """Get fastq paths for a case."""
+        return Path(self.root_dir, "fastq", case_id)
+
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
+        return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
 
 class MutantFastqHandler(FastqHandler):
