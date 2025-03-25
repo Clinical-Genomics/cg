@@ -62,14 +62,12 @@ class IlluminaCleanRunsService:
             self.set_sample_sheet_path_from_housekeeper()
             if self.can_run_directory_be_deleted():
                 if self.dry_run:
-                    LOG.debug(
-                        f"Dry run: Would have removed: {self.sequencing_run_dir_data.get_sequencing_runs_dir()}"
-                    )
+                    LOG.debug(f"Dry run: Would have removed: {self.sequencing_run_dir_data.path}")
                     return
                 remove_directory_and_contents(self.sequencing_run_dir_data.path)
         except Exception as error:
             raise IlluminaCleanRunError(
-                f"Sequencing run with path {self.sequencing_run_dir_data.get_sequencing_runs_dir()} not removed: {repr(error)}"
+                f"Sequencing run with path {self.sequencing_run_dir_data.path} not removed: {repr(error)}"
             )
 
     def set_sample_sheet_path_from_housekeeper(self):
