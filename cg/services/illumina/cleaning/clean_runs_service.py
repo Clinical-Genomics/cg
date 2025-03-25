@@ -9,15 +9,12 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import (
-    IlluminaCleanRunError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
+    IlluminaCleanRunError,
 )
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.store.models import (
-    IlluminaSequencingRun,
-    IlluminaSampleSequencingMetrics,
-)
+from cg.store.models import IlluminaSampleSequencingMetrics, IlluminaSequencingRun
 from cg.store.store import Store
 from cg.utils.files import remove_directory_and_contents
 from cg.utils.time import is_directory_older_than_days_old
@@ -69,9 +66,7 @@ class IlluminaCleanRunsService:
                         f"Dry run: Would have removed: {self.sequencing_run_dir_data.get_sequencing_runs_dir()}"
                     )
                     return
-                remove_directory_and_contents(
-                    self.sequencing_run_dir_data.get_sequencing_runs_dir()
-                )
+                remove_directory_and_contents(self.sequencing_run_dir_data.path)
         except Exception as error:
             raise IlluminaCleanRunError(
                 f"Sequencing run with path {self.sequencing_run_dir_data.get_sequencing_runs_dir()} not removed: {repr(error)}"
