@@ -49,9 +49,7 @@ class FastqHandler:
             fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
             self.link_fastq_files_for_sample(sample=sample, fastq_dir=fastq_dir)
 
-    def link_fastq_files_for_sample(
-        self, sample: Sample, fastq_dir: Path, concatenate: bool = False, meta: str | None = None
-    ) -> None:
+    def link_fastq_files_for_sample(self, sample: Sample, fastq_dir: Path) -> None:
         """
         Link FASTQ files for a sample to the work directory.
         If workflow input requires concatenated fastq, files can also be concatenated
@@ -71,7 +69,6 @@ class FastqHandler:
                 sample=sample.internal_id,
                 read_direction=fastq_file.read_direction,
                 undetermined=fastq_file.undetermined,
-                meta=meta,
             )
             destination_path = Path(fastq_dir, fastq_file_name)
             linked_reads_paths[fastq_file.read_direction].append(destination_path)
@@ -84,14 +81,6 @@ class FastqHandler:
                 destination_path.symlink_to(fastq_file.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
-
-        if not concatenate:
-            return
-
-        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
-        for read, value in linked_reads_paths.items():
-            self.concatenate(linked_reads_paths[read], concatenated_paths[read])
-            self.remove_files(value)
 
     def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
@@ -270,7 +259,7 @@ class MicrosaltFastqHandler(FastqHandler):
         return Path(self.root_dir, "fastq", case_id)
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
-        return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
+        return Path(self.get_case_fastq_path(case.internal_id), sample.internal_id)
 
 
 class MutantFastqHandler(FastqHandler):
