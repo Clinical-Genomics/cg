@@ -56,13 +56,11 @@ class FastqHandler:
         """
         linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
         concatenated_paths: dict[int, str] = {1: "", 2: ""}
-        fastq_files_meta: list[FastqFileMeta] = self.gather_file_data_for_sample(sample=sample)
-        sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
-            fastq_files_meta, key=lambda k: k.path
-        )
+        fastq_files: list[FastqFileMeta] = self.gather_file_data_for_sample(sample=sample)
+        sorted_fastq_files: list[FastqFileMeta] = sorted(fastq_files, key=lambda k: k.path)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        for fastq_file in sorted_fastq_files_meta:
+        for fastq_file in sorted_fastq_files:
             fastq_file_name: str = self.create_fastq_name(
                 lane=fastq_file.lane,
                 flow_cell=fastq_file.flow_cell_id,
