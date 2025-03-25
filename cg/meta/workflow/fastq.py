@@ -56,7 +56,7 @@ class FastqHandler:
         """
         linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
         concatenated_paths: dict[int, str] = {1: "", 2: ""}
-        fastq_files: list[FastqFileMeta] = self.gather_file_data_for_sample(sample=sample)
+        fastq_files: list[FastqFileMeta] = self.gather_fastq_files_for_sample(sample=sample)
         sorted_fastq_files: list[FastqFileMeta] = sorted(fastq_files, key=lambda k: k.path)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
@@ -80,7 +80,7 @@ class FastqHandler:
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
-    def gather_file_data_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
+    def gather_fastq_files_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
             self.parse_file_data(hk_file.full_path)
             for hk_file in self.housekeeper_api.files(
