@@ -37,8 +37,8 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             analysis_obj=analysis_obj,
             lims_api=lims_api,
         )
-        self.case_tags: CaseTags = CaseTags(**NALLO_CASE_TAGS)
-        self.sample_tags: SampleTags = SampleTags(**NALLO_SAMPLE_TAGS)
+        self.case_tags = CaseTags(**NALLO_CASE_TAGS)
+        self.sample_tags = SampleTags(**NALLO_SAMPLE_TAGS)
         self.nallo_analysis_api: NalloAnalysisAPI = nallo_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
