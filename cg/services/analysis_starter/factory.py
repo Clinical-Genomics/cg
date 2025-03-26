@@ -6,26 +6,28 @@ from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
-from cg.services.analysis_starter.configurator.abstract_service import Configurator
+from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
-from cg.services.analysis_starter.configurator.file_creators.config_file import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
-from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
+    GenePanelFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.params_file.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator

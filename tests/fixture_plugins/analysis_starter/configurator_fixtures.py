@@ -2,13 +2,13 @@ import pytest
 
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
-from cg.services.analysis_starter.configurator.file_creators.config_file import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
