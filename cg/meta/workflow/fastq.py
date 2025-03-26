@@ -52,7 +52,6 @@ class FastqHandler:
     def link_fastq_files_for_sample(self, sample: Sample, fastq_dir: Path) -> None:
         """
         Link FASTQ files for a sample to the work directory.
-        If workflow input requires concatenated fastq, files can also be concatenated
         """
         linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
         concatenated_paths: dict[int, str] = {1: "", 2: ""}
