@@ -33,7 +33,6 @@ class MicrosaltConfigFileCreator:
 
     def _get_content(self, case_id: str) -> list[MicrosaltConfigContent]:
         case: Case = self.store.get_case_by_internal_id(case_id)
-
         return [self._get_content_for_sample(sample) for sample in case.samples]
 
     def _get_content_for_sample(self, sample: Sample) -> MicrosaltConfigContent:
