@@ -46,7 +46,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
     def build_load_config(self) -> NalloLoadConfig:
         """Create a NALLO specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for NALLO case")
-        load_config: NalloLoadConfig = NalloLoadConfig(
+        load_config = NalloLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
