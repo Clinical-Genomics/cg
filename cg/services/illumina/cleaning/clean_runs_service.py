@@ -95,7 +95,7 @@ class IlluminaCleanRunsService:
     def is_directory_older_than_21_days(self) -> bool:
         """Check if a given directory is older than 21 days."""
         return is_directory_older_than_days_old(
-            directory_path=self.sequencing_run_dir_data.get_sequencing_runs_dir(),
+            directory_path=self.sequencing_run_dir_data.path,
             days_old=TWENTY_ONE_DAYS,
         )
 
