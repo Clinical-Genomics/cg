@@ -119,7 +119,7 @@ def test_store_fail(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_store_available_success(
     cli_runner: CliRunner,
@@ -176,7 +176,7 @@ def test_store_available_success(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_store_available_fail(
     cli_runner: CliRunner,
