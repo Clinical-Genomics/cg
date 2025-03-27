@@ -54,7 +54,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
 
     def build_config_sample(
-        self, case_sample: CaseSample, analysis_obj: Analysis, hk_version_obj: Version
+        self, case_sample: CaseSample, hk_version_obj: Version
     ) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutCancerIndividual()
@@ -102,9 +102,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         for db_sample in analysis_obj.case.links:
             load_config.samples.append(
-                self.build_config_sample(
-                    case_sample=db_sample, analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
-                )
+                self.build_config_sample(case_sample=db_sample, hk_version_obj=hk_version_obj)
             )
 
         return load_config

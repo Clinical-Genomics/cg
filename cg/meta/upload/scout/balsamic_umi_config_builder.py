@@ -46,9 +46,7 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
 
         for db_sample in analysis_obj.case.links:
             load_config.samples.append(
-                self.build_config_sample(
-                    case_sample=db_sample, analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
-                )
+                self.build_config_sample(case_sample=db_sample, hk_version_obj=hk_version_obj)
             )
 
         return load_config

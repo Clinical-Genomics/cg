@@ -103,22 +103,21 @@ class ScoutConfigBuilder:
         db_sample: CaseSample
         for db_sample in analysis_obj.case.links:
             load_config.samples.append(
-                self.build_config_sample(
-                    case_sample=db_sample, analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
-                )
+                self.build_config_sample(case_sample=db_sample, hk_version_obj=hk_version_obj)
             )
 
     def build_config_sample(
-        self, case_sample: CaseSample, analysis_obj: Analysis, hk_version_obj: Version
+        self, case_sample: CaseSample, hk_version_obj: Version
     ) -> ScoutIndividual:
         """Build a sample with rnafusion specific information."""
-        if analysis_obj.workflow == Workflow.RAREDISEASE:
+        workflow = case_sample.case.data_analysis
+        if workflow == Workflow.RAREDISEASE:
             config_sample = ScoutRarediseaseIndividual()
-        elif analysis_obj.workflow == Workflow.MIP_DNA:
+        elif workflow == Workflow.MIP_DNA:
             config_sample = ScoutMipIndividual()
-        elif analysis_obj.workflow == Workflow.NALLO:
+        elif workflow == Workflow.NALLO:
             config_sample = ScoutNalloIndividual()
-        elif analysis_obj.workflow == Workflow.RNAFUSION:
+        elif workflow == Workflow.RNAFUSION:
             config_sample = ScoutIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(
