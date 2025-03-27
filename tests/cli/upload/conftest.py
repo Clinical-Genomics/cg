@@ -23,6 +23,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis
 from cg.store.store import Store
+from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.store_helpers import StoreHelpers
@@ -191,7 +192,7 @@ def fastq_context(
 
 
 @pytest.fixture(scope="function")
-def upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+def upload_scout_api(housekeeper_api: MockHousekeeperAPI):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api
