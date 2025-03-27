@@ -422,6 +422,18 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return swegen_file
 
+    def should_soft_filter_normal(
+        self, config_case: dict, verified_panel_bed: str | None
+    ) -> dict[str, bool]:
+        """Sets soft_filter_normal to True for all TGA tumor normal paired analyses."""
+        return {
+            "soft_filter_normal": bool(
+                config_case["tumor_sample_name"]
+                and config_case["normal_sample_name"]
+                and verified_panel_bed
+            )
+        }
+
     def get_verified_config_case_arguments(
         self,
         case_id: str,
@@ -463,6 +475,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
         config_case.update(self.get_verified_samples(case_id=case_id))
+
+        config_case.update(
+            self.should_soft_filter_normal(
+                config_case=config_case, verified_panel_bed=verified_panel_bed
+            )
+        )
+
         config_case.update(self.get_parsed_observation_file_paths(observations))
         if genome_version == GenomeVersion.HG19:
             config_case.update(
@@ -573,6 +592,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--exome": arguments.get("exome"),
                 "--sentieon-install-dir": self.sentieon_licence_path,
                 "--sentieon-license": self.sentieon_licence_server,
+                "--soft-filter-normal": arguments.get("soft_filter_normal"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
