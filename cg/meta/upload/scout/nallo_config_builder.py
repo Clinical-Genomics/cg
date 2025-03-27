@@ -68,7 +68,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         """Include case level files for NALLO case."""
         LOG.info("Including NALLO specific case level files")
         for scout_key in NALLO_CASE_TAGS.keys():
-            self._include_case_file(load_config, scout_key)
+            self._include_case_file(load_config=load_config, scout_key=scout_key)
 
     def _include_case_file(self, load_config: NalloLoadConfig, scout_key: str) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
