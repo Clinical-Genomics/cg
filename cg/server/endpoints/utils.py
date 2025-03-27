@@ -1,26 +1,19 @@
 import logging
 from functools import wraps
 from http import HTTPStatus
-
 import cachecontrol
+from keycloak import KeycloakAuthenticationError, KeycloakError, KeycloakInvalidTokenError
 import requests
 from flask import abort, current_app, g, jsonify, make_response, request
-from google.auth import exceptions
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token
-
-from cg.server.ext import db
+from cg.server.ext import auth_service
+from cg.services.authentication.exc import UserNotFoundError
 from cg.store.models import User
+
 
 LOG = logging.getLogger(__name__)
 
 session = requests.session()
 cached_session = cachecontrol.CacheControl(session)
-
-
-def verify_google_token(token):
-    request = google_requests.Request(session=cached_session)
-    return id_token.verify_oauth2_token(id_token=token, request=request)
 
 
 def is_public(route_function):
@@ -51,20 +44,13 @@ def before_request():
         return abort(
             make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
         )
-
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = verify_google_token(jwt_token)
-    except (exceptions.OAuthError, ValueError) as e:
-        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
-        return abort(
-            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
-        )
-
-    user: User = db.get_user_by_email(user_data["email"])
-    if user is None or not user.order_portal_login:
-        message = f"{user_data['email']} doesn't have access"
-        LOG.error(message)
-        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
-
+        user: User = auth_service.verify_token(jwt_token)
+    except UserNotFoundError as error:
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.FORBIDDEN))
+    except (KeycloakError, KeycloakAuthenticationError, KeycloakInvalidTokenError) as error:
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.UNAUTHORIZED))
+    except Exception as error:
+        return abort(make_response(jsonify(message=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR))
     g.current_user = user

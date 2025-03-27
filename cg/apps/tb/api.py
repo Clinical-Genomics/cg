@@ -3,13 +3,10 @@
 import datetime
 import logging
 from typing import Any
-
-from google.auth.transport.requests import Request
-from google.oauth2 import service_account
-
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
+from cg.clients.authentication import keycloak_client
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
@@ -20,7 +17,8 @@ from cg.exc import (
     TrailblazerAPIHTTPError,
 )
 from cg.io.controller import APIRequest, ReadStream
-
+from cg.services.authentication.models import TokenResponseModel
+from cg.clients.authentication.keycloak_client import KeycloakClient
 
 LOG = logging.getLogger(__name__)
 
@@ -43,19 +41,22 @@ class TrailblazerAPI:
         AnalysisStatus.QC,
     ]
 
-    def __init__(self, config: dict):
-        self.service_account = config["trailblazer"]["service_account"]
-        self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
+    def __init__(self, config: dict, keycloak_client: KeycloakClient):
+        self.keycloak_client: KeycloakClient = keycloak_client
+        self.keycloak_backend_user = config["trailblazer"]["keycloak_backend_user"]
+        self.keycloak_backend_user_password = config["trailblazer"][
+            "keycloak_backend_user_password"
+        ]
         self.host = config["trailblazer"]["host"]
 
     @property
     def auth_header(self) -> dict:
-        credentials = service_account.IDTokenCredentials.from_service_account_file(
-            filename=self.service_account_auth_file,
-            target_audience="trailblazer",
+        token = TokenResponseModel(
+            **self.keycloak_client.get_token_by_user_password(
+                user_name=self.keycloak_backend_user, password=self.keycloak_backend_user_password
+            )
         )
-        credentials.refresh(Request())
-        return {"Authorization": f"Bearer {credentials.token}"}
+        return {"Authorization": f"Bearer {token.access_token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
