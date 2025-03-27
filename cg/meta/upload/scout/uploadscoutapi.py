@@ -52,17 +52,19 @@ class UploadScoutAPI:
         self.lims = lims_api
         self.status_db = status_db
 
-    def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
+    def generate_config(self, analysis_obj: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
         LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        LOG.info(f"Found workflow {analysis.workflow}")
-        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
-        return config_builder.build_load_config()
+        LOG.info(f"Found workflow {analysis_obj.workflow}")
+        config_builder = self.get_config_builder(analysis_obj=analysis_obj)
+        return config_builder.build_load_config(
+            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj
+        )
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -607,54 +609,40 @@ class UploadScoutAPI:
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
 
-    def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
+    def get_config_builder(self, analysis_obj) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.NALLO: NalloConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 nallo_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
         }
 
-        return config_builders[analysis.workflow]
+        return config_builders[analysis_obj.workflow]
 
     def _dna_cases_related_to_dna_sample(
         self, dna_sample: Sample, collaborators: set[Customer]

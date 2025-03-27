@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, GenomeVersion
@@ -799,16 +798,12 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 @pytest.fixture
 def mip_config_builder(
-    mip_dna_analysis_hk_version: Version,
-    mip_dna_analysis: Analysis,
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
     """Return a MIP config builder."""
     return MipConfigBuilder(
-        hk_version_obj=mip_dna_analysis_hk_version,
-        analysis_obj=mip_dna_analysis,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
@@ -817,16 +812,12 @@ def mip_config_builder(
 
 @pytest.fixture
 def raredisease_config_builder(
-    raredisease_analysis_hk_version: Version,
-    raredisease_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
     """Return a MIP config builder."""
     return RarediseaseConfigBuilder(
-        hk_version_obj=raredisease_analysis_hk_version,
-        analysis_obj=raredisease_analysis_obj,
         lims_api=lims_api,
         madeline_api=madeline_api,
         raredisease_analysis_api=raredisease_analysis_api,
@@ -835,14 +826,10 @@ def raredisease_config_builder(
 
 @pytest.fixture
 def balsamic_config_builder(
-    balsamic_analysis_hk_version: Version,
-    balsamic_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
 ) -> BalsamicConfigBuilder:
     """Return a Balsamic config builder."""
     return BalsamicConfigBuilder(
-        hk_version_obj=balsamic_analysis_hk_version,
-        analysis_obj=balsamic_analysis_obj,
         lims_api=lims_api,
     )
 

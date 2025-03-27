@@ -19,35 +19,43 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(self, lims_api: LimsAPI):
         super().__init__(
-            hk_version_obj=hk_version_obj,
-            analysis_obj=analysis_obj,
             lims_api=lims_api,
         )
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_UMI_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_UMI_SAMPLE_TAGS)
 
-    def build_load_config(self) -> BalsamicUmiLoadConfig:
+    def build_load_config(
+        self, hk_version_obj: Version, analysis_obj: Analysis
+    ) -> BalsamicUmiLoadConfig:
         LOG.info("Build load config for balsamic case")
         load_config: BalsamicUmiLoadConfig = BalsamicUmiLoadConfig(
             track=UploadTrack.CANCER.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+            delivery_report=self.get_file_from_hk(
+                {HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
+            ),
         )
-        self.add_common_info_to_load_config(load_config)
+        self.add_common_info_to_load_config(load_config=load_config, analysis_obj=analysis_obj)
         load_config.human_genome_build = GenomeBuild.hg19
         load_config.rank_score_threshold = -100
-        self.include_case_files(load_config)
+        self.include_case_files(load_config=load_config, hk_version_obj=hk_version_obj)
 
         LOG.info("Building samples")
         db_sample: CaseSample
 
-        for db_sample in self.analysis_obj.case.links:
-            load_config.samples.append(self.build_config_sample(case_sample=db_sample))
+        for db_sample in analysis_obj.case.links:
+            load_config.samples.append(
+                self.build_config_sample(
+                    case_sample=db_sample, analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
+                )
+            )
 
         return load_config
 
-    def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
+    def include_sample_files(
+        self, config_sample: ScoutCancerIndividual, hk_version_obj: Version
+    ) -> None:
         LOG.info("Including BALSAMIC specific sample level files")
 
     def get_balsamic_analysis_type(self, sample: Sample) -> str:

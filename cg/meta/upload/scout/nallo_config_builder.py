@@ -26,15 +26,11 @@ LOG = logging.getLogger(__name__)
 class NalloConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
-        hk_version_obj: Version,
-        analysis_obj: Analysis,
         nallo_analysis_api: NalloAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
     ):
         super().__init__(
-            hk_version_obj=hk_version_obj,
-            analysis_obj=analysis_obj,
             lims_api=lims_api,
         )
         self.case_tags = CaseTags(**NALLO_CASE_TAGS)
@@ -43,20 +39,25 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
-    def build_load_config(self) -> NalloLoadConfig:
+    def build_load_config(self, hk_version_obj: Version, analysis_obj: Analysis) -> NalloLoadConfig:
         """Create a NALLO specific load config for uploading analysis to Scout."""
         LOG.info("Build load config for NALLO case")
         load_config = NalloLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+            delivery_report=self.get_file_from_hk(
+                {HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
+            ),
         )
-        self.add_common_info_to_load_config(load_config)
+        self.add_common_info_to_load_config(load_config=load_config, analysis_obj=analysis_obj)
         load_config.gene_panels = self.nallo_analysis_api.get_aggregated_panels(
-            customer_id=self.analysis_obj.case.customer.internal_id,
-            default_panels=set(self.analysis_obj.case.panels),
+            customer_id=analysis_obj.case.customer.internal_id,
+            default_panels=set(analysis_obj.case.panels),
         )
-        self.include_case_files(load_config)
-        self.get_sample_information(load_config)
+        self.include_case_files(load_config=load_config, hk_version_obj=hk_version_obj)
+        LOG.info("Building samples")
+        self.get_sample_information(
+            load_config=load_config, analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
+        )
         self.include_pedigree_picture(load_config)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
@@ -64,19 +65,29 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         load_config.sv_rank_model_version = NALLO_RANK_MODEL_VERSION_SV
         return load_config
 
-    def include_case_files(self, load_config: NalloLoadConfig) -> None:
+    def include_case_files(
+        self, load_config: NalloLoadConfig, hk_version_obj: Version = None
+    ) -> None:
         """Include case level files for NALLO case."""
         LOG.info("Including NALLO specific case level files")
         for scout_key in NALLO_CASE_TAGS.keys():
-            self._include_case_file(load_config=load_config, scout_key=scout_key)
+            self._include_case_file(
+                load_config=load_config, scout_key=scout_key, hk_version_obj=hk_version_obj
+            )
 
-    def _include_case_file(self, load_config: NalloLoadConfig, scout_key: str) -> None:
+    def _include_case_file(
+        self, load_config: NalloLoadConfig, scout_key: str, hk_version_obj: Version
+    ) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
-        file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key))
+        file_path = self.get_file_from_hk(
+            getattr(self.case_tags, scout_key), hk_version_obj=hk_version_obj
+        )
         setattr(load_config, scout_key, file_path)
 
-    def include_sample_files(self, config_sample: ScoutNalloIndividual) -> None:
+    def include_sample_files(
+        self, config_sample: ScoutNalloIndividual, hk_version_obj: Version
+    ) -> None:
         """Include sample level files that are optional."""
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = config_sample.sample_id
@@ -84,5 +95,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.d4_file, sample_id=sample_id
         )
         config_sample.paraphase_alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.paraphase_alignment_path, sample_id=sample_id
+            hk_tags=self.sample_tags.paraphase_alignment_path,
+            sample_id=sample_id,
+            hk_version_obj=hk_version_obj,
         )
