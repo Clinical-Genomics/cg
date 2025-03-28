@@ -72,7 +72,9 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         setattr(
             load_config,
             scout_key,
-            self.get_file_from_hk(getattr(self.case_tags, scout_key), hk_version=hk_version),
+            self.get_file_from_hk(
+                hk_tags=getattr(self.case_tags, scout_key), hk_version=hk_version
+            ),
         )
 
     def include_sample_files(
