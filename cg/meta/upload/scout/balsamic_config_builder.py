@@ -24,19 +24,19 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)
 
-    def include_case_files(self, load_config: BalsamicLoadConfig, hk_version_obj: Version) -> None:
+    def include_case_files(self, load_config: BalsamicLoadConfig, hk_version: Version) -> None:
         LOG.info("Including BALSAMIC specific case level files")
         load_config.vcf_cancer = self.get_file_from_hk(
-            hk_tags=self.case_tags.snv_vcf, hk_version_obj=hk_version_obj
+            hk_tags=self.case_tags.snv_vcf, hk_version=hk_version
         )
         load_config.vcf_cancer_sv = self.get_file_from_hk(
-            hk_tags=self.case_tags.sv_vcf, hk_version_obj=hk_version_obj
+            hk_tags=self.case_tags.sv_vcf, hk_version=hk_version
         )
-        self.include_cnv_report(load_config, hk_version_obj=hk_version_obj)
-        self.include_multiqc_report(load_config=load_config, hk_version_obj=hk_version_obj)
+        self.include_cnv_report(load_config, hk_version=hk_version)
+        self.include_multiqc_report(load_config=load_config, hk_version=hk_version)
 
     def include_sample_files(
-        self, config_sample: ScoutCancerIndividual, hk_version_obj: Version
+        self, config_sample: ScoutCancerIndividual, hk_version: Version
     ) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
 
@@ -50,17 +50,17 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure,
             sample_id=sample_id,
-            hk_version_obj=hk_version_obj,
+            hk_version=hk_version,
         )
 
     def build_config_sample(
-        self, case_sample: CaseSample, hk_version_obj: Version
+        self, case_sample: CaseSample, hk_version: Version
     ) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutCancerIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(
-            config_sample=config_sample, case_sample=case_sample, hk_version_obj=hk_version_obj
+            config_sample=config_sample, case_sample=case_sample, hk_version=hk_version
         )
         if BalsamicAnalysisAPI.get_sample_type(sample_obj=case_sample.sample) == SampleType.TUMOR:
             config_sample.phenotype = PhenotypeStatus.AFFECTED.value
@@ -82,27 +82,25 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         return analysis_type
 
-    def build_load_config(
-        self, hk_version_obj: Version, analysis_obj: Analysis
-    ) -> BalsamicLoadConfig:
+    def build_load_config(self, hk_version: Version, analysis: Analysis) -> BalsamicLoadConfig:
         LOG.info("Build load config for balsamic case")
         load_config: BalsamicLoadConfig = BalsamicLoadConfig(
             track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk(
-                {HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
+                hk_tags={HK_DELIVERY_REPORT_TAG}, hk_version=hk_version
             ),
         )
-        self.add_common_info_to_load_config(load_config=load_config, analysis_obj=analysis_obj)
+        self.add_common_info_to_load_config(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg19
         load_config.rank_score_threshold = -100
-        self.include_case_files(load_config=load_config, hk_version_obj=hk_version_obj)
+        self.include_case_files(load_config=load_config, hk_version=hk_version)
 
         LOG.info("Building samples")
         db_sample: CaseSample
 
-        for db_sample in analysis_obj.case.links:
+        for db_sample in analysis.case.links:
             load_config.samples.append(
-                self.build_config_sample(case_sample=db_sample, hk_version_obj=hk_version_obj)
+                self.build_config_sample(case_sample=db_sample, hk_version=hk_version)
             )
 
         return load_config

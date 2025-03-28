@@ -746,54 +746,54 @@ def mip_dna_analysis(
 
 
 @pytest.fixture
-def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_analysis(analysis: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
-    analysis_obj.workflow = Workflow.BALSAMIC
-    for link_object in analysis_obj.case.links:
+    analysis.workflow = Workflow.BALSAMIC
+    for link_object in analysis.case.links:
         link_object.sample.application_version.application.prep_category = (
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC
-    return analysis_obj
+    return analysis
 
 
 @pytest.fixture
-def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_umi_analysis(analysis: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
-    analysis_obj.workflow = Workflow.BALSAMIC_UMI
-    for link_object in analysis_obj.case.links:
+    analysis.workflow = Workflow.BALSAMIC_UMI
+    for link_object in analysis.case.links:
         link_object.sample.application_version.application.prep_category = (
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.BALSAMIC_UMI
 
-    return analysis_obj
+    return analysis
 
 
 @pytest.fixture
-def raredisease_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def raredisease_analysis(analysis: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
-    analysis_obj.workflow = Workflow.RAREDISEASE
-    for link_object in analysis_obj.case.links:
+    analysis.workflow = Workflow.RAREDISEASE
+    for link_object in analysis.case.links:
         link_object.sample.application_version.application.prep_category = (
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         )
         link_object.sample.reference_genome = GenomeVersion.GRCh37
         link_object.case.data_analysis = Workflow.RAREDISEASE
-    return analysis_obj
+    return analysis
 
 
 @pytest.fixture
-def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def rnafusion_analysis(analysis: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
-    analysis_obj.workflow = Workflow.RNAFUSION
-    for link_object in analysis_obj.case.links:
+    analysis.workflow = Workflow.RNAFUSION
+    for link_object in analysis.case.links:
         link_object.sample.application_version.application.prep_category = (
             SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.RNAFUSION
         link_object.case.panels = None
-    return analysis_obj
+    return analysis
 
 
 @pytest.fixture

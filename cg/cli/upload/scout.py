@@ -73,13 +73,13 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
-    if not case_obj.analyses:
+    if not case.analyses:
         LOG.warning(f"Could not find analyses for {case_id}")
         raise click.Abort
 
-    context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case_obj)
+    context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case)
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
 
@@ -87,7 +87,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     LOG.info("Create load config")
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(
-            analysis_obj=case_obj.analyses[0]
+            analysis=case.analyses[0]
         )
     except SyntaxError as error:
         LOG.warning(repr(error))

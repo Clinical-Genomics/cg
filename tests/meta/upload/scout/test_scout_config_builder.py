@@ -70,7 +70,7 @@ def test_raredisease_config_builder(
 
 
 def test_rnafusion_config_builder(
-    rnafusion_analysis_obj: Analysis,
+    rnafusion_analysis: Analysis,
     lims_api: MockLimsAPI,
 ):
     """Test RNAfusion config builder class."""
@@ -95,7 +95,7 @@ def test_include_synopsis(
 
     # WHEN including the synopsis
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # THEN assert that the synopsis was added
@@ -110,11 +110,11 @@ def test_include_phenotype_groups(
     """Test include phenotype groups."""
     # GIVEN a config builder with some data
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # WHEN including the phenotype groups
-    mip_config_builder.include_phenotype_groups(load_config, analysis_obj=mip_dna_analysis)
+    mip_config_builder.include_phenotype_groups(load_config, analysis=mip_dna_analysis)
 
     # THEN assert that the phenotype groups were added
     assert load_config.phenotype_groups is not None
@@ -129,11 +129,11 @@ def test_include_phenotype_terms(
     # GIVEN a config builder with some data
 
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # WHEN including the phenotype terms
-    mip_config_builder.include_phenotype_terms(load_config, analysis_obj=mip_dna_analysis)
+    mip_config_builder.include_phenotype_terms(load_config, analysis=mip_dna_analysis)
 
     # THEN assert that the phenotype terms were added
     assert load_config.phenotype_terms is not None
@@ -150,7 +150,7 @@ def test_include_alignment_file_individual(
 
     # WHEN building the scout load config
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # THEN assert that the alignment file was added to sample id
@@ -174,7 +174,7 @@ def test_include_mip_case_files(
 
     # WHEN including the case level files
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # THEN assert that the mandatory SNV VCF was added
@@ -196,7 +196,7 @@ def test_include_mip_sample_files(
 
     # WHEN including the case level files
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # THEN assert that the mandatory SNV VCF was added
@@ -221,7 +221,7 @@ def test_include_mip_sample_subject_id(
 
     # WHEN building the config
     load_config = mip_config_builder.build_load_config(
-        analysis_obj=mip_dna_analysis, hk_version_obj=mip_dna_analysis_hk_version
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
     )
 
     # THEN the subject_id was added to the scout sample
@@ -235,7 +235,7 @@ def test_include_mip_sample_subject_id(
 
 def test_include_balsamic_case_files(
     balsamic_config_builder: BalsamicConfigBuilder,
-    balsamic_analysis_obj: Analysis,
+    balsamic_analysis: Analysis,
     balsamic_analysis_hk_version: Version,
 ):
     """Test include Balsamic case files."""
@@ -244,7 +244,7 @@ def test_include_balsamic_case_files(
 
     # WHEN including the case level files
     load_config = balsamic_config_builder.build_load_config(
-        analysis_obj=balsamic_analysis_obj, hk_version_obj=balsamic_analysis_hk_version
+        analysis=balsamic_analysis, hk_version=balsamic_analysis_hk_version
     )
 
     # THEN assert that the mandatory snv vcf was added
@@ -253,7 +253,7 @@ def test_include_balsamic_case_files(
 
 def test_include_balsamic_delivery_report(
     balsamic_config_builder: BalsamicConfigBuilder,
-    balsamic_analysis_obj: Analysis,
+    balsamic_analysis: Analysis,
     balsamic_analysis_hk_version: Version,
 ):
     """Test include Balsamic delivery report."""
@@ -262,7 +262,7 @@ def test_include_balsamic_delivery_report(
 
     # WHEN including the case level files
     load_config = balsamic_config_builder.build_load_config(
-        analysis_obj=balsamic_analysis_obj, hk_version_obj=balsamic_analysis_hk_version
+        analysis=balsamic_analysis, hk_version=balsamic_analysis_hk_version
     )
 
     # THEN assert that the delivery_report exists

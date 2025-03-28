@@ -120,15 +120,15 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.get_analyses_to_upload(workflow=workflow):
-        if analysis_obj.case.analyses[0].uploaded_at is not None:
+    for analysis in status_db.get_analyses_to_upload(workflow=workflow):
+        if analysis.case.analyses[0].uploaded_at is not None:
             LOG.warning(
-                f"Skipping upload for case {analysis_obj.case.internal_id}. "
-                f"Case has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
+                f"Skipping upload for case {analysis.case.internal_id}. "
+                f"Case has been already uploaded at {analysis.case.analyses[0].uploaded_at}."
             )
             continue
 
-        case_id = analysis_obj.case.internal_id
+        case_id = analysis.case.internal_id
         LOG.info(f"Uploading analysis for case: {case_id}")
         try:
             context.invoke(upload, case_id=case_id)
