@@ -37,7 +37,8 @@ class NalloUploadAPI(UploadAPI):
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
-        self.update_uploaded_at(analysis=analysis)
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
+
+        self.update_uploaded_at(analysis=analysis)
