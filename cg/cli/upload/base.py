@@ -27,8 +27,8 @@ from cg.cli.upload.scout import (
     upload_rna_junctions_to_scout,
     upload_rna_omics_to_scout,
     upload_rna_to_scout,
-    upload_tomte_to_scout,
     upload_to_scout,
+    upload_tomte_to_scout,
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
@@ -40,9 +40,10 @@ from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.mutant.mutant import MutantUploadAPI
+from cg.meta.upload.nallo.nallo import NalloUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
-from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
+from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -86,6 +87,8 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = MipRNAUploadAPI(config_object)
         elif case.data_analysis == Workflow.MICROSALT:
             upload_api = MicrosaltUploadAPI(config_object)
+        elif case.data_analysis == Workflow.NALLO:
+            upload_api = NalloUploadAPI(config_object)
         elif case.data_analysis == Workflow.RAREDISEASE:
             upload_api = RarediseaseUploadAPI(config_object)
         elif case.data_analysis == Workflow.TOMTE:
@@ -117,15 +120,15 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.get_analyses_to_upload(workflow=workflow):
-        if analysis_obj.case.analyses[0].uploaded_at is not None:
+    for analysis in status_db.get_analyses_to_upload(workflow=workflow):
+        if analysis.case.analyses[0].uploaded_at is not None:
             LOG.warning(
-                f"Skipping upload for case {analysis_obj.case.internal_id}. "
-                f"Case has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
+                f"Skipping upload for case {analysis.case.internal_id}. "
+                f"Case has been already uploaded at {analysis.case.analyses[0].uploaded_at}."
             )
             continue
 
-        case_id = analysis_obj.case.internal_id
+        case_id = analysis.case.internal_id
         LOG.info(f"Uploading analysis for case: {case_id}")
         try:
             context.invoke(upload, case_id=case_id)

@@ -576,8 +576,8 @@ class AnalysisAPI(MetaAPI):
         """Add a cleaned at date for all analyses related to a case."""
         analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
-        for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
+        for analysis in analyses:
+            analysis.cleaned_at = analysis.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
     def clean_run_dir(

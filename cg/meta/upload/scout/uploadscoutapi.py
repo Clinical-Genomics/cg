@@ -19,6 +19,7 @@ from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -56,12 +57,12 @@ class UploadScoutAPI:
         LOG.info("Generate scout load config")
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
-        LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
+        hk_version: Version = self.housekeeper.last_version(analysis.case.internal_id)
+        LOG.debug(f"Found housekeeper version {hk_version.id}")
 
         LOG.info(f"Found workflow {analysis.workflow}")
-        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
-        return config_builder.build_load_config()
+        config_builder = self.get_config_builder(analysis=analysis)
+        return config_builder.build_load_config(hk_version=hk_version, analysis=analysis)
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -606,42 +607,35 @@ class UploadScoutAPI:
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
 
-    def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
+    def get_config_builder(self, analysis: Analysis) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.MIP_RNA: MipConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 mip_analysis_api=self.analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
+            Workflow.NALLO: NalloConfigBuilder(
+                nallo_analysis_api=self.analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
             Workflow.RAREDISEASE: RarediseaseConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 raredisease_analysis_api=self.raredisease_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
                 lims_api=self.lims,
             ),
         }

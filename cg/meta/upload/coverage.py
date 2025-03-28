@@ -18,12 +18,12 @@ class UploadCoverageApi:
         self.hk_api = hk_api
         self.chanjo_api = chanjo_api
 
-    def data(self, analysis_obj: Analysis) -> dict:
+    def data(self, analysis: Analysis) -> dict:
         """Get data for uploading coverage."""
-        family_id = analysis_obj.case.internal_id
-        data = {"family": family_id, "family_name": analysis_obj.case.name, "samples": []}
-        for link_obj in analysis_obj.case.links:
-            analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+        family_id = analysis.case.internal_id
+        data = {"family": family_id, "family_name": analysis.case.name, "samples": []}
+        for link_obj in analysis.case.links:
+            analysis_date = analysis.started_at or analysis.completed_at
             hk_version = self.hk_api.version(family_id, analysis_date)
             hk_coverage = self.hk_api.files(
                 version=hk_version.id, tags=[link_obj.sample.internal_id, "coverage"]
