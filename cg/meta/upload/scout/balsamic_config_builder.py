@@ -32,7 +32,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, hk_version_obj=hk_version_obj
         )
-        self.include_cnv_report(load_config, hk_version_obj=hk_version_obj)
+        self.include_cnv_report(load_config=load_config, hk_version_obj=hk_version_obj)
         self.include_multiqc_report(load_config=load_config, hk_version_obj=hk_version_obj)
 
     def include_sample_files(
@@ -89,7 +89,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         load_config: BalsamicLoadConfig = BalsamicLoadConfig(
             track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk(
-                {HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
+                hk_tags={HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
             ),
         )
         self.add_common_info_to_load_config(load_config=load_config, analysis_obj=analysis_obj)

@@ -33,7 +33,7 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
         load_config: BalsamicUmiLoadConfig = BalsamicUmiLoadConfig(
             track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk(
-                {HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
+                hk_tags={HK_DELIVERY_REPORT_TAG}, hk_version_obj=hk_version_obj
             ),
         )
         self.add_common_info_to_load_config(load_config=load_config, analysis_obj=analysis_obj)
