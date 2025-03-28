@@ -10,6 +10,7 @@ from cg.models.delivery_report.metadata import (
     RnafusionSampleMetadataModel,
     TaxprofilerSampleMetadataModel,
     TomteSampleMetadataModel,
+    NalloSampleMetadataModel,
 )
 from cg.models.delivery_report.validators import (
     get_boolean_as_string,
@@ -109,6 +110,7 @@ class SampleModel(BaseModel):
         BalsamicTargetedSampleMetadataModel
         | BalsamicWGSSampleMetadataModel
         | MipDNASampleMetadataModel
+        | NalloSampleMetadataModel
         | RarediseaseSampleMetadataModel
         | RnafusionSampleMetadataModel
         | TaxprofilerSampleMetadataModel
