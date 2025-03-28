@@ -48,7 +48,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         LOG.info("Generate load config for mip case")
         load_config: MipLoadConfig = MipLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}, hk_version=hk_version),
+            delivery_report=self.get_file_from_hk(
+                hk_tags={HK_DELIVERY_REPORT_TAG}, hk_version=hk_version
+            ),
         )
         self.add_common_info_to_load_config(load_config=load_config, analysis=analysis)
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(

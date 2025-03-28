@@ -44,7 +44,9 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         LOG.info("Build load config for NALLO case")
         load_config = NalloLoadConfig(
             track=UploadTrack.RARE_DISEASE.value,
-            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}, hk_version=hk_version),
+            delivery_report=self.get_file_from_hk(
+                hk_tags={HK_DELIVERY_REPORT_TAG}, hk_version=hk_version
+            ),
         )
         self.add_common_info_to_load_config(load_config=load_config, analysis=analysis)
         load_config.gene_panels = self.nallo_analysis_api.get_aggregated_panels(
@@ -76,7 +78,9 @@ class NalloConfigBuilder(ScoutConfigBuilder):
     ) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
-        file_path = self.get_file_from_hk(getattr(self.case_tags, scout_key), hk_version=hk_version)
+        file_path = self.get_file_from_hk(
+            hk_tags=getattr(self.case_tags, scout_key), hk_version=hk_version
+        )
         setattr(load_config, scout_key, file_path)
 
     def include_sample_files(
