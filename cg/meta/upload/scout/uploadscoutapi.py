@@ -607,7 +607,7 @@ class UploadScoutAPI:
             dry_run=dry_run, rna_dna_collections=rna_dna_collections
         )
 
-    def get_config_builder(self, analysis) -> ScoutConfigBuilder:
+    def get_config_builder(self, analysis: Analysis) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
                 lims_api=self.lims,
