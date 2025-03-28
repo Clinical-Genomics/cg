@@ -88,6 +88,14 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
+    def get_cluster_env_script(self):
+        """Returns usestage or useprod script depending on the environment active."""
+        env = os.getenv("ENVIRONMENT")
+        if env == "stage":
+            return "/home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh"
+        else:
+            return "/home/proj/production/servers/resources/hasta.scilifelab.se/useprod.sh"
+
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists() and not dry_run:
             raise CgError(f"No config file found for case {case_id}")
