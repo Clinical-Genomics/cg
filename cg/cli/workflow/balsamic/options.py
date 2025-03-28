@@ -61,6 +61,6 @@ OPTION_WORKFLOW_PROFILE = click.option(
 OPTION_CLUSTER_ENV = click.option(
     "--cluster-env",
     type=click.Path(exists=True),
-    required=True,
+    required=False,
     help="Path to usestage.sh or useprod.sh.",
 )
