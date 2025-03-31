@@ -316,7 +316,7 @@ def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: St
         return False
 
     valid_beds = [bed.name for bed in store.get_active_beds()]
-    return not sample.capture_kit in valid_beds
+    return sample.capture_kit not in valid_beds
 
 
 def is_sample_not_from_collaboration(
