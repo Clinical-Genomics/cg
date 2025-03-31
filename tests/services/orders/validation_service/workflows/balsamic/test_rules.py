@@ -59,9 +59,7 @@ def test_validate_capture_kit(
     valid_order.cases[0].samples[0].capture_kit = "invalid name"
 
     # WHEN validating that the order has a valid capture kit panel
-    errors: list[InvalidCaptureKitError] = validate_capture_kit(
-        order=valid_order, store=base_store
-    )
+    errors: list[InvalidCaptureKitError] = validate_capture_kit(order=valid_order, store=base_store)
 
     # THEN an error should be returned
     assert errors
