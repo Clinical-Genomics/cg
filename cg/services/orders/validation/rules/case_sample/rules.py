@@ -14,6 +14,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     ContainerNameRepeatedError,
     FatherNotInCaseError,
     InvalidBufferError,
+    InvalidCaptureKitError,
     InvalidConcentrationIfSkipRCError,
     InvalidFatherSexError,
     InvalidMotherSexError,
@@ -57,6 +58,7 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
+    is_invalid_capture_kit,
     is_sample_missing_capture_kit,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
@@ -450,7 +452,7 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
     return errors
 
 
-def validate_capture_kit_panel_requirement(
+def validate_capture_kit_requirement(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[CaptureKitMissingError]:
     """
@@ -463,6 +465,17 @@ def validate_capture_kit_panel_requirement(
             if is_sample_missing_capture_kit(sample=sample, store=store):
                 error = CaptureKitMissingError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
+    return errors
+
+
+def validate_capture_kit(
+    order: BalsamicOrder | BalsamicUmiOrder, store: Store
+) -> list[InvalidCaptureKitError]:
+    errors: list[InvalidCaptureKitError] = []
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if is_invalid_capture_kit(sample=sample, store=store):
+            errors.append(InvalidCaptureKitError(sample_index=sample_index, case_index=case_index))
+
     return errors
 
 
