@@ -1,12 +1,12 @@
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 LOG = logging.getLogger(__name__)
 
 
-class Configurator:
+class Configurator(ABC):
 
     @abstractmethod
     def configure(self, case_id: str) -> CaseConfig:
