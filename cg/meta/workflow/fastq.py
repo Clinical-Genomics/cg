@@ -53,8 +53,6 @@ class FastqHandler:
         """
         Link FASTQ files for a sample to the work directory.
         """
-        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
-        concatenated_paths: dict[int, str] = {1: "", 2: ""}
         fastq_files: list[FastqFileMeta] = self.gather_fastq_files_for_sample(sample=sample)
         sorted_fastq_files: list[FastqFileMeta] = sorted(fastq_files, key=lambda k: k.path)
         fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -68,10 +66,6 @@ class FastqHandler:
                 undetermined=fastq_file.undetermined,
             )
             destination_path = Path(fastq_dir, fastq_file_name)
-            linked_reads_paths[fastq_file.read_direction].append(destination_path)
-            concatenated_paths[fastq_file.read_direction] = (
-                f"{fastq_dir}/{self.get_concatenated_name(fastq_file_name)}"
-            )
 
             if not destination_path.exists():
                 LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
