@@ -310,6 +310,12 @@ def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, st
         and not sample.capture_kit
     )
 
+def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
+    if not sample.capture_kit:
+        return False
+
+    valid_beds = [bed.name for bed in store.get_active_beds()]
+    return not sample.capture_kit in valid_beds
 
 def is_sample_not_from_collaboration(
     customer_id: str, sample: ExistingSample, store: Store
