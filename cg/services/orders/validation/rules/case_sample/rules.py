@@ -467,13 +467,17 @@ def validate_capture_kit_panel_requirement(
                 errors.append(error)
     return errors
 
-def validate_capture_kit_panel(order: BalsamicOrder | BalsamicUmiOrder, store: Store) -> list[InvalidCaptureKitError]:
+
+def validate_capture_kit_panel(
+    order: BalsamicOrder | BalsamicUmiOrder, store: Store
+) -> list[InvalidCaptureKitError]:
     errors: list[InvalidCaptureKitError] = []
     for case_index, sample_index, sample in order.enumerated_new_samples:
         if is_invalid_capture_kit(sample, store):
             errors.append(InvalidCaptureKitError(sample_index=sample_index, case_index=case_index))
 
     return errors
+
 
 def validate_existing_samples_belong_to_collaboration(
     order: OrderWithCases, store: Store, **kwargs

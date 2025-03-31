@@ -5,7 +5,10 @@ from cg.services.orders.validation.errors.case_errors import (
     NormalOnlyWGSError,
     NumberOfNormalSamplesError,
 )
-from cg.services.orders.validation.errors.case_sample_errors import CaptureKitMissingError, InvalidCaptureKitError
+from cg.services.orders.validation.errors.case_sample_errors import (
+    CaptureKitMissingError,
+    InvalidCaptureKitError,
+)
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -16,7 +19,7 @@ from cg.services.orders.validation.rules.case.rules import (
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_capture_kit_panel_requirement,
-    validate_capture_kit_panel
+    validate_capture_kit_panel,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -45,6 +48,7 @@ def test_validate_capture_kit_required(
 
     # THEN the error should concern the missing capture kit
     assert isinstance(errors[0], CaptureKitMissingError)
+
 
 def test_validate_capture_kit(
     valid_order: BalsamicOrder, base_store: Store, application_tgs: Application

@@ -146,6 +146,7 @@ class CaptureKitMissingError(CaseSampleError):
     field: str = "capture_kit"
     message: str = "Bait set is required for TGS analyses"
 
+
 class InvalidCaptureKitError(CaseSampleError):
     field: str = "capture_kit"
     message: str = "Bait set must be valid"
