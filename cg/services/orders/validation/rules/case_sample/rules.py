@@ -452,7 +452,7 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
     return errors
 
 
-def validate_capture_kit_panel_requirement(
+def validate_capture_kit_requirement(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[CaptureKitMissingError]:
     """
@@ -468,12 +468,12 @@ def validate_capture_kit_panel_requirement(
     return errors
 
 
-def validate_capture_kit_panel(
+def validate_capture_kit(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[InvalidCaptureKitError]:
     errors: list[InvalidCaptureKitError] = []
     for case_index, sample_index, sample in order.enumerated_new_samples:
-        if is_invalid_capture_kit(sample, store):
+        if is_invalid_capture_kit(sample=sample, store=store):
             errors.append(InvalidCaptureKitError(sample_index=sample_index, case_index=case_index))
 
     return errors

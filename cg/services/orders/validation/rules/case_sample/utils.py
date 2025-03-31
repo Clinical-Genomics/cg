@@ -315,7 +315,7 @@ def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: St
     if not sample.capture_kit:
         return False
 
-    valid_beds = [bed.name for bed in store.get_active_beds()]
+    valid_beds: list[str] = [bed.name for bed in store.get_active_beds()]
     return sample.capture_kit not in valid_beds
 
 

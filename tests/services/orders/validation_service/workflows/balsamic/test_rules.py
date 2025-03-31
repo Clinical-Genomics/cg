@@ -18,8 +18,8 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_number_of_normal_samples,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
-    validate_capture_kit_panel_requirement,
-    validate_capture_kit_panel,
+    validate_capture_kit_requirement,
+    validate_capture_kit,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -39,7 +39,7 @@ def test_validate_capture_kit_required(
     valid_order.cases[0].samples[0].capture_kit = None
 
     # WHEN validating that the order has required capture kits set
-    errors: list[CaptureKitMissingError] = validate_capture_kit_panel_requirement(
+    errors: list[CaptureKitMissingError] = validate_capture_kit_requirement(
         order=valid_order, store=base_store
     )
 
@@ -59,7 +59,7 @@ def test_validate_capture_kit(
     valid_order.cases[0].samples[0].capture_kit = "invalid name"
 
     # WHEN validating that the order has a valid capture kit panel
-    errors: list[CaptureKitMissingError] = validate_capture_kit_panel(
+    errors: list[InvalidCaptureKitError] = validate_capture_kit(
         order=valid_order, store=base_store
     )
 
