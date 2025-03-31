@@ -63,9 +63,9 @@ class MicrosaltConfigFileCreator:
         )
 
     def _get_organism(self, sample: Sample) -> str:
-        """Organism
-        - Fallback based on reference, ‘Other species’ and ‘Comment’.
-        Default to "Unset"."""
+        """
+        Gets organism special handling for certain species. Fallback on reference genome.
+        """
 
         if not sample.organism:
             raise CgDataError("Organism missing on Sample")
