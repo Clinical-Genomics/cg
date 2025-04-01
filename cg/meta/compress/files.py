@@ -99,7 +99,7 @@ def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:
     fastq_dict = {}
     compression_objects: list[CompressionData] = get_compression_data(list(hk_files_dict.keys()))
     if not compression_objects:
-        LOG.info(f"Could not find FASTQ files for {sample_id}")
+        LOG.debug(f"Could not find FASTQ files for {sample_id}")
         return None
 
     for compression_obj in compression_objects:
