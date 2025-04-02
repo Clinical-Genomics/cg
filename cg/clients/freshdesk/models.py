@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Tuple, Union
 
 from pydantic import BaseModel, EmailStr, Field
@@ -16,6 +17,8 @@ class TicketCreate(BaseModel):
     priority: int = Priority.LOW
     source: int = Source.EMAIL
     status: int = Status.PENDING
+    due_by: date
+    fr_due_by: date
     subject: str
     tags: list[str] = []
     type: str | None = None

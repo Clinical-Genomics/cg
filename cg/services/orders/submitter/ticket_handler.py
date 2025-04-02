@@ -1,17 +1,18 @@
 import logging
+from datetime import date
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
-from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
+from cg.constants.priority import Priority
+from cg.meta.orders.utils import get_due_by_date, get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
-from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,6 +42,9 @@ class TicketHandler:
         tags: list[str] = get_ticket_tags(order=order, order_type=order_type)
         status: int = get_ticket_status(order=order)
 
+        order_priority: Priority = self._get_max_case_priority(order=order)
+        deadline_date: date = get_due_by_date(priority=order_priority)
+
         with TemporaryDirectory() as temp_dir:
             attachments: Path = self.create_attachment_file(order=order, temp_dir=temp_dir)
 
@@ -57,6 +61,8 @@ class TicketHandler:
                 },
                 attachments=[],
                 status=status,
+                due_by=deadline_date,
+                fr_due_by=deadline_date,
             )
             ticket_response: TicketResponse = self.client.create_ticket(
                 ticket=freshdesk_ticket, attachments=[attachments]
@@ -217,3 +223,21 @@ class TicketHandler:
                             message=message, comment=sample.comment
                         )
         return message
+
+    def _get_max_case_priority(self, order: Order) -> Priority:
+        """Get max case priority for a given order."""
+        priority_list: list[Priority] = []
+
+        if isinstance(order, OrderWithCases):
+            for index, new_case in order.enumerated_new_cases:
+                priority_list.append(Priority[new_case.priority])
+
+            for index, case in order.enumerated_existing_cases:
+                case: Case = self.status_db.get_case_by_internal_id(case.internal_id)
+                priority_list.append(case.priority)
+
+        if isinstance(order, OrderWithSamples):
+            for sample in order.samples:
+                priority_list.append(Priority[sample.priority])
+
+        return max(priority_list)
