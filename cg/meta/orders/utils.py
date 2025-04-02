@@ -7,7 +7,7 @@ from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 
-TIMEDELTA_BY_PRIORITY: dict[Priority, timedelta.days] = {
+DUE_TIME_BY_PRIORITY: dict[Priority, timedelta.days] = {
     Priority.express: timedelta(days=7),
     Priority.priority: timedelta(days=14),
     Priority.standard: timedelta(days=21),
@@ -52,5 +52,5 @@ def get_ticket_status(order: Order) -> Status:
 
 def get_due_by_date(priority: Priority) -> date:
     """Get the ticket due by date based on the order priority."""
-    due_by: datetime = datetime.now() + TIMEDELTA_BY_PRIORITY[priority]
+    due_by: datetime = datetime.now() + DUE_TIME_BY_PRIORITY[priority]
     return due_by.date()
