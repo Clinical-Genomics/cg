@@ -1,9 +1,21 @@
 import pytest
 
+from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
+    MicrosaltConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
+from cg.store.store import Store
+
+
+@pytest.fixture
+def microsalt_config_file_creator(
+    base_store: Store, lims_api: LimsAPI
+) -> MicrosaltConfigFileCreator:
+    return MicrosaltConfigFileCreator(lims_api=lims_api, queries_path="/dev/null", store=base_store)
 
 
 @pytest.fixture

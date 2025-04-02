@@ -1,7 +1,12 @@
 import pytest
 
+from cg.apps.lims import LimsAPI
+from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
+    MicrosaltConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -11,7 +16,26 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.store.store import Store
+
+
+@pytest.fixture
+def microsalt_configurator(
+    microsalt_config_file_creator: MicrosaltConfigFileCreator,
+    microsalt_fastq_handler: MicrosaltFastqHandler,
+    lims_api: LimsAPI,
+    base_store: Store,
+) -> MicrosaltConfigurator:
+    return MicrosaltConfigurator(
+        config_file_creator=microsalt_config_file_creator,
+        fastq_handler=microsalt_fastq_handler,
+        lims_api=lims_api,
+        store=base_store,
+    )
 
 
 @pytest.fixture
