@@ -9,17 +9,14 @@ from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
-from cg.store.models import Analysis
-from cg.store.store import Store
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.store.models import Analysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 
 def test_mip_config_builder(
-    hk_version: Version,
-    mip_dna_analysis: Analysis,
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
@@ -29,8 +26,6 @@ def test_mip_config_builder(
 
     # WHEN instantiating
     config_builder = MipConfigBuilder(
-        hk_version_obj=hk_version,
-        analysis_obj=mip_dna_analysis,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,
@@ -41,8 +36,6 @@ def test_mip_config_builder(
 
 
 def test_balsamic_config_builder(
-    hk_version: Version,
-    balsamic_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
 ):
     """Test Balsamic config builder class."""
@@ -50,8 +43,6 @@ def test_balsamic_config_builder(
 
     # WHEN instantiating
     file_handler = BalsamicConfigBuilder(
-        hk_version_obj=hk_version,
-        analysis_obj=balsamic_analysis_obj,
         lims_api=lims_api,
     )
 
@@ -60,8 +51,6 @@ def test_balsamic_config_builder(
 
 
 def test_raredisease_config_builder(
-    hk_version: Version,
-    raredisease_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
@@ -71,8 +60,6 @@ def test_raredisease_config_builder(
 
     # WHEN instantiating
     file_handler = RarediseaseConfigBuilder(
-        hk_version_obj=hk_version,
-        analysis_obj=raredisease_analysis_obj,
         lims_api=lims_api,
         raredisease_analysis_api=raredisease_analysis_api,
         madeline_api=madeline_api,
@@ -83,8 +70,7 @@ def test_raredisease_config_builder(
 
 
 def test_rnafusion_config_builder(
-    hk_version: Version,
-    rnafusion_analysis_obj: Analysis,
+    rnafusion_analysis: Analysis,
     lims_api: MockLimsAPI,
 ):
     """Test RNAfusion config builder class."""
@@ -92,8 +78,6 @@ def test_rnafusion_config_builder(
 
     # WHEN instantiating
     file_handler = RnafusionConfigBuilder(
-        hk_version_obj=hk_version,
-        analysis_obj=rnafusion_analysis_obj,
         lims_api=lims_api,
     )
 
@@ -101,48 +85,73 @@ def test_rnafusion_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_include_synopsis(mip_config_builder: MipConfigBuilder):
+def test_include_synopsis(
+    mip_config_builder: MipConfigBuilder,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include synopsis."""
     # GIVEN a config builder with some data
 
     # WHEN including the synopsis
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # THEN assert that the synopsis was added
     assert load_config.synopsis
 
 
-def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
+def test_include_phenotype_groups(
+    mip_config_builder: MipConfigBuilder,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include phenotype groups."""
     # GIVEN a config builder with some data
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # WHEN including the phenotype groups
-    mip_config_builder.include_phenotype_groups(load_config)
+    mip_config_builder.include_phenotype_groups(load_config, analysis=mip_dna_analysis)
 
     # THEN assert that the phenotype groups were added
     assert load_config.phenotype_groups is not None
 
 
-def test_include_phenotype_terms(mip_config_builder: MipConfigBuilder):
+def test_include_phenotype_terms(
+    mip_config_builder: MipConfigBuilder,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include phenotype terms."""
     # GIVEN a config builder with some data
 
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # WHEN including the phenotype terms
-    mip_config_builder.include_phenotype_terms(load_config)
+    mip_config_builder.include_phenotype_terms(load_config, analysis=mip_dna_analysis)
 
     # THEN assert that the phenotype terms were added
     assert load_config.phenotype_terms is not None
 
 
-def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
+def test_include_alignment_file_individual(
+    mip_config_builder: MipConfigBuilder,
+    sample_id: str,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include alignment files."""
     # GIVEN a mip config builder with some information
 
     # WHEN building the scout load config
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # THEN assert that the alignment file was added to sample id
     file_found = False
@@ -153,20 +162,31 @@ def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder,
     assert file_found
 
 
-def test_include_mip_case_files(mip_config_builder: MipConfigBuilder):
+def test_include_mip_case_files(
+    mip_config_builder: MipConfigBuilder,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include MIP case files."""
     # GIVEN a Housekeeper version bundle with MIP analysis files
     # GIVEN a case load object
     # GIVEN a MIP file handler
 
     # WHEN including the case level files
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # THEN assert that the mandatory SNV VCF was added
     assert load_config.vcf_snv
 
 
-def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_id: str):
+def test_include_mip_sample_files(
+    mip_config_builder: MipConfigBuilder,
+    sample_id: str,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+):
     """Test include MIP sample files."""
     # GIVEN a Housekeeper version bundle with MIP analysis files
     # GIVEN a case load object
@@ -175,7 +195,9 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
     # GIVEN a MIP file handler
 
     # WHEN including the case level files
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # THEN assert that the mandatory SNV VCF was added
     file_found = False
@@ -187,14 +209,20 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
 
 
 def test_include_mip_sample_subject_id(
-    mip_config_builder: MipConfigBuilder, sample_id: str, caplog
+    mip_config_builder: MipConfigBuilder,
+    sample_id: str,
+    mip_dna_analysis: Analysis,
+    mip_dna_analysis_hk_version: Version,
+    caplog,
 ):
     """Test include MIP sample subject id."""
     # GIVEN subject_id on the sample
     caplog.set_level(level=logging.DEBUG)
 
     # WHEN building the config
-    load_config = mip_config_builder.build_load_config()
+    load_config = mip_config_builder.build_load_config(
+        analysis=mip_dna_analysis, hk_version=mip_dna_analysis_hk_version
+    )
 
     # THEN the subject_id was added to the scout sample
     subject_id_found = False
@@ -205,25 +233,37 @@ def test_include_mip_sample_subject_id(
     assert subject_id_found
 
 
-def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuilder):
+def test_include_balsamic_case_files(
+    balsamic_config_builder: BalsamicConfigBuilder,
+    balsamic_analysis: Analysis,
+    balsamic_analysis_hk_version: Version,
+):
     """Test include Balsamic case files."""
     # GIVEN a Housekeeper version bundle with balsamic analysis files
     # GIVEN a case load object
 
     # WHEN including the case level files
-    load_config = balsamic_config_builder.build_load_config()
+    load_config = balsamic_config_builder.build_load_config(
+        analysis=balsamic_analysis, hk_version=balsamic_analysis_hk_version
+    )
 
     # THEN assert that the mandatory snv vcf was added
     assert load_config.vcf_cancer
 
 
-def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfigBuilder):
+def test_include_balsamic_delivery_report(
+    balsamic_config_builder: BalsamicConfigBuilder,
+    balsamic_analysis: Analysis,
+    balsamic_analysis_hk_version: Version,
+):
     """Test include Balsamic delivery report."""
     # GIVEN a Housekeeper version bundle with balsamic analysis files
     # GIVEN a case load object
 
     # WHEN including the case level files
-    load_config = balsamic_config_builder.build_load_config()
+    load_config = balsamic_config_builder.build_load_config(
+        analysis=balsamic_analysis, hk_version=balsamic_analysis_hk_version
+    )
 
     # THEN assert that the delivery_report exists
     assert load_config.delivery_report

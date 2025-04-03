@@ -601,9 +601,7 @@ class Case(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         if analyses:
-            data["analyses"] = [
-                analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
-            ]
+            data["analyses"] = [analysis.to_dict(family=False) for analysis in self.analyses]
         return data
 
 

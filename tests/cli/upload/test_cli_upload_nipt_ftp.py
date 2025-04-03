@@ -91,10 +91,10 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.case.internal_id
-    assert not analysis_obj.upload_started_at
-    assert not analysis_obj.uploaded_at
+    analysis = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis.case.internal_id
+    assert not analysis.upload_started_at
+    assert not analysis.uploaded_at
 
     # WHEN adding a result file of a specified NIPT case
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
@@ -104,10 +104,10 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN set analysis.upload_started_at in the database
-    assert not analysis_obj.upload_started_at
+    assert not analysis.upload_started_at
 
     # THEN set analysis.uploaded_at in the database
-    assert not analysis_obj.uploaded_at
+    assert not analysis.uploaded_at
 
     # THEN exit without errors
     assert result.exit_code == 0

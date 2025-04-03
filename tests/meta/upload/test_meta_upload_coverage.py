@@ -34,10 +34,10 @@ def test_data(
     coverage_api = coverage_upload_api
     case_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_name)
-    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
+    analysis = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
 
     # WHEN using the data method
-    results = coverage_api.data(analysis_obj=analysis_obj)
+    results = coverage_api.data(analysis=analysis)
 
     # THEN this returns the data needed to upload samples to chanjo
     assert results["family"] == case_name
@@ -63,8 +63,8 @@ def test_upload(
     coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)
     family_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(family_name)
-    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
-    data = coverage_api.data(analysis_obj=analysis_obj)
+    analysis = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
+    data = coverage_api.data(analysis=analysis)
 
     # WHEN uploading samples in data dictionary
     coverage_api.upload(data=data)
