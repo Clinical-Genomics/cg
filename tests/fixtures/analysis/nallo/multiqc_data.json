@@ -25,6 +25,11 @@
                 "percent_duplicates": 1.7232745723252236,
                 "percent_fails": 30.0
             }
+        },
+        {
+            "ADM1": {
+                "predicted_sex_sex_check": "female"
+            }
         }
     ]
 }
