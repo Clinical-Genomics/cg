@@ -160,9 +160,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-        metric_conditions: dict[str, dict[str, Any]] = dict(NALLO_METRIC_CONDITIONS)
-        self.set_order_sex_for_sample(sample, metric_conditions)
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        metric_conditions: dict[str, dict[str, Any]] = NALLO_METRIC_CONDITIONS
+        self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         return metric_conditions
 
     @staticmethod
