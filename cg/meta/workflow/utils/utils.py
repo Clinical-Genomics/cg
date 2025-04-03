@@ -1,9 +1,9 @@
-from cg.constants.priority import TrailblazerPriority
+from cg.constants.priority import Priority, TrailblazerPriority
 
-MAP_TO_TRAILBLAZER_PRIORITY: dict[int, TrailblazerPriority] = {
-    0: TrailblazerPriority.LOW,
-    1: TrailblazerPriority.NORMAL,
-    2: TrailblazerPriority.HIGH,
-    3: TrailblazerPriority.EXPRESS,
-    4: TrailblazerPriority.NORMAL,
+MAP_TO_TRAILBLAZER_PRIORITY: dict[Priority, TrailblazerPriority] = {
+    Priority.research: TrailblazerPriority.LOW,
+    Priority.standard: TrailblazerPriority.NORMAL,
+    Priority.clinical_trials: TrailblazerPriority.NORMAL,
+    Priority.priority: TrailblazerPriority.HIGH,
+    Priority.express: TrailblazerPriority.EXPRESS,
 }

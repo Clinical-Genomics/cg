@@ -5,7 +5,10 @@ from cg.services.orders.validation.errors.case_errors import (
     NormalOnlyWGSError,
     NumberOfNormalSamplesError,
 )
-from cg.services.orders.validation.errors.case_sample_errors import CaptureKitMissingError
+from cg.services.orders.validation.errors.case_sample_errors import (
+    CaptureKitMissingError,
+    InvalidCaptureKitError,
+)
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -15,7 +18,8 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_number_of_normal_samples,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
-    validate_capture_kit_panel_requirement,
+    validate_capture_kit_requirement,
+    validate_capture_kit,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -35,7 +39,7 @@ def test_validate_capture_kit_required(
     valid_order.cases[0].samples[0].capture_kit = None
 
     # WHEN validating that the order has required capture kits set
-    errors: list[CaptureKitMissingError] = validate_capture_kit_panel_requirement(
+    errors: list[CaptureKitMissingError] = validate_capture_kit_requirement(
         order=valid_order, store=base_store
     )
 
@@ -44,6 +48,24 @@ def test_validate_capture_kit_required(
 
     # THEN the error should concern the missing capture kit
     assert isinstance(errors[0], CaptureKitMissingError)
+
+
+def test_validate_capture_kit(
+    valid_order: BalsamicOrder, base_store: Store, application_tgs: Application
+):
+
+    # GIVEN an order with a capture kit set with an invalid value
+    valid_order.cases[0].samples[0].application = application_tgs.tag
+    valid_order.cases[0].samples[0].capture_kit = "invalid name"
+
+    # WHEN validating that the order has a valid capture kit panel
+    errors: list[InvalidCaptureKitError] = validate_capture_kit(order=valid_order, store=base_store)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern the invalid capture kit
+    assert isinstance(errors[0], InvalidCaptureKitError)
 
 
 def test_more_than_two_samples_in_case(
