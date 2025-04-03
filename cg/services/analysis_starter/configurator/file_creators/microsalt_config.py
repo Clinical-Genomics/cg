@@ -21,7 +21,7 @@ class MicrosaltConfigFileCreator:
         self.queries_path = queries_path
         self.store = store
 
-    def create(self, case_id: str):
+    def create(self, case_id: str) -> None:
         content: list[MicrosaltConfigContent] = self._get_content(case_id)
         content_adapter = TypeAdapter(list[MicrosaltConfigContent])
         config_case_path: Path = self.get_config_path(case_id)

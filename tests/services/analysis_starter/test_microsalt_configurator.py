@@ -1,13 +1,28 @@
 from pathlib import Path
 from unittest import mock
 
-from cg.constants import DataDelivery, FileExtensions, Workflow
+import pytest
+
+from cg.constants import DataDelivery, FileExtensions, Priority, Workflow
+from cg.exc import CgDataError
 from cg.io.controller import WriteFile
+from cg.meta.workflow.fastq import FastqHandler
+from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
-from cg.store.models import Case
+from cg.store.models import Application, Case, Customer, Organism, Sample
+
+
+@pytest.fixture(autouse=True)
+def mock_file_creation():
+    """Mocks run before each test in the module."""
+    with (
+        mock.patch.object(FastqHandler, "link_fastq_files_for_sample", return_value=None),
+        mock.patch.object(WriteFile, "write_file_from_content", return_value=None),
+    ):
+        yield
 
 
 def test_configure_success(microsalt_configurator: MicrosaltConfigurator):
@@ -21,12 +36,25 @@ def test_configure_success(microsalt_configurator: MicrosaltConfigurator):
         name="microsalt-name",
         ticket="123456",
     )
+    application: Application = microsalt_configurator.store.get_application_by_tag("MWRNXTR003")
+    customer: Customer = microsalt_configurator.store.get_customers()[0]
+    organism: Organism = microsalt_configurator.store.get_all_organisms()[0]
+    microsalt_sample: Sample = microsalt_configurator.store.add_sample(
+        application_version=application.versions[0],
+        customer=customer,
+        name="microsalt-sample",
+        organism=organism,
+        priority=Priority.standard,
+        sex=SexEnum.unknown,
+    )
+    microsalt_configurator.store.relate_sample(
+        case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
+    )
     microsalt_configurator.store.add_item_to_store(microsalt_case)
     microsalt_configurator.store.commit_to_store()
 
-    # WHEN configuring a case
-    with mock.patch.object(WriteFile, "write_file_from_content", return_value=None):
-        config: MicrosaltCaseConfig = microsalt_configurator.configure(microsalt_case.internal_id)
+    # WHEN configuring the case
+    config: MicrosaltCaseConfig = microsalt_configurator.configure(microsalt_case.internal_id)
 
     # THEN we should get a config back
     assert config.case_id == microsalt_case.internal_id
@@ -35,3 +63,34 @@ def test_configure_success(microsalt_configurator: MicrosaltConfigurator):
         microsalt_configurator.config_file_creator.queries_path,
         microsalt_case.internal_id + FileExtensions.JSON,
     )
+
+
+def test_configure_missing_organism(microsalt_configurator: MicrosaltConfigurator):
+    # GIVEN a microSALT case containing a sample with a missing organism
+    microsalt_case: Case = microsalt_configurator.store.add_case(
+        customer_id=0,
+        data_analysis=Workflow.MICROSALT,
+        data_delivery=DataDelivery.ANALYSIS_FILES,
+        name="microsalt-name",
+        ticket="123456",
+    )
+    application: Application = microsalt_configurator.store.get_application_by_tag("MWRNXTR003")
+    customer: Customer = microsalt_configurator.store.get_customers()[0]
+    microsalt_sample: Sample = microsalt_configurator.store.add_sample(
+        application_version=application.versions[0],
+        customer=customer,
+        name="microsalt-sample",
+        priority=Priority.standard,
+        sex=SexEnum.unknown,
+    )
+    microsalt_configurator.store.relate_sample(
+        case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
+    )
+    microsalt_configurator.store.add_item_to_store(microsalt_case)
+    microsalt_configurator.store.commit_to_store()
+
+    # WHEN configuring the case
+
+    # THEN the missing organism should raise a CgDataError
+    with pytest.raises(CgDataError):
+        microsalt_configurator.configure(microsalt_case.internal_id)
