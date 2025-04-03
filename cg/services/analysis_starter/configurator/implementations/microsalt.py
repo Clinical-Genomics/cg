@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import Workflow
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
@@ -34,6 +35,10 @@ class MicrosaltConfigurator(Configurator):
 
     def get_config(self, case_id: str) -> MicrosaltCaseConfig:
         config_file_path: Path = self.config_file_creator.get_config_path(case_id)
+        if not config_file_path.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that the config file {config_file_path.as_posix} exists."
+            )
         return MicrosaltCaseConfig(
             case_id=case_id, config_file_path=config_file_path, workflow=Workflow.MICROSALT
         )

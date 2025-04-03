@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from cg.constants import DataDelivery, FileExtensions, Priority, Workflow
-from cg.exc import CgDataError
+from cg.exc import CaseNotConfiguredError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.orders.sample_base import SexEnum, StatusEnum
@@ -53,16 +53,12 @@ def test_configure_success(microsalt_configurator: MicrosaltConfigurator):
     microsalt_configurator.store.add_item_to_store(microsalt_case)
     microsalt_configurator.store.commit_to_store()
 
-    # WHEN configuring the case
-    config: MicrosaltCaseConfig = microsalt_configurator.configure(microsalt_case.internal_id)
+    with mock.patch.object(Path, "exists", return_value=True):
+        # WHEN configuring the case
+        config: MicrosaltCaseConfig = microsalt_configurator.configure(microsalt_case.internal_id)
 
-    # THEN we should get a config back
-    assert config.case_id == microsalt_case.internal_id
-    assert config.workflow == microsalt_case.data_analysis
-    assert config.config_file_path == Path(
-        microsalt_configurator.config_file_creator.queries_path,
-        microsalt_case.internal_id + FileExtensions.JSON,
-    )
+        # THEN we should get a config back
+        assert config
 
 
 def test_configure_missing_organism(microsalt_configurator: MicrosaltConfigurator):
@@ -89,8 +85,47 @@ def test_configure_missing_organism(microsalt_configurator: MicrosaltConfigurato
     microsalt_configurator.store.add_item_to_store(microsalt_case)
     microsalt_configurator.store.commit_to_store()
 
-    # WHEN configuring the case
-
-    # THEN the missing organism should raise a CgDataError
     with pytest.raises(CgDataError):
+        # WHEN configuring the case
         microsalt_configurator.configure(microsalt_case.internal_id)
+    # THEN the missing organism should raise a CgDataError
+
+
+def test_get_config_path_success(microsalt_configurator: MicrosaltConfigurator):
+    microsalt_case: Case = microsalt_configurator.store.add_case(
+        customer_id=0,
+        data_analysis=Workflow.MICROSALT,
+        data_delivery=DataDelivery.ANALYSIS_FILES,
+        name="microsalt-name",
+        ticket="123456",
+    )
+
+    microsalt_configurator.store.add_item_to_store(microsalt_case)
+    microsalt_configurator.store.commit_to_store()
+
+    with mock.patch.object(Path, "exists", return_value=True):
+        # WHEN configuring the case
+        config = microsalt_configurator.get_config(microsalt_case.internal_id)
+
+        assert config.case_id == microsalt_case.internal_id
+        assert config.workflow == microsalt_case.data_analysis
+        assert config.config_file_path == Path(
+            microsalt_configurator.config_file_creator.queries_path,
+            microsalt_case.internal_id + FileExtensions.JSON,
+        )
+
+
+def test_get_config_path_config_not_ready(microsalt_configurator: MicrosaltConfigurator):
+    microsalt_case: Case = microsalt_configurator.store.add_case(
+        customer_id=0,
+        data_analysis=Workflow.MICROSALT,
+        data_delivery=DataDelivery.ANALYSIS_FILES,
+        name="microsalt-name",
+        ticket="123456",
+    )
+
+    microsalt_configurator.store.add_item_to_store(microsalt_case)
+    microsalt_configurator.store.commit_to_store()
+
+    with pytest.raises(CaseNotConfiguredError):
+        microsalt_configurator.get_config(microsalt_case.internal_id)
