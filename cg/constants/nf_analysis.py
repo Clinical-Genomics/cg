@@ -20,14 +20,11 @@ NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
 }
 
-RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
-
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
     "Contamination Status": {"norm": "eq", "threshold": "NO"},
-    "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "AT_DROPOUT": {"norm": "lt", "threshold": 10},
@@ -39,7 +36,6 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
     "Contamination Status": {"norm": "eq", "threshold": "NO"},
-    "adapter_cutting_adapter_trimmed_reads": {"norm": "lt", "threshold": None},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
     "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},

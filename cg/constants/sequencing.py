@@ -79,5 +79,3 @@ DNA_PREP_CATEGORIES: list[SeqLibraryPrepCategory] = [
     SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
 ]
-
-NOVASEQ_SEQUENCING_READ_LENGTH = 151

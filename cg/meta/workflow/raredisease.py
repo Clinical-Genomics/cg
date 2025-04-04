@@ -22,10 +22,9 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
-    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
-from cg.constants.sequencing import SeqLibraryPrepCategory, NOVASEQ_SEQUENCING_READ_LENGTH
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -179,7 +178,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
             self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
-            self.set_adapter_bases_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
@@ -246,18 +244,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
-
-    @staticmethod
-    def set_adapter_bases_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        """Calculate threshold for maximum number of adapter bases for a given sample"""
-        adapter_bases_threshold: float = (
-            sample.reads
-            * NOVASEQ_SEQUENCING_READ_LENGTH
-            * RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD
-        )
-        metric_conditions["adapter_cutting_adapter_trimmed_reads"][
-            "threshold"
-        ] = adapter_bases_threshold
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Raredisease d4 coverage file path."""
