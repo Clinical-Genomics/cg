@@ -57,7 +57,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSh
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseParameters,
     RarediseaseSampleSheetHeaders,
 )
@@ -98,8 +98,9 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.case_config_fixtures",
     "tests.fixture_plugins.analysis_starter.config_file_creators",
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
-    "tests.fixture_plugins.analysis_starter.extension_fixtures",
     "tests.fixture_plugins.analysis_starter.config_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.extension_fixtures",
+    "tests.fixture_plugins.analysis_starter.fastq_handlers",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
     "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
@@ -107,6 +108,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.seqera_submitter_fixtures",
     "tests.fixture_plugins.analysis_starter.specific_file_creators",
     "tests.fixture_plugins.analysis_starter.specific_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.store_fixtures",
     "tests.fixture_plugins.analysis_starter.params_file_creators",
     "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",

@@ -10,10 +10,10 @@ from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import _is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )

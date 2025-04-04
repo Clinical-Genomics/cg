@@ -34,7 +34,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.models import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,

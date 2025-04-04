@@ -4,7 +4,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import FileExtensions, GenePanelMasterList, Workflow
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
 from cg.io.txt import write_txt
-from cg.services.analysis_starter.configurator.file_creators.utils import get_genome_build
+from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
 from cg.store.models import Case
 from cg.store.store import Store
 

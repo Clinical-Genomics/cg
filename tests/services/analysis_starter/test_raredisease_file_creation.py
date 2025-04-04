@@ -4,17 +4,19 @@ from unittest import mock
 import pytest
 
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.services.analysis_starter.configurator.file_creators.config_file import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
-from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
+    GenePanelFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
 
