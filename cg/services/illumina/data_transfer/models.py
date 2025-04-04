@@ -17,8 +17,7 @@ class IlluminaFlowCellDTO(BaseModel):
     type: DeviceType
     model: str | None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("model")
     def validate_model(cls, model: str) -> str:
