@@ -86,6 +86,10 @@ class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
 
 
+class DecompressionCouldNotStartError(CgError):
+    """Raised when decompression could not be started."""
+
+
 class DeliveryReportError(CgError):
     """
     Exception related to delivery report creation.
@@ -334,3 +338,7 @@ class Chanjo2RequestError(Chanjo2APIClientError):
 
 class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
+
+
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""
