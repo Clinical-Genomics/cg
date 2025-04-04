@@ -28,13 +28,13 @@ def microsalt_configurator(
     microsalt_config_file_creator: MicrosaltConfigFileCreator,
     microsalt_fastq_handler: MicrosaltFastqHandler,
     lims_api: LimsAPI,
-    base_store: Store,
+    microsalt_store: Store,
 ) -> MicrosaltConfigurator:
     return MicrosaltConfigurator(
         config_file_creator=microsalt_config_file_creator,
         fastq_handler=microsalt_fastq_handler,
         lims_api=lims_api,
-        store=base_store,
+        store=microsalt_store,
     )
 
 
