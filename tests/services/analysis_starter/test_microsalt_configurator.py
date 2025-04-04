@@ -41,77 +41,44 @@ def test_configure_success(microsalt_configurator: MicrosaltConfigurator, micros
         assert config
 
 
-def test_configure_missing_organism(microsalt_configurator: MicrosaltConfigurator):
+def test_configure_missing_organism(
+    microsalt_configurator: MicrosaltConfigurator, microsalt_case_id: str
+):
     # GIVEN a microSALT case containing a sample with a missing organism
-    microsalt_case: Case = microsalt_configurator.store.add_case(
-        customer_id=0,
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.ANALYSIS_FILES,
-        name="microsalt-name",
-        ticket="123456",
-    )
-    application: Application = microsalt_configurator.store.get_application_by_tag("MWRNXTR003")
-    customer: Customer = microsalt_configurator.store.get_customers()[0]
-    microsalt_sample: Sample = microsalt_configurator.store.add_sample(
-        application_version=application.versions[0],
-        customer=customer,
-        name="microsalt-sample",
-        priority=Priority.standard,
-        sex=SexEnum.unknown,
-    )
-    microsalt_configurator.store.relate_sample(
-        case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
-    )
-    microsalt_configurator.store.add_item_to_store(microsalt_case)
-    microsalt_configurator.store.commit_to_store()
+    case: Case = microsalt_configurator.store.get_case_by_internal_id(microsalt_case_id)
+    sample: Sample = case.samples[0]
+    sample.organism = None
 
     with pytest.raises(CgDataError):
         # WHEN configuring the case
-        microsalt_configurator.configure(microsalt_case.internal_id)
-    # THEN the missing organism should raise a CgDataError
+        microsalt_configurator.configure(microsalt_case_id)
+        # THEN the missing organism should raise a CgDataError
 
 
-def test_get_config_path_success(microsalt_configurator: MicrosaltConfigurator):
+def test_get_config_path_success(
+    microsalt_configurator: MicrosaltConfigurator, microsalt_case_id: str
+):
     # GIVEN a microsalt case
-    microsalt_case: Case = microsalt_configurator.store.add_case(
-        customer_id=0,
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.ANALYSIS_FILES,
-        name="microsalt-name",
-        ticket="123456",
-    )
-
-    microsalt_configurator.store.add_item_to_store(microsalt_case)
-    microsalt_configurator.store.commit_to_store()
-
     # GIVEN that the config file exists
     with mock.patch.object(Path, "exists", return_value=True):
         # WHEN configuring the case
-        config = microsalt_configurator.get_config(microsalt_case.internal_id)
+        config = microsalt_configurator.get_config(microsalt_case_id)
 
         # THEN the returned configuration should be correct
-        assert config.case_id == microsalt_case.internal_id
-        assert config.workflow == microsalt_case.data_analysis
+        assert config.case_id == microsalt_case_id
+        assert config.workflow == Workflow.MICROSALT
         assert config.config_file_path == Path(
             microsalt_configurator.config_file_creator.queries_path,
-            microsalt_case.internal_id + FileExtensions.JSON,
+            microsalt_case_id + FileExtensions.JSON,
         )
 
 
-def test_get_config_path_config_not_ready(microsalt_configurator: MicrosaltConfigurator):
+def test_get_config_path_config_not_ready(
+    microsalt_configurator: MicrosaltConfigurator, microsalt_case_id: str
+):
     # GIVEN a microsalt case with no existing config file
-    microsalt_case: Case = microsalt_configurator.store.add_case(
-        customer_id=0,
-        data_analysis=Workflow.MICROSALT,
-        data_delivery=DataDelivery.ANALYSIS_FILES,
-        name="microsalt-name",
-        ticket="123456",
-    )
-
-    microsalt_configurator.store.add_item_to_store(microsalt_case)
-    microsalt_configurator.store.commit_to_store()
 
     with pytest.raises(CaseNotConfiguredError):
         # WHEN configuring the case
-        microsalt_configurator.get_config(microsalt_case.internal_id)
-        # THEN
+        microsalt_configurator.get_config(microsalt_case_id)
+        # THEN it raises a CaseNotConfiguredError

@@ -3,13 +3,14 @@ import pytest
 from cg.constants.constants import DataDelivery, Workflow
 from cg.constants.priority import Priority
 from cg.models.orders.sample_base import SexEnum, StatusEnum
-from cg.store.models import Application, Case, Customer, Sample
+from cg.store.models import Application, Case, Customer, Organism, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
 def microsalt_store(base_store: Store, microsalt_case_id: str, helpers: StoreHelpers) -> Store:
+    organism: Organism = base_store.get_all_organisms()[0]
     microsalt_case: Case = helpers.add_case(
         customer_id="cust000",
         data_analysis=Workflow.MICROSALT,
@@ -26,6 +27,7 @@ def microsalt_store(base_store: Store, microsalt_case_id: str, helpers: StoreHel
         application_version=application.versions[0],
         customer=customer,
         name="microsalt-sample",
+        organism=organism,
         priority=Priority.standard,
         sex=SexEnum.unknown,
     )
