@@ -13,9 +13,11 @@ from cg.store.store import Store
 
 @pytest.fixture
 def microsalt_config_file_creator(
-    base_store: Store, lims_api: LimsAPI
+    microsalt_store: Store, lims_api: LimsAPI
 ) -> MicrosaltConfigFileCreator:
-    return MicrosaltConfigFileCreator(lims_api=lims_api, queries_path="/dev/null", store=base_store)
+    return MicrosaltConfigFileCreator(
+        lims_api=lims_api, queries_path="/dev/null", store=microsalt_store
+    )
 
 
 @pytest.fixture
