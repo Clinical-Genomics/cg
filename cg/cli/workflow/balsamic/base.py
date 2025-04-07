@@ -221,7 +221,6 @@ def start(
     """Start full workflow for case ID."""
     analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
-    cluster_env_script = analysis_api.get_cluster_env_script()
     LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(
@@ -240,7 +239,7 @@ def start(
         case_id=case_id,
         workflow_profile=workflow_profile,
         slurm_quality_of_service=slurm_quality_of_service,
-        cluster_env=cluster_env_script,
+        cluster_env=cluster_env,
         dry_run=dry_run,
     )
 
