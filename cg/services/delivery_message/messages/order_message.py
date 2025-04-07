@@ -4,7 +4,7 @@ from cg.services.delivery_message.messages.utils import get_caesar_delivery_path
 from cg.store.models import Case
 
 
-class OrderDeliveryMessage(DeliveryMessage):
+class TaxprofilerDeliveryMessage(DeliveryMessage):
 
     FILE_TYPES_BY_DATA_DELIVERY_MAP: dict[DataDelivery, str] = {
         DataDelivery.FASTQ_ANALYSIS: "fastq and analysis",
