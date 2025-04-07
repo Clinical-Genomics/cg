@@ -44,7 +44,7 @@ def test_create_failure_missing_organism(
         # WHEN creating the case's config file
         # THEN the method should raise a CgDataError
         microsalt_config_file_creator.create(microsalt_case_id)
-        assert error.value == "Organism missing on Sample"
+    assert str(error.value) == "Organism missing on Sample"
 
 
 def test_organism_override(microsalt_store: Store, microsalt_case_id: str):
