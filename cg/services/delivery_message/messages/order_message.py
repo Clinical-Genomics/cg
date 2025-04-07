@@ -8,7 +8,7 @@ class OrderDeliveryMessage(DeliveryMessage):
 
     FILE_TYPES_BY_DATA_DELIVERY_MAP: dict[DataDelivery, str] = {
         DataDelivery.FASTQ_ANALYSIS: "fastq and analysis",
-        DataDelivery.ANALYSIS: DataDelivery.ANALYSIS,
+        DataDelivery.ANALYSIS_FILES: DataDelivery.ANALYSIS_FILES,
     }
 
     def create_message(self, cases: list[Case]) -> str:

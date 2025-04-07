@@ -165,7 +165,6 @@ class SampleType(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS: str = "analysis"
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
     BAM: str = "bam"
