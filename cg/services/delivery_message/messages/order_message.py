@@ -8,7 +8,6 @@ class OrderDeliveryMessage(DeliveryMessage):
 
     FILE_TYPES_BY_DATA_DELIVERY_MAP: dict[DataDelivery, str] = {
         DataDelivery.FASTQ_ANALYSIS: "fastq and analysis",
-        DataDelivery.FASTQ: DataDelivery.FASTQ,
         DataDelivery.ANALYSIS: DataDelivery.ANALYSIS,
     }
 
