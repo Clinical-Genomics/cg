@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.devices import DeviceType
@@ -17,8 +17,7 @@ class IlluminaFlowCellDTO(BaseModel):
     type: DeviceType
     model: str | None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("model")
     def validate_model(cls, model: str) -> str:
@@ -58,9 +57,7 @@ class IlluminaSequencingRunDTO(BaseModel):
             return fraction_to_percent(value)
         return value
 
-    class Config:
-        arbitrary_types_allowed = True
-        validate_assignment = True
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
 
 
 class IlluminaSampleSequencingMetricsDTO(BaseModel):
@@ -82,6 +79,4 @@ class IlluminaSampleSequencingMetricsDTO(BaseModel):
             return fraction_to_percent(value)
         return value
 
-    class Config:
-        arbitrary_types_allowed = True
-        validate_assignment = True
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
