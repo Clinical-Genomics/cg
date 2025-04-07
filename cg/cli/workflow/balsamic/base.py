@@ -111,12 +111,11 @@ def run(
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
-        cluster_env_script = analysis_api.get_cluster_env_script()
         analysis_api.run_analysis(
             case_id=case_id,
             workflow_profile=workflow_profile,
             slurm_quality_of_service=slurm_quality_of_service,
-            cluster_env=cluster_env_script,
+            cluster_env=cluster_env,
             dry_run=dry_run,
         )
         if dry_run:
