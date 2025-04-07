@@ -62,7 +62,8 @@ class MicrosaltConfigFileCreator:
             sequencing_qc_passed=passes_sequencing_qc,
         )
 
-    def _get_organism(self, sample: Sample) -> str:
+    @staticmethod
+    def _get_organism(sample: Sample) -> str:
         """
         Gets organism special handling for certain species. Fallback on reference genome.
         """
