@@ -65,7 +65,7 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
         return get_rna_message_strategy_from_data_delivery(case=case, store=store)
 
     if case.data_analysis in Workflow.TAXPROFILER:
-        return get_order_message_strategy_from_data_delivery(case=case)
+        return OrderDeliveryMessage()
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
@@ -74,10 +74,6 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
 def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
     message_strategy: DeliveryMessage = MESSAGE_MAP[case.data_delivery]()
     return message_strategy
-
-
-def get_order_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
-    return OrderDeliveryMessage()
 
 
 def get_rna_message_strategy_from_data_delivery(
