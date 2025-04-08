@@ -67,7 +67,7 @@ CLINICAL_DELIVERY_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
 RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
+    {"fastq", "bam"},
 ]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -196,7 +196,9 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
+    # Deprecate class? it is only for type hints which are wrong
     ANALYSIS: str = "analysis"
     BAM: str = "bam"
     FASTQ: str = "fastq"
     FASTQ_ANALYSIS: str = "fastq-analysis"
+    RAW_DATA_ANALYSIS: str = "raw_data-analysis"
