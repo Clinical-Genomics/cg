@@ -65,7 +65,7 @@ def test_configure_missing_organism(
 def test_get_config_path_success(
     microsalt_configurator: MicrosaltConfigurator, microsalt_case: Case, microsalt_sample: Sample
 ):
-    # GIVEN a microsalt case
+    # GIVEN a microSALT case
     # GIVEN that the config file exists
     with mock.patch.object(Path, "exists", return_value=True):
         # WHEN configuring the case
