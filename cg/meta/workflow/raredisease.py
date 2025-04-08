@@ -111,7 +111,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_germlinecnvcaller_flag(self, analysis_type: str, target_bed_file: str) -> bool:
         LOG.info(f"Analysis type: {analysis_type}")
-        if analysis_type == AnalysisType.WES and target_bed_file == DEFAULT_CAPTURE_KIT:
+        if analysis_type == AnalysisType.WES and DEFAULT_CAPTURE_KIT in target_bed_file:
+            LOG.info(f"Skip germlinecnvcaller for {analysis_type} with {target_bed_file}")
             return False
         return True
 
