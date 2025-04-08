@@ -142,6 +142,11 @@ class SexSubjectIdError(CaseSampleError):
     message: str = "Another sample with the same subject id has a different sex"
 
 
+class CaptureKitResetError(CaseSampleError):
+    field: str = "warnings"
+    message: str = "Capture Kit was reset since it will not be used with this application."
+
+
 class CaptureKitMissingError(CaseSampleError):
     field: str = "capture_kit"
     message: str = "Bait set is required for TGS analyses"
