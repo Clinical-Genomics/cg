@@ -594,7 +594,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {
                 "--account": self.account,
@@ -605,7 +604,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--workflow-profile": workflow_profile,
             }
         )
-        parameters = command + options + run_analysis + benchmark
+        parameters = command + options + run_analysis
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
