@@ -16,16 +16,16 @@ from cg.clients.chanjo2.models import (
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
+    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
-    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
-    RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
-    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
-from cg.constants.sequencing import SeqLibraryPrepCategory, NOVASEQ_SEQUENCING_READ_LENGTH
+from cg.constants.sequencing import NOVASEQ_SEQUENCING_READ_LENGTH, SeqLibraryPrepCategory
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -34,9 +34,9 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
+    RarediseaseQCMetrics,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
-    RarediseaseQCMetrics,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
@@ -109,16 +109,19 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
 
-    def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
-        if analysis_type == AnalysisType.WGS:
-            return True
-        return False
+    def get_germlinecnvcaller_flag(self, analysis_type: str, target_bed_file: str) -> bool:
+        LOG.info(f"Analysis type: {analysis_type}")
+        if analysis_type == AnalysisType.WES and target_bed_file == DEFAULT_CAPTURE_KIT:
+            return False
+        return True
 
     def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
-        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
+        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(
+            analysis_type=analysis_type, target_bed_file=target_bed_file
+        )
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
