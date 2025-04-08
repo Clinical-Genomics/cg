@@ -197,7 +197,6 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
-    # Deprecate class? it is only for type hints which are wrong
     ANALYSIS: str = "analysis"
     BAM: str = "bam"
     FASTQ: str = "fastq"
