@@ -16,7 +16,8 @@ class NfTowerStatus(StrEnum):
 
 
 NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
-    "median_coverage": {"norm": "gt", "threshold": 25},
+    "median_coverage": {"norm": "gt", "threshold": 20},
+    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD = 0.005
@@ -76,6 +77,10 @@ MULTIQC_NEXFLOW_CONFIG = """process {
     }
 }
 """
+
+NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
+NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
+NALLO_COVERAGE_THRESHOLD: int = 10
 
 RAREDISEASE_COVERAGE_FILE_TAGS: list[str] = ["coverage", "d4"]
 RAREDISEASE_COVERAGE_INTERVAL_TYPE: str = "genes"

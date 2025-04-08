@@ -126,7 +126,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
-MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
+MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{"storage", "assembly"}]
 
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
@@ -162,6 +162,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.MUTANT: {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
+    },
+    Workflow.NALLO: {
+        "case_tags": CLINICAL_DELIVERY_TAGS,
+        "sample_tags": CLINICAL_DELIVERY_TAGS,
     },
     Workflow.RAREDISEASE: {
         "case_tags": CLINICAL_DELIVERY_TAGS,

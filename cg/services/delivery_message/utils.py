@@ -15,6 +15,7 @@ from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
+from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
 from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAAnalysisStrategy,
     RNADeliveryMessage,
@@ -62,6 +63,9 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
 
     if case.data_analysis in [Workflow.MIP_RNA, Workflow.TOMTE]:
         return get_rna_message_strategy_from_data_delivery(case=case, store=store)
+
+    if case.data_analysis in Workflow.TAXPROFILER:
+        return TaxprofilerDeliveryMessage()
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
