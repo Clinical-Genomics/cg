@@ -68,7 +68,7 @@ def test_get_config_path_success(
     # GIVEN a microSALT case
     # GIVEN that the config file exists
     with mock.patch.object(Path, "exists", return_value=True):
-        # WHEN configuring the case
+        # WHEN getting the config object
         config = microsalt_configurator.get_config(microsalt_case.internal_id)
 
         # THEN the returned configuration should be correct
