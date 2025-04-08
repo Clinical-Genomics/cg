@@ -123,6 +123,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(
             analysis_type=analysis_type, target_bed_file=target_bed_file
         )
+        LOG.info(f"Skip germlinecnvcaller: {skip_germlinecnvcaller}")
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
