@@ -1,9 +1,6 @@
-import logging
 from abc import ABC, abstractmethod
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
-
-LOG = logging.getLogger(__name__)
 
 
 class Configurator(ABC):
