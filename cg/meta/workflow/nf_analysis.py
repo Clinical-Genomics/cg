@@ -355,9 +355,11 @@ class NfAnalysisAPI(AnalysisAPI):
         workflow_parameters: dict = built_workflow_parameters | (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
+        LOG.info(f"Parameters file content: {workflow_parameters}")
         replaced_workflow_parameters: dict = self.replace_values_in_params_file(
             workflow_parameters=workflow_parameters
         )
+        LOG.info(f"Parameters file content: {replaced_workflow_parameters}")
         if not dry_run:
             self.write_params_file(
                 case_id=case_id, replaced_workflow_parameters=replaced_workflow_parameters
