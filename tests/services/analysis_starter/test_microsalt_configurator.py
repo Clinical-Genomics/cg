@@ -83,7 +83,7 @@ def test_get_config_path_success(
 def test_get_config_path_config_not_ready(
     microsalt_configurator: MicrosaltConfigurator, microsalt_case: Case
 ):
-    # GIVEN a microsalt case with no existing config file
+    # GIVEN a microSALT case with no existing config file
 
     with pytest.raises(CaseNotConfiguredError):
         # WHEN getting the config object
