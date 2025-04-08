@@ -352,6 +352,7 @@ class NfAnalysisAPI(AnalysisAPI):
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 
+        LOG.info(f"Built workflow parameters: {built_workflow_parameters}")
         workflow_parameters: dict = built_workflow_parameters | (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
