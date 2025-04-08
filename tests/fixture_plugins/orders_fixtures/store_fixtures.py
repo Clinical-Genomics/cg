@@ -15,6 +15,7 @@ def store_to_submit_and_validate_orders(
 ) -> Store:
     app_tags: dict[str, list[OrderType]] = {
         "PANKTTR100": [OrderType.BALSAMIC],
+        "PANKTTR020": [OrderType.BALSAMIC],
         "WGSPCFC030": [OrderType.FASTQ, OrderType.MIP_DNA],
         "RMLP15R100": [OrderType.FLUFFY, OrderType.RML],
         "RMLP15R200": [OrderType.FLUFFY, OrderType.RML],
