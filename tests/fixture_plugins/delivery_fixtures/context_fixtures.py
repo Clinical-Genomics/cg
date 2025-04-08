@@ -7,7 +7,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample, Order
+from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -25,6 +25,44 @@ def delivery_housekeeper_api(
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_sample_bundle, include=True)
     helpers.ensure_hk_bundle(
         store=hk_api, bundle_data=hk_delivery_another_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_case_bundle, include=True)
+    return hk_api
+
+
+@pytest.fixture
+def fastq_delivery_housekeeper_api(
+    real_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    hk_delivery_fastq_sample_bundle: dict[str, Any],
+    hk_delivery_another_fastq_sample_bundle: dict[str, Any],
+    hk_delivery_case_bundle: dict[str, Any],
+) -> HousekeeperAPI:
+    """Delivery API Housekeeper context."""
+    hk_api: HousekeeperAPI = real_housekeeper_api
+    helpers.ensure_hk_bundle(
+        store=hk_api, bundle_data=hk_delivery_fastq_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(
+        store=hk_api, bundle_data=hk_delivery_another_fastq_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_case_bundle, include=True)
+    return hk_api
+
+
+@pytest.fixture
+def bam_delivery_housekeeper_api(
+    real_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    hk_delivery_bam_sample_bundle: dict[str, Any],
+    hk_delivery_another_bam_sample_bundle: dict[str, Any],
+    hk_delivery_case_bundle: dict[str, Any],
+) -> HousekeeperAPI:
+    """Delivery API Housekeeper context."""
+    hk_api: HousekeeperAPI = real_housekeeper_api
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_bam_sample_bundle, include=True)
+    helpers.ensure_hk_bundle(
+        store=hk_api, bundle_data=hk_delivery_another_bam_sample_bundle, include=True
     )
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_case_bundle, include=True)
     return hk_api
@@ -238,10 +276,10 @@ def delivery_context_balsamic(
 @pytest.fixture
 def delivery_context_microsalt(
     cg_context: CGConfig,
-    delivery_housekeeper_api: HousekeeperAPI,
+    fastq_delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_microsalt: Store,
 ) -> CGConfig:
     """Delivery API MicroSALT context."""
-    cg_context.housekeeper_api_ = delivery_housekeeper_api
+    cg_context.housekeeper_api_ = fastq_delivery_housekeeper_api
     cg_context.status_db_ = delivery_store_microsalt
     return cg_context
