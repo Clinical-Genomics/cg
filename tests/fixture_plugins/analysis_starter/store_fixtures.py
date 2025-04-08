@@ -9,13 +9,13 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def microsalt_store(base_store: Store, microsalt_case_id: str, helpers: StoreHelpers) -> Store:
+def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
     organism: Organism = base_store.get_all_organisms()[0]
     microsalt_case: Case = helpers.add_case(
         customer_id="cust000",
         data_analysis=Workflow.MICROSALT,
         data_delivery=DataDelivery.ANALYSIS_FILES,
-        internal_id=microsalt_case_id,
+        internal_id="microparakeet",
         name="microsalt-name",
         store=base_store,
         ticket="123456",
@@ -40,8 +40,3 @@ def microsalt_store(base_store: Store, microsalt_case_id: str, helpers: StoreHel
     base_store.commit_to_store()
 
     return base_store
-
-
-@pytest.fixture
-def microsalt_case_id() -> str:
-    return "microparakeet"
