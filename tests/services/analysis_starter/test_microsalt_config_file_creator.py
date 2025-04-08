@@ -28,7 +28,7 @@ def test_create_success(
 ):
     # GIVEN a microsalt_config_file_creator
     with mock.patch.object(WriteFile, "write_file_from_content", return_value=True) as file_writer:
-        # WHEN creating a microsalt config file
+        # WHEN creating a microSALT config file
         microsalt_config_file_creator.create(microsalt_case.internal_id)
         # THEN it should be written to disk as json
         file_writer.assert_called_once_with(
