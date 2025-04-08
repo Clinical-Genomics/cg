@@ -1,7 +1,7 @@
 import pytest
 
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.file_creators.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
 

@@ -1,5 +1,5 @@
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
-from cg.services.analysis_starter.configurator.abstract_service import Configurator
+from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
 from cg.services.analysis_starter.submitters.submitter import Submitter
 
