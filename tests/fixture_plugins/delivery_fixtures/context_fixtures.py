@@ -55,14 +55,16 @@ def delivery_fohm_upload_housekeeper_api(
     real_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
     hk_delivery_case_bundle_fohm_upload: dict[str, Any],
-    hk_delivery_sample_bundle: dict[str, Any],
-    hk_delivery_another_sample_bundle: dict[str, Any],
+    hk_delivery_fastq_sample_bundle: dict[str, Any],
+    hk_delivery_another_fastq_sample_bundle: dict[str, Any],
 ) -> HousekeeperAPI:
     """Delivery API Housekeeper context."""
     hk_api: HousekeeperAPI = real_housekeeper_api
-    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_sample_bundle, include=True)
     helpers.ensure_hk_bundle(
-        store=hk_api, bundle_data=hk_delivery_another_sample_bundle, include=True
+        store=hk_api, bundle_data=hk_delivery_fastq_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(
+        store=hk_api, bundle_data=hk_delivery_another_fastq_sample_bundle, include=True
     )
     helpers.ensure_hk_bundle(
         store=hk_api, bundle_data=hk_delivery_case_bundle_fohm_upload, include=True

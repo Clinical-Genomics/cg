@@ -144,7 +144,6 @@ class DeliveryServiceFactory:
         """
         if delivery_destination == DeliveryDestination.FOHM:
             return FOHMUploadTagsFetcher()
-        # Do we need different tag fetchers now that BAM is included in the raw data tags?
         service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,

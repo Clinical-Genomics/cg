@@ -11,36 +11,6 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileT
 
 
 @pytest.fixture
-def hk_delivery_sample_bundle(
-    sample_hk_bundle_no_files: dict[str, Any],
-    sample_id: str,
-    delivery_fastq_file: Path,
-    delivery_bam_file: Path,
-    delivery_spring_file: Path,
-) -> dict:
-    sample_hk_bundle: dict[str, Any] = deepcopy(sample_hk_bundle_no_files)
-    sample_hk_bundle["name"] = sample_id
-    sample_hk_bundle["files"] = [
-        {
-            "archive": False,
-            "path": delivery_fastq_file.as_posix(),
-            "tags": [SequencingFileTag.FASTQ, sample_id],
-        },
-        {
-            "archive": False,
-            "path": delivery_spring_file.as_posix(),
-            "tags": [SequencingFileTag.SPRING, sample_id],
-        },
-        {
-            "archive": False,
-            "path": delivery_bam_file.as_posix(),
-            "tags": [AlignmentFileTag.BAM, sample_id],
-        },
-    ]
-    return sample_hk_bundle
-
-
-@pytest.fixture
 def hk_delivery_fastq_sample_bundle(
     sample_hk_bundle_no_files: dict[str, Any],
     sample_id: str,
@@ -118,36 +88,6 @@ def hk_delivery_another_bam_sample_bundle(
         {
             "archive": False,
             "path": delivery_bam_file.as_posix(),
-            "tags": [AlignmentFileTag.BAM, another_sample_id],
-        },
-    ]
-    return sample_hk_bundle
-
-
-@pytest.fixture
-def hk_delivery_another_sample_bundle(
-    sample_hk_bundle_no_files: dict[str, Any],
-    another_sample_id: str,
-    delivery_another_fastq_file: Path,
-    delivery_another_bam_file: Path,
-    delivery_another_spring_file: Path,
-) -> dict:
-    sample_hk_bundle: dict[str, Any] = deepcopy(sample_hk_bundle_no_files)
-    sample_hk_bundle["name"] = another_sample_id
-    sample_hk_bundle["files"] = [
-        {
-            "archive": False,
-            "path": delivery_another_fastq_file.as_posix(),
-            "tags": [SequencingFileTag.FASTQ, another_sample_id],
-        },
-        {
-            "archive": False,
-            "path": delivery_another_spring_file.as_posix(),
-            "tags": [SequencingFileTag.SPRING, another_sample_id],
-        },
-        {
-            "archive": False,
-            "path": delivery_another_bam_file.as_posix(),
             "tags": [AlignmentFileTag.BAM, another_sample_id],
         },
     ]
