@@ -86,6 +86,6 @@ def test_get_config_path_config_not_ready(
     # GIVEN a microsalt case with no existing config file
 
     with pytest.raises(CaseNotConfiguredError):
-        # WHEN configuring the case
+        # WHEN getting the config object
         microsalt_configurator.get_config(microsalt_case.internal_id)
         # THEN it raises a CaseNotConfiguredError
