@@ -95,13 +95,13 @@ def fohm_data_delivery_service(
 
 @pytest.fixture
 def analysis_delivery_service(
-    delivery_housekeeper_api: HousekeeperAPI,
+    fastq_delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_balsamic: Store,
 ) -> AnalysisDeliveryFileFetcher:
     """Fixture to get an instance of FetchAnalysisDeliveryFilesService."""
     tag_service = SampleAndCaseDeliveryTagsFetcher()
     return AnalysisDeliveryFileFetcher(
-        hk_api=delivery_housekeeper_api,
+        hk_api=fastq_delivery_housekeeper_api,
         status_db=delivery_store_balsamic,
         tags_fetcher=tag_service,
     )

@@ -13,24 +13,6 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def delivery_housekeeper_api(
-    real_housekeeper_api: HousekeeperAPI,
-    helpers: StoreHelpers,
-    hk_delivery_sample_bundle: dict[str, Any],
-    hk_delivery_another_sample_bundle: dict[str, Any],
-    hk_delivery_case_bundle: dict[str, Any],
-) -> HousekeeperAPI:
-    """Delivery API Housekeeper context."""
-    hk_api: HousekeeperAPI = real_housekeeper_api
-    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_sample_bundle, include=True)
-    helpers.ensure_hk_bundle(
-        store=hk_api, bundle_data=hk_delivery_another_sample_bundle, include=True
-    )
-    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_delivery_case_bundle, include=True)
-    return hk_api
-
-
-@pytest.fixture
 def fastq_delivery_housekeeper_api(
     real_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -264,11 +246,11 @@ def delivery_store_mutant(
 @pytest.fixture
 def delivery_context_balsamic(
     cg_context: CGConfig,
-    delivery_housekeeper_api: HousekeeperAPI,
+    fastq_delivery_housekeeper_api: HousekeeperAPI,
     delivery_store_balsamic: Store,
 ) -> CGConfig:
     """Delivery API Balsamic context."""
-    cg_context.housekeeper_api_ = delivery_housekeeper_api
+    cg_context.housekeeper_api_ = fastq_delivery_housekeeper_api
     cg_context.status_db_ = delivery_store_balsamic
     return cg_context
 
