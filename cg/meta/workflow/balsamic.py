@@ -586,7 +586,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         workflow_profile: Path | None = None,
-        cluster_env: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -600,7 +599,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--cluster-env": cluster_env or self.get_cluster_env_script(),
                 "--workflow-profile": workflow_profile,
             }
         )

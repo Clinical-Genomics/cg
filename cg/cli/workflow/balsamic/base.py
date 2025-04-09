@@ -11,7 +11,6 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
     OPTION_WORKFLOW_PROFILE,
     OPTION_GENDER,
-    OPTION_CLUSTER_ENV,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
@@ -93,7 +92,6 @@ def config_case(
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
 @OPTION_WORKFLOW_PROFILE
-@OPTION_CLUSTER_ENV
 @DRY_RUN
 @OPTION_QOS
 @click.pass_obj
@@ -101,7 +99,6 @@ def run(
     context: CGConfig,
     case_id: str,
     workflow_profile: click.Path,
-    cluster_env: str,
     slurm_quality_of_service: str,
     dry_run: bool,
 ):
@@ -115,7 +112,6 @@ def run(
             case_id=case_id,
             workflow_profile=workflow_profile,
             slurm_quality_of_service=slurm_quality_of_service,
-            cluster_env=cluster_env,
             dry_run=dry_run,
         )
         if dry_run:
@@ -201,7 +197,6 @@ def store_housekeeper(
 @OPTION_CACHE_VERSION
 @OPTION_OBSERVATIONS
 @OPTION_WORKFLOW_PROFILE
-@OPTION_CLUSTER_ENV
 @click.pass_context
 def start(
     context: click.Context,
@@ -214,7 +209,6 @@ def start(
     observations: list[click.Path],
     slurm_quality_of_service: str,
     workflow_profile: click.Path,
-    cluster_env: str,
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
@@ -238,7 +232,6 @@ def start(
         case_id=case_id,
         workflow_profile=workflow_profile,
         slurm_quality_of_service=slurm_quality_of_service,
-        cluster_env=cluster_env,
         dry_run=dry_run,
     )
 

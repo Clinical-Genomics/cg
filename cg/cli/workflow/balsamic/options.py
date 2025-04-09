@@ -57,10 +57,3 @@ OPTION_WORKFLOW_PROFILE = click.option(
     required=False,
     help="Path to directory containing config.yaml with workflow rule resources.",
 )
-
-OPTION_CLUSTER_ENV = click.option(
-    "--cluster-env",
-    type=click.Path(exists=True),
-    required=False,
-    help="Path to usestage.sh or useprod.sh.",
-)
