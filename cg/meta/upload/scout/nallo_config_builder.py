@@ -90,7 +90,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.d4_file = self.get_sample_file(
-            hk_tags=self.sample_tags.d4_file, sample_id=sample_id
+            hk_tags=self.sample_tags.d4_file, sample_id=sample_id, hk_version=hk_version
         )
         config_sample.paraphase_alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.paraphase_alignment_path,
