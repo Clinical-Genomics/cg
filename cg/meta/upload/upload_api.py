@@ -15,9 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -31,7 +29,7 @@ class UploadAPI(MetaAPI):
         self.analysis_api: AnalysisAPI = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
             hk_api=config.housekeeper_api,
-            scout_api=config.scout_api,
+            scout_api=analysis_api.scout_api,
             madeline_api=config.madeline_api,
             analysis_api=self.analysis_api,
             lims_api=config.lims_api,

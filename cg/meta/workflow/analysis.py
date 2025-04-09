@@ -10,6 +10,7 @@ import rich_click as click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -57,6 +58,10 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.workflow = workflow
+        if workflow == workflow.NALLO:
+            self.scout_api: ScoutAPI = self.scout_api_38
+        else:
+            self.scout_api: ScoutAPI = self.scout_api_37
         self._process = None
 
     @property
