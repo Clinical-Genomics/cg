@@ -225,6 +225,7 @@ class ExcelOrderformParser(OrderformParser):
     def _transform_data_delivery(data_delivery: str) -> str:
         """Transforms the data-delivery parsed in the excel file, to the ones used in cg."""
         try:
+            # TODO: Add compatibility for raw_data ordering (Nallo)
             orderform_to_internal: dict = {
                 "analysis": DataDelivery.ANALYSIS_FILES,
                 "analysis + scout": DataDelivery.ANALYSIS_SCOUT,
