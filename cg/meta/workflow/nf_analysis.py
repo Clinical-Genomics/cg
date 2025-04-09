@@ -358,8 +358,6 @@ class NfAnalysisAPI(AnalysisAPI):
         duplicate_keys = set(built_workflow_parameters.keys()) & set(yaml_params.keys())
         if duplicate_keys:
             raise ValueError(f"Duplicate parameter keys found: {duplicate_keys}")
-
-        # LOG.info(f"Built workflow parameters: {built_workflow_parameters}")
         workflow_parameters: dict = built_workflow_parameters | (yaml_params)
         replaced_workflow_parameters: dict = self.replace_values_in_params_file(
             workflow_parameters=workflow_parameters
