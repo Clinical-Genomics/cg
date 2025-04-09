@@ -16,6 +16,11 @@ from cg.services.delivery_message.messages.delivery_message import DeliveryMessa
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
 from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
+from cg.services.delivery_message.messages.raw_data_analysis_message import RawDataAnalysisMessage
+from cg.services.delivery_message.messages.raw_data_analysis_scout_message import (
+    RawDataAnalysisScoutMessage,
+)
+from cg.services.delivery_message.messages.raw_data_scout_message import RawDataScoutMessage
 from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAAnalysisStrategy,
     RNADeliveryMessage,
@@ -29,14 +34,17 @@ from cg.store.store import Store
 
 MESSAGE_MAP = {
     DataDelivery.ANALYSIS_FILES: AnalysisMessage,
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: ScoutMessage,
-    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
-    DataDelivery.STATINA: StatinaMessage,
     DataDelivery.BAM: BamMessage,
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.RAW_DATA_ANALYSIS: RawDataAnalysisMessage,
+    DataDelivery.RAW_DATA_ANALYSIS_SCOUT: RawDataAnalysisScoutMessage,
+    DataDelivery.RAW_DATA_SCOUT: RawDataScoutMessage,
+    DataDelivery.SCOUT: ScoutMessage,
+    DataDelivery.STATINA: StatinaMessage,
 }
 
 
