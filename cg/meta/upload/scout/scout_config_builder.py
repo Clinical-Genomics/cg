@@ -76,10 +76,11 @@ class ScoutConfigBuilder:
                 return True
         return False
 
-    def include_pedigree_picture(self, load_config: ScoutLoadConfig) -> None:
+    def include_pedigree_picture(self, load_config: ScoutLoadConfig, analysis: Analysis) -> None:
+        """Run Madeline only for cases with multiple related samples."""
         if self.is_multi_sample_case(load_config=load_config):
             if self.is_family_case(load_config=load_config):
-                svg_path: Path = self.run_madeline(self.analysis.case)
+                svg_path: Path = self.run_madeline(analysis.case)
                 load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
