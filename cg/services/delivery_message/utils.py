@@ -58,7 +58,7 @@ RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAUploadMessageStrategy]] = {
 
 
 def get_message(cases: list[Case], store: Store) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(cases[0], store)
+    message_strategy: DeliveryMessage = get_message_strategy(case=cases[0], store=store)
     return message_strategy.create_message(cases)
 
 
