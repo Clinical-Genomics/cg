@@ -23,7 +23,7 @@ from cg.store.store import Store
 
 @pytest.fixture
 def expected_fastq_delivery_files(
-    delivery_housekeeper_api: HousekeeperAPI,
+    fastq_delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
     sample_id: str,
     sample_name: str,
@@ -41,7 +41,7 @@ def expected_fastq_delivery_files(
             case_id=case_id,
             sample_id=sample[0],
             sample_name=sample[1],
-            file_path=delivery_housekeeper_api.get_files_from_latest_version(
+            file_path=fastq_delivery_housekeeper_api.get_files_from_latest_version(
                 bundle_name=sample[0], tags=[SequencingFileTag.FASTQ]
             )[0].full_path,
         )
@@ -58,7 +58,7 @@ def expected_fastq_delivery_files(
 
 @pytest.fixture
 def expected_bam_delivery_files(
-    delivery_housekeeper_api: HousekeeperAPI,
+    bam_delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
     sample_id: str,
     sample_name: str,
@@ -76,7 +76,7 @@ def expected_bam_delivery_files(
             case_id=case_id,
             sample_id=sample[0],
             sample_name=sample[1],
-            file_path=delivery_housekeeper_api.get_files_from_latest_version(
+            file_path=bam_delivery_housekeeper_api.get_files_from_latest_version(
                 bundle_name=sample[0], tags=[AlignmentFileTag.BAM]
             )[0].full_path,
         )
@@ -165,7 +165,7 @@ def expected_fohm_delivery_files(
 
 @pytest.fixture
 def expected_analysis_delivery_files(
-    delivery_housekeeper_api: HousekeeperAPI,
+    fastq_delivery_housekeeper_api: HousekeeperAPI,
     case_id: str,
     case_name: str,
     sample_id: str,
@@ -189,7 +189,7 @@ def expected_analysis_delivery_files(
                     sample_name=sample[1],
                     file_path=file.full_path,
                 )
-                for file in delivery_housekeeper_api.get_files_from_latest_version(
+                for file in fastq_delivery_housekeeper_api.get_files_from_latest_version(
                     bundle_name=case_id, tags=[AlignmentFileTag.CRAM, sample[0]]
                 )
             ]
@@ -198,7 +198,7 @@ def expected_analysis_delivery_files(
         CaseFile(
             case_id=case_id,
             case_name=case_name,
-            file_path=delivery_housekeeper_api.get_files_from_latest_version(
+            file_path=fastq_delivery_housekeeper_api.get_files_from_latest_version(
                 bundle_name=case_id, tags=[HK_DELIVERY_REPORT_TAG]
             )[0].full_path,
         )

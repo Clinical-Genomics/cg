@@ -2,11 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
-from cg.services.deliver_files.tag_fetcher.abstract import (
-    FetchDeliveryFileTagsService,
-)
+from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -29,6 +26,6 @@ class FetchDeliveryFilesService(ABC):
         self.tags_fetcher = tags_fetcher
 
     @abstractmethod
-    def get_files_to_deliver(self, case_id: str, sample_id: str | None) -> DeliveryFiles:
+    def get_files_to_deliver(self, case_id: str, sample_id: str | None = None) -> DeliveryFiles:
         """Get the files to deliver."""
         pass
