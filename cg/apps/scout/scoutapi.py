@@ -20,9 +20,9 @@ LOG = logging.getLogger(__name__)
 class ScoutAPI:
     """Interface to Scout."""
 
-    def __init__(self, config, slurm_upload_service: SlurmUploadService):
-        binary_path = config["scout"]["binary_path"]
-        config_path = config["scout"]["config_path"]
+    def __init__(self, scout_config, slurm_upload_service: SlurmUploadService):
+        binary_path = scout_config.binary_path
+        config_path = scout_config.config_path
         self.process = Process(binary=binary_path, config=config_path)
         self.slurm_upload_service = slurm_upload_service
         self.scout_base_command = f"{binary_path} --config {config_path}"

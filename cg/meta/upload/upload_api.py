@@ -29,7 +29,7 @@ class UploadAPI(MetaAPI):
         self.analysis_api: AnalysisAPI = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
             hk_api=config.housekeeper_api,
-            scout_api=config.scout_api,
+            scout_api=analysis_api.scout_api,
             madeline_api=config.madeline_api,
             analysis_api=self.analysis_api,
             lims_api=config.lims_api,

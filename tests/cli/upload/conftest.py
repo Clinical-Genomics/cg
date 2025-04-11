@@ -168,7 +168,7 @@ def base_context(
     cg_context.status_db_ = analysis_store
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = trailblazer_api
-    cg_context.scout_api_ = MockScoutApi()
+    cg_context.scout_api_37_ = MockScoutApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
 
@@ -287,7 +287,7 @@ def upload_context(
     cg_context.meta_apis["report_api"] = raredisease_delivery_report_api
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
-        scout_api=cg_context.scout_api,
+        scout_api=cg_context.scout_api_37,
         madeline_api=cg_context.madeline_api,
         analysis_api=analysis_api,
         lims_api=cg_context.lims_api,

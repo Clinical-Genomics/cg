@@ -237,6 +237,6 @@ def test_config_case_dry_run(
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     if analysis_api.is_gene_panel_required:
         assert "Creating gene panel file" in caplog.text
-        assert "bin/scout --config scout-stage.yaml export panel" in caplog.text
+        assert f"{analysis_api.scout_api.scout_base_command} export panel" in caplog.text
         gene_panel_path: Path = request.getfixturevalue(f"{workflow}_gene_panel_path")
         assert not gene_panel_path.is_file()

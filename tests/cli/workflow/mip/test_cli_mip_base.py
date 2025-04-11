@@ -189,7 +189,7 @@ def test_case_needs_to_be_stored(
 
     # GIVEN that, a panel is returned
     with mock.patch.object(
-        mip_dna_context.scout_api,
+        mip_dna_context.scout_api_37,
         "export_panels",
         return_value=["OMIM-AUTO"],
     ):
