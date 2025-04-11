@@ -22,6 +22,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -332,6 +333,22 @@ def mutant_past_run_dirs(
     """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
+    context.invoke(
+        past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
+    )
+
+
+@click.command("nallo-past-run-dirs")
+@SKIP_CONFIRMATION
+@DRY_RUN
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def nallo_past_run_dirs(
+    context: click.Context, before_str: str, skip_confirmation: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Nallo case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = NalloAnalysisAPI(context.obj)
     context.invoke(
         past_run_dirs, skip_confirmation=skip_confirmation, dry_run=dry_run, before_str=before_str
     )
