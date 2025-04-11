@@ -14,6 +14,10 @@ LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST143,
     CustomerId.CUST147,
 ]
+LOQUSDB_LONG_READ_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
+LOQUSDB_LONG_READ_SEQUENCING_METHODS = [
+    SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+]
 LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [
     SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
@@ -43,6 +47,7 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
+    LWP: str = "loqusdb-rd-lwp"
     WGS: str = "loqusdb"
     WES: str = "loqusdb-wes"
     SOMATIC: str = "loqusdb-somatic"
@@ -65,6 +70,23 @@ class MipDNAObservationsAnalysisTag(StrEnum):
     SV_VCF: str = "vcf-sv-research"
     PROFILE_GBCF: str = "snv-gbcf"
     FAMILY_PED: str = "pedigree"
+
+
+class NalloObservationsAnalysisTag(StrEnum):
+    """Nallo observations files analysis tags."""
+
+    SNV_VCF: str = "vcf-snv"
+    SV_VCF: str = "vcf-sv"
+    FAMILY_PED: str = "pedigree"
+
+
+class NalloLoadParameters(Enum):
+    """Nallo Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
 
 
 class ObservationsFileWildcards(StrEnum):
