@@ -58,7 +58,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.get_sample_information(
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
-        self.include_pedigree_picture(load_config)
+        self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
         load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
