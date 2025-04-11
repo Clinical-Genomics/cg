@@ -6,7 +6,12 @@ from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 
 LOQUSDB_ID = "_id"
-LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.BALSAMIC, Workflow.MIP_DNA, Workflow.RAREDISEASE]
+LOQUSDB_SUPPORTED_WORKFLOWS = [
+    Workflow.BALSAMIC,
+    Workflow.MIP_DNA,
+    Workflow.NALLO,
+    Workflow.RAREDISEASE,
+]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST110,
