@@ -13,11 +13,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkMipAnalysisTag,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
 from cg.io.controller import ReadFile
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -56,9 +52,7 @@ def upload_genotypes_hk_bundle(
 
 
 @pytest.fixture
-def analysis_obj(
-    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
-) -> Analysis:
+def analysis(analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers) -> Analysis:
     """Return an analysis object with a trio"""
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
@@ -67,12 +61,12 @@ def analysis_obj(
 def upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
-    analysis_obj: Analysis,
+    analysis: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -151,13 +145,13 @@ def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp)
 def upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
-    analysis_obj: Analysis,
+    analysis: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload reports hk bundle"""
 
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -196,7 +190,7 @@ def fastq_context(
 
 
 @pytest.fixture(scope="function")
-def upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+def upload_scout_api(housekeeper_api: MockHousekeeperAPI):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api
@@ -241,7 +235,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def _request_analysis(self, analysis_store_single_case):
         self.analysis = analysis_store_single_case
 
-    def generate_config(self, analysis, **kwargs):
+    def generate_config(self, analysis=analysis, **kwargs):
         """Mock the generate config"""
         if self.missing_mandatory_field:
             self.config.vcf_snv = None
