@@ -6,6 +6,10 @@ from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
+from cg.services.orders.validation.models.sample import Sample
+from cg.store.models import Application
+from cg.store.store import Store
 
 DUE_TIME_BY_PRIORITY: dict[Priority, timedelta.days] = {
     Priority.express: timedelta(days=7),
@@ -21,7 +25,15 @@ def contains_existing_data(order: OrderWithCases) -> bool:
     return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
 
 
-def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
+def contains_external_data(samples: list[Sample], store: Store) -> bool:
+    for sample in samples:
+        application: Application | None = store.get_application_by_tag(sample.application)
+        if application and application.is_external:
+            return True
+    return False
+
+
+def get_ticket_tags(order: Order, order_type: OrderType, store: Store) -> list[str]:
     """Generate ticket tags based on the order and order type"""
 
     tags: list[str] = [ORDER_TYPE_WORKFLOW_MAP[order_type]]
@@ -29,6 +41,10 @@ def get_ticket_tags(order: Order, order_type: OrderType) -> list[str]:
     if isinstance(order, OrderWithCases):
         if contains_existing_data(order):
             tags.append("existing-data")
+
+    if isinstance(order, OrderWithSamples):
+        if contains_external_data(order.samples, store):
+            tags.append("external-data")
 
     return tags
 

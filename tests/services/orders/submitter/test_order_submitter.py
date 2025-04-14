@@ -1,22 +1,25 @@
 import datetime as dt
-from unittest.mock import patch
+from unittest.mock import MagicMock, create_autospec, patch
 
 import pytest
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
+from cg.constants.constants import DataDelivery
 from cg.exc import TicketCreationError
 from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import ContainerEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.order import Order
+from cg.services.orders.validation.models.sample import Sample as ValidationSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
-from cg.store.models import Case
+from cg.store.models import Application, Case
 from cg.store.models import Order as DbOrder
 from cg.store.models import Pool, Sample, User
 from cg.store.store import Store
@@ -203,10 +206,45 @@ def test_get_ticket_tags(
     order: OrderWithCases = request.getfixturevalue(order_fixture)
 
     # WHEN getting the ticket tags
-    tags = get_ticket_tags(order=order, order_type=order_type)
+    tags = get_ticket_tags(order=order, order_type=order_type, store=create_autospec(Store))
 
     # THEN the tags should be correct
     assert tags == expected_tags
+
+
+def test_get_ticket_tags_with_external_data_sample():
+
+    # GIVEN an order with an external data sample + another sample
+    external_application = Application()
+    external_application.is_external = True
+
+    store: Store = create_autospec(Store)
+    store.get_application_by_tag = lambda tag: external_application if tag == "ext_app" else None
+
+    order = OrderWithSamples(
+        customer="test_customer",
+        delivery_type=DataDelivery.ANALYSIS_FILES,
+        name="order with external data sample",
+        project_type=OrderType.MIP_DNA,
+        samples=[
+            ValidationSample(
+                application="missing_app",
+                container=ContainerEnum.no_container,
+                name="ExternalSample",
+            ),
+            ValidationSample(
+                application="ext_app",
+                container=ContainerEnum.no_container,
+                name="ExternalSample",
+            ),
+        ],
+    )
+
+    # WHEN getting the ticket tags
+    tags: list[str] = get_ticket_tags(order=order, order_type=order.order_type, store=store)
+
+    # THEN the tags should include external-data
+    assert "external-data" in tags
 
 
 @pytest.mark.parametrize(

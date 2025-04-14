@@ -4,6 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
+from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.constants.priority import Priority
@@ -39,7 +40,7 @@ class TicketHandler:
             order_type=order_type,
         )
 
-        tags: list[str] = get_ticket_tags(order=order, order_type=order_type)
+        tags: list[str] = get_ticket_tags(order=order, order_type=order_type, store=self.status_db)
         status: int = get_ticket_status(order=order)
 
         order_priority: Priority = self._get_max_case_priority(order=order)
