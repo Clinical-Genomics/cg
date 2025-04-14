@@ -46,7 +46,7 @@ def delivery_cases(
     microsalt_mwx_case_id: str,
     mip_case_id: str,
 ) -> list[dict]:
-    """Return a dictionary of case IDs."""
+    """Return a list of dictionary representations of cases."""
     return [
         _get_case_representation(
             case_id=fluffy_case_id,
