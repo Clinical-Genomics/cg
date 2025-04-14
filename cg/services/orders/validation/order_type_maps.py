@@ -42,6 +42,11 @@ from cg.services.orders.validation.order_types.mip_rna.validation_rules import (
 )
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.services.orders.validation.order_types.mutant.validation_rules import MUTANT_SAMPLE_RULES
+from cg.services.orders.validation.order_types.nallo.models.order import NALLOOrder
+from cg.services.orders.validation.order_types.nallo.validation_rules import (
+    NALLO_CASE_RULES,
+    NALLO_CASE_SAMPLE_RULES,
+)
 from cg.services.orders.validation.order_types.order_validation_rules import ORDER_RULES
 from cg.services.orders.validation.order_types.pacbio_long_read.models.order import PacbioOrder
 from cg.services.orders.validation.order_types.pacbio_long_read.validation_rules import (
@@ -104,6 +109,10 @@ ORDER_TYPE_RULE_SET_MAP: dict[OrderType, RuleSet] = {
         case_rules=MIP_RNA_CASE_RULES,
         case_sample_rules=MIP_RNA_CASE_SAMPLE_RULES,
     ),
+    OrderType.NALLO: RuleSet(
+        case_rules=NALLO_CASE_RULES,
+        case_sample_rules=NALLO_CASE_SAMPLE_RULES,
+    ),
     OrderType.PACBIO_LONG_READ: RuleSet(
         sample_rules=PACBIO_LONG_READ_SAMPLE_RULES,
     ),
@@ -136,6 +145,7 @@ ORDER_TYPE_MODEL_MAP: dict[OrderType, type[Order]] = {
     OrderType.MICROSALT: MicrosaltOrder,
     OrderType.MIP_DNA: MIPDNAOrder,
     OrderType.MIP_RNA: MIPRNAOrder,
+    OrderType.NALLO: NALLOOrder,
     OrderType.PACBIO_LONG_READ: PacbioOrder,
     OrderType.RML: RMLOrder,
     OrderType.RNAFUSION: RNAFusionOrder,
