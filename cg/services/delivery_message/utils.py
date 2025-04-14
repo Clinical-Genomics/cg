@@ -107,17 +107,17 @@ def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
     raise NotImplementedError(f"Microsalt apptag {app_tag} not supported.")
 
 
-def has_mwx_samples(case: Case):
+def has_mwx_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.MWXNXTR003
 
 
-def has_mwr_samples(case: Case):
+def has_mwr_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.MWRNXTR003
 
 
-def has_vwg_samples(case: Case):
+def has_vwg_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.VWGNXTR001
 
