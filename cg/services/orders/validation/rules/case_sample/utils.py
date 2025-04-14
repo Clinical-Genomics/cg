@@ -333,3 +333,12 @@ def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]
         if db_case := status_db.get_case_by_internal_id(case.internal_id):
             existing_case_names.add(db_case.name)
     return existing_case_names
+
+
+def is_sample_name_used(sample: Sample, customer_entry_id: int, store: Store) -> bool:
+    """Check if a sample name is already used by the customer"""
+    if store.get_sample_by_customer_and_name(
+        customer_entry_id=customer_entry_id, sample_name=sample.name
+    ):
+        return True
+    return False
