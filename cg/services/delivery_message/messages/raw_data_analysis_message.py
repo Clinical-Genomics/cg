@@ -9,10 +9,10 @@ class RawDataAnalysisMessage(DeliveryMessage):
         case_names: str = "\n".join([case.name for case in cases])
         case_s_: str = "case" if len(cases) == 1 else "cases"
         return (
-            f"Hello,\n\n"
+            "Hello,\n\n"
             f"The raw data and analysis files for the following {case_s_} "
             "are currently being uploaded to your inbox on Caesar:\n\n"
             f"{case_names}\n\n"
-            f"Available under: \n"
+            "Available under: \n"
             f"{delivery_path}"
         )

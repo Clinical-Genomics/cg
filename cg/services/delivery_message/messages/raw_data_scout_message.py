@@ -7,10 +7,10 @@ def get_case_message(case: Case) -> str:
     scout_link: str = get_scout_link(case)
     delivery_path: str = get_caesar_delivery_path(case)
     return (
-        f"Hello,\n\n"
-        f"The analysis has been uploaded to Scout for the following case:\n\n"
+        "Hello,\n\n"
+        "The analysis has been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
-        f"The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
+        "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"
     )
 
@@ -20,10 +20,10 @@ def get_cases_message(cases: list[Case]) -> str:
     scout_links_row_separated: str = "\n".join(scout_links)
     delivery_path: str = get_caesar_delivery_path(cases[0])
     return (
-        f"Hello,\n\n "
-        f"The analyses have been uploaded to Scout for the following cases:\n\n"
+        "Hello,\n\n "
+        "The analyses have been uploaded to Scout for the following cases:\n\n"
         f"{scout_links_row_separated}\n\n"
-        f"The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
+        "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"
     )
 
