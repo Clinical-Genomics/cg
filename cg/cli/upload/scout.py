@@ -142,7 +142,10 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("----------------- UPLOAD -----------------------")
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    scout_api: ScoutAPI = context.scout_api
+    workflow = context.status_db.get_case_by_internal_id(case_id).data_analysis
+    scout_api: ScoutAPI = (
+        context.scout_api_38 if workflow == Workflow.NALLO else context.scout_api_37
+    )
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)
