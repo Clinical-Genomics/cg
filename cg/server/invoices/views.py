@@ -2,7 +2,6 @@ import http
 import os
 import tempfile
 from datetime import date
-
 from flask import (
     Blueprint,
     abort,
@@ -15,26 +14,25 @@ from flask import (
     session,
     url_for,
 )
-from flask_dance.contrib.google import google
-
 from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
+from cg.server.endpoints.authentication.auth_error_handler import handle_auth_errors
 from cg.server.ext import db, lims
 from cg.store.models import Customer, Invoice, Pool, Sample
+import logging
+from cg.server.ext import auth_service
+
+LOG = logging.getLogger(__name__)
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
 
 @BLUEPRINT.before_request
+@handle_auth_errors
 def before_request():
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
-
-def logged_in():
-    user = db.get_user_by_email(email=session.get("user_email"))
-    return google.authorized and user and user.is_admin
+    user_roles = session.get("user_roles")
+    auth_service.check_role(user_roles)
 
 
 def undo_invoice(invoice_id):
