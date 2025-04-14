@@ -70,24 +70,20 @@ class UploadAPI(MetaAPI):
             raise AnalysisUploadError
 
         if not restart:
-            analysis_obj: Analysis = case_obj.analyses[0]
+            analysis: Analysis = case_obj.analyses[0]
 
-            if analysis_obj.uploaded_at:
-                LOG.error(
-                    f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}"
-                )
+            if analysis.uploaded_at:
+                LOG.error(f"The analysis has been already uploaded: {analysis.uploaded_at.date()}")
                 raise AnalysisAlreadyUploadedError
-            elif analysis_obj.upload_started_at:
-                if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
+            elif analysis.upload_started_at:
+                if datetime.now() - analysis.upload_started_at > timedelta(hours=24):
                     LOG.error(
-                        f"This upload has already started at {analysis_obj.upload_started_at}, but something went wrong. "
+                        f"This upload has already started at {analysis.upload_started_at}, but something went wrong. "
                         f"Restart it with the --restart flag."
                     )
                     raise AnalysisUploadError
 
-                LOG.warning(
-                    f"The upload has already started: {analysis_obj.upload_started_at.time()}"
-                )
+                LOG.warning(f"The upload has already started: {analysis.upload_started_at.time()}")
                 raise AnalysisAlreadyUploadedError
 
     @handle_delivery_type_errors
