@@ -39,6 +39,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
+from cg.services.orders.validation.rules.case_sample.utils import are_all_samples_unknown
 
 NALLO_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
@@ -52,6 +53,7 @@ NALLO_CASE_RULES: list[callable] = [
 ]
 
 NALLO_CASE_SAMPLE_RULES: list[callable] = [
+    are_all_samples_unknown,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
