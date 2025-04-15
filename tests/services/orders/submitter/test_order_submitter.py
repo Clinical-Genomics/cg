@@ -214,6 +214,7 @@ def test_get_ticket_tags(
 
 def test_get_ticket_tags_with_external_data_sample():
 
+    # GIVEN an order with two samples, one including external data
     store: Store = create_autospec(Store)
     store.get_application_by_tag = lambda tag: (
         Application(is_external=True) if tag == "external_app" else None
