@@ -24,6 +24,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     PedigreeError,
     SampleDoesNotExistError,
     SampleNameAlreadyExistsError,
+    SampleNameNotUniqueError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
@@ -511,4 +512,16 @@ def validate_sample_names_available(
                     case_index=case_index, sample_index=sample_index
                 )
                 errors.append(error)
+    return errors
+
+
+def validate_sample_names_unique(order: OrderWithCases, **kwargs) -> list[SampleNameNotUniqueError]:
+    """Validates that new sample names are unique within the order."""
+    errors: list[SampleNameNotUniqueError] = []
+    sample_names: list[str] = [sample.name for _, _, sample in order.enumerated_new_samples]
+    name_counts: Counter = Counter(sample_names)
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if name_counts[sample.name] > 1:
+            error = SampleNameNotUniqueError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors
