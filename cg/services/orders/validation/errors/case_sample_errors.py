@@ -179,7 +179,7 @@ class SampleOutsideOfCollaborationError(CaseSampleError):
 
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
-    message: str = "Sample name already exists in the database"
+    message: str = "Sample name already exists in a previous order"
 
 
 class SampleNameNotUniqueError(CaseSampleError):
