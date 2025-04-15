@@ -214,12 +214,10 @@ def test_get_ticket_tags(
 
 def test_get_ticket_tags_with_external_data_sample():
 
-    # GIVEN an order with an external data sample + another sample
-    external_application = Application()
-    external_application.is_external = True
-
     store: Store = create_autospec(Store)
-    store.get_application_by_tag = lambda tag: external_application if tag == "ext_app" else None
+    store.get_application_by_tag = lambda tag: (
+        Application(is_external=True) if tag == "external_app" else None
+    )
 
     order = OrderWithSamples(
         customer="test_customer",
@@ -233,7 +231,7 @@ def test_get_ticket_tags_with_external_data_sample():
                 name="ExternalSample",
             ),
             ValidationSample(
-                application="ext_app",
+                application="external_app",
                 container=ContainerEnum.no_container,
                 name="ExternalSample",
             ),

@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from typing import Optional
 
 from cg.clients.freshdesk.constants import Status
 from cg.constants.priority import Priority
@@ -28,7 +29,7 @@ def contains_existing_data(order: OrderWithCases) -> bool:
 def contains_external_data(samples: list[Sample], store: Store) -> bool:
     for sample in samples:
         application: Application | None = store.get_application_by_tag(sample.application)
-        if application and application.is_external:
+        if application is not None and application.is_external:
             return True
     return False
 
