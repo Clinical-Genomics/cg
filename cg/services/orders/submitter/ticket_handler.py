@@ -4,7 +4,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
-from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.constants.priority import Priority
