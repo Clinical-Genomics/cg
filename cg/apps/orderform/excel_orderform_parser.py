@@ -175,11 +175,7 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """
-        Return the data delivery, as it is saved in cg, of the samples in the order.
-        Raises:
-            OrderFormError: if the samples have different data deliveries
-        """
+        "Get the data delivery type."
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
@@ -227,11 +223,7 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
-        """
-        Transforms the data-delivery parsed in the excel file, to the ones used in cg.
-        Raises:
-            OrderFormError: if the data delivery is not supported
-        """
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg."""
         try:
             orderform_to_internal: dict = {
                 "analysis": DataDelivery.ANALYSIS_FILES,
@@ -244,9 +236,6 @@ class ExcelOrderformParser(OrderformParser):
                 "fastq qc": DataDelivery.FASTQ_QC,
                 "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
                 "no delivery": DataDelivery.NO_DELIVERY,
-                "raw data + analysis": DataDelivery.RAW_DATA_ANALYSIS,
-                "raw data + analysis + scout": DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
-                "raw data + scout": DataDelivery.RAW_DATA_SCOUT,
                 "scout": DataDelivery.SCOUT,
                 "statina": DataDelivery.STATINA,
                 "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
