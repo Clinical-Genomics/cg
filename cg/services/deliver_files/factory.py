@@ -130,27 +130,18 @@ class DeliveryServiceFactory:
 
     @staticmethod
     def _get_file_tag_fetcher(
-        delivery_type: DataDelivery, delivery_destination: DeliveryDestination
+        delivery_destination: DeliveryDestination,
     ) -> FetchDeliveryFileTagsService:
         """
-        Get the file tag fetcher based on the delivery type or delivery destination.
-        NOTE: added complexity to handle the FOHM delivery type as it requires a special set of tags as compared to customer delivery.
-        It overrides the default behaviour of the delivery type given by the case.
+        Return the correct file tag fetcher based on the delivery destination.
+        NOTE: The FOHM upload requires a special tag system, all the other destination use
+        sample and case tags.
         args:
-            delivery_type: The type of delivery to perform.
             delivery_destination: The destination of the delivery defaults to customer.
-
         """
         if delivery_destination == DeliveryDestination.FOHM:
             return FOHMUploadTagsFetcher()
-        service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
-            DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.BAM: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.RAW_DATA_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-        }
-        return service_map[delivery_type]()
+        return SampleAndCaseDeliveryTagsFetcher()
 
     def _get_file_fetcher(
         self, delivery_type: DataDelivery, delivery_destination: DeliveryDestination
@@ -169,7 +160,7 @@ class DeliveryServiceFactory:
             DataDelivery.BAM: RawDataDeliveryFileFetcher,
         }
         file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(
-            delivery_type=delivery_type, delivery_destination=delivery_destination
+            delivery_destination=delivery_destination
         )
         return service_map[delivery_type](
             status_db=self.store,
