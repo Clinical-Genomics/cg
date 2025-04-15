@@ -338,7 +338,7 @@ def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]
 def is_sample_name_used(sample: Sample, customer_entry_id: int, store: Store) -> bool:
     """Check if a sample name is already used by the customer"""
     if store.get_sample_by_customer_and_name(
-        customer_entry_id=customer_entry_id, sample_name=sample.name
+        customer_entry_id=[customer_entry_id], sample_name=sample.name
     ):
         return True
     return False
