@@ -46,7 +46,6 @@ from cg.services.deliver_files.file_mover.customer_inbox_service import (
 )
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
-from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
 from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -148,7 +147,7 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.BAM: BamDeliveryTagsFetcher,
+            DataDelivery.BAM: SampleAndCaseDeliveryTagsFetcher,
             DataDelivery.RAW_DATA_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
         }
         return service_map[delivery_type]()
