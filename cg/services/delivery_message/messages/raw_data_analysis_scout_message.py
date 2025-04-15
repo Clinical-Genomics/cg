@@ -1,9 +1,5 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import (
-    get_caesar_delivery_path,
-    get_scout38_link,
-    get_scout_link,
-)
+from cg.services.delivery_message.messages.utils import get_caesar_delivery_path, get_scout38_link
 from cg.store.models import Case
 
 
