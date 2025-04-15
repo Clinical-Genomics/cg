@@ -301,14 +301,19 @@ def is_buffer_missing(sample: SampleInCase) -> bool:
     )
 
 
-def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    """Returns whether a TGS sample has an application and is missing a capture kit."""
+def does_sample_need_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
+    """Returns True if the sample needs capture kit set."""
     application: Application | None = store.get_application_by_tag(sample.application)
     return (
         application
         and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-        and not sample.capture_kit
     )
+
+
+def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
+    """Returns whether a TGS sample has an application and is missing a capture kit."""
+    is_needed: bool = does_sample_need_capture_kit(sample=sample, store=store)
+    return is_needed and not sample.capture_kit
 
 
 def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
