@@ -2213,7 +2213,7 @@ def context_config(
             },
             "tower_workflow": "taxprofiler",
         },
-        "scout_37": {
+        "scout": {
             "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
         },
