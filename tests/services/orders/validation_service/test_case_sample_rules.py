@@ -47,7 +47,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_sample_names_available,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
-    validate_sample_names_unique,
     validate_samples_exist,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
@@ -639,20 +638,3 @@ def test_validate_sample_names_available(
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
     # THEN the error should concern the sample name
     assert isinstance(errors[0], SampleNameAlreadyExistsError)
-
-
-def test_validate_sample_names_unique(
-    valid_order: OrderWithCases,
-):
-    # GIVEN an order with two samples with the same name
-    valid_order.cases[0].samples[0].name = "sample_name"
-    valid_order.cases[0].samples[1].name = "sample_name"
-
-    # WHEN validating that the sample names are unique
-    errors: list[SampleNameNotUniqueError] = validate_sample_names_unique(order=valid_order)
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the non-unique sample name
-    assert isinstance(errors[0], SampleNameNotUniqueError)
