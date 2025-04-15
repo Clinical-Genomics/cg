@@ -636,7 +636,7 @@ def test_validate_sample_names_available(
     )
     # THEN an error should be returned for the first sample
     assert errors
-    assert len(errors) == 1
+    assert errors[0].sample_index == 0 and errors[0].case_index == 0
     # THEN the error should concern the sample name
     assert isinstance(errors[0], SampleNameAlreadyExistsError)
 
