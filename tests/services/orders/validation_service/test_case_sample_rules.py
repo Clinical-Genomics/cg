@@ -621,18 +621,18 @@ def test_existing_sample_from_outside_of_collaboration(
 
 def test_validate_sample_names_available(
     valid_order: OrderWithCases,
-    store_with_multiple_cases_and_samples: Store,
+    store: Store,
     helpers: StoreHelpers,
 ):
     # GIVEN a sample in the database with the same sample name and customer as in the order
     helpers.add_sample(
-        store=store_with_multiple_cases_and_samples,
+        store=store,
         name="name1",
     )
 
     # WHEN validating if the sample names are available
     errors: list[SampleNameAlreadyExistsError] = validate_sample_names_available(
-        order=valid_order, store=store_with_multiple_cases_and_samples
+        order=valid_order, store=store
     )
     # THEN an error should be returned for the first sample
     assert errors
