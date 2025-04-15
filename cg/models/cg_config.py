@@ -454,7 +454,7 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     run_names_services_: RunNamesServices | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
-    scout_37: ScoutConfig = None
+    scout: ScoutConfig = None
     scout_38: ScoutConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
@@ -712,9 +712,7 @@ class CGConfig(BaseModel):
         api = self.scout_api_37_
         if not api:
             LOG.debug("Instantiating scout api, genome build 37")
-            api = ScoutAPI(
-                scout_config=self.scout_37, slurm_upload_service=self.slurm_upload_service
-            )
+            api = ScoutAPI(scout_config=self.scout, slurm_upload_service=self.slurm_upload_service)
             self.scout_api_37_ = api
         return api
 
