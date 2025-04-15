@@ -269,6 +269,7 @@ def validate_wells_contain_at_most_one_sample(
 def validate_sample_names_not_repeated(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
+    """Ensures that sample names are unique within the order and that sample names in the order were not already used in the case previously."""
     old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
     new_samples: list[tuple[int, int, SampleInCase]] = order.enumerated_new_samples
     sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
