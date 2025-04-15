@@ -1,5 +1,5 @@
 import datetime as dt
-from unittest.mock import MagicMock, create_autospec, patch
+from unittest.mock import create_autospec, patch
 
 import pytest
 
