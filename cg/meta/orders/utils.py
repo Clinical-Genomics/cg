@@ -44,7 +44,7 @@ def get_ticket_tags(order: Order, order_type: OrderType, status_db: Store) -> li
             tags.append("existing-data")
 
     if isinstance(order, OrderWithSamples):
-        if contains_external_data(order.samples, status_db):
+        if contains_external_data(samples=order.samples, status_db=status_db):
             tags.append("external-data")
 
     return tags
