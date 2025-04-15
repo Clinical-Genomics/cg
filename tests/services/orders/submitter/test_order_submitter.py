@@ -206,7 +206,7 @@ def test_get_ticket_tags(
     order: OrderWithCases = request.getfixturevalue(order_fixture)
 
     # WHEN getting the ticket tags
-    tags = get_ticket_tags(order=order, order_type=order_type, store=create_autospec(Store))
+    tags = get_ticket_tags(order=order, order_type=order_type, status_db=create_autospec(Store))
 
     # THEN the tags should be correct
     assert tags == expected_tags
@@ -239,7 +239,7 @@ def test_get_ticket_tags_with_external_data_sample():
     )
 
     # WHEN getting the ticket tags
-    tags: list[str] = get_ticket_tags(order=order, order_type=order.order_type, store=store)
+    tags: list[str] = get_ticket_tags(order=order, order_type=order.order_type, status_db=store)
 
     # THEN the tags should include external-data
     assert "external-data" in tags

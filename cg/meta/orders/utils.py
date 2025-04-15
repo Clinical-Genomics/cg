@@ -26,15 +26,15 @@ def contains_existing_data(order: OrderWithCases) -> bool:
     return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
 
 
-def contains_external_data(samples: list[Sample], store: Store) -> bool:
+def contains_external_data(samples: list[Sample], status_db: Store) -> bool:
     for sample in samples:
-        application: Application | None = store.get_application_by_tag(sample.application)
+        application: Application | None = status_db.get_application_by_tag(sample.application)
         if application is not None and application.is_external:
             return True
     return False
 
 
-def get_ticket_tags(order: Order, order_type: OrderType, store: Store) -> list[str]:
+def get_ticket_tags(order: Order, order_type: OrderType, status_db: Store) -> list[str]:
     """Generate ticket tags based on the order and order type"""
 
     tags: list[str] = [ORDER_TYPE_WORKFLOW_MAP[order_type]]
@@ -44,7 +44,7 @@ def get_ticket_tags(order: Order, order_type: OrderType, store: Store) -> list[s
             tags.append("existing-data")
 
     if isinstance(order, OrderWithSamples):
-        if contains_external_data(order.samples, store):
+        if contains_external_data(order.samples, status_db):
             tags.append("external-data")
 
     return tags
