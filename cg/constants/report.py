@@ -39,6 +39,14 @@ REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
     DataDelivery.FASTQ_SCOUT,
     DataDelivery.SCOUT,
 )
+NALLO_REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
+    DataDelivery.ANALYSIS_FILES,
+    DataDelivery.ANALYSIS_SCOUT,
+    DataDelivery.RAW_DATA_ANALYSIS,
+    DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+    DataDelivery.RAW_DATA_SCOUT,
+    DataDelivery.SCOUT,
+)
 
 NA_FIELD: str = "N/A"
 YES_FIELD: str = "Ja"
