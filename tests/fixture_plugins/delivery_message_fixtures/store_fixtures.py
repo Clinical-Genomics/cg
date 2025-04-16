@@ -1,8 +1,8 @@
 import pytest
-from store_helpers import StoreHelpers
 
 from cg.store.models import Customer, Order
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
