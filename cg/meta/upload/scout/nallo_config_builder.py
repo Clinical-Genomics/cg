@@ -97,3 +97,8 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        config_sample.tiddit_coverage_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.hificnv_coverage,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )

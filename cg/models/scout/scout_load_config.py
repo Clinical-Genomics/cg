@@ -85,6 +85,7 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutNalloIndividual(ScoutIndividual):
     d4_file: str | None = None
     paraphase_alignment_path: str | None = None
+    tiddit_coverage_wig: str | None = None
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
