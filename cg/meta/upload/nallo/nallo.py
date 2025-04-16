@@ -30,7 +30,8 @@ class NalloUploadAPI(UploadAPI):
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
-            # Scout specific upload
+
+        # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
         LOG.info(
