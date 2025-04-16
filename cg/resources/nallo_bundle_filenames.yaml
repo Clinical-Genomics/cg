@@ -208,6 +208,36 @@
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz.tbi
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_hificnv
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_hificnv_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_severus
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_severus_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_sniffles
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_sniffles_index
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.copynum.bedgraph
