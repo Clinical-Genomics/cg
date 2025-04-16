@@ -130,22 +130,22 @@
   tag: vcf_index
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_trgt.vcf.gz
   step: sorted_repeats
   tag: vcf_str
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz.tbi
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_trgt.vcf.gz.tbi
   step: sorted_repeats
   tag: vcf_str_index
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_trgt.bam
   step: spanning_repeats
   tag: bam
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam.bai
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_trgt.bam.bai
   step: spanning_repeats
   tag: bam_index
 - format: vcf
