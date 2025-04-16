@@ -106,6 +106,7 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_message_fixtures.case_id_fixtures",
     "tests.fixture_plugins.delivery_message_fixtures.message_fixtures",
     "tests.fixture_plugins.delivery_message_fixtures.service_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.store_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
