@@ -1,14 +1,12 @@
 import pytest
 
-from cg.services.deliver_files.file_fetcher.abstract import (
-    FetchDeliveryFilesService,
-)
+from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
 from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
 
 
 @pytest.mark.parametrize(
-    "expected_delivery_files,delivery_file_service,sample_id_to_fetch",
+    "expected_files_fixture, file_fetcher_fixture, sample_id_to_fetch",
     [
         ("expected_fohm_delivery_files", "fohm_data_delivery_service", "empty_sample"),
         ("expected_fastq_delivery_files", "raw_data_delivery_service", "empty_sample"),
@@ -16,22 +14,29 @@ from cg.services.deliver_files.file_fetcher.models import DeliveryFiles
         ("expected_bam_delivery_files", "bam_data_delivery_service", "empty_sample"),
         ("expected_bam_delivery_files_single_sample", "bam_data_delivery_service", "sample_id"),
     ],
+    ids=[
+        "FOHM delivery files",
+        "Fastq delivery files",
+        "Analysis delivery files",
+        "BAM delivery files",
+        "BAM delivery files single sample",
+    ],
 )
 def test_get_files_to_deliver(
-    expected_delivery_files: DeliveryFiles,
-    delivery_file_service: FetchDeliveryFilesService,
-    sample_id_to_fetch: str | None,
+    expected_files_fixture: str,
+    file_fetcher_fixture: str,
+    sample_id_to_fetch: str,
     case_id: str,
-    request,
+    request: pytest.FixtureRequest,
 ):
     """Test to get the files to deliver from the FetchDeliveryFilesService."""
     # GIVEN a case id, samples that are present in Housekeeper and a delivery service
-    delivery_file_service = request.getfixturevalue(delivery_file_service)
-    expected_delivery_files = request.getfixturevalue(expected_delivery_files)
-    sample_id: str | None = request.getfixturevalue(sample_id_to_fetch)
+    file_fetcher: FetchDeliveryFilesService = request.getfixturevalue(file_fetcher_fixture)
+    expected_delivery_files: DeliveryFiles = request.getfixturevalue(expected_files_fixture)
+    sample_id: str = request.getfixturevalue(sample_id_to_fetch)
 
     # WHEN getting the files to deliver
-    delivery_files: DeliveryFiles = delivery_file_service.get_files_to_deliver(
+    delivery_files: DeliveryFiles = file_fetcher.get_files_to_deliver(
         case_id=case_id, sample_id=sample_id
     )
 

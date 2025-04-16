@@ -65,7 +65,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.get_sample_information(
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
-        self.include_pedigree_picture(load_config)
+        self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         self.load_custom_image_sample(
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
