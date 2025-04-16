@@ -75,6 +75,18 @@ def test_validate_well_position_format(valid_order: OrderWithCases):
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
 
 
+def test_validate_well_position_format_is_none(valid_order: OrderWithCases):
+
+    # GIVEN an order with a missing well position
+    valid_order.cases[0].samples[0].well_position = None
+
+    # WHEN validating the well position format
+    errors: list[WellFormatError] = validate_well_position_format(order=valid_order)
+
+    # THEN no error should be returned
+    assert not errors
+
+
 def test_validate_tube_container_name_unique(valid_order: OrderWithCases):
 
     # GIVEN an order with two samples with the same tube container name

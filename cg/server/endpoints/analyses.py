@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
-from cg.server.ext import db
 from cg.server.endpoints.utils import before_request
+from cg.server.ext import db
 from cg.store.models import Analysis
 
 ANALYSES_BLUEPRINT = Blueprint("analyses", __name__, url_prefix="/api/v1")
@@ -17,5 +17,5 @@ def get_analyses():
         analyses: list[Analysis] = db.get_analyses_to_upload()
     else:
         analyses: list[Analysis] = db.get_analyses()
-    parsed_analysis: list[dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
+    parsed_analysis: list[dict] = [analysis.to_dict() for analysis in analyses[:30]]
     return jsonify(analyses=parsed_analysis, total=len(analyses))

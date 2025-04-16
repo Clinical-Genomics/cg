@@ -46,7 +46,6 @@ from cg.services.deliver_files.file_mover.customer_inbox_service import (
 )
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
-from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
 from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -95,63 +94,55 @@ class DeliveryServiceFactory:
         """
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
-        if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
+        if delivery_type == DataDelivery.ANALYSIS_SCOUT:
             return DataDelivery.ANALYSIS_FILES
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,
         ]:
             return DataDelivery.FASTQ_ANALYSIS
-        if delivery_type in [DataDelivery.RAW_DATA_SCOUT]:
+        if delivery_type == DataDelivery.RAW_DATA_SCOUT:
             return DataDelivery.BAM
-        if delivery_type in [DataDelivery.RAW_DATA_ANALYSIS_SCOUT]:
+        if delivery_type == DataDelivery.RAW_DATA_ANALYSIS_SCOUT:
             return DataDelivery.RAW_DATA_ANALYSIS
         return delivery_type
 
     @staticmethod
-    def _validate_delivery_type(delivery_type: DataDelivery):
+    def _validate_delivery_type(delivery_type: DataDelivery) -> None:
         """
         Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
         args:
             delivery_type: The type of delivery to perform.
+        Raises:
+            DeliveryTypeNotSupported: If the delivery type is not supported.
         """
-        if delivery_type in [
+        if delivery_type not in [
             DataDelivery.ANALYSIS_FILES,
             DataDelivery.BAM,
             DataDelivery.FASTQ,
             DataDelivery.FASTQ_ANALYSIS,
             DataDelivery.RAW_DATA_ANALYSIS,
         ]:
-            return
-        raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are"
-            f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
-            f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}, {DataDelivery.RAW_DATA_ANALYSIS}."
-        )
+            raise DeliveryTypeNotSupported(
+                f"Delivery type {delivery_type} is not supported. Supported delivery types are"
+                f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
+                f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}, {DataDelivery.RAW_DATA_ANALYSIS}."
+            )
 
     @staticmethod
     def _get_file_tag_fetcher(
-        delivery_type: DataDelivery, delivery_destination: DeliveryDestination
+        delivery_destination: DeliveryDestination,
     ) -> FetchDeliveryFileTagsService:
         """
-        Get the file tag fetcher based on the delivery type or delivery destination.
-        NOTE: added complexity to handle the FOHM delivery type as it requires a special set of tags as compared to customer delivery.
-        It overrides the default behaviour of the delivery type given by the case.
+        Return the correct file tag fetcher based on the delivery destination.
+        NOTE: The FOHM upload requires a special tag system, all the other destination use
+        sample and case tags.
         args:
-            delivery_type: The type of delivery to perform.
             delivery_destination: The destination of the delivery defaults to customer.
-
         """
         if delivery_destination == DeliveryDestination.FOHM:
             return FOHMUploadTagsFetcher()
-        service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
-            DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.BAM: BamDeliveryTagsFetcher,
-            DataDelivery.RAW_DATA_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-        }
-        return service_map[delivery_type]()
+        return SampleAndCaseDeliveryTagsFetcher()
 
     def _get_file_fetcher(
         self, delivery_type: DataDelivery, delivery_destination: DeliveryDestination
@@ -170,7 +161,7 @@ class DeliveryServiceFactory:
             DataDelivery.BAM: RawDataDeliveryFileFetcher,
         }
         file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(
-            delivery_type=delivery_type, delivery_destination=delivery_destination
+            delivery_destination=delivery_destination
         )
         return service_map[delivery_type](
             status_db=self.store,

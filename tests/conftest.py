@@ -1249,7 +1249,7 @@ def hermes_api(hermes_process: ProcessMock) -> HermesApi:
 # Scout fixtures
 
 
-@pytest.fixture(name="scout_api")
+@pytest.fixture
 def scout_api() -> MockScoutAPI:
     """Setup Scout API."""
     return MockScoutAPI()
@@ -2219,6 +2219,10 @@ def context_config(
         "scout": {
             "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
+        },
+        "scout_38": {
+            "binary_path": "bin/scout_38",
+            "config_path": "scout_38-stage.yaml",
         },
         "statina": {
             "api_url": "api_url",
