@@ -14,6 +14,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.nallo_observations_api import NalloObservationsAPI
 from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, CaseSample, Sample
@@ -109,6 +110,31 @@ def test_get_observations_api(cg_context: CGConfig, helpers: StoreHelpers):
     # THEN a MIP-DNA API should be returned
     assert observations_api
     assert isinstance(observations_api, MipDNAObservationsAPI)
+
+
+def test_get_observations_api_nallo(cg_context: CGConfig, helpers: StoreHelpers):
+    """Test get Nallo observation API given a Loqusdb supported case."""
+    store: Store = cg_context.status_db
+
+    # GIVEN a Loqusdb supported case
+    case: Case = helpers.add_case(store, data_analysis=Workflow.NALLO)
+    sample: Sample = helpers.add_sample(
+        store, application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    )
+    case_sample: CaseSample = store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
+
+    store.session.add(case_sample)
+
+    # WHEN retrieving the observation API
+    observations_api: NalloObservationsAPI = get_observations_api(
+        context=cg_context, case_id=case.internal_id, upload=True
+    )
+
+    # THEN a Nallo Observations API should be returned
+    assert observations_api
+    assert isinstance(observations_api, NalloObservationsAPI)
 
 
 def test_get_observations_api_raredisease(cg_context: CGConfig, helpers: StoreHelpers):
