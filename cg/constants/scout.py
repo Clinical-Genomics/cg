@@ -182,5 +182,5 @@ RNAFUSION_SAMPLE_TAGS = dict(
 RANK_MODEL_THRESHOLD = 5
 
 NALLO_RANK_MODEL_THRESHOLD = 8
-NALLO_RANK_MODEL_VERSION_SNV = "https://github.com/Clinical-Genomics/reference-files/blob/master/nallo/rank_model/grch38_rank_model_snvs_-v1.0-.ini"
-NALLO_RANK_MODEL_VERSION_SV = "https://github.com/Clinical-Genomics/reference-files/blob/master/nallo/rank_model/grch38_rank_model_svs_-v1.0-.ini"
+NALLO_RANK_MODEL_VERSION_SNV = "1.0"
+NALLO_RANK_MODEL_VERSION_SV = "1.0"
