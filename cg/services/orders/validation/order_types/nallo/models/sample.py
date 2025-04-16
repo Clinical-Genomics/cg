@@ -23,5 +23,5 @@ class NalloSample(Sample):
     source: str
     status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
-    tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None
+    tissue_block_size: TissueBlockEnum | None = None
