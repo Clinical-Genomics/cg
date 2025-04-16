@@ -170,6 +170,9 @@ class MipLoadConfig(ScoutLoadConfig):
 
 class NalloLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
+    peddy_check: str | None = None
+    peddy_ped: str | None = None
+    peddy_sex: str | None = None
     samples: list[ScoutNalloIndividual] = []
     somalier_samples: str | None = None
     somalier_pairs: str | None = None
