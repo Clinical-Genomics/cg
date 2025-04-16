@@ -387,11 +387,6 @@ class PostProcessingServices(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class ScoutConfig(BaseModel):
-    binary_path: str
-    config_path: str
-
-
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -454,8 +449,8 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     run_names_services_: RunNamesServices | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
-    scout: ScoutConfig = None
-    scout_38: ScoutConfig = None
+    scout: CommonAppConfig = None
+    scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
     tar: CommonAppConfig | None = None
