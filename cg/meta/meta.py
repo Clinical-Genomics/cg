@@ -49,6 +49,7 @@ class MetaAPI:
                 ),
             ),
         )
-        self.scout_api: ScoutAPI = config.scout_api
+        self.scout_api_37: ScoutAPI = config.scout_api_37
+        self.scout_api_38: ScoutAPI = config.scout_api_38
         self.status_db: Store = config.status_db
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
