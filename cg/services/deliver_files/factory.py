@@ -22,19 +22,15 @@ from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliv
 from cg.services.deliver_files.file_formatter.destination.abstract import (
     DeliveryDestinationFormatter,
 )
-from cg.services.deliver_files.file_formatter.destination.base_service import (
-    BaseDeliveryFormatter,
-)
+from cg.services.deliver_files.file_formatter.destination.base_service import BaseDeliveryFormatter
 from cg.services.deliver_files.file_formatter.files.case_service import CaseFileFormatter
-from cg.services.deliver_files.file_formatter.files.mutant_service import (
-    MutantFileFormatter,
-)
 from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
+from cg.services.deliver_files.file_formatter.files.mutant_service import MutantFileFormatter
 from cg.services.deliver_files.file_formatter.files.sample_service import (
-    SampleFileFormatter,
     FileManager,
+    SampleFileFormatter,
 )
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
@@ -44,13 +40,12 @@ from cg.services.deliver_files.file_formatter.path_name.nested_structure import 
     NestedStructurePathFormatter,
 )
 from cg.services.deliver_files.file_mover.abstract import DestinationFilesMover
+from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
 from cg.services.deliver_files.file_mover.customer_inbox_service import (
     CustomerInboxDestinationFilesMover,
 )
-from cg.services.deliver_files.file_mover.base_service import BaseDestinationFilesMover
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
-from cg.services.deliver_files.tag_fetcher.bam_service import BamDeliveryTagsFetcher
 from cg.services.deliver_files.tag_fetcher.fohm_upload_service import FOHMUploadTagsFetcher
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -65,7 +60,8 @@ from cg.store.store import Store
 
 class DeliveryServiceFactory:
     """
-    Class to build the delivery services based on case, workflow, delivery type, delivery destination and delivery structure.
+    Class to build the delivery services based on case, workflow, delivery type, delivery
+    destination and delivery structure.
     The delivery destination is used to specify delivery to the customer or for external upload.
     Workflow is used to specify the workflow of the case and is required for the tag fetcher.
     Delivery type is used to specify the type of delivery to perform.
@@ -98,57 +94,55 @@ class DeliveryServiceFactory:
         """
         if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
             return DataDelivery.FASTQ
-        if delivery_type in [DataDelivery.ANALYSIS_SCOUT]:
+        if delivery_type == DataDelivery.ANALYSIS_SCOUT:
             return DataDelivery.ANALYSIS_FILES
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,
         ]:
             return DataDelivery.FASTQ_ANALYSIS
+        if delivery_type == DataDelivery.RAW_DATA_SCOUT:
+            return DataDelivery.BAM
+        if delivery_type == DataDelivery.RAW_DATA_ANALYSIS_SCOUT:
+            return DataDelivery.RAW_DATA_ANALYSIS
         return delivery_type
 
     @staticmethod
-    def _validate_delivery_type(delivery_type: DataDelivery):
+    def _validate_delivery_type(delivery_type: DataDelivery) -> None:
         """
         Check if the delivery type is supported. Raises DeliveryTypeNotSupported error.
         args:
             delivery_type: The type of delivery to perform.
+        Raises:
+            DeliveryTypeNotSupported: If the delivery type is not supported.
         """
-        if delivery_type in [
-            DataDelivery.FASTQ,
+        if delivery_type not in [
             DataDelivery.ANALYSIS_FILES,
-            DataDelivery.FASTQ_ANALYSIS,
             DataDelivery.BAM,
+            DataDelivery.FASTQ,
+            DataDelivery.FASTQ_ANALYSIS,
+            DataDelivery.RAW_DATA_ANALYSIS,
         ]:
-            return
-        raise DeliveryTypeNotSupported(
-            f"Delivery type {delivery_type} is not supported. Supported delivery types are"
-            f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
-            f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}."
-        )
+            raise DeliveryTypeNotSupported(
+                f"Delivery type {delivery_type} is not supported. Supported delivery types are"
+                f" {DataDelivery.FASTQ}, {DataDelivery.ANALYSIS_FILES},"
+                f" {DataDelivery.FASTQ_ANALYSIS}, {DataDelivery.BAM}, {DataDelivery.RAW_DATA_ANALYSIS}."
+            )
 
     @staticmethod
     def _get_file_tag_fetcher(
-        delivery_type: DataDelivery, delivery_destination: DeliveryDestination
+        delivery_destination: DeliveryDestination,
     ) -> FetchDeliveryFileTagsService:
         """
-        Get the file tag fetcher based on the delivery type or delivery destination.
-        NOTE: added complexity to handle the FOHM delivery type as it requires a special set of tags as compared to customer delivery.
-        It overrides the default behaviour of the delivery type given by the case.
+        Return the correct file tag fetcher based on the delivery destination.
+        NOTE: The FOHM upload requires a special tag system, all the other destination use
+        sample and case tags.
         args:
-            delivery_type: The type of delivery to perform.
             delivery_destination: The destination of the delivery defaults to customer.
-
         """
         if delivery_destination == DeliveryDestination.FOHM:
             return FOHMUploadTagsFetcher()
-        service_map: dict[DataDelivery, Type[FetchDeliveryFileTagsService]] = {
-            DataDelivery.FASTQ: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.ANALYSIS_FILES: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.FASTQ_ANALYSIS: SampleAndCaseDeliveryTagsFetcher,
-            DataDelivery.BAM: BamDeliveryTagsFetcher,
-        }
-        return service_map[delivery_type]()
+        return SampleAndCaseDeliveryTagsFetcher()
 
     def _get_file_fetcher(
         self, delivery_type: DataDelivery, delivery_destination: DeliveryDestination
@@ -163,10 +157,11 @@ class DeliveryServiceFactory:
             DataDelivery.FASTQ: RawDataDeliveryFileFetcher,
             DataDelivery.ANALYSIS_FILES: AnalysisDeliveryFileFetcher,
             DataDelivery.FASTQ_ANALYSIS: RawDataAndAnalysisDeliveryFileFetcher,
+            DataDelivery.RAW_DATA_ANALYSIS: RawDataAndAnalysisDeliveryFileFetcher,
             DataDelivery.BAM: RawDataDeliveryFileFetcher,
         }
         file_tag_fetcher: FetchDeliveryFileTagsService = self._get_file_tag_fetcher(
-            delivery_type=delivery_type, delivery_destination=delivery_destination
+            delivery_destination=delivery_destination
         )
         return service_map[delivery_type](
             status_db=self.store,
@@ -198,7 +193,7 @@ class DeliveryServiceFactory:
         case: Case,
         delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,
     ) -> SampleFileFormatter | SampleFileConcatenationFormatter | MutantFileFormatter:
-        """Get the file formatter service based on the workflow.
+        """Return the appropriate file formatter service based on the workflow.
         Depending on the delivery structure the path name formatter will be different.
         Args:
             case: The case to deliver files for.
@@ -292,12 +287,14 @@ class DeliveryServiceFactory:
         delivery_destination: DeliveryDestination = DeliveryDestination.CUSTOMER,
         delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,
     ) -> DeliverFilesService:
-        """Build a delivery service based on a case.
+        """Build a delivery service for a case.
         args:
             case: The case to deliver files for.
-            delivery_type: The type of data delivery to perform. See DataDelivery enum for explanation.
-            delivery_destination: The destination of the delivery defaults to customer. See DeliveryDestination enum for explanation.
-            delivery_structure: The structure of the delivery defaults to nested. See DeliveryStructure enum for explanation.
+            delivery_type: The type of delivery to perform. See DataDelivery enum for explanation.
+            delivery_destination: Representation of where the files will be uploaded.
+                Defaults to 'customer'. See DeliveryDestination enum for explanation.
+            delivery_structure: File structure for the delivery directory. Defaults to 'nested'.
+                See DeliveryStructure enum for explanation.
         """
         delivery_type: DataDelivery = self._sanitise_delivery_type(
             delivery_type if delivery_type else case.data_delivery
