@@ -21,7 +21,7 @@ class NalloSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
-    status: Literal[StatusEnum.affected.value, StatusEnum.unaffected.value]
+    status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None
