@@ -37,6 +37,9 @@ REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
     DataDelivery.FASTQ_ANALYSIS_SCOUT,
     DataDelivery.FASTQ_QC_ANALYSIS,
     DataDelivery.FASTQ_SCOUT,
+    DataDelivery.RAW_DATA_ANALYSIS,
+    DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+    DataDelivery.RAW_DATA_SCOUT,
     DataDelivery.SCOUT,
 )
 
