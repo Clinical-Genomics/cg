@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 
 HGNC_ID = "hgnc_id"
 
@@ -89,6 +89,18 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_str={"vcf-str"},
 )
 
+NALLO_CASE_TAGS = dict(
+    delivery_report={"delivery-report"},
+    multiqc={"multiqc-html"},
+    somalier_pairs={"relate-pairs", "somalier"},
+    somalier_samples={"relate-samples", "somalier"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_str={"vcf-str"},
+)
+
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
     snv_vcf={"vcf-snv-clinical"},
@@ -154,6 +166,12 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     mitodel_file={"mitodel"},
 )
 
+NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    alignment_file={AlignmentFileTag.BAM, NalloAnalysisTag.HAPLOTAGS},
+    d4_file={"d4"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+)
+
 BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -171,3 +189,7 @@ RNAFUSION_SAMPLE_TAGS = dict(
 )
 
 RANK_MODEL_THRESHOLD = 5
+
+NALLO_RANK_MODEL_THRESHOLD = 8
+NALLO_RANK_MODEL_VERSION_SNV = "1.0"
+NALLO_RANK_MODEL_VERSION_SV = "1.0"
