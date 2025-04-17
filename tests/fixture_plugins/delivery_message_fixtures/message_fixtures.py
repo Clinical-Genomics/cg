@@ -56,7 +56,7 @@ def nallo_raw_data_analysis_scout_message(
     return (
         "Hello,\n\n"
         "The analysis has been uploaded to Scout for the following case:\n\n"
-        f"https://scout38.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
+        f"https://scout38.sys.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
         "The raw data and analysis files are currently being uploaded to your inbox on Caesar:\n\n"
         f"/home/{customer_id}/inbox/{ticket_id}"
     )
@@ -68,7 +68,7 @@ def nallo_raw_data_scout_message(customer_id: str, nallo_case_id: str, ticket_id
     return (
         "Hello,\n\n"
         "The analysis has been uploaded to Scout for the following case:\n\n"
-        f"https://scout38.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
+        f"https://scout38.sys.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
         "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
         f"/home/{customer_id}/inbox/{ticket_id}"
     )

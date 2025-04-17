@@ -1,3 +1,4 @@
+from cg.constants import Workflow
 from cg.store.models import Case
 
 
@@ -10,13 +11,12 @@ def get_caesar_delivery_path(case: Case) -> str:
 def get_scout_link(case: Case) -> str:
     customer_id: str = case.customer.internal_id
     case_name: str = case.name
-    return f"https://scout.scilifelab.se/{customer_id}/{case_name}"
-
-
-def get_scout38_link(case: Case) -> str:
-    customer_id: str = case.customer.internal_id
-    case_name: str = case.name
-    return f"https://scout38.scilifelab.se/{customer_id}/{case_name}"
+    url: str = (
+        "https://scout38.sys.scilifelab.se/"
+        if case.data_analysis == Workflow.NALLO
+        else "https://scout.scilifelab.se/"
+    )
+    return f"{url}{customer_id}/{case_name}"
 
 
 def get_scout_links_row_separated(cases: list[Case]) -> str:
