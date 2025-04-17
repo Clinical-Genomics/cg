@@ -62,7 +62,6 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_invalid_plate_well_format,
     is_invalid_capture_kit,
     is_sample_missing_capture_kit,
-    is_sample_name_used,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
@@ -508,7 +507,7 @@ def validate_sample_names_available(
     customer_entry_id: int = store.get_customer_by_internal_id(order.customer).id
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_new_samples:
-            if is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id, store=store):
+            if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
                 error = SampleNameAlreadyExistsError(
                     case_index=case_index, sample_index=sample_index
                 )
