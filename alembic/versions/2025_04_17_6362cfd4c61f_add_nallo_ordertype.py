@@ -44,7 +44,6 @@ new_order_type_enum = mysql.ENUM(*new_options)
 
 
 def upgrade():
-    # Add the new value to the enum
     op.alter_column(
         "order_type_application",
         "order_type",
@@ -52,11 +51,9 @@ def upgrade():
         type_=new_order_type_enum,
         existing_nullable=False,
     )
-    new_order_type_enum.create(op.get_bind(), checkfirst=False)
 
 
 def downgrade():
-    # Remove the new value from the enum
     op.alter_column(
         "order_type_application",
         "order_type",
@@ -64,5 +61,3 @@ def downgrade():
         type_=old_order_type_enum,
         existing_nullable=False,
     )
-    old_order_type_enum.create(op.get_bind(), checkfirst=False)
-    new_order_type_enum.drop(op.get_bind(), checkfirst=False)
