@@ -137,7 +137,8 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_file={"alignment_haplotags"},
+    alignment_file={AlignmentFileTag.BAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
     d4_file={"mosdepth_d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},

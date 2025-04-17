@@ -87,6 +87,7 @@ class ScoutNalloIndividual(ScoutIndividual):
     paraphase_alignment_path: str | None = None
     tiddit_coverage_wig: str | None = None
     minor_allele_frequency_bigwig: str | None = None
+    assembly_alignment_path: str | None = None
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):

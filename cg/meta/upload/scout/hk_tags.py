@@ -74,6 +74,7 @@ class SampleTags(BaseModel):
     bam_file: set[str] | None = None
     alignment_file: set[str] | None = None
     alignment_path: set[str] | None = None
+    assembly_alignment_path: set[str] | None = None
     d4_file: set[str] | None = None
     vcf2cytosure: set[str] | None = None
     eklipse_path: set[str] | None = None
