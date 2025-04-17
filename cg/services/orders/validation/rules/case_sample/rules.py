@@ -23,6 +23,8 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     OccupiedWellError,
     PedigreeError,
     SampleDoesNotExistError,
+    SampleNameAlreadyExistsError,
+    SampleNameNotUniqueError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
@@ -266,6 +268,7 @@ def validate_wells_contain_at_most_one_sample(
 def validate_sample_names_not_repeated(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
+    """Ensures that sample names are unique within the order and that sample names in the order were not already used in the case previously."""
     old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
     new_samples: list[tuple[int, int, SampleInCase]] = order.enumerated_new_samples
     sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
@@ -491,6 +494,22 @@ def validate_existing_samples_belong_to_collaboration(
             ):
                 error = SampleOutsideOfCollaborationError(
                     sample_index=sample_index, case_index=case_index
+                )
+                errors.append(error)
+    return errors
+
+
+def validate_sample_names_available(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[SampleNameAlreadyExistsError]:
+    """Validates that new sample names are not already used by the customer."""
+    errors: list[SampleNameAlreadyExistsError] = []
+    customer_entry_id: int = store.get_customer_by_internal_id(order.customer).id
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
+                error = SampleNameAlreadyExistsError(
+                    case_index=case_index, sample_index=sample_index
                 )
                 errors.append(error)
     return errors
