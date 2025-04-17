@@ -1,12 +1,7 @@
-from typing import Literal
+from pydantic import Field
 
-from pydantic import BeforeValidator, Field
-from typing_extensions import Annotated
-
-from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
-from cg.services.orders.validation.constants import ElutionBuffer, TissueBlockEnum
+from cg.models.orders.sample_base import NAME_PATTERN, SexEnum, StatusEnum
 from cg.services.orders.validation.models.sample import Sample
-from cg.services.orders.validation.utils import parse_buffer, parse_control
 
 
 class NalloSample(Sample):
