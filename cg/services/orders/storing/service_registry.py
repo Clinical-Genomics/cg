@@ -12,6 +12,7 @@ from cg.services.orders.storing.implementations.microbial_fastq_order_service im
 from cg.services.orders.storing.implementations.microbial_order_service import (
     StoreMicrobialOrderService,
 )
+from cg.services.orders.storing.implementations.nallo_order_service import StoreNalloOrderService
 from cg.services.orders.storing.implementations.pacbio_order_service import StorePacBioOrderService
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
 from cg.services.orders.storing.service import StoreOrderService
@@ -73,6 +74,10 @@ order_service_mapping = {
     OrderType.MIP_RNA: (
         OrderLimsService,
         StoreCaseOrderService,
+    ),
+    OrderType.NALLO: (
+        OrderLimsService,
+        StoreNalloOrderService,
     ),
     OrderType.PACBIO_LONG_READ: (
         OrderLimsService,
