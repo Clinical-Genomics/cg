@@ -102,3 +102,8 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        config_sample.minor_allele_frequency_bigwig = self.get_sample_file(
+            hk_tags=self.sample_tags.minor_allele_frequency_bigwig,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )

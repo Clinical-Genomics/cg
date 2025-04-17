@@ -83,6 +83,7 @@ class SampleTags(BaseModel):
     chromograph_regions: set[str] | None = None
     chromograph_sites: set[str] | None = None
     hificnv_coverage: set[str] | None = None
+    minor_allele_frequency_bigwig: set[str] | None = None
     reviewer_alignment: set[str] | None = None
     reviewer_alignment_index: set[str] | None = None
     reviewer_catalog: set[str] | None = None
