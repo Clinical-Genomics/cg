@@ -109,18 +109,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
 
-    def get_germlinecnvcaller_flag(self, analysis_type: str, target_bed_file: str) -> bool:
-        if analysis_type == AnalysisType.WES and DEFAULT_CAPTURE_KIT in target_bed_file:
-            return False
-        return True
-
     def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
-        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(
-            analysis_type=analysis_type, target_bed_file=target_bed_file
-        )
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
@@ -129,7 +121,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             analysis_type=analysis_type,
             target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
-            skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
         )
