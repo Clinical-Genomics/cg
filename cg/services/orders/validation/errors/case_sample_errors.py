@@ -147,6 +147,11 @@ class CaptureKitMissingError(CaseSampleError):
     message: str = "Bait set is required for TGS analyses"
 
 
+class InvalidCaptureKitError(CaseSampleError):
+    field: str = "capture_kit"
+    message: str = "Bait set must be valid"
+
+
 class WellFormatError(CaseSampleError):
     field: str = "well_position"
     message: str = "Well position must follow the format A-H:1-12"

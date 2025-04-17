@@ -68,6 +68,7 @@ RAW_DATA_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
 RAW_DATA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
+    {"bam"},
 ]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -126,7 +127,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
-MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
+MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{"storage", "assembly"}]
 
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
@@ -200,3 +201,4 @@ class FileDeliveryOption(StrEnum):
     BAM: str = "bam"
     FASTQ: str = "fastq"
     FASTQ_ANALYSIS: str = "fastq-analysis"
+    RAW_DATA_ANALYSIS: str = "raw_data-analysis"

@@ -254,8 +254,8 @@ def create_invalid_concentration_error(
 
 def is_invalid_plate_well_format(sample: Sample) -> bool:
     """Check if a sample has an invalid well format."""
-    correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
-    if sample.is_on_plate:
+    if sample.is_on_plate and sample.well_position:
+        correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
 
@@ -309,6 +309,14 @@ def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, st
         and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
         and not sample.capture_kit
     )
+
+
+def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
+    if not sample.capture_kit:
+        return False
+
+    valid_beds: list[str] = [bed.name for bed in store.get_active_beds()]
+    return sample.capture_kit not in valid_beds
 
 
 def is_sample_not_from_collaboration(

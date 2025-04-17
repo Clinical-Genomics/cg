@@ -103,6 +103,10 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.delivery_files_models_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_services_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_formatted_files_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.case_id_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.message_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.service_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.store_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
@@ -1246,7 +1250,7 @@ def hermes_api(hermes_process: ProcessMock) -> HermesApi:
 # Scout fixtures
 
 
-@pytest.fixture(name="scout_api")
+@pytest.fixture
 def scout_api() -> MockScoutAPI:
     """Setup Scout API."""
     return MockScoutAPI()
@@ -2216,6 +2220,10 @@ def context_config(
         "scout": {
             "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
+        },
+        "scout_38": {
+            "binary_path": "bin/scout_38",
+            "config_path": "scout_38-stage.yaml",
         },
         "statina": {
             "api_url": "api_url",
