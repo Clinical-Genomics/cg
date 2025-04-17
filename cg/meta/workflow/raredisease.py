@@ -13,7 +13,7 @@ from cg.clients.chanjo2.models import (
     CoveragePostResponse,
     CoverageSample,
 )
-from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
+from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
@@ -98,14 +98,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
         return True
 
-    def get_target_bed(self, case_id: str, analysis_type: str) -> str:
+    def get_target_bed(self, case_id: str, analysis_type: str) -> str | None:
         """
         Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
-        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed_file:
-            if analysis_type == AnalysisType.WGS:
-                return DEFAULT_CAPTURE_KIT
+        target_bed_file: str | None = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed_file and (
+            analysis_type == AnalysisType.WES or analysis_type == AnalysisType.WTS
+        ):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
 
