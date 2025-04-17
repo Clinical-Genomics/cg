@@ -140,6 +140,7 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={"alignment_haplotags"},
     d4_file={"mosdepth_d4"},
     hificnv_coverage={"hificnv", "bigwig"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
 )
 
 MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
@@ -155,12 +156,6 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
     mitodel_file={"mitodel"},
-)
-
-NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_file={AlignmentFileTag.BAM, NalloAnalysisTag.HAPLOTAGS},
-    d4_file={"d4"},
-    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
