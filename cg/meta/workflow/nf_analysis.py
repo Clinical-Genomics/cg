@@ -352,9 +352,15 @@ class NfAnalysisAPI(AnalysisAPI):
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 
-        workflow_parameters: dict = built_workflow_parameters | (
+        yaml_params: dict = (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
+
+        # Check for duplicate keys
+        duplicate_keys = set(built_workflow_parameters.keys()) & set(yaml_params.keys())
+        if duplicate_keys:
+            raise ValueError(f"Duplicate parameter keys found: {duplicate_keys}")
+        workflow_parameters: dict = built_workflow_parameters | (yaml_params)
         replaced_workflow_parameters: dict = self.replace_values_in_params_file(
             workflow_parameters=workflow_parameters
         )
