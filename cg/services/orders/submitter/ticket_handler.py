@@ -39,7 +39,9 @@ class TicketHandler:
             order_type=order_type,
         )
 
-        tags: list[str] = get_ticket_tags(order=order, order_type=order_type)
+        tags: list[str] = get_ticket_tags(
+            order=order, order_type=order_type, status_db=self.status_db
+        )
         status: int = get_ticket_status(order=order)
 
         order_priority: Priority = self._get_max_case_priority(order=order)

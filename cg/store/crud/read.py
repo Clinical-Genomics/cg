@@ -816,7 +816,7 @@ class ReadHandler(BaseHandler):
         """Check if a sample exists in StatusDB."""
         return bool(self.get_sample_by_internal_id(sample_id))
 
-    def get_application_by_tag(self, tag: str) -> Application:
+    def get_application_by_tag(self, tag: str) -> Application | None:
         """Return an application by tag."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
