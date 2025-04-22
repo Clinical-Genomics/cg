@@ -4,7 +4,6 @@ from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
-
 from cg.constants.lims import LimsArtifactTypes, LimsProcess
 from cg.exc import LimsDataError
 

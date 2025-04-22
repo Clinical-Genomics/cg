@@ -12,6 +12,7 @@ from cg.services.orders.storing.implementations.microbial_fastq_order_service im
 from cg.services.orders.storing.implementations.microbial_order_service import (
     StoreMicrobialOrderService,
 )
+from cg.services.orders.storing.implementations.nallo_order_service import StoreNalloOrderService
 from cg.services.orders.storing.implementations.pacbio_order_service import StorePacBioOrderService
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
 from cg.store.store import Store
@@ -78,5 +79,14 @@ def store_microbial_fastq_order_service(
     store_to_submit_and_validate_orders: Store, lims_api: MockLimsAPI
 ) -> StoreMicrobialFastqOrderService:
     return StoreMicrobialFastqOrderService(
+        status_db=store_to_submit_and_validate_orders, lims_service=OrderLimsService(lims_api)
+    )
+
+
+@pytest.fixture
+def store_nallo_order_service(
+    store_to_submit_and_validate_orders: Store, lims_api: MockLimsAPI
+) -> StoreNalloOrderService:
+    return StoreNalloOrderService(
         status_db=store_to_submit_and_validate_orders, lims_service=OrderLimsService(lims_api)
     )
