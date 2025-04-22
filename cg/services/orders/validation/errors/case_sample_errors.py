@@ -175,3 +175,8 @@ class BufferMissingError(CaseSampleError):
 class SampleOutsideOfCollaborationError(CaseSampleError):
     field: str = "internal_id"
     message: str = "Sample cannot be outside of collaboration"
+
+
+class ExistingSampleWrongTypeError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "The sample is not compatible with the order type."
