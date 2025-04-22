@@ -180,16 +180,6 @@
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
-  step: snv_annotated_filtered
-  tag: vcf_snv_clinical
-- format: vcf
-  id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
-  step: snv_annotated_filtered
-  tag: vcf_snv_clinical_index
-- format: vcf
-  id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz
   step: sv_annotated_ranked
   tag: vcf_sv_research
