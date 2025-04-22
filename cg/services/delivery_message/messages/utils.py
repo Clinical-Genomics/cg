@@ -13,6 +13,12 @@ def get_scout_link(case: Case) -> str:
     return f"https://scout.scilifelab.se/{customer_id}/{case_name}"
 
 
+def get_scout38_link(case: Case) -> str:
+    customer_id: str = case.customer.internal_id
+    case_name: str = case.name
+    return f"https://scout38.scilifelab.se/{customer_id}/{case_name}"
+
+
 def get_scout_links_row_separated(cases: list[Case]) -> str:
     scout_links: list[str] = [get_scout_link(case) for case in cases]
     return "\n".join(scout_links)
