@@ -6,7 +6,7 @@ Create Date: 2025-04-17 10:42:20.943466
 
 """
 
-from sqlalchemy.dialects import mysql
+from sqlalchemy import Enum
 
 from alembic import op
 
@@ -18,29 +18,29 @@ depends_on = None
 
 
 base_options = (
-    "balsamic",
-    "balsamic-umi",
-    "fastq",
-    "fluffy",
-    "metagenome",
-    "microbial-fastq",
-    "microsalt",
-    "mip-dna",
-    "mip-rna",
-    "pacbio-long-read",
-    "rml",
-    "rnafusion",
-    "sars-cov-2",
-    "taxprofiler",
-    "tomte",
+    "BALSAMIC",
+    "BALSAMIC_UMI",
+    "FASTQ",
+    "FLUFFY",
+    "METAGENOME",
+    "MICROBIAL_FASTQ",
+    "MICROSALT",
+    "MIP_DNA",
+    "MIP_RNA",
+    "PACBIO_LONG_READ",
+    "RML",
+    "RNAFUSION",
+    "SARS_COV_2",
+    "TAXPROFILER",
+    "TOMTE",
 )
 
 old_options = sorted(base_options)
-new_options = sorted(base_options + ("nallo",))
+new_options = sorted(old_options + ("NALLO",))
 
 
-old_order_type_enum = mysql.ENUM(*old_options)
-new_order_type_enum = mysql.ENUM(*new_options)
+old_order_type_enum = Enum(*old_options)
+new_order_type_enum = Enum(*new_options)
 
 
 def upgrade():
