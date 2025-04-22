@@ -29,12 +29,12 @@ class CaseTags(BaseModel):
     )
     cnv_report: set[str] | None = Field(None, description="CNV visualization report for cancer")
     smn_tsv: set[str] | None = Field(None, description="SMN gene variants, only for rare disease")
-    peddy_ped: set[str] = Field(None, description="Ped info from peddy, only for rare disease")
-    peddy_sex: set[str] | None = Field(None, description="Peddy sex check, only for rare disease")
-    peddy_check: set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
+    peddy_ped: set[str] = Field(None, description="Ped info from peddy")
+    peddy_sex: set[str] | None = Field(None, description="Peddy sex check")
+    peddy_check: set[str] = Field(None, description="Peddy pedigree check")
     somalier_samples: set[str] = Field(None, description="Somalier samples info")
     somalier_pairs: set[str] = Field(None, description="Somalier pairs info")
-    sex_check: set[str] = Field(None, description="Somalier sex check info, only for rare disease")
+    sex_check: set[str] = Field(None, description="Somalier sex check info")
     multiqc_report: set[str] | None = Field(None, description="MultiQC report")
     multiqc: set[str] | None = Field(None, description="MultiQC report")
     delivery_report: set[str] | None = Field(None, description="Delivery report")
@@ -74,6 +74,7 @@ class SampleTags(BaseModel):
     bam_file: set[str] | None = None
     alignment_file: set[str] | None = None
     alignment_path: set[str] | None = None
+    assembly_alignment_path: set[str] | None = None
     d4_file: set[str] | None = None
     vcf2cytosure: set[str] | None = None
     eklipse_path: set[str] | None = None
@@ -82,6 +83,8 @@ class SampleTags(BaseModel):
     chromograph_coverage: set[str] | None = None
     chromograph_regions: set[str] | None = None
     chromograph_sites: set[str] | None = None
+    hificnv_coverage: set[str] | None = None
+    minor_allele_frequency_wig: set[str] | None = None
     reviewer_alignment: set[str] | None = None
     reviewer_alignment_index: set[str] | None = None
     reviewer_catalog: set[str] | None = None
