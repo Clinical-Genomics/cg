@@ -104,7 +104,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """
         target_bed_file: str | None = self.get_target_bed_from_lims(case_id=case_id)
         if not target_bed_file and (
-            analysis_type == AnalysisType.WES or analysis_type == AnalysisType.WTS
+            analysis_type == AnalysisType.WES or analysis_type == AnalysisType.TGS
         ):
             raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
