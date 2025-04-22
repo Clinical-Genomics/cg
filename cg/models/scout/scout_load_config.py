@@ -86,7 +86,7 @@ class ScoutNalloIndividual(ScoutIndividual):
     d4_file: str | None = None
     paraphase_alignment_path: str | None = None
     tiddit_coverage_wig: str | None = None
-    minor_allele_frequency_bigwig: str | None = None
+    minor_allele_frequency_wig: str | None = None
     assembly_alignment_path: str | None = None
 
 

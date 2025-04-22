@@ -142,7 +142,7 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     d4_file={"mosdepth_d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
-    minor_allele_frequency_bigwig={"hificnv", "bigwig", "maf"},
+    minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
 
 MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
