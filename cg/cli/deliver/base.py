@@ -15,9 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case
 
@@ -29,6 +27,7 @@ DELIVERY_TYPE = click.option(
     multiple=False,
     type=click.Choice(choices=[option for option in FileDeliveryOption]),
     required=False,
+    help="The delivery type to use. Overrides any delivery type from the case",
 )
 TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
