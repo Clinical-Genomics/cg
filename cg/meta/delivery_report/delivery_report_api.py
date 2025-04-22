@@ -37,14 +37,7 @@ from cg.models.delivery_report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
