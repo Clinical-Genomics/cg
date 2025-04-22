@@ -144,7 +144,7 @@ class SexSubjectIdError(CaseSampleError):
 
 class CaptureKitResetError(CaseSampleError):
     field: str = "warnings"
-    message: str = "Capture Kit was reset since it will not be used with this application."
+    message: str = "No bait set will be used, since it is not required for this application."
 
 
 class CaptureKitMissingError(CaseSampleError):
