@@ -1,14 +1,10 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import (
-    get_caesar_delivery_path,
-    get_scout38_link,
-    get_scout_link,
-)
+from cg.services.delivery_message.messages.utils import get_caesar_delivery_path, get_scout_link
 from cg.store.models import Case
 
 
 def get_case_message(case: Case) -> str:
-    scout_link: str = get_scout38_link(case)
+    scout_link: str = get_scout_link(case)
     delivery_path: str = get_caesar_delivery_path(case)
     return (
         "Hello,\n\n"
@@ -20,7 +16,7 @@ def get_case_message(case: Case) -> str:
 
 
 def get_cases_message(cases: list[Case]) -> str:
-    scout_links: list[str] = [get_scout38_link(case) for case in cases]
+    scout_links: list[str] = [get_scout_link(case) for case in cases]
     scout_links_row_separated: str = "\n".join(scout_links)
     delivery_path: str = get_caesar_delivery_path(cases[0])
     return (
