@@ -6,7 +6,7 @@ Create Date: 2025-04-17 10:42:20.943466
 
 """
 
-from sqlalchemy import Enum
+import sqlalchemy as sa
 
 from alembic import op
 
@@ -16,8 +16,7 @@ down_revision = "3a0250e5526d"
 branch_labels = None
 depends_on = None
 
-
-base_options = (
+old_order_types = [
     "BALSAMIC",
     "BALSAMIC_UMI",
     "FASTQ",
@@ -33,31 +32,27 @@ base_options = (
     "SARS_COV_2",
     "TAXPROFILER",
     "TOMTE",
-)
+]
 
-old_options = sorted(base_options)
-new_options = sorted(old_options + ("NALLO",))
-
-
-old_order_type_enum = Enum(*old_options)
-new_order_type_enum = Enum(*new_options)
+new_order_types = old_order_types.copy()
+new_order_types.append("NALLO")
 
 
 def upgrade():
     op.alter_column(
-        "order_type_application",
-        "order_type",
-        existing_type=old_order_type_enum,
-        type_=new_order_type_enum,
-        existing_nullable=False,
+        table_name="order_type_application",
+        column_name="order_type",
+        existing_type=sa.Enum(*old_order_types),
+        type_=sa.Enum(*new_order_types),
+        nullable=False,
     )
 
 
 def downgrade():
     op.alter_column(
-        "order_type_application",
-        "order_type",
-        existing_type=new_order_type_enum,
-        type_=old_order_type_enum,
-        existing_nullable=False,
+        table_name="order_type_application",
+        column_name="order_type",
+        existing_type=sa.Enum(*new_order_types),
+        type_=sa.Enum(*old_order_types),
+        nullable=False,
     )
