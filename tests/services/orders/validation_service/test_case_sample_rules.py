@@ -15,7 +15,6 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameAlreadyExistsError,
-    SampleNameNotUniqueError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
@@ -624,9 +623,10 @@ def test_validate_sample_names_available(
     helpers: StoreHelpers,
 ):
     # GIVEN a sample in the database with the same sample name and customer as in the order
+    sample_name: str = valid_order.cases[0].samples[0].name
     helpers.add_sample(
         store=store,
-        name="name1",
+        name=sample_name,
     )
 
     # WHEN validating if the sample names are available
