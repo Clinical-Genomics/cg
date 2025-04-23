@@ -6,7 +6,8 @@ from cg.models.orders.orderform_schema import Orderform
 
 
 @pytest.mark.parametrize(
-    "valid_json_order_type", [OrderType.MIP_DNA, OrderType.BALSAMIC, OrderType.FLUFFY]
+    "valid_json_order_type",
+    [OrderType.MIP_DNA, OrderType.BALSAMIC, OrderType.FLUFFY, OrderType.NALLO],
 )
 def test_generate_mip_json_orderform(valid_json_order_type: str, json_order_dict: dict):
     """Tests the orderform generation for customer-submitted json files"""

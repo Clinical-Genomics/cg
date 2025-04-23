@@ -305,14 +305,25 @@ def fluffy_uploaded_json_order(orderforms: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
+def nallo_uploaded_json_order(orderforms: Path) -> dict:
+    """Load an example Nallo order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON,
+        file_path=Path(orderforms, "nallo_uploaded_json_orderform.json"),
+    )
+
+
+@pytest.fixture(scope="session")
 def json_order_dict(
     mip_uploaded_json_order: dict,
     fluffy_uploaded_json_order: dict,
     balsamic_uploaded_json_order: dict,
+    nallo_uploaded_json_order: dict,
 ) -> dict[str, dict]:
     """Return a dict of orders that can be uploaded in the json format."""
     return {
         OrderType.MIP_DNA: mip_uploaded_json_order,
         OrderType.FLUFFY: fluffy_uploaded_json_order,
         OrderType.BALSAMIC: balsamic_uploaded_json_order,
+        OrderType.NALLO: nallo_uploaded_json_order,
     }

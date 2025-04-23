@@ -6,12 +6,12 @@
       {
         "age_at_sampling": "46.14648",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
         "comment": "Data finns F0034567-8 2020-45678",
         "container": "Tube",
-        "control": "negative",
         "container_name": "2020-12345-67",
         "family_name": "F0034567",
         "father": "",
@@ -40,13 +40,13 @@
       {
         "age_at_sampling": "67.89101",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
         "comment": "Data finns F0067891-0 2020-78910",
         "container": "Tube",
         "container_name": "2020-56789-10",
-        "control": "positive",
         "family_name": "F0067891",
         "father": "",
         "mother": "",
@@ -74,13 +74,13 @@
       {
         "age_at_sampling": "9.10111",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
         "comment": "Data finns F0010111-2 2020-11121",
         "container": "Tube",
         "container_name": "2020-89101-11",
-        "control": "",
         "family_name": "F0010111",
         "father": "",
         "mother": "",
@@ -108,6 +108,7 @@
       {
         "age_at_sampling": "1.31415",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
@@ -141,6 +142,7 @@
       {
         "age_at_sampling": "17.18192",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           "Cohorts1",
           "Cohorts2"
@@ -178,6 +180,7 @@
       {
         "age_at_sampling": "21.22232",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           "Cohorts1",
           "Cohorts2"
@@ -213,6 +216,7 @@
       {
         "age_at_sampling": "2.12223",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
@@ -246,6 +250,7 @@
       {
         "age_at_sampling": "2.52627",
         "application": "LWPBELB070",
+        "data_analysis":"nallo",
         "cohorts": [
           ""
         ],
