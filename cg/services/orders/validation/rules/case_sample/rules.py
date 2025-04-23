@@ -502,7 +502,7 @@ def validate_existing_samples_compatible_with_order_type(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[ExistingSampleWrongTypeError]:
     errors: list[ExistingSampleWrongTypeError] = []
-    for case_index, sample_index, sample in order.enumerated_existing_cases:
+    for case_index, sample_index, sample in order.enumerated_existing_samples:
         if not is_sample_compatible_with_order_type(
             order_type=order.order_type, sample=sample, store=store
         ):
