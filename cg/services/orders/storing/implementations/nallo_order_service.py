@@ -11,7 +11,7 @@ from cg.services.orders.validation.order_types.nallo.models.order import NalloOr
 from cg.services.orders.validation.order_types.nallo.models.sample import NalloSample
 from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
-from cg.store.models import CaseSample, Customer
+from cg.store.models import Customer
 from cg.store.models import Order as DbOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
@@ -59,7 +59,6 @@ class StoreNalloOrderService(StoreOrderService):
                     case=case,
                     customer=db_order.customer,
                     ticket=str(order._generated_ticket_id),
-                    workflow=Workflow.NALLO,
                     delivery_type=order.delivery_type,
                 )
                 new_cases.append(db_case)
@@ -74,26 +73,10 @@ class StoreNalloOrderService(StoreOrderService):
                 )
 
             db_order.cases.append(db_case)
-            self.status_db.session.add_all(new_cases)
-            self.status_db.session.add(db_order)
-            self.status_db.session.commit()
+            self.status_db.add_multiple_items_to_store(new_cases)
+            self.status_db.add_item_to_store(db_order)
+            self.status_db.commit_to_store()
         return new_cases
-
-    def _create_link(
-        self,
-        db_case: DbCase,
-        db_sample: DbSample,
-        father: DbSample,
-        mother: DbSample,
-        sample: NalloSample,
-    ) -> CaseSample:
-        return self.status_db.relate_sample(
-            case=db_case,
-            sample=db_sample,
-            status=sample.status,
-            mother=mother,
-            father=father,
-        )
 
     def _create_db_sample(
         self,
@@ -104,7 +87,7 @@ class StoreNalloOrderService(StoreOrderService):
         sample: NalloSample,
         ticket: str,
     ):
-        application_tag = sample.application
+        application_tag: str = sample.application
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=application_tag)
         )
@@ -118,7 +101,6 @@ class StoreNalloOrderService(StoreOrderService):
             **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
         db_sample.customer = customer
-        self.status_db.add_item_to_store(db_sample)
         return db_sample
 
     def _create_db_case(
@@ -126,12 +108,11 @@ class StoreNalloOrderService(StoreOrderService):
         case: NalloCase,
         customer: Customer,
         ticket: str,
-        workflow: Workflow,
         delivery_type: DataDelivery,
     ) -> DbCase:
         db_case: DbCase = self.status_db.add_case(
             ticket=ticket,
-            data_analysis=workflow,
+            data_analysis=Workflow.NALLO,
             data_delivery=delivery_type,
             **case.model_dump(exclude={"samples"}),
         )
@@ -173,14 +154,13 @@ class StoreNalloOrderService(StoreOrderService):
             db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
             sample_father_name: str = sample.father
             db_sample_father: DbSample | None = case_samples.get(sample_father_name)
-            case_sample: CaseSample = self._create_link(
-                db_case=db_case,
-                db_sample=db_sample,
-                father=db_sample_father,
+            self.status_db.relate_sample(
+                case=db_case,
+                sample=db_sample,
+                status=sample.status,
                 mother=db_sample_mother,
-                sample=sample,
+                father=db_sample_father,
             )
-            self.status_db.add_item_to_store(case_sample)
 
     def _create_db_sample_dict(
         self, case: NalloCase, order: NalloOrder, customer: Customer
@@ -190,15 +170,14 @@ class StoreNalloOrderService(StoreOrderService):
         case_samples: dict[str, DbSample] = {}
         for sample in case.samples:
             if sample.is_new:
-                with self.status_db.session.no_autoflush:
-                    db_sample: DbSample = self._create_db_sample(
-                        case=case,
-                        customer=customer,
-                        order_name=order.name,
-                        ordered=datetime.now(),
-                        sample=sample,
-                        ticket=str(order._generated_ticket_id),
-                    )
+                db_sample: DbSample = self._create_db_sample(
+                    case=case,
+                    customer=customer,
+                    order_name=order.name,
+                    ordered=datetime.now(),
+                    sample=sample,
+                    ticket=str(order._generated_ticket_id),
+                )
             else:
                 db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
             case_samples[db_sample.name] = db_sample
