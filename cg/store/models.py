@@ -848,6 +848,10 @@ class Sample(Base, PriorityMixin):
         return self.control == ControlOptions.NEGATIVE
 
     @property
+    def is_external(self) -> bool:
+        return self.application_version.application.is_external
+
+    @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flowcell for metric in self.sequencing_metrics})

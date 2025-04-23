@@ -1,5 +1,5 @@
 import datetime as dt
-from unittest.mock import create_autospec, patch
+from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
 
@@ -9,15 +9,18 @@ from cg.constants.constants import DataDelivery
 from cg.exc import TicketCreationError
 from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
-from cg.models.orders.sample_base import ContainerEnum
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
+from cg.services.orders.validation.models.case import Case as ValidationCase
+from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order import Order
-from cg.services.orders.validation.models.sample import Sample as ValidationSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
+from cg.services.orders.validation.models.sample import Sample as ValidationSample
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.store.models import Application, Case
 from cg.store.models import Order as DbOrder
@@ -202,17 +205,20 @@ def test_get_ticket_tags(
 ):
     """Test that the correct tags are generated based on the order and order type."""
 
-    # GIVEN an order with existing data
+    # GIVEN an order with existing data and no external samples
     order: OrderWithCases = request.getfixturevalue(order_fixture)
 
+    store: Store = create_autospec(Store)
+    store.get_application_by_tag = lambda tag: Application(is_external=False)
+
     # WHEN getting the ticket tags
-    tags = get_ticket_tags(order=order, order_type=order_type, status_db=create_autospec(Store))
+    tags: list[str] = get_ticket_tags(order=order, order_type=order_type, status_db=store)
 
     # THEN the tags should be correct
     assert tags == expected_tags
 
 
-def test_get_ticket_tags_with_external_data_sample():
+def test_get_ticket_tags_with_external_data_sample_for_order_with_samples():
 
     # GIVEN an order with two samples, one including external data
     store: Store = create_autospec(Store)
@@ -244,6 +250,70 @@ def test_get_ticket_tags_with_external_data_sample():
 
     # THEN the tags should include external-data
     assert "external-data" in tags
+
+
+def test_get_ticket_tags_with_external_data_for_order_with_new_case():
+
+    # GIVEN an order with a new case and a new sample with external data
+    store: Store = create_autospec(Store)
+    store.get_application_by_tag = lambda tag: (
+        Application(is_external=True) if tag == "external_app" else None
+    )
+
+    order = OrderWithCases(
+        delivery_type=DataDelivery.BAM,
+        cases=[
+            ValidationCase(
+                name="new-case",
+                samples=[
+                    BalsamicSample(
+                        application="external_app",
+                        container=ContainerEnum.no_container,
+                        name="new-sample",
+                        sex=SexEnum.female,
+                        source="a source",
+                        subject_id="subject-id",
+                    ),
+                ],
+            ),
+        ],
+        customer="test_customer",
+        project_type=OrderType.PACBIO_LONG_READ,
+        name="order with new cases and external sample data",
+    )
+
+    # WHEN getting the ticket tags
+    # THEN the tags should include external data
+    assert "external-data" in get_ticket_tags(
+        order=order, order_type=order.order_type, status_db=store
+    )
+
+
+def test_get_ticket_tags_with_external_data_for_order_with_existing_case():
+
+    # GIVEN an existing case with an existing sample with external data
+    with patch.object(Sample, "is_external", new_callable=PropertyMock) as mock_prop:
+        mock_prop.return_value = True
+        sample1: Sample = create_autospec(Sample)
+
+    store: Store = create_autospec(Store)
+    store.get_samples_by_case_id = lambda case_id: (
+        [sample1] if case_id == "existing_case_id" else []
+    )
+
+    order = OrderWithCases(
+        delivery_type=DataDelivery.ANALYSIS_FILES,
+        cases=[ExistingCase(internal_id="existing_case_id")],
+        customer="test_customer",
+        project_type=OrderType.BALSAMIC_UMI,
+        name="order with existing case and external sample data",
+    )
+
+    # WHEN getting the ticket tags
+    # THEN the tags should include external data
+    assert "external-data" in get_ticket_tags(
+        order=order, order_type=order.order_type, status_db=store
+    )
 
 
 @pytest.mark.parametrize(

@@ -27,11 +27,11 @@ class PriorityTerms(StrEnum):
 
 
 class Priority(IntEnum):
-    research: int = 0
-    standard: int = 1
-    clinical_trials: int = 2
-    priority: int = 3
-    express: int = 4
+    research = 0
+    standard = 1
+    clinical_trials = 2
+    priority = 3
+    express = 4
 
     @classmethod
     def priority_to_slurm_qos(cls) -> dict[int, str]:
