@@ -93,6 +93,7 @@ class StoreNalloOrderService(StoreOrderService):
         )
         db_sample: DbSample = self.status_db.add_sample(
             application_version=application_version,
+            customer=customer,
             internal_id=sample._generated_lims_id,
             order=order_name,
             ordered=ordered,
@@ -100,7 +101,6 @@ class StoreNalloOrderService(StoreOrderService):
             priority=case.priority,
             **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
-        db_sample.customer = customer
         return db_sample
 
     def _create_db_case(
