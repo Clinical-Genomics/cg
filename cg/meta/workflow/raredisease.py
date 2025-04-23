@@ -98,21 +98,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
         return True
 
-    def get_target_bed(self, case_id: str, analysis_type: str) -> str | None:
+    def get_target_bed(self, case_id: str) -> str | None:
         """
         Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
         """
         target_bed_file: str | None = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed_file and (
-            analysis_type == AnalysisType.WES or analysis_type == AnalysisType.TGS
-        ):
-            raise ValueError("No capture kit was found in LIMS")
         return target_bed_file
 
     def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        target_bed_file: str = self.get_target_bed(case_id=case_id) or ""
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
