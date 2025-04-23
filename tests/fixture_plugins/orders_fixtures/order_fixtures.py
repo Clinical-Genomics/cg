@@ -1,6 +1,5 @@
 """Fixtures for orders parsed into their respective models."""
 
-from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 import pytest
 
 from cg.services.orders.validation.models.existing_sample import ExistingSample
@@ -15,6 +14,7 @@ from cg.services.orders.validation.order_types.microsalt.models.order import Mic
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.order_types.pacbio_long_read.models.order import PacbioOrder
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
@@ -163,10 +163,10 @@ def mip_dna_order_with_only_existing_samples(mip_dna_order_to_submit: dict) -> M
 
 
 @pytest.fixture
-def nallo_order(nallo_order_to_submit: dict) -> NalloOrder:
+def nallo_order(nallo_order_to_submit: dict, ticket_id_as_int: int) -> NalloOrder:
     nallo_order_to_submit["user_id"] = 1
     nallo_order = NalloOrder.model_validate(nallo_order_to_submit)
     for case_index, sample_index, sample in nallo_order.enumerated_new_samples:
         sample._generated_lims_id = f"ACC{case_index}-{sample_index}"
-    nallo_order._generated_ticket_id = 123456
+    nallo_order._generated_ticket_id = ticket_id_as_int
     return nallo_order

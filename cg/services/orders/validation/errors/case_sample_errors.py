@@ -180,8 +180,3 @@ class SampleOutsideOfCollaborationError(CaseSampleError):
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already exists in a previous order"
-
-
-class SampleNameNotUniqueError(CaseSampleError):
-    field: str = "name"
-    message: str = "Sample name must be unique in the order"
