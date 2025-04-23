@@ -537,6 +537,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         order: Order = None,
+        ticket_id: str = "123456",
     ):
         """Load a case with samples and link relations."""
         if not customer:
@@ -552,6 +553,7 @@ class StoreHelpers:
                 name=case_name,
                 internal_id=case_id,
                 action=action,
+                ticket=ticket_id,
             )
             case.customer = customer
         if order:

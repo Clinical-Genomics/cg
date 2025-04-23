@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 
 HGNC_ID = "hgnc_id"
 
@@ -65,6 +65,9 @@ RAREDISEASE_CASE_TAGS = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    peddy_check={"ped-check", "peddy"},
+    peddy_ped={"ped", "peddy"},
+    peddy_sex={"sex-check", "peddy"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
@@ -134,10 +137,13 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_file={"alignment_haplotags"},
+    alignment_path={AlignmentFileTag.BAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
     d4_file={"mosdepth_d4"},
+    hificnv_coverage={"hificnv", "bigwig"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
-
 
 MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     bam_file={"bam"},
@@ -171,3 +177,7 @@ RNAFUSION_SAMPLE_TAGS = dict(
 )
 
 RANK_MODEL_THRESHOLD = 5
+
+NALLO_RANK_MODEL_THRESHOLD = 8
+NALLO_RANK_MODEL_VERSION_SNV = "1.0"
+NALLO_RANK_MODEL_VERSION_SV = "1.0"

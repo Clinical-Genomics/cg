@@ -122,7 +122,7 @@ def scout_finished_cases(
     context: click.Context, days_old: int, skip_confirmation: bool = False, dry_run: bool = False
 ) -> None:
     """Clean up of solved and archived Scout cases."""
-    scout_api: ScoutAPI = context.obj.scout_api
+    scout_api: ScoutAPI = context.obj.scout_api_37
     bundles: list[str] = []
     for status in [ScoutTag.ARCHIVED, ScoutTag.SOLVED]:
         cases: list[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
