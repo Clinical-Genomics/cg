@@ -4,20 +4,13 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.services.deliver_files.file_fetcher.abstract import (
-    FetchDeliveryFilesService,
-)
-from cg.services.deliver_files.file_fetcher.error_handling import (
-    handle_missing_bundle_errors,
-)
+from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
+from cg.services.deliver_files.file_fetcher.error_handling import handle_missing_bundle_errors
 from cg.services.deliver_files.file_fetcher.exc import NoDeliveryFilesError
 from cg.services.deliver_files.file_fetcher.models import (
     DeliveryFiles,
     DeliveryMetaData,
     SampleFile,
-)
-from cg.services.deliver_files.tag_fetcher.bam_service import (
-    BamDeliveryTagsFetcher,
 )
 from cg.services.deliver_files.tag_fetcher.sample_and_case_service import (
     SampleAndCaseDeliveryTagsFetcher,
@@ -37,7 +30,7 @@ class RawDataDeliveryFileFetcher(FetchDeliveryFilesService):
         self,
         status_db: Store,
         hk_api: HousekeeperAPI,
-        tags_fetcher: SampleAndCaseDeliveryTagsFetcher | BamDeliveryTagsFetcher,
+        tags_fetcher: SampleAndCaseDeliveryTagsFetcher,
     ):
         self.status_db = status_db
         self.hk_api = hk_api

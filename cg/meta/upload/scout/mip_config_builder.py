@@ -81,7 +81,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
             load_config.samples.append(
                 self.build_config_sample(case_sample=db_sample, hk_version=hk_version)
             )
-        self.include_pedigree_picture(load_config)
+        self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         return load_config
 
     def include_case_files(self, load_config: MipLoadConfig, hk_version: Version) -> None:

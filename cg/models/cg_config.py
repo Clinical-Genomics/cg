@@ -451,7 +451,9 @@ class CGConfig(BaseModel):
     run_names_services_: RunNamesServices | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
     scout: CommonAppConfig = None
-    scout_api_: ScoutAPI = None
+    scout_38: CommonAppConfig = None
+    scout_api_37_: ScoutAPI = None
+    scout_api_38_: ScoutAPI = None
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
@@ -702,12 +704,23 @@ class CGConfig(BaseModel):
         return AnalysisService(analysis_client=self.trailblazer_api, status_db=self.status_db)
 
     @property
-    def scout_api(self) -> ScoutAPI:
-        api = self.__dict__.get("scout_api_")
+    def scout_api_37(self) -> ScoutAPI:
+        api = self.scout_api_37_
+        if not api:
+            LOG.debug("Instantiating scout api, genome build 37")
+            api = ScoutAPI(scout_config=self.scout, slurm_upload_service=self.slurm_upload_service)
+            self.scout_api_37_ = api
+        return api
+
+    @property
+    def scout_api_38(self) -> ScoutAPI:
+        api = self.scout_api_38_
         if api is None:
-            LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
-            self.scout_api_ = api
+            LOG.debug("Instantiating scout api, genome build 38")
+            api = ScoutAPI(
+                scout_config=self.scout_38, slurm_upload_service=self.slurm_upload_service
+            )
+            self.scout_api_38_ = api
         return api
 
     @property

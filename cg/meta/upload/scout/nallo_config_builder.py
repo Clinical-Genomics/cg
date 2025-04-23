@@ -58,7 +58,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.get_sample_information(
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
-        self.include_pedigree_picture(load_config)
+        self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
         load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
@@ -90,10 +90,30 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.d4_file = self.get_sample_file(
-            hk_tags=self.sample_tags.d4_file, sample_id=sample_id
+            hk_tags=self.sample_tags.d4_file, sample_id=sample_id, hk_version=hk_version
         )
         config_sample.paraphase_alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.paraphase_alignment_path,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.tiddit_coverage_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.hificnv_coverage,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.minor_allele_frequency_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.minor_allele_frequency_wig,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.assembly_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.assembly_alignment_path,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_path,
             sample_id=sample_id,
             hk_version=hk_version,
         )
