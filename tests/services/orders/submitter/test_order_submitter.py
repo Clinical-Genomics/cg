@@ -64,6 +64,7 @@ def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
         (OrderType.MICROSALT, "microsalt_order"),
         (OrderType.MIP_DNA, "mip_dna_order"),
         (OrderType.MIP_RNA, "mip_rna_order"),
+        (OrderType.NALLO, "nallo_order"),
         (OrderType.PACBIO_LONG_READ, "pacbio_order"),
         (OrderType.RML, "rml_order"),
         (OrderType.RNAFUSION, "rnafusion_order"),
