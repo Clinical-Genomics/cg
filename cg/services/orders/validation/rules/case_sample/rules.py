@@ -505,11 +505,8 @@ def validate_sample_names_available(
     """Validates that new sample names are not already used by the customer."""
     errors: list[SampleNameAlreadyExistsError] = []
     customer_entry_id: int = store.get_customer_by_internal_id(order.customer).id
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_new_samples:
-            if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
-                error = SampleNameAlreadyExistsError(
-                    case_index=case_index, sample_index=sample_index
-                )
-                errors.append(error)
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
+            error = SampleNameAlreadyExistsError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors
