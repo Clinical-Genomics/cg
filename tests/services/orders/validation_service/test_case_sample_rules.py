@@ -14,6 +14,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidVolumeError,
     OccupiedWellError,
     SampleDoesNotExistError,
+    SampleNameAlreadyExistsError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
@@ -42,6 +43,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
     validate_not_all_samples_unknown_in_case,
+    validate_sample_names_available,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
     validate_samples_exist,
@@ -57,6 +59,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 from cg.store.models import Application, Sample
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_validate_well_position_format(valid_order: OrderWithCases):
@@ -612,3 +615,26 @@ def test_existing_sample_from_outside_of_collaboration(
 
     # THEN the error should concern the added existing case
     assert isinstance(errors[0], SampleOutsideOfCollaborationError)
+
+
+def test_validate_sample_names_available(
+    valid_order: OrderWithCases,
+    store: Store,
+    helpers: StoreHelpers,
+):
+    # GIVEN a sample in the database with the same sample name and customer as in the order
+    sample_name: str = valid_order.cases[0].samples[0].name
+    helpers.add_sample(
+        store=store,
+        name=sample_name,
+    )
+
+    # WHEN validating if the sample names are available
+    errors: list[SampleNameAlreadyExistsError] = validate_sample_names_available(
+        order=valid_order, store=store
+    )
+    # THEN an error should be returned for the first sample
+    assert errors
+    assert errors[0].sample_index == 0 and errors[0].case_index == 0
+    # THEN the error should concern the sample name
+    assert isinstance(errors[0], SampleNameAlreadyExistsError)

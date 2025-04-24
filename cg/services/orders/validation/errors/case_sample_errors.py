@@ -180,3 +180,8 @@ class BufferMissingError(CaseSampleError):
 class SampleOutsideOfCollaborationError(CaseSampleError):
     field: str = "internal_id"
     message: str = "Sample cannot be outside of collaboration"
+
+
+class SampleNameAlreadyExistsError(CaseSampleError):
+    field: str = "name"
+    message: str = "Sample name already exists in a previous order"
