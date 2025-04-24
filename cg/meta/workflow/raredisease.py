@@ -16,11 +16,12 @@ from cg.clients.chanjo2.models import (
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
-    RAREDISEASE_ADAPTER_BASES_PERCENTAGE_THRESHOLD,
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS_WES,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
