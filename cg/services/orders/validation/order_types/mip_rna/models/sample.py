@@ -21,3 +21,4 @@ class MIPRNASample(Sample):
     source: str
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
+    tumour: bool = False

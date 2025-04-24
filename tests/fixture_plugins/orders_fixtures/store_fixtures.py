@@ -27,7 +27,7 @@ def store_to_submit_and_validate_orders(
         "VWGNXTR001": [OrderType.MICROSALT],
         "WGSWPFC030": [OrderType.MIP_DNA],
         "RNAPOAR025": [OrderType.MIP_RNA, OrderType.RNAFUSION, OrderType.TOMTE],
-        "LWPBELB070": [OrderType.PACBIO_LONG_READ],
+        "LWPBELB070": [OrderType.PACBIO_LONG_READ, OrderType.NALLO],
         "VWGDPTR001": [OrderType.SARS_COV_2],
     }
     for tag, orders in app_tags.items():

@@ -1836,3 +1836,11 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
+        """Check if a sample name is already used by the customer"""
+        if self.get_sample_by_customer_and_name(
+            customer_entry_id=[customer_entry_id], sample_name=sample.name
+        ):
+            return True
+        return False
