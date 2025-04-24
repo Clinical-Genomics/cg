@@ -85,9 +85,9 @@ class StoreCaseOrderService(StoreOrderService):
                 )
 
             db_order.cases.append(db_case)
-            self.status_db.session.add_all(new_cases)
-            self.status_db.session.add(db_order)
-            self.status_db.session.commit()
+            self.status_db.add_multiple_items_to_store(new_cases)
+            self.status_db.add_item_to_store(db_order)
+            self.status_db.commit_to_store()
         return new_cases
 
     @staticmethod
@@ -129,7 +129,7 @@ class StoreCaseOrderService(StoreOrderService):
         ordered: datetime,
         sample: SampleInCase,
         ticket: str,
-    ):
+    ) -> DbSample:
         application_tag = sample.application
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=application_tag)
@@ -144,7 +144,7 @@ class StoreCaseOrderService(StoreOrderService):
             **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
         db_sample.customer = customer
-        self.status_db.session.add(db_sample)
+        self.status_db.add_item_to_store(db_sample)
         return db_sample
 
     def _create_db_case(
@@ -214,7 +214,7 @@ class StoreCaseOrderService(StoreOrderService):
         case_samples: dict[str, DbSample] = {}
         for sample in case.samples:
             if sample.is_new:
-                with self.status_db.session.no_autoflush:
+                with self.status_db.no_autoflush_context():
                     db_sample: DbSample = self._create_db_sample(
                         case=case,
                         customer=customer,
