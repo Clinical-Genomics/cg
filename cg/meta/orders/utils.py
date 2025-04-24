@@ -28,6 +28,7 @@ def contains_existing_data(order: OrderWithCases) -> bool:
 def contains_external_data(
     existing_samples: list[Sample], new_samples: list[ValidationSample], status_db: Store
 ):
+    """Check if any existing or new sample from the given sample lists is external."""
     if any([sample.is_external for sample in existing_samples]):
         return True
 
