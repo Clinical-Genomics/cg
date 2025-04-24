@@ -11,6 +11,7 @@ ORDER_TYPE_WORKFLOW_MAP: dict[OrderType, Workflow] = {
     OrderType.MICROSALT: Workflow.MICROSALT,
     OrderType.MIP_DNA: Workflow.MIP_DNA,
     OrderType.MIP_RNA: Workflow.MIP_RNA,
+    OrderType.NALLO: Workflow.NALLO,
     OrderType.PACBIO_LONG_READ: Workflow.RAW_DATA,
     OrderType.RML: Workflow.RAW_DATA,
     OrderType.RNAFUSION: Workflow.RNAFUSION,

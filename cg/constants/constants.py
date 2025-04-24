@@ -176,6 +176,9 @@ class DataDelivery(StrEnum):
     FASTQ_ANALYSIS_SCOUT = "fastq-analysis-scout"
     NIPT_VIEWER = "nipt-viewer"
     NO_DELIVERY = "no-delivery"
+    RAW_DATA_ANALYSIS = "raw_data-analysis"
+    RAW_DATA_ANALYSIS_SCOUT = "raw_data-analysis-scout"
+    RAW_DATA_SCOUT = "raw_data-scout"
     SCOUT = "scout"
     STATINA = "statina"
 

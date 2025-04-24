@@ -13,6 +13,7 @@ class OrderType(StrEnum):
     MICROSALT = Workflow.MICROSALT
     MIP_DNA = Workflow.MIP_DNA
     MIP_RNA = Workflow.MIP_RNA
+    NALLO = Workflow.NALLO
     PACBIO_LONG_READ = "pacbio-long-read"
     RML = "rml"
     RNAFUSION = Workflow.RNAFUSION

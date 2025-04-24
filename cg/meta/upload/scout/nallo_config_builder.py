@@ -97,3 +97,23 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        config_sample.tiddit_coverage_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.hificnv_coverage,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.minor_allele_frequency_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.minor_allele_frequency_wig,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.assembly_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.assembly_alignment_path,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_path,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
