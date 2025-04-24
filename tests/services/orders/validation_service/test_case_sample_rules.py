@@ -669,7 +669,7 @@ def test_existing_sample_compatible_application_passes(
     # THEN no error should be returned
     assert not errors
 
-    
+
 def test_validate_sample_names_available(
     valid_order: OrderWithCases,
     store: Store,

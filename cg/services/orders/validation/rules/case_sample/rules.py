@@ -513,8 +513,7 @@ def validate_existing_samples_compatible_with_order_type(
             errors.append(error)
     return errors
 
-  
-  
+
 def validate_sample_names_available(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameAlreadyExistsError]:
