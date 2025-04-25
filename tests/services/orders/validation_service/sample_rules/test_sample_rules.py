@@ -1,3 +1,4 @@
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
 from cg.services.orders.validation.constants import ElutionBuffer, IndexEnum
 from cg.services.orders.validation.errors.sample_errors import (
@@ -25,6 +26,8 @@ from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rml.models.sample import RMLSample
 from cg.services.orders.validation.rules.sample.rules import (
     validate_buffer_skip_rc_condition,
+    validate_capture_kit_compatible,
+    validate_capture_kit_required,
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
@@ -410,3 +413,39 @@ def test_validate_index_number_out_of_range(rml_order: RMLOrder):
     # THEN the error should concern the sample's index number being out of range
     assert isinstance(errors[0], IndexNumberOutOfRangeError)
     assert errors[0].sample_index == 0
+
+
+def test_validate_capture_kit_missing(
+    fastq_order: FastqOrder, store_to_submit_and_validate_orders: Store
+):
+
+    # GIVEN a Fastq order with a missing capture kit
+    fastq_order.samples[0].application = "PANKTTR100"
+    fastq_order.samples[0].capture_kit = None
+    store_to_submit_and_validate_orders.get_application_by_tag("PANKTTR100").prep_category = (
+        SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+    )
+
+    # WHEN validating that the capture kit is valid
+    errors = validate_capture_kit_required(
+        order=fastq_order, store=store_to_submit_and_validate_orders
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+
+def test_validate_capture_kit_incompatible(
+    fastq_order: FastqOrder, store_to_submit_and_validate_orders: Store
+):
+
+    # GIVEN a Fastq order with an invalid capture kit
+    fastq_order.samples[0].capture_kit = "Invalid capture kit"
+
+    # WHEN validating that the capture kit is valid
+    errors = validate_capture_kit_compatible(
+        order=fastq_order, store=store_to_submit_and_validate_orders
+    )
+
+    # THEN an error should be returned
+    assert errors
