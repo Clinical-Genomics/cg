@@ -6,8 +6,6 @@ Create Date: 2025-04-25 13:57:47.960893
 
 """
 
-from enum import StrEnum
-
 import sqlalchemy as sa
 from sqlalchemy.orm import declarative_base
 
@@ -20,25 +18,6 @@ branch_labels = None
 depends_on = None
 
 Base = declarative_base()
-
-
-class OrderType(StrEnum):
-    BALSAMIC = "balsamic"
-    BALSAMIC_UMI = "balsamic-umi"
-    FASTQ = "fastq"
-    FLUFFY = "fluffy"
-    METAGENOME = "metagenome"
-    MICROBIAL_FASTQ = "microbial-fastq"
-    MICROSALT = "microsalt"
-    MIP_DNA = "mip-dna"
-    MIP_RNA = "mip-rna"
-    NALLO = "nallo"
-    PACBIO_LONG_READ = "pacbio-long-read"
-    RML = "rml"
-    RNAFUSION = "rnafusion"
-    SARS_COV_2 = "sars-cov-2"
-    TAXPROFILER = "taxprofiler"
-    TOMTE = "tomte"
 
 
 old_order_types = [
@@ -69,7 +48,7 @@ class OrderTypeApplication(Base):
     """Maps an order type to its allowed applications"""
 
     __tablename__ = "order_type_application"
-    order_type = sa.Column(sa.types.Enum(*list(OrderType)), primary_key=True)
+    order_type = sa.Column(sa.types.Enum(*new_order_types), primary_key=True)
 
 
 def upgrade():
