@@ -1,7 +1,9 @@
 import datetime as dt
-from unittest.mock import PropertyMock, create_autospec, patch
+from typing import Any, Generator
+from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
+from pytest_mock import mocker
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -16,6 +18,7 @@ from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.case import Case as ValidationCase
 from cg.services.orders.validation.models.existing_case import ExistingCase
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
@@ -65,13 +68,44 @@ def external_app_name() -> str:
 
 
 @pytest.fixture
-def store_with_applications(external_app_name: str) -> Store:
-    store: Store = create_autospec(Store)
+def existing_case_id() -> str:
+    return "existing_case_id"
+
+
+@pytest.fixture
+def existing_sample_id() -> str:
+    return "existing_sample_id"
+
+
+@pytest.fixture
+def store_with_externals(
+    external_app_name: str, existing_case_id: str, existing_sample_id: str
+) -> Store:
+    sample: Sample = create_autospec(Sample, instance=True)
+    type(sample).is_external = PropertyMock(return_value=True)  # type: ignore
+
+    store: Store = create_autospec(Store, instance=True)
     store.get_application_by_tag = lambda tag: (
-        Application(is_external=True)
-        if tag == external_app_name
-        else Application(is_external=False)
+        Application(is_external=True) if tag == external_app_name else None
     )
+
+    store.get_samples_by_case_id = lambda case_id: ([sample] if case_id == existing_case_id else [])
+    store.get_sample_by_internal_id = lambda internal_id: (
+        sample if internal_id == existing_sample_id else None
+    )
+
+    return store
+
+
+@pytest.fixture
+def store_with_no_externals() -> Store:
+    sample: Sample = create_autospec(Sample, instance=True)
+    type(sample).is_external = PropertyMock(return_value=False)  # type: ignore
+
+    store: Store = create_autospec(Store, instance=True)
+    store.get_sample_by_internal_id.return_value = sample
+    store.get_application_by_tag.return_value = Application(is_external=False)
+
     return store
 
 
@@ -98,7 +132,7 @@ def order_with_one_external_sample(external_app_name: str) -> OrderWithSamples:
 
 
 @pytest.fixture
-def order_with_new_case_and_external_sample(external_app_name: str) -> OrderWithCases:
+def order_with_new_case_and_new_external_sample(external_app_name: str) -> OrderWithCases:
     return OrderWithCases(
         delivery_type=DataDelivery.ANALYSIS_SCOUT,
         cases=[
@@ -123,8 +157,22 @@ def order_with_new_case_and_external_sample(external_app_name: str) -> OrderWith
 
 
 @pytest.fixture
-def existing_case_id() -> str:
-    return "existing_case_id"
+def order_with_new_case_and_existing_external_samples(existing_sample_id: str) -> OrderWithCases:
+    return OrderWithCases(
+        delivery_type=DataDelivery.ANALYSIS_SCOUT,
+        cases=[
+            ValidationCase(
+                name="new-case",
+                samples=[
+                    ExistingSample(father="a", mother="b", internal_id=existing_sample_id),
+                    ExistingSample(father="c", mother="d", internal_id="sample_not_in_database"),
+                ],
+            )
+        ],
+        customer="test_customer",
+        project_type=OrderType.BALSAMIC,
+        name="order with new case and existing external sample data",
+    )
 
 
 @pytest.fixture
@@ -136,20 +184,6 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
         project_type=OrderType.BALSAMIC_UMI,
         name="order with existing case and external sample data",
     )
-
-
-@pytest.fixture
-def store_with_existing_sample(existing_case_id: str) -> Store:
-    with patch.object(Sample, "is_external", new_callable=PropertyMock) as mock_prop:
-        mock_prop.return_value = True
-        sample1: Sample = create_autospec(Sample)
-
-    store: Store = create_autospec(Store)
-    store.get_samples_by_case_id = lambda case_id: (
-        [sample1] if case_id == existing_case_id else []
-    )
-
-    return store
 
 
 @pytest.mark.parametrize(
@@ -296,7 +330,7 @@ def test_get_ticket_tags(
     order_fixture: str,
     order_type: OrderType,
     expected_tags: list[str],
-    store_with_applications: Store,
+    store_with_no_externals: Store,
 ):
     """Test that the correct tags are generated based on the order and order type."""
 
@@ -305,7 +339,7 @@ def test_get_ticket_tags(
 
     # WHEN getting the ticket tags
     tags: list[str] = get_ticket_tags(
-        order=order, order_type=order_type, status_db=store_with_applications
+        order=order, order_type=order_type, status_db=store_with_no_externals
     )
 
     # THEN the tags should be correct
@@ -314,7 +348,7 @@ def test_get_ticket_tags(
 
 def test_get_ticket_tags_with_external_data_sample_for_order_with_samples(
     order_with_one_external_sample: OrderWithSamples,
-    store_with_applications: Store,
+    store_with_externals: Store,
 ):
 
     # GIVEN an order with two samples, one including external data
@@ -322,24 +356,41 @@ def test_get_ticket_tags_with_external_data_sample_for_order_with_samples(
 
     # WHEN getting the ticket tags
     tags: list[str] = get_ticket_tags(
-        order=order, order_type=order.order_type, status_db=store_with_applications
+        order=order, order_type=order.order_type, status_db=store_with_externals
     )
 
     # THEN the tags should include external-data
     assert "external-data" in tags
 
 
-def test_get_ticket_tags_with_external_data_for_order_with_new_case(
-    order_with_new_case_and_external_sample: OrderWithCases,
-    store_with_applications: Store,
+def test_get_ticket_tags_with_external_data_for_order_with_new_case_and_existing_samples(
+    order_with_new_case_and_existing_external_samples: OrderWithCases,
+    store_with_externals: Store,
 ):
 
     # GIVEN an order with a new case and a new sample with external data
-    order: OrderWithCases = order_with_new_case_and_external_sample
+    order: OrderWithCases = order_with_new_case_and_existing_external_samples
 
     # WHEN getting the ticket tags
     tags: list[str] = get_ticket_tags(
-        order=order, order_type=order.order_type, status_db=store_with_applications
+        order=order, order_type=order.order_type, status_db=store_with_externals
+    )
+
+    # THEN the tags should include external data
+    assert "external-data" in tags
+
+
+def test_get_ticket_tags_with_external_data_for_order_with_new_case_and_new_samples(
+    order_with_new_case_and_new_external_sample: OrderWithCases,
+    store_with_externals: Store,
+):
+
+    # GIVEN an order with a new case and a new sample with external data
+    order: OrderWithCases = order_with_new_case_and_new_external_sample
+
+    # WHEN getting the ticket tags
+    tags: list[str] = get_ticket_tags(
+        order=order, order_type=order.order_type, status_db=store_with_externals
     )
 
     # THEN the tags should include external data
@@ -347,7 +398,7 @@ def test_get_ticket_tags_with_external_data_for_order_with_new_case(
 
 
 def test_get_ticket_tags_with_external_data_for_order_with_existing_case(
-    order_with_existing_case_and_external_sample: OrderWithCases, store_with_existing_sample: Store
+    order_with_existing_case_and_external_sample: OrderWithCases, store_with_externals: Store
 ):
 
     # GIVEN an existing case with an existing sample with external data
@@ -355,7 +406,7 @@ def test_get_ticket_tags_with_external_data_for_order_with_existing_case(
 
     # WHEN getting the ticket tags
     tags: list[str] = get_ticket_tags(
-        order=order, order_type=order.order_type, status_db=store_with_existing_sample
+        order=order, order_type=order.order_type, status_db=store_with_externals
     )
 
     # THEN the tags should include external data
