@@ -668,6 +668,10 @@ class ReadHandler(BaseHandler):
         return samples.offset(offset).limit(limit).all(), total
 
     def get_collaborator_samples(self, request: CollaboratorSamplesRequest) -> list[Sample]:
+        """Fetches all samples with matching sample name or internal id, within
+        the specified customer's collaboration. If the request specifies an order type, the
+        response will only include samples which can be ordered with that order type."""
+
         customer: Customer | None = self.get_customer_by_internal_id(request.customer)
         collaborator_ids = [collaborator.id for collaborator in customer.collaborators]
 
