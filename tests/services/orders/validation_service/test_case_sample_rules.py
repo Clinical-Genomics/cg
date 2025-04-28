@@ -1,5 +1,6 @@
 import pytest
 
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_sample_errors import (
     ApplicationArchivedError,
@@ -9,6 +10,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    ExistingSampleWrongTypeError,
     InvalidBufferError,
     InvalidConcentrationIfSkipRCError,
     InvalidVolumeError,
@@ -42,6 +44,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
+    validate_existing_samples_compatible_with_order_type,
     validate_not_all_samples_unknown_in_case,
     validate_sample_names_available,
     validate_sample_names_different_from_case_names,
@@ -57,7 +60,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
 )
-from cg.store.models import Application, Sample
+from cg.store.models import Application, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -615,6 +618,56 @@ def test_existing_sample_from_outside_of_collaboration(
 
     # THEN the error should concern the added existing case
     assert isinstance(errors[0], SampleOutsideOfCollaborationError)
+
+
+def test_existing_sample_incompatible_application_gives_error(
+    store_to_submit_and_validate_orders: Store, mip_dna_order: MIPDNAOrder, helpers: StoreHelpers
+):
+    # GIVEN an order with a linked existing sample which is not orderable with MIP-DNA
+    db_sample: Sample = helpers.add_sample(
+        application_tag="rna-tag", is_rna=True, store=store_to_submit_and_validate_orders
+    )
+    assert OrderType.MIP_DNA not in db_sample.application_version.application.order_types
+    existing_sample = ExistingSample(internal_id=db_sample.internal_id)
+    mip_dna_order.cases[0].samples.append(existing_sample)
+
+    # WHEN validating that the existing samples are compatible with the order type
+    errors: list[ExistingSampleWrongTypeError] = (
+        validate_existing_samples_compatible_with_order_type(
+            order=mip_dna_order, store=store_to_submit_and_validate_orders
+        )
+    )
+
+    # THEN an error should be returned regarding the incompatible existing sample
+    assert isinstance(errors[0], ExistingSampleWrongTypeError)
+
+
+def test_existing_sample_compatible_application_passes(
+    store_to_submit_and_validate_orders: Store, mip_dna_order: MIPDNAOrder, helpers: StoreHelpers
+):
+    # GIVEN an order with a linked existing sample which is orderable with MIP-DNA
+    db_sample: Sample = helpers.add_sample(
+        application_tag="mip-dna-tag", is_rna=False, store=store_to_submit_and_validate_orders
+    )
+    order_type_applications: list[OrderTypeApplication] = (
+        store_to_submit_and_validate_orders.link_order_types_to_application(
+            application=db_sample.application_version.application, order_types=[OrderType.MIP_DNA]
+        )
+    )
+    store_to_submit_and_validate_orders.add_multiple_items_to_store(order_type_applications)
+    store_to_submit_and_validate_orders.commit_to_store()
+    existing_sample = ExistingSample(internal_id=db_sample.internal_id)
+    mip_dna_order.cases[0].samples.append(existing_sample)
+
+    # WHEN validating that the existing samples are compatible with the order type
+    errors: list[ExistingSampleWrongTypeError] = (
+        validate_existing_samples_compatible_with_order_type(
+            order=mip_dna_order, store=store_to_submit_and_validate_orders
+        )
+    )
+
+    # THEN no error should be returned
+    assert not errors
 
 
 def test_validate_sample_names_available(
