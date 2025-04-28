@@ -61,7 +61,6 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_container_name_missing,
     is_invalid_plate_well_format,
     is_sample_compatible_with_order_type,
-    is_sample_missing_capture_kit,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
