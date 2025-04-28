@@ -87,14 +87,17 @@ def is_sample_concentration_within_interval(
     return interval[0] <= concentration <= interval[1]
 
 
-def is_sample_missing_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
-    """Returns whether a TGS sample has an application and is missing a capture kit."""
+def does_sample_need_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
     application: Application | None = store.get_application_by_tag(sample.application)
     return (
         application
         and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-        and not sample.capture_kit
     )
+
+
+def is_sample_missing_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
+    """Returns whether a TGS sample has an application and is missing a capture kit."""
+    return does_sample_need_capture_kit(sample=sample, store=store) and not sample.capture_kit
 
 
 def is_invalid_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
