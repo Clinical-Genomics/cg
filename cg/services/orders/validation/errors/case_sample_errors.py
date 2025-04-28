@@ -177,6 +177,11 @@ class SampleOutsideOfCollaborationError(CaseSampleError):
     message: str = "Sample cannot be outside of collaboration"
 
 
+class ExistingSampleWrongTypeError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "The sample is not compatible with the order type."
+
+
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already exists in a previous order"

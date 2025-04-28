@@ -3,6 +3,7 @@ from collections import Counter
 
 from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.validation.errors.case_errors import RepeatedCaseNameError
 from cg.services.orders.validation.errors.case_sample_errors import (
@@ -312,3 +313,12 @@ def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]
         if db_case := status_db.get_case_by_internal_id(case.internal_id):
             existing_case_names.add(db_case.name)
     return existing_case_names
+
+
+def is_sample_compatible_with_order_type(
+    order_type: OrderType, sample: ExistingSample, store: Store
+) -> bool:
+    if db_sample := store.get_sample_by_internal_id(sample.internal_id):
+        return order_type in db_sample.application_version.application.order_types
+    else:
+        return True
