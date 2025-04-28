@@ -46,7 +46,6 @@ from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree 
 )
 from cg.services.orders.validation.rules.case_sample.utils import (
     are_all_samples_unknown,
-    does_sample_need_capture_kit,
     get_counter_container_names,
     get_existing_case_names,
     get_existing_sample_names,
@@ -61,10 +60,8 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_buffer_missing,
     is_concentration_missing,
     is_container_name_missing,
-    is_invalid_capture_kit,
     is_invalid_plate_well_format,
     is_sample_compatible_with_order_type,
-    is_sample_missing_capture_kit,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
@@ -72,7 +69,10 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.orders.validation.rules.utils import (
+    does_sample_need_capture_kit,
     is_application_compatible,
+    is_invalid_capture_kit,
+    is_sample_missing_capture_kit,
     is_volume_invalid,
     is_volume_missing,
 )

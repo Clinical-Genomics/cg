@@ -2,7 +2,6 @@ import re
 from collections import Counter
 
 from cg.constants.constants import StatusOptions
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
@@ -29,8 +28,6 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
-from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
@@ -39,7 +36,7 @@ from cg.services.orders.validation.rules.utils import (
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.store.models import Application, Customer
+from cg.store.models import Customer
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -300,29 +297,6 @@ def is_buffer_missing(sample: SampleInCase) -> bool:
         sample.application.startswith(tuple(applications_requiring_buffer))
         and not sample.elution_buffer
     )
-
-
-def does_sample_need_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    """Returns True if the sample needs capture kit set."""
-    application: Application | None = store.get_application_by_tag(sample.application)
-    return (
-        application
-        and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-    )
-
-
-def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    """Returns whether a TGS sample has an application and is missing a capture kit."""
-    is_needed: bool = does_sample_need_capture_kit(sample=sample, store=store)
-    return is_needed and not sample.capture_kit
-
-
-def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    if not sample.capture_kit:
-        return False
-
-    valid_beds: list[str] = [bed.name for bed in store.get_active_beds()]
-    return sample.capture_kit not in valid_beds
 
 
 def is_sample_not_from_collaboration(
