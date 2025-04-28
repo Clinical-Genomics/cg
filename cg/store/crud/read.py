@@ -675,20 +675,18 @@ class ReadHandler(BaseHandler):
             SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
             SampleFilter.ORDER_BY_CREATED_AT_DESC,
             SampleFilter.IS_NOT_CANCELLED,
-            SampleFilter.LIMIT,
         ]
         samples: Query = apply_sample_filter(
             samples=self._get_query(table=Sample),
             customer_entry_ids=collaborator_ids,
             search_pattern=request.enquiry,
             filter_functions=filters,
-            limit=request.limit,
         )
         if request.order_type:
-            samples.join(Application).filter(
+            samples.join(ApplicationVersion).join(Application).filter(
                 Application.order_type_applications.contains(request.order_type)
             )
-        return samples.all()
+        return samples.limit(request.limit).all()
 
     def _get_samples_by_customer_and_subject_id_query(
         self, customer_internal_id: str, subject_id: str
