@@ -677,16 +677,20 @@ class ReadHandler(BaseHandler):
             SampleFilter.ORDER_BY_CREATED_AT_DESC,
             SampleFilter.IS_NOT_CANCELLED,
         ]
+        query = (
+            self._get_query(table=Sample)
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
+            .join(Application.order_type_applications)
+        )
         samples: Query = apply_sample_filter(
-            samples=self._get_query(table=Sample),
+            samples=query,
             customer_entry_ids=collaborator_ids,
             search_pattern=request.enquiry,
             filter_functions=filters,
         )
         if request.order_type:
-            samples.join(ApplicationVersion).join(Application).join(OrderTypeApplication).filter(
-                OrderTypeApplication.order_type == request.order_type
-            )
+            samples = samples.filter(OrderTypeApplication.order_type == request.order_type)
         return samples.limit(request.limit).all()
 
     def _get_samples_by_customer_and_subject_id_query(
