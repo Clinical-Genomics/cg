@@ -7,6 +7,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_number_of_normal_samples,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
+    reset_optional_capture_kits,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -43,6 +44,7 @@ BALSAMIC_CASE_RULES: list[callable] = [
 ]
 
 BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
+    reset_optional_capture_kits,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,

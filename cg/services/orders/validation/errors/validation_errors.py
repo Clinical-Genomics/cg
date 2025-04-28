@@ -14,8 +14,13 @@ class ValidationErrors(BaseModel):
 
     @property
     def is_empty(self) -> bool:
-        """Return True if there are no errors in any of the attributes."""
-        return all(not getattr(self, field) for field in self.model_fields)
+        """Return True if there are no errors in any of the attributes,
+        or if all the errors are actually warnings."""
+        return all(
+            not getattr(self, field)
+            or (all(getattr(item, "field") == "warnings" for item in getattr(self, field)))
+            for field in self.model_fields
+        )
 
     def get_error_message(self) -> str:
         """Gets a string documenting all errors."""
