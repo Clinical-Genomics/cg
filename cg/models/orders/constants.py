@@ -16,6 +16,7 @@ class OrderType(StrEnum):
     NALLO = Workflow.NALLO
     PACBIO_LONG_READ = "pacbio-long-read"
     RML = "rml"
+    RAREDISEASE = Workflow.RAREDISEASE
     RNAFUSION = Workflow.RNAFUSION
     SARS_COV_2 = "sars-cov-2"
     TAXPROFILER = Workflow.TAXPROFILER
