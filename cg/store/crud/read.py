@@ -684,7 +684,7 @@ class ReadHandler(BaseHandler):
         )
         if request.order_type:
             samples.join(ApplicationVersion).join(Application).filter(
-                Application.order_type_applications.contains(request.order_type)
+                Application.order_type_applications.order_type == request.order_type
             )
         return samples.limit(request.limit).all()
 
