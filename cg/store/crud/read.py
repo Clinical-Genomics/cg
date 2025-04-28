@@ -86,6 +86,7 @@ from cg.store.models import (
     InstrumentRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
@@ -683,8 +684,8 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
         )
         if request.order_type:
-            samples.join(ApplicationVersion).join(Application).filter(
-                Application.order_type_applications.order_type == request.order_type
+            samples.join(ApplicationVersion).join(Application).join(OrderTypeApplication).filter(
+                OrderTypeApplication.order_type == request.order_type
             )
         return samples.limit(request.limit).all()
 
