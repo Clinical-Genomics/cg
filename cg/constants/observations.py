@@ -52,7 +52,7 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
-    LWP: str = "loqusdb-rd-lwp"
+    LWP: str = "loqusdb-lwp"
     WGS: str = "loqusdb"
     WES: str = "loqusdb-wes"
     SOMATIC: str = "loqusdb-somatic"
