@@ -9,9 +9,11 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     ApplicationNotValidError,
     BufferMissingError,
     CaptureKitMissingError,
+    CaptureKitResetError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    ExistingSampleWrongTypeError,
     FatherNotInCaseError,
     InvalidBufferError,
     InvalidCaptureKitError,
@@ -23,6 +25,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     OccupiedWellError,
     PedigreeError,
     SampleDoesNotExistError,
+    SampleNameAlreadyExistsError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
@@ -58,8 +61,7 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_concentration_missing,
     is_container_name_missing,
     is_invalid_plate_well_format,
-    is_invalid_capture_kit,
-    is_sample_missing_capture_kit,
+    is_sample_compatible_with_order_type,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
@@ -67,7 +69,10 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.orders.validation.rules.utils import (
+    does_sample_need_capture_kit,
     is_application_compatible,
+    is_invalid_capture_kit,
+    is_sample_missing_capture_kit,
     is_volume_invalid,
     is_volume_missing,
 )
@@ -266,6 +271,8 @@ def validate_wells_contain_at_most_one_sample(
 def validate_sample_names_not_repeated(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[SampleNameRepeatedError]:
+    """Ensures that sample names are unique within the order
+    and that they not already used in the case previously."""
     old_sample_names: set[str] = get_existing_sample_names(order=order, status_db=store)
     new_samples: list[tuple[int, int, SampleInCase]] = order.enumerated_new_samples
     sample_name_counter = Counter([sample.name for _, _, sample in new_samples])
@@ -452,6 +459,23 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
     return errors
 
 
+def reset_optional_capture_kits(
+    order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
+) -> list[CaptureKitResetError]:
+    """
+    Sets the capture kit to None for each sample where it is set but not needed and returns an error
+    to be rendered as a warning for each such sample.
+    """
+    errors: list[CaptureKitResetError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if not does_sample_need_capture_kit(sample=sample, store=store) and sample.capture_kit:
+                sample.capture_kit = None
+                error = CaptureKitResetError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
 def validate_capture_kit_requirement(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[CaptureKitMissingError]:
@@ -493,4 +517,30 @@ def validate_existing_samples_belong_to_collaboration(
                     sample_index=sample_index, case_index=case_index
                 )
                 errors.append(error)
+    return errors
+
+
+def validate_existing_samples_compatible_with_order_type(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[ExistingSampleWrongTypeError]:
+    errors: list[ExistingSampleWrongTypeError] = []
+    for case_index, sample_index, sample in order.enumerated_existing_samples:
+        if not is_sample_compatible_with_order_type(
+            order_type=order.order_type, sample=sample, store=store
+        ):
+            error = ExistingSampleWrongTypeError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_sample_names_available(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[SampleNameAlreadyExistsError]:
+    """Validates that new sample names are not already used by the customer."""
+    errors: list[SampleNameAlreadyExistsError] = []
+    customer_entry_id: int = store.get_customer_by_internal_id(order.customer).id
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
+            error = SampleNameAlreadyExistsError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors

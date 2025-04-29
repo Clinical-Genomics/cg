@@ -2978,7 +2978,6 @@ def raredisease_parameters_default(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed_file=bed_version_file_name,
-        skip_germlinecnvcaller=False,
         analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
         vcfanno_extra_resources=str(
