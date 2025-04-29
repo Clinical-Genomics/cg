@@ -117,9 +117,9 @@ def test_get_observations_api_nallo(cg_context: CGConfig, helpers: StoreHelpers)
     store: Store = cg_context.status_db
 
     # GIVEN a Loqusdb supported case
-    case: Case = helpers.add_case(store, data_analysis=Workflow.NALLO)
+    case: Case = helpers.add_case(store=store, data_analysis=Workflow.NALLO)
     sample: Sample = helpers.add_sample(
-        store, application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        store=store, application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
     case_sample: CaseSample = store.relate_sample(
         case=case, sample=sample, status=PhenotypeStatus.UNKNOWN

@@ -3,18 +3,19 @@
 import logging
 
 from housekeeper.store.models import File, Version
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
-    LoqusdbInstance,
+    LOQUSDB_ID,
     LOQUSDB_LONG_READ_CUSTOMERS,
     LOQUSDB_LONG_READ_SEQUENCING_METHODS,
+    LoqusdbInstance,
     NalloLoadParameters,
-    LOQUSDB_ID,
     NalloObservationsAnalysisTag,
 )
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import LoqusdbDuplicateRecordError, CaseNotFoundError
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -97,7 +98,7 @@ class NalloObservationsAPI(ObservationsAPI):
     def get_observations_files_from_hk(
         self, hk_version: Version, case_id: str
     ) -> NalloObservationsInputFiles:
-        """Return observations files given a Housekeeper version for RAREDISEASE."""
+        """Return observations files given a Housekeeper version for Nallo."""
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[NalloObservationsAnalysisTag.SNV_VCF]

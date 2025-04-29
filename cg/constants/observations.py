@@ -80,18 +80,18 @@ class MipDNAObservationsAnalysisTag(StrEnum):
 class NalloObservationsAnalysisTag(StrEnum):
     """Nallo observations files analysis tags."""
 
-    SNV_VCF: str = "vcf-snv"
-    SV_VCF: str = "vcf-sv"
-    FAMILY_PED: str = "pedigree"
+    SNV_VCF = "vcf-snv"
+    SV_VCF = "vcf-sv"
+    FAMILY_PED = "pedigree"
 
 
 class NalloLoadParameters(Enum):
     """Nallo Loqusdb load command parameters."""
 
-    PROFILE_THRESHOLD: float = 0.95
-    GQ_THRESHOLD: int = 10
-    HARD_THRESHOLD: float = 0.95
-    SOFT_THRESHOLD: float = 0.90
+    PROFILE_THRESHOLD = 0.95
+    GQ_THRESHOLD = 10
+    HARD_THRESHOLD = 0.95
+    SOFT_THRESHOLD = 0.90
 
 
 class ObservationsFileWildcards(StrEnum):
