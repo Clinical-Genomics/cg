@@ -80,8 +80,8 @@ class MipDNAObservationsAnalysisTag(StrEnum):
 class NalloObservationsAnalysisTag(StrEnum):
     """Nallo observations files analysis tags."""
 
-    SNV_VCF = "vcf-snv"
-    SV_VCF = "vcf-sv"
+    SNV_VCF = "vcf-snv-clinical"
+    SV_VCF = "vcf-sv-clinical"
     FAMILY_PED = "pedigree"
 
 
