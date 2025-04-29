@@ -40,7 +40,6 @@ from cg.server.ext import (
     ticket_handler,
 )
 from cg.services.orders.submitter.service import OrderSubmitter
-from cg.services.orders.validation.index_sequences import INDEX_SEQUENCES
 from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
@@ -258,8 +257,3 @@ def validate_order(order_type: OrderType):
         raw_order=raw_order, order_type=order_type, user_id=g.current_user.id
     )
     return jsonify(response), HTTPStatus.OK
-
-
-@ORDERS_BLUEPRINT.route("/index_sequences", methods=["GET"])
-def get_index_sequences():
-    return jsonify(INDEX_SEQUENCES), HTTPStatus.OK
