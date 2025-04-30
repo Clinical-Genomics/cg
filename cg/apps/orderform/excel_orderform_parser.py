@@ -240,6 +240,9 @@ class ExcelOrderformParser(OrderformParser):
                 "scout": DataDelivery.SCOUT,
                 "statina": DataDelivery.STATINA,
                 "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
+                "raw_data + analysis": DataDelivery.RAW_DATA_ANALYSIS,
+                "raw_data + scout": DataDelivery.RAW_DATA_SCOUT,
+                "raw_data + analysis + scout": DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
             }
             return orderform_to_internal[data_delivery]
         except KeyError as error:
