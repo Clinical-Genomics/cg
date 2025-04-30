@@ -253,6 +253,14 @@ def mip_rna_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
+def nallo_order_form(orderforms: Path) -> str:
+    return Path(
+        orderforms,
+        f"{Orderform.NALLO}.{Orderform.get_current_orderform_version(Orderform.NALLO)}.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
 def rnafusion_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""
     return Path(
