@@ -9,6 +9,6 @@ INDEX_SEQUENCES_BLUEPRINT = Blueprint("index_sequences", __name__, url_prefix="/
 INDEX_SEQUENCES_BLUEPRINT.before_request(before_request)
 
 
-@INDEX_SEQUENCES_BLUEPRINT.route("/", methods=["GET"])
+@INDEX_SEQUENCES_BLUEPRINT.route("index_sequences", methods=["GET"])
 def get_index_sequences():
     return jsonify(INDEX_SEQUENCES), HTTPStatus.OK
