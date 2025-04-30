@@ -7,6 +7,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleTumourError,
     ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
+    MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
     NormalOnlyWGSError,
@@ -22,6 +23,7 @@ from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDN
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    get_case_prep_categories,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
@@ -120,8 +122,11 @@ def validate_at_most_two_samples_per_case(
 def validate_number_of_normal_samples(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
 ) -> list[NumberOfNormalSamplesError]:
-    """Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample, that cases with one WGS sample only contain a tumour sample.
-    Only applicable to Balsamic and Balsamic-UMI."""
+    """
+    Validates that Balsamic cases with pairs of samples contain one tumour and one normal sample
+    and that cases with one WGS sample only contain a tumour sample.
+    Only applicable to Balsamic and Balsamic-UMI.
+    """
     errors: list[NumberOfNormalSamplesError] = []
     for case_index, case in order.enumerated_new_cases:
         if is_double_normal(case=case, store=store):
@@ -156,5 +161,17 @@ def validate_existing_cases_have_an_affected_sample(
         db_case: DbCase = store.get_case_by_internal_id(case.internal_id)
         if all(link.status != StatusEnum.affected for link in db_case.links):
             error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_samples_in_case_have_same_prep_category(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[MultiplePrepCategoriesError]:
+    errors: list[MultiplePrepCategoriesError] = []
+    for case_index, case in order.enumerated_new_cases:
+        prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
+        if len(prep_categories) > 1:
+            error = MultiplePrepCategoriesError(case_index=case_index)
             errors.append(error)
     return errors

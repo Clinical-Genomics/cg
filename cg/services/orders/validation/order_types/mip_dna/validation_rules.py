@@ -6,6 +6,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
     validate_gene_panels_unique,
+    validate_samples_in_case_have_same_prep_category,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
@@ -48,6 +49,7 @@ MIP_DNA_CASE_RULES: list[callable] = [
     validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
+    validate_samples_in_case_have_same_prep_category,
 ]
 
 MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [

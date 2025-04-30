@@ -116,6 +116,7 @@ ORDER_TYPE_RULE_SET_MAP: dict[OrderType, RuleSet] = {
     OrderType.PACBIO_LONG_READ: RuleSet(
         sample_rules=PACBIO_LONG_READ_SAMPLE_RULES,
     ),
+    # TODO: Add raredisease to this map
     OrderType.RML: RuleSet(
         sample_rules=RML_SAMPLE_RULES,
     ),

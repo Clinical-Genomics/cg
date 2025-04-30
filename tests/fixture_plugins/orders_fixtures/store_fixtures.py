@@ -13,10 +13,12 @@ from tests.store_helpers import StoreHelpers
 def store_to_submit_and_validate_orders(
     store: Store, helpers: StoreHelpers, customer_id: str
 ) -> Store:
+    # TODO: Add raredisease to this fixture
     app_tags: dict[str, list[OrderType]] = {
         "PANKTTR100": [OrderType.FASTQ, OrderType.BALSAMIC],
         "PANKTTR020": [OrderType.BALSAMIC],
         "WGSPCFC030": [OrderType.FASTQ, OrderType.MIP_DNA],
+        "EXOKTTR040": [OrderType.BALSAMIC, OrderType.FASTQ, OrderType.MIP_DNA],
         "RMLP15R100": [OrderType.FLUFFY, OrderType.RML],
         "RMLP15R200": [OrderType.FLUFFY, OrderType.RML],
         "RMLP15R400": [OrderType.FLUFFY, OrderType.RML],

@@ -69,3 +69,16 @@ def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
     elif case.get_existing_sample_from_db(sample_name=sample_name, store=store):
         return True
     return False
+
+
+def get_case_prep_categories(case: Case, store: Store) -> set[str]:
+    """
+    Return a set with all prep categories of the samples in the case
+    if the sample application exists and has a prep category.
+    """
+    prep_categories: set[str] = set()
+    for sample in case.samples:
+        application: Application | None = store.get_application_by_tag(sample.application)
+        if application and application.prep_category:
+            prep_categories.add(application.prep_category)
+    return prep_categories
