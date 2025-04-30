@@ -53,8 +53,10 @@ from cg.services.orders.validation.order_types.pacbio_long_read.validation_rules
     PACBIO_LONG_READ_SAMPLE_RULES,
 )
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
-from cg.services.orders.validation.order_types.raredisease.validation_rules import \
-    RAREDISEASE_CASE_SAMPLE_RULES, RAREDISEASE_CASE_RULES
+from cg.services.orders.validation.order_types.raredisease.validation_rules import (
+    RAREDISEASE_CASE_RULES,
+    RAREDISEASE_CASE_SAMPLE_RULES,
+)
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rml.validation_rules import RML_SAMPLE_RULES
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
