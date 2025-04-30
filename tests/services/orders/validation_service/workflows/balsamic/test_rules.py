@@ -1,3 +1,4 @@
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.errors.case_errors import (
     DoubleNormalError,
     DoubleTumourError,
@@ -7,6 +8,7 @@ from cg.services.orders.validation.errors.case_errors import (
 )
 from cg.services.orders.validation.errors.case_sample_errors import (
     CaptureKitMissingError,
+    CaptureKitResetError,
     InvalidCaptureKitError,
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
@@ -18,8 +20,9 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_number_of_normal_samples,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
-    validate_capture_kit_requirement,
+    reset_optional_capture_kits,
     validate_capture_kit,
+    validate_capture_kit_requirement,
 )
 from cg.store.models import Application
 from cg.store.store import Store
@@ -188,3 +191,65 @@ def test_normal_only_wgs_in_case_with_existing_sample(
     assert isinstance(errors[0], NormalOnlyWGSError)
     assert errors[0].case_index == 0
     assert len(order.cases[0].samples) == 1
+
+
+def test_reset_faulty_but_not_required_capture_kit(
+    valid_order: BalsamicOrder, store_to_submit_and_validate_orders: Store, wgs_application_tag: str
+):
+    # GIVEN an order containing a sample with a faulty capture kit
+    sample: BalsamicSample = valid_order.cases[0].samples[0]
+    sample.capture_kit = "Non-existent capture kit"
+
+    # GIVEN that the sample does not need a capture kit
+    application: Application = store_to_submit_and_validate_orders.get_application_by_tag(
+        sample.application
+    )
+    application.prep_category = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+
+    # WHEN resetting capture kits which are not valid
+    errors: list[CaptureKitResetError] = reset_optional_capture_kits(
+        order=valid_order, store=store_to_submit_and_validate_orders
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the capture kit should have been reset
+    assert not sample.capture_kit
+
+    # THEN the order should not get an error for the faulty capture kit
+    errors: list[InvalidCaptureKitError] = validate_capture_kit(
+        order=valid_order, store=store_to_submit_and_validate_orders
+    )
+    assert not errors
+
+
+def test_not_reset_faulty_required_capture_kit(
+    valid_order: BalsamicOrder, store_to_submit_and_validate_orders: Store, wgs_application_tag: str
+):
+    # GIVEN an order containing a sample with a faulty capture kit
+    sample: BalsamicSample = valid_order.cases[0].samples[0]
+    sample.capture_kit = "Non-existent capture kit"
+
+    # GIVEN that the sample needs a capture kit
+    application: Application = store_to_submit_and_validate_orders.get_application_by_tag(
+        sample.application
+    )
+    application.prep_category = SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+
+    # WHEN resetting capture kits which are not valid
+    errors: list[CaptureKitResetError] = reset_optional_capture_kits(
+        order=valid_order, store=store_to_submit_and_validate_orders
+    )
+
+    # THEN an error should not be returned
+    assert not errors
+
+    # THEN the capture kit should not have been reset
+    assert sample.capture_kit
+
+    # THEN the order should get an error for the faulty capture kit
+    errors: list[InvalidCaptureKitError] = validate_capture_kit(
+        order=valid_order, store=store_to_submit_and_validate_orders
+    )
+    assert errors

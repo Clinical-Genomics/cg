@@ -67,6 +67,5 @@ class RarediseaseParameters(WorkflowParameters):
     target_bed_file: str
     analysis_type: str
     save_mapped_as_cram: bool
-    skip_germlinecnvcaller: bool
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str

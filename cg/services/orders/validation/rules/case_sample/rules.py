@@ -9,9 +9,11 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     ApplicationNotValidError,
     BufferMissingError,
     CaptureKitMissingError,
+    CaptureKitResetError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
+    ExistingSampleWrongTypeError,
     FatherNotInCaseError,
     InvalidBufferError,
     InvalidCaptureKitError,
@@ -58,9 +60,8 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     is_buffer_missing,
     is_concentration_missing,
     is_container_name_missing,
-    is_invalid_capture_kit,
     is_invalid_plate_well_format,
-    is_sample_missing_capture_kit,
+    is_sample_compatible_with_order_type,
     is_sample_not_from_collaboration,
     is_sample_tube_name_reused,
     is_well_position_missing,
@@ -68,7 +69,10 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     validate_subject_ids_in_case,
 )
 from cg.services.orders.validation.rules.utils import (
+    does_sample_need_capture_kit,
     is_application_compatible,
+    is_invalid_capture_kit,
+    is_sample_missing_capture_kit,
     is_volume_invalid,
     is_volume_missing,
 )
@@ -455,6 +459,23 @@ def validate_buffer_required(order: OrderWithCases, **kwargs) -> list[BufferMiss
     return errors
 
 
+def reset_optional_capture_kits(
+    order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
+) -> list[CaptureKitResetError]:
+    """
+    Sets the capture kit to None for each sample where it is set but not needed and returns an error
+    to be rendered as a warning for each such sample.
+    """
+    errors: list[CaptureKitResetError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if not does_sample_need_capture_kit(sample=sample, store=store) and sample.capture_kit:
+                sample.capture_kit = None
+                error = CaptureKitResetError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
 def validate_capture_kit_requirement(
     order: BalsamicOrder | BalsamicUmiOrder, store: Store
 ) -> list[CaptureKitMissingError]:
@@ -496,6 +517,19 @@ def validate_existing_samples_belong_to_collaboration(
                     sample_index=sample_index, case_index=case_index
                 )
                 errors.append(error)
+    return errors
+
+
+def validate_existing_samples_compatible_with_order_type(
+    order: OrderWithCases, store: Store, **kwargs
+) -> list[ExistingSampleWrongTypeError]:
+    errors: list[ExistingSampleWrongTypeError] = []
+    for case_index, sample_index, sample in order.enumerated_existing_samples:
+        if not is_sample_compatible_with_order_type(
+            order_type=order.order_type, sample=sample, store=store
+        ):
+            error = ExistingSampleWrongTypeError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors
 
 

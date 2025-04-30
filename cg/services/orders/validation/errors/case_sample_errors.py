@@ -142,6 +142,11 @@ class SexSubjectIdError(CaseSampleError):
     message: str = "Another sample with the same subject id has a different sex"
 
 
+class CaptureKitResetError(CaseSampleError):
+    field: str = "warnings"
+    message: str = "No bait set will be used, since it is not required for this application."
+
+
 class CaptureKitMissingError(CaseSampleError):
     field: str = "capture_kit"
     message: str = "Bait set is required for TGS analyses"
@@ -175,6 +180,11 @@ class BufferMissingError(CaseSampleError):
 class SampleOutsideOfCollaborationError(CaseSampleError):
     field: str = "internal_id"
     message: str = "Sample cannot be outside of collaboration"
+
+
+class ExistingSampleWrongTypeError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "The sample is not compatible with the order type."
 
 
 class SampleNameAlreadyExistsError(CaseSampleError):

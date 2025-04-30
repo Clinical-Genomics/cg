@@ -21,3 +21,5 @@ SampleInCase = (
 SampleWithRelatives = TomteSample | MIPDNASample
 
 SampleWithSkipRC = TomteSample | MIPDNASample | FastqSample
+
+SampleWithCaptureKit = BalsamicSample | BalsamicUmiSample | FastqSample
