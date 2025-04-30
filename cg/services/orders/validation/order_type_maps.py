@@ -52,6 +52,9 @@ from cg.services.orders.validation.order_types.pacbio_long_read.models.order imp
 from cg.services.orders.validation.order_types.pacbio_long_read.validation_rules import (
     PACBIO_LONG_READ_SAMPLE_RULES,
 )
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.order_types.raredisease.validation_rules import \
+    RAREDISEASE_CASE_SAMPLE_RULES, RAREDISEASE_CASE_RULES
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rml.validation_rules import RML_SAMPLE_RULES
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
@@ -116,7 +119,10 @@ ORDER_TYPE_RULE_SET_MAP: dict[OrderType, RuleSet] = {
     OrderType.PACBIO_LONG_READ: RuleSet(
         sample_rules=PACBIO_LONG_READ_SAMPLE_RULES,
     ),
-    # TODO: Add raredisease to this map
+    OrderType.RAREDISEASE: RuleSet(
+        case_rules=RAREDISEASE_CASE_RULES,
+        case_sample_rules=RAREDISEASE_CASE_SAMPLE_RULES,
+    ),
     OrderType.RML: RuleSet(
         sample_rules=RML_SAMPLE_RULES,
     ),
@@ -148,6 +154,7 @@ ORDER_TYPE_MODEL_MAP: dict[OrderType, type[Order]] = {
     OrderType.MIP_RNA: MIPRNAOrder,
     OrderType.NALLO: NalloOrder,
     OrderType.PACBIO_LONG_READ: PacbioOrder,
+    OrderType.RAREDISEASE: RarediseaseOrder,
     OrderType.RML: RMLOrder,
     OrderType.RNAFUSION: RNAFusionOrder,
     OrderType.SARS_COV_2: MutantOrder,
