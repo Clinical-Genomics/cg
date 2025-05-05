@@ -44,7 +44,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         return NalloSampleMetadataModel(
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             avg_sequence_length=sample_metrics.avg_sequence_length,
-            coverage_bases=sample_metrics.coverage_bases / 1000000000,
+            coverage_bases=sample_metrics.coverage_bases / 1_000_000_000,
             duplicates=sample_metrics.percent_duplicates,
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             median_coverage=sample_metrics.median_coverage,
