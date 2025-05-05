@@ -33,11 +33,18 @@ def upgrade():
     )
 
     for row in mip_dna_rows:
-        rare_disease_row = OrderTypeApplication(
-            order_type="RAREDISEASE",  # type: ignore
-            application_id=row.application_id,  # type: ignore
+        exists: OrderTypeApplication | None = (
+            session.query(OrderTypeApplication)
+            .filter_by(order_type="RAREDISEASE", application_id=row.application_id)
+            .first()
         )
-        session.add(rare_disease_row)
+
+        if not exists:
+            rare_disease_row = OrderTypeApplication(
+                order_type="RAREDISEASE",  # type: ignore
+                application_id=row.application_id,  # type: ignore
+            )
+            session.add(rare_disease_row)
 
     session.commit()
 
