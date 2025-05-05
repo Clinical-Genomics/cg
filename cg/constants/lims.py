@@ -113,6 +113,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Library Preparation Method",
             "atlas_version": "Atlas Version",
         },
+        "Library Prep PCR-free WGS v1": {
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "sequencing_method_step": {
         "CG002 - Cluster Generation (HiSeq X)": {
