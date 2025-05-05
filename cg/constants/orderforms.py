@@ -16,7 +16,7 @@ class Orderform(StrEnum):
     MICROSALT = "1603"
     MIP_DNA = "1508"
     MIP_RNA = "1508"
-    NALLO = "nallo_pacbio_revio_sequencing_analysis"
+    NALLO = "long_read_nallo_analysis"
     RNAFUSION = "1508"
     RML = "1604"
     SARS_COV_2 = "2184"
