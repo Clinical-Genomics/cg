@@ -1,4 +1,7 @@
+from enum import StrEnum
+
 from cg.constants.constants import SexOptions
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
 
 
