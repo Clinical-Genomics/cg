@@ -77,8 +77,13 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
     if the sample application exists and has a prep category.
     """
     prep_categories: set[str] = set()
-    for sample in case.samples:
+    for _, sample in case.enumerated_new_samples:
         application: Application | None = store.get_application_by_tag(sample.application)
         if application and application.prep_category:
             prep_categories.add(application.prep_category)
+
+    for _, sample in case.enumerated_existing_samples:
+        db_sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
+        if db_sample and db_sample.prep_category:
+            prep_categories.add(db_sample.prep_category)
     return prep_categories
