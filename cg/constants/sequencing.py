@@ -65,13 +65,13 @@ class SequencingPlatform(StrEnum):
 
 
 class SeqLibraryPrepCategory(StrEnum):
-    COVID: str = "cov"
-    MICROBIAL: str = "mic"
-    READY_MADE_LIBRARY: str = "rml"
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+    COVID = "cov"
+    MICROBIAL = "mic"
+    READY_MADE_LIBRARY = "rml"
+    TARGETED_GENOME_SEQUENCING = "tgs"
+    WHOLE_EXOME_SEQUENCING = "wes"
+    WHOLE_GENOME_SEQUENCING = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING = "wts"
 
 
 DNA_PREP_CATEGORIES: list[SeqLibraryPrepCategory] = [
