@@ -53,14 +53,11 @@ from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
+from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
-    RarediseaseParameters,
-    RarediseaseSampleSheetHeaders,
-)
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService

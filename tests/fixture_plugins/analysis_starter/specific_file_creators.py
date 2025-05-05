@@ -15,7 +15,7 @@ def raredisease_gene_panel_creator(
 ) -> GenePanelFileCreator:
     return GenePanelFileCreator(
         store=raredisease_context.status_db,
-        scout_api=raredisease_context.scout_api,
+        scout_api=raredisease_context.scout_api_37,
     )
 
 
@@ -25,5 +25,5 @@ def raredisease_managed_variants_creator(
 ) -> ManagedVariantsFileCreator:
     return ManagedVariantsFileCreator(
         store=raredisease_context.status_db,
-        scout_api=raredisease_context.scout_api,
+        scout_api=raredisease_context.scout_api_37,
     )
