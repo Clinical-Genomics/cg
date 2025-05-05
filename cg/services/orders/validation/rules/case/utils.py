@@ -74,7 +74,7 @@ def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
 def get_case_prep_categories(case: Case, store: Store) -> set[str]:
     """
     Return a set with all prep categories of the samples in the case
-    if the sample application exists and has a prep category.
+    if the sample and its application exist, and has a prep category.
     """
     prep_categories: set[str] = set()
     for _, sample in case.enumerated_new_samples:
