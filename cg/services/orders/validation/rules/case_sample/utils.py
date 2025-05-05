@@ -2,8 +2,8 @@ import re
 from collections import Counter
 
 from cg.constants.constants import StatusOptions
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import Sex
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.validation.errors.case_errors import RepeatedCaseNameError
 from cg.services.orders.validation.errors.case_sample_errors import (
@@ -28,8 +28,6 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
-from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
 from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
@@ -38,7 +36,7 @@ from cg.services.orders.validation.rules.utils import (
     is_sample_on_plate,
     is_volume_within_allowed_interval,
 )
-from cg.store.models import Application, Customer
+from cg.store.models import Customer
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -254,8 +252,8 @@ def create_invalid_concentration_error(
 
 def is_invalid_plate_well_format(sample: Sample) -> bool:
     """Check if a sample has an invalid well format."""
-    correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
-    if sample.is_on_plate:
+    if sample.is_on_plate and sample.well_position:
+        correct_well_position_pattern: str = r"^[A-H]:([1-9]|1[0-2])$"
         return not bool(re.match(correct_well_position_pattern, sample.well_position))
     return False
 
@@ -301,24 +299,6 @@ def is_buffer_missing(sample: SampleInCase) -> bool:
     )
 
 
-def is_sample_missing_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    """Returns whether a TGS sample has an application and is missing a capture kit."""
-    application: Application | None = store.get_application_by_tag(sample.application)
-    return (
-        application
-        and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-        and not sample.capture_kit
-    )
-
-
-def is_invalid_capture_kit(sample: BalsamicSample | BalsamicUmiSample, store: Store) -> bool:
-    if not sample.capture_kit:
-        return False
-
-    valid_beds: list[str] = [bed.name for bed in store.get_active_beds()]
-    return sample.capture_kit not in valid_beds
-
-
 def is_sample_not_from_collaboration(
     customer_id: str, sample: ExistingSample, store: Store
 ) -> bool:
@@ -333,3 +313,12 @@ def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]
         if db_case := status_db.get_case_by_internal_id(case.internal_id):
             existing_case_names.add(db_case.name)
     return existing_case_names
+
+
+def is_sample_compatible_with_order_type(
+    order_type: OrderType, sample: ExistingSample, store: Store
+) -> bool:
+    if db_sample := store.get_sample_by_internal_id(sample.internal_id):
+        return order_type in db_sample.application_version.application.order_types
+    else:
+        return True

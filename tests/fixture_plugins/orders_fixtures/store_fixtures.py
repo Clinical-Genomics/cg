@@ -14,7 +14,8 @@ def store_to_submit_and_validate_orders(
     store: Store, helpers: StoreHelpers, customer_id: str
 ) -> Store:
     app_tags: dict[str, list[OrderType]] = {
-        "PANKTTR100": [OrderType.BALSAMIC],
+        "PANKTTR100": [OrderType.FASTQ, OrderType.BALSAMIC],
+        "PANKTTR020": [OrderType.BALSAMIC],
         "WGSPCFC030": [OrderType.FASTQ, OrderType.MIP_DNA],
         "RMLP15R100": [OrderType.FLUFFY, OrderType.RML],
         "RMLP15R200": [OrderType.FLUFFY, OrderType.RML],
@@ -27,7 +28,7 @@ def store_to_submit_and_validate_orders(
         "VWGNXTR001": [OrderType.MICROSALT],
         "WGSWPFC030": [OrderType.MIP_DNA],
         "RNAPOAR025": [OrderType.MIP_RNA, OrderType.RNAFUSION, OrderType.TOMTE],
-        "LWPBELB070": [OrderType.PACBIO_LONG_READ],
+        "LWPBELB070": [OrderType.PACBIO_LONG_READ, OrderType.NALLO],
         "VWGDPTR001": [OrderType.SARS_COV_2],
     }
     for tag, orders in app_tags.items():

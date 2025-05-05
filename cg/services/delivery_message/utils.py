@@ -15,6 +15,12 @@ from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
+from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
+from cg.services.delivery_message.messages.raw_data_analysis_message import RawDataAnalysisMessage
+from cg.services.delivery_message.messages.raw_data_analysis_scout_message import (
+    RawDataAnalysisScoutMessage,
+)
+from cg.services.delivery_message.messages.raw_data_scout_message import RawDataScoutMessage
 from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAAnalysisStrategy,
     RNADeliveryMessage,
@@ -28,14 +34,17 @@ from cg.store.store import Store
 
 MESSAGE_MAP = {
     DataDelivery.ANALYSIS_FILES: AnalysisMessage,
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: ScoutMessage,
-    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
-    DataDelivery.STATINA: StatinaMessage,
     DataDelivery.BAM: BamMessage,
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.FASTQ_ANALYSIS: FastqAnalysisMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.RAW_DATA_ANALYSIS: RawDataAnalysisMessage,
+    DataDelivery.RAW_DATA_ANALYSIS_SCOUT: RawDataAnalysisScoutMessage,
+    DataDelivery.RAW_DATA_SCOUT: RawDataScoutMessage,
+    DataDelivery.SCOUT: ScoutMessage,
+    DataDelivery.STATINA: StatinaMessage,
 }
 
 
@@ -49,7 +58,7 @@ RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAUploadMessageStrategy]] = {
 
 
 def get_message(cases: list[Case], store: Store) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(cases[0], store)
+    message_strategy: DeliveryMessage = get_message_strategy(case=cases[0], store=store)
     return message_strategy.create_message(cases)
 
 
@@ -62,6 +71,9 @@ def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
 
     if case.data_analysis in [Workflow.MIP_RNA, Workflow.TOMTE]:
         return get_rna_message_strategy_from_data_delivery(case=case, store=store)
+
+    if case.data_analysis in Workflow.TAXPROFILER:
+        return TaxprofilerDeliveryMessage()
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
@@ -95,17 +107,17 @@ def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
     raise NotImplementedError(f"Microsalt apptag {app_tag} not supported.")
 
 
-def has_mwx_samples(case: Case):
+def has_mwx_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.MWXNXTR003
 
 
-def has_mwr_samples(case: Case):
+def has_mwr_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.MWRNXTR003
 
 
-def has_vwg_samples(case: Case):
+def has_vwg_samples(case: Case) -> bool:
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.VWGNXTR001
 
