@@ -6,8 +6,6 @@ Create Date: 2025-04-30 09:56:53.670128
 
 """
 
-from typing import List
-
 import sqlalchemy as sa
 from sqlalchemy.orm import Session, declarative_base
 
@@ -30,7 +28,7 @@ class OrderTypeApplication(Base):
 
 def upgrade():
     session: Session = Session(bind=bind)
-    mip_dna_rows: List[OrderTypeApplication] = (
+    mip_dna_rows: list[OrderTypeApplication] = (
         session.query(OrderTypeApplication).filter_by(order_type="MIP_DNA").all()
     )
 
