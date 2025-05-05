@@ -1851,7 +1851,6 @@ class ReadHandler(BaseHandler):
         case: Case = self.get_case_by_internal_id(case_id)
         return Workflow(case.data_analysis)
 
-      
     def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
         """Check if a sample name is already used by the customer"""
         if self.get_sample_by_customer_and_name(
