@@ -32,7 +32,7 @@ class Orderform(StrEnum):
             Orderform.RML: "19",
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "10",
-            Orderform.MICROBIAL_FASTQ: "1",
+            Orderform.MICROBIAL_FASTQ: "2",
             Orderform.PACBIO_LONG_READ: "1",
         }
         return current_order_form_versions[order_form]
