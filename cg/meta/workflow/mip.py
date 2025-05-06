@@ -251,10 +251,12 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def get_cases_ready_for_analysis(self, limit: int = None) -> list[Case]:
         """Return cases to analyze."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze(limit=limit)
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
+        if limit:
+            return cases_ready_for_analysis[:limit]
         return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     @staticmethod

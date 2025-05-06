@@ -19,6 +19,17 @@ def test_dry(cli_runner, mip_dna_context):
     assert result.exit_code == EXIT_SUCCESS
 
 
+def test_start_available_with_limit(cli_runner, mip_dna_context):
+
+    # GIVEN a mip_dna_context
+
+    # WHEN running start-available command with limit=1
+    result = cli_runner.invoke(start_available, ["--dry-run", "limit", 1], obj=mip_dna_context)
+
+    # THEN command should have accepted the option happily
+    assert result.exit_code == EXIT_SUCCESS
+
+
 def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):
     """Test mip dna start with a DNA case"""
 

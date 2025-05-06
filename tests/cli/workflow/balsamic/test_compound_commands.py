@@ -1,19 +1,11 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.balsamic.base import (
-    balsamic,
-    start,
-    start_available,
-    store,
-    store_available,
-)
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -138,6 +130,55 @@ def test_start_available(
 
     # THEN the ineligible case should NOT be run
     assert f"Starting analysis for {case_id_not_enough_reads}" not in caplog.text
+
+
+def test_start_available_with_limit(
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_illumina_run
+):
+    """Test that start-available picks up only the provided max given number of cases."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN 2 cases where the sample read counts pass threshold
+    case_id_1 = "balsamic_case_wgs_single"
+    case_id_2 = "balsamic_case_tgs_single"
+
+    # Ensure case 2 passes QC
+    for sample in balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id_2).samples:
+        sample.reads = sample.expected_reads_for_sample
+    # balsamic_context.status_db.session.commit()
+
+    # Ensure the config is mocked to run compound command for both cases
+    Path.mkdir(
+        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_1)).parent,
+        exist_ok=True,
+    )
+    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_1)).touch(
+        exist_ok=True
+    )
+
+    Path.mkdir(
+        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_2)).parent,
+        exist_ok=True,
+    )
+    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_2)).touch(
+        exist_ok=True
+    )
+
+    # GIVEN decompression is not needed and config case performed
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
+    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
+
+    # WHEN running command with limit=1
+    result = cli_runner.invoke(start_available, ["--dry-run", "--limit", 1], obj=balsamic_context)
+
+    # THEN command exits with a successful exit code
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN it should successfully identify the one case eligible for auto-start
+    assert f"Starting analysis for {case_id_1}" in caplog.text
+
+    # THEN the ineligible case should NOT be run
+    assert f"Starting analysis for {case_id_2}" not in caplog.text
 
 
 def test_store_available(
