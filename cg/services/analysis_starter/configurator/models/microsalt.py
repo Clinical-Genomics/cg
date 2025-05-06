@@ -1,7 +1,6 @@
-from pathlib import Path
-
 from pydantic import BaseModel
 
+from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
@@ -24,4 +23,9 @@ class MicrosaltConfigContent(BaseModel):
 
 
 class MicrosaltCaseConfig(CaseConfig):
-    config_file_path: Path
+    binary: str
+    conda_binary: str
+    config_file: str
+    environment: str
+    fastq_directory: str
+    workflow: Workflow = Workflow.MICROSALT
