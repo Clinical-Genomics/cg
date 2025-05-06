@@ -201,6 +201,7 @@ def start(
 @DRY_RUN
 @click.option(
     "--limit",
+    type=int,
     help="Maximum number of cases to start",
 )
 @click.pass_context
@@ -210,7 +211,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int = 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis(limit=int(limit)):
+    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
