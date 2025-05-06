@@ -240,7 +240,7 @@ def start(
 @DRY_RUN
 @click.option(
     "--limit",
-    help="Maximum number of analyses to start",
+    help="Maximum number of cases to start",
 )
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False, limit: int = None):
