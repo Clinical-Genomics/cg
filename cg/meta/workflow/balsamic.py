@@ -93,9 +93,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_ready_for_analysis(self) -> list[Case]:
+    def get_cases_ready_for_analysis(self, limit: int = None) -> list[Case]:
         """Returns a list of cases that are ready for analysis."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze(limit=limit)
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]

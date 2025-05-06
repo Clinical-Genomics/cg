@@ -249,9 +249,9 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_ready_for_analysis(self) -> list[Case]:
+    def get_cases_ready_for_analysis(self, limit: int = None) -> list[Case]:
         """Return cases to analyze."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze(limit=limit)
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
