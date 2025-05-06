@@ -76,4 +76,4 @@ class ExistingCaseWithoutAffectedSampleError(CaseError):
 
 class MultiplePrepCategoriesError(CaseError):
     field: str = "sample_errors"
-    message: str = "Case cannot contain samples with different prep categories"
+    message: str = "Case cannot contain samples with incompatible applications"
