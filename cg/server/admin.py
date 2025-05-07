@@ -40,31 +40,28 @@ class BaseView(ModelView):
 
 
 def view_priority(unused1, unused2, model, unused3):
-    """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup(escape(model.priority.name)) if model else ""
+    return escape(model.priority.name) if model else ""
 
 
 def view_flow_cell_internal_id(unused1, unused2, model, unused3):
-    """column formatter for internal ID"""
     del unused1, unused2, unused3
-    return Markup(escape(model.device.internal_id)) if model and model.device else ""
+    return escape(model.device.internal_id) if model and model.device else ""
 
 
 def view_flow_cell_model(unused1, unused2, model, unused3):
-    """Column formatter for flow cell model"""
     del unused1, unused2, unused3
-    return Markup(escape(model.device.model)) if model and model.device else ""
+    return escape(model.device.model) if model and model.device else ""
 
 
 def view_smrt_cell_model(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(escape(model.device.model)) if model and model.device else ""
+    return escape(model.device.model) if model and model.device else ""
 
 
 def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(escape(model.device.internal_id)) if model and model.device else ""
+    return escape(model.device.internal_id) if model and model.device else ""
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
