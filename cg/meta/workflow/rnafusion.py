@@ -86,7 +86,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
-        unique_sample: Sample = self.get_validated_case(case_id=case_id).samples
+        unique_sample: Sample = self.get_validated_case(case_id=case_id).samples[0]
         return RnafusionParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
