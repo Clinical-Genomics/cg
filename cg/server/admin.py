@@ -3,10 +3,10 @@
 import logging
 from gettext import gettext
 
-from flask import escape, flash, redirect, request, session, url_for
+from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import Markup
+from markupsafe import escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
@@ -65,16 +65,12 @@ def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
-    """Column formatter to open the case-sample view"""
     del unused1, unused2, unused3
-
     if not model or not model.internal_id:
         return ""
-
     url = escape(url_for("casesample.index_view", search=f"={model.internal_id}"))
     display = escape(model.internal_id)
-
-    return Markup(f"<a href='{url}'>{display}</a>")
+    return f"<a href='{url}'>{display}</a>"
 
 
 def is_external_application(unused1, unused2, model, unused3):
@@ -85,9 +81,9 @@ def is_external_application(unused1, unused2, model, unused3):
 
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    order_type_list = "<br>".join(model.order_types)
+    order_type_list = "<br>".join(escape(t) for t in model.order_types)
     return (
-        Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
+        f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>'
         if model.order_type_applications
         else ""
     )
@@ -134,15 +130,13 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
 
 
 def view_user_link(unused1, unused2, model, property_name):
-    """Column formatter used for linking to the User table."""
     del unused1, unused2
     contact_name: str = getattr(model, property_name)
     if not contact_name:
         return ""
-
     url = escape(url_for("user.index_view", search=contact_name))
     display = escape(contact_name)
-    return Markup(f"<a href='{url}'>{display}</a>")
+    return f"<a href='{url}'>{display}</a>"
 
 
 class ApplicationView(BaseView):
@@ -197,16 +191,12 @@ class ApplicationView(BaseView):
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.application:
             return ""
-
         url = escape(url_for("application.index_view", search=model.application.tag))
         display = escape(model.application.tag)
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -291,16 +281,12 @@ class BedView(BaseView):
 
     @staticmethod
     def view_bed_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.bed:
             return ""
-
         url = escape(url_for("bed.index_view", search=model.bed.name))
         display = escape(model.bed.name)
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
 
 class BedVersionView(BaseView):
@@ -398,16 +384,12 @@ class CaseView(BaseView):
 
     @staticmethod
     def view_case_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.case:
             return ""
-
         url = escape(url_for("case.index_view", search=f"={model.case.internal_id}"))
         display = escape(str(model.case))
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
     @action(
         "set_hold",
@@ -468,20 +450,16 @@ class InvoiceView(BaseView):
 
     @staticmethod
     def view_invoice_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.invoice:
             return ""
-
         url = escape(url_for("invoice.index_view", search=model.invoice.id))
         display = (
             escape(str(model.invoice.invoiced_at.date()))
             if model.invoice.invoiced_at
             else escape("In progress")
         )
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
 
 class AnalysisView(BaseView):
@@ -544,17 +522,13 @@ class IlluminaFlowCellView(BaseView):
 
     @staticmethod
     def view_flow_cell_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.instrument_run or not model.instrument_run.device:
             return ""
-
         device_id = model.instrument_run.device.internal_id
         url = escape(url_for("illuminasequencingrun.index_view", search=device_id))
         display = escape(device_id)
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
 
 class OrganismView(BaseView):
@@ -647,19 +621,12 @@ class SampleView(BaseView):
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
         del unused1, unused2, unused3
-        return (
-            Markup(
-                "<a href='%s'>%s</a>"
-                % (
-                    url_for("sample.index_view", search=f"={model.sample.internal_id}"),
-                    model.sample,
-                )
-            )
-            if model.sample
-            else ""
-        )
+        if not model.sample:
+            return ""
+        url = escape(url_for("sample.index_view", search=f"={model.sample.internal_id}"))
+        display = escape(str(model.sample))
+        return f"<a href='{url}'>{display}</a>"
 
     @action(
         "cancel_samples",
@@ -769,17 +736,13 @@ class PacbioSmrtCellView(BaseView):
 
     @staticmethod
     def view_smrt_cell_link(unused1, unused2, model, unused3):
-        """Column formatter to open this view"""
         del unused1, unused2, unused3
-
         if not model.instrument_run or not model.instrument_run.device:
             return ""
-
         device_id = model.instrument_run.device.internal_id
         url = escape(url_for("pacbiosequencingrun.index_view", search=device_id))
         display = escape(device_id)
-
-        return Markup(f"<a href='{url}'>{display}</a>")
+        return f"<a href='{url}'>{display}</a>"
 
 
 class PacbioSampleRunMetricsView(BaseView):
