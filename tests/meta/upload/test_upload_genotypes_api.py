@@ -81,7 +81,7 @@ def test_get_genotype_file(upload_genotypes_api: UploadGenotypesAPI, case_id: st
 
 
 def test_get_data_mip(
-    analysis_obj: Analysis,
+    analysis: Analysis,
     genotype_analysis_sex: dict,
     mocker,
     upload_genotypes_api: UploadGenotypesAPI,
@@ -94,17 +94,17 @@ def test_get_data_mip(
     mocker.patch.object(UploadGenotypesAPI, "_get_analysis_sex_mip_dna")
     UploadGenotypesAPI._get_analysis_sex_mip_dna.return_value = genotype_analysis_sex
 
-    analysis_obj.workflow = Workflow.MIP_DNA
+    analysis.workflow = Workflow.MIP_DNA
 
     # WHEN parsing the data
-    result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)
+    result = upload_genotypes_api.get_genotype_data(analysis=analysis)
 
     # THEN assert that the the number of samples sex is set
     assert len(result["samples_sex"]) == 3
 
 
 def test_get_data_raredisease(
-    analysis_obj: Analysis,
+    analysis: Analysis,
     genotype_analysis_sex: dict,
     mocker,
     upload_genotypes_api: UploadGenotypesAPI,
@@ -117,10 +117,10 @@ def test_get_data_raredisease(
     mocker.patch.object(UploadGenotypesAPI, "_get_analysis_sex_raredisease")
     UploadGenotypesAPI._get_analysis_sex_raredisease.return_value = genotype_analysis_sex
 
-    analysis_obj.workflow = Workflow.RAREDISEASE
+    analysis.workflow = Workflow.RAREDISEASE
 
     # WHEN parsing the data
-    result = upload_genotypes_api.get_genotype_data(analysis=analysis_obj)
+    result = upload_genotypes_api.get_genotype_data(analysis=analysis)
 
     # THEN assert that the the number of samples sex is set
     assert len(result["samples_sex"]) == 3

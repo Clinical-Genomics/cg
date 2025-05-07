@@ -80,14 +80,17 @@ class AnalysisTag(StrEnum):
     JUNCTION: str = "junction"
     MULTIQC_HTML: str = "multiqc-html"
     OUTRIDER: str = "outrider"
+    REPEATS: str = "repeats"
     RESEARCH: str = "research"
     RNA: str = "rna"
     SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV: str = "vcf-snv"
     VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
     VCF_STR: str = "vcf-str"
     VCF_SV_CLINICAL: str = "vcf-sv-clinical"
+    VCF_SV: str = "vcf-sv"
 
 
 class HkMipAnalysisTag:
@@ -103,6 +106,11 @@ class NFAnalysisTags:
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+
+
+class NalloAnalysisTag:
+    HAPLOTAGS: str = "haplotags"
+    PARAPHASE: str = "paraphase"
 
 
 class HkAnalysisMetricsTag:

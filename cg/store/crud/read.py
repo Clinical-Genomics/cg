@@ -86,6 +86,7 @@ from cg.store.models import (
     InstrumentRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
@@ -675,15 +676,22 @@ class ReadHandler(BaseHandler):
             SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
             SampleFilter.ORDER_BY_CREATED_AT_DESC,
             SampleFilter.IS_NOT_CANCELLED,
-            SampleFilter.LIMIT,
         ]
-        return apply_sample_filter(
-            samples=self._get_query(table=Sample),
+        query = (
+            self._get_query(table=Sample)
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
+            .join(Application.order_type_applications)
+        )
+        samples: Query = apply_sample_filter(
+            samples=query,
             customer_entry_ids=collaborator_ids,
             search_pattern=request.enquiry,
             filter_functions=filters,
-            limit=request.limit,
-        ).all()
+        )
+        if request.order_type:
+            samples = samples.filter(OrderTypeApplication.order_type == request.order_type)
+        return samples.limit(request.limit).all()
 
     def _get_samples_by_customer_and_subject_id_query(
         self, customer_internal_id: str, subject_id: str
@@ -816,7 +824,7 @@ class ReadHandler(BaseHandler):
         """Check if a sample exists in StatusDB."""
         return bool(self.get_sample_by_internal_id(sample_id))
 
-    def get_application_by_tag(self, tag: str) -> Application:
+    def get_application_by_tag(self, tag: str) -> Application | None:
         """Return an application by tag."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
@@ -1711,7 +1719,10 @@ class ReadHandler(BaseHandler):
             uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
                 rna_sample=rna_sample, collaborators=collaborators
             )
-            related_dna_cases.extend(uploaded_dna_cases)
+            # Only add unique DNA cases to the list since we are going from RNA samples to DNA cases in the loop above
+            for case in uploaded_dna_cases:
+                if case not in related_dna_cases:
+                    related_dna_cases.append(case)
         if not related_dna_cases:
             raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
@@ -1828,3 +1839,11 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
+        """Check if a sample name is already used by the customer"""
+        if self.get_sample_by_customer_and_name(
+            customer_entry_id=[customer_entry_id], sample_name=sample.name
+        ):
+            return True
+        return False

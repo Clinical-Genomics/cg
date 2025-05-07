@@ -1,10 +1,13 @@
 from pydantic import BaseModel, Field
 
+from cg.models.orders.constants import OrderType
+
 
 class CollaboratorSamplesRequest(BaseModel):
-    enquiry: str
     customer: str
+    enquiry: str
     limit: int = 50
+    order_type: OrderType | None = None
 
 
 class SamplesRequest(BaseModel):

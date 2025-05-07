@@ -208,7 +208,7 @@ def test_to_lims_balsamic(balsamic_order: BalsamicOrder):
     assert container_names == set(["BalsamicPlate"])
     assert first_sample["well_position"] == "A:1"
     assert first_sample["udfs"]["tumour"] is True
-    assert first_sample["udfs"]["capture_kit"] == "GMCKsolid"
+    assert first_sample["udfs"]["capture_kit"] == "GIcfDNA"
     assert first_sample["udfs"]["tumour_purity"] == "13"
     assert first_sample["udfs"]["formalin_fixation_time"] == "15"
     assert first_sample["udfs"]["post_formalin_fixation_time"] == "3"
