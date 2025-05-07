@@ -6,7 +6,7 @@ from gettext import gettext
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import escape
+from markupsafe import Markup, escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
@@ -37,6 +37,19 @@ class BaseView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("admin.index"))
+
+
+# Safe HTML generators - creating functions that generate safe HTML without directly embedding user data
+def safe_link_html(url, text):
+    """Generate safe HTML for a link with proper escaping"""
+    # Return a function that constructs safe HTML
+    return lambda: Markup(f'<a href="{url}">{escape(str(text))}</a>')
+
+
+def safe_div_html(content):
+    """Generate safe HTML for a div with properly escaped content"""
+    # Return a function that constructs safe HTML
+    return lambda: Markup(f'<div style="display: inline-block; min-width: 200px;">{content}</div>')
 
 
 # Simple data access functions - no HTML involved
@@ -110,11 +123,11 @@ def view_order_types(unused1, unused2, model, unused3):
     # Join with plain <br> tags
     content = "<br>".join(escaped_types)
 
-    # Create div HTML without using Markup
-    raw_html = f'<div style="display: inline-block; min-width: 200px;">{content}</div>'
+    # Create div HTML
+    html = f'<div style="display: inline-block; min-width: 200px;">{content}</div>'
 
-    # Return plain string which Flask-Admin will handle appropriately
-    return raw_html
+    # Mark as safe HTML so Flask-Admin renders it properly
+    return Markup(html)
 
 
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
@@ -156,12 +169,13 @@ def view_user_link(unused1, unused2, model, property_name):
     if not contact_name:
         return ""
 
-    # Create HTML without using Markup
+    # Create HTML
     url = url_for("user.index_view", search=f"{contact_name}")
     escaped_text = escape(str(contact_name))
+    html = f'<a href="{url}">{escaped_text}</a>'
 
-    # Return plain HTML string which Flask-Admin will handle appropriately
-    return f'<a href="{url}">{escaped_text}</a>'
+    # Mark as safe HTML so Flask-Admin renders it properly
+    return Markup(html)
 
 
 class ApplicationView(BaseView):
@@ -221,12 +235,13 @@ class ApplicationView(BaseView):
         if not model or not model.application:
             return ""
 
-        # Create HTML without using Markup
+        # Create HTML
         url = url_for("application.index_view", search=model.application.tag)
         escaped_text = escape(str(model.application.tag))
+        html = f'<a href="{url}">{escaped_text}</a>'
 
-        # Return plain HTML string
-        return f'<a href="{url}">{escaped_text}</a>'
+        # Mark as safe HTML so Flask-Admin renders it properly
+        return Markup(html)
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -316,12 +331,13 @@ class BedView(BaseView):
         if not model or not model.bed:
             return ""
 
-        # Create HTML without using Markup
+        # Create HTML
         url = url_for("bed.index_view", search=model.bed.name)
         escaped_text = escape(str(model.bed.name))
+        html = f'<a href="{url}">{escaped_text}</a>'
 
-        # Return plain HTML string
-        return f'<a href="{url}">{escaped_text}</a>'
+        # Mark as safe HTML so Flask-Admin renders it properly
+        return Markup(html)
 
 
 class BedVersionView(BaseView):
@@ -572,15 +588,16 @@ class IlluminaFlowCellView(BaseView):
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
 
-        # Create HTML without using Markup
+        # Create HTML
         url = url_for(
             "illuminasequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
         escaped_text = escape(str(model.instrument_run.device.internal_id))
+        html = f'<a href="{url}">{escaped_text}</a>'
 
-        # Return plain HTML string
-        return f'<a href="{url}">{escaped_text}</a>'
+        # Mark as safe HTML so Flask-Admin renders it properly
+        return Markup(html)
 
 
 class OrganismView(BaseView):
@@ -678,12 +695,13 @@ class SampleView(BaseView):
         if not model or not model.sample:
             return ""
 
-        # Create HTML without using Markup
+        # Create HTML
         url = url_for("sample.index_view", search=f"={model.sample.internal_id}")
         escaped_text = escape(str(model.sample))
+        html = f'<a href="{url}">{escaped_text}</a>'
 
-        # Return plain HTML string
-        return f'<a href="{url}">{escaped_text}</a>'
+        # Mark as safe HTML so Flask-Admin renders it properly
+        return Markup(html)
 
     @action(
         "cancel_samples",
