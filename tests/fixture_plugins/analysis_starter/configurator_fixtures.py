@@ -26,6 +26,7 @@ from cg.store.store import Store
 @pytest.fixture
 def microsalt_configurator(
     microsalt_config_file_creator: MicrosaltConfigFileCreator,
+    cg_context: CGConfig,
     microsalt_fastq_handler: MicrosaltFastqHandler,
     lims_api: LimsAPI,
     microsalt_store: Store,
@@ -34,6 +35,7 @@ def microsalt_configurator(
         config_file_creator=microsalt_config_file_creator,
         fastq_handler=microsalt_fastq_handler,
         lims_api=lims_api,
+        microsalt_config=cg_context.microsalt,
         store=microsalt_store,
     )
 

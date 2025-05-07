@@ -306,7 +306,7 @@ class TaxprofilerConfig(CommonAppConfig):
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: str | None = None
+    conda_binary: str
     conda_env: str
     queries_path: str
     root: str

@@ -3,16 +3,15 @@ from unittest import mock
 
 import pytest
 
-from cg.constants import DataDelivery, FileExtensions, Priority, Workflow
+from cg.constants import FileExtensions, Workflow
 from cg.exc import CaseNotConfiguredError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.fastq import FastqHandler
-from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
-from cg.store.models import Application, Case, Customer, Organism, Sample
+from cg.store.models import Case, Organism, Sample
 
 
 @pytest.fixture(autouse=True)
@@ -74,9 +73,12 @@ def test_get_config_path_success(
         # THEN the returned configuration should be correct
         assert config.case_id == microsalt_case.internal_id
         assert config.workflow == Workflow.MICROSALT
-        assert config.config_file_path == Path(
-            microsalt_configurator.config_file_creator.queries_path,
-            microsalt_case.internal_id + FileExtensions.JSON,
+        assert (
+            config.config_file
+            == Path(
+                microsalt_configurator.config_file_creator.queries_path,
+                microsalt_case.internal_id + FileExtensions.JSON,
+            ).as_posix()
         )
 
 
