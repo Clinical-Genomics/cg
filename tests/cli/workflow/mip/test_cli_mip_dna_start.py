@@ -29,7 +29,7 @@ def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
 
     # GIVEN a mip_dna_context with several cases that are ready to analyse
 
-    # GIVEN that the fastq files for the cases are available
+    # GIVEN that the cases do not need decompression
     with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
 
         # WHEN running start-available command with limit=1
@@ -40,7 +40,7 @@ def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
     # THEN command succeeds
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN only one case should be started
+    # THEN only one case is picked up to start
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
 
 
