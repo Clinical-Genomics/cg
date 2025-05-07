@@ -26,6 +26,7 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WHOLE_GENOME_SEQUENCING
+        f"{Orderform.NALLO}:{Orderform.get_current_orderform_version(Orderform.NALLO)}",  # Nallo
         f"{Orderform.RML}:{Orderform.get_current_orderform_version(Orderform.RML)}",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:{Orderform.get_current_orderform_version(Orderform.METAGENOME)}",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}",  # Orderform SARS-CoV-2
@@ -146,6 +147,7 @@ class ExcelOrderformParser(OrderformParser):
             Orderform.MICROSALT: OrderType.MICROSALT,
             Orderform.SARS_COV_2: OrderType.SARS_COV_2,
             Orderform.MICROBIAL_FASTQ: OrderType.MICROBIAL_FASTQ,
+            Orderform.NALLO: OrderType.NALLO,
             Orderform.PACBIO_LONG_READ: OrderType.PACBIO_LONG_READ,
         }
         for document_number, value in document_number_to_project_type.items():
@@ -239,6 +241,9 @@ class ExcelOrderformParser(OrderformParser):
                 "scout": DataDelivery.SCOUT,
                 "statina": DataDelivery.STATINA,
                 "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
+                "raw_data + analysis": DataDelivery.RAW_DATA_ANALYSIS,
+                "raw_data + scout": DataDelivery.RAW_DATA_SCOUT,
+                "raw_data + analysis + scout": DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
             }
             return orderform_to_internal[data_delivery]
         except KeyError as error:
