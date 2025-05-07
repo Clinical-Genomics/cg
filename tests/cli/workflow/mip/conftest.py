@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -148,6 +149,7 @@ def mip_dna_context(
                 application_type="wgs",
                 customer_id="cust000",
                 sex=Sex.UNKNOWN,
+                last_sequenced_at=datetime.now(),
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api

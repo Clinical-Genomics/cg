@@ -142,31 +142,8 @@ def test_start_available_with_limit(
     case_id_1 = "balsamic_case_wgs_single"
     case_id_2 = "balsamic_case_tgs_single"
 
-    # Ensure case 2 passes QC
-    for sample in balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id_2).samples:
-        sample.reads = sample.expected_reads_for_sample
-    # balsamic_context.status_db.session.commit()
-
-    # Ensure the config is mocked to run compound command for both cases
-    Path.mkdir(
-        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_1)).parent,
-        exist_ok=True,
-    )
-    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_1)).touch(
-        exist_ok=True
-    )
-
-    Path.mkdir(
-        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_2)).parent,
-        exist_ok=True,
-    )
-    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_2)).touch(
-        exist_ok=True
-    )
-
-    # GIVEN decompression is not needed and config case performed
+    # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
-    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
 
     # WHEN running command with limit=1
     result = cli_runner.invoke(start_available, ["--dry-run", "--limit", 1], obj=balsamic_context)

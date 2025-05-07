@@ -1,33 +1,47 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 
 import logging
+from unittest import mock
 
 from cg.cli.workflow.mip_dna.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 
 
 def test_dry(cli_runner, mip_dna_context):
     """Test mip dna start with --dry option"""
 
-    # GIVEN a mip_dna_context
+    # GIVEN a mip_dna_context with several cases that are ready to analyse
 
-    # WHEN using dry running
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
+    # GIVEN that the cases do not need decompression
+    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
 
-    # THEN command should have accepted the option happily
-    assert result.exit_code == EXIT_SUCCESS
-
-
-def test_start_available_with_limit(cli_runner, mip_dna_context):
-
-    # GIVEN a mip_dna_context
-
-    # WHEN running start-available command with limit=1
-    result = cli_runner.invoke(start_available, ["--dry-run", "limit", 1], obj=mip_dna_context)
+        # WHEN using dry running
+        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
+
+
+def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a mip_dna_context with several cases that are ready to analyse
+
+    # GIVEN that the fastq files for the cases are available
+    with mock.patch.object(MipDNAAnalysisAPI, "prepare_fastq_files", return_value=None):
+
+        # WHEN running start-available command with limit=1
+        result = cli_runner.invoke(
+            start_available, ["--dry-run", "--limit", 1], obj=mip_dna_context
+        )
+
+    # THEN command succeeds
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN only one case should be started
+    assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
 
 
 def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):
