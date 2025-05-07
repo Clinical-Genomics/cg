@@ -6,7 +6,7 @@ from gettext import gettext
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import escape
+from markupsafe import Markup, escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
@@ -70,7 +70,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
         return ""
     url = escape(url_for("casesample.index_view", search=f"={model.internal_id}"))
     display = escape(model.internal_id)
-    return f"<a href='{url}'>{display}</a>"
+    return Markup(f"<a href='{url}'>{display}</a>")
 
 
 def is_external_application(unused1, unused2, model, unused3):
@@ -83,7 +83,7 @@ def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(escape(t) for t in model.order_types)
     return (
-        f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>'
+        Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
         if model.order_type_applications
         else ""
     )
@@ -136,7 +136,7 @@ def view_user_link(unused1, unused2, model, property_name):
         return ""
     url = escape(url_for("user.index_view", search=contact_name))
     display = escape(contact_name)
-    return f"<a href='{url}'>{display}</a>"
+    return Markup(f"<a href='{url}'>{display}</a>")
 
 
 class ApplicationView(BaseView):
@@ -196,7 +196,7 @@ class ApplicationView(BaseView):
             return ""
         url = escape(url_for("application.index_view", search=model.application.tag))
         display = escape(model.application.tag)
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -286,7 +286,7 @@ class BedView(BaseView):
             return ""
         url = escape(url_for("bed.index_view", search=model.bed.name))
         display = escape(model.bed.name)
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
 
 class BedVersionView(BaseView):
@@ -389,7 +389,7 @@ class CaseView(BaseView):
             return ""
         url = escape(url_for("case.index_view", search=f"={model.case.internal_id}"))
         display = escape(str(model.case))
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
     @action(
         "set_hold",
@@ -459,7 +459,7 @@ class InvoiceView(BaseView):
             if model.invoice.invoiced_at
             else escape("In progress")
         )
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
 
 class AnalysisView(BaseView):
@@ -528,7 +528,7 @@ class IlluminaFlowCellView(BaseView):
         device_id = model.instrument_run.device.internal_id
         url = escape(url_for("illuminasequencingrun.index_view", search=device_id))
         display = escape(device_id)
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
 
 class OrganismView(BaseView):
@@ -626,7 +626,7 @@ class SampleView(BaseView):
             return ""
         url = escape(url_for("sample.index_view", search=f"={model.sample.internal_id}"))
         display = escape(str(model.sample))
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
     @action(
         "cancel_samples",
@@ -742,7 +742,7 @@ class PacbioSmrtCellView(BaseView):
         device_id = model.instrument_run.device.internal_id
         url = escape(url_for("pacbiosequencingrun.index_view", search=device_id))
         display = escape(device_id)
-        return f"<a href='{url}'>{display}</a>"
+        return Markup(f"<a href='{url}'>{display}</a>")
 
 
 class PacbioSampleRunMetricsView(BaseView):
