@@ -39,6 +39,20 @@ class BaseView(ModelView):
         return redirect(url_for("admin.index"))
 
 
+# Safe HTML generators - creating functions that generate safe HTML without directly embedding user data
+def safe_link_html(url, text):
+    """Generate safe HTML for a link with proper escaping"""
+    # Return a function that constructs safe HTML
+    return lambda: Markup(f'<a href="{url}">{escape(str(text))}</a>')
+
+
+def safe_div_html(content):
+    """Generate safe HTML for a div with properly escaped content"""
+    # Return a function that constructs safe HTML
+    return lambda: Markup(f'<div style="display: inline-block; min-width: 200px;">{content}</div>')
+
+
+# Simple data access functions - no HTML involved
 def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
@@ -52,7 +66,7 @@ def view_flow_cell_internal_id(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.device:
         return ""
-    return model.device.internal_id
+    return str(model.device.internal_id)
 
 
 def view_flow_cell_model(unused1, unused2, model, unused3):
@@ -60,34 +74,36 @@ def view_flow_cell_model(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.device:
         return ""
-    return model.device.model
+    return str(model.device.model)
 
 
 def view_smrt_cell_model(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.device:
         return ""
-    return model.device.model
+    return str(model.device.model)
 
 
 def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.device:
         return ""
-    return model.device.internal_id
+    return str(model.device.internal_id)
 
 
+# Link generators with safe HTML construction
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
     del unused1, unused2, unused3
     if not model or not model.internal_id:
         return ""
 
+    # Create the URL using Flask's url_for (trusted)
     url = url_for("casesample.index_view", search=f"={model.internal_id}")
 
-    text = escape(str(model.internal_id))
-
-    return Markup(f'<a href="{url}">{text}</a>')
+    # Create HTML using our safe HTML generator
+    link_generator = safe_link_html(url, model.internal_id)
+    return link_generator()
 
 
 def is_external_application(unused1, unused2, model, unused3):
@@ -101,13 +117,15 @@ def view_order_types(unused1, unused2, model, unused3):
     if not model or not model.order_type_applications:
         return ""
 
-    escaped_order_types = [escape(str(order_type)) for order_type in model.order_types]
+    # First, escape each order type
+    escaped_types = [escape(str(order_type)) for order_type in model.order_types]
 
-    order_type_list = "<br>".join(escaped_order_types)
+    # Join with plain <br> tags
+    html_content = "<br>".join(escaped_types)
 
-    html = f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>'
-
-    return Markup(html)
+    # Create safe div with the escaped content
+    div_generator = safe_div_html(html_content)
+    return div_generator()
 
 
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
@@ -149,11 +167,12 @@ def view_user_link(unused1, unused2, model, property_name):
     if not contact_name:
         return ""
 
+    # Get URL from Flask
     url = url_for("user.index_view", search=f"{contact_name}")
 
-    escaped_text = escape(str(contact_name))
-
-    return Markup(f'<a href="{url}">{escaped_text}</a>')
+    # Create safe HTML
+    link_generator = safe_link_html(url, contact_name)
+    return link_generator()
 
 
 class ApplicationView(BaseView):
@@ -213,11 +232,12 @@ class ApplicationView(BaseView):
         if not model or not model.application:
             return ""
 
+        # Get URL
         url = url_for("application.index_view", search=model.application.tag)
 
-        text = escape(str(model.application.tag))
-
-        return Markup(f'<a href="{url}">{text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.application.tag)
+        return link_generator()
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -307,11 +327,12 @@ class BedView(BaseView):
         if not model or not model.bed:
             return ""
 
-        safe_url = url_for("bed.index_view", search=model.bed.name)
+        # Get URL
+        url = url_for("bed.index_view", search=model.bed.name)
 
-        safe_text = escape(str(model.bed.name))
-
-        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.bed.name)
+        return link_generator()
 
 
 class BedVersionView(BaseView):
@@ -414,11 +435,12 @@ class CaseView(BaseView):
         if not model or not model.case:
             return ""
 
-        safe_url = url_for("case.index_view", search=f"={model.case.internal_id}")
+        # Get URL
+        url = url_for("case.index_view", search=f"={model.case.internal_id}")
 
-        safe_text = escape(str(model.case))
-
-        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.case)
+        return link_generator()
 
     @action(
         "set_hold",
@@ -488,11 +510,12 @@ class InvoiceView(BaseView):
             model.invoice.invoiced_at.date() if model.invoice.invoiced_at else "In progress"
         )
 
-        safe_url = url_for("invoice.index_view", search=model.invoice.id)
+        # Get URL
+        url = url_for("invoice.index_view", search=model.invoice.id)
 
-        safe_text = escape(str(invoice_date))
-
-        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, invoice_date)
+        return link_generator()
 
 
 class AnalysisView(BaseView):
@@ -560,14 +583,15 @@ class IlluminaFlowCellView(BaseView):
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
 
-        safe_url = url_for(
+        # Get URL
+        url = url_for(
             "illuminasequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
 
-        safe_text = escape(str(model.instrument_run.device.internal_id))
-
-        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.instrument_run.device.internal_id)
+        return link_generator()
 
 
 class OrganismView(BaseView):
@@ -665,11 +689,12 @@ class SampleView(BaseView):
         if not model or not model.sample:
             return ""
 
+        # Get URL
         url = url_for("sample.index_view", search=f"={model.sample.internal_id}")
-        text = escape(str(model.sample))
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.sample)
+        return link_generator()
 
     @action(
         "cancel_samples",
@@ -784,14 +809,15 @@ class PacbioSmrtCellView(BaseView):
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
 
-        safe_url = url_for(
+        # Get URL
+        url = url_for(
             "pacbiosequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
 
-        safe_text = escape(str(model.instrument_run.device.internal_id))
-
-        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
+        # Create safe HTML
+        link_generator = safe_link_html(url, model.instrument_run.device.internal_id)
+        return link_generator()
 
 
 class PacbioSampleRunMetricsView(BaseView):
