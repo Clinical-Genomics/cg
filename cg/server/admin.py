@@ -42,29 +42,29 @@ class BaseView(ModelView):
 def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup(escape(model.priority.name) if model else ""
+    return Markup(escape(model.priority.name)) if model else ""
 
 
 def view_flow_cell_internal_id(unused1, unused2, model, unused3):
-    """column formatter for priority"""
+    """column formatter for internal ID"""
     del unused1, unused2, unused3
-    return Markup(escape(model.device.internal_id))
+    return Markup(escape(model.device.internal_id)) if model and model.device else ""
 
 
 def view_flow_cell_model(unused1, unused2, model, unused3):
-    """column formatter for priority"""
+    """Column formatter for flow cell model"""
     del unused1, unused2, unused3
-    return Markup(escape(model.device.model)
+    return Markup(escape(model.device.model)) if model and model.device else ""
 
 
 def view_smrt_cell_model(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(escape(model.device.model)
+    return Markup(escape(model.device.model)) if model and model.device else ""
 
 
 def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(escape(model.device.internal_id)
+    return Markup(escape(model.device.internal_id)) if model and model.device else ""
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
@@ -74,8 +74,10 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % escape(url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id),
-    escape(model.internal_id)
+        % escape(
+            url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id
+        ),
+        escape(model.internal_id),
     )
 
 
@@ -304,6 +306,7 @@ class BedView(BaseView):
 
         return Markup(f"<a href='{url}'>{display}</a>")
 
+
 class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
@@ -406,7 +409,7 @@ class CaseView(BaseView):
             return ""
 
         url = escape(url_for("case.index_view", search=f"={model.case.internal_id}"))
-        display = escape(str(model.case)) 
+        display = escape(str(model.case))
 
         return Markup(f"<a href='{url}'>{display}</a>")
 
@@ -483,6 +486,7 @@ class InvoiceView(BaseView):
         )
 
         return Markup(f"<a href='{url}'>{display}</a>")
+
 
 class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
@@ -780,6 +784,7 @@ class PacbioSmrtCellView(BaseView):
         display = escape(device_id)
 
         return Markup(f"<a href='{url}'>{display}</a>")
+
 
 class PacbioSampleRunMetricsView(BaseView):
     column_list = [
