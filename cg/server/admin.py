@@ -1,21 +1,21 @@
 """Module for Flask-Admin views"""
 
-import logging
 from gettext import gettext
-
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import Markup, escape
+from markupsafe import escape, Markup
 from sqlalchemy import inspect
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
-from cg.server.ext import applications_service, auth_service, db, sample_service
+from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.ext import auth_service
+import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ def safe_link_html(url, text):
 
 def safe_div_html(content):
     """Generate safe HTML for a div with properly escaped content"""
-    # Return a function that constructs safe HTML
+    # Return a function that constructs safe HTML 
     return lambda: Markup(f'<div style="display: inline-block; min-width: 200px;">{content}</div>')
 
 
@@ -91,19 +91,19 @@ def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
     return str(model.device.internal_id)
 
 
-# Link generators with safe HTML construction
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
     del unused1, unused2, unused3
     if not model or not model.internal_id:
         return ""
 
-    # Create the URL using Flask's url_for (trusted)
+    # Create HTML without using Markup
     url = url_for("casesample.index_view", search=f"={model.internal_id}")
-
-    # Create HTML using our safe HTML generator
-    link_generator = safe_link_html(url, model.internal_id)
-    return link_generator()
+    escaped_text = escape(str(model.internal_id))
+    raw_html = f'<a href="{url}">{escaped_text}</a>'
+    
+    # Return plain string which Flask-Admin will handle appropriately
+    return raw_html
 
 
 def is_external_application(unused1, unused2, model, unused3):
@@ -116,16 +116,18 @@ def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.order_type_applications:
         return ""
-
+    
     # First, escape each order type
     escaped_types = [escape(str(order_type)) for order_type in model.order_types]
-
+    
     # Join with plain <br> tags
-    html_content = "<br>".join(escaped_types)
-
-    # Create safe div with the escaped content
-    div_generator = safe_div_html(html_content)
-    return div_generator()
+    content = "<br>".join(escaped_types)
+    
+    # Create div HTML without using Markup
+    raw_html = f'<div style="display: inline-block; min-width: 200px;">{content}</div>'
+    
+    # Return plain string which Flask-Admin will handle appropriately
+    return raw_html
 
 
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
@@ -166,13 +168,13 @@ def view_user_link(unused1, unused2, model, property_name):
     contact_name = getattr(model, property_name, None)
     if not contact_name:
         return ""
-
-    # Get URL from Flask
+    
+    # Create HTML without using Markup
     url = url_for("user.index_view", search=f"{contact_name}")
-
-    # Create safe HTML
-    link_generator = safe_link_html(url, contact_name)
-    return link_generator()
+    escaped_text = escape(str(contact_name))
+    
+    # Return plain HTML string which Flask-Admin will handle appropriately
+    return f'<a href="{url}">{escaped_text}</a>'
 
 
 class ApplicationView(BaseView):
@@ -231,14 +233,14 @@ class ApplicationView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.application:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for("application.index_view", search=model.application.tag)
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.application.tag)
-        return link_generator()
-
+        escaped_text = escape(str(model.application.tag))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
+        
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
@@ -326,13 +328,13 @@ class BedView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.bed:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for("bed.index_view", search=model.bed.name)
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.bed.name)
-        return link_generator()
+        escaped_text = escape(str(model.bed.name))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
 
 
 class BedVersionView(BaseView):
@@ -434,13 +436,13 @@ class CaseView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.case:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for("case.index_view", search=f"={model.case.internal_id}")
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.case)
-        return link_generator()
+        escaped_text = escape(str(model.case))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
 
     @action(
         "set_hold",
@@ -505,14 +507,25 @@ class InvoiceView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.invoice:
             return ""
-
+        
         invoice_date = (
-            model.invoice.invoiced_at.date() if model.invoice.invoiced_at else "In progress"
+            model.invoice.invoiced_at.date()
+            if model.invoice.invoiced_at
+            else "In progress"
         )
-
+        
+        # Create HTML without using Markup
+        url = url_for("invoice.index_view", search=model.invoice.id)
+        escaped_text = escape(str(invoice_date))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'at
+            else "In progress"
+        )
+        
         # Get URL
         url = url_for("invoice.index_view", search=model.invoice.id)
-
+        
         # Create safe HTML
         link_generator = safe_link_html(url, invoice_date)
         return link_generator()
@@ -582,16 +595,16 @@ class IlluminaFlowCellView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for(
             "illuminasequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.instrument_run.device.internal_id)
-        return link_generator()
+        escaped_text = escape(str(model.instrument_run.device.internal_id))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
 
 
 class OrganismView(BaseView):
@@ -688,13 +701,13 @@ class SampleView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.sample:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for("sample.index_view", search=f"={model.sample.internal_id}")
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.sample)
-        return link_generator()
+        escaped_text = escape(str(model.sample))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
 
     @action(
         "cancel_samples",
@@ -808,16 +821,16 @@ class PacbioSmrtCellView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
-
-        # Get URL
+        
+        # Create HTML without using Markup
         url = url_for(
             "pacbiosequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
-
-        # Create safe HTML
-        link_generator = safe_link_html(url, model.instrument_run.device.internal_id)
-        return link_generator()
+        escaped_text = escape(str(model.instrument_run.device.internal_id))
+        
+        # Return plain HTML string
+        return f'<a href="{url}">{escaped_text}</a>'
 
 
 class PacbioSampleRunMetricsView(BaseView):
