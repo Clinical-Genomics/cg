@@ -68,17 +68,16 @@ def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
-    """column formatter to open the case-sample view"""
-
+    """Column formatter to open the case-sample view"""
     del unused1, unused2, unused3
 
-    return Markup(
-        "<a href='%s'>%s</a>"
-        % escape(
-            url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id
-        ),
-        escape(model.internal_id),
-    )
+    if not model or not model.internal_id:
+        return ""
+
+    url = escape(url_for("casesample.index_view", search=f"={model.internal_id}"))
+    display = escape(model.internal_id)
+
+    return Markup(f"<a href='{url}'>{display}</a>")
 
 
 def is_external_application(unused1, unused2, model, unused3):
