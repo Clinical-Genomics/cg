@@ -1,21 +1,21 @@
 """Module for Flask-Admin views"""
 
+import logging
 from gettext import gettext
+
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import escape, Markup
+from markupsafe import Markup, escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
-from cg.server.ext import applications_service, db, sample_service
+from cg.server.ext import applications_service, auth_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
-from cg.server.ext import auth_service
-import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     url = url_for("casesample.index_view", search=f"={model.internal_id}")
     text = escape(model.internal_id)
-    
+
     html = f"<a href='{url}'>{text}</a>"
     return Markup(html)
 
@@ -100,9 +100,9 @@ def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.order_type_applications:
         return ""
-    
+
     escaped_order_types = [escape(order_type) for order_type in model.order_types]
-    
+
     order_type_list = Markup("<br>").join(escaped_order_types)
     html = f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>'
     return Markup(html)
@@ -146,10 +146,10 @@ def view_user_link(unused1, unused2, model, property_name):
     contact_name = getattr(model, property_name, None)
     if not contact_name:
         return ""
-    
+
     url = url_for("user.index_view", search=f"{contact_name}")
     text = escape(contact_name)
-    
+
     html = f"<a href='{url}'>{text}</a>"
     return Markup(html)
 
@@ -210,28 +210,12 @@ class ApplicationView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.application:
             return ""
-        
+
         url = url_for("application.index_view", search=model.application.tag)
         text = escape(model.application.tag)
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
-
-
-class PacbioSampleRunMetricsView(BaseView):
-    column_list = [
-        "smrt_cell",
-        "sample",
-        "hifi_reads",
-        "hifi_yield",
-        "hifi_mean_read_length",
-        "hifi_median_read_quality",
-    ]
-    column_formatters = {
-        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
-        "sample": SampleView.view_sample_link,
-    }
-    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"] Markup(html)
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -320,10 +304,10 @@ class BedView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.bed:
             return ""
-        
+
         url = url_for("bed.index_view", search=model.bed.name)
         text = escape(model.bed.name)
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
 
@@ -427,10 +411,10 @@ class CaseView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.case:
             return ""
-        
+
         url = url_for("case.index_view", search=f"={model.case.internal_id}")
         text = escape(str(model.case))
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
 
@@ -497,16 +481,14 @@ class InvoiceView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.invoice:
             return ""
-        
+
         invoice_date = (
-            model.invoice.invoiced_at.date()
-            if model.invoice.invoiced_at
-            else "In progress"
+            model.invoice.invoiced_at.date() if model.invoice.invoiced_at else "In progress"
         )
-        
+
         url = url_for("invoice.index_view", search=model.invoice.id)
         text = escape(str(invoice_date))
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
 
@@ -575,13 +557,13 @@ class IlluminaFlowCellView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
-        
+
         url = url_for(
             "illuminasequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
         text = escape(model.instrument_run.device.internal_id)
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
 
@@ -680,10 +662,10 @@ class SampleView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.sample:
             return ""
-        
+
         url = url_for("sample.index_view", search=f"={model.sample.internal_id}")
         text = escape(str(model.sample))
-        
+
         html = f"<a href='{url}'>{text}</a>"
         return Markup(html)
 
@@ -799,12 +781,28 @@ class PacbioSmrtCellView(BaseView):
         del unused1, unused2, unused3
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
-        
+
         url = url_for(
             "pacbiosequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
         text = escape(model.instrument_run.device.internal_id)
-        
+
         html = f"<a href='{url}'>{text}</a>"
-        return
+        return Markup(html)
+
+
+class PacbioSampleRunMetricsView(BaseView):
+    column_list = [
+        "smrt_cell",
+        "sample",
+        "hifi_reads",
+        "hifi_yield",
+        "hifi_mean_read_length",
+        "hifi_median_read_quality",
+    ]
+    column_formatters = {
+        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
+    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
