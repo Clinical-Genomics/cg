@@ -6,7 +6,7 @@ from gettext import gettext
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import Markup, escape
+from markupsafe import escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
@@ -37,19 +37,6 @@ class BaseView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("admin.index"))
-
-
-# Safe HTML generators - creating functions that generate safe HTML without directly embedding user data
-def safe_link_html(url, text):
-    """Generate safe HTML for a link with proper escaping"""
-    # Return a function that constructs safe HTML
-    return lambda: Markup(f'<a href="{url}">{escape(str(text))}</a>')
-
-
-def safe_div_html(content):
-    """Generate safe HTML for a div with properly escaped content"""
-    # Return a function that constructs safe HTML
-    return lambda: Markup(f'<div style="display: inline-block; min-width: 200px;">{content}</div>')
 
 
 # Simple data access functions - no HTML involved
