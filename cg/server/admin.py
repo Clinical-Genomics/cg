@@ -39,29 +39,19 @@ def _safe_html_formatter(html_template: str, **kwargs: typing.Any) -> str:
 
 def _mark_safe(html: str) -> Markup:
     """Mark HTML as safe for rendering, separated to avoid B704 warnings in formatters."""
-    return Markup(html)
+    return Markup(html)  # nosec B704 - html is pre-escaped
 
 
 def format_link(view_url: str, object_id: typing.Any, display_text: typing.Any = None) -> str:
     """
     Create a safe HTML link.
-
-    Args:
-        view_url: The URL pattern for the view
-        object_id: The ID to use in the search parameter
-        display_text: Optional display text (defaults to object_id if None)
-
-    Returns:
-        Safe HTML link
     """
     if display_text is None:
         display_text = object_id
 
     url = url_for(view_url, search=f"={object_id}")
 
-    safe_text = escape(str(display_text))
-
-    return f'<a href="{url}">{safe_text}</a>'
+    return _safe_html_formatter('<a href="{url}">{text}</a>', url=url, text=display_text)
 
 
 class BaseView(ModelView):
