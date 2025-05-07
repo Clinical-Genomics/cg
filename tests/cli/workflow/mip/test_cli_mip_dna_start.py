@@ -30,7 +30,7 @@ def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
     # GIVEN a mip_dna_context with several cases that are ready to analyse
 
     # GIVEN that the fastq files for the cases are available
-    with mock.patch.object(MipDNAAnalysisAPI, "prepare_fastq_files", return_value=None):
+    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
 
         # WHEN running start-available command with limit=1
         result = cli_runner.invoke(
