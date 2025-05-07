@@ -59,7 +59,9 @@ def format_link(view_url: str, object_id: typing.Any, display_text: typing.Any =
 
     url = url_for(view_url, search=f"={object_id}")
 
-    return _safe_html_formatter('<a href="{url}">{text}</a>', url=url, text=display_text)
+    safe_text = escape(str(display_text))
+
+    return f'<a href="{url}">{safe_text}</a>'
 
 
 class BaseView(ModelView):
