@@ -44,7 +44,7 @@ def view_priority(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     if not model or not model.priority:
         return ""
-    return model.priority.name
+    return str(model.priority.name)
 
 
 def view_flow_cell_internal_id(unused1, unused2, model, unused3):
@@ -84,10 +84,10 @@ def view_case_sample_link(unused1, unused2, model, unused3):
         return ""
 
     url = url_for("casesample.index_view", search=f"={model.internal_id}")
-    text = escape(model.internal_id)
 
-    html = f"<a href='{url}'>{text}</a>"
-    return Markup(html)
+    text = escape(str(model.internal_id))
+
+    return Markup(f'<a href="{url}">{text}</a>')
 
 
 def is_external_application(unused1, unused2, model, unused3):
@@ -101,10 +101,12 @@ def view_order_types(unused1, unused2, model, unused3):
     if not model or not model.order_type_applications:
         return ""
 
-    escaped_order_types = [escape(order_type) for order_type in model.order_types]
+    escaped_order_types = [escape(str(order_type)) for order_type in model.order_types]
 
-    order_type_list = Markup("<br>").join(escaped_order_types)
+    order_type_list = "<br>".join(escaped_order_types)
+
     html = f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>'
+
     return Markup(html)
 
 
@@ -148,10 +150,10 @@ def view_user_link(unused1, unused2, model, property_name):
         return ""
 
     url = url_for("user.index_view", search=f"{contact_name}")
-    text = escape(contact_name)
 
-    html = f"<a href='{url}'>{text}</a>"
-    return Markup(html)
+    escaped_text = escape(str(contact_name))
+
+    return Markup(f'<a href="{url}">{escaped_text}</a>')
 
 
 class ApplicationView(BaseView):
@@ -212,10 +214,10 @@ class ApplicationView(BaseView):
             return ""
 
         url = url_for("application.index_view", search=model.application.tag)
-        text = escape(model.application.tag)
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        text = escape(str(model.application.tag))
+
+        return Markup(f'<a href="{url}">{text}</a>')
 
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
@@ -305,11 +307,11 @@ class BedView(BaseView):
         if not model or not model.bed:
             return ""
 
-        url = url_for("bed.index_view", search=model.bed.name)
-        text = escape(model.bed.name)
+        safe_url = url_for("bed.index_view", search=model.bed.name)
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        safe_text = escape(str(model.bed.name))
+
+        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
 
 
 class BedVersionView(BaseView):
@@ -412,11 +414,11 @@ class CaseView(BaseView):
         if not model or not model.case:
             return ""
 
-        url = url_for("case.index_view", search=f"={model.case.internal_id}")
-        text = escape(str(model.case))
+        safe_url = url_for("case.index_view", search=f"={model.case.internal_id}")
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        safe_text = escape(str(model.case))
+
+        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
 
     @action(
         "set_hold",
@@ -486,11 +488,11 @@ class InvoiceView(BaseView):
             model.invoice.invoiced_at.date() if model.invoice.invoiced_at else "In progress"
         )
 
-        url = url_for("invoice.index_view", search=model.invoice.id)
-        text = escape(str(invoice_date))
+        safe_url = url_for("invoice.index_view", search=model.invoice.id)
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        safe_text = escape(str(invoice_date))
+
+        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
 
 
 class AnalysisView(BaseView):
@@ -558,14 +560,14 @@ class IlluminaFlowCellView(BaseView):
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
 
-        url = url_for(
+        safe_url = url_for(
             "illuminasequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
-        text = escape(model.instrument_run.device.internal_id)
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        safe_text = escape(str(model.instrument_run.device.internal_id))
+
+        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
 
 
 class OrganismView(BaseView):
@@ -782,14 +784,14 @@ class PacbioSmrtCellView(BaseView):
         if not model or not model.instrument_run or not model.instrument_run.device:
             return ""
 
-        url = url_for(
+        safe_url = url_for(
             "pacbiosequencingrun.index_view",
             search=model.instrument_run.device.internal_id,
         )
-        text = escape(model.instrument_run.device.internal_id)
 
-        html = f"<a href='{url}'>{text}</a>"
-        return Markup(html)
+        safe_text = escape(str(model.instrument_run.device.internal_id))
+
+        return Markup(f'<a href="{safe_url}">{safe_text}</a>')
 
 
 class PacbioSampleRunMetricsView(BaseView):
