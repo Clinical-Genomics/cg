@@ -18,7 +18,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
-    validate_existing_samples_compatible_with_order_type,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
     validate_gene_panels_exist,
@@ -40,19 +39,18 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-MIP_DNA_CASE_RULES: list[callable] = [
+RAREDISEASE_CASE_RULES: list[callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_have_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
-    validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
 ]
 
-MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [
+RAREDISEASE_CASE_SAMPLE_RULES: list[callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -62,9 +60,9 @@ MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
-    validate_existing_samples_compatible_with_order_type,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
+    validate_gene_panels_exist,
     validate_mothers_are_female,
     validate_mothers_in_same_case_as_children,
     validate_not_all_samples_unknown_in_case,

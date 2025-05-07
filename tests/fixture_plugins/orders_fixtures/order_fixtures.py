@@ -16,6 +16,7 @@ from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRN
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.order_types.pacbio_long_read.models.order import PacbioOrder
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
@@ -107,6 +108,14 @@ def pacbio_order(pacbio_order_to_submit: dict, ticket_id_as_int: int) -> PacbioO
     order = PacbioOrder.model_validate(pacbio_order_to_submit)
     order._generated_ticket_id = ticket_id_as_int
     return order
+
+
+@pytest.fixture
+def raredisease_order(raredisease_order_to_submit: dict, ticket_id_as_int: int) -> RarediseaseOrder:
+    """Parse Raredisease order example."""
+    raredisease_order = RarediseaseOrder.model_validate(raredisease_order_to_submit)
+    raredisease_order._generated_ticket_id = ticket_id_as_int
+    return raredisease_order
 
 
 @pytest.fixture

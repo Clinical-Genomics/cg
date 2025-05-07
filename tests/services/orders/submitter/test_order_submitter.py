@@ -199,6 +199,7 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
         (OrderType.MIP_RNA, "mip_rna_order"),
         (OrderType.NALLO, "nallo_order"),
         (OrderType.PACBIO_LONG_READ, "pacbio_order"),
+        (OrderType.RAREDISEASE, "raredisease_order"),
         (OrderType.RML, "rml_order"),
         (OrderType.RNAFUSION, "rnafusion_order"),
         (OrderType.SARS_COV_2, "mutant_order"),
