@@ -82,6 +82,10 @@ order_service_mapping = {
         OrderLimsService,
         StorePacBioOrderService,
     ),
+    OrderType.RAREDISEASE: (
+        OrderLimsService,
+        StoreCaseOrderService,
+    ),
     OrderType.RML: (
         OrderLimsService,
         StorePoolOrderService,
