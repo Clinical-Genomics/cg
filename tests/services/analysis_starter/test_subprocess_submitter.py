@@ -23,9 +23,9 @@ def test_subprocess_submitter():
 
         # THEN the analysis should have been started
         expected_args = (
-            "/path/to/conda/binary run --name S_microsalt "
-            "/path/to/microsalt/binary analyse /path/to/microsalt_case/config.json "
-            "--input /path/to/microsalt_case/fastq"
+            f"{microsalt_case_config.conda_binary} run --name {microsalt_case_config.environment} "
+            f"{microsalt_case_config.binary} analyse {microsalt_case_config.config_file} "
+            f"--input {microsalt_case_config.fastq_directory}"
         )
         mock_run.assert_called_once_with(
             args=expected_args,
