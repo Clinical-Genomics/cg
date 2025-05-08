@@ -200,3 +200,8 @@ def setup_mocks(
 
     mocker.patch.object(ReadHandler, "are_all_illumina_runs_on_disk")
     ReadHandler.are_all_illumina_runs_on_disk.return_value = True
+
+
+@pytest.fixture(scope="function")
+def mip_dna_analysis_api(mip_dna_context: CGConfig) -> MipDNAAnalysisAPI:
+    return MipDNAAnalysisAPI(config=mip_dna_context)

@@ -3,10 +3,13 @@
 import logging
 from unittest import mock
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.mip_dna.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 
 
 def test_dry(cli_runner, mip_dna_context, caplog):
@@ -31,14 +34,18 @@ def test_dry(cli_runner, mip_dna_context, caplog):
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 3
 
 
-def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
+def test_start_available_with_limit(
+    cli_runner: CliRunner,
+    caplog,
+    mip_dna_context: CGConfig,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
+):
     """Test that the mip-dna start-available command picks up only the given max number of cases."""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
     # GIVEN a mip_dna_context with 3 cases that are ready for analysis
-    analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
-    assert len(analysis_api.get_cases_ready_for_analysis()) == 3
+    assert len(mip_dna_analysis_api.get_cases_ready_for_analysis()) == 3
 
     # GIVEN that the cases do not need decompression
     with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
