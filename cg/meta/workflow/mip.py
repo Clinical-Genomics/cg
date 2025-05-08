@@ -249,15 +249,15 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_ready_for_analysis(self, limit: int = None) -> list[Case]:
+    def get_cases_ready_for_analysis(
+        self, limit: int = MAX_CASES_TO_START_IN_50_MINUTES
+    ) -> list[Case]:
         """Return cases to analyze."""
         cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        if limit:
-            return cases_ready_for_analysis[:limit]
-        return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
+        return cases_ready_for_analysis[:limit]
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:
