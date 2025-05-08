@@ -93,15 +93,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_ready_for_analysis(
-        self, limit: int = MAX_CASES_TO_START_IN_50_MINUTES
-    ) -> list[Case]:
+    def get_cases_ready_for_analysis(self, limit: int | None = None) -> list[Case]:
         """Returns a list of cases that are ready for analysis."""
         cases_to_analyse: list[Case] = self.get_cases_to_analyze()
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        return cases_ready_for_analysis[:limit]
+        return cases_ready_for_analysis[: limit if limit else MAX_CASES_TO_START_IN_50_MINUTES]
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.
