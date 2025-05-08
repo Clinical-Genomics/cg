@@ -8,6 +8,7 @@ from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 EXIT_SUCCESS = 0
 
@@ -139,7 +140,15 @@ def test_start_available_with_limit(
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a balsamic_context with 3 cases that are ready to analyse
+    # GIVEN a balsamic_context with 1 case that is ready to analyse
+
+    # GIVEN that 1 additional case is also ready to analyse
+    case: Case = balsamic_context.status_db.get_case_by_internal_id(
+        internal_id="balsamic_case_tgs_single"
+    )
+    for sample in case.samples:
+        sample.reads = sample.expected_reads_for_sample
+    balsamic_context.status_db.session.commit()
 
     # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
