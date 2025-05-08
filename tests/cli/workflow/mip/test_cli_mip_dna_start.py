@@ -30,6 +30,7 @@ def test_dry(cli_runner, mip_dna_context, caplog):
 
 
 def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
+    """Test that the mip-dna start-available command picks up only the given max number of cases."""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 

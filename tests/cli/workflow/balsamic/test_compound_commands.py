@@ -135,7 +135,8 @@ def test_start_available(
 def test_start_available_with_limit(
     cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_illumina_run
 ):
-    """Test that start-available picks up only the provided max given number of cases."""
+    """Test that the balsamic start-available command picks up only the given max number of cases."""
+    # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
     # GIVEN 2 cases where the sample read counts pass threshold
