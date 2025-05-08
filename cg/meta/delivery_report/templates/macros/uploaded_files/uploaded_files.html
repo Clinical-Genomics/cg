@@ -28,8 +28,13 @@
     <h4 class="mt-4 mb-3">Scout</h4>
     <div class="alert alert-info" role="alert">
       Varianter finns uppladdade i Scout:
-      <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
-        https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
+      {% if "nallo" in workflow %}
+        <a href="https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+          https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
+      {% else %}
+        <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+          https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
+      {% endif %}
     </div>
     {% if "balsamic" in workflow %}
       <!-- BALSAMIC Scout files -->
