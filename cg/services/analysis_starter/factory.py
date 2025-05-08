@@ -74,11 +74,8 @@ class AnalysisStarterFactory:
         workflow: Workflow = self.store.get_case_workflow(case_id)
         LOG.info(f"Getting a {workflow} analysis starter for case {case_id}")
         configurator: Configurator = self._get_configurator(workflow)
-        LOG.debug(f"Resolved configurator {configurator.__class__.__name__}")
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
-        LOG.debug(f"Resolved input fetcher {input_fetcher.__class__.__name__}")
         submitter: Submitter = self._get_submitter(workflow)
-        LOG.debug(f"Resolved submitter {submitter.__class__.__name__}")
         return AnalysisStarter(
             configurator=configurator, input_fetcher=input_fetcher, submitter=submitter
         )
