@@ -12,9 +12,9 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.tomte.tomte import (
     TomteParameters,
+    TomteQCMetrics,
     TomteSampleSheetEntry,
     TomteSampleSheetHeaders,
-    TomteQCMetrics,
 )
 from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
@@ -77,7 +77,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_built_workflow_parameters(self, case_id: str) -> TomteParameters:
+    def get_built_workflow_parameters(self, case_id: str, dry_run: bool = False) -> TomteParameters:
         """Return parameters."""
         return TomteParameters(
             input=self.get_sample_sheet_path(case_id=case_id),

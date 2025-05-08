@@ -13,8 +13,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
     TaxprofilerQCMetrics,
+    TaxprofilerSampleSheetEntry,
 )
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
@@ -80,7 +80,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_built_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
+    def get_built_workflow_parameters(
+        self, case_id: str, dry_run: bool = False
+    ) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
         return TaxprofilerParameters(
             input=self.get_sample_sheet_path(case_id=case_id),

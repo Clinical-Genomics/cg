@@ -2917,6 +2917,14 @@ def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
+    """Return sample id map path."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_customer_internal_mapping"
+    ).with_suffix(FileExtensions.CSV)
+
+
+@pytest.fixture(scope="function")
 def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to parameters file."""
     return Path(
@@ -2970,7 +2978,8 @@ def raredisease_parameters_default(
     raredisease_dir: Path,
     raredisease_case_id: str,
     raredisease_sample_sheet_path: Path,
-    bed_version_file_name,
+    bed_version_file_name: str,
+    raredisease_sample_id_map: Path,
 ) -> RarediseaseParameters:
     """Return Tomte parameters."""
     return RarediseaseParameters(
@@ -2979,6 +2988,7 @@ def raredisease_parameters_default(
         target_bed_file=bed_version_file_name,
         analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
+        sample_id_map=raredisease_sample_id_map,
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
         ),

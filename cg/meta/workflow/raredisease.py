@@ -1,5 +1,6 @@
 """Module for Raredisease Analysis API."""
 
+import csv
 import logging
 from itertools import permutations
 from pathlib import Path
@@ -97,11 +98,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
         return True
 
-    def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
+    def get_built_workflow_parameters(
+        self, case_id: str, dry_run: bool = False
+    ) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id) or ""
         outdir = self.get_case_path(case_id=case_id)
+        sample_id_map: Path = self.get_customer_internal_mapping_csv_path(case=case_id)
+        # Build the sample_id_map path
+        if not dry_run:
+            self.export_customer_internal_mapping_csv(case=case_id, output_path=sample_id_map)
 
         return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
@@ -111,6 +118,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             save_mapped_as_cram=True,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
+            sample_id_map=sample_id_map,
         )
 
     @staticmethod
@@ -274,3 +282,18 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return super().parse_analysis(
             qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
         )
+
+    def get_customer_internal_mapping_csv_path(self, case: str) -> Path:
+        """Return the path to the customer internal mapping CSV file."""
+        return Path(self.get_case_path(case)) / f"{case}_customer_internal_mapping.csv"
+
+    def export_customer_internal_mapping_csv(self, case: str, output_path: Path):
+        """Export a CSV file mapping customer sample names to internal sample IDs."""
+        LOG.info(f"Exporting customer internal mapping CSV for case {case} to {output_path}")
+        with output_path.open("w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["customer_id", "internal_id"])
+            for link in self.status_db.get_case_by_internal_id(case).links:
+                customer_name = link.sample.name
+                internal_id = link.sample.internal_id
+                writer.writerow([customer_name, internal_id])

@@ -9,18 +9,18 @@ from click import File
 from cg.clients.chanjo2.models import (
     CoverageMetrics,
     CoveragePostRequest,
-    CoverageSample,
     CoveragePostResponse,
+    CoverageSample,
 )
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion, FileFormat
+from cg.constants.constants import FileFormat, GenomeVersion
 from cg.constants.nf_analysis import (
-    NALLO_METRIC_CONDITIONS,
-    NALLO_COVERAGE_THRESHOLD,
-    NALLO_COVERAGE_INTERVAL_TYPE,
     NALLO_COVERAGE_FILE_TAGS,
+    NALLO_COVERAGE_INTERVAL_TYPE,
+    NALLO_COVERAGE_THRESHOLD,
+    NALLO_METRIC_CONDITIONS,
 )
-from cg.constants.scout import ScoutExportFileName, NALLO_CASE_TAGS
+from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -29,9 +29,9 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.nallo.nallo import (
     NalloParameters,
+    NalloQCMetrics,
     NalloSampleSheetEntry,
     NalloSampleSheetHeaders,
-    NalloQCMetrics,
 )
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
@@ -110,7 +110,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             raise ValueError(f"{sex} is not a valid sex")
         return code
 
-    def get_built_workflow_parameters(self, case_id: str) -> NalloParameters:
+    def get_built_workflow_parameters(self, case_id: str, dry_run: bool = False) -> NalloParameters:
         """Return parameters."""
         outdir = self.get_case_path(case_id=case_id)
 
