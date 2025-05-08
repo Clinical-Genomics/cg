@@ -897,6 +897,6 @@ def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
     Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def balsamic_analysis_api(balsamic_context: CGConfig) -> BalsamicAnalysisAPI:
     return BalsamicAnalysisAPI(config=balsamic_context)

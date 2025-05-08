@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from unittest import mock
 
 from click.testing import CliRunner
 
@@ -138,7 +137,9 @@ def test_start_available_with_limit(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     caplog,
+    mocker,
     balsamic_analysis_api: BalsamicAnalysisAPI,
+    mock_analysis_illumina_run,
 ):
     """Test that the balsamic start-available command picks up only the given max number of cases."""
     # GIVEN that the log messages are captured
@@ -155,15 +156,14 @@ def test_start_available_with_limit(
     balsamic_context.status_db.commit_to_store()
 
     # GIVEN that there are now 2 cases that are ready for analysis
-    assert len(balsamic_analysis_api.get_cases_ready_for_analysis()) == 2
+    analysis_api = BalsamicAnalysisAPI(config=balsamic_context)
+    assert len(analysis_api.get_cases_ready_for_analysis()) == 2
 
     # GIVEN that decompression is not needed
-    with mock.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None):
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
 
-        # WHEN running the command with limit=1
-        result = cli_runner.invoke(
-            start_available, ["--dry-run", "--limit", 1], obj=balsamic_context
-        )
+    # WHEN running the command with limit=1
+    result = cli_runner.invoke(start_available, ["--dry-run", "--limit", 1], obj=balsamic_context)
 
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
