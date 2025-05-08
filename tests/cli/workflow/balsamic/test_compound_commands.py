@@ -148,7 +148,7 @@ def test_start_available_with_limit(
     )
     for sample in case.samples:
         sample.reads = sample.expected_reads_for_sample
-    balsamic_context.status_db.session.commit()
+    balsamic_context.status_db.commit_to_database()
 
     # GIVEN that there are now 2 cases that are ready for analysis
     analysis_api = BalsamicAnalysisAPI(config=balsamic_context)
