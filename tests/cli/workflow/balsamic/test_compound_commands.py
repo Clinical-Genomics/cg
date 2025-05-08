@@ -139,9 +139,7 @@ def test_start_available_with_limit(
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN 2 cases where the sample read counts pass threshold
-    case_id_1 = "balsamic_case_wgs_single"
-    case_id_2 = "balsamic_case_tgs_single"
+    # GIVEN a balsamic_context with 3 cases that are ready to analyse
 
     # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
@@ -152,11 +150,8 @@ def test_start_available_with_limit(
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN it should successfully identify the one case eligible for auto-start
-    assert f"Starting analysis for {case_id_1}" in caplog.text
-
-    # THEN the ineligible case should NOT be run
-    assert f"Starting analysis for {case_id_2}" not in caplog.text
+    # THEN only 1 case is picked up to start
+    assert caplog.text.count("Starting analysis for") == 1
 
 
 def test_store_available(
