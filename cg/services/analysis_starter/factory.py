@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -52,6 +53,8 @@ from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class AnalysisStarterFactory:
     def __init__(self, cg_config: CGConfig):
@@ -69,42 +72,50 @@ class AnalysisStarterFactory:
 
     def get_analysis_starter(self, case_id: str) -> AnalysisStarter:
         workflow: Workflow = self.store.get_case_workflow(case_id)
+        LOG.info(f"Getting a {workflow} analysis starter for case {case_id}")
         configurator: Configurator = self._get_configurator(workflow)
+        LOG.debug(f"Resolved configurator {configurator.__class__.__name__}")
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
+        LOG.debug(f"Resolved input fetcher {input_fetcher.__class__.__name__}")
         submitter: Submitter = self._get_submitter(workflow)
+        LOG.debug(f"Resolved submitter {submitter.__class__.__name__}")
         return AnalysisStarter(
             configurator=configurator, input_fetcher=input_fetcher, submitter=submitter
         )
 
     def _get_configurator(self, workflow: Workflow) -> Configurator:
         if workflow in NEXTFLOW_WORKFLOWS:
-            config_file_creator = self._get_nextflow_config_file_creator(workflow)
-            params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
-            sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(
-                workflow
-            )
-            return NextflowConfigurator(
-                config_file_creator=config_file_creator,
-                housekeeper_api=self.housekeeper_api,
-                lims=self.lims_api,
-                params_file_creator=params_file_creator,
-                pipeline_config=self._get_pipeline_config(workflow),
-                sample_sheet_creator=sample_sheet_creator,
-                store=self.store,
-                pipeline_extension=self._get_pipeline_extension(workflow),
-            )
+            return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
-            return MicrosaltConfigurator(
-                config_file_creator=self._get_microsalt_config_file_creator(),
-                fastq_handler=MicrosaltFastqHandler(
-                    housekeeper_api=self.housekeeper_api,
-                    root_dir=Path(self.cg_config.microsalt.root),
-                    status_db=self.store,
-                ),
-                lims_api=self.lims_api,
-                microsalt_config=self.cg_config.microsalt,
-                store=self.store,
-            )
+            return self._get_microsalt_configurator()
+
+    def _get_microsalt_configurator(self):
+        return MicrosaltConfigurator(
+            config_file_creator=self._get_microsalt_config_file_creator(),
+            fastq_handler=MicrosaltFastqHandler(
+                housekeeper_api=self.housekeeper_api,
+                root_dir=Path(self.cg_config.microsalt.root),
+                status_db=self.store,
+            ),
+            lims_api=self.lims_api,
+            microsalt_config=self.cg_config.microsalt,
+            store=self.store,
+        )
+
+    def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
+        config_file_creator = self._get_nextflow_config_file_creator(workflow)
+        params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
+        sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        return NextflowConfigurator(
+            config_file_creator=config_file_creator,
+            housekeeper_api=self.housekeeper_api,
+            lims=self.lims_api,
+            params_file_creator=params_file_creator,
+            pipeline_config=self._get_pipeline_config(workflow),
+            sample_sheet_creator=sample_sheet_creator,
+            store=self.store,
+            pipeline_extension=self._get_pipeline_extension(workflow),
+        )
 
     def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
         pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
