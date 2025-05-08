@@ -20,7 +20,7 @@ from cg.cli.workflow.balsamic.options import (
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -238,13 +238,9 @@ def start(
 
 @balsamic.command("start-available")
 @DRY_RUN
-@click.option(
-    "--limit",
-    type=int,
-    help="Maximum number of cases to start",
-)
+@LIMIT
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False, limit: int = None):
+def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
     """Start full workflow for all cases ready for analysis"""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]

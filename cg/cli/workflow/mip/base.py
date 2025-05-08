@@ -19,7 +19,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -199,13 +199,9 @@ def start(
 
 @click.command("start-available")
 @DRY_RUN
-@click.option(
-    "--limit",
-    type=int,
-    help="Maximum number of cases to start",
-)
+@LIMIT
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False, limit: int = None):
+def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
     """Start full analysis workflow for all cases ready for analysis."""
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
