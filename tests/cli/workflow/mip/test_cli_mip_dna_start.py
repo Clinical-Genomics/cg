@@ -14,7 +14,7 @@ def test_dry(cli_runner, mip_dna_context, caplog):
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with 3 cases that are ready to analyse
+    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
     analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
     assert len(analysis_api.get_cases_ready_for_analysis()) == 3
 
@@ -36,7 +36,7 @@ def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with 3 cases that are ready to analyse
+    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
     analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
     assert len(analysis_api.get_cases_ready_for_analysis()) == 3
 

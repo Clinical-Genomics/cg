@@ -140,9 +140,9 @@ def test_start_available_with_limit(
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a balsamic_context with 1 case that is ready to analyse
+    # GIVEN a balsamic_context with 1 case that is ready for analysis
 
-    # GIVEN that 1 additional case is also ready to analyse
+    # GIVEN that 1 additional case is also ready for analysis
     case: Case = balsamic_context.status_db.get_case_by_internal_id(
         internal_id="balsamic_case_tgs_single"
     )
@@ -150,7 +150,7 @@ def test_start_available_with_limit(
         sample.reads = sample.expected_reads_for_sample
     balsamic_context.status_db.session.commit()
 
-    # GIVEN that there are now 2 cases that are ready to analyse
+    # GIVEN that there are now 2 cases that are ready for analysis
     analysis_api = BalsamicAnalysisAPI(config=balsamic_context)
     assert len(analysis_api.get_cases_ready_for_analysis()) == 2
 
