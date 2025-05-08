@@ -113,6 +113,7 @@ class ScoutCancerIndividual(ScoutIndividual):
 
 
 class ScoutLoadConfig(BaseModel):
+    # See here
     owner: Annotated[str | None, AfterValidator(field_not_none)] = None
     family: Annotated[str | None, AfterValidator(field_not_none)] = None
     family_name: str | None = None
