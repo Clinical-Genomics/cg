@@ -16,7 +16,7 @@ def test_get_cases_ready_for_analysis_with_limit(balsamic_analysis_api: Balsamic
     # GIVEN a balsamic_context with 1 case that is ready for analysis
 
     # WHEN running the command with limit=0
-    cases_to_analyse = balsamic_analysis_api.get_cases_ready_for_analysis(limit=0)
+    cases_to_analyse: list[Case] = balsamic_analysis_api.get_cases_ready_for_analysis(limit=0)
 
     # THEN no case is retrieved
     assert len(cases_to_analyse) == 0
