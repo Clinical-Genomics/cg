@@ -150,6 +150,10 @@ def test_start_available_with_limit(
         sample.reads = sample.expected_reads_for_sample
     balsamic_context.status_db.session.commit()
 
+    # GIVEN that thera are now 2 cases that are ready to analyse
+    analysis_api = BalsamicAnalysisAPI(config=balsamic_context)
+    assert len(analysis_api.get_cases_ready_for_analysis()) == 2
+
     # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
 

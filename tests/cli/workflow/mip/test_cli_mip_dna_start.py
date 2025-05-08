@@ -15,6 +15,8 @@ def test_dry(cli_runner, mip_dna_context, caplog):
     caplog.set_level(logging.INFO)
 
     # GIVEN a mip_dna_context with 3 cases that are ready to analyse
+    analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
+    assert len(analysis_api.get_cases_ready_for_analysis()) == 3
 
     # GIVEN that the cases do not need decompression
     with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
@@ -35,6 +37,8 @@ def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
     caplog.set_level(logging.INFO)
 
     # GIVEN a mip_dna_context with 3 cases that are ready to analyse
+    analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
+    assert len(analysis_api.get_cases_ready_for_analysis()) == 3
 
     # GIVEN that the cases do not need decompression
     with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
