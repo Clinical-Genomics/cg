@@ -9,10 +9,12 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 
 
-def test_dry(cli_runner, mip_dna_context):
-    """Test mip dna start with --dry option"""
+def test_dry(cli_runner, mip_dna_context, caplog):
+    """Test mip-dna start-available with --dry option"""
+    # GIVEN that the log messages are captured
+    caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with several cases that are ready to analyse
+    # GIVEN a mip_dna_context with 3 cases that are ready to analyse
 
     # GIVEN that the cases do not need decompression
     with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
@@ -23,8 +25,12 @@ def test_dry(cli_runner, mip_dna_context):
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
+    # THEN that the 3 cases are picked up to start
+    assert caplog.text.count("Starting full MIP analysis workflow for case") == 3
+
 
 def test_start_available_with_limit(cli_runner, mip_dna_context, caplog):
+    # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
     # GIVEN a mip_dna_context with several cases that are ready to analyse
