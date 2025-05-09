@@ -83,7 +83,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         return analysis_type
 
     def build_load_config(self, hk_version: Version, analysis: Analysis) -> BalsamicLoadConfig:
-        # See here
         LOG.info("Build load config for balsamic case")
         load_config: BalsamicLoadConfig = BalsamicLoadConfig(
             track=UploadTrack.CANCER.value,
