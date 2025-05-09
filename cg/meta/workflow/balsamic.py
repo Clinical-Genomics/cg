@@ -607,7 +607,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        cluster_config: Path | None = None,
+        workflow_profile: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -615,17 +615,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {
                 "--account": self.account,
                 "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--cluster-config": cluster_config,
+                "--workflow-profile": workflow_profile,
             }
         )
-        parameters = command + options + run_analysis + benchmark
+        parameters = command + options + run_analysis
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
