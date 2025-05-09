@@ -3488,6 +3488,7 @@ def rnafusion_parameters_default(
         genomes_base=Path(existing_directory),
         input=rnafusion_sample_sheet_path,
         outdir=Path(rnafusion_dir, rnafusion_case_id),
+        samplename="rnafusion_sample_name",
         priority="development",
     )
 

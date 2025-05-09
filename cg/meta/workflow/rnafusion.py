@@ -14,11 +14,11 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import (
     RnafusionParameters,
-    RnafusionSampleSheetEntry,
     RnafusionQCMetrics,
+    RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -86,9 +86,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
+        unique_sample: Sample = self.get_validated_case(case_id=case_id).samples[0]
         return RnafusionParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
+            samplename=unique_sample.name,
         )
 
     @staticmethod
