@@ -9,6 +9,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants import Priority
 from cg.constants.constants import Workflow
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -41,7 +42,11 @@ class ScoutConfigBuilder:
         load_config.family = analysis.case.internal_id
         load_config.family_name = analysis.case.name
         load_config.owner = analysis.case.customer.internal_id
-        load_config.status = "prioritized" if analysis.case.is_prioritized else None
+        load_config.status = (
+            "prioritized"
+            if analysis.case.priority in [Priority.priority, Priority.express]
+            else None
+        )
         load_config.synopsis = analysis.case.synopsis
         self.include_cohorts(load_config=load_config, analysis=analysis)
         self.include_phenotype_groups(load_config=load_config, analysis=analysis)

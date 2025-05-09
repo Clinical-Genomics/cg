@@ -573,14 +573,6 @@ class Case(Base, PriorityMixin):
         return self.analyses and self.analyses[0].uploaded_at
 
     @property
-    def is_prioritized(self) -> bool:
-        return (
-            True
-            if self.priority == Priority.priority or self.priority == Priority.express
-            else False
-        )
-
-    @property
     def slurm_priority(self) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         if self.are_all_samples_control():
