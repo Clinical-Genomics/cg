@@ -41,6 +41,7 @@ class ScoutConfigBuilder:
         load_config.family = analysis.case.internal_id
         load_config.family_name = analysis.case.name
         load_config.owner = analysis.case.customer.internal_id
+        load_config.status = "prioritized" if analysis.case.is_prioritized else None
         load_config.synopsis = analysis.case.synopsis
         self.include_cohorts(load_config=load_config, analysis=analysis)
         self.include_phenotype_groups(load_config=load_config, analysis=analysis)
