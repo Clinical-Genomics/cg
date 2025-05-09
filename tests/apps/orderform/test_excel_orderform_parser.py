@@ -101,6 +101,21 @@ def test_parse_pacbio_sequencing_orderform(pacbio_revio_sequencing_orderform: st
     assert orderform_parser.project_type == OrderType.PACBIO_LONG_READ
 
 
+def test_parse_nallo_sequencing_orderform(nallo_order_form: str):
+    """Test to parse a Nallo order form in Excel format"""
+    # GIVEN a Nallo order form in Excel format
+    assert is_excel(Path(nallo_order_form))
+
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=nallo_order_form)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.NALLO
+
+
 def test_parse_sarscov2_orderform(sarscov2_orderform: str):
     """Test to parse a sarscov2 orderform in excel format"""
 

@@ -117,6 +117,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Library Preparation Method",
             "atlas_version": "Atlas Version",
         },
+        "SMRTbell library prep (Revio) v1": {
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "sequencing_method_step": {
         "CG002 - Cluster Generation (HiSeq X)": {
@@ -134,6 +138,10 @@ MASTER_STEPS_UDFS = {
             "atlas_version": "Atlas Version",
         },
         "Define Run Format and Calculate Volumes (NovaSeq X)": {
+            "atlas_document": "Sequencing Method",
+            "atlas_version": "Atlas Version",
+        },
+        "Set Up Sequencing Run (Revio) v1": {
             "atlas_document": "Sequencing Method",
             "atlas_version": "Atlas Version",
         },
