@@ -608,7 +608,6 @@ class UploadScoutAPI:
         )
 
     def get_config_builder(self, analysis: Analysis) -> ScoutConfigBuilder:
-        # Change for all of these configs
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
                 lims_api=self.lims,
