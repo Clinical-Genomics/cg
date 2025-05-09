@@ -30,3 +30,6 @@ class PlinkSex(StrEnum):
 
 class RelationshipStatus(StrEnum):
     HAS_NO_PARENT = str(0)
+
+
+SCOUT_PRIORITIZED_STATUS: str = "prioritized"
