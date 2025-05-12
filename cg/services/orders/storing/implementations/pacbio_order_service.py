@@ -112,5 +112,4 @@ class StorePacBioOrderService(StoreOrderService):
             original_ticket=ticket_id,
             priority=sample.priority,
             tumour=sample.tumour,
-            subject_id=sample.subject_id,
         )

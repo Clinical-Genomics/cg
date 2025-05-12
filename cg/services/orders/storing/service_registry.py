@@ -74,9 +74,17 @@ order_service_mapping = {
         OrderLimsService,
         StoreCaseOrderService,
     ),
+    OrderType.NALLO: (
+        OrderLimsService,
+        StoreCaseOrderService,
+    ),
     OrderType.PACBIO_LONG_READ: (
         OrderLimsService,
         StorePacBioOrderService,
+    ),
+    OrderType.RAREDISEASE: (
+        OrderLimsService,
+        StoreCaseOrderService,
     ),
     OrderType.RML: (
         OrderLimsService,

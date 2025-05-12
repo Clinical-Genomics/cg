@@ -72,7 +72,7 @@ metrics:
   value: 2.0
 - condition:
     norm: gt
-    threshold: 25.0
+    threshold: 20.0
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -121,3 +121,12 @@ metrics:
   name: percent_fails
   step: multiqc
   value: 30.0
+- condition:
+    norm: eq
+    threshold: female
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: predicted_sex_sex_check
+  step: multiqc
+  value: female

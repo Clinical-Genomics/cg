@@ -87,9 +87,11 @@ def balsamic_validation_service(
 ) -> OrderValidationService:
     customer: Customer = base_store.get_customer_by_internal_id("cust000")
     user: User = base_store.add_user(customer=customer, email="mail@email.com", name="new user")
-    base_store.session.add(user)
-    base_store.session.add(balsamic_application)
-    base_store.session.commit()
+    base_store.add_item_to_store(user)
+    base_store.add_item_to_store(balsamic_application)
+    bed = base_store.add_bed("GIcfDNA")
+    base_store.add_item_to_store(bed)
+    base_store.commit_to_store()
     return OrderValidationService(base_store)
 
 

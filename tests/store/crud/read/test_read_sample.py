@@ -7,7 +7,9 @@ from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.store.models import Customer, Invoice, Sample
+from cg.models.orders.constants import OrderType
+from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.store.models import Customer, Invoice, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -599,3 +601,38 @@ def test_get_related_samples(
 
     # THEN the correct set of samples is returned
     assert set(related_dna_samples) == set(fetched_related_dna_samples)
+
+
+def test_get_collaborator_samples_filters_on_order_type(
+    store_with_rna_and_dna_samples_and_cases: Store, rna_sample: Sample
+):
+    # GIVEN a store containing samples compatible with specific order types
+    store: Store = store_with_rna_and_dna_samples_and_cases
+    links: list[OrderTypeApplication] = store.link_order_types_to_application(
+        application=rna_sample.application_version.application, order_types=[OrderType.MIP_RNA]
+    )
+    store.add_multiple_items_to_store(links)
+    store.commit_to_store()
+    assert OrderType.BALSAMIC not in rna_sample.application_version.application.order_types
+
+    # WHEN fetching samples filtered on an incompatible order type
+    request = CollaboratorSamplesRequest(
+        customer=rna_sample.customer.internal_id,
+        enquiry=rna_sample.name,
+        order_type=OrderType.BALSAMIC,
+    )
+    samples: list[Sample] = store.get_collaborator_samples(request)
+
+    # THEN no samples should be returned
+    assert not samples
+
+    # WHEN fetching samples filtered on a compatible order type
+    request = CollaboratorSamplesRequest(
+        customer=rna_sample.customer.internal_id,
+        enquiry=rna_sample.name,
+        order_type=OrderType.MIP_RNA,
+    )
+    samples: list[Sample] = store.get_collaborator_samples(request)
+
+    # THEN samples should be returned
+    assert samples

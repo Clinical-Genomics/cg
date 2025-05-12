@@ -12,6 +12,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -24,6 +25,7 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.BALSAMIC,
     Workflow.MIP_DNA,
     Workflow.MIP_RNA,
+    Workflow.NALLO,
     Workflow.RNAFUSION,
 ]
 
@@ -31,6 +33,7 @@ ANALYSIS_API: list = [
     (Workflow.BALSAMIC, BalsamicAnalysisAPI),
     (Workflow.MIP_DNA, MipDNAAnalysisAPI),
     (Workflow.MIP_RNA, MipRNAAnalysisAPI),
+    (Workflow.NALLO, NalloAnalysisAPI),
     (Workflow.RNAFUSION, RnafusionAnalysisAPI),
     (Workflow.TOMTE, TomteAnalysisAPI),
 ]
