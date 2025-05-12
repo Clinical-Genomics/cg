@@ -3,10 +3,12 @@
 {% macro nallo_qc_metrics(samples) %}
   {% set
     metrics = [
-      {"name": "Läspar [M]",            "key": "million_read_pairs",   "description": "Antal sekvenseringsläsningar i miljoner läspar."},
-      {"name": "Medelsekvenslängd",     "key": "avg_sequence_length",           "description": "Medelvärdet av längden av sekvenseringsläsningar."},
-      {"name": "Medelsekvensdjup",      "key": "mean_target_coverage", "description": "Medelvärdet av täckningsgraden i baser över genpanelen/genpanelerna angivna under dataanalys."},
-      {"name": "Täckningsgrad 10x [%]", "key": "pct_10x",              "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (10x) över genpanelen/genpanelerna angivna under dataanalys. Det beräknas efter borttagning av duplikata läsningar."},
+      {"name": "Kön",                     "key": "sex",                  "description": "Kön beräknat genom bioinformatisk analys."},
+      {"name": "Mappade HiFi baser [Gb]", "key": "coverage_bases",       "description": "Antal miljarder baser som mappar mot referens genomet."},
+      {"name": "Medelsekvenslängd",       "key": "avg_sequence_length",  "description": "Medelvärdet av längden av sekvenseringsläsningar."},
+      {"name": "Mediantäckning [baser]",  "key": "median_coverage",      "description": "Median av täckningen över alla baser inkluderade i analysen."},
+      {"name": "Medelsekvensdjup",        "key": "mean_target_coverage", "description": "Medelvärdet av täckningsgraden i baser över genpanelen/genpanelerna angivna under dataanalys."},
+      {"name": "Täckningsgrad 10x [%]",   "key": "pct_10x",              "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (10x) över genpanelen/genpanelerna angivna under dataanalys."},
     ]
   %}
   <!-- Quality control metrics -->

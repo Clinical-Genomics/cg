@@ -48,14 +48,20 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific Nallo sample.
 
     Attributes:
+        avg_sequence_length: average length of the sequenced reads; source: workflow
+        coverage_bases: total number of bases aligned to the genome; source: workflow
         mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        median_coverage: median coverage of mapped sequence in bases; source: workflow
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
-        avg_sequence_length: Average length of the sequenced reads; source: workflow
+        sex: sex predicted by the workflow; source: workflow
     """
 
     avg_sequence_length: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    coverage_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    median_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    sex: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
 
 
 class RarediseaseSampleMetadataModel(SampleMetadataModel):

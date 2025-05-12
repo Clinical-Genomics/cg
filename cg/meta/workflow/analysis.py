@@ -10,6 +10,7 @@ import rich_click as click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -57,6 +58,10 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.workflow = workflow
+        if self.workflow == Workflow.NALLO:
+            self.scout_api: ScoutAPI = self.scout_api_38
+        else:
+            self.scout_api: ScoutAPI = self.scout_api_37
         self._process = None
 
     @property
@@ -576,8 +581,8 @@ class AnalysisAPI(MetaAPI):
         """Add a cleaned at date for all analyses related to a case."""
         analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
-        for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
+        for analysis in analyses:
+            analysis.cleaned_at = analysis.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
     def clean_run_dir(

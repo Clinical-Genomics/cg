@@ -391,6 +391,7 @@ class StoreHelpers:
         control: str = "",
         customer_id: str = None,
         sex: str = Sex.FEMALE,
+        last_sequenced_at: datetime = None,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -423,6 +424,7 @@ class StoreHelpers:
             control=control,
             original_ticket=original_ticket,
             tumour=is_tumour,
+            last_sequenced_at=last_sequenced_at,
             reads=reads,
             internal_id=internal_id,
             subject_id=subject_id,
@@ -537,6 +539,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         order: Order = None,
+        ticket_id: str = "123456",
     ):
         """Load a case with samples and link relations."""
         if not customer:
@@ -552,6 +555,7 @@ class StoreHelpers:
                 name=case_name,
                 internal_id=case_id,
                 action=action,
+                ticket=ticket_id,
             )
             case.customer = customer
         if order:
