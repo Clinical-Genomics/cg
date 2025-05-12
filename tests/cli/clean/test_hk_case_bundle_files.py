@@ -38,11 +38,12 @@ def test_date_days_ago_one_days():
 
 
 def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGConfig, caplog):
-    # GIVEN no analysis in database
+    # GIVEN no analysis in database more recent than a year ago
     days_ago = 365 * 100
     date_one_year_ago = get_date_days_ago(days_ago)
     context = clean_context
-    assert not context.status_db.get_analyses_started_at_before(started_at_before=date_one_year_ago)
+    analyses: list[Analysis] = context.status_db._get_query(table=Analysis).all()
+    assert all([analysis.started_at > date_one_year_ago for analysis in analyses])
 
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)
