@@ -283,9 +283,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
         )
 
-    def get_customer_internal_mapping_csv_path(self, case: str) -> Path:
-        """Return the path to the customer internal mapping CSV file."""
-        return Path(self.get_case_path(case)) / f"{case}_customer_internal_mapping.csv"
+    def get_sample_name_mapping_csv_path(self, case: str) -> Path:
+        """Return the path to the CSV file containing the mapping between sample names and internal ids."""
+        return Path(self.get_case_path(case), f"{case}_customer_internal_mapping.csv")
 
     def export_customer_internal_mapping_csv(self, case: str, output_path: Path):
         """Export a CSV file mapping customer sample names to internal sample IDs."""
