@@ -54,7 +54,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
