@@ -35,6 +35,7 @@ class IndexEnum(StrEnum):
     IDT_DS_B = "IDT DupSeq 10 bp Set B"
     IDT_DS_F = "IDT DupSeq 10 bp Set F"
     IDT_XGEN_UDI = "IDT xGen UDI Adapters"
+    IDT10_UDI_NIPT = "IDT10 UDI NIPT"
     KAPA_UDI_NIPT = "KAPA UDI NIPT"
     NEXTERA_XT = "Nextera XT Dual"
     NEXTFLEX_UDI_96 = "NEXTflex® Unique Dual Index Barcodes 1 - 96"

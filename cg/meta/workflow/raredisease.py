@@ -13,15 +13,15 @@ from cg.clients.chanjo2.models import (
     CoveragePostResponse,
     CoverageSample,
 )
-from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
+from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_COVERAGE_INTERVAL_TYPE,
     RAREDISEASE_COVERAGE_THRESHOLD,
-    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
-    RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
+    RAREDISEASE_METRIC_CONDITIONS_WGS,
+    RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -33,9 +33,9 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import (
     RarediseaseParameters,
+    RarediseaseQCMetrics,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
-    RarediseaseQCMetrics,
 )
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
@@ -94,30 +94,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
         return True
-
-    def get_target_bed(self, case_id: str, analysis_type: str) -> str:
-        """
-        Return the target bed file from LIMS and use default capture kit for WHOLE_GENOME_SEQUENCING.
-        """
-        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed_file:
-            if analysis_type == AnalysisType.WGS:
-                return DEFAULT_CAPTURE_KIT
-            raise ValueError("No capture kit was found in LIMS")
-        return target_bed_file
-
-    def get_germlinecnvcaller_flag(self, analysis_type: str) -> bool:
-        if analysis_type == AnalysisType.WGS:
-            return True
-        return False
 
     def get_built_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed_file: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
-        skip_germlinecnvcaller = self.get_germlinecnvcaller_flag(analysis_type=analysis_type)
+        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id) or ""
         outdir = self.get_case_path(case_id=case_id)
 
         return RarediseaseParameters(
@@ -126,7 +109,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             analysis_type=analysis_type,
             target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
-            skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
         )
