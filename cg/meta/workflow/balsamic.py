@@ -596,7 +596,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         options = build_command_from_dict(
             {
                 "--account": self.account,
-                "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--workflow-profile": workflow_profile,
