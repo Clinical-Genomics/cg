@@ -6,10 +6,12 @@ Create Date: 2025-04-30 09:56:53.670128
 
 """
 
+import sqlalchemy
 import sqlalchemy as sa
-from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy.orm import Session, declarative_base, mapped_column
 
 from alembic import op
+from cg.models.orders.constants import OrderType
 
 Base = declarative_base()
 
@@ -19,14 +21,16 @@ down_revision = "039dbdf8af01"
 branch_labels = None
 depends_on = None
 
-bind: sa.Connection = op.get_bind()
-
 
 class OrderTypeApplication(Base):
-    __table__ = sa.Table("order_type_application", sa.MetaData(), autoload_with=bind)
+    """Maps an order type to its allowed applications"""
+
+    __tablename__ = "order_type_application"
+    order_type = mapped_column(sqlalchemy.Enum(OrderType), primary_key=True)
 
 
 def upgrade():
+    bind: sa.Connection = op.get_bind()
     session: Session = Session(bind=bind)
     mip_dna_rows: list[OrderTypeApplication] = (
         session.query(OrderTypeApplication).filter_by(order_type="MIP_DNA").all()
