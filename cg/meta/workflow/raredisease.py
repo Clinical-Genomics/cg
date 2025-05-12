@@ -105,7 +105,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id) or ""
         outdir = self.get_case_path(case_id=case_id)
-        sample_id_map: Path = self.get_customer_internal_mapping_csv_path(case=case_id)
+        sample_id_map: Path = self.get_sample_name_mapping_csv_path(case=case_id)
         # Build the sample_id_map path
         if not dry_run:
             self.export_customer_internal_mapping_csv(case=case_id, output_path=sample_id_map)
