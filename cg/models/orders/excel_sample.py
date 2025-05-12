@@ -8,6 +8,7 @@ from cg.models.orders.validators.excel_sample_validators import (
     convert_to_date,
     convert_to_lower,
     convert_to_priority,
+    empty_string_to_none,
     numeric_value,
     parse_panels,
     replace_spaces_with_underscores,
@@ -86,7 +87,9 @@ class ExcelSample(OrderSample):
     reference_genome: str = Field(None, alias=ExcelSampleAliases.REFERENCE_GENOME)
     region: str = Field(None, alias=ExcelSampleAliases.REGION)
     region_code: str = Field(None, alias=ExcelSampleAliases.REGION_CODE)
-    require_qc_ok: bool = Field(None, alias=ExcelSampleAliases.REQUIRE_QC_OK)
+    require_qc_ok: Annotated[bool | None, BeforeValidator(empty_string_to_none)] = Field(
+        None, alias=ExcelSampleAliases.REQUIRE_QC_OK
+    )
     rml_plate_name: str = Field(None, alias=ExcelSampleAliases.RML_PLATE_NAME)
     selection_criteria: str = Field(None, alias=ExcelSampleAliases.SELECTION_CRITERIA)
     sex: Annotated[str, AfterValidator(convert_sex)] = Field(None, alias=ExcelSampleAliases.SEX)
@@ -99,7 +102,9 @@ class ExcelSample(OrderSample):
     subject_id: str = Field(None, alias=ExcelSampleAliases.SUBJECT_ID)
     synopsis: str = Field(None, alias=ExcelSampleAliases.SYNOPSIS)
     tissue_block_size: str = Field(None, alias=ExcelSampleAliases.TISSUE_BLOCK_SIZE)
-    tumour: bool = Field(None, alias=ExcelSampleAliases.TUMOUR)
+    tumour: Annotated[bool | None, BeforeValidator(empty_string_to_none)] = Field(
+        None, alias=ExcelSampleAliases.TUMOUR
+    )
     tumour_purity: str = Field(None, alias=ExcelSampleAliases.TUMOUR_PURITY)
     volume: Annotated[str, AfterValidator(numeric_value)] = Field(
         None, alias=ExcelSampleAliases.VOLUME
