@@ -292,8 +292,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.info(f"Exporting customer internal mapping CSV for case {case} to {output_path}")
         with output_path.open("w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["customer_id", "internal_id"])
+            writer.writerow(
+                ["customer_id", "internal_id"]
+            )  # this is the header expected by the pipeline
             for link in self.status_db.get_case_by_internal_id(case).links:
-                customer_name = link.sample.name
+                customer_sample_name = link.sample.name
                 internal_id = link.sample.internal_id
-                writer.writerow([customer_name, internal_id])
+                writer.writerow([customer_sample_name, internal_id])
