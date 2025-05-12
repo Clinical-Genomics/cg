@@ -57,3 +57,10 @@ OPTION_WORKFLOW_PROFILE = click.option(
     required=False,
     help="Path to directory containing config.yaml with workflow rule resources.",
 )
+
+OPTION_RUN_INTERACTIVELY = click.option(
+    "--run-interactively",
+    type=bool,
+    required=False,
+    help="If given snakemake will run interactively on the current node and submit jobs sequentially.",
+)

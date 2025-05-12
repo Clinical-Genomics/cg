@@ -607,6 +607,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         workflow_profile: Path | None = None,
+        run_interactively: bool = False,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -614,6 +615,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
+        run_interactively = ["--run-interactively"] if not run_interactively else []
         options = build_command_from_dict(
             {
                 "--account": self.account,
@@ -622,7 +624,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--workflow-profile": workflow_profile,
             }
         )
-        parameters = command + options + run_analysis
+        parameters = command + options + run_analysis + run_interactively
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:

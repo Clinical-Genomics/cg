@@ -16,6 +16,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
+    OPTION_RUN_INTERACTIVELY,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.utils import validate_force_store_option
@@ -92,6 +93,7 @@ def config_case(
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
 @OPTION_WORKFLOW_PROFILE
+@OPTION_RUN_INTERACTIVELY
 @DRY_RUN
 @OPTION_QOS
 @click.pass_obj
@@ -99,6 +101,7 @@ def run(
     context: CGConfig,
     case_id: str,
     workflow_profile: click.Path,
+    run_interactively: bool,
     slurm_quality_of_service: str,
     dry_run: bool,
 ):
@@ -111,6 +114,7 @@ def run(
         analysis_api.run_analysis(
             case_id=case_id,
             workflow_profile=workflow_profile,
+            run_interactively=run_interactively,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
@@ -197,6 +201,7 @@ def store_housekeeper(
 @OPTION_CACHE_VERSION
 @OPTION_OBSERVATIONS
 @OPTION_WORKFLOW_PROFILE
+@OPTION_RUN_INTERACTIVELY
 @click.pass_context
 def start(
     context: click.Context,
@@ -209,6 +214,7 @@ def start(
     observations: list[click.Path],
     slurm_quality_of_service: str,
     workflow_profile: click.Path,
+    run_interactively: bool,
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
@@ -231,6 +237,7 @@ def start(
         run,
         case_id=case_id,
         workflow_profile=workflow_profile,
+        run_interactively=run_interactively,
         slurm_quality_of_service=slurm_quality_of_service,
         dry_run=dry_run,
     )
