@@ -615,7 +615,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        run_interactively = ["--run-interactively"] if not run_interactively else []
+        run_interactively = ["--run-interactively"] if run_interactively else []
         options = build_command_from_dict(
             {
                 "--account": self.account,
