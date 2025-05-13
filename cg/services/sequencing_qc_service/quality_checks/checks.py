@@ -3,10 +3,10 @@ from typing import Callable
 
 from cg.constants import Workflow
 from cg.services.sequencing_qc_service.quality_checks.utils import (
+    all_samples_in_case_have_reads,
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
     sample_pass_sequencing_qc,
-    all_samples_in_case_have_reads,
 )
 from cg.store.models import Case
 
@@ -41,7 +41,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
         Workflow.RAW_DATA: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.MICROSALT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.MUTANT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
-        Workflow.TAXPROFILER: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.TAXPROFILER: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
         Workflow.NALLO: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
     }
 
