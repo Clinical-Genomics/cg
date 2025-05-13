@@ -37,9 +37,10 @@ class JobType(StrEnum):
 
 
 class CaseActions(StrEnum):
-    ANALYZE: str = "analyze"
-    HOLD: str = "hold"
-    RUNNING: str = "running"
+    ANALYZE = "analyze"
+    HOLD = "hold"
+    RUNNING = "running"
+    TOP_UP = "top-up"
 
     @classmethod
     def actions(cls) -> list[str]:
