@@ -39,7 +39,7 @@ def test_date_days_ago_one_days():
 
 def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGConfig, caplog):
     # GIVEN no analysis in database more recent than a year ago
-    days_ago = 365 * 100
+    days_ago = 365
     date_one_year_ago = get_date_days_ago(days_ago)
     context = clean_context
     analyses: list[Analysis] = context.status_db._get_query(table=Analysis).all()
