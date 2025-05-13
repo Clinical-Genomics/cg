@@ -25,7 +25,11 @@ class OrderTypeApplication(Base):
     """Maps an order type to its allowed applications"""
 
     __tablename__ = "order_type_application"
+
     order_type = mapped_column(sa.Enum(OrderType), primary_key=True)
+    application_id = mapped_column(
+        sa.ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
+    )
 
 
 def upgrade():
