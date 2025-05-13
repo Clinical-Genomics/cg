@@ -14,6 +14,7 @@ from cg.services.orders.storing.implementations.microbial_order_service import (
 )
 from cg.services.orders.storing.implementations.pacbio_order_service import StorePacBioOrderService
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
+from cg.services.orders.storing.implementations.taxprofiler_order_service import StoreTaxprofilerOrderService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.store.store import Store
 
@@ -100,7 +101,7 @@ order_service_mapping = {
     ),
     OrderType.TAXPROFILER: (
         OrderLimsService,
-        StoreMetagenomeOrderService,
+        StoreTaxprofilerOrderService,
     ),
     OrderType.TOMTE: (
         OrderLimsService,
