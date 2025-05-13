@@ -1,11 +1,11 @@
 """cg module for cleaning databases and files."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import rich_click as click
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
@@ -25,17 +25,13 @@ from cg.cli.workflow.commands import (
     tower_past_run_dirs,
 )
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
-from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import FlowCellError, IlluminaCleanRunError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
 from cg.services.illumina.cleaning.clean_runs_service import IlluminaCleanRunsService
-from cg.store.models import Analysis
-from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
-from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path
 
 CHECK_COLOR = {True: "green", False: "red"}
@@ -172,87 +168,6 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
 
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)} GB. Dry run: {dry_run}")
-
-
-@clean.command("hk-bundle-files")
-@click.option("-c", "--case-id", type=str, required=False)
-@click.option("-w", "--workflow", type=Workflow, required=False)
-@click.option("-t", "--tags", multiple=True, required=True)
-@click.option("-o", "--days-old", type=int, default=30)
-@DRY_RUN
-@click.pass_obj
-def hk_bundle_files(
-    context: CGConfig,
-    case_id: str | None,
-    tags: list,
-    days_old: int | None,
-    workflow: Workflow | None,
-    dry_run: bool,
-):
-    """Remove files found in Housekeeper bundles."""
-
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    status_db: Store = context.status_db
-
-    date_threshold: datetime = get_date_days_ago(days_ago=days_old)
-
-    function_dispatcher: Dispatcher = Dispatcher(
-        functions=[
-            status_db.get_analyses_started_at_before,
-            status_db.get_analyses_for_case_and_workflow_started_at_before,
-            status_db.get_analyses_for_workflow_started_at_before,
-            status_db.get_analyses_for_case_started_at_before,
-        ],
-        input_dict={
-            "case_internal_id": case_id,
-            "workflow": workflow,
-            "started_at_before": date_threshold,
-        },
-    )
-    analyses: list[Analysis] = function_dispatcher()
-
-    size_cleaned: int = 0
-    for analysis in analyses:
-        LOG.info(f"Cleaning analysis {analysis}")
-        bundle_name: str = analysis.case.internal_id
-        hk_bundle_version: Version | None = housekeeper_api.version(
-            bundle=bundle_name, date=analysis.started_at
-        )
-        if not hk_bundle_version:
-            LOG.warning(
-                f"Version not found for "
-                f"bundle:{bundle_name}; "
-                f"workflow: {analysis.workflow}; "
-                f"date {analysis.started_at}"
-            )
-            continue
-
-        LOG.info(
-            f"Version found for "
-            f"bundle:{bundle_name}; "
-            f"workflow: {analysis.workflow}; "
-            f"date {analysis.started_at}"
-        )
-        version_files: list[File] = housekeeper_api.get_files(
-            bundle=analysis.case.internal_id, tags=tags, version=hk_bundle_version.id
-        ).all()
-        for version_file in version_files:
-            file_path: Path = Path(version_file.full_path)
-            if not file_path.exists():
-                LOG.info(f"File {file_path} not on disk.")
-                continue
-            LOG.info(f"File {file_path} found on disk.")
-            file_size = file_path.stat().st_size
-            size_cleaned += file_size
-            if dry_run:
-                continue
-
-            file_path.unlink()
-            housekeeper_api.delete_file(version_file.id)
-            housekeeper_api.commit()
-            LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
-
-    LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
 @clean.command("illumina-runs")
