@@ -45,8 +45,8 @@ class StoreTaxprofilerOrderService(StoreOrderService):
         order: TaxprofilerOrder,
     ) -> list[DbSample]:
         """Store samples in the StatusDB database."""
-        customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         new_samples = []
+        customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         db_order: DbOrder = self.status_db.add_order(
             customer=customer, ticket_id=order._generated_ticket_id
         )
@@ -94,9 +94,9 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             original_ticket=order._generated_ticket_id,
             priority=sample.priority,
         )
-        db_sample.customer = customer
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(sample.application)
         )
+        db_sample.customer = customer
         db_sample.application_version = application_version
         return db_sample
