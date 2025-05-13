@@ -6,7 +6,6 @@ Create Date: 2025-04-30 09:56:53.670128
 
 """
 
-import sqlalchemy
 import sqlalchemy as sa
 from sqlalchemy.orm import Session, declarative_base, mapped_column
 
@@ -26,7 +25,7 @@ class OrderTypeApplication(Base):
     """Maps an order type to its allowed applications"""
 
     __tablename__ = "order_type_application"
-    order_type = mapped_column(sqlalchemy.Enum(OrderType), primary_key=True)
+    order_type = mapped_column(sa.Enum(OrderType), primary_key=True)
 
 
 def upgrade():
