@@ -57,7 +57,9 @@ class StoreMetagenomeOrderService(StoreOrderService):
         )
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
-                db_case = self._create_db_case_for_sample(order=order, sample=sample, customer=customer)
+                db_case = self._create_db_case_for_sample(
+                    order=order, sample=sample, customer=customer
+                )
                 db_sample = self._create_db_sample(order=order, sample=sample, customer=customer)
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
@@ -69,7 +71,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         self.status_db.add_multiple_items_to_store(new_samples)
         self.status_db.commit_to_store()
         return new_samples
-    
+
     def _create_db_case_for_sample(
         self, order: OrderMetagenome, sample: SampleMetagenome, customer: Customer
     ) -> DbCase:
