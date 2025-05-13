@@ -10,9 +10,28 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session, declarative_base, mapped_column
 
 from alembic import op
-from cg.models.orders.constants import OrderType
 
 Base = declarative_base()
+
+order_types = [
+    "BALSAMIC_UMI",
+    "BALSAMIC",
+    "FASTQ",
+    "FLUFFY",
+    "METAGENOME",
+    "MICROBIAL_FASTQ",
+    "MICROSALT",
+    "MIP_DNA",
+    "MIP_RNA",
+    "NALLO",
+    "PACBIO_LONG_READ",
+    "RAREDISEASE",
+    "RML",
+    "RNAFUSION",
+    "SARS_COV_2",
+    "TAXPROFILER",
+    "TOMTE",
+]
 
 # revision identifiers, used by Alembic.
 revision = "8e0b9e03054d"
@@ -26,7 +45,7 @@ class OrderTypeApplication(Base):
 
     __tablename__ = "order_type_application"
 
-    order_type = mapped_column(sa.Enum(OrderType), primary_key=True)
+    order_type = mapped_column(sa.Enum(*order_types), primary_key=True)
     application_id = mapped_column(
         sa.ForeignKey("application.id", ondelete="CASCADE"), primary_key=True
     )
