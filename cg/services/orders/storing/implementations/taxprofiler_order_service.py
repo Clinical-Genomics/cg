@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, Sex
+from cg.constants.constants import Workflow
 from cg.models.orders.sample_base import PriorityEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -32,7 +33,7 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             customer=order.customer,
             ticket=order._generated_ticket_id,
             order_name=order.name,
-            workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            workflow=Workflow.TAXPROFILER,
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )

@@ -2,14 +2,13 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, Sex
+from cg.constants.constants import Workflow
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.order_types.metagenome.models.order import MetagenomeOrder
 from cg.services.orders.validation.order_types.metagenome.models.sample import MetagenomeSample
-from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
-from cg.services.orders.validation.order_types.taxprofiler.models.sample import TaxprofilerSample
 from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
 from cg.store.models import CaseSample, Customer
@@ -19,9 +18,6 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
-OrderMetagenome = MetagenomeOrder | TaxprofilerOrder
-SampleMetagenome = MetagenomeSample | TaxprofilerSample
-
 
 class StoreMetagenomeOrderService(StoreOrderService):
     """Storing service for Metagenome orders."""
@@ -30,14 +26,14 @@ class StoreMetagenomeOrderService(StoreOrderService):
         self.status_db = status_db
         self.lims = lims_service
 
-    def store_order(self, order: OrderMetagenome) -> dict:
+    def store_order(self, order: MetagenomeOrder) -> dict:
         """Submit a batch of metagenome samples."""
         project_data, lims_map = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
             ticket=order._generated_ticket_id,
             order_name=order.name,
-            workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            workflow=Workflow.RAW_DATA,
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
@@ -47,7 +43,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
 
     def store_order_data_in_status_db(
         self,
-        order: OrderMetagenome,
+        order: MetagenomeOrder,
     ) -> list[DbSample]:
         """Store samples in the StatusDB database."""
         customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
@@ -73,7 +69,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         return new_samples
 
     def _create_db_case_for_sample(
-        self, order: OrderMetagenome, sample: SampleMetagenome, customer: Customer
+        self, order: MetagenomeOrder, sample: MetagenomeSample, customer: Customer
     ) -> DbCase:
         """Return a Case database object for a sample."""
         ticket_id: str = str(order._generated_ticket_id)
@@ -89,7 +85,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         return db_case
 
     def _create_db_sample(
-        self, sample: SampleMetagenome, order: OrderMetagenome, customer: Customer
+        self, sample: MetagenomeSample, order: MetagenomeOrder, customer: Customer
     ) -> DbSample:
         db_sample: DbSample = self.status_db.add_sample(
             name=sample.name,
