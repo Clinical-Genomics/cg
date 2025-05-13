@@ -1,4 +1,6 @@
-from cg.services.orders.storing.implementations.taxprofiler_order_service import StoreTaxprofilerOrderService
+from cg.services.orders.storing.implementations.taxprofiler_order_service import (
+    StoreTaxprofilerOrderService,
+)
 import pytest
 
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -81,6 +83,7 @@ def store_microbial_fastq_order_service(
     return StoreMicrobialFastqOrderService(
         status_db=store_to_submit_and_validate_orders, lims_service=OrderLimsService(lims_api)
     )
+
 
 @pytest.fixture
 def store_taxprofiler_order_service(
