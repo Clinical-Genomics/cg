@@ -862,6 +862,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+            # TODO: Replace with self.update_analysis_as_completed_statusdb
             self.upload_bundle_statusdb(
                 case_id=case_id, comment=comment, dry_run=dry_run, force=force
             )

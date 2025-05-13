@@ -169,6 +169,7 @@ def store_housekeeper(
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        # TODO: Replace with analysis_api.update_analysis_as_completed_statusdb
         analysis_api.upload_bundle_statusdb(
             case_id=case_id, comment=comment, dry_run=dry_run, force=force
         )

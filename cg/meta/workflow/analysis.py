@@ -307,7 +307,7 @@ class AnalysisAPI(MetaAPI):
         """Update the created_at date of the latest analysis of a case."""
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis: Analysis | None = case.analyses[0]
+        analysis: Analysis | None = case.analyses[0]  # this gets the latest analysis
         analysis_completed: datetime = datetime.now()
         if not analysis:
             raise CgError(f"No analysis found for case {case_id}")
