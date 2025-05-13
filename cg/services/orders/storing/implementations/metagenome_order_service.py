@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, Sex
-from cg.models.orders.sample_base import PriorityEnum, StatusEnum
+from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
