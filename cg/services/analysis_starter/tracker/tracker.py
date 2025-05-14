@@ -9,7 +9,6 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
-from cg.models.cg_config import CommonAppConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -17,9 +16,7 @@ from cg.store.store import Store
 class Tracker(ABC):
     """Ensures tracking of started analyses. This mainly means exporting analyses to Trailblazer."""
 
-    def __init__(
-        self, store: Store, trailblazer_api: TrailblazerAPI, workflow_config: CommonAppConfig
-    ):
+    def __init__(self, store: Store, trailblazer_api: TrailblazerAPI, workflow_config):
         self.store = store
         self.trailblazer_api = trailblazer_api
         self.workflow_config = workflow_config
