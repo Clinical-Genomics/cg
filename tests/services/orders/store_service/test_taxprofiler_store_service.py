@@ -4,8 +4,6 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
-import pytest
-
 from cg.services.orders.storing.implementations.taxprofiler_order_service import (
     StoreTaxprofilerOrderService,
 )

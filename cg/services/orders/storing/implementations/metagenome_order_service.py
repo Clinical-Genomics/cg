@@ -4,7 +4,6 @@ from datetime import datetime
 from cg.constants import DataDelivery, Sex
 from cg.constants.constants import Workflow
 from cg.models.orders.sample_base import StatusEnum
-from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.order_types.metagenome.models.order import MetagenomeOrder
@@ -53,10 +52,12 @@ class StoreMetagenomeOrderService(StoreOrderService):
         )
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
-                db_case = self._create_db_case_for_sample(
+                db_case: DbCase = self._create_db_case_for_sample(
                     order=order, sample=sample, customer=customer
                 )
-                db_sample = self._create_db_sample(order=order, sample=sample, customer=customer)
+                db_sample: DbSample = self._create_db_sample(
+                    order=order, sample=sample, customer=customer
+                )
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
@@ -75,7 +76,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         ticket_id: str = str(order._generated_ticket_id)
         case_name: str = f"{sample.name}-{ticket_id}"
         db_case: DbCase = self.status_db.add_case(
-            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_analysis=Workflow.RAW_DATA,
             data_delivery=DataDelivery(order.delivery_type),
             name=case_name,
             priority=sample.priority,

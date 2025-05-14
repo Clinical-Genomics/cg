@@ -52,11 +52,13 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             customer=customer, ticket_id=order._generated_ticket_id
         )
         priority: PriorityEnum = order.samples[0].priority
-        db_case = self._create_db_case(order=order, customer=customer, priority=priority)
+        db_case: DbCase = self._create_db_case(order=order, customer=customer, priority=priority)
         db_order.cases.append(db_case)
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
-                db_sample = self._create_db_sample(order=order, sample=sample, customer=customer)
+                db_sample: DbSample = self._create_db_sample(
+                    order=order, sample=sample, customer=customer
+                )
                 new_relationship: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
@@ -72,7 +74,7 @@ class StoreTaxprofilerOrderService(StoreOrderService):
         self, order: TaxprofilerOrder, customer: Customer, priority: PriorityEnum
     ) -> DbCase:
         db_case: DbCase = self.status_db.add_case(
-            data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+            data_analysis=Workflow.TAXPROFILER,
             data_delivery=DataDelivery(order.delivery_type),
             name=str(order._generated_ticket_id),
             priority=priority,
