@@ -41,6 +41,7 @@ class FastqFetcher(InputFetcher):
         Raises:
             AnalysisNotReadyError if the FASTQ files are not ready to be analysed.
         """
+        LOG.info("Ensuring Fastq files are ready for analysis")
         self._ensure_files_are_present(case_id)
         self._resolve_decompression(case_id)
         if not self._are_fastq_files_ready_for_analysis(case_id):

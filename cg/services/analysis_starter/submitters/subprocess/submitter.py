@@ -1,13 +1,17 @@
+import logging
 import subprocess
 
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.commands import WORKFLOW_COMMAND_MAP
 
+LOG = logging.getLogger(__name__)
+
 
 class SubprocessSubmitter(Submitter):
-    def submit(self, case_config: CaseConfig):
+    def submit(self, case_config: CaseConfig) -> None:
         command: str = self._get_command(case_config)
+        LOG.info(f"Running: {command}")
         subprocess.run(
             args=command,
             shell=True,

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class MicrosaltConfigFileCreator:
 
@@ -22,6 +25,7 @@ class MicrosaltConfigFileCreator:
         self.store = store
 
     def create(self, case_id: str) -> None:
+        LOG.info(f"Creating microSALT config file for {case_id}")
         content: list[MicrosaltConfigContent] = self._get_content(case_id)
         content_adapter = TypeAdapter(list[MicrosaltConfigContent])
         config_case_path: Path = self.get_config_path(case_id)
