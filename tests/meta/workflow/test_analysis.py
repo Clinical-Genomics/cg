@@ -5,6 +5,7 @@ from unittest.mock import PropertyMock, create_autospec
 
 import mock
 import pytest
+from pytest import LogCaptureFixture
 from sqlalchemy.orm import Session
 
 from cg.apps.tb.api import TrailblazerAPI
@@ -15,6 +16,7 @@ from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
@@ -732,11 +734,15 @@ def config(
 
 
 def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
-    config: CGConfig, case_mock: Case, trailblazer_api_mock: TrailblazerAPI
+    config: CGConfig,
+    case_mock: Case,
+    trailblazer_api_mock: TrailblazerAPI,
+    caplog: LogCaptureFixture,
 ):
     # GIVEN
     analysis_api = MipDNAAnalysisAPI(workflow=Workflow.MIP_DNA, config=config)
     analysis_api.trailblazer_api = trailblazer_api_mock
+    caplog.set_level(logging.INFO)
 
     # WHEN
     analysis_api.on_analysis_started(case_mock.internal_id)
@@ -744,6 +750,23 @@ def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
     # THEN
     trailblazer_kwargs = trailblazer_api_mock.add_pending_analysis.call_args.kwargs
     assert trailblazer_kwargs["case_id"] == case_mock.internal_id
+    assert "Submitted case" in caplog.text
+
+
+def test_on_analysis_started_handles_failure_to_add_analysis_to_trailblazer(
+    config: CGConfig,
+    trailblazer_api_mock: TrailblazerAPI,
+    case_mock: Case,
+    caplog: LogCaptureFixture,
+):
+    analysis_api = FluffyAnalysisAPI(workflow=Workflow.FLUFFY, config=config)
+    analysis_api.trailblazer_api = trailblazer_api_mock
+
+    trailblazer_api_mock.add_pending_analysis.side_effect = Exception("Boom!")
+
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    assert "error: Boom!" in caplog.text
 
 
 def test_on_analysis_started_sets_the_case_action_to_running(config: CGConfig, case_mock: Case):

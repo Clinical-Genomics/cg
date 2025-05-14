@@ -76,14 +76,7 @@ def run(
     )
     if dry_run:
         return
-    # Submit analysis for tracking in Trailblazer
-    try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        LOG.info(f"Submitted case {case_id} to Trailblazer!")
-    except Exception as error:
-        LOG.warning(f"Unable to submit job file to Trailblazer, raised error: {error}")
-
-    analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    analysis_api.on_analysis_started(case_id)
 
 
 @fluffy.command()

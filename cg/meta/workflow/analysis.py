@@ -322,6 +322,7 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
+    # TODO: make private when all uses outside of AnalysisAPI are removed
     def add_pending_trailblazer_analysis(
         self,
         case_id: str,
@@ -782,7 +783,11 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def on_analysis_started(self, case_id: str):
-        self.add_pending_trailblazer_analysis(case_id=case_id)
+        try:
+            self.add_pending_trailblazer_analysis(case_id=case_id)
+            LOG.info(f"Submitted case {case_id} to Trailblazer")
+        except Exception as error:
+            LOG.warning(f"Unable to submit case to Trailblazer, raised error: {error}")
         self.set_statusdb_action(case_id=case_id, action="running")
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
