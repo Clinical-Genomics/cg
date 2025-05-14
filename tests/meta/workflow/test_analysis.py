@@ -1,13 +1,16 @@
 """Test for analysis"""
 
 import logging
+from unittest.mock import PropertyMock, create_autospec
 
 import mock
 import pytest
+from sqlalchemy.orm import Session
 
+from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import ControlOptions
+from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -15,8 +18,9 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Case, IlluminaSequencingRun, Sample
+from cg.store.models import Case, CaseSample, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -688,3 +692,68 @@ def test_get_trailblazer_priority(
 
     # THEN the expected trailblazer priority should be returned
     assert trailblazer_priority is expected_trailblazer_priority
+
+
+@pytest.fixture
+def case_mock() -> Case:
+    case_sample: CaseSample = create_autospec(CaseSample)
+    case_sample.sample = create_autospec(Sample)
+
+    case: Case = create_autospec(Case)
+    case.internal_id = "some_case_id"
+    case.links = [case_sample]
+    case.priority = Priority.standard
+    return case
+
+
+@pytest.fixture
+def status_db_mock(case_mock: Case) -> Store:
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = lambda internal_id: case_mock
+    store.session = PropertyMock(return_value=create_autospec(Session))
+    return store
+
+
+@pytest.fixture
+def trailblazer_api_mock() -> TrailblazerAPI:
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_api.is_latest_analysis_ongoing = lambda case_id: False
+    return trailblazer_api
+
+
+@pytest.fixture()
+def config(
+    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = status_db_mock
+    cg_config.trailblazer_api_ = trailblazer_api_mock
+    return cg_config
+
+
+def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
+    config: CGConfig, case_mock: Case, trailblazer_api_mock: TrailblazerAPI
+):
+    # GIVEN
+    analysis_api = MipDNAAnalysisAPI(workflow=Workflow.MIP_DNA, config=config)
+    analysis_api.trailblazer_api = trailblazer_api_mock
+
+    # WHEN
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    # THEN
+    trailblazer_kwargs = trailblazer_api_mock.add_pending_analysis.call_args.kwargs
+    assert trailblazer_kwargs["case_id"] == case_mock.internal_id
+
+
+def test_on_analysis_started_sets_the_case_action_to_running(config: CGConfig, case_mock: Case):
+    # GIVEN
+    analysis_api = MipDNAAnalysisAPI(workflow=Workflow.MIP_DNA, config=config)
+
+    case_mock.action = None
+
+    # WHEN
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    # THEN
+    assert case_mock.action == CaseActions.RUNNING

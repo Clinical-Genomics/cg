@@ -781,6 +781,10 @@ class AnalysisAPI(MetaAPI):
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
 
+    def on_analysis_started(self, case_id: str):
+        self.add_pending_trailblazer_analysis(case_id=case_id)
+        self.set_statusdb_action(case_id=case_id, action="running")
+
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """
         Return data analysis type carried out.
