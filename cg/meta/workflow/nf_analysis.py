@@ -577,6 +577,7 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError
 
         if not dry_run:
+            # TODO: Add analysis
             self.add_pending_trailblazer_analysis(
                 case_id=case_id,
                 tower_workflow_id=tower_workflow_id,

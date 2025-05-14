@@ -79,6 +79,7 @@ def run(
     # Submit analysis for tracking in Trailblazer
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+        # TODO: Add analysis
         LOG.info(f"Submitted case {case_id} to Trailblazer!")
     except Exception as error:
         LOG.warning(f"Unable to submit job file to Trailblazer, raised error: {error}")
