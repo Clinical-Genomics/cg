@@ -54,7 +54,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
@@ -607,7 +606,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        cluster_config: Path | None = None,
+        workflow_profile: Path | None = None,
+        run_interactively: bool = False,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -615,17 +615,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]
+        run_interactively = ["--run-interactively"] if run_interactively else []
         options = build_command_from_dict(
             {
                 "--account": self.account,
-                "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--cluster-config": cluster_config,
+                "--workflow-profile": workflow_profile,
             }
         )
-        parameters = command + options + run_analysis + benchmark
+        parameters = command + options + run_analysis + run_interactively
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
