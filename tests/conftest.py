@@ -2236,11 +2236,18 @@ def context_config(
         "tar": {"binary_path": "/bin/tar"},
         "trailblazer": {
             "host": "https://trailblazer.scilifelab.se/",
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
+            "keycloak_backend_user": "user",
+            "keycloak_backend_user_password": "password",
         },
         "arnold": {"api_url": "https://arnold.scilifelab.se/"},
         "janus": {"host": "https://janus.sys.scilifelab.se/"},
+        "keycloak": {
+            "server_url": "url",
+            "client_id": "cid",
+            "realm_name": "realm",
+            "client_secret_key": "secret",
+            "redirect_uri": "uri",
+        },
     }
 
 

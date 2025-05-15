@@ -9,7 +9,6 @@ class AppConfig(BaseSettings):
 
     # Gunicorn settings
     gunicorn_workers: int = 4
-    gunicorn_threads: int = 4
     gunicorn_bind: str = "0.0.0.0:8000"
     gunicorn_timeout: int = 400
 
@@ -29,11 +28,8 @@ class AppConfig(BaseSettings):
     support_system_email: str = "support@mail.com"
     email_uri: str = "smtp://localhost"
 
-    # Google OAuth settings
-    google_oauth_client_id: str = "client_id"
-    google_oauth_client_secret: str = "client_secret"
-
     # Trailblazer settings
+
     trailblazer_host: str = "trailblazer_host"
     trailblazer_service_account: str = "service_account"
     trailblazer_service_account_auth_file: str = "auth_file.json"
@@ -43,6 +39,15 @@ class AppConfig(BaseSettings):
     freshdesk_api_key: str = "freshdesk_api_key"
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
+
+    # Keycloak settings
+    keycloak_client_url: str = "keycloak_host"
+    keycloak_realm_name: str = "keycloak_realm"
+    keycloak_client_id: str = "keycloak_client_id"
+    keycloak_client_secret_key: str = "keycloak_client_secret"
+    keycloak_redirect_uri: str = "keycloak_redirect_uri"
+    keycloak_backend_user: str = "user"
+    keycloak_backend_user_password: str = "password"
 
 
 app_config = AppConfig()
