@@ -1,7 +1,9 @@
 """Test for analysis"""
 
 import logging
-from unittest.mock import PropertyMock, create_autospec
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import ANY, Mock, PropertyMock, create_autospec
 
 import mock
 import pytest
@@ -9,6 +11,7 @@ from pytest import LogCaptureFixture
 from sqlalchemy.orm import Session
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
@@ -16,13 +19,12 @@ from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Case, CaseSample, IlluminaSequencingRun, Sample
+from cg.store.models import Analysis, Case, CaseSample, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -696,6 +698,15 @@ def test_get_trailblazer_priority(
     assert trailblazer_priority is expected_trailblazer_priority
 
 
+# TODO: integrate these new fixtures with old tests in this module
+
+
+@pytest.fixture
+def patch_abstract_methods(mocker):
+    mocker.patch.object(AnalysisAPI, "get_job_ids_path", return_value=Path("/job/ids/path"))
+    mocker.patch.object(AnalysisAPI, "get_workflow_version", return_value="0.0.0.0")
+
+
 @pytest.fixture
 def case_mock() -> Case:
     case_sample: CaseSample = create_autospec(CaseSample)
@@ -724,8 +735,8 @@ def trailblazer_api_mock() -> TrailblazerAPI:
 
 
 @pytest.fixture()
-def config(
-    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI
+def analysis_config(
+    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI, fs
 ) -> CGConfig:
     cg_config = CGConfig(**context_config)
     cg_config.status_db_ = status_db_mock
@@ -733,50 +744,97 @@ def config(
     return cg_config
 
 
+@pytest.mark.usefixtures("patch_abstract_methods")
 def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
-    config: CGConfig,
+    analysis_config: CGConfig,
     case_mock: Case,
     trailblazer_api_mock: TrailblazerAPI,
     caplog: LogCaptureFixture,
 ):
-    # GIVEN
-    analysis_api = MipDNAAnalysisAPI(workflow=Workflow.MIP_DNA, config=config)
+    # GIVEN an analysis api with log level set to INFO
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
     analysis_api.trailblazer_api = trailblazer_api_mock
+
     caplog.set_level(logging.INFO)
 
-    # WHEN
+    # WHEN on_analysis is called
     analysis_api.on_analysis_started(case_mock.internal_id)
 
-    # THEN
-    trailblazer_kwargs = trailblazer_api_mock.add_pending_analysis.call_args.kwargs
-    assert trailblazer_kwargs["case_id"] == case_mock.internal_id
+    # THEN a pending analysis is added to trailblazer with the correct case_id
+    assert (
+        call_args := trailblazer_api_mock.add_pending_analysis.call_args
+    ), "Expected trailblazer_api.add_pending_analysis to have been called"
+    assert call_args.kwargs["case_id"] == case_mock.internal_id
     assert "Submitted case" in caplog.text
 
 
+@pytest.mark.usefixtures("patch_abstract_methods")
 def test_on_analysis_started_handles_failure_to_add_analysis_to_trailblazer(
-    config: CGConfig,
+    analysis_config: CGConfig,
     trailblazer_api_mock: TrailblazerAPI,
     case_mock: Case,
     caplog: LogCaptureFixture,
 ):
-    analysis_api = FluffyAnalysisAPI(workflow=Workflow.FLUFFY, config=config)
+    # GIVEN an analysis api attempts to create a trailblazer analysis, an exception is thrown
+    analysis_api = AnalysisAPI(workflow=Workflow.FLUFFY, config=analysis_config)
     analysis_api.trailblazer_api = trailblazer_api_mock
 
     trailblazer_api_mock.add_pending_analysis.side_effect = Exception("Boom!")
 
+    # WHEN on_analysis_started is called
     analysis_api.on_analysis_started(case_mock.internal_id)
 
+    # THEN the error is caught and logged
     assert "error: Boom!" in caplog.text
 
 
-def test_on_analysis_started_sets_the_case_action_to_running(config: CGConfig, case_mock: Case):
-    # GIVEN
-    analysis_api = MipDNAAnalysisAPI(workflow=Workflow.MIP_DNA, config=config)
+@pytest.mark.freeze_time
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_creates_an_analysis_in_status_db(
+    analysis_config: CGConfig,
+    case_mock: Case,
+    status_db_mock: Store,
+    trailblazer_api_mock: TrailblazerAPI,
+):
+    # GIVEN an analysis api can successfully create a trailblazer analysis
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
 
-    case_mock.action = None
+    new_trailblazer_analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis)
+    new_trailblazer_analysis.id = 123456789  # type: ignore
+    trailblazer_api_mock.add_pending_analysis = Mock(return_value=new_trailblazer_analysis)
 
-    # WHEN
+    new_analysis: Analysis = create_autospec(Analysis)
+    status_db_mock.add_analysis = Mock(return_value=new_analysis)
+
+    # WHEN on_analysis_started is called
     analysis_api.on_analysis_started(case_mock.internal_id)
 
-    # THEN
+    # THEN it creates an Analysis row in status db connected with:
+    #   - the trailblazer analysis id
+    #   - the given case
+    status_db_mock.add_analysis.assert_called_with(
+        workflow=Workflow.BALSAMIC,
+        trailblazer_id=new_trailblazer_analysis.id,
+        comment=ANY,
+        completed_at=None,
+        primary=True,
+        started_at=datetime.now(),
+        version=ANY,
+    )
+    status_db_mock.add_item_to_store.assert_called_with(new_analysis)
+    status_db_mock.commit_to_store.assert_called()
+    assert new_analysis.case == case_mock
+
+
+def test_on_analysis_started_sets_the_case_action_to_running(
+    analysis_config: CGConfig, case_mock: Case
+):
+    # GIVEN an analysis api and a case with action = None
+    analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+    case_mock.action = None
+
+    # WHEN on_analysis_started is called
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    # THEN the case action is set to RUNNING
     assert case_mock.action == CaseActions.RUNNING

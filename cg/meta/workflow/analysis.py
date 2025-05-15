@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -255,6 +256,7 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
+    # TODO: remove when it is no longer referenced anywhere
     def upload_bundle_statusdb(
         self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
     ) -> None:
@@ -279,23 +281,31 @@ class AnalysisAPI(MetaAPI):
         self.status_db.session.commit()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
-    def create_analysis_statusdb(
-        self, case_id: str, comment: str | None = None, dry_run: bool = False
+    def _create_analysis_statusdb(
+        self,
+        case_id: str,
+        comment: str | None = None,
+        dry_run: bool = False,
+        trailblazer_id: int | None = None,
     ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis_start: datetime.date = datetime.now()
+        case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
+        is_primary: bool = (len(case_obj.analyses) == 0) if case_obj else False
+
+        analysis_start: datetime = datetime.now()
         workflow_version: str = self.get_workflow_version(case_id)
         new_analysis: Analysis = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
             completed_at=None,
-            primary=(len(case_obj.analyses) == 0),
+            primary=is_primary,
             started_at=analysis_start,
             comment=comment,
+            trailblazer_id=trailblazer_id,
         )
-        new_analysis.case = case_obj
+        if case_obj:
+            new_analysis.case = case_obj
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
@@ -327,7 +337,7 @@ class AnalysisAPI(MetaAPI):
         self,
         case_id: str,
         tower_workflow_id: str | None = None,
-    ) -> None:
+    ) -> TrailblazerAnalysis:
         self.check_analysis_ongoing(case_id)
         analysis_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
@@ -341,7 +351,7 @@ class AnalysisAPI(MetaAPI):
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
-        self.trailblazer_api.add_pending_analysis(
+        return self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
@@ -783,12 +793,16 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def on_analysis_started(self, case_id: str):
+        trailblazer_analysis_id: int | None = None
         try:
-            self.add_pending_trailblazer_analysis(case_id=case_id)
+            if trailblazer_analysis := self.add_pending_trailblazer_analysis(case_id=case_id):
+                trailblazer_analysis_id = trailblazer_analysis.id
             LOG.info(f"Submitted case {case_id} to Trailblazer")
         except Exception as error:
             LOG.warning(f"Unable to submit case to Trailblazer, raised error: {error}")
+
         self.set_statusdb_action(case_id=case_id, action="running")
+        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis_id)
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """

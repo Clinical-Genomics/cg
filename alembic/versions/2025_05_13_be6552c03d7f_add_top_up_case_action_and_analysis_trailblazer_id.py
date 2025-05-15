@@ -18,8 +18,11 @@ depends_on = None
 
 
 def upgrade():
-    pass
+    op.add_column(
+        table_name="analysis",
+        column=sa.Column("trailblazer_id", sa.Integer(), nullable=True),
+    )
 
 
 def downgrade():
-    pass
+    op.drop_column(table_name="analysis", column_name="trailblazer_id")
