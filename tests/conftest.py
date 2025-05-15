@@ -2261,7 +2261,7 @@ def context_config(
     }
 
 
-@pytest.fixture(name="cg_context")
+@pytest.fixture
 def cg_context(
     context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
@@ -3062,7 +3062,10 @@ def raredisease_context(
         application_tag=wgs_application_tag,
         reference_genome=GenomeVersion.HG19,
     )
-
+    order = status_db.add_order(
+        customer=case_enough_reads.customer, ticket_id=int(case_enough_reads.latest_ticket)
+    )
+    case_enough_reads.orders.append(order)
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # GIVEN a genome build

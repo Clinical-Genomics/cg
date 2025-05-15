@@ -3,7 +3,7 @@ import pytest
 from cg.constants.constants import DataDelivery, Workflow
 from cg.constants.priority import Priority
 from cg.models.orders.sample_base import SexEnum, StatusEnum
-from cg.store.models import Application, Case, Customer, Organism, Sample
+from cg.store.models import Application, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -35,6 +35,8 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
     base_store.relate_sample(
         case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
     )
+    order: Order = base_store.add_order(customer=customer, ticket_id=1)
+    microsalt_case.orders.append(order)
     base_store.add_item_to_store(microsalt_case)
     base_store.add_item_to_store(microsalt_sample)
     base_store.commit_to_store()
