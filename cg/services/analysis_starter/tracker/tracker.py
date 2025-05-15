@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -12,6 +13,8 @@ from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class Tracker(ABC):
     """Ensures tracking of started analyses. This mainly means exporting analyses to Trailblazer."""
@@ -21,13 +24,16 @@ class Tracker(ABC):
         self.trailblazer_api = trailblazer_api
         self.workflow_config = workflow_config
 
+    def ensure_analysis_not_ongoing(self, case_id: str) -> None:
+        if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
+            LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
+            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+
     def track(
         self,
         case_id: str,
         tower_workflow_id: str | None = None,
     ) -> None:
-        if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
-            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
         analysis_type: str = self._get_analysis_type(case_id)
         config_path: Path = self._get_job_ids_path(case_id)
         email: str = environ_email()

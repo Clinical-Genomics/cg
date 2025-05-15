@@ -20,6 +20,7 @@ class AnalysisStarter:
 
     def start(self, case_id: str):
         """Fetches raw data, generates configuration files and runs the specified case."""
+        self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
         case_config: CaseConfig = self.configurator.configure(case_id)
         tower_workflow_id: str | None = self.submitter.submit(case_config)
@@ -27,6 +28,7 @@ class AnalysisStarter:
 
     def run(self, case_id: str):
         """Run a case using an assumed existing configuration."""
+        self.tracker.ensure_analysis_not_ongoing(case_id)
         case_config: CaseConfig = self.configurator.get_config(case_id)
         tower_workflow_id: str | None = self.submitter.submit(case_config)
         self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
