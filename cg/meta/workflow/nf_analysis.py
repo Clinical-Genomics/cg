@@ -130,7 +130,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(
+        self, case_id: str, dry_run: bool = False
+    ) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
@@ -348,7 +350,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create parameters file for a case."""
         LOG.debug("Getting parameters information built on-the-fly")
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
-            case_id=case_id
+            case_id=case_id, dry_run=dry_run
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 

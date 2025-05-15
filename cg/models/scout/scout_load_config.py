@@ -116,6 +116,7 @@ class ScoutLoadConfig(BaseModel):
     owner: Annotated[str | None, AfterValidator(field_not_none)] = None
     family: Annotated[str | None, AfterValidator(field_not_none)] = None
     family_name: str | None = None
+    status: str | None = None
     synopsis: str | None = None
     phenotype_terms: list[str] | None = None
     phenotype_groups: list[str] | None = None
