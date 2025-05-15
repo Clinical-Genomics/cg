@@ -44,6 +44,7 @@ class FastqHandler:
         self.status_db = status_db
 
     def link_fastq_files(self, case_id: str) -> None:
+        LOG.debug("Linking Fastq files")
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for sample in case.samples:
             fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)

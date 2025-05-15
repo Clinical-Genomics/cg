@@ -265,8 +265,8 @@ class MetaApis:
 
 
 class WorkflowManager(StrEnum):
-    Slurm: str = "slurm"
-    Tower: str = "nf_tower"
+    Slurm = "slurm"
+    Tower = "nf_tower"
 
 
 class Strandedness(StrEnum):
