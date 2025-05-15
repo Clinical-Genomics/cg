@@ -16,19 +16,8 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def nextflow_tracker(cg_context: CGConfig):
-    return NextflowTracker(
-        store=cg_context.status_db,
-        trailblazer_api=cg_context.trailblazer_api,
-        workflow_config=cg_context.raredisease,
-    )
-
-
-def test_nextflow_tracker(
-    nextflow_tracker: NextflowTracker, raredisease_case_id: str, helpers: StoreHelpers
-):
-    # GIVEN a raredisease case
-    store: Store = nextflow_tracker.store
+def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_case_id: str):
+    store: Store = cg_context.status_db
     customer: Customer = store.get_customers()[0]
     order: Order = store.add_order(customer=customer, ticket_id=1)
     store.add_item_to_store(order)
@@ -42,6 +31,17 @@ def test_nextflow_tracker(
     )
     store.add_multiple_items_to_store([case, sample, case_sample])
     store.commit_to_store()
+    return NextflowTracker(
+        store=cg_context.status_db,
+        trailblazer_api=cg_context.trailblazer_api,
+        workflow_config=cg_context.raredisease,
+    )
+
+
+def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id: str):
+    # GIVEN a raredisease case
+    case: Case = nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id)
+
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
         TrailblazerAPI, "query_trailblazer", return_value=None
