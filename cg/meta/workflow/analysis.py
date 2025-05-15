@@ -255,31 +255,6 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    # TODO: Remove this method when the analysis is stored in Housekeeper
-    def upload_bundle_statusdb(
-        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Storing an analysis bundle in StatusDB for a provided case."""
-        LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis_start: datetime.date = self.get_bundle_created_date(case_id)
-        workflow_version: str = self.get_workflow_version(case_id)
-        new_analysis: Analysis = self.status_db.add_analysis(
-            workflow=self.workflow,
-            version=workflow_version,
-            completed_at=datetime.now() if not force else None,
-            primary=(len(case_obj.analyses) == 0),
-            started_at=analysis_start,
-            comment=comment,
-        )
-        new_analysis.case = case_obj
-        if dry_run:
-            LOG.info("Dry-run: StatusDB changes will not be commited")
-            return
-        self.status_db.session.add(new_analysis)
-        self.status_db.session.commit()
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
-
     def create_analysis_statusdb(self, case_id: str) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
