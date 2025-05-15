@@ -303,7 +303,7 @@ class AnalysisAPI(MetaAPI):
     ) -> None:
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis: Analysis | None = case.analyses[0]  # this gets the latest analysis
+        analysis: Analysis | None = case.analyses[0] if case.analyses else None
         if not analysis:
             raise CgError(f"No analysis found for case {case_id}")
         if dry_run:
