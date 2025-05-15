@@ -39,9 +39,6 @@ class NalloUploadAPI(UploadAPI):
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
 
-        # Upload to loqusdb
-        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
-
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
 

@@ -90,6 +90,7 @@ class NalloObservationsAPI(ObservationsAPI):
             gq_threshold=NalloLoadParameters.GQ_THRESHOLD.value,
             hard_threshold=NalloLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=NalloLoadParameters.SOFT_THRESHOLD.value,
+            snv_gq_only=NalloLoadParameters.SNV_GQ_ONLY.value,
         )
         loqusdb_id = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)

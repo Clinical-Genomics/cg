@@ -80,8 +80,8 @@ class MipDNAObservationsAnalysisTag(StrEnum):
 class NalloObservationsAnalysisTag(StrEnum):
     """Nallo observations files analysis tags."""
 
-    SNV_VCF = "vcf-snv-clinical"
-    SV_VCF = "vcf-sv-clinical"
+    SNV_VCF = "vcf-snv-research"
+    SV_VCF = "vcf-sv-research"
     FAMILY_PED = "pedigree"
 
 
@@ -92,6 +92,7 @@ class NalloLoadParameters(Enum):
     GQ_THRESHOLD = 10
     HARD_THRESHOLD = 0.95
     SOFT_THRESHOLD = 0.90
+    SNV_GQ_ONLY = True
 
 
 class ObservationsFileWildcards(StrEnum):
