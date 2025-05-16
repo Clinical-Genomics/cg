@@ -734,7 +734,7 @@ def trailblazer_api_mock() -> TrailblazerAPI:
 
 @pytest.fixture()
 def analysis_config(
-    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI, fs
+    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI
 ) -> CGConfig:
     cg_config = CGConfig(**context_config)
     cg_config.status_db_ = status_db_mock
