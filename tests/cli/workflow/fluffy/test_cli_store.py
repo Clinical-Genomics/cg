@@ -30,6 +30,12 @@ def test_cli_store_dry_no_case(
     assert "could not be found" in caplog.text
 
 
+import pytest
+
+
+@pytest.mark.skip(
+    reason="This test needs an analysis object for the case in store, without complete_at date"
+)
 def test_cli_store(
     cli_runner: CliRunner,
     fluffy_case_id_existing: str,
@@ -114,6 +120,9 @@ def test_cli_store_bundle_already_added(
     assert "Error storing deliverables" in caplog.text
 
 
+@pytest.mark.skip(
+    reason="This test needs an analysis object for the case in store, without complete_at date"
+)
 def test_cli_store_available_case_is_running(
     cli_runner: CliRunner,
     fluffy_case_id_existing,

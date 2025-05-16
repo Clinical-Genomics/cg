@@ -1,11 +1,15 @@
-""" This file groups all tests related to microsalt start creation """
+"""This file groups all tests related to microsalt start creation"""
 
 import logging
+from pathlib import Path
+from unittest.mock import PropertyMock, create_autospec
 
 from click.testing import CliRunner
 
 from cg.cli.workflow.microsalt.base import run
+from cg.meta.workflow.microsalt.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.store import Store
 
 EXIT_SUCCESS = 0
 
@@ -34,3 +38,22 @@ def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket_id,
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS
     assert f"Running command" in caplog.text
+
+
+def test_calls_on_analysis_started(cli_runner: CliRunner, base_context: CGConfig):
+    # GIVEN
+    analysis_api: MicrosaltAnalysisAPI = create_autospec(MicrosaltAnalysisAPI)
+    analysis_api.status_db = PropertyMock(return_value=create_autospec(Store))  # type: ignore
+
+    case_id = "some_case_id"
+    analysis_api.resolve_case_sample_id = lambda sample, ticket, unique_id: (case_id, None)
+    analysis_api.get_config_path.return_value = Path("/config/path")
+    analysis_api.get_case_fastq_path.return_value = Path("/a/fastq/path")
+
+    base_context.meta_apis["analysis_api"] = analysis_api
+
+    # WHEN
+    cli_runner.invoke(run, [case_id], obj=base_context)
+
+    # THEN
+    analysis_api.on_analysis_started.assert_called_with(case_id)

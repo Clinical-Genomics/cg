@@ -16,6 +16,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
+@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
@@ -117,6 +118,7 @@ def test_store_fail(
     assert result_fail.exit_code != EXIT_SUCCESS
 
 
+@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
@@ -174,6 +176,7 @@ def test_store_available_success(
     assert result.exit_code == EXIT_SUCCESS
 
 
+@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],

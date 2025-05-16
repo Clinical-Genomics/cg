@@ -284,11 +284,11 @@ class CreateHandler(BaseHandler):
     def add_analysis(
         self,
         workflow: Workflow,
-        version: str = None,
-        completed_at: datetime = None,
+        version: str | None = None,
+        completed_at: datetime | None = None,
         primary: bool = False,
-        uploaded: datetime = None,
-        started_at: datetime = None,
+        uploaded: datetime | None = None,
+        started_at: datetime | None = None,
         comment: str | None = None,
         **kwargs,
     ) -> Analysis:
