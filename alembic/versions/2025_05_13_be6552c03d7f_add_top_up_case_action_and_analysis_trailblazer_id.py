@@ -36,6 +36,10 @@ class Case(Base):
 
 
 def upgrade():
+    op.add_column(
+        table_name="analysis",
+        column=sa.Column("trailblazer_id", sa.Integer(), nullable=True),
+    )
     op.alter_column(
         table_name="case",
         column_name="action",
@@ -46,10 +50,10 @@ def upgrade():
 
 
 def downgrade():
-    # Remove incompatible entries
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
+    # Remove incompatible entries
     for case in session.query(Case).filter(Case.action == "top-up"):
         case.action = "running"
 
@@ -62,3 +66,5 @@ def downgrade():
         type_=sa.Enum(*old_case_actions),
         nullable=True,
     )
+
+    op.drop_column(table_name="analysis", column_name="trailblazer_id")

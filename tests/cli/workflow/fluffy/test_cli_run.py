@@ -1,8 +1,12 @@
+from unittest.mock import PropertyMock, create_autospec
+
 from click.testing import CliRunner
 
 from cg.cli.workflow.fluffy.base import run
 from cg.constants import EXIT_SUCCESS
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.store import Store
 
 
 def test_cli_run_dry(
@@ -61,3 +65,17 @@ def test_cli_run(
 
     # THEN log informs about the analysis being tracked in Trailblazer
     assert "Trailblazer" in caplog.text
+
+
+def test_calls_on_analysis_started(cli_runner: CliRunner, fluffy_context: CGConfig):
+    # GIVEN
+    analysis_api: FluffyAnalysisAPI = create_autospec(FluffyAnalysisAPI)
+    analysis_api.status_db = PropertyMock(return_value=create_autospec(Store))  # type: ignore
+    fluffy_context.meta_apis["analysis_api"] = analysis_api
+    case_id = "some_case_id"
+
+    # WHEN
+    cli_runner.invoke(run, [case_id], obj=fluffy_context)
+
+    # THEN
+    analysis_api.on_analysis_started.assert_called_with(case_id)

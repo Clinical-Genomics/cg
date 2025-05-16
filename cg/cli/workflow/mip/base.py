@@ -139,9 +139,7 @@ def run(
         return
 
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.create_analysis_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.on_analysis_started(case_id=case_id)
         LOG.info(f"{analysis_api.workflow} run started!")
     except CgError as error:
         LOG.error(error)

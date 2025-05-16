@@ -53,9 +53,8 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
     analysis_api: MutantAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
     if not dry_run:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.create_analysis_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.on_analysis_started(case_id=case_id)
+
     try:
         analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, config_artic=config_artic)
     except:
