@@ -747,23 +747,30 @@ def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
     analysis_config: CGConfig,
     case_mock: Case,
     trailblazer_api_mock: TrailblazerAPI,
-    caplog: LogCaptureFixture,
 ):
-    # GIVEN an analysis api with log level set to INFO
+    # GIVEN an analysis api with a reference to the trailblazer api
     analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
     analysis_api.trailblazer_api = trailblazer_api_mock
-
-    caplog.set_level(logging.INFO)
+    tower_id = "some_tower_id"
 
     # WHEN on_analysis is called
-    analysis_api.on_analysis_started(case_mock.internal_id)
+    analysis_api.on_analysis_started(case_id=case_mock.internal_id, tower_workflow_id=tower_id)
 
     # THEN a pending analysis is added to trailblazer with the correct case_id
-    assert (
-        call_args := trailblazer_api_mock.add_pending_analysis.call_args
-    ), "Expected trailblazer_api.add_pending_analysis to have been called"
-    assert call_args.kwargs["case_id"] == case_mock.internal_id
-    assert "Submitted case" in caplog.text
+    trailblazer_api_mock.add_pending_analysis.assert_called_with(
+        case_id=case_mock.internal_id,
+        tower_workflow_id=tower_id,
+        analysis_type=ANY,
+        config_path=ANY,
+        email=ANY,
+        is_hidden=False,
+        order_id=ANY,
+        out_dir=ANY,
+        priority=ANY,
+        ticket=ANY,
+        workflow=Workflow.BALSAMIC,
+        workflow_manager=ANY,
+    )
 
 
 @pytest.mark.usefixtures("patch_abstract_methods")

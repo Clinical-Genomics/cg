@@ -567,7 +567,6 @@ class NfAnalysisAPI(AnalysisAPI):
                 use_nextflow=use_nextflow,
                 dry_run=dry_run,
             )
-            self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run)
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
@@ -578,13 +577,8 @@ class NfAnalysisAPI(AnalysisAPI):
             LOG.error(f"Could not run analysis: {error}")
             raise CgError
 
-        if not dry_run:
-            # self.add_pending_trailblazer_analysis(
-            #     case_id=case_id,
-            #     tower_workflow_id=tower_workflow_id,
-            # )
-            # TODO: add tower_workflow_id needs to be sent to trailblazer again
-            self.on_analysis_started(case_id=case_id)
+        # TODO: pass on dry_run parameter
+        self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
 
     def run_analysis(
         self,

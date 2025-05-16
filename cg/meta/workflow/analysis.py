@@ -256,7 +256,7 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int) -> None:
+    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
@@ -769,10 +769,12 @@ class AnalysisAPI(MetaAPI):
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
 
-    def on_analysis_started(self, case_id: str):
+    def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
         trailblazer_analysis_id: int | None = None
         try:
-            if trailblazer_analysis := self.add_pending_trailblazer_analysis(case_id=case_id):
+            if trailblazer_analysis := self.add_pending_trailblazer_analysis(
+                case_id=case_id, tower_workflow_id=tower_workflow_id
+            ):
                 trailblazer_analysis_id = trailblazer_analysis.id
             LOG.info(f"Submitted case {case_id} to Trailblazer")
         except Exception as error:
