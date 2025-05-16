@@ -6,12 +6,7 @@ from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import (
-    CaseActions,
-    DataDelivery,
-    SequencingQCStatus,
-    Workflow,
-)
+from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
@@ -114,6 +109,8 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
             ),
+            # Production will have to manually set a case to top-up in status-db
+            and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
         )
     )
 
