@@ -279,7 +279,11 @@ class AnalysisAPI(MetaAPI):
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
     def update_analysis_statusdb(
-        self, case_id: str, comment: str | None = None, dry_run: bool = False
+        self,
+        case_id: str,
+        comment: str | None = None,
+        dry_run: bool = False,
+        force: bool = False,
     ) -> None:
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -289,17 +293,18 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.update_analysis_as_completed(analysis_id=analysis.id)
-        self.update_analysis_comment(analysis_id=analysis.id, comment=comment)
+        if not force:
+            self._update_analysis_as_completed(analysis_id=analysis.id)
+        self._update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
-    def update_analysis_as_completed(self, analysis_id: int) -> None:
+    def _update_analysis_as_completed(self, analysis_id: int) -> None:
         """Update the created_at date of the latest analysis of a case."""
         analysis_completed: datetime = datetime.now()
         self.status_db.update_analysis_completed_at(
             analysis_id=analysis_id, completed_at=analysis_completed
         )
 
-    def update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
+    def _update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
         """Update the comment of the latest analysis of a case."""
         self.status_db.update_analysis_comment(analysis_id=analysis_id, comment=comment)
 
