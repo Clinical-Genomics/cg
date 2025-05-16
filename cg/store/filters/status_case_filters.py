@@ -99,17 +99,15 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
+            # Existing data or data retrieved from DDN
             Case.action == CaseActions.ANALYZE,
+            # Data just demultiplexed (new data or data retrieved from PDC)
             and_(
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
             ),
-            and_(
-                Case.action.is_(None),
-                Analysis.created_at < Sample.last_sequenced_at,
-            ),
-            # Production will have to manually set a case to top-up in status-db
+            # Cases manually set to top-up by production that get the new data
             and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
         )
     )
