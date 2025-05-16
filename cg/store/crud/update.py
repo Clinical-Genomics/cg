@@ -99,6 +99,12 @@ class UpdateHandler(BaseHandler):
         analysis.completed_at = completed_at
         self.session.commit()
 
+    def update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
+        """Update the comment field of an analysis appending the new comment over any existing."""
+        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis.comment = f"{analysis.comment}\n{comment}" if analysis.comment else comment
+        self.session.commit()
+
     def update_analysis_uploaded_at(self, analysis_id: int, uploaded_at: datetime | None) -> None:
         """Update the uploaded at field of an analysis."""
         analysis = self.get_analysis_by_entry_id(analysis_id)

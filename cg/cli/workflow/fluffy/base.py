@@ -76,6 +76,7 @@ def run(
     )
     if dry_run:
         return
+
     analysis_api.on_analysis_started(case_id)
 
 

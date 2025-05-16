@@ -256,38 +256,7 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    # TODO: remove when it is no longer referenced anywhere
-    def upload_bundle_statusdb(
-        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Storing an analysis bundle in StatusDB for a provided case."""
-        LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis_start: datetime.date = self.get_bundle_created_date(case_id)
-        workflow_version: str = self.get_workflow_version(case_id)
-        new_analysis: Analysis = self.status_db.add_analysis(
-            workflow=self.workflow,
-            version=workflow_version,
-            completed_at=datetime.now() if not force else None,
-            primary=(len(case_obj.analyses) == 0),
-            started_at=analysis_start,
-            comment=comment,
-        )
-        new_analysis.case = case_obj
-        if dry_run:
-            LOG.info("Dry-run: StatusDB changes will not be commited")
-            return
-        self.status_db.session.add(new_analysis)
-        self.status_db.session.commit()
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
-
-    def _create_analysis_statusdb(
-        self,
-        case_id: str,
-        comment: str | None = None,
-        dry_run: bool = False,
-        trailblazer_id: int | None = None,
-    ) -> None:
+    def create_analysis_statusdb(self, case_id: str) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
@@ -313,18 +282,30 @@ class AnalysisAPI(MetaAPI):
         self.status_db.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
-    def update_analysis_as_completed_statusdb(self, case_id: str) -> None:
-        """Update the created_at date of the latest analysis of a case."""
+    def update_analysis_statusdb(
+        self, case_id: str, comment: str | None = None, dry_run: bool = False
+    ) -> None:
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis: Analysis | None = case.analyses[0]  # this gets the latest analysis
-        analysis_completed: datetime = datetime.now()
+        analysis: Analysis | None = case.analyses[0] if case.analyses else None
         if not analysis:
             raise CgError(f"No analysis found for case {case_id}")
+        if dry_run:
+            LOG.info("Dry-run: StatusDB changes will not be commited")
+            return
+        self.update_analysis_as_completed(analysis_id=analysis.id)
+        self.update_analysis_comment(analysis_id=analysis.id, comment=comment)
+
+    def update_analysis_as_completed(self, analysis_id: int) -> None:
+        """Update the created_at date of the latest analysis of a case."""
+        analysis_completed: datetime = datetime.now()
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=analysis_completed
+            analysis_id=analysis_id, completed_at=analysis_completed
         )
-        LOG.info(f"Analysis for {case_id} successfully marked as completed at {analysis_completed}")
+
+    def update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
+        """Update the comment of the latest analysis of a case."""
+        self.status_db.update_analysis_comment(analysis_id=analysis_id, comment=comment)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         raise NotImplementedError
