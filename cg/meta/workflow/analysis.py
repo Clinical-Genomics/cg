@@ -410,7 +410,7 @@ class AnalysisAPI(MetaAPI):
         if action in [None, *CaseActions.actions()]:
             case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case.action = action
-            self.status_db.session.commit()
+            self.status_db.commit_to_store()
             LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(

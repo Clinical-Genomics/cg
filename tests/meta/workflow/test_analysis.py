@@ -8,7 +8,6 @@ from unittest.mock import ANY, Mock, PropertyMock, create_autospec
 import mock
 import pytest
 from pytest import LogCaptureFixture
-from sqlalchemy.orm import Session
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -723,7 +722,6 @@ def case_mock() -> Case:
 def status_db_mock(case_mock: Case) -> Store:
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = lambda internal_id: case_mock
-    store.session = PropertyMock(return_value=create_autospec(Session))
     return store
 
 
@@ -827,7 +825,7 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
 
 
 def test_on_analysis_started_sets_the_case_action_to_running(
-    analysis_config: CGConfig, case_mock: Case
+    analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
 ):
     # GIVEN an analysis api and a case with action = None
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
@@ -838,3 +836,4 @@ def test_on_analysis_started_sets_the_case_action_to_running(
 
     # THEN the case action is set to RUNNING
     assert case_mock.action == CaseActions.RUNNING
+    status_db_mock.commit_to_store.assert_called()
