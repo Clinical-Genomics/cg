@@ -579,11 +579,12 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError
 
         if not dry_run:
-            self.add_pending_trailblazer_analysis(
-                case_id=case_id,
-                tower_workflow_id=tower_workflow_id,
-            )
-            self.create_analysis_statusdb(case_id=case_id)
+            # self.add_pending_trailblazer_analysis(
+            #     case_id=case_id,
+            #     tower_workflow_id=tower_workflow_id,
+            # )
+            # TODO: add tower_workflow_id needs to be sent to trailblazer again
+            self.on_analysis_started(case_id=case_id)
 
     def run_analysis(
         self,

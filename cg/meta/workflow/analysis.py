@@ -256,7 +256,7 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def create_analysis_statusdb(self, case_id: str) -> None:
+    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
@@ -270,14 +270,10 @@ class AnalysisAPI(MetaAPI):
             completed_at=None,
             primary=is_primary,
             started_at=analysis_start,
-            comment=comment,
             trailblazer_id=trailblazer_id,
         )
         if case_obj:
             new_analysis.case = case_obj
-        if dry_run:
-            LOG.info("Dry-run: StatusDB changes will not be commited")
-            return
         self.status_db.add_item_to_store(new_analysis)
         self.status_db.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")

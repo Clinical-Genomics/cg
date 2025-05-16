@@ -813,7 +813,6 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
     status_db_mock.add_analysis.assert_called_with(
         workflow=Workflow.BALSAMIC,
         trailblazer_id=new_trailblazer_analysis.id,
-        comment=ANY,
         completed_at=None,
         primary=True,
         started_at=datetime.now(),
