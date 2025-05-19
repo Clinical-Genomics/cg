@@ -11,7 +11,7 @@ class MicrosaltTracker(Tracker):
     def _workflow_manager(self) -> WorkflowManager:
         return WorkflowManager.Slurm
 
-    def _get_job_ids_path(self, case_id) -> Path:
+    def _get_job_ids_path(self, case_id: str) -> Path:
         project_id: str = self._get_project_id(case_id)
         job_ids_path = Path(
             self.workflow_config.root,
