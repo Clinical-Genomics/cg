@@ -141,8 +141,8 @@ def run(
     try:
         analysis_api.on_analysis_started(case_id=case_id)
         LOG.info(f"{analysis_api.workflow} run started!")
-    except CgError as error:
-        LOG.error(error)
+    except Exception as error:
+        LOG.error(f"Database error, unable to update analysis for case {case_id}: {error}")
         raise click.Abort
 
 

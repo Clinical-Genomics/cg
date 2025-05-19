@@ -73,8 +73,7 @@ def test_mip_run(
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
-    mocker.patch.object(MipDNAAnalysisAPI, "add_pending_trailblazer_analysis")
-    MipDNAAnalysisAPI.add_pending_trailblazer_analysis.return_value = True
+    mocker.patch.object(MipDNAAnalysisAPI, "on_analysis_started")
 
     # GIVEN that the case has a QC sample info file
     mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")

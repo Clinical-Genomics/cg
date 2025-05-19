@@ -333,7 +333,7 @@ class AnalysisAPI(MetaAPI):
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
-        return self.trailblazer_api.add_pending_analysis(
+        tb_analysis: TrailblazerAnalysis = self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
@@ -347,6 +347,8 @@ class AnalysisAPI(MetaAPI):
             tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
+        LOG.info(f"Submitted case {case_id} to Trailblazer")
+        return tb_analysis
 
     def _is_case_for_development(self, case_id: str) -> bool:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -390,10 +392,8 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CaseActions.actions()]:
-            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case.action = action
-            self.status_db.commit_to_store()
-            LOG.info("Action %s set for case %s", action, case_id)
+            self.status_db.update_case_action(action=action, case_internal_id=case_id)
+            LOG.info(f"Action '{action}' set for case {case_id}")
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
@@ -776,17 +776,13 @@ class AnalysisAPI(MetaAPI):
 
     def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
         trailblazer_analysis_id: int | None = None
-        try:
-            if trailblazer_analysis := self.add_pending_trailblazer_analysis(
-                case_id=case_id, tower_workflow_id=tower_workflow_id
-            ):
-                trailblazer_analysis_id = trailblazer_analysis.id
-            LOG.info(f"Submitted case {case_id} to Trailblazer")
-        except Exception as error:
-            LOG.warning(f"Unable to submit case to Trailblazer, raised error: {error}")
+        if trailblazer_analysis := self.add_pending_trailblazer_analysis(
+            case_id=case_id, tower_workflow_id=tower_workflow_id
+        ):
+            trailblazer_analysis_id = trailblazer_analysis.id
 
-        self.set_statusdb_action(case_id=case_id, action="running")
         self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis_id)
+        self.set_statusdb_action(case_id=case_id, action="running")
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """

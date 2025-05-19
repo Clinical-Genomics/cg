@@ -117,9 +117,6 @@ def run(
         if dry_run:
             return
         analysis_api.on_analysis_started(case_id)
-    except CgError as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()

@@ -314,7 +314,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert action is None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
     # Then the action should be set to analyze

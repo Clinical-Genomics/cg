@@ -567,6 +567,8 @@ class NfAnalysisAPI(AnalysisAPI):
                 use_nextflow=use_nextflow,
                 dry_run=dry_run,
             )
+            if not dry_run:
+                self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
@@ -576,9 +578,6 @@ class NfAnalysisAPI(AnalysisAPI):
         except CgError as error:
             LOG.error(f"Could not run analysis: {error}")
             raise CgError
-
-        # TODO: pass on dry_run parameter
-        self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
 
     def run_analysis(
         self,

@@ -773,26 +773,6 @@ def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
     )
 
 
-@pytest.mark.usefixtures("patch_abstract_methods")
-def test_on_analysis_started_handles_failure_to_add_analysis_to_trailblazer(
-    analysis_config: CGConfig,
-    trailblazer_api_mock: TrailblazerAPI,
-    case_mock: Case,
-    caplog: LogCaptureFixture,
-):
-    # GIVEN an analysis api attempts to create a trailblazer analysis, an exception is thrown
-    analysis_api = AnalysisAPI(workflow=Workflow.FLUFFY, config=analysis_config)
-    analysis_api.trailblazer_api = trailblazer_api_mock
-
-    trailblazer_api_mock.add_pending_analysis.side_effect = Exception("Boom!")
-
-    # WHEN on_analysis_started is called
-    analysis_api.on_analysis_started(case_mock.internal_id)
-
-    # THEN the error is caught and logged
-    assert "error: Boom!" in caplog.text
-
-
 @pytest.mark.freeze_time
 @pytest.mark.usefixtures("patch_abstract_methods")
 def test_on_analysis_started_creates_an_analysis_in_status_db(
@@ -826,10 +806,13 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
         version=ANY,
     )
     status_db_mock.add_item_to_store.assert_called_with(new_analysis)
-    status_db_mock.commit_to_store.assert_called()
+    status_db_mock.update_case_action.assert_called_with(
+        action=CaseActions.RUNNING, case_internal_id=case_mock.internal_id
+    )
     assert new_analysis.case == case_mock
 
 
+@pytest.mark.usefixtures("patch_abstract_methods")
 def test_on_analysis_started_sets_the_case_action_to_running(
     analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
 ):
@@ -841,5 +824,6 @@ def test_on_analysis_started_sets_the_case_action_to_running(
     analysis_api.on_analysis_started(case_mock.internal_id)
 
     # THEN the case action is set to RUNNING
-    assert case_mock.action == CaseActions.RUNNING
-    status_db_mock.commit_to_store.assert_called()
+    status_db_mock.update_case_action.assert_called_with(
+        action=CaseActions.RUNNING, case_internal_id=case_mock.internal_id
+    )

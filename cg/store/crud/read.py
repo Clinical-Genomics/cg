@@ -1123,14 +1123,6 @@ class ReadHandler(BaseHandler):
         ]
         return cases_to_analyze[:limit]
 
-    def set_case_action(
-        self, action: Literal[CaseActions.actions()], case_internal_id: str
-    ) -> None:
-        """Sets the action of provided cases to None or the given action."""
-        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
-        case.action = action
-        self.session.commit()
-
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: list[CaseFilter] = [

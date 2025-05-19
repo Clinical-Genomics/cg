@@ -63,9 +63,6 @@ def test_cli_run(
     # THEN log informs about process running
     assert "Running command" in caplog.text
 
-    # THEN log informs about the analysis being tracked in Trailblazer
-    assert "Trailblazer" in caplog.text
-
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, fluffy_context: CGConfig):
     # GIVEN

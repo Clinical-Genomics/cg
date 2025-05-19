@@ -1,11 +1,12 @@
 """Handler to update data objects"""
 
 from datetime import datetime
+from typing import Literal
 
 from sqlalchemy.orm import Session
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import SequencingQCStatus
+from cg.constants.constants import CaseActions, SequencingQCStatus
 from cg.constants.sequencing import Sequencers
 from cg.services.illumina.post_processing.utils import get_q30_threshold
 from cg.store.base import BaseHandler
@@ -59,6 +60,12 @@ class UpdateHandler(BaseHandler):
     def update_sequencing_qc_status(self, case: Case, status: SequencingQCStatus) -> None:
         case.aggregated_sequencing_qc = status
         self.session.commit()
+
+    def update_case_action(self, action: CaseActions, case_internal_id: str) -> None:
+        """Sets the action of provided cases to None or the given action."""
+        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case.action = action
+        self.commit_to_store()
 
     def update_sample_reads_illumina(self, internal_id: str, sequencer_type: Sequencers):
         sample: Sample = self.get_sample_by_internal_id(internal_id)
