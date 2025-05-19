@@ -24,10 +24,10 @@ class CleanAPI:
 
         analysis: Analysis
         LOG.debug(
-            f"number of {workflow} analyses before: {before} : {len(self.status_db.get_analyses_for_workflow_started_at_before(workflow=workflow, started_at_before=before))}"
+            f"number of {workflow} analyses before: {before} : {len(self.status_db.get_completed_analyses_for_workflow_started_at_before(workflow=workflow, started_at_before=before))}"
         )
 
-        for analysis in self.status_db.get_analyses_for_workflow_started_at_before(
+        for analysis in self.status_db.get_completed_analyses_for_workflow_started_at_before(
             workflow=workflow, started_at_before=before
         ):
             bundle_name = analysis.case.internal_id

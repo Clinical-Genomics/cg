@@ -119,7 +119,7 @@ def get_report_analysis_started_at(
             .started_at
         )
     # If there is no analysis for the provided date
-    if not report_api.status_db.get_analysis_by_case_entry_id_and_started_at(
+    if not report_api.status_db.get_completed_analysis_by_case_entry_id_and_started_at(
         case_entry_id=case.id, started_at_date=analysis_started_at
     ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
