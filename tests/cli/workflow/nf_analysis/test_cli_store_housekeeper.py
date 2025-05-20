@@ -1,6 +1,7 @@
 """Tests CLI common methods to store deliverable files into Housekeeper for NF analyses."""
 
 import logging
+from unittest.mock import ANY
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -16,6 +17,7 @@ from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import WriteStream
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from cg.utils import Process
@@ -135,19 +137,17 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
     assert "Could not store bundle in Housekeeper and StatusDB" in caplog.text
 
 
-@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
+@pytest.mark.usefixtures("housekeeper_api", "workflow_version")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_store_housekeeper_valid_case(
-    cli_runner,
+    cli_runner: CliRunner,
     workflow: Workflow,
-    mocker,
     caplog: LogCaptureFixture,
-    workflow_version: str,
-    housekeeper_api: HousekeeperAPI,
     request: FixtureRequest,
+    mocker,
 ):
     """Test store-housekeeper command for workflow with a valid case id."""
     caplog.set_level(logging.INFO)
@@ -162,6 +162,9 @@ def test_store_housekeeper_valid_case(
     # GIVEN that case is not already stored in StatusDB
     assert not store.get_case_by_internal_id(internal_id=case_id).analyses
 
+    # mock update_analysis_statusdb so we can assert is was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
@@ -169,32 +172,28 @@ def test_store_housekeeper_valid_case(
     # WHEN running the store-housekeeper command
     result = cli_runner.invoke(workflow_cli, [workflow, "store-housekeeper", case_id], obj=context)
 
-    # THEN a bundle should be successfully added to Housekeeper and StatusDB
+    # THEN a bundle should be successfully added to Housekeeper
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert store.get_case_by_internal_id(internal_id=case_id).analyses
     assert context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
-    # THEN a workflow version should be correctly stored in StatusDB
-    assert (
-        store.get_case_by_internal_id(internal_id=case_id).analyses[0].workflow_version
-        == workflow_version
+    # THEN the analysis should be updated in StatusDB
+    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
 
-@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_valid_case_already_added(
-    cli_runner,
-    mocker,
+    cli_runner: CliRunner,
     workflow: Workflow,
     real_housekeeper_api: HousekeeperAPI,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
+    mocker,
 ):
     """Test store-housekeeper command for workflow with a case already added in Housekeeper."""
     caplog.set_level(logging.INFO)
@@ -206,11 +205,14 @@ def test_valid_case_already_added(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a Housekeeper API
-    context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN that case is not already stored in StatusDB
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
+
+    # mock update_analysis_statusdb so we can assert is was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -233,8 +235,12 @@ def test_valid_case_already_added(
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
 
+    # THEN the analysis should be updated in StatusDB
+    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )
 
-@pytest.mark.skip(reason="This test requires an analysis for teh case to be present in the store")
+
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
@@ -257,8 +263,11 @@ def test_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a Housekeeper API
-    context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # mock update_analysis_statusdb so we can assert is was called correctly
+    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -278,5 +287,9 @@ def test_dry_run(
     # THEN bundle should not be added to Housekeeper nor StatusDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Dry-run: Housekeeper changes will not be commited" in caplog.text
-    assert "Dry-run: StatusDB changes will not be commited" in caplog.text
     assert not context.housekeeper_api.bundle(case_id)
+
+    # THEN update_analysis_statusdb should be called with dry_run=TRUE
+    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=True, force=False
+    )
