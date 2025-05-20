@@ -30,7 +30,7 @@ def test_subprocess_submitter():
         mock_run.assert_called_once_with(
             args=expected_args,
             shell=True,
-            check=False,
+            check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
