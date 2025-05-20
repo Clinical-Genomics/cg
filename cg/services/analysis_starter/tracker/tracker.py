@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import CaseActions, CustomerId
+from cg.constants.constants import CustomerId
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
@@ -56,7 +56,6 @@ class Tracker(ABC):
             tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
-        self.store.set_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
 
     def _get_analysis_type(self, case_id: str) -> str:
         """

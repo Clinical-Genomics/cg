@@ -15,7 +15,7 @@ class SubprocessSubmitter(Submitter):
         subprocess.run(
             args=command,
             shell=True,
-            check=False,
+            check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
