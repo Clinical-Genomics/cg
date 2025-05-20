@@ -1,8 +1,15 @@
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import ANY
+
 from click.testing import CliRunner
+from pytest import LogCaptureFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.models import InputBundle
 from cg.cli.workflow.fluffy.base import store, store_available
 from cg.constants import EXIT_SUCCESS
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -33,17 +40,14 @@ def test_cli_store_dry_no_case(
 import pytest
 
 
-@pytest.mark.skip(
-    reason="This test needs an analysis object for the case in store, without complete_at date"
-)
 def test_cli_store(
     cli_runner: CliRunner,
     fluffy_case_id_existing: str,
-    deliverables_yaml_path,
-    fluffy_hermes_deliverables_response_data,
+    deliverables_yaml_path: Path,
+    fluffy_hermes_deliverables_response_data: InputBundle,
     fluffy_context: CGConfig,
-    timestamp_yesterday,
-    caplog,
+    timestamp_yesterday: datetime,
+    caplog: LogCaptureFixture,
     mocker,
 ):
     caplog.set_level("INFO")
@@ -62,6 +66,9 @@ def test_cli_store(
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
+    # Mock the method that updates the analysis in status db
+    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_statusdb")
+
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
     HermesApi.create_housekeeper_bundle.return_value = fluffy_hermes_deliverables_response_data
@@ -74,12 +81,14 @@ def test_cli_store(
 
     # THEN log informs that analysis was stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    assert "stored in StatusDB" in caplog.text
 
-    # THEN action of case in StatusDB is set to None
-    assert not fluffy_analysis_api.status_db.get_case_by_internal_id(
-        internal_id=fluffy_case_id_existing
-    ).action
+    # THEN the analysis should be updated in status db
+    FluffyAnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=fluffy_case_id_existing,
+        comment=ANY,
+        dry_run=False,
+        force=False,
+    )
 
 
 def test_cli_store_bundle_already_added(
@@ -120,17 +129,14 @@ def test_cli_store_bundle_already_added(
     assert "Error storing deliverables" in caplog.text
 
 
-@pytest.mark.skip(
-    reason="This test needs an analysis object for the case in store, without complete_at date"
-)
 def test_cli_store_available_case_is_running(
     cli_runner: CliRunner,
-    fluffy_case_id_existing,
-    deliverables_yaml_path,
-    fluffy_hermes_deliverables_response_data,
+    fluffy_case_id_existing: str,
+    deliverables_yaml_path: Path,
+    fluffy_hermes_deliverables_response_data: InputBundle,
     fluffy_context: CGConfig,
-    timestamp_yesterday,
-    caplog,
+    timestamp_yesterday: datetime,
+    caplog: LogCaptureFixture,
     mocker,
 ):
     caplog.set_level("INFO")
@@ -149,6 +155,9 @@ def test_cli_store_available_case_is_running(
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
+    # Mock the method that updates the analysis in status db
+    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_statusdb")
+
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
     HermesApi.create_housekeeper_bundle.return_value = fluffy_hermes_deliverables_response_data
@@ -161,15 +170,18 @@ def test_cli_store_available_case_is_running(
 
     # THEN analysis data is stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    assert "stored in StatusDB" in caplog.text
+    # assert "stored in StatusDB" in caplog.text
 
     # THEN log informs about eligible case
     assert fluffy_case_id_existing in caplog.text
 
-    # THEN case action is set to None after storing
-    assert not fluffy_analysis_api.status_db.get_case_by_internal_id(
-        internal_id=fluffy_case_id_existing
-    ).action
+    # THEN the analysis should be updated in status db
+    FluffyAnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=fluffy_case_id_existing,
+        comment=ANY,
+        dry_run=False,
+        force=False,
+    )
 
 
 def test_cli_store_available_case_not_running(

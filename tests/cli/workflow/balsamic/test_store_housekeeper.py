@@ -1,10 +1,12 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import ANY
 
 import pytest
 from click.testing import CliRunner
 from pydantic import ValidationError
+from pytest import LogCaptureFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -124,15 +126,13 @@ def test_case_with_malformed_deliverables_file(
         assert "field required" in caplog.text
 
 
-@pytest.mark.skip(reason="Test needs an analysis object for the case in store")
+@pytest.mark.usefixtures("mock_config", "mock_deliverable")
 def test_valid_case(
-    cli_runner,
+    cli_runner: CliRunner,
     mocker,
-    hermes_deliverables,
+    hermes_deliverables: dict,
     balsamic_context: CGConfig,
-    mock_config,
-    mock_deliverable,
-    caplog,
+    caplog: LogCaptureFixture,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -142,6 +142,8 @@ def test_valid_case(
 
     # Make sure  analysis not alredy stored in ClinicalDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
+
+    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -153,9 +155,11 @@ def test_valid_case(
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert balsamic_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
+
+    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )
 
 
 def test_valid_case_already_added(
