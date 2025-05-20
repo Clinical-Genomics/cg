@@ -697,7 +697,8 @@ def test_get_trailblazer_priority(
     assert trailblazer_priority is expected_trailblazer_priority
 
 
-# TODO: integrate these new fixtures with old tests in this module
+#  Below are new tests using mocks instead of a test database,
+#  in the future the old tests in this module could be adjusted to also use these fixtures
 
 
 @pytest.fixture
