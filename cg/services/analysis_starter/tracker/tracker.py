@@ -61,8 +61,7 @@ class Tracker(ABC):
     def _get_analysis_type(self, case_id: str) -> str:
         """
         Return the analysis type for sample.
-        Only analysis types supported by Trailblazer
-        are valid outputs.
+        Only analysis types supported by Trailblazer are valid outputs.
         """
         sample: Sample = self.store.get_case_by_internal_id(case_id).links[0].sample
         prep_category: str = sample.prep_category
