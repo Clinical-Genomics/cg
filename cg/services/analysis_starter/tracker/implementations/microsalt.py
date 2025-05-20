@@ -12,7 +12,7 @@ class MicrosaltTracker(Tracker):
         return WorkflowManager.Slurm
 
     def _get_job_ids_path(self, case_id: str) -> Path:
-        project_id: str = self._get_project_id(case_id)
+        project_id: str = self._get_lims_project_id(case_id)
         job_ids_path = Path(
             self.workflow_config.root,
             "results",
@@ -24,7 +24,7 @@ class MicrosaltTracker(Tracker):
         self._ensure_old_job_ids_are_removed(job_ids_path)
         return job_ids_path
 
-    def _get_project_id(self, case_id: str) -> str:
+    def _get_lims_project_id(self, case_id: str) -> str:
         case: Case = self.store.get_case_by_internal_id(case_id)
         sample_id: str = case.links[0].sample.internal_id
         return self._extract_project_id(sample_id)
