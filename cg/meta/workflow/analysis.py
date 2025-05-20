@@ -314,8 +314,7 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    # TODO: make private when all uses outside of AnalysisAPI are removed
-    def add_pending_trailblazer_analysis(
+    def _add_pending_trailblazer_analysis(
         self,
         case_id: str,
         tower_workflow_id: str | None = None,
@@ -776,7 +775,7 @@ class AnalysisAPI(MetaAPI):
 
     def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
         trailblazer_analysis_id: int | None = None
-        if trailblazer_analysis := self.add_pending_trailblazer_analysis(
+        if trailblazer_analysis := self._add_pending_trailblazer_analysis(
             case_id=case_id, tower_workflow_id=tower_workflow_id
         ):
             trailblazer_analysis_id = trailblazer_analysis.id
