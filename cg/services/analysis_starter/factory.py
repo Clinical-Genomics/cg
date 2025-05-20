@@ -83,6 +83,7 @@ class AnalysisStarterFactory:
         return AnalysisStarter(
             configurator=configurator,
             input_fetcher=input_fetcher,
+            store=self.store,
             submitter=submitter,
             tracker=tracker,
         )
