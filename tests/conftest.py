@@ -2953,6 +2953,14 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 
 
 @pytest.fixture(scope="function")
+def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
+    """Return sample id map path."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_customer_internal_mapping"
+    ).with_suffix(FileExtensions.CSV)
+
+
+@pytest.fixture(scope="function")
 def raredisease_parameters_default(
     raredisease_dir: Path,
     raredisease_case_id: str,
