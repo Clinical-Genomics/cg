@@ -18,10 +18,12 @@ from cg.cli.workflow.nf_analysis import (
     store_housekeeper,
 )
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import MetaApis
+from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -39,11 +41,60 @@ raredisease.add_command(resolve_compression)
 raredisease.add_command(config_case)
 raredisease.add_command(report_deliver)
 raredisease.add_command(run)
-raredisease.add_command(start)
 raredisease.add_command(start_available)
 raredisease.add_command(store)
 raredisease.add_command(store_available)
 raredisease.add_command(store_housekeeper)
+
+
+@click.command("start")
+@ARGUMENT_CASE_ID
+@OPTION_WORKDIR
+@OPTION_PROFILE
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
+@OPTION_REVISION
+@OPTION_COMPUTE_ENV
+@OPTION_USE_NEXTFLOW
+@OPTION_STUB
+@DRY_RUN
+@click.pass_obj
+def start(
+    context: CGConfig,
+    case_id: str,
+    work_dir: str,
+    profile: str,
+    config: str,
+    params_file: str,
+    revision: str,
+    compute_env: str,
+    use_nextflow: bool,
+    stub_run: bool,
+    dry_run: bool,
+) -> None:
+    """Start workflow for a case."""
+    LOG.info(f"Starting analysis for {case_id}")
+    analysis_starter: AnalysisStarter = AnalysisStarterFactory(context).get_analysis_starter_for_workflow(Workflow.RAREDISEASE)
+    try:
+        analysis_starter.start(
+            case_id=case_id,
+            dry_run=dry_run,
+            work_dir=work_dir,
+            profile=profile,
+            config=config,
+            params_file=params_file,
+            revision=revision,
+            compute_env=compute_env,
+            use_nextflow=use_nextflow,
+            stub_run=stub_run,
+        )
+        analysis_api.run_nextflow_analysis(
+
+        )
+    except Exception as error:
+        LOG.error(f"Unexpected error occurred: {error}")
+        raise click.Abort from error
+
 
 
 @raredisease.command("panel")

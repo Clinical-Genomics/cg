@@ -1,9 +1,11 @@
 from pathlib import Path
+from typing import overload
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CommonAppConfig
+from cg.services.analysis_starter.configurator.abstract_model import StartParameters
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
@@ -19,8 +21,20 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 from cg.store.store import Store
 
 
-class NextflowConfigurator(Configurator):
+class NextflowStartParameters(StartParameters):
+    work_dir: str
+    from_start: bool
+    profile: str
+    config: str
+    params_file: str
+    revision: str
+    compute_env: str
+    nf_tower_id: str | None = None
+    stub_run: bool = False
+    dry_run: bool = False
 
+
+class NextflowConfigurator(Configurator):
     def __init__(
         self,
         config_file_creator: NextflowConfigFileCreator,
@@ -45,13 +59,16 @@ class NextflowConfigurator(Configurator):
         self.sample_sheet_creator = sample_sheet_creator
         self.params_file_creator = params_file_creator
 
-    def configure(self, case_id: str) -> NextflowCaseConfig:
+    def configure(
+            self,
+            parameters: NextflowStartParameters) -> NextflowCaseConfig:
         """Configure a Nextflow case so that it is ready for analysis. This entails
         1. Creating a case directory.
         2. Creating a sample sheet.
         3. Creating a parameters file.
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
+        case_id: str = parameters.case_id
         case_path: Path = self._get_case_path(case_id=case_id)
         self._create_case_directory(case_id=case_id)
         self.sample_sheet_creator.create(case_id=case_id, case_path=case_path)

@@ -30,6 +30,9 @@ class MicrosaltConfigurator(Configurator):
         self.config = microsalt_config
         self.store = store
 
+    def get_parameters_class(self):
+        return
+
     def configure(self, case_id: str) -> MicrosaltCaseConfig:
         LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)

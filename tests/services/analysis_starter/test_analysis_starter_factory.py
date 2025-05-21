@@ -23,7 +23,7 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig):
     # GIVEN a microSALT case
     with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT):
         # WHEN fetching the AnalysisStarter
-        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter("case_id")
+        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case("case_id")
 
         # THEN the Factory should have it configured correctly
         assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
@@ -43,7 +43,7 @@ def test_analysis_starter_factory_raredisease(
     # GIVEN a Raredisease case
     with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.RAREDISEASE):
         # WHEN fetching the AnalysisStarter
-        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter("case_id")
+        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case("case_id")
 
         # THEN the Factory should have it configured correctly
         assert isinstance(analysis_starter.configurator, NextflowConfigurator)
